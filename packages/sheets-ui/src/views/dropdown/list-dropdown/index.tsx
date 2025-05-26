@@ -77,7 +77,7 @@ const SelectList = (props: ISelectListProps) => {
             style={style}
         >
             <div
-                className="univer-flex-shrink-0 univer-flex-grow-0 univer-px-[14px] univer-py-2 univer-text-xs"
+                className="univer-flex-shrink-0 univer-flex-grow-0 univer-px-3.5 univer-py-2 univer-text-xs"
             >
                 {title}
             </div>
@@ -127,7 +127,7 @@ const SelectList = (props: ISelectListProps) => {
                                     ? (
                                         <>
                                             <span>{item.label.substring(0, index)}</span>
-                                            <span style={{ fontWeight: 'bold' }}>{item.label.substring(index, index + lowerFilter.length)}</span>
+                                            <span className="univer-font-semibold">{item.label.substring(index, index + lowerFilter.length)}</span>
                                             <span>{item.label.substring(index + lowerFilter.length)}</span>
                                         </>
                                     )
@@ -139,7 +139,7 @@ const SelectList = (props: ISelectListProps) => {
                                   univer-text-base univer-text-primary-500
                                 `}
                             >
-                                {selected ? <CheckMarkSingle /> : null}
+                                {selected && <CheckMarkSingle className="univer-text-primary-600" />}
                             </div>
                         </div>
                     );
@@ -150,7 +150,7 @@ const SelectList = (props: ISelectListProps) => {
                     <>
                         <div
                             className={`
-                              univer-my-1 univer-h-[1px] univer-flex-shrink-0 univer-flex-grow-0 univer-bg-gray-200
+                              univer-my-1 univer-h-px univer-flex-shrink-0 univer-flex-grow-0 univer-bg-gray-200
                               dark:!univer-bg-gray-700
                             `}
                         />

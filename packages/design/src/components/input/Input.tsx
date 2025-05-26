@@ -33,6 +33,7 @@ export const inputVariants = cva(
     {
         variants: {
             size: {
+                mini: 'univer-h-7 univer-px-1.5 univer-text-sm',
                 small: 'univer-h-8 univer-px-2 univer-text-sm',
                 middle: 'univer-h-10 univer-px-3 univer-text-base',
                 large: 'univer-h-12 univer-px-4 univer-text-lg',
@@ -165,9 +166,9 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                                 type="button"
                                 onClick={handleClear}
                                 className={`
-                                  univer-flex univer-size-4 univer-cursor-pointer univer-rounded-full univer-border-none
-                                  univer-bg-transparent univer-p-1 univer-text-gray-400 univer-transition-colors
-                                  univer-duration-200
+                                  univer-flex univer-size-4 univer-cursor-pointer univer-items-center
+                                  univer-rounded-full univer-border-none univer-bg-transparent univer-p-1
+                                  univer-text-gray-400 univer-transition-colors univer-duration-200
                                   focus:univer-outline-none
                                   hover:univer-text-gray-500
                                 `}

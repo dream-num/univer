@@ -49,13 +49,15 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
     }, [range, colIndex, sheetsSortUIService, univerInstanceService, onClose]);
 
     return (
-        <ButtonGroup className="univer-mb-3 univer-w-full">
-            <Button className="univer-w-1/2" onClick={() => apply(true)}>
-                <AscendingSingle className="univer-mr-1" />
+        <ButtonGroup
+            className="univer-mb-3 univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-2 univer-gap-2"
+        >
+            <Button onClick={() => apply(true)}>
+                <AscendingSingle />
                 {localeService.t('sheets-sort.general.sort-asc')}
             </Button>
-            <Button className="univer-w-1/2" onClick={() => apply(false)}>
-                <DescendingSingle className="univer-mr-1" />
+            <Button onClick={() => apply(false)}>
+                <DescendingSingle />
                 {localeService.t('sheets-sort.general.sort-desc')}
             </Button>
         </ButtonGroup>

@@ -147,8 +147,8 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
             <div
                 id={id}
                 ref={innerDomRef}
-                className="univer-overflow-hidden"
-                style={{ position: 'absolute', ...innerStyle.current }}
+                className="univer-absolute univer-overflow-hidden"
+                style={{ ...innerStyle.current }}
             >
                 {component}
             </div>

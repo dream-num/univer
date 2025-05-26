@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { ReactElement } from 'react';
 
 // TODO@gggpound: Error checking needs to be implemented by the form control
 export const WrapperError = (props: {
     errorText: string;
-    children: React.ReactElement;
+    children: ReactElement;
 }) => {
     return (
-        <div style={{ position: 'relative' }}>
-            <div style={{
-                position: 'absolute',
-                zIndex: 999,
-                bottom: '-13px',
-                fontSize: '10px',
-                color: 'red',
-            }}
+        <div className="univer-relative">
+            <div
+                className="univer-absolute univer-bottom-[-13px] univer-z-[999] univer-text-[10px] univer-text-red-500"
             >
                 {props.errorText}
             </div>

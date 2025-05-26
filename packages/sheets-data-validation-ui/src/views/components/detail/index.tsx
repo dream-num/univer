@@ -248,7 +248,7 @@ export function DataValidationDetail() {
     const shouldHideFormula = operators.length && !localRule.operator;
 
     return (
-        <div data-u-comp="data-validation-detail">
+        <div data-u-comp="data-validation-detail" className="univer-py-2">
             <FormLayout
                 label={localeService.t('dataValidation.panel.range')}
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}

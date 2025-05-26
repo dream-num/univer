@@ -16,6 +16,7 @@
 
 import type { NamedStyleType } from '@univerjs/core';
 import { LocaleService, NAMED_STYLE_MAP } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import { useDependency } from '../../utils/di';
 
 export const HeadingItem = (props: { value: NamedStyleType; text: string }) => {
@@ -26,10 +27,11 @@ export const HeadingItem = (props: { value: NamedStyleType; text: string }) => {
 
     return (
         <span
-            className="univer-text-sm"
+            className={clsx('univer-text-sm', {
+                'univer-font-bold': style?.bl,
+            })}
             style={{
                 fontSize: style?.fs,
-                fontWeight: style?.bl ? 'bold' : 'normal',
                 color: style?.cl?.rgb ?? undefined,
             }}
         >

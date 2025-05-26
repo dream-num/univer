@@ -356,18 +356,14 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     return (
         <div
             id={`${prefix}-${unitId}-${subUnitId}-${id}`}
-            className={clsx(
-                `
-                  univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4
-                  dark:!univer-bg-gray-900 dark:!univer-text-white
-                `,
-                borderClassName,
-                {
-                    'univer-w-[278px]': !full,
-                    'univer-w-full': full,
-                    'univer-shadow': !resolved && (showHighlight || isHover || prefix === 'cell'),
-                }
-            )}
+            className={clsx(`
+              univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4
+              dark:!univer-bg-gray-900 dark:!univer-text-white
+            `, borderClassName, {
+                'univer-w-[278px]': !full,
+                'univer-w-full': full,
+                'univer-shadow': !resolved && (showHighlight || isHover || prefix === 'cell'),
+            })}
             style={style}
             onClick={onClick}
             onMouseEnter={() => {
@@ -379,16 +375,14 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 setIsHover(false);
             }}
         >
-            {!resolved && showHighlight
-                ? (
-                    <div
-                        className={`
-                          univer-absolute univer-left-0 univer-right-0 univer-top-0 univer-h-1.5 univer-rounded-t-md
-                          univer-bg-yellow-400
-                        `}
-                    />
-                )
-                : null}
+            {!resolved && showHighlight && (
+                <div
+                    className={`
+                      univer-absolute univer-left-0 univer-right-0 univer-top-0 univer-h-1.5 univer-rounded-t-md
+                      univer-bg-yellow-400
+                    `}
+                />
+            )}
             <div
                 className={`
                   univer-mb-4 univer-flex univer-flex-row univer-items-center univer-justify-between univer-text-sm
@@ -410,44 +404,41 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         </div>
                     </Tooltip>
                 </div>
-                {comments
-                    ? (
-                        <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
-                            <div
-                                className={clsx(
-                                    `
+                {!!comments && (
+                    <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
+                        <div
+                            className={clsx(
+                                `
+                                  univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                  univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
+                                  dark:hover:!univer-bg-gray-800
+                                  hover:univer-bg-gray-50
+                                `,
+                                {
+                                    'univer-text-green-500': resolved,
+                                }
+                            )}
+                            onClick={handleResolve}
+                        >
+                            {resolved ? <ResolvedSingle /> : <SolveSingle />}
+                        </div>
+                        {currentUser?.userID === comments.root.personId
+                            ? (
+                                <div
+                                    className={`
                                       univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
                                       dark:hover:!univer-bg-gray-800
                                       hover:univer-bg-gray-50
-                                    `,
-                                    {
-                                        'univer-text-green-500': resolved,
-                                    }
-                                )}
-                                onClick={handleResolve}
-                            >
-                                {resolved ? <ResolvedSingle /> : <SolveSingle />}
-                            </div>
-                            {currentUser?.userID === comments.root.personId
-                                ? (
-                                    <div
-                                        className={`
-                                          univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                          univer-items-center univer-justify-center univer-rounded-[3px]
-                                          univer-text-base
-                                          dark:hover:!univer-bg-gray-800
-                                          hover:univer-bg-gray-50
-                                        `}
-                                        onClick={handleDeleteRoot}
-                                    >
-                                        <DeleteSingle />
-                                    </div>
-                                )
-                                : null}
-                        </div>
-                    )
-                    : null}
+                                    `}
+                                    onClick={handleDeleteRoot}
+                                >
+                                    <DeleteSingle />
+                                </div>
+                            )
+                            : null}
+                    </div>
+                )}
             </div>
             <div
                 ref={scroller}
@@ -456,7 +447,6 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 {renderComments.map(
                     (item) => (
                         <ThreadCommentItem
-                            onClose={onClose}
                             unitId={unitId}
                             subUnitId={subUnitId}
                             item={item}
@@ -465,6 +455,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             editing={editingId === item.id}
                             resolved={comments?.root.resolved}
                             type={type}
+                            onClose={onClose}
                             onEditingChange={(editing) => {
                                 if (editing) {
                                     setEditingId(item.id);
@@ -498,55 +489,53 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     )
                 )}
             </div>
-            {editorVisible
-                ? (
-                    <div>
-                        <ThreadCommentEditor
-                            key={`${autoFocus}`}
-                            ref={editorRef}
-                            type={type}
-                            unitId={unitId}
-                            subUnitId={subUnitId}
-                            onSave={async ({ text, attachments }) => {
-                                const comment: IThreadComment = {
-                                    text,
-                                    attachments,
-                                    dT: getDT(),
-                                    id: generateRandomId(),
-                                    ref: refStr!,
-                                    personId: currentUser?.userID!,
-                                    parentId: comments?.root.id,
+            {editorVisible && (
+                <div>
+                    <ThreadCommentEditor
+                        key={`${autoFocus}`}
+                        ref={editorRef}
+                        type={type}
+                        unitId={unitId}
+                        subUnitId={subUnitId}
+                        onSave={async ({ text, attachments }) => {
+                            const comment: IThreadComment = {
+                                text,
+                                attachments,
+                                dT: getDT(),
+                                id: generateRandomId(),
+                                ref: refStr!,
+                                personId: currentUser?.userID!,
+                                parentId: comments?.root.id,
+                                unitId,
+                                subUnitId,
+                                threadId: comments?.root.threadId!,
+                            };
+
+                            if (onAddComment?.(comment) === false) {
+                                return;
+                            }
+
+                            await commandService.executeCommand(
+                                AddCommentCommand.id,
+                                {
                                     unitId,
                                     subUnitId,
-                                    threadId: comments?.root.threadId!,
-                                };
-
-                                if (onAddComment?.(comment) === false) {
-                                    return;
-                                }
-
-                                await commandService.executeCommand(
-                                    AddCommentCommand.id,
-                                    {
-                                        unitId,
-                                        subUnitId,
-                                        comment,
-                                    } as IAddCommentCommandParams
-                                );
-                                if (scroller.current) {
-                                    scroller.current.scrollTop = scroller.current.scrollHeight;
-                                }
-                            }}
-                            autoFocus={autoFocus || (!comments)}
-                            onCancel={() => {
-                                if (!comments) {
-                                    onClose?.();
-                                }
-                            }}
-                        />
-                    </div>
-                )
-                : null}
+                                    comment,
+                                } as IAddCommentCommandParams
+                            );
+                            if (scroller.current) {
+                                scroller.current.scrollTop = scroller.current.scrollHeight;
+                            }
+                        }}
+                        autoFocus={autoFocus || (!comments)}
+                        onCancel={() => {
+                            if (!comments) {
+                                onClose?.();
+                            }
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 };

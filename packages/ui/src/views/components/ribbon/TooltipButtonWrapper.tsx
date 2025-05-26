@@ -66,9 +66,9 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
 
     return (
         <Tooltip
-            {...tooltipProps}
             visible={tooltipVisible}
             onVisibleChange={handleChangeTooltipVisible}
+            {...tooltipProps}
         >
             <span ref={spanRef}>
                 <TooltipWrapperContext.Provider value={contextValue}>
@@ -81,7 +81,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
 
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
     const { children, overlay, disabled, align = 'start' } = props;
-    const { setDropdownVisible } = useContext(TooltipWrapperContext);
+    const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {
         setDropdownVisible(visible);
@@ -96,6 +96,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
                 </div>
             )}
             disabled={disabled}
+            open={dropdownVisible}
             onOpenChange={handleVisibleChange}
         >
             <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
@@ -157,7 +158,7 @@ export function DropdownMenuWrapper({
     disabled?: boolean;
     onOptionSelect: (option: IValueOption) => void;
 }) {
-    const { setDropdownVisible } = useContext(TooltipWrapperContext);
+    const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
 
     const menuManagerService = useDependency(IMenuManagerService);
     const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
@@ -280,6 +281,7 @@ export function DropdownMenuWrapper({
                 align="start"
                 items={items}
                 disabled={disabled}
+                open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
             >
                 {children}
@@ -327,6 +329,7 @@ export function DropdownMenuWrapper({
                 align="start"
                 items={items}
                 disabled={disabled}
+                open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
             >
                 {children}

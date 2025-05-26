@@ -50,11 +50,11 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
     const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
-    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+    const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
         const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
-        isOutSide && isFocusFormulaEditorSet(false);
+        isOutSide && setIsFocusFormulaEditor(false);
     });
     return (
         <div className="univer-relative">
@@ -87,7 +87,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                                 const formula = v || '';
                                 onChange(formula);
                             }}
-                            onFocus={() => isFocusFormulaEditorSet(true)}
+                            onFocus={() => setIsFocusFormulaEditor(true)}
                         />
                     </div>
                 )}
@@ -405,8 +405,8 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const { interceptorManager } = props;
     const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
-    const [errorMap, errorMapSet] = useState<Record<string, string>>({});
-    const [currentIconType, currentIconTypeSet] = useState<IIconType>(() => {
+    const [errorMap, setErrorMap] = useState<Record<string, string>>({});
+    const [currentIconType, setCurrentIconType] = useState<IIconType>(() => {
         const defaultV = Object.keys(iconMap)[0] as IIconType;
         if (rule && rule.config.length) {
             const type = rule.config[0].iconType;
@@ -418,7 +418,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         return defaultV;
     });
 
-    const [configList, configListSet] = useState(() => {
+    const [configList, setConfigList] = useState(() => {
         if (rule && rule.config.length) {
             return Tools.deepClone(rule?.config);
         }
@@ -438,7 +438,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         });
     });
 
-    const [isShowValue, isShowValueSet] = useState(() => {
+    const [isShowValue, setIsShowValue] = useState(() => {
         if (!rule) {
             return true;
         }
@@ -509,16 +509,16 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         const oldV = get(configList, keys);
         if (oldV !== v) {
             set(configList, keys, v);
-            configListSet([...configList]);
-            errorMapSet(checkResult(configList));
+            setConfigList([...configList]);
+            setErrorMap(checkResult(configList));
         }
     };
     const handleClickIconList = (iconType: IIconType) => {
-        currentIconTypeSet(iconType);
+        setCurrentIconType(iconType);
         const list = iconMap[iconType] || [];
         const config = new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(iconType, index, list));
-        configListSet(config);
-        errorMapSet(checkResult(config));
+        setConfigList(config);
+        setErrorMap(checkResult(config));
     };
 
     useEffect(() => {
@@ -553,7 +553,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             item.iconId = newIcon.iconId;
             item.iconType = newIcon.iconType;
         });
-        configListSet([...configList]);
+        setConfigList([...configList]);
     };
     const layoutService = useDependency(ILayoutService);
     const [iconGroupListEl, setIconGroupListEl] = useState<HTMLDivElement>();
@@ -598,7 +598,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     {localeService.t('sheet.cf.iconSet.reverseIconOrder')}
                 </div>
                 <div className="univer-ml-6 univer-flex univer-items-center univer-text-xs">
-                    <Checkbox checked={!isShowValue} onChange={(v) => { isShowValueSet(!v); }} />
+                    <Checkbox checked={!isShowValue} onChange={(v) => { setIsShowValue(!v); }} />
                     {localeService.t('sheet.cf.iconSet.onlyShowIcon')}
                 </div>
             </div>

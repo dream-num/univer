@@ -33,7 +33,7 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
-    const [suffix, suffixSet] = useState(() => getCurrencyType(defaultPattern) || userHabitCurrency[0]);
+    const [suffix, setSuffix] = useState(() => getCurrencyType(defaultPattern) || userHabitCurrency[0]);
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), []);
 
     const localeService = useDependency(LocaleService);
@@ -42,7 +42,7 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
     action.current = () => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal);
 
     const handleSelect = (v: string) => {
-        suffixSet(v);
+        setSuffix(v);
         onChange(setPatternDecimal(`_("${v}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal));
     };
 

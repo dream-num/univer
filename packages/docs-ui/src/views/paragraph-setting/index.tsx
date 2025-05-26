@@ -19,7 +19,7 @@ import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams 
 import { debounce, generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DocParagraphSettingCommand } from '../../commands/commands/doc-paragraph-setting.command';
 import { ParagraphSetting } from './Setting';
 
@@ -34,9 +34,9 @@ export function ParagraphSettingIndex() {
     const localeService = useDependency(LocaleService);
     const currentLocale = useObservable(localeService.currentLocale$);
 
-    const [key, keySet] = useState('');
+    const [key, setKey] = useState('');
     const debounceReset = useMemo(() => {
-        return debounce(() => keySet(generateRandomId(4)), 300);
+        return debounce(() => setKey(generateRandomId(4)), 300);
     }, []);
 
     const rangeRef = useRef<ITextRange[]>([]);
@@ -46,7 +46,7 @@ export function ParagraphSettingIndex() {
             if (SetTextSelectionsOperation.id === info.id) {
                 const ranges = (info.params as ISetTextSelectionsOperationParams).ranges;
                 if (!isRangesEqual(ranges, rangeRef.current)) {
-                    keySet(generateRandomId(4));
+                    setKey(generateRandomId(4));
                 }
                 rangeRef.current = ranges;
             }
@@ -62,7 +62,7 @@ export function ParagraphSettingIndex() {
     }, [debounceReset]);
 
     useEffect(() => {
-        keySet(generateRandomId(4));
+        setKey(generateRandomId(4));
     }, [currentLocale]);
 
     useEffect(() => () => debounceReset.cancel(), [debounceReset]);

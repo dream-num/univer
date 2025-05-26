@@ -63,7 +63,7 @@ export function DataValidationDetail() {
     const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
     const [isRangeError, setIsRangeError] = useState(false);
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
+    const [isFocusRangeSelector, setIsFocusRangeSelector] = useState(false);
     const rangeSelectorInstance = useRef<IRangeSelectorInstance>(null);
     const sheetSelectionService = useDependency(SheetsSelectionsService);
 
@@ -264,7 +264,7 @@ export function DataValidationDetail() {
                         }
                     }}
                     onFocusChange={(focusing, str) => {
-                        isFocusRangeSelectorSet(focusing);
+                        setIsFocusRangeSelector(focusing);
                         if (!focusing && str && rangeSelectorInstance.current?.verify()) {
                             handleUpdateRuleRanges(str);
                         }

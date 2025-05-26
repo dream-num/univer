@@ -46,7 +46,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const visible = useMemo(() => !!searchList.length, [searchList]);
     const ulRef = useRef<HTMLUListElement>(undefined);
-    const [active, activeSet] = useState(0);
+    const [active, setActive] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
     const [position$] = useEditorPosition(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
@@ -63,14 +63,14 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         if (!isEnableMouseEnterOrOut.current) {
             return;
         }
-        activeSet(index);
+        setActive(index);
     }
 
     function handleLiMouseLeave() {
         if (!isEnableMouseEnterOrOut.current) {
             return;
         }
-        activeSet(-1);
+        setActive(-1);
     }
 
     useEffect(() => {
@@ -85,7 +85,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
 
             switch (keycode) {
                 case KeyCode.ARROW_UP: {
-                    activeSet((pre) => {
+                    setActive((pre) => {
                         const res = Math.max(0, pre - 1);
                         scrollToVisible(res);
                         return res;
@@ -94,7 +94,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     break;
                 }
                 case KeyCode.ARROW_DOWN: {
-                    activeSet((pre) => {
+                    setActive((pre) => {
                         const res = Math.min(searchList.length - 1, pre + 1);
                         scrollToVisible(res);
                         return res;

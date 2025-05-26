@@ -46,7 +46,7 @@ export const SheetPermissionPanelList = () => {
     const permissionService = useDependency(IPermissionService);
     const usesManagerService = useDependency(UserManagerService);
     const currentUser = usesManagerService.getCurrentUser();
-    const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
+    const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
 
     const _sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
@@ -151,7 +151,7 @@ export const SheetPermissionPanelList = () => {
         if (res) {
             setForceUpdateFlag(!forceUpdateFlag);
             if ((rule as IRangeProtectionRule).ranges === currentRuleRanges) {
-                currentRuleRangesSet([]);
+                setCurrentRuleRanges([]);
             }
         }
     };
@@ -278,13 +278,13 @@ export const SheetPermissionPanelList = () => {
                                         }
                                         if (unitType === UnitObject.SelectRange) {
                                             const ranges = (rule as IRangeProtectionRule).ranges || [];
-                                            ranges !== currentRuleRanges && currentRuleRangesSet(ranges);
+                                            ranges !== currentRuleRanges && setCurrentRuleRanges(ranges);
                                         } else if (unitType === UnitObject.Worksheet) {
                                             const ranges = [{ startRow: 0, endRow: activeSheet.getRowCount() - 1, startColumn: 0, endColumn: activeSheet.getColumnCount() - 1 }];
-                                            ranges !== currentRuleRanges && currentRuleRangesSet(ranges);
+                                            ranges !== currentRuleRanges && setCurrentRuleRanges(ranges);
                                         }
                                     }}
-                                    onMouseLeave={() => currentRuleRangesSet([])}
+                                    onMouseLeave={() => setCurrentRuleRanges([])}
                                 >
                                     <div className="univer-flex univer-h-5 univer-justify-between univer-leading-5">
                                         <Tooltip title={ruleName}>

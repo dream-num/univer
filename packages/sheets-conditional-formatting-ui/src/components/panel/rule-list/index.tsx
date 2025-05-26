@@ -126,7 +126,7 @@ export const RuleList = (props: IRuleListProps) => {
 
     const subUnitId = worksheet.getSheetId();
 
-    const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
+    const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
     const [selectValue, setSelectValue] = useState('2');
     const [fetchRuleListId, setFetchRuleListId] = useState(0);
     const [draggingId, setDraggingId] = useState<number>(-1);
@@ -159,7 +159,7 @@ export const RuleList = (props: IRuleListProps) => {
         return [];
     };
 
-    const [ruleList, ruleListSet] = useState(getRuleList);
+    const [ruleList, setRuleList] = useState(getRuleList);
 
     useHighlightRange(currentRuleRanges);
 
@@ -173,7 +173,7 @@ export const RuleList = (props: IRuleListProps) => {
     });
 
     useEffect(() => {
-        ruleListSet(getRuleList);
+        setRuleList(getRuleList);
     }, [selectValue, fetchRuleListId, unitId, subUnitId]);
 
     useEffect(() => {
@@ -192,7 +192,7 @@ export const RuleList = (props: IRuleListProps) => {
                 });
                 return () => disposable.dispose();
             }).pipe(debounceTime(16)).subscribe(() => {
-                ruleListSet(getRuleList);
+                setRuleList(getRuleList);
             });
         return () => {
             subscription.unsubscribe();
@@ -387,9 +387,9 @@ export const RuleList = (props: IRuleListProps) => {
                                             'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === index,
                                         })}
                                         onMouseMove={() => {
-                                            rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
+                                            rule.ranges !== currentRuleRanges && setCurrentRuleRanges(rule.ranges);
                                         }}
-                                        onMouseLeave={() => currentRuleRangesSet([])}
+                                        onMouseLeave={() => setCurrentRuleRanges([])}
                                         onClick={() => {
                                             onClick(rule);
                                         }}
@@ -438,7 +438,7 @@ export const RuleList = (props: IRuleListProps) => {
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleDelete(rule);
-                                                currentRuleRangesSet([]);
+                                                setCurrentRuleRanges([]);
                                             }}
                                         >
                                             <DeleteSingle />

@@ -25,11 +25,11 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
     const { unitId, subUnitId, value, onChange, showError, validResult } = props;
     const formula1Res = showError ? validResult?.formula1 : undefined;
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
-    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+    const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
         const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
-        isOutSide && isFocusFormulaEditorSet(false);
+        isOutSide && setIsFocusFormulaEditor(false);
     });
 
     return (
@@ -60,7 +60,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                         formula1: newFormula,
                     });
                 }}
-                onFocus={() => isFocusFormulaEditorSet(true)}
+                onFocus={() => setIsFocusFormulaEditor(true)}
             />
         </FormLayout>
     );

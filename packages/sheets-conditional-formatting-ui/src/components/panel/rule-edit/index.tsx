@@ -51,7 +51,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
-    const [errorText, errorTextSet] = useState<string | undefined>(undefined);
+    const [errorText, setErrorText] = useState<string | undefined>(undefined);
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
 
     const rangeString = useMemo(() => {
@@ -78,7 +78,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         { label: localeService.t('sheet.cf.ruleType.iconSet'), value: '6' },
     ];
 
-    const [ruleType, ruleTypeSet] = useState(() => {
+    const [ruleType, setRuleType] = useState(() => {
         const type = props.rule?.rule.type;
         const defaultType = options[0].value;
         if (!type) {
@@ -220,12 +220,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const handleVerify = (v: boolean, rangeText: string) => {
         if (v) {
             if (rangeText.length < 1) {
-                errorTextSet(localeService.t('sheet.cf.errorMessage.rangeError'));
+                setErrorText(localeService.t('sheet.cf.errorMessage.rangeError'));
             } else {
-                errorTextSet(undefined);
+                setErrorText(undefined);
             }
         } else {
-            errorTextSet(localeService.t('sheet.cf.errorMessage.rangeError'));
+            setErrorText(localeService.t('sheet.cf.errorMessage.rangeError'));
         }
     };
     return (
@@ -260,7 +260,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 className="univer-mt-4 univer-w-full"
                 value={ruleType}
                 options={options}
-                onChange={(e) => ruleTypeSet(e)}
+                onChange={(e) => setRuleType(e)}
             />
             <StyleEditor
                 interceptorManager={interceptorManager}

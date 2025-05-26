@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { PointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface IColorSpectrumProps {
     hsv: [number, number, number];
@@ -47,7 +48,8 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }, [hsv]);
 
-    const handlePointerEvent = (e: React.PointerEvent) => {
+    const handlePointerEvent = (e: PointerEvent) => {
+        e.stopPropagation();
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -115,12 +117,13 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
 
     return (
         <div
+            data-u-comp="color-picker-spectrum"
             ref={containerRef}
             className="univer-relative univer-overflow-hidden"
         >
             <canvas
                 ref={canvasRef}
-                className="univer-h-[148px] univer-w-full univer-min-w-[260px] univer-cursor-crosshair univer-rounded"
+                className="univer-h-full univer-w-full univer-cursor-crosshair univer-rounded"
                 onPointerDown={(e) => {
                     setIsDragging(true);
                     handlePointerEvent(e);

@@ -43,8 +43,9 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getRangesHeight } from './util';
+import { getRangesHeight, getSuitableRangesInView } from './util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -118,7 +119,9 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             cellValue: cellValue.getMatrix(),
         };
 
-        const cellHeights = getRangesHeight(ranges, worksheet);
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+        const cellHeights = getRangesHeight(suitableRanges, worksheet);
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
             setRangeValuesMutationParams
@@ -133,7 +136,11 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             id: SetStyleCommand.id,
             params: {
                 ...params,
+                unitId,
+                subUnitId,
                 cellHeights,
+                autoHeightRanges: suitableRanges,
+                lazyAutoHeightRanges: remainingRanges,
             },
         });
 

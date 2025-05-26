@@ -25,11 +25,13 @@ import type {
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
 } from '@univerjs/sheets';
-import { Disposable, IConfigService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, generateRandomId, IConfigService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    CancelMarkDirtyRowAutoHeightOperation,
     DeltaColumnWidthCommand,
     getSheetCommandTarget,
+    MarkDirtyRowAutoHeightOperation,
     MoveRangeCommand,
     ReorderRangeCommand,
     SetColWidthCommand,
@@ -45,6 +47,12 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
+interface IAutoHeightParams {
+    cellHeights?: ObjectMatrix<number>;
+    autoHeightRanges?: IRange[];
+    lazyAutoHeightRanges?: IRange[];
+}
+
 export class AutoHeightController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
@@ -55,6 +63,41 @@ export class AutoHeightController extends Disposable {
     ) {
         super();
         this._initialize();
+    }
+
+    private _processLazyAutoHeight(redoUndoItem: { redos: any[]; undos: any[] }, unitId: string, subUnitId: string, lazyAutoHeightRanges?: IRange[]) {
+        if (lazyAutoHeightRanges?.length) {
+            const redo = {
+                id: MarkDirtyRowAutoHeightOperation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    ranges: lazyAutoHeightRanges,
+                    id: generateRandomId(),
+                },
+                options: {
+                    onlyLocal: true,
+                },
+            };
+            const undo = {
+                id: CancelMarkDirtyRowAutoHeightOperation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    id: redo.params.id,
+                },
+                options: {
+                    onlyLocal: true,
+                },
+            };
+
+            return {
+                redos: [...redoUndoItem.redos, redo],
+                undos: [...redoUndoItem.undos, undo],
+            };
+        }
+
+        return redoUndoItem;
     }
 
     getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): { redos: any[]; undos: any[] } {
@@ -133,25 +176,27 @@ export class AutoHeightController extends Disposable {
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
-                    const params = command.params as ISetRangeValuesRangeMutationParams & { cellHeights?: ObjectMatrix<number> };
+                    const params = command.params as ISetRangeValuesRangeMutationParams & IAutoHeightParams;
                     return this.getUndoRedoParamsOfAutoHeight(params.range, params.subUnitId, params.cellHeights);
                 }
 
                 if (command.id === SetColWidthCommand.id) {
-                    const params = command.params as ISetWorksheetColWidthMutationParams & { cellHeights?: ObjectMatrix<number> };
+                    const params = command.params as ISetWorksheetColWidthMutationParams & IAutoHeightParams;
 
                     if (params.ranges) {
-                        return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
+                        const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(params.autoHeightRanges ?? params.ranges, params.subUnitId, params.cellHeights);
+                        return this._processLazyAutoHeight(undoRedoItem, params.unitId, params.subUnitId, params.lazyAutoHeightRanges);
                     }
                 }
 
                 if (command.id === SetWorksheetRowIsAutoHeightCommand.id) {
-                    const params = command.params as ISetWorksheetRowIsAutoHeightMutationParams & { cellHeights?: ObjectMatrix<number> };
-                    return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
+                    const params = command.params as ISetWorksheetRowIsAutoHeightMutationParams & IAutoHeightParams;
+                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
+                    return this._processLazyAutoHeight(undoRedoItem, params.unitId, params.subUnitId, params.lazyAutoHeightRanges);
                 }
 
                 if (command.id === SetStyleCommand.id) {
-                    const params = command.params as ISetStyleCommandParams<number> & { cellHeights?: ObjectMatrix<number> };
+                    const params = command.params as ISetStyleCommandParams<number> & IAutoHeightParams;
                     if (!AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
                         return {
                             redos: [],
@@ -168,7 +213,8 @@ export class AutoHeightController extends Disposable {
                         };
                     }
 
-                    return this.getUndoRedoParamsOfAutoHeight(selections, params.subUnitId, params.cellHeights);
+                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(selections, params.subUnitId, params.cellHeights);
+                    return this._processLazyAutoHeight(undoRedoItem, params.unitId!, params.subUnitId!, params.lazyAutoHeightRanges);
                 }
 
                 return {
@@ -191,9 +237,9 @@ export class AutoHeightController extends Disposable {
                 }
 
                 if (command.id === DeltaColumnWidthCommand.id) {
-                    const params = command.params as ISetWorksheetColWidthMutationParams & { cellHeights?: ObjectMatrix<number> }; ;
-
-                    return this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
+                    const params = command.params as ISetWorksheetColWidthMutationParams & IAutoHeightParams;
+                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
+                    return this._processLazyAutoHeight(undoRedoItem, params.unitId!, params.subUnitId!, params.lazyAutoHeightRanges);
                 }
 
                 return {

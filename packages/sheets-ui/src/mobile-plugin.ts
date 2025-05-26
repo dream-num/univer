@@ -50,6 +50,7 @@ import { SheetRenderController } from './controllers/render-controllers/sheet.re
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
+import { AutoHeightService } from './services/auto-height.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
@@ -147,6 +148,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SheetRenderController],
             [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
             [SheetScrollManagerService],
+            [AutoHeightService],
         ] as Dependency[]).forEach((renderDep) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, renderDep));
         });

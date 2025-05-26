@@ -114,6 +114,7 @@ import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { UnregisterWorksheetRangeThemeStyleCommand } from '../commands/commands/unregister-range-theme.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
+import { AddRangeThemeMutation } from '../commands/mutations/add-range-theme.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../commands/mutations/add-worksheet-range-theme.mutation';
@@ -127,6 +128,7 @@ import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/register-range-theme.mutation';
+import { RemoveRangeThemeMutation } from '../commands/mutations/remove-range-theme.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
@@ -136,6 +138,7 @@ import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutatio
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetGridlinesColorMutation } from '../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
+import { SetRangeThemeMutation } from '../commands/mutations/set-range-theme.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
@@ -157,14 +160,12 @@ import {
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
+import { CancelMarkDirtyRowAutoHeightOperation, MarkDirtyRowAutoHeightOperation } from '../commands/operations/mark-dirty-auto-height.operation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SelectRangeCommand, SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
-import { SetRangeThemeMutation } from '../commands/mutations/set-range-theme.mutation';
-import { RemoveRangeThemeMutation } from '../commands/mutations/remove-range-theme.mutation';
-import { AddRangeThemeMutation } from '../commands/mutations/add-range-theme.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -204,6 +205,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             EmptyMutation,
             SetRowHiddenMutation, // formula SUBTOTAL
             SetRowVisibleMutation,
+
+            MarkDirtyRowAutoHeightOperation,
+            CancelMarkDirtyRowAutoHeightOperation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);

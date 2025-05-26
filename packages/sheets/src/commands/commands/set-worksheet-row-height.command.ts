@@ -32,12 +32,14 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,
     SetWorksheetRowIsAutoHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
+import { getSuitableRangesInView } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaRowHeightCommand {
@@ -326,9 +328,16 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
             redoMutationParams
         );
 
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetWorksheetRowIsAutoHeightCommand.id,
-            params: redoMutationParams,
+            params: {
+                ...redoMutationParams,
+                autoHeightRanges: suitableRanges,
+                lazyAutoHeightRanges: remainingRanges,
+            },
         });
 
         const result = sequenceExecute([...redos], commandService);

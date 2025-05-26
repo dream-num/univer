@@ -195,7 +195,7 @@ export interface IRowData {
 
 export interface IRowAutoHeightInfo {
     row: number;
-    autoHeight: number;
+    autoHeight?: number;
 }
 
 /**

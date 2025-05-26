@@ -45,6 +45,17 @@ export class DocSimpleSkeleton {
         }
         this._dirty = false;
         this._lines = [];
+        if (this._text.length === 0) {
+            const textSize = FontCache.getMeasureText('A', this._fontStyle);
+            this._lines.push({
+                text: '',
+                width: 0,
+                height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
+                baseline: textSize.fontBoundingBoxAscent,
+            });
+            return this._lines;
+        }
+
         if (!this._warp) {
             const textSize = FontCache.getMeasureText(this._text, this._fontStyle);
             this._lines.push({

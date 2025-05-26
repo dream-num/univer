@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { default as numfmt } from 'numfmt';
+export * as numfmt from 'numfmt';
 
 export type INumfmtLocalTag =
     | 'zh-CN'

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { excelDateTimeSerial, isDate, parseFormattedValue } from '../../../basics/date';
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { excelDateTimeSerial, isDate, parseFormattedDate } from '../../../basics/date';
+import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -41,13 +41,14 @@ export class Datevalue extends BaseFunction {
     private _handleSingleObject(dateTextObject: BaseValueObject) {
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
-            const parsedDate = parseFormattedValue(value);
+            const parsedDate = parseFormattedDate(value);
             if (parsedDate) {
                 let { v, z } = parsedDate;
 
+                // currently, we the v is a number by numfmt the 3.2
                 if (z && isDate(z)) {
-                    if (v instanceof Date) {
-                        v = excelDateTimeSerial(v);
+                    if ((v as any) instanceof Date) {
+                        v = excelDateTimeSerial(v as any);
                     }
 
                     return NumberValueObject.create(Math.trunc(+v));

@@ -26,14 +26,15 @@ interface IPatternPreview {
 }
 
 export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocalTag = 'en'): IPatternPreview => {
-    const info = numfmt.getFormatInfo(pattern);
-    const negInfo = info._partitions[1];
-
+    // in the source code of numfmt, the formatColor function will read the the partitions[3]
+    const color = String(numfmt.formatColor(pattern, value));
     const result = numfmt.format(pattern, value, { locale, throws: false });
     if (value < 0) {
+        // pay attention, controllers/numfmt.controller.ts
+        // in the pattern, the negative value color may be upper case one , so if we read a color with UpperCase, we should return the color with lower case for our theme system
         return {
             result,
-            color: negInfo.color,
+            color,
         };
     }
     return {

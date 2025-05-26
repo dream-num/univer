@@ -47,8 +47,8 @@ export class Timevalue extends BaseFunction {
                 let { v, z } = parsedTime;
 
                 if (z && isDate(z)) {
-                    if (v instanceof Date) {
-                        v = excelDateTimeSerial(v);
+                    if ((v as any) instanceof Date) {
+                        v = excelDateTimeSerial((v as any));
                     }
 
                     return NumberValueObject.create(getFractionalPart(+v));

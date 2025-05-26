@@ -29,34 +29,35 @@ export const getDecimalFromPattern = (pattern: string, defaultValue: number = 0)
 };
 
 /**
- * Determines whether two pattern are equal, excluding differences in decimal places
+ * Determines whether two patterns are equal, excluding differences in decimal places.
  */
-export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string) => {
+export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string): boolean => {
     if ((patternA && !patternB) || (!patternA && patternB)) {
         return false;
     }
-    const getString = (tokens: unknown[]) =>
-        (tokens as Array<{ type: string; num?: string; value?: string }>).reduce(
-            (pre, cur) => {
-                if (pre.isEnd) {
-                    return pre;
-                }
-                const str = cur.value || cur.num;
-                if (cur.type === 'point') {
-                    pre.isEnd = true;
-                    return pre;
-                }
-                return { ...pre, result: pre.result + str };
-            },
-            { isEnd: false, result: '' }
-        ).result;
-    const partitionsA = numfmt.getFormatInfo(patternA)._partitions;
-    const partitionsB = numfmt.getFormatInfo(patternB)._partitions;
-    const A1 = getString(partitionsA[0].tokens);
-    const B1 = getString(partitionsB[0].tokens);
-    const A2 = getString(partitionsA[1].tokens);
-    const B2 = getString(partitionsB[1].tokens);
-    return A1 === B1 && A2 === B2 && partitionsA[1].color === partitionsB[1].color;
+
+    const getStringWithoutDecimal = (pattern: string): string => {
+        const tokens = numfmt.tokenize(pattern);
+        let result = '';
+        let isDecimalPart = false;
+
+        for (const token of tokens) {
+            if (token.type === numfmt.tokenTypes.POINT) {
+                isDecimalPart = true; // Start ignoring tokens after the decimal point
+                continue;
+            }
+            if (!isDecimalPart) {
+                result += token.value || '';
+            }
+        }
+
+        return result;
+    };
+
+    const normalizedA = getStringWithoutDecimal(patternA);
+    const normalizedB = getStringWithoutDecimal(patternB);
+
+    return normalizedA === normalizedB;
 };
 
 export const getDecimalString = (length: number) =>

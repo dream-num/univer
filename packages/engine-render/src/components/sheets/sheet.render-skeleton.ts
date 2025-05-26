@@ -130,6 +130,8 @@ export interface IGetPosByRowColOptions {
     firstMatch?: boolean;
 }
 
+const CACHE_COUNT = 100;
+
 export class SpreadsheetSkeleton extends SheetSkeleton {
     /**
      * Range viewBounds. only update by viewBounds.
@@ -150,11 +152,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _stylesCache: IStylesCache = {
         background: {},
         backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
-        font: {} as Record<string, ObjectMatrix<IFontCacheItem>>,
         fontMatrix: new ObjectMatrix<IFontCacheItem>(),
         border: new ObjectMatrix<BorderCache>(),
     };
 
+    private _clearTaskId: Nullable<number> = null;
     /** A matrix to store if a (row, column) position has render cache. */
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
@@ -252,7 +254,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
-            font: {} as Record<string, ObjectMatrix<IFontCacheItem>>,
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };
@@ -315,6 +316,30 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     }
 
     /**
+     * Clear cache out of visible range when browser are free.
+     */
+    private _clearCacheOutOfVisibleRange(visibleStartRow: number, visibleEndRow: number, visibleStartColumn: number, visibleEndColumn: number) {
+        if (this._clearTaskId) {
+            cancelIdleCallback(this._clearTaskId);
+        }
+
+        this._clearTaskId = requestIdleCallback(() => {
+            this._stylesCache.fontMatrix.forValue((row, col) => {
+                if (
+                    row < (visibleStartRow - CACHE_COUNT) ||
+                    row > (visibleEndRow + CACHE_COUNT) ||
+                    col < (visibleStartColumn - CACHE_COUNT) ||
+                    col > (visibleEndColumn + CACHE_COUNT)
+                ) {
+                    this._stylesCache.fontMatrix.realDeleteValue(row, col);
+                }
+            });
+
+            this._clearTaskId = null;
+        });
+    }
+
+    /**
      * Set border background and font to this._stylesCache by visible range, which derives from bounds)
      * @param vpInfo viewBounds
      */
@@ -327,6 +352,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const rowColumnSegment = this._drawingRange;
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = rowColumnSegment;
+
+        // clear cache out of visible range
+        this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
 
         if (visibleEndColumn === -1 || visibleEndRow === -1) return;
 
@@ -1228,7 +1256,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
-            font: {},
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };

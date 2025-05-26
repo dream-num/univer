@@ -59,7 +59,6 @@ type colorString = string;
 export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;
     backgroundPositions?: ObjectMatrix<ICellWithCoord>;
-    font?: Record<string, ObjectMatrix<IFontCacheItem>>;
     /**
      * Get value from getCell in skeleton and this value is used in font extension
      */

@@ -15,7 +15,7 @@
  */
 
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
-import { ICommandService, IPermissionService } from '@univerjs/core';
+import { ICommandService, IPermissionService, throttle } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -42,21 +42,21 @@ export const SheetBar = () => {
     const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id));
     const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId)?.id));
 
-    useEffect(() => {
-        const subscription = sheetBarService.scroll$.subscribe((state: IScrollState) => {
-            updateScrollButtonState(state);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
-
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;
         setLeftScrollState(leftEnd);
         setRightScrollState(rightEnd);
     };
+
+    useEffect(() => {
+        const subscription = sheetBarService.scroll$.subscribe(throttle((state: IScrollState) => {
+            updateScrollButtonState(state);
+        }, 100));
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     // Complete the _addSheet, handleScrollLeft, and handleScrollRight functions
     const addSheet = () => {

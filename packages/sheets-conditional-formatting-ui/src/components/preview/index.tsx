@@ -45,8 +45,7 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
         }
     }, [rule]);
 
-    const previewClassName = `univer-pointer-events-none univer-flex univer-h-5 univer-min-w-[72px] univer-items-center
-    univer-justify-center univer-text-xs`;
+    const previewClassName = 'univer-pointer-events-none univer-flex univer-h-5 univer-min-w-[72px] univer-items-center univer-justify-center univer-text-xs';
 
     switch (rule.type) {
         case CFRuleType.dataBar:
@@ -58,17 +57,17 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             return (
                 <div className={previewClassName}>
                     <div
-                        className="univer-h-full univer-w-1/2"
+                        className="univer-h-full univer-w-1/2 univer-border univer-border-solid"
                         style={{
                             background: nativeColor,
-                            border: `1px solid ${rule.config.nativeColor || defaultDataBarNativeColor}`,
+                            borderColor: rule.config.nativeColor ?? defaultDataBarNativeColor,
                         }}
                     />
                     <div
-                        className="univer-h-full univer-w-1/2"
+                        className="univer-h-full univer-w-1/2 univer-border univer-border-solid"
                         style={{
                             background: positiveColor,
-                            border: `1px solid ${rule.config.positiveColor || defaultDataBarPositiveColor}`,
+                            borderColor: rule.config.positiveColor ?? defaultDataBarPositiveColor,
                         }}
                     />
                 </div>
@@ -79,7 +78,11 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             return colorList && (
                 <div className={previewClassName}>
                     {colorList.map((item, index) => (
-                        <div key={index} className="univer-h-full" style={{ width: `${100 / colorList.length}%`, background: item }} />
+                        <div
+                            key={index}
+                            className="univer-h-full"
+                            style={{ width: `${100 / colorList.length}%`, background: item }}
+                        />
                     ))}
                 </div>
             );

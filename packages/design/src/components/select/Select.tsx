@@ -65,6 +65,12 @@ export interface ISelectProps {
     onChange: (value: string) => void;
 }
 
+export const selectClassName = clsx(`
+  univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center univer-justify-between
+  univer-gap-2 univer-rounded-lg univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
+  dark:!univer-bg-gray-700 dark:!univer-text-white
+`, borderClassName);
+
 export function Select(props: ISelectProps) {
     const {
         className,
@@ -149,12 +155,7 @@ export function Select(props: ISelectProps) {
         >
             <div
                 data-u-comp="select"
-                className={clsx(`
-                  univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center
-                  univer-justify-between univer-gap-2 univer-rounded-lg univer-bg-white univer-px-2.5
-                  univer-transition-colors univer-duration-200
-                  dark:!univer-bg-gray-700 dark:!univer-text-white
-                `, borderClassName, {
+                className={clsx(selectClassName, {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                     'univer-cursor-not-allowed': disabled,

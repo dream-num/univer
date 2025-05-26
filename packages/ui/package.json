@@ -84,7 +84,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.3.24",
-        "@wendellhu/redi": "0.18.0",
+        "@wendellhu/redi": "0.18.3",
         "localforage": "^1.10.0"
     },
     "optionalDependencies": {
@@ -103,6 +103,6 @@
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
         "vitest": "^3.1.4",
-        "vue": "^3.5.13"
+        "vue": "^3.5.14"
     }
 }

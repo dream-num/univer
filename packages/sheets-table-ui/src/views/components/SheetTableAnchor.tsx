@@ -111,11 +111,7 @@ export const SheetTableAnchor = () => {
     }
 
     return (
-        <div
-            className="univer-absolute univer-z-50 univer-h-0 univer-w-0"
-            style={{
-            }}
-        >
+        <div className="univer-absolute univer-z-50 univer-h-0 univer-w-0">
             {anchorPosition.map((item) => {
                 const table = tableManager.getTableById(unitId, item.tableId);
                 if (!table) return null;
@@ -139,16 +135,18 @@ export const SheetTableAnchor = () => {
                     <div
                         key={item.tableId}
                         className={clsx(`
-                          univer-absolute univer-box-border univer-flex univer-cursor-pointer univer-items-center
-                          univer-rounded-xl univer-pl-2 univer-pr-2 univer-shadow-xs
-                        `, borderClassName)}
+                          univer-absolute univer-box-border univer-cursor-pointer univer-items-center univer-rounded-xl
+                          univer-pl-2 univer-pr-2 univer-shadow-xs
+                        `, borderClassName, {
+                            'univer-flex': !shouldHidden,
+                            'univer-hidden': shouldHidden,
+                        })}
                         style={{
                             left: item.x,
                             top: Math.max(item.y, 0),
                             backgroundColor: headerBgColor,
                             color: headerTextColor,
                             borderWidth: '0.5px',
-                            display: shouldHidden ? 'none' : 'flex',
                             height: anchorHeight ? `${anchorHeight}px` : '24px',
                         }}
                     >
@@ -176,17 +174,14 @@ export const SheetTableAnchor = () => {
                                 )}
                         </div>
                         <Dropdown
-                            open={openStates[item.tableId] ?? false}
-                            onOpenChange={(isOpen) => {
-                                updateOpenState(item.tableId, isOpen);
-                            }}
                             key={item.tableId}
+                            align="start"
                             overlay={(
                                 <div className="univer-pb-2 univer-pt-2">
                                     <div
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-gap-2 univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                         onClick={() => {
@@ -194,7 +189,7 @@ export const SheetTableAnchor = () => {
                                             setInputValue(item.tableName);
                                         }}
                                     >
-                                        <RenameSingle className="univer-mr-2" />
+                                        <RenameSingle />
                                         {localeService.t('sheets-table.rename')}
                                     </div>
                                     <div
@@ -206,17 +201,17 @@ export const SheetTableAnchor = () => {
                                         onClick={() => handleChangeRange(item.tableId)}
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-gap-2 univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                     >
-                                        <GridOutlineSingle className="univer-mr-2" />
+                                        <GridOutlineSingle />
                                         {localeService.t('sheets-table.updateRange')}
                                     </div>
                                     <div
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-gap-2 univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                         onClick={() => {
@@ -241,7 +236,6 @@ export const SheetTableAnchor = () => {
                                     >
                                         <PaintBucket
                                             extend={{ colorChannel1: 'rgb(53,91,183)' }}
-                                            className="univer-mr-2"
                                         />
                                         {localeService.t('sheets-table.setTheme')}
                                     </div>
@@ -270,7 +264,10 @@ export const SheetTableAnchor = () => {
                                     </div>
                                 </div>
                             )}
-                            align="start"
+                            open={openStates[item.tableId] ?? false}
+                            onOpenChange={(isOpen) => {
+                                updateOpenState(item.tableId, isOpen);
+                            }}
                         >
                             <MoreDownSingle />
                         </Dropdown>

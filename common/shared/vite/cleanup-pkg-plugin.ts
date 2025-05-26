@@ -19,7 +19,6 @@ import path from 'node:path';
 import process from 'node:process';
 import fs from 'fs-extra';
 import sortKeys from 'sort-keys';
-
 import localPkg from '../package.json';
 import { peerDepsMap } from './data';
 
@@ -78,6 +77,7 @@ export function cleanupPkgPlugin(): Plugin {
         generateBundle() {
             const hasLocales = fs.existsSync(path.resolve(process.cwd(), 'src/locale'));
             const hasFacade = fs.existsSync(path.resolve(process.cwd(), 'src/facade/index.ts'));
+            pkg.version = localPkg.version;
             pkg.publishConfig = {
                 access: 'public',
                 main: './lib/es/index.js',

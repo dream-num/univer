@@ -20,9 +20,10 @@ import { Button } from '../button/Button';
 import { Input } from '../input/Input';
 
 export interface IInputNumberProps
-    extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue'> {
+    extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
     value?: number | null;
     defaultValue?: number;
+    size?: 'mini' | 'small';
     min?: number;
     max?: number;
     step?: number;
@@ -44,6 +45,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         {
             value,
             defaultValue,
+            size = 'small',
             min = Number.MIN_SAFE_INTEGER,
             max = Number.MAX_SAFE_INTEGER,
             step = 1,
@@ -315,6 +317,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                     <Input
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}
+                        size={size}
                         value={inputValue}
                         disabled={disabled}
                         onChange={handleInputChange}

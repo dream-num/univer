@@ -20,6 +20,7 @@ import type { IPopup } from '@univerjs/ui';
 import type { IUniverSheetsNoteUIPluginConfig } from '../controllers/config.schema';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -29,12 +30,14 @@ import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
+    const renderManagerService = useDependency(IRenderManagerService);
     const config = useConfigValue<IUniverSheetsNoteUIPluginConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
     const activePopup = props.popup.extraProps?.location;
     if (!activePopup) {
         console.error('Popup extraProps or location is undefined.');
         return null; // Or handle this case appropriately
     }
+    const currentRender = renderManagerService.getRenderById(activePopup.unitId)!;
     const [note, setNote] = useState<ISheetNote>(() => {
         const defaultNote = { width: config?.defaultNoteSize?.width || 216, height: config?.defaultNoteSize?.height || 92, note: '' };
         const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
@@ -118,6 +121,12 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
 
     return (
         <textarea
+            onWheel={(e) => {
+                if (document.activeElement !== textareaRef.current) {
+                    currentRender.engine.getCanvasElement().dispatchEvent(new WheelEvent(e.type, e.nativeEvent));
+                    e.preventDefault();
+                }
+            }}
             ref={textareaRef}
             data-u-comp="note-textarea"
             className={clsx(`

@@ -454,11 +454,11 @@ export {
     SetWorksheetRowIsAutoHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export {
-    CancelMarkDirtyRowAutoHeightOperation,
-    type ICancelMarkDirtyRowAutoHeightOperationParams,
-    type IMarkDirtyRowAutoHeightOperationParams,
-    MarkDirtyRowAutoHeightOperation,
-} from './commands/operations/mark-dirty-auto-height.operation';
+    CancelMarkDirtyRowAutoHeightMutation,
+    type ICancelMarkDirtyRowAutoHeightMutationParams,
+    type IMarkDirtyRowAutoHeightMutationParams,
+    MarkDirtyRowAutoHeightMutation,
+} from './commands/mutations/mark-dirty-auto-height.mutation';
 
 export { type IScrollToCellOperationParams, ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 

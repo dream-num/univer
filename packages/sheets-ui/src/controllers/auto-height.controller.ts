@@ -20,9 +20,9 @@ import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets'
 import { Disposable, generateRandomId, IConfigService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    CancelMarkDirtyRowAutoHeightOperation,
+    CancelMarkDirtyRowAutoHeightMutation,
     getSheetCommandTarget,
-    MarkDirtyRowAutoHeightOperation,
+    MarkDirtyRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SheetInterceptorService,
@@ -54,7 +54,7 @@ export class AutoHeightController extends Disposable {
     private _processLazyAutoHeight(redoUndoItem: { redos: any[]; undos: any[] }, unitId: string, subUnitId: string, lazyAutoHeightRanges?: IRange[]) {
         if (lazyAutoHeightRanges?.length) {
             const redo = {
-                id: MarkDirtyRowAutoHeightOperation.id,
+                id: MarkDirtyRowAutoHeightMutation.id,
                 params: {
                     unitId,
                     subUnitId,
@@ -66,7 +66,7 @@ export class AutoHeightController extends Disposable {
                 },
             };
             const undo = {
-                id: CancelMarkDirtyRowAutoHeightOperation.id,
+                id: CancelMarkDirtyRowAutoHeightMutation.id,
                 params: {
                     unitId,
                     subUnitId,

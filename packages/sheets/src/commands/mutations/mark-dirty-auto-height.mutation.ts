@@ -17,14 +17,14 @@
 import type { IOperation, IRange } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-export interface IMarkDirtyRowAutoHeightOperationParams {
+export interface IMarkDirtyRowAutoHeightMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
     id: string;
 }
 
-export const MarkDirtyRowAutoHeightOperation: IOperation<IMarkDirtyRowAutoHeightOperationParams> = {
+export const MarkDirtyRowAutoHeightMutation: IOperation<IMarkDirtyRowAutoHeightMutationParams> = {
     id: 'sheet.operation.mark-dirty-row-auto-height',
     type: CommandType.OPERATION,
     handler: () => {
@@ -32,13 +32,13 @@ export const MarkDirtyRowAutoHeightOperation: IOperation<IMarkDirtyRowAutoHeight
     },
 };
 
-export interface ICancelMarkDirtyRowAutoHeightOperationParams {
+export interface ICancelMarkDirtyRowAutoHeightMutationParams {
     unitId: string;
     subUnitId: string;
     id: string;
 }
 
-export const CancelMarkDirtyRowAutoHeightOperation: IOperation<ICancelMarkDirtyRowAutoHeightOperationParams> = {
+export const CancelMarkDirtyRowAutoHeightMutation: IOperation<ICancelMarkDirtyRowAutoHeightMutationParams> = {
     id: 'sheet.operation.cancel-mark-dirty-row-auto-height',
     type: CommandType.OPERATION,
     handler: () => {

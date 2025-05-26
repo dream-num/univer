@@ -16,9 +16,9 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ICancelMarkDirtyRowAutoHeightOperationParams, IMarkDirtyRowAutoHeightOperationParams } from '@univerjs/sheets';
+import type { ICancelMarkDirtyRowAutoHeightMutationParams, IMarkDirtyRowAutoHeightMutationParams } from '@univerjs/sheets';
 import { createIdentifier, Disposable, ICommandService, Inject, Rectangle } from '@univerjs/core';
-import { CancelMarkDirtyRowAutoHeightOperation, MarkDirtyRowAutoHeightOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { CancelMarkDirtyRowAutoHeightMutation, MarkDirtyRowAutoHeightMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IAutoHeightTask {
@@ -86,8 +86,8 @@ export class AutoHeightService extends Disposable implements IRenderModule {
     private _initMarkDirty() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((info) => {
-                if (info.id === MarkDirtyRowAutoHeightOperation.id) {
-                    const params = info.params as IMarkDirtyRowAutoHeightOperationParams;
+                if (info.id === MarkDirtyRowAutoHeightMutation.id) {
+                    const params = info.params as IMarkDirtyRowAutoHeightMutationParams;
                     const { unitId, subUnitId, ranges, id } = params;
                     if (unitId !== this._context.unitId) {
                         return;
@@ -100,8 +100,8 @@ export class AutoHeightService extends Disposable implements IRenderModule {
                     });
                 }
 
-                if (info.id === CancelMarkDirtyRowAutoHeightOperation.id) {
-                    const params = info.params as ICancelMarkDirtyRowAutoHeightOperationParams;
+                if (info.id === CancelMarkDirtyRowAutoHeightMutation.id) {
+                    const params = info.params as ICancelMarkDirtyRowAutoHeightMutationParams;
                     const { unitId, id } = params;
                     if (unitId !== this._context.unitId) {
                         return;

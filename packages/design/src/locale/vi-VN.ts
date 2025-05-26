@@ -34,6 +34,11 @@ const locale: ILocale = {
         Select: {
             empty: 'Không có',
         },
+        ColorPicker: {
+            more: 'Màu sắc khác',
+            cancel: 'Hủy bỏ',
+            confirm: 'Xác nhận',
+        },
     },
 };
 

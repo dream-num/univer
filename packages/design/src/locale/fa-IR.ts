@@ -34,6 +34,11 @@ const locale: ILocale = {
         Select: {
             empty: 'هیچ‌کدام',
         },
+        ColorPicker: {
+            more: 'رنگ‌های بیشتر',
+            cancel: 'لغو',
+            confirm: 'باشه',
+        },
     },
 };
 

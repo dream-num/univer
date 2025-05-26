@@ -22,6 +22,8 @@ const locale: typeof enUS = {
             title: 'Record Actions',
             record: 'Record Actions...',
             'replay-local': 'Replace Local Record...',
+            'replay-local-name': 'Replace Local Record by Subunit...',
+            'replay-local-active': 'Replace Local Record by Current Subunit...',
         },
     },
 };

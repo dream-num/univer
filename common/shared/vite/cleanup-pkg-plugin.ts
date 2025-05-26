@@ -19,7 +19,6 @@ import path from 'node:path';
 import process from 'node:process';
 import fs from 'fs-extra';
 import sortKeys from 'sort-keys';
-
 import localPkg from '../package.json';
 import { peerDepsMap } from './data';
 

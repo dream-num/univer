@@ -93,7 +93,7 @@ export function App() {
                     title={TITLE_MAP[id]}
                     toolbarControls={<div />}
                 >
-                    <div id={`app-${id}`} style={{ height: '100%' }}>
+                    <div id={`app-${id}`} className="univer-h-full">
                         {TITLE_MAP[id]}
                     </div>
                 </MosaicWindow>

@@ -19,6 +19,7 @@ import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import type { IUniverUIConfig } from '../../../controllers/config.schema';
 import { IConfigService } from '@univerjs/core';
+import { clsx } from '@univerjs/design';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
@@ -323,10 +324,13 @@ function RectPopup(props: IRectPopupProps) {
             <section
                 data-u-comp="rect-popup"
                 ref={nodeRef}
-                className={`
+                className={clsx(`
                   univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
-                `}
-                style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null, zIndex }}
+                `, {
+                    'univer-hidden': hidden,
+                    'univer-animate-in univer-fade-in-70': !hidden,
+                })}
+                style={{ ...positionRef.current, zIndex }}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={onClick}
                 onPointerEnter={onPointerEnter}

@@ -97,6 +97,8 @@ export class AutoHeightService extends Disposable implements IRenderModule {
                         ranges,
                         sheetId: subUnitId,
                         id,
+                        // 10s timeout
+                        maxTime: 10_000,
                     });
                 }
 
@@ -114,7 +116,16 @@ export class AutoHeightService extends Disposable implements IRenderModule {
 
     private _loopTask(task: IAutoHeightTaskInfo) {
         const skeleton = task.skeleton;
-        const { result, lasts } = taskRowsFromRanges(task.ranges, CALCULATE_ROWS);
+        let result: IRange[] = [];
+        let lasts: IRange[] = [];
+        if (task.maxTime && task.maxTime + task.startTime <= Date.now()) {
+            result = task.ranges;
+        } else {
+            const info = taskRowsFromRanges(task.ranges, CALCULATE_ROWS);
+            result = info.result;
+            lasts = info.lasts;
+        }
+
         const autoHeightInfos = skeleton.calculateAutoHeightInRange(result);
         const updatedRowsAutoHeightInfo = autoHeightInfos.filter((info) => {
             const { row, autoHeight } = info;
@@ -183,7 +194,13 @@ export class AutoHeightService extends Disposable implements IRenderModule {
             };
         }));
 
-        const remainRanges = Rectangle.subtractMulti(task.ranges, this._autoHeightTasks.map((task) => task.ranges).flat());
+        const remainRanges = Rectangle.subtractMulti(
+            task.ranges,
+            this._autoHeightTasks
+                .filter((newTask) => newTask.sheetId === task.sheetId)
+                .map((task) => task.ranges)
+                .flat()
+        );
 
         if (remainRanges.length) {
             this._autoHeightTasks.push({

@@ -34,7 +34,7 @@ import type {
     ITextRotation,
     Nullable,
     Styles,
-
+    VerticalAlign,
     Worksheet,
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
@@ -63,7 +63,6 @@ import {
     searchArray,
     SheetSkeleton,
     Tools,
-    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
@@ -1326,23 +1325,19 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return;
         }
         const style = this._styles.getStyleByCell(cellData);
-
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
         const isRichText = cellData?.p || vertexAngle || centerAngle;
 
         const modelObject = isRichText ?
-            this._getCellDocumentModel(cellData, {
-                displayRawFormula: this._renderRawFormula,
-            })
+            this._getCellDocumentModel(cellData, { displayRawFormula: this._renderRawFormula })
             : null;
 
         if (modelObject) {
             const { documentModel } = modelObject;
             if (documentModel) {
-                const { fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+                const { fontString, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
                 const documentViewModel = new DocumentViewModel(documentModel);
                 if (documentViewModel) {
-                    const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
                     const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
                     documentSkeleton.calculate();
 
@@ -1358,8 +1353,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                         fontString,
                         style,
                     };
-                    this._calculateOverflowCell(row, col, config as IFontCacheItem);
-                    this._handleFontMatrix.setValue(row, col, true);
                 }
             }
         } else {
@@ -1369,16 +1362,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 documentSkeleton: undefined,
                 vertexAngle,
                 centerAngle,
-                verticalAlign: verticalAlign ?? VerticalAlign.UNSPECIFIED,
-                horizontalAlign: horizontalAlign ?? HorizontalAlign.UNSPECIFIED,
-                wrapStrategy: wrapStrategy ?? WrapStrategy.OVERFLOW,
+                verticalAlign: verticalAlign ?? undefined,
+                horizontalAlign: horizontalAlign ?? undefined,
+                wrapStrategy: wrapStrategy ?? undefined,
                 imageCacheMap: this._imageCacheMap,
                 cellData,
                 fontString,
                 style,
             };
-            this._calculateOverflowCell(row, col, config as IFontCacheItem);
-            this._handleFontMatrix.setValue(row, col, true);
         }
 
         this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);

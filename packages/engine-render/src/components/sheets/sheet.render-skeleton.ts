@@ -158,7 +158,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     /** A matrix to store if a (row, column) position has render cache. */
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
-    private _handleFontMatrix = new ObjectMatrix<boolean>();
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
     private _scene: Nullable<Scene> = null;
@@ -1373,7 +1372,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
-        this._handleFontMatrix.setValue(row, col, true);
     }
 
     /**

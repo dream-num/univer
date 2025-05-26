@@ -30,6 +30,8 @@ export const getDecimalFromPattern = (pattern: string, defaultValue: number = 0)
 
 /**
  * Determines whether two patterns are equal, excluding differences in decimal places.
+ * This function ignores the decimal part of the patterns and the positive color will be ignored but negative color will be considered.
+ * more info can check the test case.
  */
 export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string): boolean => {
     if ((patternA && !patternB) || (!patternA && patternB)) {
@@ -40,12 +42,40 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
         const tokens = numfmt.tokenize(pattern);
         let result = '';
         let isDecimalPart = false;
+        let isColorBefore = false;
 
         for (const token of tokens) {
             if (token.type === numfmt.tokenTypes.POINT) {
                 isDecimalPart = true; // Start ignoring tokens after the decimal point
                 continue;
             }
+            // for the excel number
+
+            // this if should be before the color token check
+            if (isColorBefore && token.type === numfmt.tokenTypes.MINUS) {
+                // ignore the minus token in the decimal part after the color token
+                continue;
+            }
+
+            if (token.type === numfmt.tokenTypes.SKIP) {
+                // Skip tokens that are not relevant to the string representation
+                continue;
+            }
+
+            if (token.type === numfmt.tokenTypes.COLOR) {
+                isColorBefore = true; // If we are in the decimal part, we ignore the color tokens
+                continue;
+            } else {
+                isColorBefore = false; // Reset after processing the color part
+            }
+
+            if (isDecimalPart && token.type === numfmt.tokenTypes.ZERO) {
+                // If we are in the decimal part, we ignore the number tokens
+                continue;
+            } else {
+                isDecimalPart = false; // Reset after processing the decimal part
+            }
+
             if (!isDecimalPart) {
                 result += token.value || '';
             }

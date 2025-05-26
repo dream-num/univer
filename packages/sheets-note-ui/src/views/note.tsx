@@ -124,7 +124,6 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             onWheel={(e) => {
                 if (document.activeElement !== textareaRef.current) {
                     currentRender.engine.getCanvasElement().dispatchEvent(new WheelEvent(e.type, e.nativeEvent));
-                    e.preventDefault();
                 }
             }}
             ref={textareaRef}

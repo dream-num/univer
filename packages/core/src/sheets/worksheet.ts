@@ -111,7 +111,11 @@ export class Worksheet {
         callback(this._viewModel);
     }
 
-    registerGetCellHeight(callback: (row: number, col: number) => number): IDisposable {
+    /**
+     * @internal
+     * this is an internal method, please do not use it
+     */
+    __registerGetCellHeight(callback: (row: number, col: number) => number): IDisposable {
         this._getCellHeight = callback;
 
         return toDisposable(() => {

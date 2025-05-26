@@ -185,7 +185,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             })
         );
 
-        this.disposeWithMe(this.worksheet.registerGetCellHeight((row, col) => {
+        this.disposeWithMe(this.worksheet.__registerGetCellHeight((row, col) => {
             return this.calculateAutoHeightForCell(row, col) ?? 0;
         }));
     }

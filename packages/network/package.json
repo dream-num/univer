@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/network",
-    "version": "0.7.0",
+    "version": "0.8.0-beta.0",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",

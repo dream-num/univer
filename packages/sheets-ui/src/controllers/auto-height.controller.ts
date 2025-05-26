@@ -51,6 +51,7 @@ interface IAutoHeightParams {
     cellHeights?: ObjectMatrix<number>;
     autoHeightRanges?: IRange[];
     lazyAutoHeightRanges?: IRange[];
+    ranges: IRange[];
 }
 
 export class AutoHeightController extends Disposable {
@@ -191,7 +192,7 @@ export class AutoHeightController extends Disposable {
 
                 if (command.id === SetWorksheetRowIsAutoHeightCommand.id) {
                     const params = command.params as ISetWorksheetRowIsAutoHeightMutationParams & IAutoHeightParams;
-                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(params.ranges, params.subUnitId, params.cellHeights);
+                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(params.autoHeightRanges ?? params.ranges, params.subUnitId);
                     return this._processLazyAutoHeight(undoRedoItem, params.unitId, params.subUnitId, params.lazyAutoHeightRanges);
                 }
 
@@ -213,7 +214,7 @@ export class AutoHeightController extends Disposable {
                         };
                     }
 
-                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(selections, params.subUnitId, params.cellHeights);
+                    const undoRedoItem = this.getUndoRedoParamsOfAutoHeight(params.autoHeightRanges ?? params.ranges, params.subUnitId, params.cellHeights);
                     return this._processLazyAutoHeight(undoRedoItem, params.unitId!, params.subUnitId!, params.lazyAutoHeightRanges);
                 }
 

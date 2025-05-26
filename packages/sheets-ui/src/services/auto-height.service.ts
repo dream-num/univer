@@ -112,17 +112,7 @@ export class AutoHeightService extends Disposable implements IRenderModule {
         );
     }
 
-    private _calculateLoop(options: IdleDeadline) {
-        if (options.timeRemaining() <= 0) {
-            return;
-        }
-
-        if (this._autoHeightTasks.length === 0) {
-            this._calculateLoopId = null;
-            return;
-        }
-
-        const task = this._autoHeightTasks[0];
+    private _loopTask(task: IAutoHeightTaskInfo) {
         const skeleton = task.skeleton;
         const { result, lasts } = taskRowsFromRanges(task.ranges, CALCULATE_ROWS);
         const autoHeightInfos = skeleton.calculateAutoHeightInRange(result);
@@ -152,6 +142,20 @@ export class AutoHeightService extends Disposable implements IRenderModule {
             };
             this._commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, redoParams);
         }
+    }
+
+    private _calculateLoop(options: IdleDeadline) {
+        while (this._autoHeightTasks.length) {
+            if (options.timeRemaining() <= 0) {
+                break;
+            }
+            const task = this._autoHeightTasks.shift();
+            if (!task) {
+                this._calculateLoopId = null;
+                return;
+            }
+            this._loopTask(task);
+        }
 
         this._calculateLoopId = requestIdleCallback((options) => {
             this._calculateLoop(options);
@@ -179,22 +183,19 @@ export class AutoHeightService extends Disposable implements IRenderModule {
                 endColumn: 0,
             };
         });
-        for (const preTask of this._autoHeightTasks) {
-            if (task.sheetId === preTask.sheetId) {
-                const remainRanges = Rectangle.subtractMulti(preTask.ranges, task.ranges);
-                preTask.ranges = remainRanges;
-            }
+
+        const remainRanges = Rectangle.subtractMulti(task.ranges, this._autoHeightTasks.map((task) => task.ranges).flat());
+
+        if (remainRanges.length) {
+            this._autoHeightTasks.push({
+                ...task,
+                startTime: Date.now(),
+                skeleton,
+                ranges: remainRanges,
+            });
+
+            this._initialCalculateLoop();
         }
-
-        this._autoHeightTasks = this._autoHeightTasks.filter((task) => task.ranges.length > 0);
-
-        this._autoHeightTasks.push({
-            ...task,
-            startTime: Date.now(),
-            skeleton,
-        });
-
-        this._initialCalculateLoop();
     }
 
     cancelTask(taskId: string): void {

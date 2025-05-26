@@ -141,6 +141,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
                 cellHeights,
                 autoHeightRanges: suitableRanges,
                 lazyAutoHeightRanges: remainingRanges,
+                ranges,
             },
         });
 

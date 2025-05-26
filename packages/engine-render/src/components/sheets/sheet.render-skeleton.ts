@@ -34,7 +34,6 @@ import type {
     ITextRotation,
     Nullable,
     Styles,
-    VerticalAlign,
     Worksheet,
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
@@ -63,6 +62,7 @@ import {
     searchArray,
     SheetSkeleton,
     Tools,
+    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
@@ -1388,9 +1388,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 documentSkeleton: undefined,
                 vertexAngle,
                 centerAngle,
-                verticalAlign: verticalAlign ?? undefined,
-                horizontalAlign: horizontalAlign ?? undefined,
-                wrapStrategy: wrapStrategy ?? undefined,
+                verticalAlign: verticalAlign ?? VerticalAlign.UNSPECIFIED,
+                horizontalAlign: horizontalAlign ?? HorizontalAlign.UNSPECIFIED,
+                wrapStrategy: wrapStrategy ?? WrapStrategy.OVERFLOW,
                 imageCacheMap: this._imageCacheMap,
                 cellData,
                 fontString,

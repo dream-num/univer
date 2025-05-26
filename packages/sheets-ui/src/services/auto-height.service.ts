@@ -130,13 +130,12 @@ export class AutoHeightService extends Disposable implements IRenderModule {
 
         if (lasts.length) {
             task.ranges = lasts;
-        } else {
-            this._autoHeightTasks.shift();
+            this._autoHeightTasks.unshift(task);
         }
 
         if (updatedRowsAutoHeightInfo.length) {
             const redoParams = {
-                unitId: task.sheetId,
+                unitId: this._context.unitId,
                 subUnitId: task.sheetId,
                 rowsAutoHeightInfo: updatedRowsAutoHeightInfo,
             };
@@ -176,13 +175,13 @@ export class AutoHeightService extends Disposable implements IRenderModule {
             return;
         }
 
-        task.ranges = task.ranges.map((range) => {
+        task.ranges = Rectangle.mergeRanges(task.ranges.map((range) => {
             return {
                 ...range,
                 startColumn: 0,
                 endColumn: 0,
             };
-        });
+        }));
 
         const remainRanges = Rectangle.subtractMulti(task.ranges, this._autoHeightTasks.map((task) => task.ranges).flat());
 

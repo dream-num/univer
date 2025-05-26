@@ -110,13 +110,31 @@ export function CustomLabel(props: ICustomLabelProps) {
         const CustomComponent = componentManager.get(labelName);
 
         if (CustomComponent) {
-            nodes.push(<CustomComponent key={index++} {...customProps} className={className} value={realValue} />);
+            nodes.push(
+                <CustomComponent
+                    key={index++}
+                    {...customProps}
+                    className={className}
+                    value={realValue}
+                />
+            );
         } else {
-            nodes.push(<span key={index++} className={className}>{localeService.t(labelName)}</span>);
+            nodes.push(
+                <span
+                    key={index++}
+                    className={className}
+                >
+                    {localeService.t(labelName)}
+                </span>
+            );
         }
     }
     if (title) {
-        nodes.push(<span key={index++} className={className}>{typeof title === 'string' ? localeService.t(title) : title}</span>);
+        nodes.push(
+            <span key={index++} className={className}>
+                {typeof title === 'string' ? localeService.t(title) : title}
+            </span>
+        );
     }
 
     return <>{nodes}</>;

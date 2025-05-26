@@ -49,8 +49,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const rangeThemeModel = useDependency(SheetRangeThemeModel);
     const sheetTableThemeUIController = useDependency(SheetTableThemeUIController);
 
-    const rangeThemeMapChanged$ = useObservable(rangeThemeModel.rangeThemeMapChange$);
-    const tableRefresh$ = useObservable(sheetTableThemeUIController.refreshTable$);
+    const rangeThemeMapChanged = useObservable(rangeThemeModel.rangeThemeMapChange$);
+    const tableRefresh = useObservable(sheetTableThemeUIController.refreshTable$);
 
     const errorService = useDependency(ErrorService);
 
@@ -122,9 +122,14 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
 
     useEffect(() => {
         setRefresh(Math.random());
-    }, [rangeThemeMapChanged$, tableRefresh$]);
+    }, [rangeThemeMapChanged, tableRefresh]);
 
     if (!table) return null;
+
+    const headerBgIsDark = new ColorKit(headerBg).isDark();
+    const firstRowBgIsDark = new ColorKit(firstRowBg).isDark();
+    const secondRowBgIsDark = new ColorKit(secondRowBg).isDark();
+    const lastRowBgIsDark = new ColorKit(lastRowBg).isDark();
 
     return (
         <div>
@@ -141,17 +146,18 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         <div
                             key={item}
                             className={clsx(`
-                              univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px univer-border univer-border-solid
-                              univer-border-gray-200
+                              univer-h-10 univer-w-8 univer-cursor-pointer univer-border univer-border-solid
+                              univer-border-gray-200 univer-p-px
+                              [&>div]:univer-box-border [&>div]:univer-h-2.5
                             `, {
                                 'univer-border-blue-500': item === themeConfig.theme,
                             })}
                             onClick={() => handleThemeChange(item)}
                         >
-                            <div className="univer-box-border univer-h-2.5" style={{ background: headerRowBg, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div className="univer-box-border univer-h-2.5" style={{ background: firstRowBg, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div className="univer-box-border univer-h-2.5" style={{ background: secondRowBg, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div className="univer-box-border univer-h-2.5" style={{ background: lastRowBg, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div style={{ background: headerRowBg, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div style={{ background: firstRowBg, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div style={{ background: secondRowBg, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                            <div style={{ background: lastRowBg, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
                         </div>
                     );
                 })}
@@ -179,8 +185,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                             <div
                                 key={item}
                                 className={clsx(`
-                                  univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px univer-border
-                                  univer-border-solid univer-border-gray-200
+                                  univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-border
+                                  univer-border-solid univer-border-gray-200 univer-p-px
                                 `, {
                                     'univer-border-blue-500': item === themeConfig.theme,
                                 })}
@@ -221,10 +227,12 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     className={clsx(`
                                       univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
                                       univer-leading-9
-                                    `, borderClassName)}
+                                    `, borderClassName, {
+                                        'univer-text-white': headerBgIsDark,
+                                        'univer-text-gray-900': !headerBgIsDark,
+                                    })}
                                     style={{
                                         background: headerBg,
-                                        color: new ColorKit(headerBg).isDark() ? '#fff' : '#000',
                                     }}
                                 >
                                     {localeService.t('sheets-table.header')}
@@ -256,10 +264,12 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         `, borderClassName)}
                                     >
                                         <div
-                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
+                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName, {
+                                                'univer-text-white': headerBgIsDark,
+                                                'univer-text-gray-900': !headerBgIsDark,
+                                            })}
                                             style={{
                                                 background: headerBg,
-                                                color: new ColorKit(headerBg).isDark() ? '#fff' : '#000',
                                             }}
                                         />
                                         <DropdownSingle className="univer-h-2 univer-w-2" />
@@ -271,10 +281,12 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     className={clsx(`
                                       univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
                                       univer-leading-9
-                                    `, borderClassName)}
+                                    `, borderClassName, {
+                                        'univer-text-white': firstRowBgIsDark,
+                                        'univer-text-gray-900': !firstRowBgIsDark,
+                                    })}
                                     style={{
                                         background: firstRowBg,
-                                        color: new ColorKit(firstRowBg).isDark() ? '#fff' : '#000',
                                     }}
                                 >
                                     {localeService.t('sheets-table.firstLine')}
@@ -319,10 +331,12 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     className={clsx(`
                                       univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
                                       univer-leading-9
-                                    `, borderClassName)}
+                                    `, borderClassName, {
+                                        'univer-text-white': secondRowBgIsDark,
+                                        'univer-text-gray-900': !secondRowBgIsDark,
+                                    })}
                                     style={{
                                         background: secondRowBg,
-                                        color: new ColorKit(secondRowBg).isDark() ? '#fff' : '#000',
                                     }}
                                 >
                                     {localeService.t('sheets-table.secondLine')}
@@ -365,10 +379,12 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     className={clsx(`
                                       univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
                                       univer-leading-9
-                                    `, borderClassName)}
+                                    `, borderClassName, {
+                                        'univer-text-white': lastRowBgIsDark,
+                                        'univer-text-gray-900': !lastRowBgIsDark,
+                                    })}
                                     style={{
                                         background: lastRowBg,
-                                        color: new ColorKit(lastRowBg).isDark() ? '#fff' : '#000',
                                     }}
                                 >
                                     {localeService.t('sheets-table.footer')}

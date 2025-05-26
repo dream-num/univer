@@ -176,8 +176,7 @@ export function ParagraphSetting() {
                 <div className="univer-flex univer-justify-between item-center">
                     <div className="univer-mt-3 univer-text-xs">{localeService.t('doc.paragraphSetting.lineSpace')}</div>
                     <div
-                        className="univer-mt-4 univer-flex univer-flex-col univer-gap-1.5"
-                        style={{ width: 162 }}
+                        className="univer-mt-4 univer-flex univer-w-[162px] univer-flex-col univer-gap-1.5"
                     >
                         <Select
                             value={`${spacingRule}`}

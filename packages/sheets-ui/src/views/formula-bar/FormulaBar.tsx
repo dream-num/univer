@@ -255,13 +255,13 @@ export function FormulaBar(props: IProps) {
         <div
             data-u-comp="formula-bar"
             className={clsx(`
-              univer-box-border univer-flex univer-h-7 univer-bg-white univer-transition-[height] univer-ease-linear
+              univer-box-border univer-flex univer-bg-white univer-transition-[height] univer-ease-linear
               dark:!univer-bg-gray-900
-            `, borderBottomClassName, className)}
-            style={{
-                height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
-                pointerEvents: editDisable ? 'none' : 'auto',
-            }}
+            `, borderBottomClassName, className, {
+                'univer-h-7': arrowDirection === ArrowDirection.Down,
+                'univer-h-20': arrowDirection === ArrowDirection.Up,
+                'univer-pointer-events-none': editDisable,
+            })}
         >
             <div className="univer-relative univer-box-border univer-h-full univer-w-[100px]">
                 <DefinedName disable={disableDefinedName ?? editDisable} />
@@ -301,12 +301,12 @@ export function FormulaBar(props: IProps) {
                             <CheckMarkSingle />
                         </span>
                         <span
-                            className={clsx(`
+                            className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
                               univer-p-1 univer-text-base
                               dark:!univer-text-white dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
-                            `)}
+                            `}
                             onClick={handlerFxBtnClick}
                         >
                             <FxSingle />
@@ -316,10 +316,10 @@ export function FormulaBar(props: IProps) {
 
                 <div className="univer-flex univer-w-full univer-flex-1 univer-overflow-hidden univer-pl-3">
                     <div
+                        ref={ref}
                         className="univer-relative univer-flex-1"
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        ref={ref}
                         style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
@@ -354,17 +354,14 @@ export function FormulaBar(props: IProps) {
                         )}
                         {/* When the editor is hidden, we just cover a div on the editor because re-instantiate
                         the formula editor will be expensive. */}
-                        {hideEditor
-                            ? (
-                                <div
-                                    className={`
-                                      univer-pointer-events-none univer-relative univer-left-0 univer-top-0
-                                      univer-z-[100] univer-h-full univer-w-full univer-cursor-not-allowed
-                                      univer-bg-white
-                                    `}
-                                />
-                            )
-                            : null}
+                        {hideEditor && (
+                            <div
+                                className={`
+                                  univer-pointer-events-none univer-relative univer-left-0 univer-top-0 univer-z-[100]
+                                  univer-h-full univer-w-full univer-cursor-not-allowed univer-bg-white
+                                `}
+                            />
+                        )}
                     </div>
                     <div
                         className={clsx(`
@@ -374,13 +371,11 @@ export function FormulaBar(props: IProps) {
                         `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:!univer-text-gray-700': editDisable })}
                         onClick={handleArrowClick}
                     >
-                        {arrowDirection === ArrowDirection.Down
-                            ? (
-                                <DropdownSingle />
-                            )
-                            : (
-                                <DropdownSingle style={{ transform: 'rotateZ(180deg)' }} />
-                            )}
+                        <DropdownSingle
+                            className={clsx({
+                                'univer-rotate-180': arrowDirection === ArrowDirection.Up,
+                            })}
+                        />
                     </div>
                 </div>
             </div>

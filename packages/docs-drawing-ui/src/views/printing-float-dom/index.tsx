@@ -68,7 +68,7 @@ export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
             .filter(([_, floatDom]) => !(floatDom.position.endX < 0 || floatDom.position.endY < 0 || floatDom.position.startX > width || floatDom.position.startY > height)), [floatDomInfos, scene, offset, width, height]);
 
     return (
-        <div style={{ position: 'absolute', top: 0, left: 0 }}>
+        <div className="univer-absolute univer-left-0 univer-top-0">
             {floatDomParams.map(([id, floatDom]) => (
                 <PrintFloatDomSingle key={id} layer={floatDom} id={id} position={floatDom.position} />
             ))}

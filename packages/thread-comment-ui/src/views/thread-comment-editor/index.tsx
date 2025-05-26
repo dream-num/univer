@@ -130,9 +130,8 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             />
             {editing
                 ? (
-                    <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-end">
+                    <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2">
                         <Button
-                            style={{ marginRight: 12 }}
                             onClick={() => {
                                 onCancel?.();
                                 setEditing(false);

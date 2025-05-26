@@ -135,7 +135,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             redoMutationParams
         );
 
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = interceptor.generateMutationsByAutoHeight({
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = interceptor.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
             ranges: suitableRanges,
@@ -202,7 +202,7 @@ export const SetColWidthCommand: ICommand = {
         const undoMutationParams = SetWorksheetColWidthMutationFactory(redoMutationParams, worksheet);
         const setColWidthResult = commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
 
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
             ranges: suitableRanges,

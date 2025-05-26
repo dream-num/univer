@@ -31,7 +31,7 @@ export function getRangesHeight(ranges: IRange[], worksheet: Worksheet) {
     return cellHeights;
 }
 
-const MAX_RANGE_HEIGHT = 300;
+const MAX_RANGE_HEIGHT = 200;
 
 export function getSuitableRangesInView(ranges: IRange[], skeleton: Nullable<SheetSkeleton>): { suitableRanges: IRange[]; remainingRanges: IRange[] } {
     if (!skeleton) {

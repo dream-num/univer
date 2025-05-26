@@ -65,7 +65,7 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
         ];
 
         const result = sequenceExecute(redos, commandService);
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
             ranges: [range],

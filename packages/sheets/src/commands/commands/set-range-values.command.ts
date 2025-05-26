@@ -112,7 +112,7 @@ export const SetRangeValuesCommand: ICommand = {
             params: setRangeValuesMutationParams,
         });
 
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
             ranges: currentSelections,

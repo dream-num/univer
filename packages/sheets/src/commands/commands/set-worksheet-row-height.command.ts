@@ -332,7 +332,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
             ranges: suitableRanges,

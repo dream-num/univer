@@ -114,7 +114,7 @@ export const MoveRangeCommand: ICommand = {
 
         const result = sequenceExecute(redos, commandService).result;
 
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsByAutoHeight({
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
             ranges: [params.fromRange, params.toRange],

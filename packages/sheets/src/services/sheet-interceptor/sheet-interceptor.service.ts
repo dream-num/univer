@@ -243,7 +243,7 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._autoHeightInterceptors, interceptor)));
     }
 
-    generateMutationsByAutoHeight(ctx: IAutoHeightContext): IUndoRedoCommandInfosByInterceptor {
+    generateMutationsOfAutoHeight(ctx: IAutoHeightContext): IUndoRedoCommandInfosByInterceptor {
         const infos = this._autoHeightInterceptors.map((i) => i.getMutations(ctx));
 
         return {

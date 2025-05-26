@@ -197,11 +197,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     };
 
     const formulaEditorRef = useRef<any>(null);
-    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+    const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
         const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
-        isOutSide && isFocusFormulaEditorSet(false);
+        isOutSide && setIsFocusFormulaEditor(false);
     });
 
     return (
@@ -262,7 +262,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                                 onVerify={(res: boolean) => {
                                     setValidFormulaOrRange(res);
                                 }}
-                                onFocus={() => isFocusFormulaEditorSet(true)}
+                                onFocus={() => setIsFocusFormulaEditor(true)}
                             />
                         </div>
                     </div>

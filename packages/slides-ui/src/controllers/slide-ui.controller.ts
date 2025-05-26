@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
+import { GraphSingle, TextSingle } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
@@ -31,7 +31,6 @@ import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMe
 import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import { SlideEditorContainer } from '../views/editor-container';
-import { IMAGE_UPLOAD_ICON } from './image.menu';
 import { menuSchema } from './menu.schema';
 import { GRAPH_SINGLE_ICON } from './shape.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
@@ -64,7 +63,6 @@ export class SlidesUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(IMAGE_UPLOAD_ICON, AddImageSingle));
         this.disposeWithMe(componentManager.register(TEXT_ICON_ID, TextSingle));
         this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));

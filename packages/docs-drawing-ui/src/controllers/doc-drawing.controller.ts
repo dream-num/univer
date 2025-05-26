@@ -15,7 +15,6 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { AddImageSingle } from '@univerjs/icons';
 
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
@@ -33,7 +32,6 @@ import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
 import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
-import { ImageUploadIcon } from '../views/menu/image.menu';
 import { menuSchema } from './menu.schema';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
@@ -51,7 +49,6 @@ export class DocDrawingUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(ImageUploadIcon, AddImageSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_DOC_DRAWING_PANEL, DocDrawingPanel));
     }
 

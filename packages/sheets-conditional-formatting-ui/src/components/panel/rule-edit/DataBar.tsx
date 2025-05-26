@@ -33,8 +33,8 @@ const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({
 const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+    const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
     const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
@@ -102,26 +102,31 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.dataBar ? props.rule : undefined;
-    const [isGradient, isGradientSet] = useState(() => {
+    const [isGradient, setIsGradient] = useState(() => {
         const defaultV = '0';
         if (!rule) {
             return defaultV;
         }
         return rule.config?.isGradient ? '1' : '0';
     });
-    const [positiveColor, positiveColorSet] = useState(() => {
+    const [positiveColor, setPositiveColor] = useState(() => {
         if (!rule) {
             return defaultDataBarPositiveColor;
         }
         return rule.config?.positiveColor || defaultDataBarPositiveColor;
     });
-    const [nativeColor, nativeColorSet] = useState(() => {
+    const [nativeColor, setNativeColor] = useState(() => {
         if (!rule) {
             return defaultDataBarNativeColor;
         }
         return rule.config?.nativeColor || defaultDataBarNativeColor;
     });
-    const commonOptions = [createOptionItem(CFValueType.num, localeService), createOptionItem(CFValueType.percent, localeService), createOptionItem(CFValueType.percentile, localeService), createOptionItem(CFValueType.formula, localeService)];
+    const commonOptions = [
+        createOptionItem(CFValueType.num, localeService),
+        createOptionItem(CFValueType.percent, localeService),
+        createOptionItem(CFValueType.percentile, localeService),
+        createOptionItem(CFValueType.formula, localeService),
+    ];
     const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
     const maxOptions = [createOptionItem(CFValueType.max, localeService), ...commonOptions];
     const [minValueType, setMinValueType] = useState<CFValueType>(() => {
@@ -138,7 +143,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         }
         return rule.config?.max.type || defaultV;
     });
-    const [minValue, minValueSet] = useState(() => {
+    const [minValue, setMinValue] = useState(() => {
         const defaultV = 0;
         if (!rule) {
             return defaultV;
@@ -203,7 +208,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return dispose as () => void;
     }, [isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, interceptorManager, isShowValue]);
 
-    const _handleChange = (option: {
+    const handleChange = (option: {
         minValueType: CFValueType;
         minValue: number | string;
         maxValueType: CFValueType;
@@ -217,9 +222,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     };
 
     const handlePositiveColorChange = (color: string) => {
-        positiveColorSet(color);
+        setPositiveColor(color);
 
-        _handleChange({
+        handleChange({
             isGradient,
             minValue,
             minValueType,
@@ -231,8 +236,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         });
     };
     const handleNativeColorChange = (color: string) => {
-        nativeColorSet(color);
-        _handleChange({
+        setNativeColor(color);
+        handleChange({
             isGradient,
             minValue,
             minValueType,
@@ -286,8 +291,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     <RadioGroup
                         value={isGradient}
                         onChange={(v) => {
-                            isGradientSet(v as string);
-                            _handleChange({
+                            setIsGradient(v as string);
+                            handleChange({
                                 isGradient: v as string,
                                 minValue,
                                 minValueType,
@@ -311,7 +316,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             checked={!isShowValue}
                             onChange={(v) => {
                                 setIsShowValue(!v);
-                                _handleChange({
+                                handleChange({
                                     isGradient: v as string,
                                     minValue,
                                     minValueType,
@@ -375,8 +380,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         onChange={(v) => {
                             setMinValueType(v as CFValueType);
                             const value = createDefaultValueByValueType(v as CFValueType, 10);
-                            minValueSet(value);
-                            _handleChange({
+                            setMinValue(value);
+                            handleChange({
                                 isGradient,
                                 minValue: value,
                                 minValueType: v as CFValueType,
@@ -396,8 +401,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         type={minValueType}
                         value={minValue}
                         onChange={(v) => {
-                            minValueSet(v || 0);
-                            _handleChange({
+                            setMinValue(v || 0);
+                            handleChange({
                                 isGradient,
                                 minValue: v || 0,
                                 minValueType,
@@ -427,7 +432,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             setMaxValueType(v as CFValueType);
                             const value = createDefaultValueByValueType(v as CFValueType, 90);
                             setMaxValue(value);
-                            _handleChange({
+                            handleChange({
                                 isGradient,
                                 minValue,
                                 minValueType,
@@ -447,7 +452,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         value={maxValue}
                         onChange={(v) => {
                             setMaxValue(v || 0);
-                            _handleChange({
+                            handleChange({
                                 isGradient,
                                 minValue,
                                 minValueType,

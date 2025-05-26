@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
+import type { IconProps } from '@univerjs/icons';
 import { ColorKit } from '@univerjs/core';
 import { clsx, Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
-import { MoreDownSingle } from '@univerjs/icons';
-import { ComponentManager, useDependency } from '@univerjs/ui';
+import { PaintBucket } from '@univerjs/icons';
 import { useMemo } from 'react';
 
 interface IColorPickerProps {
     color: string;
     onChange: (color: string) => void;
     disable?: boolean;
-    iconId?: string;
+    Icon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGElement>>;
     className?: string;
-    isNeedDropdownIcon?: boolean;
 };
 
 export const ColorPicker = (props: IColorPickerProps) => {
-    const { color, onChange, disable = false, iconId = 'PaintBucket', className, isNeedDropdownIcon = true } = props;
-    const componentManager = useDependency(ComponentManager);
+    const { color, onChange, disable = false, Icon = PaintBucket, className } = props;
 
     const colorKit = useMemo(() => new ColorKit(color), [color]);
-    const Icon = componentManager.get(iconId);
 
-    if (!Icon) return null;
+    const renderIcon = () => {
+        const iconProps = {
+            className: clsx('univer-fill-primary-600', disable && className),
+            extend: { colorChannel1: colorKit.isValid ? color : '' },
+        };
+
+        return (
+            <Icon {...iconProps} />
+        );
+    };
 
     return !disable
         ? (
@@ -54,14 +60,9 @@ export const ColorPicker = (props: IColorPickerProps) => {
                       hover:univer-bg-gray-100
                     `, className)}
                 >
-                    <Icon className="univer-fill-primary-600" extend={{ colorChannel1: colorKit.isValid ? color : '' }} />
-                    {isNeedDropdownIcon && (
-                        <MoreDownSingle
-                            className="univer-ml-1.5 univer-text-gray-400"
-                        />
-                    )}
+                    {renderIcon()}
                 </span>
             </Dropdown>
         )
-        : <Icon className={clsx('univer-fill-primary-600', className)} extend={{ colorChannel1: colorKit.isValid ? color : '' }} />;
+        : renderIcon();
 };

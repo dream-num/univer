@@ -112,9 +112,10 @@ class ImportCSVButtonPlugin extends Plugin {
      * The plugin should add its own module to the dependency injection system at this lifecycle.
      * It is not recommended to initialize the internal module of the plugin outside this lifecycle.
      */
+    // eslint-disable-next-line max-lines-per-function
     override onStarting() {
         // register icon component
-        this.componentManager.register('FolderSingle', FolderSingle);
+        this.componentManager.register('FolderSingle2', FolderSingle);
 
         const buttonId = 'import-csv-button';
 
@@ -205,7 +206,7 @@ class ImportCSVButtonPlugin extends Plugin {
             id: buttonId,
             title: 'Import CSV',
             tooltip: 'Import CSV',
-            icon: 'FolderSingle', // icon name
+            icon: 'FolderSingle2', // icon name
             type: MenuItemType.BUTTON,
         });
 

@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { isBrowser } from '../../helper/is-browser';
-import { AlphaSlider } from './AlphaSlider';
+import { Button } from '../button/Button';
+import { ConfigContext } from '../config-provider/ConfigProvider';
+import { Dialog } from '../dialog/Dialog';
 import { hexToHsv, hsvToHex, hsvToRgb, rgbToHex } from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
 import { HueSlider } from './HueSlider';
 
-const MemoizedColorSpectrum = React.memo(ColorSpectrum);
-const MemoizedHueSlider = React.memo(HueSlider);
-const MemoizedAlphaSlider = React.memo(AlphaSlider);
-const MemoizedColorInput = React.memo(ColorInput);
-const MemoizedColorPresets = React.memo(ColorPresets);
+const MemoizedColorSpectrum = memo(ColorSpectrum);
+const MemoizedHueSlider = memo(HueSlider);
+const MemoizedColorInput = memo(ColorInput);
+const MemoizedColorPresets = memo(ColorPresets);
 
 export interface IColorPickerProps {
     format?: 'hex';
     value?: string;
-    showAlpha?: boolean;
     onChange?: (value: string) => void;
 }
 
-export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = false, onChange }: IColorPickerProps) {
+export function ColorPicker({ format = 'hex', value = '#000000', onChange }: IColorPickerProps) {
     if (!isBrowser) return null;
 
+    const { locale } = useContext(ConfigContext);
+
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
-    const [alpha, setAlpha] = useState(1);
+    const [visible, setVisible] = useState(false);
 
     const getRgb = useCallback((h: number, s: number, v: number) => {
         return hsvToRgb(h, s, v);
@@ -51,7 +53,6 @@ export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = fal
             if (format === 'hex') {
                 const [h, s, v] = value ? hexToHsv(value) : hsv;
                 setHsv([h, s, v]);
-                setAlpha(1);
             }
         } catch (error) {
             console.error('Invalid value:', error);
@@ -70,54 +71,22 @@ export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = fal
         }
     }
 
-    function handleAlphaChange(a: number) {
-        setAlpha(a);
-    }
-
-    function handleAlphaChanged(a: number) {
-        if (format === 'hex') {
-            const hex = hsvToHex(hsv[0], hsv[1], hsv[2]);
-            onChange?.(hex);
-        }
+    function handleConfirmCustomColor() {
+        const [h, s, v] = hsv;
+        const hex = hsvToHex(h, s, v);
+        onChange?.(hex);
+        setVisible(false);
     }
 
     return (
         <div
+            data-u-comp="color-picker"
             className={`
-              univer-w-[292px] univer-cursor-default univer-space-y-4 univer-rounded-lg univer-bg-white
+              univer-cursor-default univer-space-y-2 univer-rounded-lg univer-bg-white
               dark:!univer-bg-gray-700
             `}
             onClick={(e) => e.stopPropagation()}
         >
-            <MemoizedColorSpectrum
-                hsv={hsv}
-                onChange={handleColorChange}
-                onChanged={handleColorChanged}
-            />
-
-            <MemoizedHueSlider
-                hsv={hsv}
-                onChange={handleColorChange}
-                onChanged={handleColorChanged}
-            />
-
-            {showAlpha && (
-                <MemoizedAlphaSlider
-                    hsv={hsv}
-                    alpha={alpha}
-                    onChange={handleAlphaChange}
-                    onChanged={handleAlphaChanged}
-                />
-            )}
-
-            <MemoizedColorInput
-                hsv={hsv}
-                alpha={alpha}
-                showAlpha={showAlpha}
-                onChangeColor={handleColorChanged}
-                onChangeAlpha={handleAlphaChanged}
-            />
-
             <MemoizedColorPresets
                 hsv={hsv}
                 onChange={(h, s, v) => {
@@ -125,6 +94,61 @@ export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = fal
                     handleColorChanged(h, s, v);
                 }}
             />
+
+            <div className="univer-flex univer-h-7 univer-items-center">
+                <a
+                    className={`
+                      univer-cursor-pointer univer-gap-2 univer-text-sm univer-text-gray-900 univer-transition-opacity
+                      dark:!univer-text-white
+                      hover:univer-opacity-80
+                    `}
+                    onClick={() => setVisible(true)}
+                >
+                    {locale?.ColorPicker.more}
+                </a>
+            </div>
+
+            <Dialog
+                className="!univer-w-fit !univer-p-2.5"
+                closable={false}
+                maskClosable={false}
+                open={visible}
+                onOpenChange={setVisible}
+            >
+                <div className="univer-grid univer-w-64 univer-gap-2">
+                    <MemoizedColorSpectrum
+                        hsv={hsv}
+                        onChange={handleColorChange}
+                    />
+
+                    <div className="univer-flex univer-items-center univer-gap-2">
+                        <div
+                            className="univer-size-6 univer-flex-shrink-0 univer-rounded-sm"
+                            style={{
+                                backgroundColor: hsvToHex(...hsv),
+                            }}
+                        />
+                        <MemoizedHueSlider
+                            hsv={hsv}
+                            onChange={handleColorChange}
+                        />
+                    </div>
+
+                    <MemoizedColorInput
+                        hsv={hsv}
+                        onChange={handleColorChange}
+                    />
+
+                    <footer className="univer-flex univer-items-center univer-justify-end univer-gap-2">
+                        <Button onClick={() => setVisible(false)}>
+                            {locale?.ColorPicker.cancel}
+                        </Button>
+                        <Button variant="primary" onClick={handleConfirmCustomColor}>
+                            {locale?.ColorPicker.confirm}
+                        </Button>
+                    </footer>
+                </div>
+            </Dialog>
         </div>
     );
 }

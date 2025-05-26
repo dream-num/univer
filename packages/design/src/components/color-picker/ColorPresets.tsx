@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { clsx } from '../../helper/clsx';
 import { hexToHsv, hsvToHex } from './color-conversion';
 import { colorPresets } from './presets';
@@ -33,7 +33,10 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
     const currentColor = hsvToHex(hsv[0], hsv[1], hsv[2]);
 
     return (
-        <div className="univer-grid univer-content-center univer-gap-2">
+        <div
+            data-u-comp="color-picker-presets"
+            className="univer-grid univer-content-center univer-gap-2"
+        >
             {colorPresets.map((row, i) => (
                 <div
                     key={i}

@@ -22,5 +22,6 @@ export interface ILocale {
         Picker: typeof PickerZhCN;
         CascaderList: Record<string, any>;
         Select: Record<string, any>;
+        ColorPicker: Record<string, any>;
     };
 }

@@ -314,7 +314,9 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         const cellValue = getCellValueOrigin(cellOrigin);
                         const valueStr = `${cellValue ?? ''}`;
 
-                        cell = {};
+                        if (!cell || cell === pos.rawData) {
+                            cell = { ...pos.rawData };
+                        }
 
                         cell.markers = {
                             ...cell?.markers,

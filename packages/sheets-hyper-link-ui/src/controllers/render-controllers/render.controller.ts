@@ -63,6 +63,10 @@ export class SheetsHyperLinkRenderManagerController extends Disposable {
                         const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
 
                         if (link && cell) {
+                            if (cell === pos.rawData) {
+                                cell = { ...pos.rawData };
+                            }
+
                             cell.linkUrl = link.payload;
                             cell.linkId = link.id;
                             return next(cell);

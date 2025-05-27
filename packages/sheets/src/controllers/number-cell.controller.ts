@@ -41,7 +41,7 @@ export class NumberCellDisplayController extends Disposable {
                     // Skip if the cell contains a numfmt pattern
                     const style = location.workbook.getStyles().getStyleByCell(cell);
                     if (style?.n?.pattern) {
-                        return next({ ...cell });
+                        return next(cell);
                     }
 
                     // Dealing with precision issues
@@ -50,13 +50,16 @@ export class NumberCellDisplayController extends Disposable {
                     // "v": "123413.23000000001",
                     // "t": 2,
                     if (cell?.t === CellValueType.NUMBER && cell.v !== undefined && cell.v !== null && isRealNum(cell.v)) {
-                        return next({
-                            ...cell,
-                            v: stripErrorMargin(Number(cell.v)),
-                        });
+                        if (!cell || cell === location.rawData) {
+                            cell = { ...location.rawData };
+                        }
+
+                        cell.v = stripErrorMargin(Number(cell.v));
+
+                        return next(cell);
                     }
 
-                    return next({ ...cell });
+                    return next(cell);
                 },
             })
         );

@@ -123,8 +123,8 @@ export class SheetsTableController extends Disposable {
                                 const tableStartRow = tableRange.startRow;
                                 if (tableStartRow === row) {
                                     const columnName = table.getColumnNameByIndex(index);
-                                    if (!cell) {
-                                        cell = {};
+                                    if (!cell || cell === context.rawData) {
+                                        cell = { ...context.rawData };
                                     }
 
                                     cell.v = columnName;

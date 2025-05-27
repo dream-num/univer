@@ -109,6 +109,10 @@ export class SheetCellImageController extends Disposable {
                     priority: InterceptCellContentPriority.CELL_IMAGE,
                     handler: (cell, pos, next) => {
                         if (cell?.p && cell.p.drawingsOrder?.length) {
+                            if (cell === pos.rawData) {
+                                cell = { ...pos.rawData };
+                            }
+
                             if (!cell.interceptorStyle) {
                                 cell.interceptorStyle = {};
                             }

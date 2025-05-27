@@ -73,7 +73,7 @@ export class SheetsCfRenderController extends Disposable {
                 }
                 const styleMap = context.workbook.getStyles();
                 const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
-                const cloneCell = cell as IConditionalFormattingCellData & ICellDataForSheetInterceptor;
+                const cloneCell = (cell === context.rawData ? { ...context.rawData } : cell) as IConditionalFormattingCellData & ICellDataForSheetInterceptor;
                 if (result.style) {
                     Object.assign(cloneCell, defaultStyle);
                 }

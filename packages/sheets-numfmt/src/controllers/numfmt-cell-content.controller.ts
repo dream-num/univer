@@ -107,7 +107,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
 
-            // eslint-disable-next-line complexity
+            // eslint-disable-next-line complexity, max-lines-per-function
             handler: (cell, location, next) => {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
@@ -132,10 +132,14 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const type = cell.t || checkCellValueType(originCellValue.v);
+                const type = cell?.t || checkCellValueType(originCellValue.v);
                 // just handle number
                 if (type !== CellValueType.NUMBER) {
                     return next(cell);
+                }
+
+                if (!cell || cell === location.rawData) {
+                    cell = { ...location.rawData };
                 }
 
                 // Add error marker to text format number
@@ -182,8 +186,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     result: res,
                     parameters: `${originCellValue.v}_${numfmtValue.pattern}`,
                 });
-
-                return next({ ...cell, ...res });
+                Object.assign(cell, res);
+                return next(cell);
             },
             priority: InterceptCellContentPriority.NUMFMT,
         }));

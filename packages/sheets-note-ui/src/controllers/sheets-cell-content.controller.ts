@@ -43,8 +43,8 @@ export class SheetsCellContentController extends Disposable {
                         const { row, col, unitId, subUnitId } = pos;
                         const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
                         if (note) {
-                            if (!cell) {
-                                cell = {};
+                            if (!cell || cell === pos.rawData) {
+                                cell = { ...pos.rawData };
                             }
 
                             cell.markers = {

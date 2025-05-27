@@ -137,7 +137,7 @@ export class SheetInterceptorService extends Disposable {
             effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
             handler(value, context): Nullable<ICellData> {
                 // only copy here, should avoid unnecessary copy object when interceptor is called
-                const rawData = context.worksheet.getCellRaw(context.row, context.col);
+                const rawData = context.rawData;
                 if (value) {
                     return {
                         ...rawData,
@@ -145,7 +145,7 @@ export class SheetInterceptorService extends Disposable {
                     };
                 }
 
-                return rawData ? { ...rawData } : undefined;
+                return rawData;
             },
         });
 

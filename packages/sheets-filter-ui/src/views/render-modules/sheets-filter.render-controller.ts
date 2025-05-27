@@ -188,10 +188,13 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     subUnitId !== worksheetId ||
                     row !== startRow ||
                     col < startColumn ||
-                    col > endColumn ||
-                    !cell
+                    col > endColumn
                 ) {
                     return next(cell);
+                }
+
+                if (!cell || cell === pos.rawData) {
+                    cell = { ...pos.rawData };
                 }
 
                 cell.fontRenderExtension = {

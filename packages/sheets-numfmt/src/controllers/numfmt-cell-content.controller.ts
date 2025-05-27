@@ -113,7 +113,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 const sheetId = location.subUnitId;
                 let numfmtValue;
                 const originCellValue = cell;
-                if (!originCellValue) {
+                if (!originCellValue || originCellValue.v === undefined || originCellValue.v === null) {
                     return next(cell);
                 }
 
@@ -160,9 +160,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue.pattern}`) {
                     return next({ ...cell, ...cache.result });
                 }
-                if (originCellValue.v === undefined || originCellValue.v === null) {
-                    return next(cell);
-                }
+
                 const info = getPatternPreviewIgnoreGeneral(numfmtValue.pattern, Number(originCellValue.v), this.local);
                 numfmtRes = info.result;
                 if (!numfmtRes) {

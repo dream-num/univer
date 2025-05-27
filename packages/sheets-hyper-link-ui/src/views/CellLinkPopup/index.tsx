@@ -30,7 +30,7 @@ import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
 const iconsMap = {
     [SheetHyperLinkType.URL]: <LinkSingle />,
-    [SheetHyperLinkType.SHEET]: <Xlsx />,
+    [SheetHyperLinkType.SHEET]: <Xlsx className="univer-text-green-500" />,
     [SheetHyperLinkType.RANGE]: <AllBorderSingle />,
     [SheetHyperLinkType.DEFINE_NAME]: <AllBorderSingle />,
     [SheetHyperLinkType.INVALID]: <AllBorderSingle />,

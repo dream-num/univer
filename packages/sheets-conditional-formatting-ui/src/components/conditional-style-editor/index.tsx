@@ -105,7 +105,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
         <div className={clsx('univer-my-2.5 univer-flex univer-justify-between', className)}>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:univer-bg-gray-700': getBooleanFromNumber(isBold || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isBold || BooleanNumber.FALSE),
                 })}
                 onClick={() => setIsBold(getAnotherBooleanNumber(isBold))}
             >
@@ -113,7 +113,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             </div>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:univer-bg-gray-700': getBooleanFromNumber(isItalic || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isItalic || BooleanNumber.FALSE),
                 })}
                 onClick={() => setIsItalic(getAnotherBooleanNumber(isItalic))}
             >
@@ -121,7 +121,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             </div>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:univer-bg-gray-700': getBooleanFromNumber(isUnderline || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isUnderline || BooleanNumber.FALSE),
                 })}
                 onClick={() => setIsUnderline(getAnotherBooleanNumber(isUnderline))}
             >
@@ -129,7 +129,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             </div>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:univer-bg-gray-700': getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE),
                 })}
                 onClick={() => setIsStrikethrough(getAnotherBooleanNumber(isStrikethrough))}
             >

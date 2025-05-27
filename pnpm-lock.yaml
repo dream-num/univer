@@ -1121,9 +1121,6 @@ importers:
       nanoid:
         specifier: 5.1.5
         version: 5.1.5
-      numeral:
-        specifier: ^2.0.6
-        version: 2.0.6
       numfmt:
         specifier: ^3.2.2
         version: 3.2.2
@@ -9112,9 +9109,6 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
-
-  numeral@2.0.6:
-    resolution: {integrity: sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA==}
 
   numfmt@3.2.2:
     resolution: {integrity: sha512-vAdkKhb+8D1ebZcPx5TdUmPnzNYhzKGA+oVy+BoENFydDWljaZDci0wWWjNfvOUcXCdgKhwS08ErdTe+VzuQ+w==}
@@ -17465,8 +17459,6 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
-
-  numeral@2.0.6: {}
 
   numfmt@3.2.2: {}
 

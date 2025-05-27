@@ -108,6 +108,8 @@ const entryPoints = [
     './src/sheets/main.ts',
     './src/sheets/worker.ts',
 
+    './src/sheets-no-worker/main.ts',
+
     // sheets-multi
     './src/sheets-multi/main.tsx',
 

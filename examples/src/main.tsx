@@ -50,6 +50,9 @@ function Examples() {
         title: '📽️ Slides',
         href: './slides/',
     }, {
+        title: '🗂️ Sheets No Worker',
+        href: './sheets-no-worker/',
+    }, {
         title: '🗂️ Sheets Multi Instance',
         href: './sheets-multi/',
     }, {

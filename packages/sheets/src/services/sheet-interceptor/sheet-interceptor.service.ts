@@ -135,15 +135,7 @@ export class SheetInterceptorService extends Disposable {
         this.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             priority: -1,
             effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
-            handler(value, context): Nullable<ICellData> {
-                // only copy here, should avoid unnecessary copy object when interceptor is called
-                const rawData = context.rawData;
-                if (value) {
-                    return value;
-                }
-
-                return rawData;
-            },
+            handler: (_value) => _value,
         });
 
         this.disposeWithMe(this.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {

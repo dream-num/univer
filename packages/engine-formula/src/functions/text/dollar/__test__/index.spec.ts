@@ -32,7 +32,7 @@ describe('Test dollar function', () => {
             const number = NumberValueObject.create(1234.567);
             const decimals = NullValueObject.create();
             const result = testFunction.calculate(number, decimals);
-            expect(getObjectValue(result)).toStrictEqual('$1,234.57 ');
+            expect(getObjectValue(result)).toStrictEqual('$1,234.57 ');
         });
 
         it('Value is negative', () => {
@@ -46,15 +46,15 @@ describe('Test dollar function', () => {
             const number = NumberValueObject.create(1234.567);
             const decimals = NumberValueObject.create(-2);
             const result = testFunction.calculate(number, decimals);
-            expect(getObjectValue(result)).toStrictEqual('$1,200 ');
+            expect(getObjectValue(result)).toStrictEqual('$1,200 ');
 
             const decimals2 = NumberValueObject.create(-4);
             const result2 = testFunction.calculate(number, decimals2);
-            expect(getObjectValue(result2)).toStrictEqual('$0 ');
+            expect(getObjectValue(result2)).toStrictEqual('$0 ');
 
             const decimals3 = NumberValueObject.create(4);
             const result3 = testFunction.calculate(number, decimals3);
-            expect(getObjectValue(result3)).toStrictEqual('$1,234.5670 ');
+            expect(getObjectValue(result3)).toStrictEqual('$1,234.5670 ');
 
             const decimals4 = NumberValueObject.create(128);
             const result4 = testFunction.calculate(number, decimals4);
@@ -62,7 +62,7 @@ describe('Test dollar function', () => {
 
             const decimals5 = NumberValueObject.create(-10);
             const result5 = testFunction.calculate(number, decimals5);
-            expect(getObjectValue(result5)).toStrictEqual('$0 ');
+            expect(getObjectValue(result5)).toStrictEqual('$0 ');
         });
 
         it('Value is normal string', () => {
@@ -76,7 +76,7 @@ describe('Test dollar function', () => {
             const number = BooleanValueObject.create(true);
             const decimals = NullValueObject.create();
             const result = testFunction.calculate(number, decimals);
-            expect(getObjectValue(result)).toStrictEqual('$1.00 ');
+            expect(getObjectValue(result)).toStrictEqual('$1.00 ');
         });
 
         it('Value is error', () => {
@@ -107,8 +107,8 @@ describe('Test dollar function', () => {
             const decimals = NullValueObject.create();
             const result = testFunction.calculate(number, decimals);
             expect(getObjectValue(result)).toStrictEqual([
-                ['$1.00 ', ErrorType.VALUE, '$1.23 ', '$1.00 ', '$0.00 ', '$0.00 '],
-                ['$0.00 ', '$100.00 ', '$2.34 ', ErrorType.VALUE, '($3.00)', ErrorType.NAME],
+                ['$1.00 ', ErrorType.VALUE, '$1.23 ', '$1.00 ', '$0.00 ', '$0.00 '],
+                ['$0.00 ', '$100.00 ', '$2.34 ', ErrorType.VALUE, '($3.00)', ErrorType.NAME],
             ]);
         });
     });

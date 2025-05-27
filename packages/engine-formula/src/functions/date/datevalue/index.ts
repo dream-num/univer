@@ -15,7 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateTimeSerial, isDate, parseFormattedDate } from '../../../basics/date';
+import { excelDateTimeSerial, isDate, parseFormattedDate, parseFormattedTime } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -41,7 +41,10 @@ export class Datevalue extends BaseFunction {
     private _handleSingleObject(dateTextObject: BaseValueObject) {
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
-            const parsedDate = parseFormattedDate(value);
+            let parsedDate = parseFormattedDate(value);
+            if (parsedDate === null) {
+                parsedDate = parseFormattedTime(value);
+            }
             if (parsedDate) {
                 let { v, z } = parsedDate;
 

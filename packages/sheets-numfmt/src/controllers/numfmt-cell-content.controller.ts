@@ -128,7 +128,9 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
                 }
 
-                if (!numfmtValue) {
+                // If the cell is not formatted, or the format is 'General', do not process it
+                // e.g. { v: '001', t: 1, s: { n: { pattern: 'General' } } } should display as '001'
+                if (!numfmtValue || numfmtValue.pattern === 'General') {
                     return next(cell);
                 }
 

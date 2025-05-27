@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useRef } from 'react';
+import type { ReactNode } from 'react';
+import { useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface IRadioProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /**
      * Used for setting the currently selected value

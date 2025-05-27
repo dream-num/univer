@@ -16,7 +16,7 @@
 
 import { ICommandService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { RecordSingle } from '@univerjs/icons';
+import { RecordIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
@@ -67,7 +67,7 @@ function RecordPanelImpl() {
             `}
         >
             <div className="univer-mr-2 univer-size-5 univer-shrink-0 univer-grow-0 univer-text-xl">
-                <RecordSingle />
+                <RecordIcon />
             </div>
             <div className="univer-flex-1 univer-text-sm">{titleText}</div>
             <div className="univer-flex univer-w-64 univer-shrink-0 univer-grow-0 univer-justify-between">

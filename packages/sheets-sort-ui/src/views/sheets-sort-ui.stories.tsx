@@ -45,7 +45,7 @@ import {
     TestConfirmService,
     UIPartsService,
 } from '@univerjs/ui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SortRangeCustomCommand } from '../commands/commands/sheets-sort.command';
 import enUS from '../locale/en-US';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';

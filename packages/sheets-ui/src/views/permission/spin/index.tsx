@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { ReactNode } from 'react';
 
 // TODO@jikkai: this component should be moved to the design package
 // so it could be reused.
 
 interface ISpinProps {
     loading: boolean;
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 const Spin = ({ loading, children }: ISpinProps) => {

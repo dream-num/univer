@@ -18,7 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { H1Single, H2Single, H3Single, H4Single, H5Single, TextTypeSingle } from '@univerjs/icons';
+import { H1Icon, H2Icon, H3Icon, H4Icon, H5Icon, TextTypeIcon } from '@univerjs/icons';
 import { ComponentManager, getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { DocCopyCurrentParagraphCommand, DocCutCurrentParagraphCommand } from '../../commands/commands/clipboard.command';
@@ -42,15 +42,15 @@ const HEADING_MAP: Record<NamedStyleType, ICommand> = {
 };
 
 export const HEADING_ICON_MAP: Record<NamedStyleType, { key: string; component: React.ComponentType<{ className: string }> }> = {
-    [NamedStyleType.HEADING_1]: { key: 'H1Single', component: H1Single },
-    [NamedStyleType.HEADING_2]: { key: 'H2Single', component: H2Single },
-    [NamedStyleType.HEADING_3]: { key: 'H3Single', component: H3Single },
-    [NamedStyleType.HEADING_4]: { key: 'H4Single', component: H4Single },
-    [NamedStyleType.HEADING_5]: { key: 'H5Single', component: H5Single },
-    [NamedStyleType.NORMAL_TEXT]: { key: 'TextTypeSingle', component: TextTypeSingle },
-    [NamedStyleType.TITLE]: { key: 'TextTypeSingle', component: TextTypeSingle },
-    [NamedStyleType.SUBTITLE]: { key: 'TextTypeSingle', component: TextTypeSingle },
-    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: { key: 'TextTypeSingle', component: TextTypeSingle },
+    [NamedStyleType.HEADING_1]: { key: 'H1Icon', component: H1Icon },
+    [NamedStyleType.HEADING_2]: { key: 'H2Icon', component: H2Icon },
+    [NamedStyleType.HEADING_3]: { key: 'H3Icon', component: H3Icon },
+    [NamedStyleType.HEADING_4]: { key: 'H4Icon', component: H4Icon },
+    [NamedStyleType.HEADING_5]: { key: 'H5Icon', component: H5Icon },
+    [NamedStyleType.NORMAL_TEXT]: { key: 'TextTypeIcon', component: TextTypeIcon },
+    [NamedStyleType.TITLE]: { key: 'TextTypeIcon', component: TextTypeIcon },
+    [NamedStyleType.SUBTITLE]: { key: 'TextTypeIcon', component: TextTypeIcon },
+    [NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED]: { key: 'TextTypeIcon', component: TextTypeIcon },
 };
 
 const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (accessor: IAccessor): IMenuItem => {
@@ -108,7 +108,7 @@ export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuI
     return {
         id: DocCopyCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'Copy',
+        icon: 'CopyDoubleIcon',
         title: 'rightClick.copy',
     };
 };
@@ -117,7 +117,7 @@ export const CutCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuIt
     return {
         id: DocCutCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'CutSingle',
+        icon: 'CutIcon',
         title: 'rightClick.cut',
     };
 };
@@ -126,7 +126,7 @@ export const DeleteCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMen
     return {
         id: DeleteCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'DeleteSingle',
+        icon: 'DeleteIcon',
         title: 'rightClick.delete',
     };
 };
@@ -135,7 +135,7 @@ export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMen
     return {
         id: InsertBulletListBellowCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'UnorderSingle',
+        icon: 'UnorderIcon',
         title: 'rightClick.bulletList',
     };
 };
@@ -144,7 +144,7 @@ export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenu
     return {
         id: InsertOrderListBellowCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'OrderSingle',
+        icon: 'OrderIcon',
         title: 'rightClick.orderList',
     };
 };
@@ -153,7 +153,7 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
     return {
         id: InsertCheckListBellowCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'TodoList',
+        icon: 'TodoListDoubleIcon',
         title: 'rightClick.checkList',
     };
 };
@@ -162,7 +162,7 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
     return {
         id: InsertHorizontalLineBellowCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ReduceSingle',
+        icon: 'ReduceIcon',
         title: 'toolbar.horizontalLine',
     };
 };

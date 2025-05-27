@@ -17,7 +17,7 @@
 import type { IUniverSheetsTableUIConfig } from '../../controllers/config.schema';
 import { cellToRange, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, Input } from '@univerjs/design';
-import { DeleteSingle, GridOutlineSingle, MoreDownSingle, PaintBucket, RenameSingle } from '@univerjs/icons';
+import { DeleteIcon, GridOutlineIcon, MoreDownIcon, PaintBucketDoubleIcon, RenameIcon } from '@univerjs/icons';
 import { getSheetCommandTarget, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService } from '@univerjs/sheets';
 import { DeleteSheetTableCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
@@ -189,7 +189,7 @@ export const SheetTableAnchor = () => {
                                             setInputValue(item.tableName);
                                         }}
                                     >
-                                        <RenameSingle />
+                                        <RenameIcon />
                                         {localeService.t('sheets-table.rename')}
                                     </div>
                                     <div
@@ -205,7 +205,7 @@ export const SheetTableAnchor = () => {
                                           hover:univer-bg-gray-200
                                         `}
                                     >
-                                        <GridOutlineSingle />
+                                        <GridOutlineIcon />
                                         {localeService.t('sheets-table.updateRange')}
                                     </div>
                                     <div
@@ -234,7 +234,7 @@ export const SheetTableAnchor = () => {
                                             sidebarService.open(sidebarConfig);
                                         }}
                                     >
-                                        <PaintBucket
+                                        <PaintBucketDoubleIcon
                                             extend={{ colorChannel1: 'rgb(53,91,183)' }}
                                         />
                                         {localeService.t('sheets-table.setTheme')}
@@ -259,7 +259,7 @@ export const SheetTableAnchor = () => {
                                             });
                                         }}
                                     >
-                                        <DeleteSingle className="univer-mr-2" />
+                                        <DeleteIcon className="univer-mr-2" />
                                         {localeService.t('sheets-table.removeTable')}
                                     </div>
                                 </div>
@@ -269,7 +269,7 @@ export const SheetTableAnchor = () => {
                                 updateOpenState(item.tableId, isOpen);
                             }}
                         >
-                            <MoreDownSingle />
+                            <MoreDownIcon />
                         </Dropdown>
                     </div>
                 );

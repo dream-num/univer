@@ -19,7 +19,7 @@ import { ColorKit, ICommandService, ThemeService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { clsx } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
-import { DeleteSingle } from '@univerjs/icons';
+import { DeleteIcon } from '@univerjs/icons';
 import { RemoveSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -131,7 +131,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                         `}
                         onClick={handleDelete}
                     >
-                        <DeleteSingle />
+                        <DeleteIcon />
                     </div>
                 )
                 : null}

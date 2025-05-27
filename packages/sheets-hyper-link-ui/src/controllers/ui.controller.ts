@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { LinkSingle } from '@univerjs/icons';
+import { LinkIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
 import { CellLinkEdit } from '../views/CellLinkEdit';
@@ -41,10 +41,10 @@ export class SheetsHyperLinkUIController extends Disposable {
 
     private _initComponents() {
         ([
-            [CellLinkPopup, CellLinkPopup.componentKey],
-            [CellLinkEdit, CellLinkEdit.componentKey],
-            [LinkSingle, 'LinkSingle'],
-        ] as const).forEach(([comp, key]) => {
+            [CellLinkPopup.componentKey, CellLinkPopup],
+            [CellLinkEdit.componentKey, CellLinkEdit],
+            ['LinkIcon', LinkIcon],
+        ] as const).forEach(([key, comp]) => {
             this._componentManager.register(key, comp);
         });
     }

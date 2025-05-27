@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
-import { DeleteSingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
+import { DeleteIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
@@ -115,7 +115,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                     style={{ background: value }}
                 />
 
-                <MoreDownSingle />
+                <MoreDownIcon />
             </div>
         </Dropdown>
     );
@@ -129,7 +129,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; className?: st
         <div className={clsx('univer-flex univer-items-center univer-gap-2', className)}>
             {!item.isRef && (
                 <div className={clsx('univer-cursor-move', 'draggableHandle')}>
-                    <SequenceSingle />
+                    <SequenceIcon />
                 </div>
             )}
             <ColorSelect
@@ -154,7 +154,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; className?: st
                           hover:univer-bg-gray-200
                         `}
                     >
-                        <DeleteSingle onClick={() => onItemDelete(item.id)} />
+                        <DeleteIcon onClick={() => onItemDelete(item.id)} />
                     </div>
                 )}
         </div>
@@ -419,7 +419,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 `}
                                 onClick={handleAdd}
                             >
-                                <IncreaseSingle className="univer-mr-1" />
+                                <IncreaseIcon className="univer-mr-1" />
                                 {localeService.t('dataValidation.list.add')}
                             </a>
                         </div>

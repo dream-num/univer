@@ -47,7 +47,7 @@ import zhCN from '@univerjs/design/locale/zh-CN';
 import { defaultTheme, greenTheme } from '@univerjs/themes';
 import { DesktopLocalStorageService, RediContext, ThemeSwitcherService } from '@univerjs/ui';
 
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import './global.css';
 
 export const themes: Record<string, Theme> = {

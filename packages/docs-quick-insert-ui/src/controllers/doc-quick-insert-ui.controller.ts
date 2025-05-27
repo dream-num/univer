@@ -17,7 +17,7 @@
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { DividerSingle, TextSingle } from '@univerjs/icons';
+import { DividerIcon, TextIcon } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
@@ -57,12 +57,12 @@ export class DocQuickInsertUIController extends Disposable {
             [QuickInsertPopup.componentKey, QuickInsertPopup],
             [KeywordInputPlaceholder.componentKey, KeywordInputPlaceholder],
             [QuickInsertPlaceholder.componentKey, QuickInsertPlaceholder],
-            [DividerSingle.displayName, DividerSingle],
-            [TextSingle.displayName, TextSingle],
+            [DividerIcon.displayName, DividerIcon],
+            [TextIcon.displayName, TextIcon],
             [QuickInsertButton.componentKey, QuickInsertButton],
-        ] as const).forEach(([name, component]) => {
-            if (name) {
-                this.disposeWithMe(this._componentManager.register(name, component));
+        ] as const).forEach(([key, comp]) => {
+            if (key) {
+                this.disposeWithMe(this._componentManager.register(key, comp));
             }
         });
 

@@ -18,7 +18,7 @@ import type { IDrawingParam } from '@univerjs/core';
 import { ArrangeTypeEnum, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
+import { BottomIcon, MoveDownIcon, MoveUpIcon, TopmostIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
@@ -70,19 +70,19 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
 
             <div className="univer-grid univer-grid-cols-2 univer-gap-2 univer-px-8">
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
-                    <MoveUpSingle />
+                    <MoveUpIcon />
                     {localeService.t('image-panel.arrange.forward')}
                 </Button>
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
-                    <MoveDownSingle />
+                    <MoveDownIcon />
                     {localeService.t('image-panel.arrange.backward')}
                 </Button>
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
-                    <TopmostSingle />
+                    <TopmostIcon />
                     {localeService.t('image-panel.arrange.front')}
                 </Button>
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
-                    <BottomSingle />
+                    <BottomIcon />
                     {localeService.t('image-panel.arrange.back')}
                 </Button>
             </div>

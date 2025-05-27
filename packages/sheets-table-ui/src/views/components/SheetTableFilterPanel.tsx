@@ -19,7 +19,7 @@ import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerj
 import type { IConditionInfo } from './type';
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { Button, ButtonGroup, Segmented } from '@univerjs/design';
-import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
+import { AscendingIcon, DescendingIcon } from '@univerjs/icons';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
@@ -155,11 +155,11 @@ export function SheetTableFilterPanel() {
                 <div className="univer-mb-3 univer-flex">
                     <ButtonGroup className="univer-mb-3 univer-w-full">
                         <Button className="univer-w-1/2" onClick={() => applySort(true)}>
-                            <AscendingSingle className="univer-mr-1" />
+                            <AscendingIcon className="univer-mr-1" />
                             {localeService.t('sheets-sort.general.sort-asc')}
                         </Button>
                         <Button className="univer-w-1/2" onClick={() => applySort(false)}>
-                            <DescendingSingle className="univer-mr-1" />
+                            <DescendingIcon className="univer-mr-1" />
                             {localeService.t('sheets-sort.general.sort-desc')}
                         </Button>
                     </ButtonGroup>

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { ReactNode } from 'react';
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
@@ -24,7 +25,7 @@ import { RectPopup } from './RectPopup';
 
 interface ISingleCanvasPopupProps {
     popup: IPopup;
-    children?: React.ReactNode;
+    children?: ReactNode;
 }
 
 export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {

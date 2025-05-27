@@ -17,9 +17,9 @@
 import type { IDataValidationRuleOptions } from '@univerjs/core';
 import { DataValidationErrorStyle, LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
-import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
+import { MoreDownIcon, MoreUpIcon } from '@univerjs/icons';
 import { ComponentManager, useDependency } from '@univerjs/ui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export interface IDataValidationOptionsParams {
     value: IDataValidationRuleOptions;
@@ -47,10 +47,10 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                 {localeService.t('dataValidation.panel.options')}
                 {show
                     ? (
-                        <MoreUpSingle className="univer-ml-1" />
+                        <MoreUpIcon className="univer-ml-1" />
                     )
                     : (
-                        <MoreDownSingle className="univer-ml-1" />
+                        <MoreDownIcon className="univer-ml-1" />
                     )}
             </div>
             {show && (

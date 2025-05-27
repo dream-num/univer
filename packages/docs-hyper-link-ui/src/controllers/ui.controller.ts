@@ -16,7 +16,7 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { LinkSingle } from '@univerjs/icons';
+import { LinkIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
@@ -48,10 +48,10 @@ export class DocHyperLinkUIController extends Disposable {
 
     private _initComponents() {
         ([
-            [DocHyperLinkEdit, DocHyperLinkEdit.componentKey],
-            [DocLinkPopup, DocLinkPopup.componentKey],
-            [LinkSingle, DOC_LINK_ICON],
-        ] as const).forEach(([comp, key]) => {
+            [DocHyperLinkEdit.componentKey, DocHyperLinkEdit],
+            [DocLinkPopup.componentKey, DocLinkPopup],
+            [DOC_LINK_ICON, LinkIcon],
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)
             );

@@ -16,8 +16,7 @@
 
 import type { Meta } from '@storybook/react';
 import { dayjs } from '@univerjs/core';
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DatePicker } from './DatePicker';
 
 const meta: Meta<typeof DatePicker> = {

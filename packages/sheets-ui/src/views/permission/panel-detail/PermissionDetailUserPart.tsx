@@ -21,7 +21,7 @@ import { Avatar, borderClassName, clsx, FormLayout, Radio, RadioGroup, Select } 
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from '../user-dialog/constant';

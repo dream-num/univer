@@ -16,8 +16,7 @@
 
 import type { Meta } from '@storybook/react';
 import type { ITreeNodeProps } from './Tree';
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Tree, TreeSelectionMode } from './Tree';
 
 const meta: Meta<typeof Tree> = {

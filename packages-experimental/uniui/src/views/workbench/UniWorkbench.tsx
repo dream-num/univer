@@ -18,16 +18,12 @@
 
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '@univerjs/ui';
-import type {
-    NodeTypes,
-    ReactFlowInstance,
-    Viewport,
-} from '@xyflow/react';
+import type { NodeTypes, ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { IFloatingToolbarRef } from '../uni-toolbar/UniFloatToolbar';
 import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
 import { borderClassName, clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { MenuSingle } from '@univerjs/icons';
+import { MenuIcon } from '@univerjs/icons';
 import {
     BuiltInUIPart,
     ComponentContainer,
@@ -316,12 +312,13 @@ function UnitNode({ data }: IUnitNodeProps) {
                   univer-justify-center univer-rounded univer-p-1 univer-shadow-sm
                 `}
             >
-                <MenuSingle />
+                <MenuIcon />
             </div>
 
             <div
                 className={`
-                  univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600 !univer-text-gray-200
+                  univer-absolute -univer-top-6 univer-left-0 univer-text-sm univer-text-gray-600
+                  dark:!univer-text-gray-200
                 `}
             >
                 {title}

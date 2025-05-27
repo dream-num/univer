@@ -17,13 +17,14 @@
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
+import type { KeyboardEvent } from 'react';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
@@ -124,7 +125,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
         setSelectList(selectList);
     }
 
-    function handleSelectListKeyDown(e: React.KeyboardEvent<HTMLUListElement> | React.KeyboardEvent<HTMLInputElement>) {
+    function handleSelectListKeyDown(e: KeyboardEvent<HTMLUListElement> | KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
         if (e.key === 'ArrowDown') {
             const nextActive = active + 1;
@@ -184,7 +185,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                         onClick={() => setCurrentFunctionInfo(index)}
                     >
                         {nameSelected === index && (
-                            <CheckMarkSingle
+                            <CheckMarkIcon
                                 className={`
                                   univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
                                   -univer-translate-y-1/2 univer-text-base univer-text-primary-600

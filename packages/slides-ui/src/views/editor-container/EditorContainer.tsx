@@ -20,11 +20,9 @@ import { borderClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SLIDE_EDITOR_ID } from '../../const';
 import { ISlideEditorManagerService } from '../../services/slide-editor-manager.service';
-
-interface ICellIEditorProps { }
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -37,10 +35,8 @@ const EDITOR_DEFAULT_POSITION = {
 
 /**
  * Floating editor's container.
- * @returns
  */
-
-export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
+export function SlideEditorContainer() {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
     });

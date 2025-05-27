@@ -15,16 +15,26 @@
  */
 
 import type { UIPartsService } from '@univerjs/ui';
-
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
-import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
+import { AscendingIcon, CustomSortIcon, DescendingIcon, ExpandAscendingIcon, ExpandDescendingIcon } from '@univerjs/icons';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentManager, connectInjector, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
+import {
+    SortRangeAscCommand,
+    SortRangeAscExtCommand,
+    SortRangeAscExtInCtxMenuCommand,
+    SortRangeAscInCtxMenuCommand,
+    SortRangeCustomCommand,
+    SortRangeCustomInCtxMenuCommand,
+    SortRangeDescCommand,
+    SortRangeDescExtCommand,
+    SortRangeDescExtInCtxMenuCommand,
+    SortRangeDescInCtxMenuCommand,
+} from '../commands/commands/sheets-sort.command';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import EmbedSortBtn from '../views/EmbedSortBtn';
@@ -82,14 +92,14 @@ export class SheetsSortUIController extends RxDisposable {
 
         ([
             ['CustomSortPanel', CustomSortPanel],
-            [SHEETS_SORT_ASC_ICON, AscendingSingle],
-            [SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingSingle],
-            [SHEETS_SORT_DESC_ICON, DescendingSingle],
-            [SHEETS_SORT_DESC_EXT_ICON, ExpandDescendingSingle],
-            [SHEETS_SORT_CUSTOM_ICON, CustomSortSingle],
-        ] as [string, React.FC][]).forEach(([id, component]) => {
+            [SHEETS_SORT_ASC_ICON, AscendingIcon],
+            [SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingIcon],
+            [SHEETS_SORT_DESC_ICON, DescendingIcon],
+            [SHEETS_SORT_DESC_EXT_ICON, ExpandDescendingIcon],
+            [SHEETS_SORT_CUSTOM_ICON, CustomSortIcon],
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
-                this._componentManager.register(id, component)
+                this._componentManager.register(key, comp)
             );
         });
 

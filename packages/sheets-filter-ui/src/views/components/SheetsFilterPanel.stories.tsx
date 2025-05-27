@@ -22,7 +22,7 @@ import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, Work
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { IShortcutService, IUIPartsService, RediContext, ShortcutService, UIPartsService } from '@univerjs/ui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import enUS from '../../locale/en-US';

@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { RecordSingle } from '@univerjs/icons';
+import { RecordIcon } from '@univerjs/icons';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -116,7 +116,7 @@ export class ActionRecorderController extends Disposable {
     private _initUI(): void {
         this._uiPartsSrv.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(RecorderPanel, this._injector));
         this.disposeWithMe(
-            this._componentManager.register('RecordSingle', RecordSingle)
+            this._componentManager.register('RecordIcon', RecordIcon)
         );
         this._menuManagerService.mergeMenu(menuSchema);
     }

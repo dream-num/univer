@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { AddNoteSingle, DeleteNoteSingle, HideNoteSingle } from '@univerjs/icons';
+import { AddNoteIcon, DeleteNoteIcon, HideNoteIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
@@ -38,12 +38,12 @@ export class SheetsNoteUIController extends Disposable {
     private _initComponents() {
         ([
             [SHEET_NOTE_COMPONENT, SheetsNote],
-            ['AddNoteSingle', AddNoteSingle],
-            ['DeleteNoteSingle', DeleteNoteSingle],
-            ['HideNoteSingle', HideNoteSingle],
-        ] as [string, React.FC][]).forEach(([id, component]) => {
+            ['AddNoteIcon', AddNoteIcon],
+            ['DeleteNoteIcon', DeleteNoteIcon],
+            ['HideNoteIcon', HideNoteIcon],
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
-                this._componentManager.register(id, component)
+                this._componentManager.register(key, comp)
             );
         });
     }

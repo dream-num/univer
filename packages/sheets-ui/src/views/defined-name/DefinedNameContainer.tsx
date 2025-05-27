@@ -20,7 +20,7 @@ import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@u
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
+import { CheckMarkIcon, DeleteIcon, IncreaseIcon } from '@univerjs/icons';
 import {
     InsertDefinedNameCommand,
     RemoveDefinedNameCommand,
@@ -190,7 +190,7 @@ export const DefinedNameContainer = () => {
                         )}
                         onClick={openInsertCloseKeyEditor}
                     >
-                        <IncreaseSingle />
+                        <IncreaseIcon />
                         <span className="univer-ml-1">{localeService.t('definedName.addButton')}</span>
                     </Button>
                     {editState && (
@@ -264,7 +264,7 @@ export const DefinedNameContainer = () => {
                                             closeInsertOpenKeyEditor(definedName.id);
                                         }}
                                     >
-                                        <CheckMarkSingle />
+                                        <CheckMarkIcon />
                                     </div>
                                 </Tooltip>
                                 <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
@@ -281,7 +281,7 @@ export const DefinedNameContainer = () => {
                                             deleteDefinedName(definedName.id);
                                         }}
                                     >
-                                        <DeleteSingle />
+                                        <DeleteIcon />
                                     </div>
                                 </Tooltip>
                             </div>

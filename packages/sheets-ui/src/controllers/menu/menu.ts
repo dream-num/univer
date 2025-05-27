@@ -125,7 +125,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         id: SetOnceFormatPainterCommand.id,
         subId: SetInfiniteFormatPainterCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'BrushSingle',
+        icon: 'BrushIcon',
         title: 'Format Painter',
         tooltip: 'toolbar.formatPainter',
         activated$: new Observable<boolean>((subscriber) => {
@@ -156,7 +156,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetRangeBoldCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'BoldSingle',
+        icon: 'BoldIcon',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true),
@@ -218,7 +218,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetRangeItalicCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ItalicSingle',
+        icon: 'ItalicIcon',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         disabled$: getCurrentRangeDisable$(
@@ -280,7 +280,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetRangeUnderlineCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'UnderlineSingle',
+        icon: 'UnderlineIcon',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
@@ -338,7 +338,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     return {
         id: SetRangeStrickThroughCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'StrikethroughSingle',
+        icon: 'StrikethroughIcon',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         disabled$: getCurrentRangeDisable$(accessor, {
@@ -523,7 +523,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
         id: ResetRangeTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
-        icon: 'NoColor',
+        icon: 'NoColorDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -539,7 +539,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 
     return {
         id: SetRangeTextColorCommand.id,
-        icon: 'FontColor',
+        icon: 'FontColorDoubleIcon',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [
@@ -577,7 +577,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
         id: ResetBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
-        icon: 'NoColor',
+        icon: 'NoColorDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -594,7 +594,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'PaintBucket',
+        icon: 'PaintBucketDoubleIcon',
         selections: [
             {
                 label: {
@@ -628,17 +628,17 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 export const HORIZONTAL_ALIGN_CHILDREN = [
     {
         label: 'align.left',
-        icon: 'LeftJustifyingSingle',
+        icon: 'LeftJustifyingIcon',
         value: HorizontalAlign.LEFT,
     },
     {
         label: 'align.center',
-        icon: 'HorizontallySingle',
+        icon: 'HorizontallyIcon',
         value: HorizontalAlign.CENTER,
     },
     {
         label: 'align.right',
-        icon: 'RightJustifyingSingle',
+        icon: 'RightJustifyingIcon',
         value: HorizontalAlign.RIGHT,
     },
 ];
@@ -695,17 +695,17 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 export const VERTICAL_ALIGN_CHILDREN = [
     {
         label: 'align.top',
-        icon: 'AlignTopSingle',
+        icon: 'AlignTopIcon',
         value: VerticalAlign.TOP,
     },
     {
         label: 'align.middle',
-        icon: 'VerticalCenterSingle',
+        icon: 'VerticalCenterIcon',
         value: VerticalAlign.MIDDLE,
     },
     {
         label: 'align.bottom',
-        icon: 'AlignBottomSingle',
+        icon: 'AlignBottomIcon',
         value: VerticalAlign.BOTTOM,
     },
 ];
@@ -762,17 +762,17 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 export const TEXT_WRAP_CHILDREN = [
     {
         label: 'textWrap.overflow',
-        icon: 'OverflowSingle',
+        icon: 'OverflowIcon',
         value: WrapStrategy.OVERFLOW,
     },
     {
         label: 'textWrap.wrap',
-        icon: 'AutowrapSingle',
+        icon: 'AutowrapIcon',
         value: WrapStrategy.WRAP,
     },
     {
         label: 'textWrap.clip',
-        icon: 'TruncationSingle',
+        icon: 'TruncationIcon',
         value: WrapStrategy.CLIP,
     },
 ];
@@ -829,32 +829,32 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 export const TEXT_ROTATE_CHILDREN = [
     {
         label: 'textRotate.none',
-        icon: 'NoRotationSingle',
+        icon: 'NoRotationIcon',
         value: 0,
     },
     {
         label: 'textRotate.angleUp',
-        icon: 'LeftRotationFortyFiveDegreesSingle',
+        icon: 'LeftRotationFortyFiveDegreesIcon',
         value: -45,
     },
     {
         label: 'textRotate.angleDown',
-        icon: 'RightRotationFortyFiveDegreesSingle',
+        icon: 'RightRotationFortyFiveDegreesIcon',
         value: 45,
     },
     {
         label: 'textRotate.vertical',
-        icon: 'VerticalTextSingle',
+        icon: 'VerticalTextIcon',
         value: 'v',
     },
     {
         label: 'textRotate.rotationUp',
-        icon: 'LeftRotationNinetyDegreesSingle',
+        icon: 'LeftRotationNinetyDegreesIcon',
         value: -90,
     },
     {
         label: 'textRotate.rotationDown',
-        icon: 'RightRotationNinetyDegreesSingle',
+        icon: 'RightRotationNinetyDegreesIcon',
         value: 90,
     },
 ];
@@ -930,7 +930,7 @@ export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         commandId: SheetCopyCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
-        icon: 'Copy',
+        icon: 'CopyDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCopyPermission],
             worksheetTypes: [WorksheetCopyPermission],
@@ -961,7 +961,7 @@ export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         commandId: SheetPasteCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
-        icon: 'PasteSpecial',
+        icon: 'PasteSpecialDoubleIcon',
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
             combineLatestWith(getCurrentRangeDisable$(accessor, {
                 rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -979,7 +979,7 @@ export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorI
     return {
         id: PASTE_SPECIAL_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'PasteSpecial',
+        icon: 'PasteSpecialDoubleIcon',
         title: 'rightClick.pasteSpecial',
         hidden$: getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),
     };
@@ -1062,7 +1062,7 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
     return {
         id: SetWorksheetRowIsAutoHeightCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'AutoHeight',
+        icon: 'AutoHeightDoubleIcon',
         title: 'rightClick.fitContent',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -1077,7 +1077,7 @@ export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: SetWorksheetColAutoWidthCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'AutoWidth',
+        icon: 'AutoWidthDoubleIcon',
         title: 'rightClick.fitContent',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -1095,7 +1095,7 @@ export function SheetFrozenMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         id: SHEET_FROZEN_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
-        icon: 'FreezeToSelectedSingle',
+        icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -1107,7 +1107,7 @@ export function SheetFrozenHeaderMenuItemFactory(accessor: IAccessor): IMenuSele
         id: SHEET_FROZEN_HEADER_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
-        icon: 'FreezeToSelectedSingle',
+        icon: 'FreezeToSelectedIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -1117,7 +1117,7 @@ export function FrozenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SetSelectionFrozenCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.freeze',
-        icon: 'FreezeToSelectedSingle',
+        icon: 'FreezeToSelectedIcon',
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1128,7 +1128,7 @@ export function FrozenRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SetRowFrozenCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.freezeRow',
-        icon: 'FreezeRowSingle',
+        icon: 'FreezeRowIcon',
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1139,7 +1139,7 @@ export function FrozenColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SetColumnFrozenCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.freezeCol',
-        icon: 'FreezeColumnSingle',
+        icon: 'FreezeColumnIcon',
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1150,7 +1150,7 @@ export function CancelFrozenMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: CancelFrozenCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.cancelFreeze',
-        icon: 'CancelFreezeSingle',
+        icon: 'CancelFreezeIcon',
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1160,7 +1160,7 @@ export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: HideRowConfirmCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'Hide',
+        icon: 'HideDoubleIcon',
         title: 'rightClick.hideSelectedRow',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -1175,7 +1175,7 @@ export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: HideColConfirmCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'Hide',
+        icon: 'HideDoubleIcon',
         title: 'rightClick.hideSelectedColumn',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -1197,7 +1197,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetSelectedRowsVisibleCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'EyeOutlineSingle',
+        icon: 'EyeOutlineIcon',
         title: 'rightClick.showHideRow',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenRowsInSelections(): boolean {
@@ -1236,7 +1236,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetSelectedColsVisibleCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'EyeOutlineSingle',
+        icon: 'EyeOutlineIcon',
         title: 'rightClick.showHideColumn',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenColsInSelections(): boolean {
@@ -1277,7 +1277,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: SetRowHeightCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'AdjustHeight',
+        icon: 'AdjustHeightDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -1322,7 +1322,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: SetColWidthCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'AdjustWidth',
+        icon: 'AdjustWidthDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {

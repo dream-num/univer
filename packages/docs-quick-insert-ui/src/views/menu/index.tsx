@@ -20,7 +20,7 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { PlusSingle } from '@univerjs/icons';
+import { IncreaseIcon } from '@univerjs/icons';
 import { ILayoutService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
@@ -90,7 +90,7 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
             tabIndex={0}
             onClick={onClick}
         >
-            <PlusSingle
+            <IncreaseIcon
                 className={`
                   univer-text-gray-800
                   dark:!univer-text-gray-200

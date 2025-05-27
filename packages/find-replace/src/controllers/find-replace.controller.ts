@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    IDisposable,
-    Nullable,
-} from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import {
     ICommandService,
     Inject,
@@ -27,10 +24,9 @@ import {
     RxDisposable,
     toDisposable,
 } from '@univerjs/core';
-import { SearchSingle } from '@univerjs/icons';
+import { SearchIcon } from '@univerjs/icons';
 import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
     FocusSelectionOperation,
@@ -112,10 +108,10 @@ export class FindReplaceController extends RxDisposable {
     private _initUI(): void {
         ([
             ['FindReplaceDialog', FindReplaceDialog],
-            ['SearchIcon', SearchSingle],
-        ] as [string, React.FC][]).forEach(([id, component]) => {
+            ['SearchIcon', SearchIcon],
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
-                this._componentManager.register(id, component)
+                this._componentManager.register(key, comp)
             );
         });
 

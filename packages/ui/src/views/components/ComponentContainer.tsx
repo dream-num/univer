@@ -15,25 +15,25 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { ComponentRenderer } from '../../services/parts/parts.service';
-import React, { useMemo, useRef } from 'react';
+import { createElement, useMemo, useRef } from 'react';
 import { debounceTime, filter, map, startWith } from 'rxjs';
 import { IUIPartsService } from '../../services/parts/parts.service';
 import { useDependency, useObservable } from '../../utils/di';
 
 export interface IComponentContainerProps {
     components?: Set<ComponentType>;
-    fallback?: React.ReactNode;
+    fallback?: ReactNode;
     sharedProps?: Record<string, unknown>;
 }
 
-export function ComponentContainer(props: IComponentContainerProps): React.ReactNode {
+export function ComponentContainer(props: IComponentContainerProps): ReactNode {
     const { components, fallback, sharedProps } = props;
     if (!components || components.size === 0) return fallback ?? null;
 
     return Array.from(components.values()).map((component, index) => {
-        return React.createElement(component, { key: `${component.displayName ?? index}`, ...sharedProps });
+        return createElement(component, { key: `${component.displayName ?? index}`, ...sharedProps });
     });
 }
 
@@ -44,7 +44,7 @@ export function ComponentContainer(props: IComponentContainerProps): React.React
  * @param injector The injector to get the service. It is optional. However, you should not change this prop in a given
  * component.
  */
-// eslint-disable-next-line react-refresh/only-export-components
+
 export function useComponentsOfPart(part: string, injector?: Injector): Set<ComponentRenderer> {
     const uiPartsService = injector?.get(IUIPartsService) ?? useDependency(IUIPartsService);
     const uiVisibleChange$ = useMemo(() => uiPartsService.uiVisibleChange$.pipe(filter((ui) => ui.ui === part)), [part, uiPartsService]);
@@ -63,6 +63,5 @@ export function useComponentsOfPart(part: string, injector?: Injector): Set<Comp
         [uiPartsService, part, changeInfo]
     );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     return useMemo(() => uiPartsService.isUIVisible(part) ? uiPartsService.getComponents(part) : new Set(), [componentPartUpdateCount]);
 }

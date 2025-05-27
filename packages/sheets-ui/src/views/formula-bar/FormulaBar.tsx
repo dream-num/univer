@@ -16,14 +16,30 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, ICommandService, IContextService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    FOCUSING_FX_BAR_EDITOR,
+    ICommandService,
+    IContextService,
+    IPermissionService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
-import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { CheckMarkIcon, CloseIcon, DropdownIcon, FxIcon } from '@univerjs/icons';
+import {
+    RangeProtectionCache,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    UnitAction,
+    WorksheetEditPermission,
+    WorksheetProtectionRuleModel,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
 import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
@@ -239,7 +255,7 @@ export function FormulaBar(props: IProps) {
         }
     };
 
-    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const handlePointerUp = () => {
         if (shouldSkipFocus.current) {
             setTimeout(() => {
                 editorService.blur(true);
@@ -286,7 +302,7 @@ export function FormulaBar(props: IProps) {
                             })}
                             onClick={handleCloseBtnClick}
                         >
-                            <CloseSingle />
+                            <CloseIcon />
                         </span>
                         <span
                             className={clsx(`
@@ -298,7 +314,7 @@ export function FormulaBar(props: IProps) {
                             })}
                             onClick={handleConfirmBtnClick}
                         >
-                            <CheckMarkSingle />
+                            <CheckMarkIcon />
                         </span>
                         <span
                             className={`
@@ -309,7 +325,7 @@ export function FormulaBar(props: IProps) {
                             `}
                             onClick={handlerFxBtnClick}
                         >
-                            <FxSingle />
+                            <FxIcon />
                         </span>
                     </div>
                 </div>
@@ -371,7 +387,7 @@ export function FormulaBar(props: IProps) {
                         `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:!univer-text-gray-700': editDisable })}
                         onClick={handleArrowClick}
                     >
-                        <DropdownSingle
+                        <DropdownIcon
                             className={clsx({
                                 'univer-rotate-180': arrowDirection === ArrowDirection.Up,
                             })}

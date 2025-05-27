@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { Image, Rect, RichText } from '@univerjs/engine-render';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
+import { BottomIcon, MoveDownIcon, MoveUpIcon, TopmostIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
@@ -104,7 +104,7 @@ export default function ArrangePanel(props: IProps) {
                 <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
-                            <MoveUpSingle />
+                            <MoveUpIcon />
                             {localeService.t('image-panel.arrange.forward')}
                         </span>
 
@@ -113,7 +113,7 @@ export default function ArrangePanel(props: IProps) {
                 <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
-                            <MoveDownSingle />
+                            <MoveDownIcon />
                             {localeService.t('image-panel.arrange.backward')}
                         </span>
 
@@ -124,7 +124,7 @@ export default function ArrangePanel(props: IProps) {
                 <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
-                            <TopmostSingle />
+                            <TopmostIcon />
                             {localeService.t('image-panel.arrange.front')}
                         </span>
 
@@ -133,7 +133,7 @@ export default function ArrangePanel(props: IProps) {
                 <div className="univer-w-1/2">
                     <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                         <span className="univer-flex univer-items-center univer-gap-1">
-                            <BottomSingle />
+                            <BottomIcon />
                             {localeService.t('image-panel.arrange.back')}
                         </span>
 

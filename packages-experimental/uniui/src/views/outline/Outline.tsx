@@ -15,7 +15,6 @@
  */
 
 import { ComponentContainer, useComponentsOfPart } from '@univerjs/ui';
-import React from 'react';
 
 export enum UniUIPart {
     OUTLINE = 'OUTLINE',

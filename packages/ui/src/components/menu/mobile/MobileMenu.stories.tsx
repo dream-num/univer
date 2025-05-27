@@ -16,7 +16,7 @@
 
 import type { Meta } from '@storybook/react';
 import { Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ComponentManager } from '../../../common';
 import { ContextMenuPosition } from '../../../services/menu/types';
 import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';

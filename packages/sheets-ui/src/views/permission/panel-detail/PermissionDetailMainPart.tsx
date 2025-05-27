@@ -15,13 +15,14 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import type { ComponentType } from 'react';
 import type { IRangeSelectorProps } from '../../../basics/editor/range';
 import { Injector, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { FormLayout, Input } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { setEndForRange } from '@univerjs/sheets';
 import { ComponentManager, useDependency } from '@univerjs/ui';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { checkRangeValid } from '../util';
 
@@ -37,7 +38,7 @@ interface IPermissionDetailMainPartProps {
 export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) => {
     const { ranges, onRangesChange, desc, onDescChange, rangesErrMsg, permissionId } = props;
     const componentManager = useDependency(ComponentManager);
-    const RangeSelector: React.ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
+    const RangeSelector: ComponentType<IRangeSelectorProps> = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []) as any;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);

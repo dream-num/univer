@@ -18,8 +18,7 @@ import type { Meta } from '@storybook/react';
 import type { Dependency } from '@univerjs/core';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { DesktopLayoutService, ILayoutService, RediContext } from '@univerjs/ui';
-
-import React, { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { FindReplaceController } from '../../controllers/find-replace.controller';
 import enUS from '../../locale/en-US';
 import ruRU from '../../locale/ru-RU';

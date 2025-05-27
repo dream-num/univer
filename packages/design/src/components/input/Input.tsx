@@ -15,13 +15,14 @@
  */
 
 import type { VariantProps } from 'class-variance-authority';
-import { CloseSingle } from '@univerjs/icons';
+import type { InputHTMLAttributes } from 'react';
+import { CloseIcon } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
-type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export const inputVariants = cva(
     `
@@ -173,7 +174,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                                   hover:univer-text-gray-500
                                 `}
                             >
-                                <CloseSingle className="univer-size-3" />
+                                <CloseIcon className="univer-size-3" />
                             </button>
                         )}
                     </div>

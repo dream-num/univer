@@ -17,7 +17,7 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu, Tooltip } from '@univerjs/design';
-import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
+import { IncreaseIcon, ReduceIcon } from '@univerjs/icons';
 import React, { useMemo, useRef, useState } from 'react';
 import { useDependency } from '../../utils/di';
 
@@ -172,7 +172,7 @@ export function Slider(props: ISliderProps) {
                 disabled={value <= min || disabled}
                 onClick={() => handleStep(-10)}
             >
-                <ReduceSingle />
+                <ReduceIcon />
             </Button>
 
             <div
@@ -223,7 +223,7 @@ export function Slider(props: ISliderProps) {
                 disabled={value >= max || disabled}
                 onClick={() => handleStep(10)}
             >
-                <IncreaseSingle />
+                <IncreaseIcon />
             </Button>
 
             <DropdownMenu

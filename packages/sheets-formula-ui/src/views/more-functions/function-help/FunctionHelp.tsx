@@ -15,7 +15,6 @@
  */
 
 import type { IFunctionParam } from '@univerjs/engine-formula';
-import React from 'react';
 import { generateParam } from '../../../services/utils';
 
 interface IFunctionHelpProps {

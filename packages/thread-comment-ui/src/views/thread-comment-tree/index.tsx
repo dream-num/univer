@@ -20,8 +20,16 @@ import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, Tooltip } from '@univerjs/design';
-import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, ResolvedIcon, SolveIcon } from '@univerjs/icons';
+import {
+    AddCommentCommand,
+    DeleteCommentCommand,
+    DeleteCommentTreeCommand,
+    getDT,
+    ResolveCommentCommand,
+    ThreadCommentModel,
+    UpdateCommentCommand,
+} from '@univerjs/thread-comment';
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
@@ -132,7 +140,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                 `}
                                                 onClick={() => onReply(user)}
                                             >
-                                                <ReplyToCommentSingle />
+                                                <ReplyToCommentIcon />
                                             </div>
                                         )
                                         : null
@@ -179,7 +187,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                               hover:univer-bg-gray-50
                                             `}
                                         >
-                                            <MoreHorizontalSingle />
+                                            <MoreHorizontalIcon />
                                         </div>
                                     </Dropdown>
                                 )
@@ -417,7 +425,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             })}
                             onClick={handleResolve}
                         >
-                            {resolved ? <ResolvedSingle /> : <SolveSingle />}
+                            {resolved ? <ResolvedIcon /> : <SolveIcon />}
                         </div>
                         {currentUser?.userID === comments.root.personId
                             ? (
@@ -430,7 +438,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     `}
                                     onClick={handleDeleteRoot}
                                 >
-                                    <DeleteSingle />
+                                    <DeleteIcon />
                                 </div>
                             )
                             : null}

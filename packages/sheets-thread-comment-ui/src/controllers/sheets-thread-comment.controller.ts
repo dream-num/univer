@@ -15,10 +15,10 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { CommentSingle } from '@univerjs/icons';
+import { CommentIcon } from '@univerjs/icons';
 import { THREAD_COMMENT_PANEL } from '@univerjs/thread-comment-ui';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
-import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
+import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { AddCommentShortcut } from './menu';
@@ -48,7 +48,7 @@ export class SheetsThreadCommentController extends Disposable {
         ([
             [SHEETS_THREAD_COMMENT_MODAL, SheetsThreadCommentCell],
             [THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
-            [COMMENT_SINGLE_ICON, CommentSingle],
+            ['CommentIcon', CommentIcon],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)

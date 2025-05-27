@@ -16,7 +16,6 @@
 
 import { Disposable, Inject } from '@univerjs/core';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
-
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 import { menuSchema } from './menu.schema';
 
@@ -36,9 +35,9 @@ export class NumfmtMenuController extends Disposable {
         ([
             [MORE_NUMFMT_TYPE_KEY, MoreNumfmtType],
             [OPTIONS_KEY, Options],
-        ] as [string, React.FC][]).forEach(([id, component]) => {
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
-                this._componentManager.register(id, component)
+                this._componentManager.register(key, comp)
             );
         });
     }

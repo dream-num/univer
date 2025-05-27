@@ -48,7 +48,7 @@ export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         id: COL_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
-        icon: 'Insert',
+        icon: 'InsertDoubleIcon',
         hidden$: getBaseRangeMenuHidden$(accessor),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetInsertColumnPermission] }),
     };
@@ -60,7 +60,7 @@ export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         id: ROW_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
-        icon: 'Insert',
+        icon: 'InsertDoubleIcon',
         hidden$: getBaseRangeMenuHidden$(accessor),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -72,7 +72,7 @@ export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         id: CELL_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
-        icon: 'Insert',
+        icon: 'InsertDoubleIcon',
         hidden$: getObservableWithExclusiveRange$(accessor, getBaseRangeMenuHidden$(accessor)),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -88,7 +88,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
-        icon: 'InsertRowAbove',
+        icon: 'InsertRowAboveDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertBeforeMenuHidden$(accessor, 'row'),
     };
@@ -107,7 +107,7 @@ export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuBu
     return {
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'InsertRowAbove',
+        icon: 'InsertRowAboveDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -148,7 +148,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRow',
-        icon: 'InsertRowBelow',
+        icon: 'InsertRowBelowDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
     };
@@ -166,7 +166,7 @@ export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'LeftInsertColumn',
+        icon: 'LeftInsertColumnDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -207,7 +207,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertColumnBefore',
-        icon: 'LeftInsertColumn',
+        icon: 'LeftInsertColumnDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertBeforeMenuHidden$(accessor, 'col'),
     };
@@ -218,7 +218,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertColumn',
-        icon: 'RightInsertColumn',
+        icon: 'RightInsertColumnDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
     };
@@ -229,7 +229,7 @@ export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuB
         id: InsertRangeMoveRightConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveRight',
-        icon: 'InsertCellShiftRight',
+        icon: 'InsertCellShiftRightDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getCellMenuHidden$(accessor, 'col'),
     };
@@ -244,7 +244,7 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
         id: InsertRangeMoveDownConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveDown',
-        icon: 'InsertCellDown',
+        icon: 'InsertCellDownDoubleIcon',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getCellMenuHidden$(accessor, 'row'),
     };
@@ -262,7 +262,7 @@ export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): 
     return {
         id: InsertMultiRowsAfterCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'InsertRowBelow',
+        icon: 'InsertRowBelowDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -311,7 +311,7 @@ export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): 
     return {
         id: InsertMultiRowsAboveCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'InsertRowAbove',
+        icon: 'InsertRowAboveDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -359,7 +359,7 @@ export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): I
     return {
         id: InsertMultiColsLeftCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'LeftInsertColumn',
+        icon: 'LeftInsertColumnDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -407,7 +407,7 @@ export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): 
     return {
         id: InsertMultiColsRightCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'RightInsertColumn',
+        icon: 'RightInsertColumnDoubleIcon',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {

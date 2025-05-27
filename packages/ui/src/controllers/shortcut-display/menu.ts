@@ -24,7 +24,7 @@ export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         id: ToggleShortcutPanelOperation.id,
         title: 'toggle-shortcut-panel',
         tooltip: 'toggle-shortcut-panel',
-        icon: 'KeyboardSingle',
+        icon: 'KeyboardIcon',
         type: MenuItemType.BUTTON,
         // hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

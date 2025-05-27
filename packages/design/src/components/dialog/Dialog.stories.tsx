@@ -15,8 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { useState } from 'react';
-
+import { useState } from 'react';
 import { Button } from '../button/Button';
 import { Dialog } from './Dialog';
 

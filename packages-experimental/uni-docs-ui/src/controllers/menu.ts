@@ -35,7 +35,7 @@ export function DocBoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DOC_BOLD_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'BoldSingle',
+        icon: 'BoldIcon',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         activated$: new Observable<boolean>((subscriber) => {
@@ -69,7 +69,7 @@ export function DocItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DOC_ITALIC_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'ItalicSingle',
+        icon: 'ItalicIcon',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         activated$: new Observable<boolean>((subscriber) => {
@@ -103,7 +103,7 @@ export function DocUnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: DOC_UNDERLINE_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'UnderlineSingle',
+        icon: 'UnderlineIcon',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         activated$: new Observable<boolean>((subscriber) => {
@@ -137,7 +137,7 @@ export function DocStrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButto
     return {
         id: DOC_STRIKE_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'StrikethroughSingle',
+        icon: 'StrikethroughIcon',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         activated$: new Observable<boolean>((subscriber) => {
@@ -169,7 +169,7 @@ export function DocTableMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DOC_TABLE_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'GridSingle',
+        icon: 'GridIcon',
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),
         // Do not show header footer menu and insert table at zen mode.

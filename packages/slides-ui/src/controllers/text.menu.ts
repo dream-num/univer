@@ -15,18 +15,16 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
+import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
-
-export const TEXT_ICON_ID = 'text-single';
 
 export function SlideAddTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
         id: SlideAddTextCommand.id,
         type: MenuItemType.BUTTON,
-        icon: TEXT_ICON_ID,
+        icon: 'TextIcon',
         tooltip: 'slide.text.insert.title',
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };

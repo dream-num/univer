@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem } from '@univerjs/ui';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_SHEET, FontItalic, FontWeight, ICommandService, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
@@ -28,9 +30,8 @@ import {
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
 
 export const SHEET_BOLD_MUTATION_ID = 'sheet.command.uni-bold';
 export const SHEET_ITALIC_MUTATION_ID = 'sheet.command.uni-italic';
@@ -46,7 +47,7 @@ export function SheetBoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SHEET_BOLD_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'BoldSingle',
+        icon: 'BoldIcon',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -108,7 +109,7 @@ export function SheetItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: SHEET_ITALIC_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'ItalicSingle',
+        icon: 'ItalicIcon',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
@@ -162,7 +163,7 @@ export function SheetUnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonI
     return {
         id: SHEET_UNDERLINE_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'UnderlineSingle',
+        icon: 'UnderlineIcon',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
@@ -216,7 +217,7 @@ export function SheetStrikeThroughMenuItemFactory(accessor: IAccessor): IMenuBut
     return {
         id: SHEET_STRIKE_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        icon: 'StrikethroughSingle',
+        icon: 'StrikethroughIcon',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),

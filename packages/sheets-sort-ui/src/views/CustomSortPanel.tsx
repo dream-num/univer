@@ -19,7 +19,7 @@ import type { IOrderRule } from '@univerjs/sheets-sort';
 import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, LocaleType, throttle } from '@univerjs/core';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
-import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
+import { CheckMarkIcon, DeleteEmptyIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -125,7 +125,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                                 `}
                                 onClick={newItem}
                             >
-                                <IncreaseSingle />
+                                <IncreaseIcon />
                                 <span className="univer-ml-1.5">{localeService.t('sheets-sort.dialog.add-condition')}</span>
                             </div>
                         )
@@ -138,7 +138,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                                   disabled:univer-text-gray-800
                                 `}
                             >
-                                <IncreaseSingle />
+                                <IncreaseIcon />
                                 <span className="univer-ml-1.5 univer-text-xs">{localeService.t('sheets-sort.dialog.add-condition')}</span>
                             </div>
                         )}
@@ -234,7 +234,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                       univer-text-gray-700
                     `}
                 >
-                    <SequenceSingle />
+                    <SequenceIcon />
                 </div>
                 <div>
                     {/* TODO@wzhudev: change it to the Select component later. */}
@@ -267,7 +267,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                         </span>
                                         <span>
                                             {menuItem.index === item.colIndex && (
-                                                <CheckMarkSingle />
+                                                <CheckMarkIcon />
                                             )}
                                         </span>
                                     </li>
@@ -290,7 +290,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             >
                                 {itemLabel}
                             </span>
-                            <MoreDownSingle />
+                            <MoreDownIcon />
                         </div>
                     </Dropdown>
                 </div>
@@ -308,7 +308,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                 </RadioGroup>
             </div>
             <div className="univer-absolute univer-right-0 univer-cursor-pointer univer-text-sm univer-s-[14px]">
-                {showDelete && <DeleteEmptySingle onClick={() => onChange(null, currentIndex)} />}
+                {showDelete && <DeleteEmptyIcon onClick={() => onChange(null, currentIndex)} />}
             </div>
         </div>
     );

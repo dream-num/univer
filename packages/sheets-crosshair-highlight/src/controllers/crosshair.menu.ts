@@ -30,7 +30,7 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
         id: ToggleCrosshairHighlightOperation.id,
         tooltip: 'crosshair.button.tooltip',
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'CrossHighlightingSingle',
+        icon: 'CrossHighlightingIcon',
         selections: [
             {
                 label: {

@@ -33,7 +33,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     return {
         id: SetBorderBasicCommand.id,
         icon: new Observable<string>((subscriber) => {
-            const defaultIcon = 'AllBorderSingle';
+            const defaultIcon = 'AllBorderIcon';
             const borderManager = accessor.get(BorderStyleManagerService);
 
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {

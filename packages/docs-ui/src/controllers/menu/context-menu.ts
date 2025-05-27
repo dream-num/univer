@@ -101,7 +101,7 @@ export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         id: DocCopyCommand.name,
         commandId: DocCopyCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'Copy',
+        icon: 'CopyDoubleIcon',
         title: 'rightClick.copy',
         disabled$: getDisableOnCollapsedObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
@@ -112,7 +112,7 @@ export const ParagraphSettingMenuFactory = (accessor: IAccessor): IMenuButtonIte
     return {
         id: DocParagraphSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'MenuSingle24',
+        icon: 'MenuIcon',
         title: 'doc.menu.paragraphSetting',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -122,7 +122,7 @@ export const CutMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
         id: DocCutCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'Copy',
+        icon: 'CopyDoubleIcon',
         title: 'rightClick.cut',
         disabled$: getDisableOnCollapsedObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
@@ -133,7 +133,7 @@ export const PasteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
         id: DocPasteCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'PasteSpecial',
+        icon: 'PasteSpecialDoubleIcon',
         title: 'rightClick.paste',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -143,7 +143,7 @@ export const DeleteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
         id: DeleteLeftCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'PasteSpecial',
+        icon: 'PasteSpecialDoubleIcon',
         title: 'rightClick.delete',
         disabled$: getDisableOnCollapsedObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
@@ -156,7 +156,7 @@ export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         id: TABLE_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'table.insert',
-        icon: 'Insert',
+        icon: 'InsertDoubleIcon',
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -168,7 +168,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         id: DocTableInsertRowAboveCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.insertRowAbove',
-        icon: 'InsertRowAbove',
+        icon: 'InsertRowAboveDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -179,7 +179,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         id: DocTableInsertRowBellowCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.insertRowBelow',
-        icon: 'InsertRowBelow',
+        icon: 'InsertRowBelowDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -190,7 +190,7 @@ export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButto
         id: DocTableInsertColumnLeftCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.insertColumnLeft',
-        icon: 'LeftInsertColumn',
+        icon: 'LeftInsertColumnDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -201,7 +201,7 @@ export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButt
         id: DocTableInsertColumnRightCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.insertColumnRight',
-        icon: 'RightInsertColumn',
+        icon: 'RightInsertColumnDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -213,7 +213,7 @@ export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         id: TABLE_DELETE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'table.delete',
-        icon: 'Reduce',
+        icon: 'ReduceDoubleIcon',
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -225,7 +225,7 @@ export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         id: DocTableDeleteRowsCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.deleteRows',
-        icon: 'DeleteRow',
+        icon: 'DeleteRowDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -236,7 +236,7 @@ export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         id: DocTableDeleteColumnsCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.deleteColumns',
-        icon: 'DeleteColumn',
+        icon: 'DeleteColumnDoubleIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
@@ -247,7 +247,7 @@ export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.deleteTable',
-        icon: 'GridSingle',
+        icon: 'GridIcon',
         disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };

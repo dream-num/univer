@@ -16,7 +16,7 @@
 
 import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import type { ICellAlert } from '../../services/cell-alert-manager.service';
-import { ErrorSingle, InfoSingle, WarningSingle } from '@univerjs/icons';
+import { ErrorIcon, InfoIcon, WarningIcon } from '@univerjs/icons';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
 
 /**
@@ -33,9 +33,9 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     const { type, title, message } = alert as ICellAlert;
 
     const iconMap = {
-        [CellAlertType.ERROR]: <ErrorSingle className="univer-mr-1.5 univer-text-red-500" />,
-        [CellAlertType.INFO]: <InfoSingle className="univer-mr-1.5 univer-text-blue-500" />,
-        [CellAlertType.WARNING]: <WarningSingle className="univer-mr-1.5 univer-text-yellow-500" />,
+        [CellAlertType.ERROR]: <ErrorIcon className="univer-mr-1.5 univer-text-red-500" />,
+        [CellAlertType.INFO]: <InfoIcon className="univer-mr-1.5 univer-text-blue-500" />,
+        [CellAlertType.WARNING]: <WarningIcon className="univer-mr-1.5 univer-text-yellow-500" />,
     };
 
     return (

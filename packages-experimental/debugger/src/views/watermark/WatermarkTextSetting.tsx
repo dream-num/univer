@@ -16,7 +16,7 @@
 
 import type { ITextWatermarkConfig } from '@univerjs/engine-render';
 import { Checkbox, clsx, ColorPicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
-import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
+import { BoldIcon, FontColorDoubleIcon, ItalicIcon } from '@univerjs/icons';
 
 interface IWatermarkTextSettingProps {
     config?: ITextWatermarkConfig;
@@ -105,7 +105,7 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                               hover:univer-bg-gray-100
                             `}
                         >
-                            <FontColor extend={{ colorChannel1: config.color ?? '#2c53f1' }} />
+                            <FontColorDoubleIcon extend={{ colorChannel1: config.color ?? '#2c53f1' }} />
                         </a>
                     </Dropdown>
                     <a
@@ -117,7 +117,7 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                         })}
                         onClick={() => { onChange({ ...config, bold: !config.bold }); }}
                     >
-                        <BoldSingle />
+                        <BoldIcon />
                     </a>
                     <a
                         className={clsx(`
@@ -128,7 +128,7 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                         })}
                         onClick={() => { onChange({ ...config, italic: !config.italic }); }}
                     >
-                        <ItalicSingle />
+                        <ItalicIcon />
                     </a>
                 </div>
             </div>

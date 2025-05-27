@@ -20,7 +20,7 @@ import { CommandType, DisposableCollection, ICommandService } from '@univerjs/co
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaSearch } from '../hooks/use-formula-search';
 import { useStateRef } from '../hooks/use-state-ref';

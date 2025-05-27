@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, RemoveWorksheetMergeCommand, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
 
 import { combineLatestWith, map } from 'rxjs';
 import {
@@ -36,7 +36,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
 
     return {
         id: AddWorksheetMergeCommand.id,
-        icon: 'MergeAllSingle',
+        icon: 'MergeAllIcon',
         tooltip: 'toolbar.mergeCell.main',
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
@@ -53,7 +53,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: AddWorksheetMergeAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.all',
-        icon: 'MergeAllSingle',
+        icon: 'MergeAllIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -63,7 +63,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
         id: AddWorksheetMergeVerticalCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.vertical',
-        icon: 'VerticalIntegrationSingle',
+        icon: 'VerticalIntegrationIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -73,7 +73,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
         id: AddWorksheetMergeHorizontalCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.horizontal',
-        icon: 'HorizontalMergeSingle',
+        icon: 'HorizontalMergeIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -83,7 +83,7 @@ export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButton
         id: RemoveWorksheetMergeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.cancel',
-        icon: 'CancelMergeSingle',
+        icon: 'CancelMergeIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

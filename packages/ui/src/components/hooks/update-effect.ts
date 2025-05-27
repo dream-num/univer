@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-export const useUpdateEffect: typeof React.useEffect = (effect, deps) => {
-    const hasMount = React.useRef(false);
+export const useUpdateEffect: typeof useEffect = (effect, deps) => {
+    const hasMount = useRef(false);
 
     useEffect(() => {
         if (hasMount.current) {

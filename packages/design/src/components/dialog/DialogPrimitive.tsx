@@ -16,7 +16,7 @@
 
 import type { ComponentPropsWithoutRef, ElementRef, HTMLAttributes } from 'react';
 import { Close, Content, Description, Overlay, Portal, Root, Title, Trigger } from '@radix-ui/react-dialog';
-import { CloseSingle } from '@univerjs/icons';
+import { CloseIcon } from '@univerjs/icons';
 import { forwardRef } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
@@ -90,7 +90,7 @@ const DialogContent = forwardRef<
                     `}
                     onClick={onClickClose}
                 >
-                    <CloseSingle className="univer-size-4 univer-text-gray-400" />
+                    <CloseIcon className="univer-size-4 univer-text-gray-400" />
                     <span className="univer-sr-only">Close</span>
                 </Close>
             )}

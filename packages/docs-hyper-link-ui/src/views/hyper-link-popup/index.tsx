@@ -17,7 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
-import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
+import { CopyIcon, LinkIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
@@ -70,7 +70,7 @@ export const DocLinkPopup = () => {
                       dark:!univer-text-white
                     `}
                 >
-                    <LinkSingle />
+                    <LinkIcon />
                 </div>
                 <Tooltip showIfEllipsis title={url}>
                     <span className="univer-flex-1 univer-truncate">{url}</span>
@@ -91,7 +91,7 @@ export const DocLinkPopup = () => {
                     }}
                 >
                     <Tooltip placement="bottom" title={localeService.t('docLink.info.copy')}>
-                        <CopySingle />
+                        <CopyIcon />
                     </Tooltip>
 
                 </div>
@@ -107,7 +107,7 @@ export const DocLinkPopup = () => {
                     }}
                 >
                     <Tooltip placement="bottom" title={localeService.t('docLink.info.edit')}>
-                        <WriteSingle />
+                        <WriteIcon />
                     </Tooltip>
                 </div>
                 <div
@@ -124,7 +124,7 @@ export const DocLinkPopup = () => {
                     }}
                 >
                     <Tooltip placement="bottom" title={localeService.t('docLink.info.cancel')}>
-                        <UnlinkSingle />
+                        <UnlinkIcon />
                     </Tooltip>
                 </div>
             </div>

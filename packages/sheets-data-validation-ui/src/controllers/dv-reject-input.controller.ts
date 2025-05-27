@@ -20,7 +20,7 @@ import { Button } from '@univerjs/design';
 import { SheetInterceptorService, VALIDATE_CELL } from '@univerjs/sheets';
 import { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { IDialogService } from '@univerjs/ui';
-import React from 'react';
+import { createElement } from 'react';
 
 export class DataValidationRejectInputController extends Disposable {
     constructor(
@@ -71,7 +71,7 @@ export class DataValidationRejectInputController extends Disposable {
                             title: validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }),
                         },
                         footer: {
-                            title: React.createElement(
+                            title: createElement(
                                 Button,
                                 {
                                     variant: 'primary',
@@ -102,7 +102,7 @@ export class DataValidationRejectInputController extends Disposable {
                 title,
             },
             footer: {
-                title: React.createElement(
+                title: createElement(
                     Button,
                     {
                         variant: 'primary',

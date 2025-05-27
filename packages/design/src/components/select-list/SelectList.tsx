@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
@@ -106,7 +106,7 @@ export function SelectList(props: ISelectListProps) {
                         >
                             {!hideCheckMark && (
                                 checked && (
-                                    <CheckMarkSingle
+                                    <CheckMarkIcon
                                         className={`
                                           univer-absolute univer-left-0 univer-top-1/2 -univer-translate-y-1/2
                                           univer-pl-2 univer-text-primary-600

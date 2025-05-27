@@ -26,42 +26,42 @@ export enum QuickInsertMenuGroup {
 export const textMenu: IDocPopupMenuItem = {
     id: 'quick-insert.text.menu',
     title: 'docQuickInsert.menu.text',
-    icon: 'TextSingle',
+    icon: 'TextIcon',
     keywords: ['text'],
 };
 
 export const numberedListMenu: IDocPopupMenuItem = {
     id: OrderListCommand.id,
     title: 'docQuickInsert.menu.numberedList',
-    icon: 'OrderSingle',
+    icon: 'OrderIcon',
     keywords: ['numbered', 'list', 'ordered'],
 };
 
 export const bulletedListMenu: IDocPopupMenuItem = {
     id: BulletListCommand.id,
     title: 'docQuickInsert.menu.bulletedList',
-    icon: 'UnorderSingle',
+    icon: 'UnorderIcon',
     keywords: ['bulleted', 'list', 'unordered'],
 };
 
 export const dividerMenu: IDocPopupMenuItem = {
     id: HorizontalLineCommand.id,
     title: 'docQuickInsert.menu.divider',
-    icon: 'DividerSingle',
+    icon: 'DividerIcon',
     keywords: ['divider', 'line', 'separate'],
 };
 
 export const tableMenu: IDocPopupMenuItem = {
     id: DocCreateTableOperation.id,
     title: 'docQuickInsert.menu.table',
-    icon: 'GridSingle',
+    icon: 'GridIcon',
     keywords: ['table', 'grid', 'spreadsheet'],
 };
 
 export const imageMenu: IDocPopupMenuItem = {
     id: InsertDocImageCommand.id,
     title: 'docQuickInsert.menu.image',
-    icon: 'addition-and-subtraction-single',
+    icon: 'AdditionAndSubtractionIcon',
     keywords: ['image', 'picture', 'photo'],
 };
 

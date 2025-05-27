@@ -18,7 +18,7 @@ import { ICommandService } from '@univerjs/core';
 import { SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 import { TriggerCalculationController } from '@univerjs/sheets-formula';
 import { ProgressBar, useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 export function FormulaProgressBar() {
     const triggerCalculationController = useDependency(TriggerCalculationController);

@@ -47,7 +47,7 @@ export enum UNI_MENU_POSITIONS {
     TOOLBAR_FLOAT = 'toolbar_float',
 }
 
-export function FakeFontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function FakeFontFamilySelectorMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: FAKE_FONT_FAMILY_MENU_ID,
         tooltip: 'toolbar.font',
@@ -58,7 +58,7 @@ export function FakeFontFamilySelectorMenuItemFactory(accessor: IAccessor): IMen
     };
 }
 
-export function FakeFontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
+export function FakeFontSizeSelectorMenuItemFactory(): IMenuSelectorItem<number> {
     return {
         id: FAKE_FONT_SIZE_MENU_ID,
         type: MenuItemType.SELECTOR,
@@ -75,10 +75,10 @@ export function FakeFontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuS
     };
 }
 
-export function FakeTextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function FakeTextColorSelectorMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: FAKE_FONT_COLOR_MENU_ID,
-        icon: 'FontColor',
+        icon: 'FontColorDoubleIcon',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [],
@@ -86,42 +86,42 @@ export function FakeTextColorSelectorMenuItemFactory(accessor: IAccessor): IMenu
     };
 }
 
-export function FakeBackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function FakeBackgroundColorSelectorMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: FAKE_BG_COLOR_MENU_ID,
         tooltip: 'toolbar.fillColor.main',
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'PaintBucket',
+        icon: 'PaintBucketDoubleIcon',
         selections: [],
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
 }
 
-export function FakeImageMenuFactory(accessor: IAccessor): IMenuItem {
+export function FakeImageMenuFactory(): IMenuItem {
     return {
         id: FAKE_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'addition-and-subtraction-single',
+        icon: 'AdditionAndSubtractionIcon',
         tooltip: 'sheetImage.title',
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
 }
 
-export function FakeUnorderListMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function FakeUnorderListMenuItemFactory(): IMenuItem {
     return {
         id: FAKE_UNORDER_LIST_MENU_ID,
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'UnorderSingle',
+        icon: 'UnorderIcon',
         tooltip: 'toolbar.unorder',
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
 }
 
-export function FakeOrderListMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function FakeOrderListMenuItemFactory(): IMenuItem {
     return {
         id: FAKE_ORDER_LIST_MENU_ID,
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'OrderSingle',
+        icon: 'OrderIcon',
         tooltip: 'toolbar.order',
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
@@ -133,7 +133,7 @@ export function FontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         id: FONT_GROUP_MENU_ID,
         type: MenuItemType.SUBITEMS,
         tooltip: 'Font group',
-        icon: 'BoldSingle',
+        icon: 'BoldIcon',
         hidden$: new Observable((subscriber) => {
             const subscription = univerInstanceService.focused$.subscribe((unitId) => {
                 if (unitId == null) {
@@ -158,27 +158,27 @@ export function FontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     };
 }
 
-export function FakeFontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function FakeFontGroupMenuItemFactory(): IMenuSelectorItem {
     return {
         id: FAKE_FONT_GROUP_MENU_ID,
         type: MenuItemType.SUBITEMS,
         tooltip: 'Font group',
-        icon: 'BoldSingle',
+        icon: 'BoldIcon',
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
 }
 
-export function FakePivotTableMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function FakePivotTableMenuItemFactory(): IMenuItem {
     return {
         id: FAKE_TABLE_MENU_ID,
         type: MenuItemType.BUTTON,
-        icon: 'PivotTableSingle',
+        icon: 'PivotTableIcon',
         tooltip: 'PivotTable',
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
 }
 
-export function UnitLineColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UnitLineColorMenuItemFactory(): IMenuButtonItem {
     return {
         id: UNIT_LINE_COLOR_MENU_ID,
         type: MenuItemType.BUTTON,
@@ -187,62 +187,62 @@ export function UnitLineColorMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function DownloadMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DownloadMenuItemFactory(): IMenuButtonItem {
     return {
         id: DOWNLOAD_MENU_ID,
         type: MenuItemType.BUTTON,
         title: '',
         tooltip: 'Download',
-        icon: 'DownloadSingle',
+        icon: 'DownloadIcon',
     };
 }
 
-export function ShareMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShareMenuItemFactory(): IMenuButtonItem {
     return {
         id: SHARE_MENU_ID,
         type: MenuItemType.BUTTON,
         title: '',
         tooltip: 'Share',
-        icon: 'ShareSingle',
+        icon: 'ShareIcon',
     };
 }
 
-export function LockMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function LockMenuItemFactory(): IMenuButtonItem {
     return {
         id: LOCK_MENU_ID,
         type: MenuItemType.BUTTON,
         title: '',
         tooltip: 'Lock',
-        icon: 'LockSingle',
+        icon: 'LockIcon',
     };
 }
 
-export function PrintMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function PrintMenuItemFactory(): IMenuButtonItem {
     return {
         id: PRINT_MENU_ID,
         type: MenuItemType.BUTTON,
         title: '',
         tooltip: 'Print',
-        icon: 'PrintSingle',
+        icon: 'PrintIcon',
     };
 }
 
-export function ZenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ZenMenuItemFactory(): IMenuButtonItem {
     return {
         id: ZEN_MENU_ID,
         type: MenuItemType.BUTTON,
         title: '',
-        icon: 'ZenSingle',
+        icon: 'ZenIcon',
         tooltip: 'Full screen',
     };
 }
 
-export function DeleteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteMenuItemFactory(): IMenuButtonItem {
     return {
         id: DELETE_MENU_ID,
         type: MenuItemType.BUTTON,
         title: 'Delete',
         tooltip: 'Delete',
-        icon: 'DeleteSingle',
+        icon: 'DeleteIcon',
     };
 }

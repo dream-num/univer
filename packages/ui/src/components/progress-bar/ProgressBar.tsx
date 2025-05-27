@@ -15,7 +15,7 @@
  */
 
 import { clsx, Tooltip } from '@univerjs/design';
-import { CloseSingle } from '@univerjs/icons';
+import { CloseIcon } from '@univerjs/icons';
 import { useEffect, useRef, useState } from 'react';
 
 export interface IProgressBarProps {
@@ -109,7 +109,7 @@ export function ProgressBar(props: IProgressBarProps) {
                 type="button"
                 onClick={onTerminate}
             >
-                <CloseSingle
+                <CloseIcon
                     className={`
                       univer-size-3.5
                       dark:!univer-text-white

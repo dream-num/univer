@@ -15,12 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import type { IUniverUIConfig } from '../../../controllers/config.schema';
 import { IConfigService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
 import { UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
@@ -62,7 +62,7 @@ export type RectPopupDirection =
     | 'horizontal-center';
 
 export interface IRectPopupProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /**
      * the anchor element bounding rect

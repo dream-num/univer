@@ -29,7 +29,7 @@ import { MoreFunctionsOperation } from '../commands/operations/more-functions.op
 export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: InsertFunctionOperation.id,
-        icon: 'FunctionSingle',
+        icon: 'FunctionIcon',
         tooltip: 'formula.insert.tooltip',
         type: MenuItemType.SELECTOR,
         selections: [
@@ -39,7 +39,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                     selectable: false,
                 },
                 value: 'SUM',
-                icon: 'SumSingle',
+                icon: 'SumIcon',
             },
             {
                 label: {
@@ -47,7 +47,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                     selectable: false,
                 },
                 value: 'AVERAGE',
-                icon: 'AvgSingle',
+                icon: 'AvgIcon',
             },
             {
                 label: {
@@ -55,7 +55,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                     selectable: false,
                 },
                 value: 'COUNT',
-                icon: 'CntSingle',
+                icon: 'CntIcon',
             },
             {
                 label: {
@@ -63,7 +63,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                     selectable: false,
                 },
                 value: 'MAX',
-                icon: 'MaxSingle',
+                icon: 'MaxIcon',
             },
             {
                 label: {
@@ -71,7 +71,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                     selectable: false,
                 },
                 value: 'MIN',
-                icon: 'MinSingle',
+                icon: 'MinIcon',
             },
         ],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -84,7 +84,7 @@ export function InsertSUMFunctionMenuItemFactory(accessor: IAccessor): IMenuItem
     return {
         id: InsertFunctionOperation.id,
         title: 'SUM',
-        icon: 'SumSingle',
+        icon: 'SumIcon',
         type: MenuItemType.BUTTON,
         params: {
             value: 'SUM',
@@ -103,7 +103,7 @@ export function InsertCOUNTFunctionMenuItemFactory(accessor: IAccessor): IMenuIt
     return {
         id: InsertFunctionOperation.id,
         title: 'COUNT',
-        icon: 'CntSingle',
+        icon: 'CntIcon',
         type: MenuItemType.BUTTON,
         params: {
             value: 'COUNT',
@@ -122,7 +122,7 @@ export function InsertAVERAGEFunctionMenuItemFactory(accessor: IAccessor): IMenu
     return {
         id: InsertFunctionOperation.id,
         title: 'AVERAGE',
-        icon: 'AvgSingle',
+        icon: 'AvgIcon',
         type: MenuItemType.BUTTON,
         params: {
             value: 'AVERAGE',
@@ -141,7 +141,7 @@ export function InsertMAXFunctionMenuItemFactory(accessor: IAccessor): IMenuItem
     return {
         id: InsertFunctionOperation.id,
         title: 'MAX',
-        icon: 'MaxSingle',
+        icon: 'MaxIcon',
         type: MenuItemType.BUTTON,
         params: {
             value: 'MAX',
@@ -160,7 +160,7 @@ export function InsertMINFunctionMenuItemFactory(accessor: IAccessor): IMenuItem
     return {
         id: InsertFunctionOperation.id,
         title: 'MIN',
-        icon: 'MinSingle',
+        icon: 'MinIcon',
         type: MenuItemType.BUTTON,
         params: {
             value: 'MIN',

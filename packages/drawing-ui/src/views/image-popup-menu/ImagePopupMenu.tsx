@@ -17,9 +17,9 @@
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
-import { Autofill, MoreDownSingle } from '@univerjs/icons';
+import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -39,7 +39,7 @@ export interface IImagePopupMenuProps {
     };
 }
 
-export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopupMenuProps) => {
+export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const { popup } = props;
 
     const menuItems = popup?.extraProps?.menuItems;
@@ -98,13 +98,13 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
                         'univer-bg-white dark:!univer-bg-gray-900': !visible,
                     })}
                 >
-                    <Autofill
+                    <AutofillDoubleIcon
                         className={`
                           univer-fill-primary-600 univer-text-gray-900
                           dark:!univer-text-white
                         `}
                     />
-                    {showMore && <MoreDownSingle className="dark:!univer-text-white" />}
+                    {showMore && <MoreDownIcon className="dark:!univer-text-white" />}
                 </div>
             </DropdownMenu>
         </div>

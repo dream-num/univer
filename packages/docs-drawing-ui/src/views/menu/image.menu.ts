@@ -65,7 +65,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DOCS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'AddImageSingle',
+        icon: 'AddImageIcon',
         tooltip: 'docImage.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),

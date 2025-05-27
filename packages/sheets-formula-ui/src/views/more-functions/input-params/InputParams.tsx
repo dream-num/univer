@@ -16,8 +16,7 @@
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { borderLeftClassName, clsx } from '@univerjs/design';
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
 

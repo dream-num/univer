@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { ReactElement } from 'react';
 
 interface IParamsProps {
     className?: string;
-    title?: string | React.ReactElement;
-    value?: string | React.ReactElement;
+    title?: string | ReactElement;
+    value?: string | ReactElement;
 }
 
 export function FunctionParams(props: IParamsProps) {
     const { className, value, title } = props;
+
     return (
         <div className="univer-mb-2 univer-text-xs">
             <div

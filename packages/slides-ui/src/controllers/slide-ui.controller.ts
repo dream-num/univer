@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { GraphSingle, TextSingle } from '@univerjs/icons';
+import { GraphIcon, TextIcon } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
@@ -32,9 +32,7 @@ import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar'
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import { SlideEditorContainer } from '../views/editor-container';
 import { menuSchema } from './menu.schema';
-import { GRAPH_SINGLE_ICON } from './shape.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
-import { TEXT_ICON_ID } from './text.menu';
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
@@ -63,8 +61,8 @@ export class SlidesUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(TEXT_ICON_ID, TextSingle));
-        this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
+        this.disposeWithMe(componentManager.register('TextIcon', TextIcon));
+        this.disposeWithMe(componentManager.register('GraphIcon', GraphIcon));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));
     }

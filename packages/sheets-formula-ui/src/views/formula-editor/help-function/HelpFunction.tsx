@@ -18,7 +18,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx } from '@univerjs/design';
-import { CloseSingle, MoreSingle } from '@univerjs/icons';
+import { CloseIcon, MoreIcon } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
@@ -158,7 +158,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                     style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
                                     onClick={() => setContentVisible(!contentVisible)}
                                 >
-                                    <MoreSingle />
+                                    <MoreIcon />
                                 </div>
                                 <div
                                     className={`
@@ -171,7 +171,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                     `}
                                     onClick={onClose}
                                 >
-                                    <CloseSingle />
+                                    <CloseIcon />
                                 </div>
                             </div>
                         </div>

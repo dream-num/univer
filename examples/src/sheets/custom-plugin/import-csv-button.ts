@@ -28,7 +28,7 @@ import {
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FolderSingle } from '@univerjs/icons';
+import { FolderIcon } from '@univerjs/icons';
 import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
@@ -115,7 +115,7 @@ class ImportCSVButtonPlugin extends Plugin {
     // eslint-disable-next-line max-lines-per-function
     override onStarting() {
         // register icon component
-        this.componentManager.register('FolderSingle2', FolderSingle);
+        this.componentManager.register('FolderIcon2', FolderIcon);
 
         const buttonId = 'import-csv-button';
 
@@ -206,7 +206,7 @@ class ImportCSVButtonPlugin extends Plugin {
             id: buttonId,
             title: 'Import CSV',
             tooltip: 'Import CSV',
-            icon: 'FolderSingle2', // icon name
+            icon: 'FolderIcon2', // icon name
             type: MenuItemType.BUTTON,
         });
 

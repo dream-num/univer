@@ -18,7 +18,7 @@ import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } fro
 import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { MoreDownSingle } from '@univerjs/icons';
+import { MoreDownIcon } from '@univerjs/icons';
 import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
 import { ComponentManager } from '../../../common/component-manager';
@@ -160,7 +160,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownSingle />
+                            <MoreDownIcon />
                         </div>
                     </DropdownMenuWrapper>
                 </div>
@@ -202,7 +202,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                                 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600': disabled,
                             })}
                         >
-                            <MoreDownSingle />
+                            <MoreDownIcon />
                         </div>
                     </div>
                 </DropdownMenuWrapper>

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ColorKit, LocaleService } from '@univerjs/core';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { isObservable } from 'rxjs';
 import { ComponentManager } from '../../common/component-manager';
@@ -32,7 +33,7 @@ export type ICustomLabelProps<T = undefined> = {
 
     onChange?(v: string | number): void;
 
-    title?: React.ReactNode;
+    title?: ReactNode;
 } & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon'>;
 
 /**

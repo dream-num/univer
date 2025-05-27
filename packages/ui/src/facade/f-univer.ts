@@ -141,10 +141,10 @@ export interface IFUniverUIMixin {
      * @example
      * ```ts
      * // Univer Icon can be viewed at https://univer.ai/en-US/icons
-     * import { SmileSingle } from '@univerjs/icons'
+     * import { SmileIcon } from '@univerjs/icons'
      *
      * // Create a custom menu with an univer icon
-     * univerAPI.registerComponent('custom-menu-icon', SmileSingle);
+     * univerAPI.registerComponent('custom-menu-icon', SmileIcon);
      * univerAPI.createMenu({
      *   id: 'custom-menu',
      *   icon: 'custom-menu-icon',

@@ -15,7 +15,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { Checkbox } from '../Checkbox';

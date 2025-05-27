@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { useContext, useMemo } from 'react';
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
@@ -147,7 +147,7 @@ export function CascaderList(props: ICascaderListProps) {
                                                 `}
                                             >
                                                 {option.value === value[index] && (
-                                                    <CheckMarkSingle
+                                                    <CheckMarkIcon
                                                         className="univer-text-primary-600"
                                                     />
                                                 )}

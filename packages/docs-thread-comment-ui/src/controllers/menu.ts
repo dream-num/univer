@@ -51,7 +51,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     return {
         id: StartAddCommentOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'CommentSingle',
+        icon: 'CommentIcon',
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, SHEET_EDITOR_UNITS),
@@ -72,7 +72,7 @@ export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: ToggleCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'CommentSingle',
+        icon: 'CommentIcon',
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

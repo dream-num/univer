@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { CloseSingle } from '@univerjs/icons';
+import { CloseIcon } from '@univerjs/icons';
 import { clsx } from '../../helper/clsx';
 
 export interface IBadgeProps {
@@ -54,7 +54,7 @@ export function Badge(props: IBadgeProps) {
                     `}
                     onClick={onClose}
                 >
-                    <CloseSingle className="univer-text-current" />
+                    <CloseIcon className="univer-text-current" />
                 </a>
             )}
         </span>

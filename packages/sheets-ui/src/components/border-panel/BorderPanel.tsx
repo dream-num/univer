@@ -18,7 +18,7 @@ import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
 import { BorderStyleTypes } from '@univerjs/core';
 import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
-import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
+import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { BorderStyleManagerService } from '@univerjs/sheets';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { BorderLine } from './border-line/BorderLine';
@@ -139,14 +139,14 @@ export function BorderPanel(props: IBorderPanelProps) {
                             `}
                             type="button"
                         >
-                            <PaintBucket
+                            <PaintBucketDoubleIcon
                                 className={`
                                   univer-fill-primary-600
                                   dark:!univer-text-white
                                 `}
                                 extend={{ colorChannel1: value?.color ?? '' }}
                             />
-                            <MoreDownSingle className="dark:!univer-text-white" />
+                            <MoreDownIcon className="dark:!univer-text-white" />
                         </button>
                     </Dropdown>
                 </div>
@@ -196,7 +196,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 `}
                                 type={BorderStyleTypes.THIN}
                             />
-                            <MoreDownSingle className="dark:!univer-text-white" />
+                            <MoreDownIcon className="dark:!univer-text-white" />
                         </button>
                     </Dropdown>
                 </div>

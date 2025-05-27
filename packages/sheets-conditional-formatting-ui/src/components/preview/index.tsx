@@ -17,7 +17,7 @@
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { SlashSingle } from '@univerjs/icons';
+import { SlashIcon } from '@univerjs/icons';
 import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor, defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
 import { useMemo } from 'react';
 
@@ -93,7 +93,7 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
                     {iconSet.map((base64, index) => (
                         base64 ?
                             <img key={index} className="univer-h-full" src={base64} draggable={false} />
-                            : <SlashSingle key={index} />))}
+                            : <SlashIcon key={index} />))}
                 </div>
             );
         }

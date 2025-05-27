@@ -15,13 +15,13 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { ComponentType } from 'react';
 import type { IUniverWorkbenchProps } from '../../views/workbench/Workbench';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { ColorPicker, render as createRoot, unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import React from 'react';
 import { ComponentManager } from '../../common';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../components';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker/interface';
@@ -70,9 +70,9 @@ export class DesktopUIController extends SingleUnitUIController {
             [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],
             [FONT_SIZE_COMPONENT, FontSize],
             [COLOR_PICKER_COMPONENT, ColorPicker],
-        ] as [string, React.FC][]).forEach(([id, component]) => {
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
-                this._componentManager.register(id, component)
+                this._componentManager.register(key, comp)
             );
         });
     }
@@ -109,7 +109,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(DesktopWorkbench, injector) as React.ComponentType<IUniverWorkbenchProps>;
+    const ConnectedApp = connectInjector(DesktopWorkbench, injector) as ComponentType<IUniverWorkbenchProps>;
     const onRendered = (contentElement: HTMLElement) => callback(contentElement, mountContainer);
 
     function render() {

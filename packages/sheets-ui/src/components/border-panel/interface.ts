@@ -25,78 +25,78 @@ export interface IBorderPanelProps extends ICustomComponentProps<IBorderInfo> {}
 export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderTop',
-        icon: 'UpBorder',
+        icon: 'UpBorderDoubleIcon',
         value: 'top',
     },
     {
         label: 'borderLine.borderBottom',
-        icon: 'DownBorder',
+        icon: 'DownBorderDoubleIcon',
         value: 'bottom',
     },
     {
         label: 'borderLine.borderLeft',
-        icon: 'LeftBorder',
+        icon: 'LeftBorderDoubleIcon',
         value: 'left',
     },
     {
         label: 'borderLine.borderRight',
-        icon: 'RightBorder',
+        icon: 'RightBorderDoubleIcon',
         value: 'right',
     },
     {
         label: 'borderLine.borderNone',
-        icon: 'NoBorderSingle',
+        icon: 'NoBorderIcon',
         value: 'none',
     },
     {
         label: 'borderLine.borderAll',
-        icon: 'AllBorderSingle',
+        icon: 'AllBorderIcon',
         value: 'all',
     },
     {
         label: 'borderLine.borderOutside',
-        icon: 'OuterBorder',
+        icon: 'OuterBorderDoubleIcon',
         value: 'outside',
     },
     {
         label: 'borderLine.borderInside',
-        icon: 'InnerBorder',
+        icon: 'InnerBorderDoubleIcon',
         value: 'inside',
     },
     {
         label: 'borderLine.borderHorizontal',
-        icon: 'HorizontalBorder',
+        icon: 'HorizontalBorderDoubleIcon',
         value: 'horizontal',
     },
     {
         label: 'borderLine.borderVertical',
-        icon: 'VerticalBorder',
+        icon: 'VerticalBorderDoubleIcon',
         value: 'vertical',
     },
 
     {
         label: 'borderLine.borderTlbr',
-        icon: 'BackSlashSingle',
+        icon: 'BackSlashIcon',
         value: 'tlbr',
     },
     {
         label: 'borderLine.borderTlbcTlmr',
-        icon: 'LeftDoubleDiagonalSingle',
+        icon: 'LeftDoubleDiagonalIcon',
         value: 'tlbc_tlmr',
     },
     {
         label: 'borderLine.borderTlbrTlbcTlmr',
-        icon: 'LeftTridiagonalSingle',
+        icon: 'LeftTridiagonalIcon',
         value: 'tlbr_tlbc_tlmr',
     },
     {
         label: 'borderLine.borderBlTr',
-        icon: 'SlashSingle',
+        icon: 'SlashIcon',
         value: 'bltr',
     },
     {
         label: 'borderLine.borderMltrBctr',
-        icon: 'RightDoubleDiagonalSingle',
+        icon: 'RightDoubleDiagonalIcon',
         value: 'mltr_bctr',
     },
 ];

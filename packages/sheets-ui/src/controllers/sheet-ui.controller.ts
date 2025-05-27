@@ -17,8 +17,7 @@
 import { Disposable, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
-
-import { HideGridlines } from '@univerjs/icons';
+import { HideGridlinesDoubleIcon } from '@univerjs/icons';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -190,7 +189,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
 
         // init icons
-        this.disposeWithMe(componentManager.register('HideGridlines', HideGridlines));
+        this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
     }
 
     private _initCommands(): void {

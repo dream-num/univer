@@ -17,7 +17,7 @@
 import type { ICollaborator } from '@univerjs/protocol';
 import { LocaleService } from '@univerjs/core';
 import { Avatar, Button, Input } from '@univerjs/design';
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
@@ -73,7 +73,7 @@ export const SheetPermissionUserDialog = () => {
                                     >
                                         <Avatar src={item.subject?.avatar} size={24} />
                                         <div className="univer-ml-1.5 univer-flex-1">{item.subject?.name}</div>
-                                        {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkSingle /></div>)}
+                                        {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkIcon /></div>)}
                                     </div>
                                 );
                             })}

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import React from 'react';
-import { cleanup, render } from '@testing-library/react';
 import type { IPagerProps } from '../Pager';
+import { cleanup, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Pager } from '../Pager';
 
 describe('Pager', () => {

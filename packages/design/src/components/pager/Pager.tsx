@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { MoreLeftSingle, MoreRightSingle } from '@univerjs/icons';
+import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useMemo } from 'react';
 import { clsx } from '../../helper/clsx';
 
@@ -77,7 +77,7 @@ export function Pager(props: IPagerProps) {
                             role="button"
                             onClick={onClickLeftArrow}
                         >
-                            <MoreLeftSingle />
+                            <MoreLeftIcon />
                         </div>
                         <div className="univer-mx-1">{text}</div>
                         <div
@@ -90,7 +90,7 @@ export function Pager(props: IPagerProps) {
                             role="button"
                             onClick={onClickRightArrow}
                         >
-                            <MoreRightSingle />
+                            <MoreRightIcon />
                         </div>
                     </>
                 )

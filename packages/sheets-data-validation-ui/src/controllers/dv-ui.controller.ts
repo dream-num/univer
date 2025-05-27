@@ -18,7 +18,7 @@ import type { Ctor } from '@univerjs/core';
 import type { BaseSheetDataValidatorView } from '../views/validator-views/sheet-validator-view';
 import { Inject, Injector, RxDisposable } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { DataValidationSingle } from '@univerjs/icons';
+import { DataValidationIcon } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { DataValidationPanel } from '../views/components';
@@ -33,7 +33,6 @@ import { ListMultipleValidatorView } from '../views/validator-views/list-multipl
 import { ListValidatorView } from '../views/validator-views/list-validator-view';
 import { TextLengthValidatorView } from '../views/validator-views/text-length-validator.view';
 import { WholeValidatorView } from '../views/validator-views/whole-validator-view';
-import { DataValidationIcon } from './dv.menu';
 
 export class SheetsDataValidationUIController extends RxDisposable {
     constructor(
@@ -49,15 +48,15 @@ export class SheetsDataValidationUIController extends RxDisposable {
 
     private _initComponents() {
         ([
-            [DataValidationIcon, DataValidationSingle],
+            ['DataValidationIcon', DataValidationIcon],
             [DATA_VALIDATION_PANEL, DataValidationPanel],
             [ListRenderModeInput.componentKey, ListRenderModeInput],
             [DateShowTimeOption.componentKey, DateShowTimeOption],
             ...FORMULA_INPUTS,
-        ] as const).forEach(([key, component]) => {
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(this._componentManger.register(
                 key,
-                component
+                comp
             ));
         });
     }

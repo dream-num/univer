@@ -18,7 +18,7 @@ import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerj
 import type { ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -125,7 +125,7 @@ function Label({ icon, value, option, onOptionSelect }: {
             })}
         >
             {hasCheckMark && String(value) === String(option.value) && (
-                <CheckMarkSingle
+                <CheckMarkIcon
                     className="univer-absolute univer-left-1 univer-top-0.5 univer-text-primary-600"
                 />
             )}

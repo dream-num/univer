@@ -174,4 +174,4 @@ export { DependencyManagerBaseService } from './services/dependency-manager.serv
 export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
 export { type IUnitRowData } from './basics/common';
 
-export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service.js';
+export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';

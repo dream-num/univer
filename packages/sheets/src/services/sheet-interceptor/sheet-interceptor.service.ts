@@ -139,10 +139,7 @@ export class SheetInterceptorService extends Disposable {
                 // only copy here, should avoid unnecessary copy object when interceptor is called
                 const rawData = context.rawData;
                 if (value) {
-                    return {
-                        ...rawData,
-                        ...value,
-                    };
+                    return value;
                 }
 
                 return rawData;

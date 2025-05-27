@@ -141,8 +141,8 @@ importers:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.3)
       eslint-plugin-readable-tailwind:
-        specifier: ^1.9.1
-        version: 1.9.1(eslint@9.27.0(jiti@2.4.2))(tailwindcss@3.4.17)
+        specifier: ^2.1.2
+        version: 2.1.2(eslint@9.27.0(jiti@2.4.2))(tailwindcss@3.4.17)
       fs-extra:
         specifier: ^11.3.0
         version: 11.3.0
@@ -7734,12 +7734,12 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
 
-  eslint-plugin-readable-tailwind@1.9.1:
-    resolution: {integrity: sha512-vZtTdQ2pDZt1cr0IeYQCI6lR0HANbOzfokEIVI9qqByZ0jUDiwxkFIDue/XXpGL3EdLVM8my7hoLKCJzgbSgWQ==}
-    engines: {node: '>=16'}
+  eslint-plugin-readable-tailwind@2.1.2:
+    resolution: {integrity: sha512-JTRxIxZ5CsjLZZGax/Mao+Q//0XetHohijExRpjyCrZCs2Ns3UPkyZGH52KLCb6m4k15Wrt2UpmQXs9xACIQlg==}
+    engines: {node: '>=v20.11.0'}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
-      tailwindcss: '>=3.3.0'
+      tailwindcss: ^3.3.0 || ^4.0.0
 
   eslint-plugin-regexp@2.7.0:
     resolution: {integrity: sha512-U8oZI77SBtH8U3ulZ05iu0qEzIizyEDXd+BWHvyVxTOjGwcDcvy/kEpgFG4DYca2ByRLiVPFZ2GeH7j1pdvZTA==}
@@ -9683,6 +9683,12 @@ packages:
     peerDependencies:
       postcss: ^8.0.0
 
+  postcss-import@16.1.0:
+    resolution: {integrity: sha512-7hsAZ4xGXl4MW+OKEWCnF6T5jqBw80/EE9aXg1r2yyn1RsVEU8EtKXbijEODa+rg7iih4bKf7vlvTGYR4CnPNg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      postcss: ^8.0.0
+
   postcss-js@4.0.1:
     resolution: {integrity: sha512-dDLF8pEO191hJMtlHFPRa8xsizHaM82MLfNkUHdUtVEV3tgTp5oj+8qbEqYM57SLfc74KSbw//4SeJma2LRVIw==}
     engines: {node: ^12 || ^14 || >= 16}
@@ -10714,6 +10720,10 @@ packages:
 
   tapable@2.2.1:
     resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}
+    engines: {node: '>=6'}
+
+  tapable@2.2.2:
+    resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
     engines: {node: '>=6'}
 
   terser-webpack-plugin@5.3.14:
@@ -15299,7 +15309,7 @@ snapshots:
   enhanced-resolve@5.18.1:
     dependencies:
       graceful-fs: 4.2.11
-      tapable: 2.2.1
+      tapable: 2.2.2
 
   ensure-posix-path@1.1.1: {}
 
@@ -15936,9 +15946,14 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-readable-tailwind@1.9.1(eslint@9.27.0(jiti@2.4.2))(tailwindcss@3.4.17):
+  eslint-plugin-readable-tailwind@2.1.2(eslint@9.27.0(jiti@2.4.2))(tailwindcss@3.4.17):
     dependencies:
+      enhanced-resolve: 5.18.1
       eslint: 9.27.0(jiti@2.4.2)
+      jiti: 2.4.2
+      postcss: 8.5.3
+      postcss-import: 16.1.0(postcss@8.5.3)
+      synckit: 0.9.2
       tailwindcss: 3.4.17
 
   eslint-plugin-regexp@2.7.0(eslint@9.27.0(jiti@2.4.2)):
@@ -16258,7 +16273,7 @@ snapshots:
       node-abort-controller: 3.1.1
       schema-utils: 3.3.0
       semver: 7.7.1
-      tapable: 2.2.1
+      tapable: 2.2.2
       typescript: 5.8.3
       webpack: 5.99.8(@swc/core@1.11.24)(esbuild@0.25.5)
 
@@ -16540,7 +16555,7 @@ snapshots:
       html-minifier-terser: 6.1.0
       lodash: 4.17.21
       pretty-error: 4.0.0
-      tapable: 2.2.1
+      tapable: 2.2.2
     optionalDependencies:
       webpack: 5.99.8(@swc/core@1.11.24)(esbuild@0.25.5)
 
@@ -18161,6 +18176,13 @@ snapshots:
       read-cache: 1.0.0
       resolve: 1.22.10
 
+  postcss-import@16.1.0(postcss@8.5.3):
+    dependencies:
+      postcss: 8.5.3
+      postcss-value-parser: 4.2.0
+      read-cache: 1.0.0
+      resolve: 1.22.10
+
   postcss-js@4.0.1(postcss@8.5.3):
     dependencies:
       camelcase-css: 2.0.1
@@ -19425,6 +19447,8 @@ snapshots:
 
   tapable@2.2.1: {}
 
+  tapable@2.2.2: {}
+
   terser-webpack-plugin@5.3.14(@swc/core@1.11.24)(esbuild@0.25.5)(webpack@5.99.8(@swc/core@1.11.24)(esbuild@0.25.5)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -20003,7 +20027,7 @@ snapshots:
       mime-types: 2.1.35
       neo-async: 2.6.2
       schema-utils: 4.3.2
-      tapable: 2.2.1
+      tapable: 2.2.2
       terser-webpack-plugin: 5.3.14(@swc/core@1.11.24)(esbuild@0.25.5)(webpack@5.99.8(@swc/core@1.11.24)(esbuild@0.25.5))
       watchpack: 2.4.2
       webpack-sources: 3.2.3

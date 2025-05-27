@@ -115,7 +115,7 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 
 ## 👾 ショーケース
 
-[Capalyze][examples-link-capalyze]でUniverを使用する
+AI 製品に Univer を組み込み、データ表示ツールとして活用します。
 
 [![][examples-preview-capalyze]][examples-link-capalyze]
 

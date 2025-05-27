@@ -115,7 +115,7 @@ Univer 内置多种语言支持，包括：
 
 ## 👾 在线示例
 
-在[表答][examples-link-biaoda]中使用 Univer
+在 AI 产品中嵌入 Univer，作为数据展示工具。
 
 [![][examples-preview-biaoda]][examples-link-biaoda]
 

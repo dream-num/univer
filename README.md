@@ -115,7 +115,7 @@ You can add the language you want by [Using Custom Locales](https://univer.ai/gu
 
 ## 👾 Showcase
 
-Using Univer in [Capalyze][examples-link-capalyze]
+Embed Univer in AI products as a data presentation tool.
 
 [![][examples-preview-capalyze]][examples-link-capalyze]
 

@@ -18,6 +18,7 @@ import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { HorizontalAlign, VerticalAlign } from '@univerjs/core';
+import { COLOR_BLACK_RGB } from '../basics';
 import { DocSimpleSkeleton } from '../components/docs/layout/doc-simple-skeleton';
 import { Shape } from './shape';
 
@@ -75,7 +76,7 @@ export class Text extends Shape<ITextProps> {
         ctx.save();
         ctx.font = fontStyle;
 
-        ctx.fillStyle = props.color ?? '#000000';
+        ctx.fillStyle = props.color ?? COLOR_BLACK_RGB;
 
         // Get font metrics using FontCache for consistency with height calculation
         for (const line of lines) {

@@ -13974,6 +13974,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
             },
         },
+        pwABhz: {
+            n: {
+                pattern: 'General',
+            },
+        },
     },
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -14493,6 +14498,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             },
                         },
                         s: 'idtqdi',
+                    },
+                },
+                26: {
+                    // example of a cell imported from excel, which should display as 001
+                    0: {
+                        v: '001',
+                        t: 1,
+                        s: 'pwABhz',
                     },
                 },
             },

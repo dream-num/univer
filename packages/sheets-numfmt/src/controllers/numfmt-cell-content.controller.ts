@@ -107,7 +107,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
 
-            // eslint-disable-next-line complexity
             handler: (cell, location, next) => {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
@@ -132,8 +131,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const type = cell?.t || checkCellValueType(originCellValue.v);
-                // just handle number
+                const type = checkCellValueType(originCellValue.v);
+                // just handle number or number string
                 if (type !== CellValueType.NUMBER) {
                     return next(cell);
                 }

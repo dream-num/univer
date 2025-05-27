@@ -35,7 +35,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelecto
     return {
         id: CLEAR_SELECTION_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'ClearFormat',
+        icon: 'ClearFormatDoubleIcon',
         title: 'rightClick.clearSelection',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -45,7 +45,7 @@ export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenu
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ClearFormat',
+        icon: 'ClearFormatDoubleIcon',
         title: 'rightClick.clearContent',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -59,7 +59,7 @@ export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuB
     return {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ClearFormat',
+        icon: 'ClearFormatDoubleIcon',
         title: 'rightClick.clearFormat',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
@@ -73,7 +73,7 @@ export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButt
     return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ClearFormat',
+        icon: 'ClearFormatDoubleIcon',
         title: 'rightClick.clearAll',
         tooltip: 'rightClick.clearAll',
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {

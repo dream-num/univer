@@ -16,9 +16,10 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { IDropdownMenuProps } from '@univerjs/design';
+import type { ReactNode } from 'react';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { clsx, DropdownMenu } from '@univerjs/design';
-import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
+import { CheckMarkIcon, ConvertIcon, EyelashIcon } from '@univerjs/icons';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -31,13 +32,13 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
 
 export interface ISheetBarMenuItem {
-    label?: React.ReactNode;
+    label?: ReactNode;
     hidden?: boolean;
     selected?: boolean;
     index?: string;
@@ -132,8 +133,8 @@ export function SheetBarMenu() {
             <div className="univer-relative univer-box-border univer-pl-6">
                 {(item.selected || item.hidden) && (
                     <span className="univer-absolute univer-left-1 univer-top-0.5">
-                        {item.selected && <CheckMarkSingle className="univer-size-4 univer-text-primary-600" />}
-                        {item.hidden && <EyelashSingle className="univer-size-4 univer-text-gray-400" />}
+                        {item.selected && <CheckMarkIcon className="univer-size-4 univer-text-primary-600" />}
+                        {item.hidden && <EyelashIcon className="univer-size-4 univer-text-gray-400" />}
                     </span>
                 )}
 
@@ -160,7 +161,7 @@ export function SheetBarMenu() {
         >
             <div>
                 <SheetBarButton>
-                    <ConvertSingle />
+                    <ConvertIcon />
                 </SheetBarButton>
             </div>
         </DropdownMenu>

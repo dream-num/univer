@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { hsvToRgb } from './color-conversion';
 
 interface IAlphaSliderProps {
@@ -24,7 +24,7 @@ interface IAlphaSliderProps {
     onChanged?: (alpha: number) => void;
 }
 
-export const AlphaSlider: React.FC<IAlphaSliderProps> = ({ hsv, alpha, onChange, onChanged }) => {
+export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);

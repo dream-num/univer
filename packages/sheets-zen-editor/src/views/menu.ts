@@ -28,7 +28,7 @@ export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: OpenZenEditorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',
-        icon: 'AmplifySingle',
+        icon: 'AmplifyIcon',
         hidden$: getCurrentExclusiveRangeInterest$(accessor),
         disabled$: editorBridgeService.currentEditCell$.pipe(
             switchMap((cell) => getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] })

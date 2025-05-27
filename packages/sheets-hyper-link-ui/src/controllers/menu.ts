@@ -104,7 +104,7 @@ const linkMenu = {
     commandId: InsertHyperLinkOperation.id,
     type: MenuItemType.BUTTON,
     title: 'hyperLink.menu.add',
-    icon: 'LinkSingle',
+    icon: 'LinkIcon',
 };
 
 export const genZenEditorMenuId = (id: string) => `${id}-zen-editor`;
@@ -132,7 +132,7 @@ const linkToolbarMenu = {
     tooltip: 'hyperLink.form.addTitle',
     commandId: InsertHyperLinkToolbarOperation.id,
     type: MenuItemType.BUTTON,
-    icon: 'LinkSingle',
+    icon: 'LinkIcon',
 };
 
 export const insertLinkMenuToolbarFactory = (accessor: IAccessor) => {

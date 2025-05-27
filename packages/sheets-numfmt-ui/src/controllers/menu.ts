@@ -103,17 +103,17 @@ export const CurrencyMenuItem = (accessor: IAccessor) => {
             const menuCurrencyService = accessor.get(MenuCurrencyService);
             function getIconKey(symbol: string) {
                 const iconMap: Record<string, string> = {
-                    [countryCurrencyMap.US]: 'DollarSingle',
-                    [countryCurrencyMap.RU]: 'RoubleSingle',
-                    [countryCurrencyMap.CN]: 'RmbSingle',
-                    [countryCurrencyMap.AT]: 'EuroSingle',
+                    [countryCurrencyMap.US]: 'DollarIcon',
+                    [countryCurrencyMap.RU]: 'RoubleIcon',
+                    [countryCurrencyMap.CN]: 'RmbIcon',
+                    [countryCurrencyMap.AT]: 'EuroIcon',
                 };
-                return iconMap[symbol] || 'DollarSingle';
+                return iconMap[symbol] ?? 'DollarIcon';
             }
-            const symbol = countryCurrencyMap[menuCurrencyService.getCurrencySymbol()] || '$';
+            const symbol = countryCurrencyMap[menuCurrencyService.getCurrencySymbol()] ?? '$';
             subscribe.next(getIconKey(symbol));
             return menuCurrencyService.currencySymbol$.subscribe((code) => {
-                const symbol = countryCurrencyMap[code] || '$';
+                const symbol = countryCurrencyMap[code] ?? '$';
                 subscribe.next(getIconKey(symbol));
             });
         }),
@@ -129,7 +129,7 @@ export const CurrencyMenuItem = (accessor: IAccessor) => {
 
 export const AddDecimalMenuItem = (accessor: IAccessor) => {
     return {
-        icon: 'AddDigitsSingle',
+        icon: 'AddDigitsIcon',
         id: AddDecimalCommand.id,
         title: 'sheet.numfmt.addDecimal',
         tooltip: 'sheet.numfmt.addDecimal',
@@ -141,7 +141,7 @@ export const AddDecimalMenuItem = (accessor: IAccessor) => {
 
 export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
     return {
-        icon: 'ReduceDigitsSingle',
+        icon: 'ReduceDigitsIcon',
         id: SubtractDecimalCommand.id,
         title: 'sheet.numfmt.subtractDecimal',
         tooltip: 'sheet.numfmt.subtractDecimal',
@@ -153,7 +153,7 @@ export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
 
 export const PercentMenuItem = (accessor: IAccessor) => {
     return {
-        icon: 'PercentSingle',
+        icon: 'PercentIcon',
         id: SetPercentCommand.id,
         title: 'sheet.numfmt.percent',
         tooltip: 'sheet.numfmt.percent',

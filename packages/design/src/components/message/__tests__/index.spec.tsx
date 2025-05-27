@@ -15,9 +15,7 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { describe, expect, it } from 'vitest';
-
 import { Button } from '../../button/Button';
 import { message, Messager, MessageType } from '../Message';
 

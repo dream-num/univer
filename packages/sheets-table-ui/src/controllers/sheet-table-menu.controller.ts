@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { TableSingle } from '@univerjs/icons';
+import { TableIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { SHEET_TABLE_THEME_PANEL, TABLE_SELECTOR_DIALOG, TABLE_TOOLBAR_BUTTON } from '../const';
 import { SheetTableSelector } from '../views/components/SheetTableSelector';
@@ -34,11 +34,11 @@ export class SheetTableMenuController extends Disposable {
 
     private _initComponents() {
         ([
-            [TABLE_TOOLBAR_BUTTON, TableSingle],
+            [TABLE_TOOLBAR_BUTTON, TableIcon],
             [TABLE_SELECTOR_DIALOG, SheetTableSelector],
             [SHEET_TABLE_THEME_PANEL, SheetTableThemePanel],
-        ] as const).forEach(([key, component]) => {
-            this.disposeWithMe(this._componentManager.register(key, component));
+        ] as const).forEach(([key, comp]) => {
+            this.disposeWithMe(this._componentManager.register(key, comp));
         });
     }
 

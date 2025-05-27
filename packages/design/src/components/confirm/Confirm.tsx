@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import type { ReactNode } from 'react';
 import type { ILocale } from '../../locale/interface';
-
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
 
 export interface IConfirmProps {
-    children: React.ReactNode;
+    children: ReactNode;
 
     /**
      * Whether the Confirm is visible.

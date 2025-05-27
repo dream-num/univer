@@ -18,7 +18,7 @@ import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
-import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
+import { AllBorderIcon, CopyIcon, LinkIcon, UnlinkIcon, WriteIcon, XlsxMultiIcon } from '@univerjs/icons';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IMessageService, IZenZoneService, useDependency } from '@univerjs/ui';
@@ -29,11 +29,11 @@ import { SheetsHyperLinkResolverService } from '../../services/resolver.service'
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
 const iconsMap = {
-    [SheetHyperLinkType.URL]: <LinkSingle />,
-    [SheetHyperLinkType.SHEET]: <Xlsx className="univer-text-green-500" />,
-    [SheetHyperLinkType.RANGE]: <AllBorderSingle />,
-    [SheetHyperLinkType.DEFINE_NAME]: <AllBorderSingle />,
-    [SheetHyperLinkType.INVALID]: <AllBorderSingle />,
+    [SheetHyperLinkType.URL]: <LinkIcon />,
+    [SheetHyperLinkType.SHEET]: <XlsxMultiIcon className="univer-text-green-500" />,
+    [SheetHyperLinkType.RANGE]: <AllBorderIcon />,
+    [SheetHyperLinkType.DEFINE_NAME]: <AllBorderIcon />,
+    [SheetHyperLinkType.INVALID]: <AllBorderIcon />,
 };
 
 interface ICellLinkPopupPureProps {
@@ -134,7 +134,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         }}
                     >
                         <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
-                            <CopySingle className="dark:!univer-text-white" />
+                            <CopyIcon className="dark:!univer-text-white" />
                         </Tooltip>
                     </div>
                 )}
@@ -159,7 +159,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
-                                <WriteSingle className="dark:!univer-text-white" />
+                                <WriteIcon className="dark:!univer-text-white" />
                             </Tooltip>
                         </div>
                         <div
@@ -186,7 +186,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
-                                <UnlinkSingle className="dark:!univer-text-white" />
+                                <UnlinkIcon className="dark:!univer-text-white" />
                             </Tooltip>
                         </div>
                     </>

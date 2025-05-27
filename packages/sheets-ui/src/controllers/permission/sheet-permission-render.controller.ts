@@ -19,7 +19,7 @@ import type { MenuConfig } from '@univerjs/ui';
 import type { IUniverSheetsUIConfig } from '../config.schema';
 import { Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
+import { CheckMarkIcon, DeleteIcon, LockIcon, ProtectIcon, WriteIcon } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
@@ -54,19 +54,19 @@ export class SheetPermissionRenderManagerController extends Disposable {
 
     private _initComponents(): void {
         ([
-            [permissionMenuIconKey, ProtectSingle],
-            [permissionDeleteIconKey, DeleteSingle],
-            [permissionEditIconKey, WriteSingle],
-            [permissionCheckIconKey, CheckMarkSingle],
-            [permissionLockIconKey, LockSingle],
+            [permissionMenuIconKey, ProtectIcon],
+            [permissionDeleteIconKey, DeleteIcon],
+            [permissionEditIconKey, WriteIcon],
+            [permissionCheckIconKey, CheckMarkIcon],
+            [permissionLockIconKey, LockIcon],
             [UNIVER_SHEET_PERMISSION_PANEL, SheetPermissionPanel],
             [UNIVER_SHEET_PERMISSION_USER_DIALOG, SheetPermissionUserDialog],
             [UNIVER_SHEET_PERMISSION_DIALOG, SheetPermissionDialog],
             [UNIVER_SHEET_PERMISSION_ALERT_DIALOG, AlertDialog],
-        ] as const).forEach(([key, component]) => {
+        ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(this._componentManager.register(
                 key,
-                component
+                comp
             ));
         });
     }

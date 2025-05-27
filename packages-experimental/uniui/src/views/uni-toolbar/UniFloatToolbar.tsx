@@ -20,7 +20,7 @@ import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { flip, offset, shift, useFloating } from '@floating-ui/react-dom';
 import { IUniverInstanceService } from '@univerjs/core';
 import { ComponentContainer, IMenuManagerService, ToolbarItem, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 
 export interface IFloatingToolbarRef {
@@ -40,7 +40,7 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
     DELETE_MENU_ID,
 ];
 
-export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps> }>(({ node }, ref) => {
+export const UniFloatingToolbar = forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps> }>(({ node }, ref) => {
     const menuManagerService = useDependency(IMenuManagerService);
     const isMenuChange = useObservable(menuManagerService.menuChanged$);
     const [uniVisibleItems, setUniVisibleItems] = useState<IMenuItem[]>([]);

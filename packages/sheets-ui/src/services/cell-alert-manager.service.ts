@@ -20,7 +20,6 @@ import { Disposable, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
-import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 import { CellPopupManagerService } from './cell-popup-manager.service';
 
 export enum CellAlertType {
@@ -51,7 +50,6 @@ export class CellAlertManagerService extends Disposable {
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @Inject(CellPopupManagerService) private readonly _cellPopupManagerService: CellPopupManagerService
     ) {
         super();

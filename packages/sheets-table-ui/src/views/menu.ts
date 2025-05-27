@@ -20,11 +20,11 @@ import type { Observable } from 'rxjs';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsTableController, SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from '@univerjs/sheets-table';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { MenuItemType } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
 import { OpenTableSelectorOperation } from '../commands/operations/open-table-selector.operation';
 import { TABLE_TOOLBAR_BUTTON } from '../const';
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 
 export const SHEET_TABLE_CONTEXT_INSERT_MENU_ID = 'sheet.table.context-insert_menu-id';
 export const SHEET_TABLE_CONTEXT_REMOVE_MENU_ID = 'sheet.table.context-remove_menu-id';
@@ -44,7 +44,7 @@ export function SheetTableInsertContextMenuFactory(accessor: IAccessor): IMenuSe
     return {
         id: SHEET_TABLE_CONTEXT_INSERT_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'Insert',
+        icon: 'InsertDoubleIcon',
         title: 'sheets-table.insert.main',
         hidden$: getSheetTableRowColOperationHidden$(accessor),
     };
@@ -54,7 +54,7 @@ export function SheetTableRemoveContextMenuFactory(accessor: IAccessor): IMenuSe
     return {
         id: SHEET_TABLE_CONTEXT_REMOVE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'Reduce',
+        icon: 'ReduceDoubleIcon',
         title: 'sheets-table.remove.main',
         hidden$: getSheetTableRowColOperationHidden$(accessor),
     };

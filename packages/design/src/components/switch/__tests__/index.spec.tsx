@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
-import React from 'react';
-
+import { afterEach, describe, expect, it } from 'vitest';
 import { Switch } from '../Switch';
 
 describe('Switch', () => {

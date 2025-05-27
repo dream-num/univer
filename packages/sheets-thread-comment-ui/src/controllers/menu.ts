@@ -15,20 +15,19 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
-import { COMMENT_SINGLE_ICON } from '../types/const';
 
 export const threadCommentMenuFactory = (accessor: IAccessor) => {
     return {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
-        icon: COMMENT_SINGLE_ICON,
+        icon: 'CommentIcon',
         title: 'sheetThreadComment.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {
@@ -36,14 +35,14 @@ export const threadCommentMenuFactory = (accessor: IAccessor) => {
             worksheetTypes: [WorksheetViewPermission],
             rangeTypes: [RangeProtectionPermissionViewPoint],
         }),
-    } as IMenuItem;
+    };
 };
 
 export const threadPanelMenuFactory = (accessor: IAccessor) => {
     return {
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
-        icon: COMMENT_SINGLE_ICON,
+        icon: 'CommentIcon',
         tooltip: 'sheetThreadComment.menu.commentManagement',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCommentPermission],
@@ -51,7 +50,6 @@ export const threadPanelMenuFactory = (accessor: IAccessor) => {
             rangeTypes: [RangeProtectionPermissionViewPoint],
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-
     };
 };
 

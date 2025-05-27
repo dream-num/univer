@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import type { Dependency } from '@univerjs/core';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
@@ -37,7 +36,6 @@ import {
 } from '../../commands/commands/inline-format.command';
 import { menuSchema } from '../../controllers/menu.schema';
 import enUS from '../../locale/en-US';
-import ruRU from '../../locale/ru-RU';
 import zhCN from '../../locale/zh-CN';
 import { FloatToolbar } from './FloatToolbar';
 
@@ -69,7 +67,6 @@ export const Playground = {
             injector?.get(LocaleService).load({
                 [LocaleType.EN_US]: enUS,
                 [LocaleType.ZH_CN]: zhCN,
-                [LocaleType.RU_RU]: ruRU,
             });
 
             deps.forEach((dependency) => injector?.add(dependency));
@@ -80,11 +77,14 @@ export const Playground = {
         useEffect(() => {
             if (!inject) return;
 
-            const componentManager = inject.get(ComponentManager);
-            componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
-            componentManager.register(FONT_FAMILY_COMPONENT, FontFamily);
-            componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);
-            componentManager.register(FONT_SIZE_COMPONENT, FontSize);
+            ([
+                [COLOR_PICKER_COMPONENT, ColorPicker],
+                [FONT_FAMILY_COMPONENT, FontFamily],
+                [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],
+                [FONT_SIZE_COMPONENT, FontSize],
+            ] as const).forEach(([key, comp]) => {
+                inject.get(ComponentManager).register(key, comp);
+            });
 
             const menuManagerService = inject.get(IMenuManagerService);
             menuManagerService.mergeMenu(menuSchema);

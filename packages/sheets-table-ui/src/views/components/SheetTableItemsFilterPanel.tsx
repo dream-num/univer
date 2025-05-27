@@ -15,10 +15,11 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
+import type { Dispatch, SetStateAction } from 'react';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { SheetsTableUiService } from '../../services/sheets-table-ui-service';
 
 interface ISheetTableItemsFilterPanelProps {
@@ -28,7 +29,7 @@ interface ISheetTableItemsFilterPanelProps {
     tableId: string;
     columnIndex: number;
     checkedItemSet: Set<string>;
-    setCheckedItemSet: React.Dispatch<React.SetStateAction<Set<string>>>;
+    setCheckedItemSet: Dispatch<SetStateAction<Set<string>>>;
 }
 
 const getCheckedCount = (map: Map<string, number>) => {

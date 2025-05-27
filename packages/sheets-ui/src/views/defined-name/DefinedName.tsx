@@ -16,7 +16,7 @@
 
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { MoreDownSingle } from '@univerjs/icons';
+import { MoreDownIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
@@ -80,7 +80,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                         'univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-700 hover:univer-bg-transparent': disable,
                     })}
                 >
-                    <MoreDownSingle />
+                    <MoreDownIcon />
                 </a>
             </Dropdown>
         </div>

@@ -17,10 +17,10 @@
 import type { IRange } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, ButtonGroup } from '@univerjs/design';
-import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
+import { AscendingIcon, DescendingIcon } from '@univerjs/icons';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
 export interface IEmbedSortBtnProps {
@@ -53,11 +53,11 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
             className="univer-mb-3 univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-2 univer-gap-2"
         >
             <Button onClick={() => apply(true)}>
-                <AscendingSingle />
+                <AscendingIcon />
                 {localeService.t('sheets-sort.general.sort-asc')}
             </Button>
             <Button onClick={() => apply(false)}>
-                <DescendingSingle />
+                <DescendingIcon />
                 {localeService.t('sheets-sort.general.sort-desc')}
             </Button>
         </ButtonGroup>

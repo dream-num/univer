@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
+import { MoreDownIcon, SlashIcon } from '@univerjs/icons';
 import {
     CFNumberOperator,
     CFRuleType,
@@ -183,7 +183,7 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
                 className="univer-mb-2.5 univer-flex univer-cursor-pointer univer-items-center univer-pl-1"
                 onClick={() => handleClick({ iconType: EMPTY_ICON_TYPE as any, iconId: '', base64: '' })}
             >
-                <SlashSingle className="univer-size-5" />
+                <SlashIcon className="univer-size-5" />
                 <span className="univer-ml-2">无单元格图标</span>
             </div>
             <div className="univer-flex univer-w-64 univer-flex-wrap">
@@ -224,7 +224,6 @@ const IconSetRuleEdit = (props: {
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.percent}`), value: CFValueType.percent },
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.percentile}`), value: CFValueType.percentile },
         { label: localeService.t(`sheet.cf.valueType.${CFValueType.formula}`), value: CFValueType.formula },
-
     ];
     const handleValueValueChange = (v: number | string, index: number) => {
         onChange([String(index), 'value', 'value'], v);
@@ -317,11 +316,11 @@ const IconSetRuleEdit = (props: {
                                     {icon
                                         ? <img src={icon} className="univer-size-4" draggable={false} />
                                         : (
-                                            <SlashSingle
+                                            <SlashIcon
                                                 className="univer-size-4"
                                             />
                                         )}
-                                    <MoreDownSingle />
+                                    <MoreDownIcon />
                                 </div>
                             </Dropdown>
                         </div>
@@ -459,7 +458,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                             src={icon}
                         />
                     )
-                    : <SlashSingle className="univer-size-5" key={index} />))}
+                    : <SlashIcon className="univer-size-5" key={index} />))}
             </div>
         );
     }, [configList]);
@@ -588,7 +587,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                         `, borderClassName)}
                     >
                         {previewIcon}
-                        <MoreDownSingle />
+                        <MoreDownIcon />
                     </div>
                 </Dropdown>
             </div>

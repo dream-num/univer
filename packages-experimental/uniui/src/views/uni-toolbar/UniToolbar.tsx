@@ -19,7 +19,7 @@ import type { ComponentType } from 'react';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useWorkbooks } from '@univerjs/sheets-ui';
 import { IMenuManagerService, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UNI_MENU_POSITIONS } from '../../controllers/menu';
 import { UniToolbarService } from '../../services/toolbar/uni-toolbar-service';
 import { UniFormulaBar } from './UniFormulaBar';

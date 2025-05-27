@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import type { ReactNode } from 'react';
 import type { ILocale } from '../../locale/interface';
-import React, { createContext, useMemo } from 'react';
+import { createContext, useMemo } from 'react';
 import { isBrowser } from '../../helper/is-browser';
 
 export interface IConfigProviderProps {
-    children: React.ReactNode;
+    children: ReactNode;
     locale?: ILocale['design'];
     mountContainer: HTMLElement | null;
 }

@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText } from '@univerjs/core';
@@ -23,7 +23,7 @@ import { borderClassName, clsx } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { useKeyboardEvent, useResize } from './hooks';
@@ -39,7 +39,7 @@ export interface IRichTextEditorProps {
     onClickOutside?: () => void;
     keyboardEventConfig?: IKeyboardEventConfig;
     moveCursor?: boolean;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     isSingle?: boolean;
     placeholder?: string;
     editorId?: string;
@@ -48,7 +48,7 @@ export interface IRichTextEditorProps {
     maxHeight?: number;
     defaultHeight?: number;
     icon?: ReactNode;
-    editorRef?: React.RefObject<Editor | null> | ((editor: Editor | null) => void);
+    editorRef?: RefObject<Editor | null> | ((editor: Editor | null) => void);
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -75,7 +75,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const [height, setHeight] = useState(defaultHeight);
-    const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null!);
+    const formulaEditorContainerRef = useRef<HTMLDivElement>(null!);
     const editorId = useMemo(() => propsEditorId ?? createInternalEditorID(`RICH_TEXT_EDITOR-${generateRandomId(4)}`), [propsEditorId]);
     const editor = useEditor({
         editorId,
@@ -89,7 +89,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const selections = useObservable(docSelectionRenderService?.textSelectionInner$);
     const isFocusing = Boolean((docSelectionRenderService?.isFocusing ?? false) && selections?.textRanges.some((r) => r.collapsed));
-    const sheetEmbeddingRef = React.useRef<HTMLDivElement>(null);
+    const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
     const { checkScrollBar } = useResize(editor, isSingle, true, true);
 

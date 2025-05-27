@@ -16,7 +16,7 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { DeleteSingle, DownloadSingle, LockSingle, PivotTableSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
+import { DeleteIcon, DownloadIcon, LockIcon, PivotTableIcon, PrintIcon, ShareIcon, ZenIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 import { UniToolbarService } from '../services/toolbar/uni-toolbar-service';
@@ -45,13 +45,13 @@ export class UniuiToolbarController extends Disposable {
     private _initComponent(): void {
         const componentManager = this._componentManager;
         const iconList: Record<string, React.ForwardRefExoticComponent<any>> = {
-            DownloadSingle,
-            ShareSingle,
-            LockSingle,
-            PrintSingle,
-            ZenSingle,
-            DeleteSingle,
-            PivotTableSingle,
+            DownloadIcon,
+            ShareIcon,
+            LockIcon,
+            PrintIcon,
+            ZenIcon,
+            DeleteIcon,
+            PivotTableIcon,
         };
         for (const k in iconList) {
             this.disposeWithMe(componentManager.register(k, iconList[k]));

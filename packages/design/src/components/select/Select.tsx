@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
-import { MoreDownSingle } from '@univerjs/icons';
+import { MoreDownIcon } from '@univerjs/icons';
 import { useMemo, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
@@ -171,7 +171,7 @@ export function Select(props: ISelectProps) {
                 >
                     {displayValue}
                 </div>
-                <MoreDownSingle
+                <MoreDownIcon
                     className={`
                       univer-flex-shrink-0
                       dark:!univer-text-white

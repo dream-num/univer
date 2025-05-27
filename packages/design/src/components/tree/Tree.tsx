@@ -15,7 +15,7 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
-import { DropdownSingle } from '@univerjs/icons';
+import { DropdownIcon } from '@univerjs/icons';
 import VirtualList from 'rc-virtual-list';
 import { useEffect, useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
@@ -161,7 +161,7 @@ export function Tree(props: ITreeProps) {
                                 handleExpendItem(treeItem);
                             }}
                         >
-                            <DropdownSingle />
+                            <DropdownIcon />
                         </span>
                     )}
                     <Checkbox

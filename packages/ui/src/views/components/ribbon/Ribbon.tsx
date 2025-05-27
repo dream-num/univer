@@ -20,7 +20,7 @@ import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
-import { DatabaseSingle, EyeSingle, FunctionSingle, HomeSingle, InsertSingle, MoreDownSingle, MoreFunctionSingle } from '@univerjs/icons';
+import { DatabaseIcon, EyeIcon, FunctionIcon, HomeIcon, InsertIcon, MoreDownIcon, MoreFunctionIcon } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -37,12 +37,12 @@ interface IRibbonProps {
 }
 
 const iconMap = {
-    [RibbonPosition.START]: HomeSingle,
-    [RibbonPosition.INSERT]: InsertSingle,
-    [RibbonPosition.FORMULAS]: FunctionSingle,
-    [RibbonPosition.DATA]: DatabaseSingle,
-    [RibbonPosition.VIEW]: EyeSingle,
-    [RibbonPosition.OTHERS]: MoreFunctionSingle,
+    [RibbonPosition.START]: HomeIcon,
+    [RibbonPosition.INSERT]: InsertIcon,
+    [RibbonPosition.FORMULAS]: FunctionIcon,
+    [RibbonPosition.DATA]: DatabaseIcon,
+    [RibbonPosition.VIEW]: EyeIcon,
+    [RibbonPosition.OTHERS]: MoreFunctionIcon,
 };
 
 export function Ribbon(props: IRibbonProps) {
@@ -375,7 +375,7 @@ export function Ribbon(props: IRibbonProps) {
                             onClick={() => setGroupSelectorVisible(true)}
                         >
                             {localeService.t(activatedTab)}
-                            <MoreDownSingle
+                            <MoreDownIcon
                                 className={`
                                   univer-text-gray-200
                                   dark:!univer-text-gray-500
@@ -438,7 +438,7 @@ export function Ribbon(props: IRibbonProps) {
                                 )}
                             >
                                 <a className={toolbarButtonClassName} type="button">
-                                    <MoreFunctionSingle />
+                                    <MoreFunctionIcon />
                                 </a>
                             </Dropdown>
                         </div>

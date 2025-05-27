@@ -16,7 +16,7 @@
 
 import type { dayjs } from '@univerjs/core';
 import type { NoUndefinedRangeValueType, RangePickerProps } from 'rc-picker/lib/PickerInput/RangePicker';
-import { CalendarSingle, GuideSingle } from '@univerjs/icons';
+import { CalendarIcon, GuideIcon } from '@univerjs/icons';
 import { RangePicker } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
 import { useContext } from 'react';
@@ -53,8 +53,8 @@ export function DateRangePicker(props: IDateRangePickerProps) {
             prefixCls="univer-date-range-picker"
             generateConfig={generateConfig}
             locale={locale?.Picker!}
-            separator={<GuideSingle />}
-            suffixIcon={<CalendarSingle className="univer-date-range-picker-suffix-icon" />}
+            separator={<GuideIcon />}
+            suffixIcon={<CalendarIcon className="univer-date-range-picker-suffix-icon" />}
             onChange={handleChange}
         />
     );

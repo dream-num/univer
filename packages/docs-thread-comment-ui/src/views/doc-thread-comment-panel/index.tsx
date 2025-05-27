@@ -21,7 +21,7 @@ import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, 
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { debounceTime, filter, Observable } from 'rxjs';
 import { AddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';

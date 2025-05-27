@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { CloseSingle } from '@univerjs/icons';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { CloseIcon } from '@univerjs/icons';
+import { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -49,9 +49,9 @@ export function Sidebar() {
         }
 
         const copy = { ...sidebarOptions } as Omit<ISidebarMethodOptions, 'children'> & {
-            children?: React.ReactNode;
-            header?: React.ReactNode;
-            footer?: React.ReactNode;
+            children?: ReactNode;
+            header?: ReactNode;
+            footer?: ReactNode;
         };
 
         for (const key of ['children', 'header', 'footer']) {
@@ -148,7 +148,7 @@ export function Sidebar() {
                         `}
                         onClick={handleClose}
                     >
-                        <CloseSingle />
+                        <CloseIcon />
                     </a>
                 </header>
 

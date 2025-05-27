@@ -17,7 +17,7 @@
 import type { IconProps } from '@univerjs/icons';
 import { ColorKit } from '@univerjs/core';
 import { clsx, Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
-import { PaintBucket } from '@univerjs/icons';
+import { PaintBucketDoubleIcon } from '@univerjs/icons';
 import { useMemo } from 'react';
 
 interface IColorPickerProps {
@@ -29,7 +29,7 @@ interface IColorPickerProps {
 };
 
 export const ColorPicker = (props: IColorPickerProps) => {
-    const { color, onChange, disable = false, Icon = PaintBucket, className } = props;
+    const { color, onChange, disable = false, Icon = PaintBucketDoubleIcon, className } = props;
 
     const colorKit = useMemo(() => new ColorKit(color), [color]);
 

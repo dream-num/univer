@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
 
-export const GRAPH_SINGLE_ICON = 'graph-single';
 export const SHAPE_MENU_ID = 'slide.menu.shape';
 
 export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHAPE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: GRAPH_SINGLE_ICON,
+        icon: 'GraphIcon',
         tooltip: 'slide.shape.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),

@@ -31,7 +31,7 @@ import {
     MenuItemGroup as DesignMenuItemGroup,
     SubMenu as DesignSubMenu,
 } from '@univerjs/design';
-import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
+import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
@@ -170,7 +170,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                 >
                     {typeof value !== 'undefined' && String(value) === String(option.value) && (
                         <span className="univer-absolute univer-left-0 univer-inline-flex univer-items-center">
-                            <CheckMarkSingle className="univer-text-primary-600" />
+                            <CheckMarkIcon className="univer-text-primary-600" />
                         </span>
                     )}
                     <CustomLabel
@@ -294,7 +294,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             {item.shortcut && ` (${item.shortcut})`}
                         </span>
                     )}
-                    expandIcon={<MoreSingle className={moreIconClassName} />}
+                    expandIcon={<MoreIcon className={moreIconClassName} />}
                 >
                     <DesignMenuItemGroup>
                         {selections.length > 0 && (
@@ -343,7 +343,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                         <CustomLabel title={item.title} icon={item.icon} label={item.label} onChange={onChange} />
                     </span>
                 )}
-                expandIcon={<MoreSingle className={moreIconClassName} />}
+                expandIcon={<MoreIcon className={moreIconClassName} />}
             >
                 <DesignMenuItemGroup>
                     {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}

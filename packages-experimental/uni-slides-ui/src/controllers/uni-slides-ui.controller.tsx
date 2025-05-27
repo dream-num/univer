@@ -19,7 +19,6 @@ import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstan
 import { SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SLIDES_IMAGE_MENU_ID, SlidesUIController } from '@univerjs/slides-ui';
 import { BuiltInUIPart, ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService, useDependency, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
-import React from 'react';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 import { menuSchema } from './menu.schema';
 

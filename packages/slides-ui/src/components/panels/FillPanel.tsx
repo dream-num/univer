@@ -15,14 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { Rect } from '@univerjs/engine-render';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderTopClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
-import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
+import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-
-import React from 'react';
+import { useState } from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
 
@@ -53,7 +51,7 @@ export default function ArrangePanel(props: IProps) {
     const object = selectedObjects.values().next().value as Nullable<Rect>;
     if (!object) return null;
 
-    const [color, setColor] = React.useState<string>(object.fill?.toString() ?? '');
+    const [color, setColor] = useState<string>(object.fill?.toString() ?? '');
 
     /**
      *
@@ -107,8 +105,8 @@ export default function ArrangePanel(props: IProps) {
                             )}
                         >
                             <a className="univer-flex univer-cursor-pointer univer-items-center univer-gap-1">
-                                <PaintBucket className="univer-fill-primary-600" />
-                                <MoreDownSingle />
+                                <PaintBucketDoubleIcon className="univer-fill-primary-600" />
+                                <MoreDownIcon />
                             </a>
                         </Dropdown>
                     </div>

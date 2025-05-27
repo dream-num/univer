@@ -38,7 +38,7 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: UndoCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'UndoSingle',
+        icon: 'UndoIcon',
         title: 'Undo',
         tooltip: 'toolbar.undo',
         disabled$: undoRedoDisableFactory$(accessor, true),
@@ -49,7 +49,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RedoCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'RedoSingle',
+        icon: 'RedoIcon',
         title: 'Redo',
         tooltip: 'toolbar.redo',
         disabled$: undoRedoDisableFactory$(accessor, false),

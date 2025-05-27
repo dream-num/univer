@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { KeyboardEvent } from 'react';
 import type { IFontSizeProps } from './interface';
 import { InputNumber } from '@univerjs/design';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useObservable } from '../../utils/di';
 
 export const FontSize = (props: IFontSizeProps) => {
@@ -32,7 +33,7 @@ export const FontSize = (props: IFontSizeProps) => {
         setRealValue(value);
     }
 
-    function handleStopPropagation(e: React.KeyboardEvent<HTMLInputElement>) {
+    function handleStopPropagation(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
 
         if (e.code === 'Enter') {

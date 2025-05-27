@@ -15,8 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { useState } from 'react';
-
+import { useState } from 'react';
 import { Pager } from './Pager';
 
 const meta: Meta = {

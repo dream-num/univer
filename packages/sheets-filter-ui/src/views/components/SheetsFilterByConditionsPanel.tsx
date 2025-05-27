@@ -20,8 +20,7 @@ import type { ByConditionsModel } from '../../services/sheets-filter-panel.servi
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
-
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FilterConditionItems } from '../../models/conditions';
 
 /**

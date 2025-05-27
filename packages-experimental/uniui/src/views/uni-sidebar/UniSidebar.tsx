@@ -15,10 +15,11 @@
  */
 
 import type { ISidebarMethodOptions } from '@univerjs/ui';
+import type { ReactNode } from 'react';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { CloseSingle } from '@univerjs/icons';
+import { CloseIcon } from '@univerjs/icons';
 import { CustomLabel, ILeftSidebarService, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 export interface IUniSidebarProps {
     position: 'left' | 'right';
@@ -47,9 +48,9 @@ export function UniSidebar(props: IUniSidebarProps) {
         }
 
         const copy = { ...sidebarOptions } as Omit<ISidebarMethodOptions, 'children'> & {
-            children?: React.ReactNode;
-            header?: React.ReactNode;
-            footer?: React.ReactNode;
+            children?: ReactNode;
+            header?: ReactNode;
+            footer?: ReactNode;
         };
 
         for (const key of ['children', 'header', 'footer']) {
@@ -133,7 +134,7 @@ export function UniSidebar(props: IUniSidebarProps) {
                         {options?.header}
 
                         <a className="univer-cursor-pointer" onClick={handleClose}>
-                            <CloseSingle />
+                            <CloseIcon />
                         </a>
                     </header>
                 )}

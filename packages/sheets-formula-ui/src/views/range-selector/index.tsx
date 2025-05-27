@@ -21,7 +21,7 @@ import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core'
 import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
+import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -197,7 +197,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                             onChange={(value) => handleRangeInput(index, value)}
                         />
                         {ranges.length > 1 && (
-                            <DeleteSingle
+                            <DeleteIcon
                                 className="univer-cursor-pointer"
                                 onClick={() => handleRangeRemove(index)}
                             />
@@ -207,7 +207,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 {ranges.length < maxRangeCount && (
                     <div>
                         <Button variant="link" onClick={handleRangeAdd}>
-                            <IncreaseSingle />
+                            <IncreaseIcon />
                             <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
                         </Button>
                     </div>
@@ -330,7 +330,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                         }}
                         icon={(
                             <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                                <SelectRangeSingle
+                                <SelectRangeIcon
                                     className={`
                                       univer-cursor-pointer
                                       dark:!univer-text-gray-300

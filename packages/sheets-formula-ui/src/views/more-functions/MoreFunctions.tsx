@@ -22,7 +22,7 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
 import { useDependency } from '@univerjs/ui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';
 

@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '../../services/menu/menu';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { MenuItemType } from '../../services/menu/menu';
 
-export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShortcutPanelMenuItemFactory(): IMenuButtonItem {
     return {
         id: ToggleShortcutPanelOperation.id,
         title: 'toggle-shortcut-panel',
         tooltip: 'toggle-shortcut-panel',
-        icon: 'KeyboardSingle',
+        icon: 'ShortcutIcon',
         type: MenuItemType.BUTTON,
-        // hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

@@ -16,7 +16,7 @@
 
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 import { ICommandService, IPermissionService, throttle } from '@univerjs/core';
-import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
+import { IncreaseIcon, MoreIcon } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -83,7 +83,7 @@ export const SheetBar = () => {
                     onClick={addSheet}
                     disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}
                 >
-                    <IncreaseSingle />
+                    <IncreaseIcon />
                 </SheetBarButton>
                 {/* All sheets button */}
                 <SheetBarMenu />
@@ -102,10 +102,10 @@ export const SheetBar = () => {
                     `}
                 >
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
-                        <MoreSingle className="univer-rotate-180" />
+                        <MoreIcon className="univer-rotate-180" />
                     </SheetBarButton>
                     <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
-                        <MoreSingle />
+                        <MoreIcon />
                     </SheetBarButton>
                 </div>
             )}

@@ -18,7 +18,7 @@ import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentFlavor, ICommandService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
-import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
+import { CheckMarkIcon, CloseIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
@@ -127,7 +127,7 @@ export function ZenEditor() {
                     `)}
                     onClick={handleCloseBtnClick}
                 >
-                    <CloseSingle className="univer-size-5" />
+                    <CloseIcon className="univer-size-5" />
                 </span>
 
                 <span
@@ -137,7 +137,7 @@ export function ZenEditor() {
                     `)}
                     onClick={handleConfirmBtnClick}
                 >
-                    <CheckMarkSingle className="univer-size-5" />
+                    <CheckMarkIcon className="univer-size-5" />
                 </span>
             </div>
             <div ref={editorRef} className="univer-absolute univer-inset-0 univer-size-full" />

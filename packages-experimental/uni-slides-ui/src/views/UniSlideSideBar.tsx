@@ -18,10 +18,10 @@ import type { SlideDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IncreaseSingle } from '@univerjs/icons';
+import { IncreaseIcon } from '@univerjs/icons';
 import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * This components works as the root component of the left Sidebar of Slide.
@@ -52,7 +52,7 @@ export function UniSlideSideBar() {
     const [activatePageId, setActivatePageId] = useState<string | null>(pageOrder[0]);
     const [barHeight, setBarHeight] = useState(0);
 
-    const divRefs = useMemo(() => slideList.map(() => React.createRef<HTMLDivElement>()), [slideList]);
+    const divRefs = useMemo(() => slideList.map(() => createRef<HTMLDivElement>()), [slideList]);
 
     useEffect(() => {
         const subscriber = currentSlide?.activePage$.subscribe((page) => {
@@ -137,7 +137,7 @@ export function UniSlideSideBar() {
                 `}
                 onClick={handleAppendSlide}
             >
-                <IncreaseSingle className="univer-mr-1 univer-size-4" />
+                <IncreaseIcon className="univer-mr-1 univer-size-4" />
                 <span>{localeService.t('slide.append')}</span>
             </button>
         </div>

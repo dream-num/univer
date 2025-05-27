@@ -16,7 +16,7 @@
 
 import { HorizontalAlign, LocaleService, SpacingRule } from '@univerjs/core';
 import { borderClassName, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
-import { AlignTextBothSingle, HorizontallySingle, LeftJustifyingSingle, RightJustifyingSingle } from '@univerjs/icons';
+import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
 import {
@@ -66,10 +66,10 @@ export function ParagraphSetting() {
     const localeService = useDependency(LocaleService);
 
     const alignmentOptions = useMemo(() => [
-        { label: localeService.t('toolbar.alignLeft'), value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingSingle /> },
-        { label: localeService.t('toolbar.alignCenter'), value: String(HorizontalAlign.CENTER), icon: <HorizontallySingle /> },
-        { label: localeService.t('toolbar.alignRight'), value: String(HorizontalAlign.RIGHT), icon: <RightJustifyingSingle /> },
-        { label: localeService.t('toolbar.alignJustify'), value: String(HorizontalAlign.JUSTIFIED), icon: <AlignTextBothSingle /> },
+        { label: localeService.t('toolbar.alignLeft'), value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingIcon /> },
+        { label: localeService.t('toolbar.alignCenter'), value: String(HorizontalAlign.CENTER), icon: <HorizontallyIcon /> },
+        { label: localeService.t('toolbar.alignRight'), value: String(HorizontalAlign.RIGHT), icon: <RightJustifyingIcon /> },
+        { label: localeService.t('toolbar.alignJustify'), value: String(HorizontalAlign.JUSTIFIED), icon: <AlignTextBothIcon /> },
     ], []);
 
     const currentParagraph = useCurrentParagraph();

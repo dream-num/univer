@@ -19,7 +19,7 @@ import type { IPermissionPanelRule } from '../../../services/permission/sheet-pe
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
 import { ComponentContainer, ISidebarService, useComponentsOfPart, useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
 import { PermissionDetailFooterPart } from './PermissionDetailFooterPart';

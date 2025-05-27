@@ -15,15 +15,16 @@
  */
 
 import type { MenuItemGroupProps, MenuItemProps, MenuProps, MenuRef, SubMenuProps } from 'rc-menu';
+import type { ComponentType } from 'react';
 import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMenu as RcSubMenu } from 'rc-menu';
-import React, { useContext } from 'react';
+import { forwardRef, useContext } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Tooltip } from '../tooltip/Tooltip';
 import './index.css';
 
 /** @deprecated */
-export const Menu = React.forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
+export const Menu = forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
     const { wrapperClass, ...rest } = props;
     return mountContainer && (
@@ -55,7 +56,7 @@ export function MenuItemGroup(props: MenuItemGroupProps) {
 export interface ITinyMenuItem {
     onClick: () => void;
     className: string;
-    Icon: React.ComponentType<{ className?: string }>;
+    Icon: ComponentType<{ className?: string }>;
     key: string;
     active?: boolean;
     tooltip?: string;

@@ -19,7 +19,7 @@ import type { IPopup } from '@univerjs/ui';
 import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DownSingle } from '@univerjs/icons';
+import { DownIcon } from '@univerjs/icons';
 import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -97,7 +97,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                       dark:!univer-text-white
                     `}
                 />
-                <DownSingle
+                <DownIcon
                     className={`
                       univer-size-3 univer-text-gray-600
                       dark:!univer-text-gray-200

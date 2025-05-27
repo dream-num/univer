@@ -20,7 +20,7 @@ import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
 import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
-import { LockSingle } from '@univerjs/icons';
+import { LockIcon } from '@univerjs/icons';
 
 import {
     InsertSheetMutation,
@@ -38,7 +38,7 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
@@ -82,7 +82,7 @@ export function SheetBarTabs() {
                 const name = hasProtect
                     ? (
                         <>
-                            <LockSingle />
+                            <LockIcon />
                             <span className="univer-outline-none">{sheet.getName()}</span>
                         </>
                     )

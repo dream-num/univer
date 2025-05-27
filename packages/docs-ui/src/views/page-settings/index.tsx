@@ -19,7 +19,7 @@ import type { IConfirmChildrenProps } from '@univerjs/ui';
 import { IUniverInstanceService, LocaleService, PAGE_SIZE, PageOrientType, PAPER_TYPES, UniverInstanceType } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface IPageSettingsProps {
     onClose: () => void;

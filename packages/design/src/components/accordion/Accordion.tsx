@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { DownSingle } from '@univerjs/icons';
+import { DownIcon } from '@univerjs/icons';
 import { useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
@@ -59,7 +59,7 @@ export function Accordion(props: IAccordionProps) {
                         type="button"
                         onClick={() => toggleItem(index)}
                     >
-                        <DownSingle
+                        <DownIcon
                             className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
                                 '-univer-rotate-90': openIndex !== index,
                                 'univer-rotate-0': openIndex === index,

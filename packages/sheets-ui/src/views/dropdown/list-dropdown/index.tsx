@@ -18,14 +18,15 @@ import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
+import type { CSSProperties } from 'react';
 import type { IBaseDropdownProps } from '../type';
 import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { RectPopup, useDependency } from '@univerjs/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 
 function serializeListOptions(options: string[]) {
@@ -43,7 +44,7 @@ interface ISelectListProps {
     options: { label: string; value: string; color?: string }[];
     title?: string;
     onEdit?: () => void;
-    style?: React.CSSProperties;
+    style?: CSSProperties;
     filter?: string;
     location: ISheetLocation;
     showEdit?: boolean;
@@ -139,7 +140,7 @@ const SelectList = (props: ISelectListProps) => {
                                   univer-text-base univer-text-primary-500
                                 `}
                             >
-                                {selected && <CheckMarkSingle className="univer-text-primary-600" />}
+                                {selected && <CheckMarkIcon className="univer-text-primary-600" />}
                             </div>
                         </div>
                     );

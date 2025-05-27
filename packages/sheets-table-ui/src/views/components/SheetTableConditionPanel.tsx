@@ -18,7 +18,7 @@ import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { dayjs, Injector, LocaleService } from '@univerjs/core';
 import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
-import { MoreDownSingle } from '@univerjs/icons';
+import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -119,7 +119,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                         {selectType}
                     </span>
 
-                    <MoreDownSingle />
+                    <MoreDownIcon />
                 </div>
             </Dropdown>
 

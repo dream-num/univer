@@ -18,10 +18,29 @@ import type { Workbook } from '@univerjs/core';
 import { ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetBackgroundColorCommand } from '@univerjs/sheets';
 import { SHEETS_IMAGE_MENU_ID } from '@univerjs/sheets-drawing-ui';
-import { RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
-import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService, useDependency, useObservable } from '@univerjs/ui';
+import {
+    RenderSheetContent,
+    SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeTextColorCommand,
+    SetRangeUnderlineCommand,
+    SheetUIController,
+} from '@univerjs/sheets-ui';
+import {
+    BuiltInUIPart,
+    ComponentManager,
+    connectInjector,
+    ILayoutService,
+    IMenuManagerService,
+    IShortcutService,
+    IUIPartsService,
+    useDependency,
+    useObservable,
+} from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService, UniUIPart } from '@univerjs/uniui';
-import React from 'react';
 import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
 import { SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID } from './menu';
 import { menuSchema } from './menu.schema';

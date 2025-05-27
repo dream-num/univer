@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
-import { CheckMarkSingle } from '@univerjs/icons';
+import type { ChangeEvent, CSSProperties, ReactNode } from 'react';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { useRef } from 'react';
 import { clsx } from '../../helper/clsx';
 
@@ -72,7 +72,7 @@ export function Checkbox(props: ICheckboxProps) {
 
     const inputRef = useRef<HTMLInputElement>(null);
 
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleChange(e: ChangeEvent<HTMLInputElement>) {
         e.stopPropagation();
 
         if (!onChange || disabled) return;
@@ -115,7 +115,7 @@ export function Checkbox(props: ICheckboxProps) {
                     })}
                 >
                     {checked && (
-                        <CheckMarkSingle
+                        <CheckMarkIcon
                             className={`
                               univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-size-3
                               -univer-translate-x-1/2 -univer-translate-y-1/2 univer-text-white

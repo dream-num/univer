@@ -28,7 +28,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'AddImageSingle',
+        icon: 'AddImageIcon',
         tooltip: 'sheetImage.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),

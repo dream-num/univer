@@ -17,7 +17,7 @@
 import type { IConfirmProps } from '@univerjs/design';
 import type { IConfirmChildrenProps, IConfirmPartMethodOptions, IContextConfirmProps } from './interface';
 import { Confirm } from '@univerjs/design';
-import React, { useEffect, useState } from 'react';
+import { cloneElement, useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IConfirmService } from '../../../services/confirm/confirm.service';
@@ -29,7 +29,7 @@ const ContextConfirm = (props: IContextConfirmProps) => {
     const [hooks] = useState<IConfirmChildrenProps['hooks']>({});
 
     // eslint-disable-next-line react/no-clone-element
-    const childrenWithHooks = children ? React.cloneElement(children, { hooks }) : null;
+    const childrenWithHooks = children ? cloneElement(children, { hooks }) : null;
 
     return (
         <Confirm

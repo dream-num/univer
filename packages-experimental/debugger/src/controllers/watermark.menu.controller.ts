@@ -36,8 +36,8 @@ export class UniverWatermarkMenuController extends Disposable {
         ([
             [WATERMARK_PANEL, WatermarkPanel],
             [WATERMARK_PANEL_FOOTER, WatermarkPanelFooter],
-        ] as const).forEach(([key, component]) => {
-            this.disposeWithMe(this._componentManager.register(key, component));
+        ] as const).forEach(([key, comp]) => {
+            this.disposeWithMe(this._componentManager.register(key, comp));
         });
     }
 }

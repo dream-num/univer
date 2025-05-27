@@ -18,9 +18,9 @@ import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { Autofill, MoreDownSingle } from '@univerjs/icons';
+import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { useActiveWorkbook } from '../../components/hook';
@@ -47,7 +47,7 @@ const useUpdate = () => {
     return useCallback(() => setState((prevState) => !prevState), []);
 };
 
-export const AutoFillPopupMenu: React.FC<{}> = () => {
+export function AutoFillPopupMenu() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -208,13 +208,13 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                             'univer-bg-white dark:!univer-bg-gray-900': !visible,
                         })}
                     >
-                        <Autofill
+                        <AutofillDoubleIcon
                             className={`
                               univer-fill-primary-600 univer-text-gray-900
                               dark:!univer-text-white
                             `}
                         />
-                        {showMore && <MoreDownSingle className="dark:!univer-text-white" />}
+                        {showMore && <MoreDownIcon className="dark:!univer-text-white" />}
                     </div>
                 </DropdownMenu>
             </div>

@@ -26,7 +26,7 @@ export function RecordMenuItemFactory(): IMenuSelectorItem {
     return {
         id: RECORD_MENU_ITEM_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'RecordSingle',
+        icon: 'RecordIcon',
         tooltip: 'action-recorder.menu.title',
     };
 }

@@ -15,7 +15,7 @@
  */
 
 import { clsx, scrollbarClassName } from '@univerjs/design';
-import { CatalogueSingle, LeftSingle } from '@univerjs/icons';
+import { CatalogueIcon, LeftIcon } from '@univerjs/icons';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 
 export interface ISideMenuItem {
@@ -104,7 +104,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                 `, iconClass)}
                 style={iconStyle}
             >
-                {open ? <LeftSingle /> : <CatalogueSingle />}
+                {open ? <LeftIcon /> : <CatalogueIcon />}
             </div>
             <div
                 className={clsx(

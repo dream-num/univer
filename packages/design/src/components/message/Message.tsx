@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ErrorSingle, InfoSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import { ErrorIcon, InfoIcon, LoadingMultiIcon, SuccessIcon, WarningIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
@@ -37,18 +37,18 @@ export interface IMessageProps {
 }
 
 const iconMap = {
-    [MessageType.Success]: <SuccessSingle className="univer-text-green-500" />,
+    [MessageType.Success]: <SuccessIcon className="univer-text-green-500" />,
     [MessageType.Info]: (
-        <InfoSingle
+        <InfoIcon
             className={`
               univer-text-indigo-600
               dark:!univer-text-primary-500
             `}
         />
     ),
-    [MessageType.Warning]: <WarningSingle className="univer-text-yellow-400" />,
-    [MessageType.Error]: <ErrorSingle className="univer-text-red-500" />,
-    [MessageType.Loading]: <Loading className="univer-animate-spin univer-text-yellow-400" />,
+    [MessageType.Warning]: <WarningIcon className="univer-text-yellow-400" />,
+    [MessageType.Error]: <ErrorIcon className="univer-text-red-500" />,
+    [MessageType.Loading]: <LoadingMultiIcon className="univer-animate-spin univer-text-yellow-400" />,
 };
 
 const Message = ({ content, type = MessageType.Info }: IMessageProps) => {

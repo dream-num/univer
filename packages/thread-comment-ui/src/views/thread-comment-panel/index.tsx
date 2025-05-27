@@ -20,7 +20,7 @@ import type { Observable } from 'rxjs';
 import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
-import { IncreaseSingle } from '@univerjs/icons';
+import { IncreaseIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -263,7 +263,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 ? (
                                     <div className="univer-mt-2 univer-flex univer-flex-row">
                                         <Button onClick={onAdd}>
-                                            <IncreaseSingle className="univer-mr-1.5" />
+                                            <IncreaseIcon className="univer-mr-1.5" />
                                             {localeService.t('threadCommentUI.panel.add')}
                                         </Button>
                                     </div>

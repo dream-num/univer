@@ -32,7 +32,7 @@ import {
     SubTrigger,
     Trigger,
 } from '@radix-ui/react-dropdown-menu';
-import { CheckMarkSingle, MoreRightSingle } from '@univerjs/icons';
+import { CheckMarkIcon, MoreRightIcon } from '@univerjs/icons';
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
@@ -112,7 +112,7 @@ function DropdownMenuSubTrigger({
             {...props}
         >
             {children}
-            <MoreRightSingle className="ml-auto" />
+            <MoreRightIcon className="ml-auto" />
         </SubTrigger>
     );
 }
@@ -248,7 +248,7 @@ function DropdownMenuCheckboxItem({
                     `}
                 >
                     <ItemIndicator>
-                        <CheckMarkSingle
+                        <CheckMarkIcon
                             className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
                         />
                     </ItemIndicator>
@@ -293,7 +293,7 @@ function DropdownMenuRadioItem({
                 >
 
                     <ItemIndicator>
-                        <CheckMarkSingle
+                        <CheckMarkIcon
                             className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
                         />
                     </ItemIndicator>

@@ -16,7 +16,7 @@
 
 import type { dayjs } from '@univerjs/core';
 import type { PickerProps } from 'rc-picker';
-import { CalendarSingle } from '@univerjs/icons';
+import { CalendarIcon } from '@univerjs/icons';
 import RcPicker from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
 import { useContext } from 'react';
@@ -53,7 +53,7 @@ export function DatePicker(props: IDatePickerProps) {
             prefixCls="univer-date-picker"
             generateConfig={generateConfig}
             locale={locale?.Picker!}
-            suffixIcon={<CalendarSingle className="univer-date-picker-suffix-icon" />}
+            suffixIcon={<CalendarIcon className="univer-date-picker-suffix-icon" />}
             onChange={handleChange}
         />
     );

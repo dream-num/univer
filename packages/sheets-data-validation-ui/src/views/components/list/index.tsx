@@ -21,7 +21,7 @@ import { Button } from '@univerjs/design';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, createDefaultNewRule, RemoveSheetAllDataValidationCommand, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationItem } from '../item';
 

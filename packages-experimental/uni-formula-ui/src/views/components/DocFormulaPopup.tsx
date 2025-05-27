@@ -29,10 +29,9 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
-import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
+import { CheckMarkIcon, CloseIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/operation';
 import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
 
@@ -146,13 +145,13 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
                     className="univer-flex univer-items-center univer-gap-2 univer-rounded-lg univer-p-1"
                     onClick={onCancel}
                 >
-                    <CloseSingle />
+                    <CloseIcon />
                 </span>
                 <span
                     className="univer-flex univer-items-center univer-gap-2 univer-rounded-lg univer-p-1"
                     onClick={onConfirm}
                 >
-                    <CheckMarkSingle />
+                    <CheckMarkIcon />
                 </span>
             </div>
         </div>

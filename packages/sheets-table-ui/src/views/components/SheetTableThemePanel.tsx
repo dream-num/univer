@@ -18,7 +18,7 @@ import type { IRangeThemeStyleItem, ISetRangeThemeMutationParams } from '@univer
 import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSetConfig } from '@univerjs/sheets-table';
 import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
-import { DropdownSingle } from '@univerjs/icons';
+import { DropdownIcon } from '@univerjs/icons';
 import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import { AddTableThemeCommand, customEmptyThemeWithBorderStyle, processStyleWithBorderStyle, RemoveTableThemeCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -272,7 +272,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                                 background: headerBg,
                                             }}
                                         />
-                                        <DropdownSingle className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-h-2 univer-w-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -322,7 +322,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                             className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: firstRowBg }}
                                         />
-                                        <DropdownSingle className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-h-2 univer-w-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -370,7 +370,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                             className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: secondRowBg }}
                                         />
-                                        <DropdownSingle className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-h-2 univer-w-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -419,7 +419,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                             className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: lastRowBg }}
                                         />
-                                        <DropdownSingle className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-h-2 univer-w-2" />
                                     </div>
                                 </Dropdown>
                             </div>

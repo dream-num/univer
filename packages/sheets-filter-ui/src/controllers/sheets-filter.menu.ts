@@ -30,7 +30,7 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
     return {
         id: SmartToggleSheetsFilterCommand.id,
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'FilterSingle',
+        icon: 'FilterIcon',
         tooltip: 'sheets-filter.toolbar.smart-toggle-filter-tooltip',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: sheetsFilterService.activeFilterModel$.pipe(map((model) => !!model)),

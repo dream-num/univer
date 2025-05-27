@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { Button } from '@univerjs/design';
 
-import React from 'react';
-
 export interface IBaseSheetBarButtonProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /** Semantic DOM class */
     className?: string;
 
     /** Semantic DOM style */
-    style?: React.CSSProperties;
+    style?: CSSProperties;
 
     /**
      * Disabled state of button
@@ -34,7 +33,7 @@ export interface IBaseSheetBarButtonProps {
     disabled?: boolean;
 
     /** Set the handler to handle `click` event */
-    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
 /**
@@ -43,7 +42,7 @@ export interface IBaseSheetBarButtonProps {
 export function SheetBarButton(props: IBaseSheetBarButtonProps) {
     const { children, className, style, disabled = false, onClick, ...restProps } = props;
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
         if (disabled) {
             e.preventDefault();
             return;

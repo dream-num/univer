@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CopySingle, CutSingle, DeleteSingle } from '@univerjs/icons';
+import { CopyIcon, CutIcon, DeleteIcon } from '@univerjs/icons';
 import { Menu, MenuItem, MenuItemGroup, SubMenu, TinyMenuGroup } from './Menu';
 
 export default {
@@ -34,80 +34,80 @@ export const Default = () => {
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: CopySingle,
+                        Icon: CopyIcon,
                         key: 'copy',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: CutSingle,
+                        Icon: CutIcon,
                         key: 'cut',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: DeleteSingle,
+                        Icon: DeleteIcon,
                         key: 'delete',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: CopySingle,
+                        Icon: CopyIcon,
                         key: 'copy1',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: CutSingle,
+                        Icon: CutIcon,
                         key: 'cut1',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: DeleteSingle,
+                        Icon: DeleteIcon,
                         key: 'delete1',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: CopySingle,
+                        Icon: CopyIcon,
                         key: 'copy2',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: CutSingle,
+                        Icon: CutIcon,
                         key: 'cut2',
                     },
                     {
                         onClick: () => {},
                         className: '',
-                        Icon: DeleteSingle,
+                        Icon: DeleteIcon,
                         key: 'delete2',
                     },
                 ]}
             />
             <MenuItemGroup>
                 <MenuItem>
-                    <CopySingle />
+                    <CopyIcon />
                     Item 1
                 </MenuItem>
                 <MenuItem>
-                    <CutSingle />
+                    <CutIcon />
                     Item 2
                 </MenuItem>
                 <MenuItem>
-                    <DeleteSingle />
+                    <DeleteIcon />
                     Item 3
                 </MenuItem>
             </MenuItemGroup>
             <MenuItemGroup title="Group 1">
                 <MenuItem>
-                    <CopySingle />
+                    <CopyIcon />
                     Item 4
                 </MenuItem>
                 <MenuItem>
-                    <CutSingle />
+                    <CutIcon />
                     Item 5
                 </MenuItem>
             </MenuItemGroup>
@@ -115,14 +115,14 @@ export const Default = () => {
                 <SubMenu
                     title={(
                         <div>
-                            <CopySingle />
+                            <CopyIcon />
                             SubMenu
                         </div>
                     )}
                 >
                     <MenuItemGroup>
                         <MenuItem>
-                            <CopySingle />
+                            <CopyIcon />
                             Item 6
                         </MenuItem>
                     </MenuItemGroup>
@@ -130,11 +130,11 @@ export const Default = () => {
                 <SubMenu title="SubMenu2">
                     <MenuItemGroup>
                         <MenuItem>
-                            <CopySingle />
+                            <CopyIcon />
                             Item 7
                         </MenuItem>
                         <MenuItem>
-                            <CutSingle />
+                            <CutIcon />
                             Item 8
                         </MenuItem>
                     </MenuItemGroup>

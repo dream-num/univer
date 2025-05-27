@@ -18,11 +18,20 @@ import type { ICommandInfo } from '@univerjs/core';
 import type { IBaseSheetBarProps } from '@univerjs/sheets-ui';
 import { ICommandService } from '@univerjs/core';
 import { clsx, scrollbarClassName, Tooltip } from '@univerjs/design';
-import { IncreaseSingle } from '@univerjs/icons';
-import { InsertSheetCommand, InsertSheetMutation, RemoveSheetMutation, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameMutation, SetWorksheetOrderMutation } from '@univerjs/sheets';
+import { IncreaseIcon } from '@univerjs/icons';
+import {
+    InsertSheetCommand,
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetTabColorMutation,
+    SetWorksheetActiveOperation,
+    SetWorksheetHideMutation,
+    SetWorksheetNameMutation,
+    SetWorksheetOrderMutation,
+} from '@univerjs/sheets';
 import { useActiveWorkbook } from '@univerjs/sheets-ui';
 import { useDependency } from '@univerjs/ui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function UniSheetBar() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
@@ -132,7 +141,7 @@ export function UniSheetBar() {
 
                 onClick={handleSheetAdd}
             >
-                <IncreaseSingle className="univer-mr-1 univer-size-4" />
+                <IncreaseIcon className="univer-mr-1 univer-size-4" />
                 <span>New sheet</span>
             </button>
         </div>

@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { CommentSingle } from '@univerjs/icons';
+import { CommentIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
@@ -54,10 +54,10 @@ export class DocThreadCommentUIController extends Disposable {
     private _initComponents() {
         ([
             [DocThreadCommentPanel.componentKey, DocThreadCommentPanel],
-            ['CommentSingle', CommentSingle],
-        ] as [string, React.FC][]).forEach(([id, component]) => {
+            ['CommentIcon', CommentIcon],
+        ] as const).forEach(([id, comp]) => {
             this.disposeWithMe(
-                this._componentManager.register(id, component)
+                this._componentManager.register(id, comp)
             );
         });
     }

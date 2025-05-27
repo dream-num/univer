@@ -21,7 +21,7 @@ import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';

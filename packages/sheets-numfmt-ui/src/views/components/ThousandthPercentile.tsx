@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import type { FC } from 'react';
 import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
 import { getDecimalFromPattern, getNumberFormatOptions, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const isThousandthPercentilePanel = (pattern: string) =>
     getNumberFormatOptions().some((item) => isPatternEqualWithoutDecimal(item.value, pattern));
 
-export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) => {
+export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
     const localeService = useDependency(LocaleService);
 
     const options = useMemo(getNumberFormatOptions, []);

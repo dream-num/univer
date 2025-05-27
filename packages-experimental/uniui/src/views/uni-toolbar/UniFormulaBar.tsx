@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
+import { CheckMarkIcon, CloseIcon, FxIcon } from '@univerjs/icons';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionRuleModel,
@@ -39,7 +39,7 @@ import {
 } from '@univerjs/sheets';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, IEditorBridgeService, IFormulaEditorManagerService, SetCellEditVisibleOperation, useActiveWorkbook, useKeyEventConfig } from '@univerjs/sheets-ui';
 import { ComponentManager, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 
 export const UniFormulaBar = () => {
@@ -73,7 +73,7 @@ export const UniFormulaBar = () => {
                 })}
                 onClick={() => handleOpenWrite()}
             >
-                <FxSingle />
+                <FxIcon />
                 <span className="univer-whitespace-nowrap univer-text-xs">
                     Write formula
                 </span>
@@ -201,10 +201,10 @@ export function FormulaBar() {
                 })}
             >
                 <Button size="small" variant="text" className="univer-text-red-600" onClick={handleCloseBtnClick}>
-                    <CloseSingle />
+                    <CloseIcon />
                 </Button>
                 <Button size="small" variant="text" className="univer-text-green-600" onClick={handleConfirmBtnClick}>
-                    <CheckMarkSingle />
+                    <CheckMarkIcon />
                 </Button>
             </div>
             {FormulaEditor && (

@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
-import { MoreDownSingle } from '@univerjs/icons';
+import { MoreDownIcon } from '@univerjs/icons';
 import { useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Badge } from '../badge/Badge';
@@ -138,7 +138,7 @@ export function MultipleSelect(props: IMultipleSelectProps) {
                 >
                     {displayValue}
                 </div>
-                <MoreDownSingle
+                <MoreDownIcon
                     className={`
                       univer-flex-shrink-0
                       dark:!univer-text-white

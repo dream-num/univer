@@ -18,7 +18,7 @@ import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/s
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Input, Tree } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
 
 /**

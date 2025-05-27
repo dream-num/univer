@@ -26,7 +26,7 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SLIDES_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        icon: 'AddImageSingle',
+        icon: 'AddImageIcon',
         tooltip: 'slide.image.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
     };

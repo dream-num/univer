@@ -20,7 +20,7 @@ import { DrawingTypeEnum, LocaleService, Tools } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
-import { GroupSingle, UngroupSingle } from '@univerjs/icons';
+import { GroupIcon, UngroupIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
@@ -202,7 +202,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     })}
                     onClick={onGroupBtnClick}
                 >
-                    <GroupSingle />
+                    <GroupIcon />
                     {localeService.t('image-panel.group.group')}
                 </Button>
                 <Button
@@ -211,7 +211,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                     })}
                     onClick={onUngroupBtnClick}
                 >
-                    <UngroupSingle />
+                    <UngroupIcon />
                     {localeService.t('image-panel.group.unGroup')}
                 </Button>
             </div>

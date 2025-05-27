@@ -191,7 +191,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
     return {
         id: OpenConditionalFormattingOperator.id,
         type: MenuItemType.SELECTOR,
-        icon: 'Conditions',
+        icon: 'ConditionsDoubleIcon',
         tooltip: 'sheet.cf.title',
         selections: selections$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

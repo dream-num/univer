@@ -17,7 +17,7 @@
 import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { BoldSingle, FontColor, ItalicSingle, StrikethroughSingle, UnderlineSingle } from '@univerjs/icons';
+import { BoldIcon, FontColorDoubleIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from '@univerjs/icons';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -109,7 +109,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
                 })}
                 onClick={() => setIsBold(getAnotherBooleanNumber(isBold))}
             >
-                <BoldSingle />
+                <BoldIcon />
             </div>
             <div
                 className={clsx(buttonItemClassName, {
@@ -117,7 +117,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
                 })}
                 onClick={() => setIsItalic(getAnotherBooleanNumber(isItalic))}
             >
-                <ItalicSingle />
+                <ItalicIcon />
             </div>
             <div
                 className={clsx(buttonItemClassName, {
@@ -125,7 +125,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
                 })}
                 onClick={() => setIsUnderline(getAnotherBooleanNumber(isUnderline))}
             >
-                <UnderlineSingle />
+                <UnderlineIcon />
             </div>
             <div
                 className={clsx(buttonItemClassName, {
@@ -133,9 +133,9 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
                 })}
                 onClick={() => setIsStrikethrough(getAnotherBooleanNumber(isStrikethrough))}
             >
-                <StrikethroughSingle />
+                <StrikethroughIcon />
             </div>
-            <ColorPicker color={fontColor} onChange={setFontColor} Icon={FontColor} />
+            <ColorPicker color={fontColor} onChange={setFontColor} Icon={FontColorDoubleIcon} />
             <ColorPicker color={bgColor} onChange={setBgColor} />
         </div>
     );

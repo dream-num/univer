@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { Input } from '../input/Input';
 
 export interface IInputNumberProps
-    extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
+    extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
     value?: number | null;
     defaultValue?: number;
     size?: 'mini' | 'small';
@@ -35,8 +36,8 @@ export interface IInputNumberProps
     inputClassName?: string;
     controlsClassName?: string;
     onChange?: (value: number | null) => void;
-    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
+    onPressEnter?: (e: KeyboardEvent<HTMLInputElement>) => void;
     allowEmpty?: boolean;
 }
 
@@ -205,7 +206,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             onChange?.(parsedValue);
         }
 
-        function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+        function handleBlur(e: FocusEvent<HTMLInputElement>) {
             // If allowEmpty is true and input is empty, do not restore the last valid value
             if (internalValue === null) {
                 if (inputValue === '' && allowEmpty) {
@@ -287,7 +288,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         }
 
         // Handle key down events for arrow keys
-        function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
             if (disabled) return;
 
             onKeyDown?.(e);

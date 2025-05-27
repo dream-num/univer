@@ -60,8 +60,8 @@ export class SheetsTableComponentController extends Disposable {
     private _initComponents() {
         ([
             [SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, SheetTableFilterPanel],
-        ] as const).forEach(([key, component]) => {
-            this.disposeWithMe(this._componentManager.register(key, component));
+        ] as const).forEach(([key, comp]) => {
+            this.disposeWithMe(this._componentManager.register(key, comp));
         });
     }
 

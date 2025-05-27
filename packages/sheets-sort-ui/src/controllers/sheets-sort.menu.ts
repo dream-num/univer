@@ -25,11 +25,11 @@ import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCo
 export const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
 export const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';
 
-export const SHEETS_SORT_ASC_ICON = 'AscendingSingle';
-export const SHEETS_SORT_ASC_EXT_ICON = 'ExpandAscendingSingle';
-export const SHEETS_SORT_DESC_ICON = 'DescendingSingle';
-export const SHEETS_SORT_DESC_EXT_ICON = 'ExpandDescendingSingle';
-export const SHEETS_SORT_CUSTOM_ICON = 'CustomSortSingle';
+export const SHEETS_SORT_ASC_ICON = 'AscendingIcon';
+export const SHEETS_SORT_ASC_EXT_ICON = 'ExpandAscendingIcon';
+export const SHEETS_SORT_DESC_ICON = 'DescendingIcon';
+export const SHEETS_SORT_DESC_EXT_ICON = 'ExpandDescendingIcon';
+export const SHEETS_SORT_CUSTOM_ICON = 'CustomSortIcon';
 
 export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
     return {

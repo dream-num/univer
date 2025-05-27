@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { CSSProperties } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
-import React, { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
@@ -40,7 +41,7 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
     const transformRef = useRef<string>(`transform: rotate(${position?.rotate}deg) translate(${position?.startX}px, ${position?.startY}px)`);
     const topRef = useRef<number>(position?.startY ?? 0);
     const leftRef = useRef<number>(position?.startX ?? 0);
-    const innerStyle = useRef<React.CSSProperties>({
+    const innerStyle = useRef<CSSProperties>({
 
     });
     const Component = typeof layer.componentKey === 'string' ? useDependency(ComponentManager).get(layer.componentKey) : layer.componentKey;

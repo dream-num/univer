@@ -17,10 +17,10 @@
 import type { IBusinessComponentProps } from './interface';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input } from '@univerjs/design';
-import { CheckMarkSingle } from '@univerjs/icons';
+import { CheckMarkIcon } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 
 const key = 'customFormat';
@@ -91,7 +91,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
                         `}
                     >
                         <div className="univer-flex univer-w-4 univer-items-center univer-text-primary-600">
-                            {pattern === p && <CheckMarkSingle />}
+                            {pattern === p && <CheckMarkIcon />}
                         </div>
                         <div>
                             {p}

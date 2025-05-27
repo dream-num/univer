@@ -20,6 +20,7 @@ import type {
     ICellDataForSheetInterceptor,
     ICellWithCoord,
     ImageCacheMap,
+    IStyleData,
     Nullable,
     ObjectMatrix,
     VerticalAlign,
@@ -42,7 +43,7 @@ export interface BorderCacheItem {
 }
 
 export interface IFontCacheItem {
-    documentSkeleton: DocumentSkeleton;
+    documentSkeleton?: DocumentSkeleton;
     vertexAngle?: number; // Text rotation offset based on the top-left corner.
     centerAngle?: number; // Text rotation based on the center point.
     verticalAlign: VerticalAlign;
@@ -50,13 +51,14 @@ export interface IFontCacheItem {
     wrapStrategy: WrapStrategy;
     imageCacheMap: ImageCacheMap;
     cellData: Nullable<ICellDataForSheetInterceptor>;
+    fontString: string;
+    style?: Nullable<IStyleData>;
 }
 
 type colorString = string;
 export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;
     backgroundPositions?: ObjectMatrix<ICellWithCoord>;
-    font?: Record<string, ObjectMatrix<IFontCacheItem>>;
     /**
      * Get value from getCell in skeleton and this value is used in font extension
      */

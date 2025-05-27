@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@wendellhu/redi';
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
@@ -22,7 +23,7 @@ import type { Styles } from './styles';
 import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
-import { composeStyles, ObjectMatrix, Tools } from '../shared';
+import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
 import { CellValueType } from '../types/enum';
@@ -73,7 +74,7 @@ const DEFAULT_CELL_DOCUMENT_MODEL_OPTION = {
 export class Worksheet {
     protected _sheetId: string;
     protected _snapshot: IWorksheetData;
-    protected _cellData: ObjectMatrix<ICellData>;
+    protected _cellData: ObjectMatrix<Nullable<ICellData>>;
 
     protected _rowManager: RowManager;
     protected _columnManager: ColumnManager;
@@ -81,6 +82,8 @@ export class Worksheet {
     protected readonly _viewModel: SheetViewModel;
 
     protected _spanModel: SpanModel;
+
+    private _getCellHeight: Nullable<(row: number, col: number) => number>;
 
     constructor(
         public readonly unitId: string,
@@ -91,7 +94,7 @@ export class Worksheet {
 
         const { columnData, rowData, cellData } = this._snapshot;
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
-        this._cellData = new ObjectMatrix<ICellData>(cellData as IObjectMatrixPrimitiveType<ICellData>);
+        this._cellData = new ObjectMatrix<Nullable<ICellData>>(cellData as IObjectMatrixPrimitiveType<Nullable<ICellData>>);
 
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet is constructed.
         this._viewModel = new SheetViewModel((row, col) => this.getCellRaw(row, col));
@@ -108,8 +111,27 @@ export class Worksheet {
         callback(this._viewModel);
     }
 
+    /**
+     * @internal
+     * this is an internal method, please do not use it
+     */
+    __registerGetCellHeight(callback: (row: number, col: number) => number): IDisposable {
+        this._getCellHeight = callback;
+
+        return toDisposable(() => {
+            this._getCellHeight = null;
+        });
+    }
+
     getSnapshot(): IWorksheetData {
         return this._snapshot;
+    }
+
+    getCellHeight(row: number, col: number): number {
+        if (this._getCellHeight) {
+            return this._getCellHeight(row, col);
+        }
+        return this._snapshot.defaultRowHeight;
     }
 
     /**

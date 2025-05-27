@@ -42,16 +42,19 @@ export class SheetsThreadCommentRenderController extends Disposable {
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         if (this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
-                            return next({
-                                ...cell,
-                                markers: {
-                                    ...cell?.markers,
-                                    tr: {
-                                        color: '#FFBD37',
-                                        size: 6,
-                                    },
+                            if (!cell) {
+                                cell = {};
+                            }
+
+                            cell.markers = {
+                                ...cell?.markers,
+                                tr: {
+                                    color: '#FFBD37',
+                                    size: 6,
                                 },
-                            });
+                            };
+
+                            return next(cell);
                         }
 
                         return next(cell);

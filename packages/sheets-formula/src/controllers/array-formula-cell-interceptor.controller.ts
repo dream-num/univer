@@ -73,11 +73,13 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
 
                     // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
-                        return next({
-                            ...cell,
-                            v: 0, // Default value for empty cell
-                            t: CellValueType.NUMBER,
-                        });
+                        if (!cell) {
+                            return next(cell);
+                        }
+
+                        cell.v = 0; // Default value for empty cell
+                        cell.t = CellValueType.NUMBER;
+                        return next(cell);
                     }
 
                     // Dealing with precision issues
@@ -86,17 +88,18 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     // "v": "123413.23000000001",
                     // "t": 2,
                     if (cell?.t === CellValueType.NUMBER && cell.v !== undefined && cell.v !== null && isRealNum(cell.v)) {
-                        return next({
-                            ...cell,
-                            v: stripErrorMargin(Number(cell.v)),
-                        });
+                        cell.v = stripErrorMargin(Number(cell.v));
+                        return next(cell);
                     }
 
-                    return next({
-                        ...cell,
-                        v: cellData.v,
-                        t: cellData.t,
-                    });
+                    if (!cell) {
+                        return next(cell);
+                    }
+
+                    cell.v = cellData.v;
+                    cell.t = cellData.t;
+
+                    return next(cell);
                 },
             })
         );

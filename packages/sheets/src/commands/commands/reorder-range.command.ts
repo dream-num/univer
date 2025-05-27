@@ -19,7 +19,9 @@ import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mut
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
+import { getSuitableRangesInView } from './util';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
@@ -63,18 +65,26 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
             undoReorderMutation,
             ...interceptorCommands.undos,
         ];
-        const result = sequenceExecute(redos, commandService);
 
+        const result = sequenceExecute(redos, commandService);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView([range], accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId));
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: [range],
+            autoHeightRanges: suitableRanges,
+            lazyAutoHeightRanges: remainingRanges,
+        });
         const reorderAfterIntercepted = sheetInterceptorService.afterCommandExecute({ id: ReorderRangeCommand.id, params });
 
         if (result.result) {
-            sequenceExecute(reorderAfterIntercepted.redos, commandService);
+            sequenceExecute([...reorderAfterIntercepted.redos, ...autoHeightRedos], commandService);
 
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...undos, ...reorderAfterIntercepted.undos],
-                redoMutations: [...redos, ...reorderAfterIntercepted.redos],
+                undoMutations: [...undos, ...reorderAfterIntercepted.undos, ...autoHeightUndos],
+                redoMutations: [...redos, ...reorderAfterIntercepted.redos, ...autoHeightRedos],
             });
             return true;
         }

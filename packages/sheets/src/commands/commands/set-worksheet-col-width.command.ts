@@ -28,10 +28,12 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
+import { getRangesHeight, getSuitableRangesInView } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaColumnWidthCommandParams {
@@ -113,7 +115,12 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             };
         }
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+        const cellHeights = getRangesHeight(suitableRanges, worksheet);
+
+        const interceptor = accessor.get(SheetInterceptorService);
+        const { undos, redos } = interceptor.onCommandExecute({
             id: DeltaColumnWidthCommand.id,
             params: redoMutationParams,
         });
@@ -128,13 +135,26 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             redoMutationParams
         );
 
-        const result = sequenceExecute([...redos], commandService);
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = interceptor.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: suitableRanges,
+            autoHeightRanges: suitableRanges,
+            lazyAutoHeightRanges: remainingRanges,
+        });
+
+        const { undos: afterUndos, redos: afterRedos } = accessor.get(SheetInterceptorService).afterCommandExecute({
+            id: DeltaColumnWidthCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = sequenceExecute([...redos, ...afterRedos, ...autoHeightRedos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos, ...afterUndos, ...autoHeightUndos],
+                redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos, ...afterRedos, ...autoHeightRedos],
             });
 
             return true;
@@ -168,6 +188,7 @@ export const SetColWidthCommand: ICommand = {
         if (!target) return false;
 
         const { subUnitId, unitId, worksheet } = target;
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
         const redoMutationParams: ISetWorksheetColWidthMutationParams = {
             subUnitId,
             unitId,
@@ -175,12 +196,18 @@ export const SetColWidthCommand: ICommand = {
             colWidth: params.value,
         };
 
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+        const cellHeights = getRangesHeight(suitableRanges, worksheet);
+
         const undoMutationParams = SetWorksheetColWidthMutationFactory(redoMutationParams, worksheet);
         const setColWidthResult = commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
-            id: SetColWidthCommand.id,
-            params: redoMutationParams,
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: suitableRanges,
+            autoHeightRanges: suitableRanges,
+            lazyAutoHeightRanges: remainingRanges,
         });
 
         const intercepted = sheetInterceptorService.onCommandExecute({
@@ -188,13 +215,13 @@ export const SetColWidthCommand: ICommand = {
             params: redoMutationParams,
         });
 
-        const result = sequenceExecute([...redos, ...intercepted.redos], commandService);
+        const result = sequenceExecute([...intercepted.redos, ...autoHeightRedos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...(intercepted.preUndos ?? []), { id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [...(intercepted.preRedos ?? []), { id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [...(intercepted.preUndos ?? []), { id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...intercepted.undos, ...autoHeightUndos],
+                redoMutations: [...(intercepted.preRedos ?? []), { id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...intercepted.redos, ...autoHeightRedos],
             });
 
             return true;

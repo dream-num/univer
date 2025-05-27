@@ -16,6 +16,7 @@
 
 export * from './base-object';
 export * from './basics';
+export * from './components/docs/layout/doc-simple-skeleton';
 export { getOffsetRectForDom } from './basics/position';
 export * from './canvas';
 export * from './components';

@@ -20,6 +20,7 @@ import type {
     ICellData,
     IColorStyle,
     ICommand,
+    IMutationInfo,
     IRange,
     IStyleData,
     ITextRotation,
@@ -43,7 +44,9 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getRangesHeight, getSuitableRangesInView } from './util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -60,6 +63,8 @@ export interface ISetStyleCommandParams<T> extends ISetStyleCommonParams {
     style: IStyleTypeValue<T>;
 }
 
+export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
+
 /**
  * The command to set cell style.
  * Set style to a bunch of ranges.
@@ -68,6 +73,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
+    // eslint-disable-next-line max-lines-per-function
     handler: <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -116,6 +122,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             cellValue: cellValue.getMatrix(),
         };
 
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
+
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
             setRangeValuesMutationParams
@@ -126,18 +134,36 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+        const interceptor = accessor.get(SheetInterceptorService);
+        let autoHeightUndos: IMutationInfo<object>[] = [];
+        let autoHeightRedos: IMutationInfo<object>[] = [];
+        if (AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
+            const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+            const cellHeights = getRangesHeight(suitableRanges, worksheet);
+            const { undos, redos } = interceptor.generateMutationsOfAutoHeight({
+                unitId,
+                subUnitId,
+                ranges: suitableRanges,
+                autoHeightRanges: suitableRanges,
+                lazyAutoHeightRanges: remainingRanges,
+                cellHeights,
+            });
+            autoHeightUndos = undos;
+            autoHeightRedos = redos;
+        }
+
+        const { undos, redos } = interceptor.onCommandExecute({
             id: SetStyleCommand.id,
             params,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: setRangeValuesMutationParams.unitId,
-                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
-                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
+                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos, ...autoHeightUndos],
+                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos, ...autoHeightRedos],
             });
 
             return true;

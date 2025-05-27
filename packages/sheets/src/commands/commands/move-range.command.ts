@@ -49,6 +49,7 @@ export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -79,7 +80,7 @@ export const MoveRangeCommand: ICommand = {
 
         const interceptorCommands = sheetInterceptorService.onCommandExecute({
             id: MoveRangeCommand.id,
-            params: { ...params },
+            params,
         });
 
         const redos = [
@@ -113,17 +114,23 @@ export const MoveRangeCommand: ICommand = {
 
         const result = sequenceExecute(redos, commandService).result;
 
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: [params.fromRange, params.toRange],
+        });
+
         const afterInterceptors = sheetInterceptorService.afterCommandExecute({
             id: MoveRangeCommand.id,
-            params: { ...params },
+            params,
         });
 
         if (result) {
-            sequenceExecute(afterInterceptors.redos, commandService);
+            sequenceExecute([...afterInterceptors.redos, ...autoHeightRedos], commandService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...undos, ...afterInterceptors.undos],
-                redoMutations: [...redos, ...afterInterceptors.redos],
+                undoMutations: [...undos, ...afterInterceptors.undos, ...autoHeightUndos],
+                redoMutations: [...redos, ...afterInterceptors.redos, ...autoHeightRedos],
             });
             return true;
         }

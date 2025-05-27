@@ -24,6 +24,7 @@ import {
     isICellData,
     IUndoRedoService,
     IUniverInstanceService,
+    mapObjectMatrix,
     ObjectMatrix,
     sequenceExecute,
     Tools,
@@ -101,16 +102,24 @@ export const SetRangeValuesCommand: ICommand = {
 
         const setRangeValuesMutationParams = { subUnitId, unitId, cellValue: realCellValue ?? cellValue.getMatrix() };
         const redoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const cellHeights = mapObjectMatrix(setRangeValuesMutationParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
 
         const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (!setValueMutationResult) return false;
 
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
-            params: { ...setRangeValuesMutationParams, range: currentSelections },
+            params: setRangeValuesMutationParams,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: currentSelections,
+            cellHeights: new ObjectMatrix<number>(cellHeights as IObjectMatrixPrimitiveType<number>),
+        });
+
+        const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
         if (result.result) {
             const selectionOperation = followSelectionOperation(range ?? cellValue.getRange(), workbook, worksheet);
             undoRedoService.pushUndoRedo({
@@ -118,11 +127,13 @@ export const SetRangeValuesCommand: ICommand = {
                 undoMutations: [
                     { id: SetRangeValuesMutation.id, params: redoParams },
                     ...undos,
+                    ...autoHeightUndos,
                     selectionOperation,
                 ],
                 redoMutations: [
                     { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
                     ...redos,
+                    ...autoHeightRedos,
                     Tools.deepClone(selectionOperation),
                 ],
                 id: redoUndoId,

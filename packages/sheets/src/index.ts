@@ -102,7 +102,7 @@ export {
 } from './services/ref-range/util';
 export type { MutationsAffectRange } from './services/ref-range/util';
 export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
-export { AFTER_CELL_EDIT, BEFORE_CELL_EDIT, SheetInterceptorService, VALIDATE_CELL } from './services/sheet-interceptor/sheet-interceptor.service';
+export { AFTER_CELL_EDIT, BEFORE_CELL_EDIT, type IAutoHeightContext, SheetInterceptorService, VALIDATE_CELL } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers/merge-cell.controller';
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
@@ -331,6 +331,7 @@ export {
 export {
     DeltaColumnWidthCommand,
     type IDeltaColumnWidthCommandParams,
+    type ISetColWidthCommandParams,
     SetColWidthCommand,
 } from './commands/commands/set-worksheet-col-width.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
@@ -452,6 +453,12 @@ export {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
+export {
+    CancelMarkDirtyRowAutoHeightMutation,
+    type ICancelMarkDirtyRowAutoHeightMutationParams,
+    type IMarkDirtyRowAutoHeightMutationParams,
+    MarkDirtyRowAutoHeightMutation,
+} from './commands/mutations/mark-dirty-auto-height.mutation';
 
 export { type IScrollToCellOperationParams, ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 

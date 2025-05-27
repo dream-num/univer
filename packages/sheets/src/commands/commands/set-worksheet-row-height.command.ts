@@ -32,12 +32,14 @@ import {
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,
     SetWorksheetRowIsAutoHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
+import { getSuitableRangesInView } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaRowHeightCommand {
@@ -326,17 +328,29 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
             redoMutationParams
         );
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId,
+            ranges: suitableRanges,
+            autoHeightRanges: suitableRanges,
+            lazyAutoHeightRanges: remainingRanges,
+        });
+
+        const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetWorksheetRowIsAutoHeightCommand.id,
             params: redoMutationParams,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
         if (setIsAutoHeightResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: undoMutationParams }, ...undos, ...autoHeightUndos],
+                redoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: redoMutationParams }, ...redos, ...autoHeightRedos],
             });
 
             return true;

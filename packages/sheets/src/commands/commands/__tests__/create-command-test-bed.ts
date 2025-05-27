@@ -37,6 +37,7 @@ import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../
 import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -104,6 +105,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetsSelectionsService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([SheetSkeletonService]);
 
             dependencies?.forEach((d) => injector.add(d));
 

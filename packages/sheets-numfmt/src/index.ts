@@ -19,7 +19,7 @@ export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatde
 export { UniverSheetsNumfmtPlugin } from './plugin';
 export { MenuCurrencyService } from './service/menu.currency.service';
 export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';
-export { getDecimalFromPattern, getDecimalString, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
+export { getDecimalFromPattern, getDecimalString, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
 export { getCurrencyType } from './utils/currency';
 export { currencySymbols } from './base/const/currency-symbols';
 export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';

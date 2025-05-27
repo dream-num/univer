@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cellToRange } from '@univerjs/core';
+import { cellToRange, isPatternEqualWithoutDecimal } from '@univerjs/core';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
@@ -23,7 +23,6 @@ import { getCurrencyType } from '../utils/currency';
 import {
     getDecimalFromPattern,
     getDecimalString,
-    isPatternEqualWithoutDecimal,
     setPatternDecimal,
 } from '../utils/decimal';
 import { mergeNumfmtMutations } from '../utils/mutation';

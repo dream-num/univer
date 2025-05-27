@@ -16,9 +16,9 @@
 
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from './interface';
-import { LocaleService } from '@univerjs/core';
+import { isPatternEqualWithoutDecimal, LocaleService } from '@univerjs/core';
 import { InputNumber, SelectList } from '@univerjs/design';
-import { getDecimalFromPattern, getNumberFormatOptions, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
+import { getDecimalFromPattern, getNumberFormatOptions, isPatternHasDecimal, setPatternDecimal } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 

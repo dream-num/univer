@@ -75,7 +75,7 @@ export class Text extends Shape<ITextProps> {
         ctx.save();
         ctx.font = fontStyle;
 
-        ctx.fillStyle = props.color ?? ctx.fillStyle;
+        ctx.fillStyle = props.color ?? '#000000';
 
         // Get font metrics using FontCache for consistency with height calculation
         for (const line of lines) {

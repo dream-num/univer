@@ -66,7 +66,7 @@ describe('Test SheetInterceptorService', () => {
                         return next({ v: 'intercepted' });
                     }
 
-                    return next();
+                    return next(_cell);
                 },
             });
 
@@ -83,7 +83,7 @@ describe('Test SheetInterceptorService', () => {
                         return { v: 'intercepted' };
                     }
 
-                    return next();
+                    return next(_cell);
                 },
             });
 
@@ -101,7 +101,7 @@ describe('Test SheetInterceptorService', () => {
                         return { v: 'intercepted A' };
                     }
 
-                    return next();
+                    return next(_cell);
                 },
             });
 
@@ -113,7 +113,7 @@ describe('Test SheetInterceptorService', () => {
                         return { v: 'intercepted B' };
                     }
 
-                    return next();
+                    return next(_cell);
                 },
             });
 

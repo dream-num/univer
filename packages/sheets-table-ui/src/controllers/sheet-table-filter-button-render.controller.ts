@@ -145,10 +145,13 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
                     subUnitId !== worksheetId ||
                     row !== startRow ||
                     col < startColumn ||
-                    col > endColumn ||
-                    !cell
+                    col > endColumn
                 ) {
                     return next(cell);
+                }
+
+                if (!cell || cell === pos.rawData) {
+                    cell = { ...pos.rawData };
                 }
 
                 cell.fontRenderExtension = {

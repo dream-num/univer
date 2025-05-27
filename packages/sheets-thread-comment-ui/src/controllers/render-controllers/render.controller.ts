@@ -42,8 +42,8 @@ export class SheetsThreadCommentRenderController extends Disposable {
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         if (this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
-                            if (!cell) {
-                                cell = {};
+                            if (!cell || cell === pos.rawData) {
+                                cell = { ...pos.rawData };
                             }
 
                             cell.markers = {

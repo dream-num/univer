@@ -47,7 +47,9 @@ export class SheetPermissionViewModelController extends Disposable {
 
                 if (selectionProtection) {
                     const isSkipRender = selectionProtection[UnitAction.View] === false;
-                    const _cellData = { ...cell, selectionProtection: [selectionProtection] };
+                    const _cellData = ((!cell || cell === context.rawData) ? { ...context.rawData } : cell) as IWorksheetProtectionRenderCellData;
+                    _cellData.selectionProtection = [selectionProtection] as IWorksheetProtectionRenderCellData['selectionProtection'];
+
                     if (isSkipRender) {
                         delete _cellData.s;
                         delete _cellData.v;
@@ -76,7 +78,10 @@ export class SheetPermissionViewModelController extends Disposable {
                         [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
                     }];
                     const isSkipRender = !selectionProtection[0]?.[UnitAction.View];
-                    const _cellData: IWorksheetProtectionRenderCellData = { ...cell, hasWorksheetRule: true, selectionProtection };
+                    const _cellData = ((!cell || cell === context.rawData) ? { ...cell } : cell) as IWorksheetProtectionRenderCellData;
+                    _cellData.hasWorksheetRule = true;
+                    _cellData.selectionProtection = selectionProtection;
+
                     if (isSkipRender) {
                         delete _cellData.s;
                         delete _cellData.v;

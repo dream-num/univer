@@ -132,20 +132,20 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const type = cell.t || checkCellValueType(originCellValue.v);
+                const type = cell?.t || checkCellValueType(originCellValue.v);
                 // just handle number
                 if (type !== CellValueType.NUMBER) {
                     return next(cell);
+                }
+
+                if (!cell || cell === location.rawData) {
+                    cell = { ...location.rawData };
                 }
 
                 // Add error marker to text format number
                 if (isTextFormat(numfmtValue.pattern)) {
                     // If the user has disabled the text format mark, do not show it
                     if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
-                        if (!cell) {
-                            return next(cell);
-                        }
-
                         cell.t = CellValueType.STRING;
                         return next(cell);
                     }
@@ -182,8 +182,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     result: res,
                     parameters: `${originCellValue.v}_${numfmtValue.pattern}`,
                 });
-
-                return next({ ...cell, ...res });
+                Object.assign(cell, res);
+                return next(cell);
             },
             priority: InterceptCellContentPriority.NUMFMT,
         }));

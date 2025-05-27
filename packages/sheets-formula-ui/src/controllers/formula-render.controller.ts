@@ -53,6 +53,10 @@ export class FormulaRenderManagerController extends RxDisposable {
                         return next(cell);
                     }
 
+                    if (cell === pos.rawData) {
+                        cell = { ...pos.rawData };
+                    }
+
                     cell.markers = {
                         ...cell?.markers,
                         ...FORMULA_ERROR_MARK,

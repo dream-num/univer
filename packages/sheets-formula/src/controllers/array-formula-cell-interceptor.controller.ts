@@ -71,12 +71,12 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                         return next(cell);
                     }
 
+                    if (!cell || cell === location.rawData) {
+                        cell = { ...location.rawData };
+                    }
+
                     // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
-                        if (!cell) {
-                            return next(cell);
-                        }
-
                         cell.v = 0; // Default value for empty cell
                         cell.t = CellValueType.NUMBER;
                         return next(cell);
@@ -89,10 +89,6 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     // "t": 2,
                     if (cell?.t === CellValueType.NUMBER && cell.v !== undefined && cell.v !== null && isRealNum(cell.v)) {
                         cell.v = stripErrorMargin(Number(cell.v));
-                        return next(cell);
-                    }
-
-                    if (!cell) {
                         return next(cell);
                     }
 

@@ -19,6 +19,7 @@ import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import { RibbonFormulasGroup } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
+import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import {
     InsertAVERAGEFunctionMenuItemFactory,
     InsertCOUNTFunctionMenuItemFactory,
@@ -36,25 +37,27 @@ export const menuSchema: MenuSchemaType = {
             menuItemFactory: InsertSUMFunctionMenuItemFactory,
         },
         [`${InsertFunctionOperation.id}.count`]: {
-            order: 0,
+            order: 1,
             menuItemFactory: InsertCOUNTFunctionMenuItemFactory,
         },
         [`${InsertFunctionOperation.id}.average`]: {
-            order: 0,
+            order: 2,
             menuItemFactory: InsertAVERAGEFunctionMenuItemFactory,
         },
         [`${InsertFunctionOperation.id}.max`]: {
-            order: 0,
+            order: 3,
             menuItemFactory: InsertMAXFunctionMenuItemFactory,
         },
         [`${InsertFunctionOperation.id}.min`]: {
-            order: 0,
+            order: 4,
             menuItemFactory: InsertMINFunctionMenuItemFactory,
         },
     },
     [RibbonFormulasGroup.OTHERS]: {
-        order: 0,
-        menuItemFactory: MoreFunctionsMenuItemFactory,
+        [MoreFunctionsOperation.id]: {
+            order: 0,
+            menuItemFactory: MoreFunctionsMenuItemFactory,
+        },
     },
     [PASTE_SPECIAL_MENU_ID]: {
         [SheetOnlyPasteFormulaCommand.id]: {

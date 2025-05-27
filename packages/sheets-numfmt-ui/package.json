@@ -72,7 +72,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.4.2",
+        "@univerjs/icons": "^0.4.3",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

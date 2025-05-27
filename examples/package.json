@@ -35,7 +35,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "0.4.2",
+        "@univerjs/icons": "0.4.3",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",

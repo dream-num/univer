@@ -115,6 +115,10 @@ You can add the language you want by [Using Custom Locales](https://univer.ai/gu
 
 ## 👾 Showcase
 
+Using Univer in [Capalyze][examples-link-capalyze]
+
+[![][examples-preview-capalyze]][examples-link-capalyze]
+
 You can find all the examples in the [Univer Examples](https://univer.ai/examples).
 
 | **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
@@ -274,6 +278,7 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [vchart-link]: https://github.com/VisActor/VChart
 [vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
 
+[examples-preview-capalyze]: ./docs/img/examples-sheets-capalyze.gif
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
 [examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
@@ -291,6 +296,7 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [examples-preview-14]: ./docs/img/examples-slides.gif
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
+[examples-link-capalyze]: https://capalyze.ai/
 [examples-link-0]: https://univer.ai/examples/sheets/
 [examples-link-1]: https://univer.ai/examples/sheets-multi/
 [examples-link-2]: https://univer.ai/examples/sheets-uniscript/

@@ -115,6 +115,10 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 
 ## 👾 ショーケース
 
+[Capalyze][examples-link-capalyze]でUniverを使用する
+
+[![][examples-preview-capalyze]][examples-link-capalyze]
+
 [Univer Examples](https://univer.ai/examples) ですべての例を見つけることができます。
 
 | **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
@@ -268,6 +272,7 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [vchart-link]: https://github.com/VisActor/VChart
 [vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
 
+[examples-preview-capalyze]: ./docs/img/examples-sheets-capalyze.gif
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
 [examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
@@ -285,6 +290,7 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-preview-14]: ./docs/img/examples-slides.gif
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
+[examples-link-capalyze]: https://capalyze.ai/
 [examples-link-0]: https://univer.ai/examples/sheets/
 [examples-link-1]: https://univer.ai/examples/sheets-multi/
 [examples-link-2]: https://univer.ai/examples/sheets-uniscript/

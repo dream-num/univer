@@ -96,7 +96,7 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                     }
 
                     this._cellAlertManagerService.showAlert({
-                        type: CellAlertType.WARNING,
+                        type: CellAlertType.ERROR,
                         title: this._localeService.t('info.error'),
                         message: this._localeService.t('info.forceStringInfo'),
                         location,

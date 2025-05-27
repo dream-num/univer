@@ -107,7 +107,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
 
-            // eslint-disable-next-line complexity, max-lines-per-function
+            // eslint-disable-next-line complexity
             handler: (cell, location, next) => {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
@@ -146,10 +146,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 if (isTextFormat(numfmtValue.pattern)) {
                     // If the user has disabled the text format mark, do not show it
                     if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
-                        if (!cell) {
-                            return next(cell);
-                        }
-
                         cell.t = CellValueType.STRING;
                         return next(cell);
                     }

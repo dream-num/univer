@@ -157,13 +157,12 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
 
 export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; user: IUser }) => (
     <div
-        className={clsx(
-            `
-              univer-flex univer-items-center univer-text-sm univer-text-gray-900
-              dark:!univer-text-white
-            `,
-            { 'univer-bg-gray-50 dark:!univer-bg-gray-900': active }
-        )}
+        className={clsx(`
+          univer-flex univer-items-center univer-text-sm univer-text-gray-900
+          dark:!univer-text-white
+        `, {
+            'univer-bg-gray-50 dark:!univer-bg-gray-900': active,
+        })}
     >
         <img
             className="univer-mr-1.5 univer-h-6 univer-w-6 univer-rounded-full"

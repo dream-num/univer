@@ -14,14 +14,41 @@
  * limitations under the License.
  */
 
+import type { VariantProps } from 'class-variance-authority';
 import type { CSSProperties, ReactNode } from 'react';
+import { cva } from 'class-variance-authority';
 import { clsx } from '../../helper/clsx';
 
-type Shape = 'circle' | 'square';
-type AvatarSize = number | 'middle' | 'small';
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
-export interface IAvatarProps {
+const avatarVariants = cva(
+    `
+      univer-relative univer-inline-block univer-overflow-hidden univer-whitespace-nowrap univer-bg-gray-200
+      univer-text-center univer-align-middle univer-text-white
+    `,
+    {
+        variants: {
+            /**
+             * The shape of the avatar
+             * @default 'circle'
+             */
+            shape: {
+                circle: 'univer-rounded-full',
+                square: 'univer-rounded',
+            },
+            size: {
+                middle: 'univer-size-9 univer-leading-9',
+                small: 'univer-size-7 univer-leading-7',
+            },
+        },
+        defaultVariants: {
+            shape: 'circle',
+            size: 'middle',
+        },
+    }
+);
+
+export interface IAvatarProps extends Omit<VariantProps<typeof avatarVariants>, 'size'> {
     children?: ReactNode;
 
     className?: string;
@@ -36,16 +63,10 @@ export interface IAvatarProps {
     alt?: string;
 
     /**
-     * The shape of the avatar
-     * @default 'circle'
-     */
-    shape?: Shape;
-
-    /**
      * The size of the avatar
      * @default 'middle'
      */
-    size?: AvatarSize;
+    size?: 'small' | 'middle' | number;
 
     /** The address of the image for an image avatar or image element */
     src?: string;
@@ -90,25 +111,23 @@ export function Avatar(props: IAvatarProps) {
             }
             : {};
 
-    const _className = clsx(`
-      univer-relative univer-inline-block univer-overflow-hidden univer-whitespace-nowrap univer-bg-gray-200
-      univer-text-center univer-align-middle univer-text-white
-    `, {
-        'univer-rounded-full': shape === 'circle',
-        'univer-rounded': shape === 'square',
-        'univer-bg-transparent': src,
-        'univer-size-9 univer-leading-9': size === 'middle',
-        'univer-size-7 univer-leading-7': size === 'small',
-    }, className);
-
     const fitStyle = { objectFit: fit };
 
-    if (src) {
-        return (
-            <span
-                className={_className}
-                style={{ ...sizeStyle, ...style, ...fitStyle }}
-            >
+    return (
+        <span
+            className={clsx(avatarVariants({
+                shape,
+                size: typeof size === 'number' ? 'middle' : size,
+            }), {
+                'univer-bg-transparent': src,
+            }, className)}
+            style={{
+                ...sizeStyle,
+                ...style,
+                ...(src && fitStyle),
+            }}
+        >
+            {src && (
                 <img
                     className="univer-block univer-size-full"
                     src={src}
@@ -117,13 +136,7 @@ export function Avatar(props: IAvatarProps) {
                     onError={onError}
                     onLoad={onLoad}
                 />
-                {children}
-            </span>
-        );
-    }
-
-    return (
-        <span className={_className} style={{ ...sizeStyle, ...style }}>
+            )}
             {children}
         </span>
     );

@@ -195,7 +195,11 @@ export function FormulaBar() {
               univer-box-border univer-flex univer-h-full univer-w-full univer-items-center univer-gap-2 univer-p-2
             `}
         >
-            <div className={clsx('univer-flex univer-univer-grow-0 univer-shrink-0 univer-px-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disable })}>
+            <div
+                className={clsx('univer-flex univer-univer-grow-0 univer-shrink-0 univer-px-1.5', {
+                    'univer-cursor-not-allowed univer-text-gray-200': disable,
+                })}
+            >
                 <Button size="small" variant="text" className="univer-text-red-600" onClick={handleCloseBtnClick}>
                     <CloseSingle />
                 </Button>

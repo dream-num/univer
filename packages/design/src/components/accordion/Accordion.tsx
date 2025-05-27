@@ -68,15 +68,13 @@ export function Accordion(props: IAccordionProps) {
                         <span className="univer-font-medium">{item.label}</span>
                     </button>
                     <div
-                        className={clsx(
-                            `
-                              univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-500
-                              univer-ease-in-out
-                            `,
-                            openIndex === index
-                                ? 'univer-max-h-screen'
-                                : 'univer-max-h-0'
-                        )}
+                        className={clsx(`
+                          univer-overflow-hidden univer-transition-[max-height,opacity] univer-duration-500
+                          univer-ease-in-out
+                        `, {
+                            'univer-max-h-screen': openIndex === index,
+                            'univer-max-h-0': openIndex !== index,
+                        })}
                     >
                         <div className="univer-box-border univer-px-4 univer-py-1.5">{item.children}</div>
                     </div>

@@ -91,7 +91,7 @@ export class DocSimpleSkeleton {
                 if (textSize.width > this._width) {
                     // Push current line if it has content
                     if (currentLine.text.length > 0) {
-                        this._lines.push({ ...currentLine });
+                        this._lines.push(currentLine);
                         totalHeight += currentLine.height;
                         if (totalHeight > this._height) {
                             break;
@@ -181,7 +181,7 @@ export class DocSimpleSkeleton {
 
                             // If there's remaining text, need to wrap to next line
                             if (remainingText.length > 0) {
-                                this._lines.push({ ...currentLine });
+                                this._lines.push(currentLine);
                                 totalHeight += currentLine.height;
                                 if (totalHeight > this._height) {
                                     break;
@@ -202,7 +202,7 @@ export class DocSimpleSkeleton {
                 } else {
                     if (currentLine.text.length > 0) {
                         // Push the current line first
-                        this._lines.push({ ...currentLine });
+                        this._lines.push(currentLine);
                         totalHeight += currentLine.height;
                         if (totalHeight > this._height) {
                             break;

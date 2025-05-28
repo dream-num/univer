@@ -65,7 +65,10 @@ export class UIPartsService extends Disposable implements IUIPartsService {
     override dispose(): void {
         super.dispose();
 
+        this._componentsByPart.clear();
+        this._uiVisible.clear();
         this._componentRegistered$.complete();
+        this._uiVisibleChange$.complete();
     }
 
     setUIVisible(part: ComponentPartKey, visible: boolean): void {

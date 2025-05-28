@@ -39,6 +39,7 @@ export class ContextService extends Disposable implements IContextService {
     override dispose(): void {
         super.dispose();
         this._contextChanged$.complete();
+        this._contextMap.clear();
     }
 
     getContextValue(key: string): boolean {

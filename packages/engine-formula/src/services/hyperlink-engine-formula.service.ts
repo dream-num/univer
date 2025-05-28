@@ -34,7 +34,7 @@ export class HyperlinkEngineFormulaService extends Disposable implements IHyperl
     }
 
     generateCellValue(url: string, label: string): ICellData {
-        if (url === '' && label === '') {
+        if (label.trim() === '') {
             return {
                 v: '',
             };

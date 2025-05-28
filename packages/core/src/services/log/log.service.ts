@@ -48,6 +48,13 @@ export class DesktopLogService extends Disposable implements ILogService {
     private _logLevel: LogLevel = LogLevel.INFO;
     private _deduction = new Set<string>();
 
+    override dispose(): void {
+        super.dispose();
+
+        this._logLevel = LogLevel.INFO;
+        this._deduction.clear();
+    }
+
     debug(...args: ArgsType): void {
         if (this._logLevel >= LogLevel.VERBOSE) {
             this._log(console.debug, ...args);

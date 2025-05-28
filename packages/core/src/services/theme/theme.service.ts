@@ -36,6 +36,7 @@ export class ThemeService extends Disposable {
         super();
 
         this.disposeWithMe(toDisposable(() => {
+            this._currentTheme = defaultTheme;
             this._currentTheme$.complete();
             this._darkMode$.complete();
         }));

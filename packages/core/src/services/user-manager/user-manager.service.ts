@@ -15,6 +15,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import { Disposable } from '../../shared/lifecycle';
 import { createDefaultUser } from './const';
 
 export interface IUser {
@@ -23,7 +24,7 @@ export interface IUser {
     avatar?: string;
 };
 
-export class UserManagerService {
+export class UserManagerService extends Disposable {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
@@ -33,6 +34,14 @@ export class UserManagerService {
      * @memberof UserManagerService
      */
     public currentUser$ = this._currentUser$.asObservable();
+
+    override dispose(): void {
+        super.dispose();
+
+        this._model.clear();
+        this._userChange$.complete();
+        this._currentUser$.complete();
+    }
 
     getCurrentUser<T extends IUser>() {
         return this._currentUser$.getValue() as T;

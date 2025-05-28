@@ -39,11 +39,16 @@ export class DebuggerController extends Disposable {
     }
 
     private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register('ImageDemo', ImageDemo));
-        this.disposeWithMe(componentManager.register('RangeLoading', RangeLoading));
-        this.disposeWithMe(componentManager.register('FloatButton', FloatButton));
-        this.disposeWithMe(componentManager.register('AIButton', AIButton));
+        ([
+            ['ImageDemo', ImageDemo],
+            ['RangeLoading', RangeLoading],
+            ['FloatButton', FloatButton],
+            ['AIButton', AIButton],
+        ] as const).forEach(([key, comp]) => {
+            this.disposeWithMe(
+                this._componentManager.register(key, comp)
+            );
+        });
 
         const configs = this._configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
 

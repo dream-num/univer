@@ -19,7 +19,7 @@ import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandPar
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
-import { borderClassName, clsx, Dropdown, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, ResolvedIcon, SolveIcon } from '@univerjs/icons';
 import {
     AddCommentCommand,
@@ -447,7 +447,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             </div>
             <div
                 ref={scroller}
-                className="univer-max-h-80 univer-overflow-y-auto univer-overflow-x-hidden"
+                className={clsx('univer-max-h-80 univer-overflow-y-auto univer-overflow-x-hidden', scrollbarClassName)}
             >
                 {renderComments.map(
                     (item) => (

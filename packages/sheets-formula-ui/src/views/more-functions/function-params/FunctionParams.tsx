@@ -15,6 +15,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { clsx } from '@univerjs/design';
 
 interface IParamsProps {
     className?: string;
@@ -28,16 +29,16 @@ export function FunctionParams(props: IParamsProps) {
     return (
         <div className="univer-mb-2 univer-text-xs">
             <div
-                className={`
+                className={clsx(`
                   univer-mb-2 univer-font-medium univer-text-gray-500
-                  ${className}
-                `}
+                  dark:!univer-text-gray-300
+                `, className)}
             >
                 {title}
             </div>
             <div
                 className={`
-                  univer-text-gray-900
+                  univer-break-all univer-text-gray-900
                   dark:!univer-text-white
                 `}
             >

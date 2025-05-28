@@ -18,7 +18,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
 import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, LocaleType, throttle } from '@univerjs/core';
-import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
+import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, DeleteEmptyIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -145,12 +145,12 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
 
                 </div>
                 <div
-                    className="univer-max-h-[310px] univer-overflow-y-auto univer-overflow-x-hidden"
+                    ref={listEndRef}
+                    className={clsx('univer-max-h-[310px] univer-overflow-y-auto univer-overflow-x-hidden', scrollbarClassName)}
                     onScroll={(e) => {
                         const position = e.currentTarget.scrollTop;
                         setScrollPosition(position);
                     }}
-                    ref={listEndRef}
                 >
                     <DraggableList
                         list={dragList}
@@ -242,11 +242,11 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                         align="start"
                         overlay={(
                             <ul
-                                className={`
+                                className={clsx(`
                                   univer-my-0 univer-box-border univer-grid univer-max-h-[310px] univer-items-center
                                   univer-gap-1 univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg
                                   univer-border univer-bg-white univer-p-1 univer-text-base univer-shadow-lg
-                                `}
+                                `, scrollbarClassName)}
                             >
                                 {availableMenu.map((menuItem) => (
                                     <li
@@ -260,9 +260,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                           hover:univer-bg-gray-100
                                         `}
                                     >
-                                        <span
-                                            className="univer-max-w-[220px] univer-truncate"
-                                        >
+                                        <span className="univer-max-w-[220px] univer-truncate">
                                             {menuItem.label}
                                         </span>
                                         <span>

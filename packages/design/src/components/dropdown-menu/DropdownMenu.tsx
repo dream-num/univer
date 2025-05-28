@@ -198,7 +198,12 @@ export function DropdownMenu(props: IDropdownMenuProps) {
             <DropdownMenuTrigger asChild>
                 {children}
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="univer-text-sm" {...restProps} onWheel={(e) => e.stopPropagation()}>
+            <DropdownMenuContent
+                className="univer-text-sm"
+                collisionPadding={{ top: 12, bottom: 12 }}
+                onWheel={(e) => e.stopPropagation()}
+                {...restProps}
+            >
                 {items.map((item, index) => renderMenuItem(item, index))}
             </DropdownMenuContent>
         </DropdownMenuPrimitive>

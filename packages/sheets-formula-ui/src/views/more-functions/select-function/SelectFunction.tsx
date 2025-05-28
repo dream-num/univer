@@ -19,7 +19,7 @@ import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
 import { LocaleService } from '@univerjs/core';
-import { borderClassName, clsx, Input, Select } from '@univerjs/design';
+import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
@@ -35,6 +35,7 @@ export interface ISelectFunctionProps {
 
 export function SelectFunction(props: ISelectFunctionProps) {
     const { onChange } = props;
+
     const allTypeValue = '-1';
     const [searchText, setSearchText] = useState<string>('');
     const [selectList, setSelectList] = useState<ISearchItem[]>([]);
@@ -148,7 +149,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     return (
         <div>
-            <div className="univer-flex univer-items-center univer-justify-between univer-gap-[10%]">
+            <div className="univer-flex univer-items-center univer-justify-between univer-gap-2">
                 <Select value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
@@ -161,44 +162,45 @@ export function SelectFunction(props: ISelectFunctionProps) {
                 />
             </div>
 
-            <ul
-                className={clsx(`
-                  univer-mx-0 univer-mb-0 univer-mt-2 univer-box-border univer-max-h-[364px] univer-w-full
-                  univer-select-none univer-list-none univer-overflow-y-auto univer-rounded univer-p-3
-                  univer-outline-none
-                `, borderClassName)}
-                onKeyDown={handleSelectListKeyDown}
-                tabIndex={-1}
-            >
-                {selectList.map(({ name }, index) => (
-                    <li
-                        key={index}
-                        className={clsx(`
-                          univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7 univer-py-1
-                          univer-text-sm univer-text-gray-900 univer-transition-colors
-                          dark:!univer-text-white
-                        `, {
-                            'univer-bg-gray-200': active === index,
-                        })}
-                        onMouseEnter={() => handleLiMouseEnter(index)}
-                        onMouseLeave={handleLiMouseLeave}
-                        onClick={() => setCurrentFunctionInfo(index)}
-                    >
-                        {nameSelected === index && (
-                            <CheckMarkIcon
-                                className={`
-                                  univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
-                                  -univer-translate-y-1/2 univer-text-base univer-text-primary-600
-                                `}
-                            />
-                        )}
-                        <span className="univer-block">{highlightSearchText(name)}</span>
-                    </li>
-                ))}
-            </ul>
+            {selectList.length > 0 && (
+                <ul
+                    className={clsx(`
+                      univer-m-0 univer-mt-2 univer-box-border univer-max-h-72 univer-w-full univer-select-none
+                      univer-list-none univer-overflow-y-auto univer-rounded univer-p-3 univer-outline-none
+                    `, borderClassName, scrollbarClassName)}
+                    onKeyDown={handleSelectListKeyDown}
+                    tabIndex={-1}
+                >
+                    {selectList.map(({ name }, index) => (
+                        <li
+                            key={index}
+                            className={clsx(`
+                              univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
+                              univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors
+                              dark:!univer-text-white
+                            `, {
+                                'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
+                            })}
+                            onMouseEnter={() => handleLiMouseEnter(index)}
+                            onMouseLeave={handleLiMouseLeave}
+                            onClick={() => setCurrentFunctionInfo(index)}
+                        >
+                            {nameSelected === index && (
+                                <CheckMarkIcon
+                                    className={`
+                                      univer-absolute univer-left-1.5 univer-top-1/2 univer-inline-flex
+                                      -univer-translate-y-1/2 univer-text-base univer-text-primary-600
+                                    `}
+                                />
+                            )}
+                            <span className="univer-block">{highlightSearchText(name)}</span>
+                        </li>
+                    ))}
+                </ul>
+            )}
 
             {functionInfo && (
-                <div className="univer-mx-0 univer-my-2 univer-max-h-[307px] univer-overflow-y-auto">
+                <div className={clsx('univer-mx-0 univer-my-2 univer-max-h-80 univer-overflow-y-auto', scrollbarClassName)}>
                     <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
 
                     <FunctionParams

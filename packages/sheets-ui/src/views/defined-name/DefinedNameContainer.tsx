@@ -18,9 +18,9 @@ import type { Nullable, Workbook } from '@univerjs/core';
 
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { Button, clsx, Confirm, Tooltip } from '@univerjs/design';
+import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CheckMarkIcon, DeleteIcon, IncreaseIcon } from '@univerjs/icons';
+import { DeleteIcon, IncreaseIcon, PenIcon } from '@univerjs/icons';
 import {
     InsertDefinedNameCommand,
     RemoveDefinedNameCommand,
@@ -179,7 +179,7 @@ export const DefinedNameContainer = () => {
             data-u-comp="defined-name-container"
             className="univer-relative univer-box-border univer-w-full"
         >
-            <div className="univer-w-full univer-overflow-hidden univer-overflow-y-auto">
+            <div className={clsx('univer-w-full univer-overflow-hidden univer-overflow-y-auto', scrollbarClassName)}>
                 <div key="insertDefinedName" className="univer-mb-4">
                     <Button
                         className={clsx(
@@ -215,16 +215,15 @@ export const DefinedNameContainer = () => {
                             `}
                         >
                             <div
+                                className={clsx(`
+                                  univer-group univer-relative univer-flex univer-cursor-default univer-select-none
+                                  univer-items-center univer-justify-between univer-rounded-md univer-p-2
+                                  dark:hover:!univer-bg-gray-700
+                                  hover:univer-bg-gray-50
+                                `, {
+                                    'univer-hidden': definedName.id === editorKey,
+                                })}
                                 onClick={() => { focusDefinedName(definedName); }}
-                                className={clsx(
-                                    `
-                                      univer-relative univer-flex univer-cursor-default univer-select-none
-                                      univer-items-center univer-justify-between univer-rounded-md univer-p-2
-                                      dark:hover:!univer-bg-gray-700
-                                      hover:univer-bg-gray-50
-                                    `,
-                                    { 'univer-hidden': definedName.id === editorKey }
-                                )}
                             >
                                 <div title={definedName.comment}>
                                     <div
@@ -235,9 +234,7 @@ export const DefinedNameContainer = () => {
                                         `}
                                     >
                                         {definedName.name}
-                                        <span
-                                            className="univer-text-xxs univer-ml-1 univer-text-gray-400"
-                                        >
+                                        <span className="univer-text-xxs univer-ml-1 univer-text-gray-400">
                                             {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                         </span>
                                     </div>
@@ -251,30 +248,34 @@ export const DefinedNameContainer = () => {
                                     </div>
                                 </div>
                                 <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
-                                    <div
+                                    <a
                                         className={`
-                                          univer-absolute univer-text-xs univer-text-primary univer-right-[60px]
-                                          univer-top-5 univer-hidden -univer-translate-y-1/2 univer-cursor-pointer
-                                          univer-rounded univer-p-1
-                                          group-hover:univer-block
-                                          hover:univer-bg-hyacinth-50
+                                          univer-absolute univer-right-[60px] univer-top-1/2 univer-hidden
+                                          -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
+                                          univer-justify-center univer-rounded univer-p-1 univer-text-xs
+                                          univer-text-primary-600
+                                          dark:hover:!univer-bg-gray-600
+                                          group-hover:univer-flex
+                                          hover:univer-bg-gray-100
                                         `}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             closeInsertOpenKeyEditor(definedName.id);
                                         }}
                                     >
-                                        <CheckMarkIcon />
-                                    </div>
+                                        <PenIcon />
+                                    </a>
                                 </Tooltip>
                                 <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
-                                    <div
+                                    <a
                                         className={`
-                                          univer-absolute univer-text-xs univer-text-error univer-right-5 univer-top-5
-                                          univer-hidden -univer-translate-y-1/2 univer-cursor-pointer univer-rounded
-                                          univer-p-1
-                                          group-hover:univer-block
-                                          hover:univer-bg-hyacinth-50
+                                          univer-absolute univer-text-xs univer-text-error univer-right-5 univer-top-1/2
+                                          univer-hidden -univer-translate-y-1/2 univer-cursor-pointer
+                                          univer-items-center univer-justify-center univer-rounded univer-p-1
+                                          univer-text-red-600
+                                          dark:hover:!univer-bg-gray-600
+                                          group-hover:univer-flex
+                                          hover:univer-bg-gray-100
                                         `}
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -282,7 +283,7 @@ export const DefinedNameContainer = () => {
                                         }}
                                     >
                                         <DeleteIcon />
-                                    </div>
+                                    </a>
                                 </Tooltip>
                             </div>
 

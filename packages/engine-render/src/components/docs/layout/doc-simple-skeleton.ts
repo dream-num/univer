@@ -87,28 +87,108 @@ export class DocSimpleSkeleton {
 
             // Check if adding this text would exceed the width
             if ((textSize.width + currentLine.width) > this._width) {
-                if (currentLine.text.length > 0) {
-                    // Push the current line first
-                    this._lines.push({ ...currentLine });
-                    totalHeight += currentLine.height;
-                    if (totalHeight > this._height) {
-                        break;
+                if (textSize.width > this._width) {
+                    // Push current line if it has content
+                    if (currentLine.text.length > 0) {
+                        this._lines.push({ ...currentLine });
+                        totalHeight += currentLine.height;
+                        if (totalHeight > this._height) {
+                            break;
+                        }
+                        // Reset current line
+                        currentLine = {
+                            text: '',
+                            width: 0,
+                            height: 0,
+                            baseline: 0,
+                        };
                     }
-                    // Reset current line and add the new text
-                    currentLine = {
-                        text,
-                        width: textSize.width,
-                        height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
-                        baseline: textSize.fontBoundingBoxAscent,
-                    };
+
+                    // Character-based line breaking processing
+                    let remainingText = text;
+                    while (remainingText.length > 0) {
+                        let charCount = 0;
+                        let lineText = '';
+                        let lineWidth = 0;
+
+                        // Add characters one by one until width limit is exceeded
+                        for (let i = 0; i < remainingText.length; i++) {
+                            const char = remainingText[i];
+                            const testText = lineText + char;
+                            const testSize = FontCache.getMeasureText(testText, this._fontStyle);
+
+                            if (testSize.width + currentLine.width <= this._width) {
+                                lineText = testText;
+                                lineWidth = testSize.width;
+                                charCount = i + 1;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        // If no character can fit, force add one character to avoid infinite loop
+                        if (charCount === 0 && currentLine.text.length === 0) {
+                            charCount = 1;
+                            lineText = remainingText[0];
+                            const charSize = FontCache.getMeasureText(lineText, this._fontStyle);
+                            lineWidth = charSize.width;
+                        }
+
+                        if (charCount > 0) {
+                            // Add to current line
+                            currentLine.text += lineText;
+                            currentLine.width += lineWidth;
+                            const textSize = FontCache.getMeasureText(currentLine.text, this._fontStyle);
+                            currentLine.height = textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent;
+                            currentLine.baseline = textSize.fontBoundingBoxAscent;
+
+                            // Remove processed characters
+                            remainingText = remainingText.slice(charCount);
+
+                            // If there's remaining text, need to wrap to next line
+                            if (remainingText.length > 0) {
+                                this._lines.push({ ...currentLine });
+                                totalHeight += currentLine.height;
+                                if (totalHeight > this._height) {
+                                    break;
+                                }
+                                // Reset current line
+                                currentLine = {
+                                    text: '',
+                                    width: 0,
+                                    height: 0,
+                                    baseline: 0,
+                                };
+                            }
+                        } else {
+                            // Cannot continue processing, exit loop
+                            break;
+                        }
+                    }
                 } else {
-                    // If current line is empty, we have to add this text anyway (single word too long)
-                    currentLine = {
-                        text,
-                        width: textSize.width,
-                        height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
-                        baseline: textSize.fontBoundingBoxAscent,
-                    };
+                    if (currentLine.text.length > 0) {
+                        // Push the current line first
+                        this._lines.push({ ...currentLine });
+                        totalHeight += currentLine.height;
+                        if (totalHeight > this._height) {
+                            break;
+                        }
+                        // Reset current line and add the new text
+                        currentLine = {
+                            text,
+                            width: textSize.width,
+                            height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
+                            baseline: textSize.fontBoundingBoxAscent,
+                        };
+                    } else {
+                        // If current line is empty, we have to add this text anyway (single word too long)
+                        currentLine = {
+                            text,
+                            width: textSize.width,
+                            height: textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent,
+                            baseline: textSize.fontBoundingBoxAscent,
+                        };
+                    }
                 }
             } else {
                 // Add text to current line
@@ -123,7 +203,7 @@ export class DocSimpleSkeleton {
 
         // Don't forget to add the last line if it has content
         if (currentLine.text.length > 0) {
-            this._lines.push({ ...currentLine });
+            this._lines.push(currentLine);
         }
 
         return this._lines;

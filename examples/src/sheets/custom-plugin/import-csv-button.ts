@@ -115,7 +115,9 @@ class ImportCSVButtonPlugin extends Plugin {
     // eslint-disable-next-line max-lines-per-function
     override onStarting() {
         // register icon component
-        this.componentManager.register('FolderIcon2', FolderIcon);
+        this.disposeWithMe(
+            this.componentManager.register('FolderIcon2', FolderIcon)
+        );
 
         const buttonId = 'import-csv-button';
 

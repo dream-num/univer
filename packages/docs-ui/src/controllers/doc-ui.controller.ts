@@ -69,15 +69,20 @@ export class DocUIController extends Disposable {
     }
 
     private _initCustomComponents(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
-        this.disposeWithMe(componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
-        this.disposeWithMe(componentManager.register('TodoListDoubleIcon', TodoListDoubleIcon));
-        this.disposeWithMe(componentManager.register('doc.paragraph.menu', ParagraphMenu));
-        this.disposeWithMe(componentManager.register('CutIcon', CutIcon));
-        this.disposeWithMe(componentManager.register('DeleteIcon', DeleteIcon));
-        this.disposeWithMe(componentManager.register(PAGE_SETTING_COMPONENT_ID, PageSettings));
-        this.disposeWithMe(componentManager.register('DocumentSettingIcon', DocSettingIcon));
+        ([
+            [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
+            [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],
+            ['TodoListDoubleIcon', TodoListDoubleIcon],
+            ['doc.paragraph.menu', ParagraphMenu],
+            ['CutIcon', CutIcon],
+            ['DeleteIcon', DeleteIcon],
+            [PAGE_SETTING_COMPONENT_ID, PageSettings],
+            ['DocumentSettingIcon', DocSettingIcon],
+        ] as const).forEach(([key, comp]) => {
+            this.disposeWithMe(
+                this._componentManager.register(key, comp)
+            );
+        });
     }
 
     private _initUiParts() {

@@ -18,7 +18,7 @@ import type { ISelectProps } from '@univerjs/design';
 import type { FC } from 'react';
 import type { IBusinessComponentProps } from './interface';
 import { LocaleService } from '@univerjs/core';
-import { Button, Select } from '@univerjs/design';
+import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -111,9 +111,9 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
 
     return (
         <div
-            className={`
+            className={clsx(`
               univer-flex univer-h-full univer-flex-col univer-justify-between univer-overflow-y-auto univer-pb-5
-            `}
+            `, scrollbarClassName)}
         >
             <div>
                 <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.numfmtType')}</div>

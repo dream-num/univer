@@ -15,7 +15,7 @@
  */
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
-import { borderLeftClassName, clsx } from '@univerjs/design';
+import { borderLeftClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { useState } from 'react';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
@@ -53,7 +53,7 @@ export function InputParams(props: IInputParamsProps) {
 
     return (
         <div>
-            <div className="univer-h-[364px] univer-overflow-y-auto">
+            <div className={clsx('univer-h-[364px] univer-overflow-y-auto', scrollbarClassName)}>
                 {functionParameter.map((item: IFunctionParam, i: number) => (
                     <div key={i}>
                         <div className="univer-text-sm">{item.name}</div>

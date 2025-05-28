@@ -63,12 +63,13 @@ export function MoreFunctions() {
     }
 
     return (
-        <div className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-leading-5">
+        <div
+            data-u-comp="sheets-formula-functions-panel"
+            className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-2"
+        >
             {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
             {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}
-            <div
-                className="univer-flex univer-justify-end"
-            >
+            <div className="univer-flex univer-justify-end">
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (
                     <Button

@@ -16,7 +16,7 @@
 
 import type { ICollaborator } from '@univerjs/protocol';
 import { LocaleService } from '@univerjs/core';
-import { Avatar, Button, Input } from '@univerjs/design';
+import { Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
@@ -57,28 +57,24 @@ export const SheetPermissionUserDialog = () => {
                     onChange={(v) => setInputValue(v)}
                 />
             </div>
-            <div className="univer-h-60 univer-overflow-y-auto">
+            <div className={clsx('univer-h-60 univer-overflow-y-auto', scrollbarClassName)}>
                 {searchUserList?.length > 0
-                    ? (
-                        <>
-                            {searchUserList?.map((item) => {
-                                return (
-                                    <div
-                                        key={item.subject?.userID}
-                                        className={`
-                                          univer-my-2 univer-flex univer-items-center univer-rounded-md
-                                          hover:univer-bg-gray-50
-                                        `}
-                                        onClick={() => handleChangeUser(item)}
-                                    >
-                                        <Avatar src={item.subject?.avatar} size={24} />
-                                        <div className="univer-ml-1.5 univer-flex-1">{item.subject?.name}</div>
-                                        {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkIcon /></div>)}
-                                    </div>
-                                );
-                            })}
-                        </>
-                    )
+                    ? searchUserList?.map((item) => {
+                        return (
+                            <div
+                                key={item.subject?.userID}
+                                className={`
+                                  univer-my-2 univer-flex univer-items-center univer-rounded-md
+                                  hover:univer-bg-gray-50
+                                `}
+                                onClick={() => handleChangeUser(item)}
+                            >
+                                <Avatar src={item.subject?.avatar} size={24} />
+                                <div className="univer-ml-1.5 univer-flex-1">{item.subject?.name}</div>
+                                {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkIcon /></div>)}
+                            </div>
+                        );
+                    })
                     : (
                         <div className="univer-flex univer-h-full univer-flex-col univer-items-center">
                             <img

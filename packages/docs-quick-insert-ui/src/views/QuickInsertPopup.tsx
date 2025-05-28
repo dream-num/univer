@@ -16,7 +16,7 @@
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
 import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
-import { clsx, Menu, MenuItem, MenuItemGroup, Tooltip } from '@univerjs/design';
+import { clsx, Menu, MenuItem, MenuItemGroup, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
@@ -280,10 +280,14 @@ export const QuickInsertPopup = () => {
     const Placeholder = currentPopup?.popup.Placeholder || componentManager.get(QuickInsertPlaceholder.componentKey);
 
     return (
-        <div className={clsx('univer-mt-2')}>
+        <div className="univer-mt-2">
             {hasMenus
                 ? (
-                    <Menu wrapperClass="univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto univer-overflow-x-hidden">
+                    <Menu
+                        wrapperClass={clsx(`
+                          univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto univer-overflow-x-hidden
+                        `, scrollbarClassName)}
+                    >
                         {renderMenus(filteredMenus)}
                     </Menu>
                 )

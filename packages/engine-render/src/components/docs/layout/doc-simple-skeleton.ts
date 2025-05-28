@@ -112,18 +112,27 @@ export class DocSimpleSkeleton {
                         let lineWidth = 0;
 
                         // Add characters one by one until width limit is exceeded
-                        for (let i = 0; i < remainingText.length; i++) {
-                            const char = remainingText[i];
-                            const testText = lineText + char;
+                        let left = 0;
+                        let right = remainingText.length;
+
+                        // Binary search to find the maximum number of characters that can fit
+                        while (left < right) {
+                            const mid = Math.floor((left + right + 1) / 2);
+                            const testText = remainingText.slice(0, mid);
                             const testSize = FontCache.getMeasureText(testText, this._fontStyle);
 
                             if (testSize.width + currentLine.width <= this._width) {
-                                lineText = testText;
-                                lineWidth = testSize.width;
-                                charCount = i + 1;
+                                left = mid;
                             } else {
-                                break;
+                                right = mid - 1;
                             }
+                        }
+
+                        charCount = left;
+                        if (charCount > 0) {
+                            lineText = remainingText.slice(0, charCount);
+                            const textSize = FontCache.getMeasureText(lineText, this._fontStyle);
+                            lineWidth = textSize.width;
                         }
 
                         // If no character can fit, force add one character to avoid infinite loop

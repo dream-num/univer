@@ -270,7 +270,7 @@ export class SheetNumfmtUIController extends Disposable {
                                         }
                                         const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._sheetsNumfmtCellContentController.local);
                                         if (info.color) {
-                                            const color = this._themeService.getColorFromTheme(`${info.color}.500`);
+                                            const color = this._themeService.getColorFromTheme(`${info.color}.500`) ?? info.color;
                                             return {
                                                 ...defaultValue,
                                                 v: info.result,

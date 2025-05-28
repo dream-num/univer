@@ -22,7 +22,7 @@ import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 
 export const isDatePanel = (pattern: string) => {
-    const info = numfmt.getInfo(pattern);
+    const info = numfmt.getFormatInfo(pattern);
     return (
         getDateFormatOptions()
             .map((item) => item.value)

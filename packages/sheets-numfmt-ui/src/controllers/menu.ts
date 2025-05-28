@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { fromCallback, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { fromCallback, ICommandService, isPatternEqualWithoutDecimal, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DEFAULT_TEXT_FORMAT_EXCEL, isDefaultFormat } from '@univerjs/engine-numfmt';
 import {
     RangeProtectionPermissionEditPoint,
@@ -27,7 +27,7 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
-import { AddDecimalCommand, countryCurrencyMap, isPatternEqualWithoutDecimal, MenuCurrencyService, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
+import { AddDecimalCommand, countryCurrencyMap, MenuCurrencyService, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { filter, merge, Observable } from 'rxjs';

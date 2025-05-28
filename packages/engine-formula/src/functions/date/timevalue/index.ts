@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { excelDateTimeSerial, isDate, parseFormattedValue } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { getFractionalPart } from '../../../engine/utils/math-kit';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -47,8 +47,8 @@ export class Timevalue extends BaseFunction {
                 let { v, z } = parsedTime;
 
                 if (z && isDate(z)) {
-                    if (v instanceof Date) {
-                        v = excelDateTimeSerial(v);
+                    if ((v as any) instanceof Date) {
+                        v = excelDateTimeSerial((v as any));
                     }
 
                     return NumberValueObject.create(getFractionalPart(+v));

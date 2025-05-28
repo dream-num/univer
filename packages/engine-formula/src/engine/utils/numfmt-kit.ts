@@ -224,7 +224,7 @@ function getNumberFormatTypeRaw(pattern: string): NumberFormatType {
         return NumberFormatType.Accounting;
     }
 
-    const type = numfmt.getInfo(pattern).type as FormatType || 'unknown';
+    const type = numfmt.getFormatInfo(pattern).type as FormatType || 'unknown';
     return NumberFormatTypeMap[type];
 }
 

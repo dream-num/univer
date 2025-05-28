@@ -14,9 +14,96 @@
  * limitations under the License.
  */
 
-import type { INumfmt, LocaleTag } from './types/numfmt.type';
-// @ts-ignore
-import _numfmt from 'numfmt';
+import * as numfmt from 'numfmt';
 
-const numfmt = _numfmt as INumfmt;
-export { LocaleTag as INumfmtLocalTag, numfmt };
+export * as numfmt from 'numfmt';
+
+export type INumfmtLocalTag =
+    | 'zh-CN'
+    | 'zh-TW'
+    | 'cs'
+    | 'da'
+    | 'nl'
+    | 'en'
+    | 'fi'
+    | 'fr'
+    | 'de'
+    | 'el'
+    | 'hu'
+    | 'is'
+    | 'id'
+    | 'it'
+    | 'ja'
+    | 'ko'
+    | 'nb'
+    | 'pl'
+    | 'pt'
+    | 'ru'
+    | 'sk'
+    | 'es'
+    | 'sv'
+    | 'th'
+    | 'tr'
+    | 'vi';
+
+    /**
+     * Determines whether two patterns are equal, excluding differences in decimal places.
+     * This function ignores the decimal part of the patterns and the positive color will be ignored but negative color will be considered.
+     * more info can check the test case.
+     */
+export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string): boolean => {
+    if ((patternA && !patternB) || (!patternA && patternB)) {
+        return false;
+    }
+
+    const getStringWithoutDecimal = (pattern: string): string => {
+        const tokens = numfmt.tokenize(pattern);
+        let result = '';
+        let isDecimalPart = false;
+        let isColorBefore = false;
+
+        for (const token of tokens) {
+            if (token.type === numfmt.tokenTypes.POINT) {
+                isDecimalPart = true; // Start ignoring tokens after the decimal point
+                continue;
+            }
+            // for the excel number
+
+            // this if should be before the color token check
+            if (isColorBefore && token.type === numfmt.tokenTypes.MINUS) {
+                // ignore the minus token in the decimal part after the color token
+                continue;
+            }
+
+            if (token.type === numfmt.tokenTypes.SKIP) {
+                // Skip tokens that are not relevant to the string representation
+                continue;
+            }
+
+            if (token.type === numfmt.tokenTypes.COLOR) {
+                isColorBefore = true; // If we are in the decimal part, we ignore the color tokens
+                continue;
+            } else {
+                isColorBefore = false; // Reset after processing the color part
+            }
+
+            if (isDecimalPart && token.type === numfmt.tokenTypes.ZERO) {
+                // If we are in the decimal part, we ignore the number tokens
+                continue;
+            } else {
+                isDecimalPart = false; // Reset after processing the decimal part
+            }
+
+            if (!isDecimalPart) {
+                result += token.value || '';
+            }
+        }
+
+        return result;
+    };
+
+    const normalizedA = getStringWithoutDecimal(patternA);
+    const normalizedB = getStringWithoutDecimal(patternB);
+
+    return normalizedA === normalizedB;
+};

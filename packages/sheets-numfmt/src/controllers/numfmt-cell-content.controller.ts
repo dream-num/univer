@@ -169,7 +169,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
                 if (info.color) {
-                    const color = this._themeService.getColorFromTheme(`${info.color}.500`);
+                    const color = this._themeService.getColorFromTheme(`${info.color}.500`) ?? info.color;
 
                     if (color) {
                         res.interceptorStyle = { cl: { rgb: color } };

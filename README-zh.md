@@ -115,6 +115,10 @@ Univer 内置多种语言支持，包括：
 
 ## 👾 在线示例
 
+在 AI 产品中嵌入 Univer，作为数据展示工具。
+
+[![][examples-preview-biaoda]][examples-link-biaoda]
+
 你可以在 [Univer Examples](https://univer.ai/examples) 中找到所有的示例。
 
 | **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
@@ -271,6 +275,7 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [vchart-link]: https://github.com/VisActor/VChart
 [vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
 
+[examples-preview-biaoda]: ./docs/img/examples-sheets-biaoda.gif
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
 [examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
@@ -288,6 +293,7 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-preview-14]: ./docs/img/examples-slides.gif
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
+[examples-link-biaoda]: https://biaoda.me/
 [examples-link-0]: https://univer.ai/examples/sheets/
 [examples-link-1]: https://univer.ai/examples/sheets-multi/
 [examples-link-2]: https://univer.ai/examples/sheets-uniscript/

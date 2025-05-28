@@ -66,10 +66,6 @@ export class SheetSkeleton extends Skeleton {
     protected _renderRawFormula = false;
     protected _cellData: ObjectMatrix<Nullable<ICellData>>;
     protected _imageCacheMap: ImageCacheMap;
-    /**
-     * Whether the row style precedes the column style.
-     */
-    protected _isRowStylePrecedeColumnStyle = false;
 
     /**
      * Whether auto height for merged cells
@@ -94,7 +90,7 @@ export class SheetSkeleton extends Skeleton {
 
     initConfig() {
         this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
-        this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+        this.worksheet.setIsRowStylePrecedeColumnStyle(this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false);
     }
 
     resetCache() {

@@ -146,7 +146,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 }
 
                 if (typeof cell.v === 'string' && Tools.isLegalUrl(cell.v) && cell.v[cell.v.length - 1] !== ' ') {
-                    const { unitId, subUnitId } = context;
+                    const { unitId, subUnitId, row, col } = context;
 
                     const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                     const worksheet = workbook?.getSheetBySheetId(subUnitId);
@@ -158,7 +158,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     // if (!skeleton) {
                     //     return next(cell);
                     // }
-                    const doc = worksheet.getBlankCellDocumentModel(cell);
+                    const doc = worksheet.getBlankCellDocumentModel(cell, row, col);
                     if (!doc.documentModel) {
                         return next(cell);
                     }

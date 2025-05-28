@@ -257,13 +257,9 @@ export class SheetClipboardController extends RxDisposable {
                     properties.colspan = `${colSpan || 1}`;
                 }
 
-                // TODO@wzhudev: should deprecate Range and
-                // use worksheet.getStyle()
-                const range = currentSheet!.getRange(row, col);
-
                 const mergedCellByRowCol = currentSheet!.getMergedCell(row, col);
 
-                const textStyle = range.getTextStyle();
+                const textStyle = currentSheet!.getComposedCellStyle(row, col);
 
                 let style = '';
 

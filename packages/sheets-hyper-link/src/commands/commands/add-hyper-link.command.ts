@@ -54,7 +54,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         const { payload, display, row, column, id } = link;
 
         const cellData = worksheet.getCell(row, column);
-        const doc = worksheet.getBlankCellDocumentModel(cellData);
+        const doc = worksheet.getBlankCellDocumentModel(cellData, row, column);
         const snapshot = doc.documentModel!.getSnapshot();
         const body = Tools.deepClone(snapshot.body);
         if (!body) return false;

@@ -421,13 +421,15 @@ export function getSetCellStyleMutations(
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     matrix.forValue((row, col, value) => {
+        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+        const style = worksheet?.getComposedCellStyle(actualRow, actualCol);
         const newValue: ICellData = {
             s: Object.assign({}, {
                 ...DEFAULT_STYLES,
                 pd: DEFAULT_PADDING_DATA,
                 bg: null,
                 cl: null,
-            }, value.s),
+            }, style),
         };
 
         // Here I don't know why when setting the border, an empty object is also assigned to the adjacent cells without borders.
@@ -445,13 +447,9 @@ export function getSetCellStyleMutations(
             }
         }
 
-        const { row: actualRow, col: actualCol } = mapFunc(row, col);
-
         // pasteFrom is null, means the data is pasted from outside, at this time, the data has no number format.
         // If the paste to cell has a number format, google sheet will apply the number format, but excel will not.
         // Here the text format need to be handled, other number format need to discuss. TODO: @wzhudev @ybzky
-        const style = worksheet?.getCellStyle(actualRow, actualCol);
-
         if (value.v && !pasteFrom && isTextFormat(style?.n?.pattern)) {
             if (!newValue.s) {
                 newValue.s = {};

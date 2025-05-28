@@ -28,6 +28,7 @@ export class DocSimpleSkeleton {
     private _lineBreaker: LineBreaker;
     private _lines: ILineInfo[] = [];
     private _dirty = true;
+    private _lastBreakLength = 0; // Cache for the last successful break length
 
     constructor(
         private _text: string,
@@ -111,24 +112,48 @@ export class DocSimpleSkeleton {
                         let lineText = '';
                         let lineWidth = 0;
 
-                        // Add characters one by one until width limit is exceeded
-                        let left = 0;
-                        let right = remainingText.length;
+                        // Heuristic search starting from cached break length
+                        let startGuess = Math.min(this._lastBreakLength, remainingText.length);
+                        if (startGuess === 0) {
+                            startGuess = Math.min(10, remainingText.length); // Default guess for first time
+                        }
 
-                        // Binary search to find the maximum number of characters that can fit
-                        while (left < right) {
-                            const mid = Math.floor((left + right + 1) / 2);
-                            const testText = remainingText.slice(0, mid);
-                            const testSize = FontCache.getMeasureText(testText, this._fontStyle);
+                        // First, try the cached length
+                        let testText = remainingText.slice(0, startGuess);
+                        let testSize = FontCache.getMeasureText(testText, this._fontStyle);
 
-                            if (testSize.width + currentLine.width <= this._width) {
-                                left = mid;
-                            } else {
-                                right = mid - 1;
+                        if (testSize.width + currentLine.width <= this._width) {
+                            // The guess fits, search forward for the maximum
+                            charCount = startGuess;
+                            for (let i = startGuess + 1; i <= remainingText.length; i++) {
+                                testText = remainingText.slice(0, i);
+                                testSize = FontCache.getMeasureText(testText, this._fontStyle);
+
+                                if (testSize.width + currentLine.width <= this._width) {
+                                    charCount = i;
+                                } else {
+                                    break;
+                                }
+                            }
+                        } else {
+                            // The guess is too big, search backward
+                            charCount = 0;
+                            for (let i = startGuess - 1; i >= 1; i--) {
+                                testText = remainingText.slice(0, i);
+                                testSize = FontCache.getMeasureText(testText, this._fontStyle);
+
+                                if (testSize.width + currentLine.width <= this._width) {
+                                    charCount = i;
+                                    break;
+                                }
                             }
                         }
 
-                        charCount = left;
+                        // Update the cache with the successful break length
+                        if (charCount > 0) {
+                            this._lastBreakLength = charCount;
+                        }
+
                         if (charCount > 0) {
                             lineText = remainingText.slice(0, charCount);
                             const textSize = FontCache.getMeasureText(lineText, this._fontStyle);
@@ -232,5 +257,6 @@ export class DocSimpleSkeleton {
 
     makeDirty() {
         this._dirty = true;
+        this._lastBreakLength = 0; // Reset cache when content changes
     }
 }

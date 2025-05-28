@@ -44,7 +44,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "fs-extra": "^11.3.0",
         "postcss": "^8.5.3",
-        "tailwindcss": "^3.4.17",
+        "tailwindcss": "^4.1.7",
         "tailwindcss-animate": "^1.0.7"
     }
 }

@@ -101,7 +101,7 @@
         "fs-extra": "^11.3.0",
         "minimist": "^1.2.8",
         "postcss": "^8.5.3",
-        "tailwindcss": "^3.4.17",
+        "tailwindcss": "^4.1.7",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.3"
     }

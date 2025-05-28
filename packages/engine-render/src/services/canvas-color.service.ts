@@ -15,7 +15,7 @@
  */
 
 import type { RGBColorType } from '@univerjs/core';
-import { createIdentifier, Disposable, Inject, invertColorByMatrix, ThemeService } from '@univerjs/core';
+import { ColorKit, createIdentifier, Disposable, Inject, invertColorByMatrix, ThemeService } from '@univerjs/core';
 
 export const ICanvasColorService = createIdentifier<ICanvasColorService>('univer.engine-render.canvas-color.service');
 /**
@@ -82,9 +82,15 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             const invertedColor = this._invertAlgo(stripped.map(Number) as RGBColorType);
             cachedColor = `rgb(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]})`;
         } else if (color.includes('.')) {
-            cachedColor = this._themeService.getColorFromTheme(color);
+            // If the color is a theme token, we can get the color from the theme service
+            return this._themeService.getColorFromTheme(color);
+        } else if (new ColorKit(color).isValid) {
+            // Support X11 color names
+            const { r, g, b, a } = new ColorKit(color).toRgb();
+            const invertedColor = this._invertAlgo([r, g, b] as RGBColorType);
+            cachedColor = `rgba(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]}, ${a})`;
         } else {
-            throw new Error(`[CanvasColorService]: illegal color ${color}`);
+            throw new Error(`[CanvasColorService]: illegal color "${color}"`);
         }
 
         this._cache.set(color, cachedColor);

@@ -25,6 +25,7 @@ export type Theme = typeof defaultTheme;
 export class ThemeService extends Disposable {
     private readonly _darkMode$ = new BehaviorSubject<boolean>(false);
     readonly darkMode$: Observable<boolean> = this._darkMode$.asObservable();
+
     get darkMode(): boolean { return this._darkMode$.getValue(); }
 
     private _currentTheme: Theme = defaultTheme;

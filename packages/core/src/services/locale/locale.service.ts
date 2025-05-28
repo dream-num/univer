@@ -36,7 +36,11 @@ export class LocaleService extends Disposable {
     constructor() {
         super();
 
-        this.disposeWithMe(toDisposable(() => this.localeChanged$.complete()));
+        this.disposeWithMe(toDisposable(() => {
+            this._locales = null;
+            this._currentLocale$.complete();
+            this.localeChanged$.complete();
+        }));
     }
 
     /**

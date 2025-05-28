@@ -19,7 +19,6 @@ import { BooleanNumber } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { BoldIcon, FontColorDoubleIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from '@univerjs/icons';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
-import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { ColorPicker } from '../color-picker';
 
@@ -35,7 +34,7 @@ const getAnotherBooleanNumber = (v: BooleanNumber | undefined) => {
 const getBooleanFromNumber = (v: BooleanNumber) => v !== BooleanNumber.FALSE;
 export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
     const { style, onChange, className } = props;
-    const componentManager = useDependency(ComponentManager);
+
     const [isBold, setIsBold] = useState<BooleanNumber | undefined>(() => {
         const defaultV = undefined;
         if (!style?.bl) {

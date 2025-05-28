@@ -57,6 +57,7 @@ export class ConfigService implements IConfigService, IDisposable {
     private readonly _config: Map<string | symbol, any> = new Map();
 
     dispose(): void {
+        this._config.clear();
         this._configChanged$.complete();
     }
 

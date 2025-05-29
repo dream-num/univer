@@ -16,12 +16,13 @@
 
 import type { Univer } from '../../univer';
 import type { IRange, IWorkbookData } from '../typedef';
+import type { Worksheet } from '../worksheet';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DisposableCollection } from '../../shared/lifecycle';
 import { CellValueType } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { RANGE_TYPE } from '../typedef';
-import { extractPureTextFromCell, type Worksheet } from '../worksheet';
+import { extractPureTextFromCell } from '../worksheet';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('test worksheet', () => {
@@ -207,6 +208,120 @@ describe('test worksheet', () => {
             const value6 = iterator1.next();
             expect(value6.done).toBeTruthy();
             expect(value6.value).toBeUndefined();
+        });
+    });
+
+    describe('test "worksheet.getComposedCellStyle"', () => {
+        const TEST_WORKBOOK_DATA_WITH_DEFAULT_STYLE: IWorkbookData = {
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    defaultStyle: {
+                        fs: 20,
+                        cl: {
+                            rgb: 'red',
+                        },
+                        bd: {
+                            t: {
+                                s: 1,
+                                cl: {
+                                    rgb: '#000',
+                                },
+                            },
+                            b: {
+                                s: 1,
+                                cl: {
+                                    rgb: '#000',
+                                },
+                            },
+                            l: {
+                                s: 1,
+                                cl: {
+                                    rgb: '#000',
+                                },
+                            },
+                            r: {
+                                s: 1,
+                                cl: {
+                                    rgb: '#000',
+                                },
+                            },
+                        },
+                    },
+                    mergeData: [
+                        { startRow: 0, endRow: 0, startColumn: 1, endColumn: 2 },
+                    ],
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 'A1',
+                            },
+                            1: {
+                                v: 'B1:C1',
+                            },
+                        },
+                        1: {
+                            // should skip over empty cells
+                            // 0: {
+                            //     v: 'A1',
+                            // },
+                            1: {
+                                v: 'B2',
+                            },
+                            2: {
+                                v: 'C2',
+                            },
+                        },
+                    },
+                },
+            },
+            locale: LocaleType.ZH_CN,
+            name: 'TEST_WORKBOOK_DATA_WITH_DEFAULT_STYLE',
+            sheetOrder: ['sheet1'],
+            styles: {},
+        };
+
+        beforeEach(() => {
+            prepare(TEST_WORKBOOK_DATA_WITH_DEFAULT_STYLE);
+            caseDisposable = new DisposableCollection();
+        });
+
+        it('test style', () => {
+            const style = worksheet.getComposedCellStyle(0, 0);
+            expect(style).toEqual({
+                fs: 20,
+                cl: {
+                    rgb: 'red',
+                },
+                bd: {
+                    t: {
+                        s: 1,
+                        cl: {
+                            rgb: '#000',
+                        },
+                    },
+                    b: {
+                        s: 1,
+                        cl: {
+                            rgb: '#000',
+                        },
+                    },
+                    l: {
+                        s: 1,
+                        cl: {
+                            rgb: '#000',
+                        },
+                    },
+                    r: {
+                        s: 1,
+                        cl: {
+                            rgb: '#000',
+                        },
+                    },
+                },
+            });
         });
     });
 });

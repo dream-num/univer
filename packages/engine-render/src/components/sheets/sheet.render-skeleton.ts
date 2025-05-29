@@ -45,7 +45,6 @@ import {
     addLinkToDocumentModel,
     BooleanNumber,
     CellValueType,
-    composeStyles,
     DEFAULT_STYLES,
     extractPureTextFromCell,
     getColorStyle,
@@ -486,7 +485,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
         const cell = this.worksheet.getCell(row, col);
-        const style = this._styles.getStyleByCell(cell);
+        const style = this.worksheet.getComposedCellStyle(row, col);
 
         if (cell?.interceptorAutoHeight) {
             const cellHeight = cell.interceptorAutoHeight();
@@ -516,7 +515,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         colWidth -= sideGap;
 
         if (isRichText) {
-            const modelObject = cell && this._getCellDocumentModel(cell);
+            const modelObject = cell && this.worksheet.getCellDocumentModel(cell, style);
             if (modelObject == null) {
                 return undefined;
             }
@@ -699,7 +698,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 if (row + MEASURE_EXTENT_FOR_PARAGRAPH <= startRowOfViewMain || row - MEASURE_EXTENT_FOR_PARAGRAPH >= endRowOfViewMain) continue;
             }
 
-            let measuredWidth = this._getMeasuredWidthByCell(cell, currColWidth);
+            let measuredWidth = this._getMeasuredWidthByCell(cell, row, colIndex, currColWidth);
             if (cell.fontRenderExtension) {
                 measuredWidth += ((cell.fontRenderExtension?.leftOffset || 0) + (cell.fontRenderExtension?.rightOffset || 0));
             }
@@ -729,7 +728,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * @param cell
      * @returns {number} currColWidth
      */
-    _getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor, currColWidth: number) {
+    _getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor, row: number, column: number, currColWidth: number) {
         let measuredWidth = 0;
 
         // isSkip means the text in this cell would not rendering.
@@ -739,8 +738,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return cellWidth;
             }
         }
-
-        const modelObject = this._getCellDocumentModel(cell);
+        const style = this.worksheet.getComposedCellStyle(row, column);
+        const modelObject = this.worksheet.getCellDocumentModel(cell, style);
         if (modelObject == null) {
             return measuredWidth;
         }
@@ -752,9 +751,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const documentViewModel = new DocumentViewModel(documentModel);
         const { vertexAngle: angle } = convertTextRotation(textRotation);
-        const cellStyle = this._styles.getStyleByCell(cell);
 
-        if (cellStyle?.tb === WrapStrategy.WRAP) {
+        if (style?.tb === WrapStrategy.WRAP) {
             documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
         } else {
             documentModel.updateDocumentDataPageSize(Infinity, Infinity);
@@ -1333,7 +1331,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>) {
+    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData) {
         if (isNullCell(cellData)) return;
 
         let config: Partial<IFontCacheItem> = {
@@ -1350,12 +1348,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
-        const style = this._styles.getStyleByCell(cellData);
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
         const isRichText = cellData?.p || vertexAngle || centerAngle;
 
         const modelObject = isRichText ?
-            this._getCellDocumentModel(cellData, { displayRawFormula: this._renderRawFormula })
+            this.worksheet.getCellDocumentModel(cellData, style, { displayRawFormula: this._renderRawFormula })
             : null;
 
         if (modelObject) {
@@ -1426,7 +1423,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this.worksheet.getCellInfoInMergeData(row, col);
-        options.mergeRange = { startRow, startColumn, endRow, endColumn };
+
+        if (isMerged) {
+            options.mergeRange = { startRow, startColumn, endRow, endColumn };
+        }
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
 
@@ -1442,18 +1442,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        const cellStyle = this._styles.getStyleByCell(cell);
-        const columnStyle = this.worksheet.getColumnStyle(col);
-        const rowStyle = this.worksheet.getRowStyle(row);
-        const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
-
-        const style = this._isRowStylePrecedeColumnStyle
-            ? composeStyles(defaultStyle, columnStyle, rowStyle, (cell as ICellDataForSheetInterceptor)?.themeStyle, cellStyle)
-            : composeStyles(defaultStyle, rowStyle, columnStyle, (cell as ICellDataForSheetInterceptor)?.themeStyle, cellStyle);
+        const style = this.worksheet.getComposedCellStyle(row, col);
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-        this._setFontStylesCache(row, col, { ...cell, ...{ s: style } });
+        this._setFontStylesCache(row, col, { ...cell, ...{ s: style } }, style);
     }
 
     /**
@@ -1507,7 +1500,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             const themeStyleBackground = cell.themeStyle?.bd;
 
-            const style = this._styles.getStyleByCell(cell);
+            const style = this.worksheet.getComposedCellStyle(row, column);
             if (!style && !themeStyleBackground) {
                 isAddBorders = false;
                 break;

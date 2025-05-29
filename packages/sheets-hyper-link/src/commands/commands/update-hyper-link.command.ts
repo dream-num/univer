@@ -59,7 +59,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         const cellData = worksheet.getCell(row, column);
         if (!cellData) return false;
 
-        const doc = worksheet.getCellDocumentModelWithFormula(cellData);
+        const doc = worksheet.getCellDocumentModelWithFormula(cellData, row, column);
         if (!doc?.documentModel) return false;
 
         const snapshot = doc.documentModel.getSnapshot();

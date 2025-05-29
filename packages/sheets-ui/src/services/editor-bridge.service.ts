@@ -356,7 +356,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             location
         );
 
-        documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+        documentLayoutObject = cell && worksheet.getCellDocumentModelWithFormula(cell, location.row, location.col);
 
         // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
@@ -365,7 +365,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
 
         if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-            const blankModel = skeleton.getBlankCellDocumentModel(cell);
+            const blankModel = worksheet.getBlankCellDocumentModel(cell, location.row, location.col);
 
             if (documentLayoutObject != null) {
                 const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;

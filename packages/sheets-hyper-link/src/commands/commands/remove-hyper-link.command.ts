@@ -56,7 +56,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         const cellData = worksheet.getCell(row, column);
         if (!cellData) return false;
 
-        const doc = worksheet.getCellDocumentModelWithFormula(cellData);
+        const doc = worksheet.getCellDocumentModelWithFormula(cellData, row, column);
         if (!doc?.documentModel) return false;
 
         const snapshot = Tools.deepClone(doc.documentModel!.getSnapshot());

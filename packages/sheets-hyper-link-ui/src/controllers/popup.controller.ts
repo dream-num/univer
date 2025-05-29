@@ -82,11 +82,17 @@ export class SheetsHyperLinkPopupController extends Disposable {
             rangeTypes: [RangeProtectionPermissionViewPoint],
         }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
 
-        const editPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
+        let editPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+
+        // Check if the cell is a hyperlink formula, if it is, we don't allow editing
+        const cell = worksheet.getCellRaw(currentRow, currentCol);
+        if (cell?.f && cell.f.startsWith('=HYPERLINK(')) {
+            editPermission = false;
+        }
 
         const copyPermission = this._permissionService.composePermission([new WorkbookCopyPermission(unitId).id, new WorksheetCopyPermission(unitId, subUnitId).id]).every((permission) => permission.value);
 
@@ -101,7 +107,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
         this.disposeWithMe(
             // hover over not editing cell
             this._hoverManagerService.currentRichText$.pipe(debounceTime(200)).subscribe((currentCell) => {
-                if (!currentCell) {
+                if (!currentCell || currentCell.customRange?.rangeType !== CustomRangeType.HYPERLINK) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }

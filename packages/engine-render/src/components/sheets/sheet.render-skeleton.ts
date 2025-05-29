@@ -1423,7 +1423,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this.worksheet.getCellInfoInMergeData(row, col);
-        options.mergeRange = isMerged ? { startRow, startColumn, endRow, endColumn } : undefined;
+
+        if (isMerged) {
+            options.mergeRange = { startRow, startColumn, endRow, endColumn };
+        }
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
 

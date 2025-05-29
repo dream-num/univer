@@ -640,13 +640,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const styles = this._univerInstanceService.getUniverSheetInstance(copyUnitId)?.getStyles();
+        const { mapFunc } = virtualizeDiscreteRanges([range]);
+        const worksheet = this._univerInstanceService.getUniverSheetInstance(copyUnitId)?.getSheetBySheetId(copySubUnitId);
+
         cellMatrix.forValue((row, col, value) => {
-            if (typeof value.s === 'string') {
-                const newValue = Tools.deepClone(value);
-                newValue.s = styles?.getStyleByCell(value);
-                cellMatrix.setValue(row, col, newValue);
-            }
+            const { row: actualRow, col: actualColumn } = mapFunc(row, col);
+            const style = worksheet?.getComposedCellStyle(actualRow, actualColumn);
+            const newValue = Tools.deepClone(value);
+            newValue.s = style;
+            cellMatrix.setValue(row, col, newValue);
 
             if (value.colSpan || value.rowSpan) {
                 for (let rStart = 0; rStart < value.rowSpan!; rStart++) {
@@ -655,7 +657,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
                         const r = row + rStart;
                         const c = col + cStart;
-                        cellMatrix.setValue(r, c, { s: styles?.getStyleByCell(value) });
+                        cellMatrix.setValue(r, c, { s: style });
                     }
                 }
             }

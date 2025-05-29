@@ -1,5 +1,30 @@
 # Changelog
 
+# [0.8.0-beta.1](https://github.com/dream-num/univer/compare/v0.8.0-beta.0...v0.8.0-beta.1) (2025-05-29)
+
+
+### Bug Fixes
+
+* clear resources in dispose methods and optimize component manager initialization ([#5287](https://github.com/dream-num/univer/issues/5287)) ([d863255](https://github.com/dream-num/univer/commit/d86325508e74322434d26159277175ca0826d409))
+* **engine-render:** handle the case that one word would be too long in break-line algo ([#5286](https://github.com/dream-num/univer/issues/5286)) ([e4ea459](https://github.com/dream-num/univer/commit/e4ea4595b95878648dd67ba878393f412bad1e21))
+* **engine-render:** improve inversion algorithm to support X11 color names ([#5288](https://github.com/dream-num/univer/issues/5288)) ([5396cae](https://github.com/dream-num/univer/commit/5396caef4107b1e2ac15999f97d84c18a83fdb08))
+* fixed imported cell value is 001 ([#5279](https://github.com/dream-num/univer/issues/5279)) ([ba5424c](https://github.com/dream-num/univer/commit/ba5424ce75dabd1e44f9f20e432f61f23ed1b4b4))
+* fixed some issues with defaultStyle ([#5290](https://github.com/dream-num/univer/issues/5290)) ([99dab69](https://github.com/dream-num/univer/commit/99dab69d61f43afd7849dd97a08750375d0a1547))
+* fixed the issue that the numfmt setting for numeric strings does not take effect ([#5278](https://github.com/dream-num/univer/issues/5278)) ([8073a3a](https://github.com/dream-num/univer/commit/8073a3a5bba2acdf3152233a6d96eac449825ea5))
+* **sheets-formula-ui:** update order of menu items in formula schema for consistency ([#5285](https://github.com/dream-num/univer/issues/5285)) ([d5c4ecb](https://github.com/dream-num/univer/commit/d5c4ecb0585b41e13c1ae413d3d06ef487f6a41f))
+* **sheets-ui:** enforce min/max constraints for row and column height settings ([#5294](https://github.com/dream-num/univer/issues/5294)) ([e6254f4](https://github.com/dream-num/univer/commit/e6254f405c7f8375fc072ca6b4474c2c18cafc5d))
+* update dark mode styles for consistency in RangeLoading and ConditionalStyleEditor components ([#5276](https://github.com/dream-num/univer/issues/5276)) ([77b37a5](https://github.com/dream-num/univer/commit/77b37a5fd3cf4439361ba472f74fb81b5f6f10c5))
+* update scrollbar styling and improve class management in UI components ([#5291](https://github.com/dream-num/univer/issues/5291)) ([bc94fd2](https://github.com/dream-num/univer/commit/bc94fd2f656b0036e5f91419d4f2eaba740ebe76))
+
+
+### Features
+
+* **design:** enhance ColorPicker functionality ([#5274](https://github.com/dream-num/univer/issues/5274)) ([d069632](https://github.com/dream-num/univer/commit/d069632df81af9583db04136440c1d889cd0ebc0))
+* **formula:** supplement HYPERLINK formula ([#5273](https://github.com/dream-num/univer/issues/5273)) ([3529ae3](https://github.com/dream-num/univer/commit/3529ae3e01c3e016d841223139e0ddced4ca7ecd))
+* optimizing cell rendering and auto-height calculating ([#5262](https://github.com/dream-num/univer/issues/5262)) ([9bbb395](https://github.com/dream-num/univer/commit/9bbb3951ed910ea541f160a2997f01dc51213963))
+* **sheets-formula:** support writing formula array cache to snapshot ([#5283](https://github.com/dream-num/univer/issues/5283)) ([dd281f0](https://github.com/dream-num/univer/commit/dd281f0c57e92cae3f1f612116c17ac3b23ccefb))
+* **sheets:** optimize getCell interceptor temporay object memory ([#5277](https://github.com/dream-num/univer/issues/5277)) ([6625a23](https://github.com/dream-num/univer/commit/6625a23535b56bbf3cea9c7171d74e7fad2d08cb))
+
 # [0.8.0-beta.0](https://github.com/dream-num/univer/compare/v0.7.0...v0.8.0-beta.0) (2025-05-26)
 
 

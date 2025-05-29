@@ -57,9 +57,9 @@ export class ThemeSwitcherService extends Disposable {
     override dispose() {
         super.dispose();
 
-        const existingStyleElement = document.getElementById(this._styleSheetId);
-        if (existingStyleElement) {
-            document.head.removeChild(existingStyleElement);
-        }
+        // const existingStyleElement = document.getElementById(this._styleSheetId);
+        // if (existingStyleElement) {
+        //     document.head.removeChild(existingStyleElement);
+        // }
     }
 }

@@ -45,7 +45,13 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     }, [contextMenuService.visible]);
 
     useEffect(() => {
-        setInputValue(value);
+        if (+value < min) {
+            setInputValue(min.toString());
+        } else if (+value > max) {
+            setInputValue(max.toString());
+        } else {
+            setInputValue(value);
+        }
     }, [value]);
 
     function handlePressEnter() {

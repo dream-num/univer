@@ -1272,7 +1272,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const defaultValue = 0;
+    const min = 2;
 
     return {
         id: SetRowHeightCommand.id,
@@ -1283,14 +1283,14 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             props: {
                 prefix: 'rightClick.rowHeight',
                 suffix: 'px',
-                min: 2,
+                min,
                 max: 1000,
             },
         },
-        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, min, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                const rowHeight = primary ? worksheet.getRowHeight(primary.startRow) : defaultValue;
+                const rowHeight = primary ? worksheet.getRowHeight(primary.startRow) : worksheet.getConfig().defaultRowHeight;
                 subscriber.next(rowHeight);
             }
 
@@ -1317,7 +1317,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const defaultValue = 0;
+    const min = 2;
 
     return {
         id: SetColWidthCommand.id,
@@ -1328,17 +1328,14 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             props: {
                 prefix: 'rightClick.columnWidth',
                 suffix: 'px',
-                min: 2,
+                min,
                 max: 1000,
             },
         },
-        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, min, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                let colWidth: number = defaultValue;
-                if (primary != null) {
-                    colWidth = worksheet.getColumnWidth(primary.startColumn);
-                }
+                const colWidth = primary ? worksheet.getColumnWidth(primary.startColumn) : worksheet.getConfig().defaultColumnWidth;
 
                 subscriber.next(colWidth);
             }

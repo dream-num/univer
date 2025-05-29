@@ -59,7 +59,7 @@ export function Fab() {
         unitType === UniverInstanceType.UNIVER_SHEET && useUnits(),
         useSnapshot(),
         useEditable(),
-        useUser(),
+        unitType === UniverInstanceType.UNIVER_SHEET && useUser(),
         useDispose(),
     ].filter((item) => item !== null) as IDropdownMenuProps['items'];
 

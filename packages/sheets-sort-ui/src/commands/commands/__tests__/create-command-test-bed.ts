@@ -16,7 +16,7 @@
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType } from '@univerjs/core';
-import { FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { FormulaReorderController } from '@univerjs/sheets-formula-ui';
 import { SheetsSortService } from '@univerjs/sheets-sort';
@@ -150,6 +150,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetInterceptorService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([SheetsSortController]);

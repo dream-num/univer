@@ -250,17 +250,17 @@ export default {
         },
     },
     HYPERLINK: {
-        description: 'Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet',
-        abstract: 'Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet',
+        description: 'Crée un lien hypertexte dans une cellule.',
+        abstract: 'Crée un lien hypertexte dans une cellule.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/fr-fr/office/hyperlink-function-333c7ce6-c5ae-4164-9c47-7de9b76f577f',
+                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=fr',
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'premier' },
-            number2: { name: 'nombre2', detail: 'second' },
+            url: { name: 'url', detail: 'URL intégrale de l\'emplacement du lien, entre guillemets, ou référence à une cellule contenant cette URL.' },
+            linkLabel: { name: 'libellé_lien', detail: 'texte à afficher dans la cellule en tant que lien, entre guillemets, ou référence à une cellule contenant ce libellé.' },
         },
     },
     IMAGE: {

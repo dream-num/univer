@@ -249,17 +249,17 @@ export default {
         },
     },
     HYPERLINK: {
-        description: 'Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet',
-        abstract: 'Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet',
+        description: 'Creates a hyperlink inside a cell.',
+        abstract: 'Creates a hyperlink inside a cell.',
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/hyperlink-function-333c7ce6-c5ae-4164-9c47-7de9b76f577f',
+                url: 'https://support.google.com/docs/answer/3093313?sjid=14131674310032162335-NC&hl=en',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            url: { name: 'url', detail: 'The full URL of the link location enclosed in quotation marks, or a reference to a cell containing such a URL.' },
+            linkLabel: { name: 'link_label', detail: 'The text to display in the cell as the link, enclosed in quotation marks, or a reference to a cell containing such a label.' },
         },
     },
     IMAGE: {

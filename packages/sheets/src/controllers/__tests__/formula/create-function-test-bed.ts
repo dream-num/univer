@@ -48,6 +48,7 @@ import {
     FunctionNodeFactory,
     FunctionService,
     GlobalComputingStatusService,
+    HyperlinkEngineFormulaService,
     ICalculateFormulaService,
     IDefinedNamesService,
     IDependencyManagerService,
@@ -56,6 +57,7 @@ import {
     IFormulaDependencyGenerator,
     IFormulaRuntimeService,
     IFunctionService,
+    IHyperlinkEngineFormulaService,
     Interpreter,
     IOtherFormulaManagerService,
     ISheetRowFilteredService,
@@ -195,6 +197,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);

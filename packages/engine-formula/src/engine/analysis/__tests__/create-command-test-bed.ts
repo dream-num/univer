@@ -37,6 +37,7 @@ import { DefinedNamesService, IDefinedNamesService } from '../../../services/def
 import { DependencyManagerService, IDependencyManagerService } from '../../../services/dependency-manager.service';
 import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from '../../../services/function.service';
+import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../../services/hyperlink-engine-formula.service';
 import {
     IOtherFormulaManagerService,
     OtherFormulaManagerService,
@@ -293,6 +294,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([LexerTreeBuilder]);
 
     injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+    injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
     injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
     injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);

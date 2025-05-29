@@ -173,3 +173,5 @@ export { generateRandomDependencyTreeId } from './engine/dependency/formula-depe
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
 export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
 export { type IUnitRowData } from './basics/common';
+
+export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';

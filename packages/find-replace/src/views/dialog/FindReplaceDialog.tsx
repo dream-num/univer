@@ -18,7 +18,7 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import type { ForwardedRef } from 'react';
 import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
-import { ILayoutService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { ILayoutService, IMessageService, useDebounceFn, useDependency, useObservable } from '@univerjs/ui';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { fromEvent } from 'rxjs';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
@@ -64,7 +64,9 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
         commandService.executeCommand(OpenReplaceDialogOperation.id);
     }, [commandService]);
 
-    const onFindStringChange = useCallback((findString: string) => findReplaceService.changeFindString(findString), [findReplaceService]);
+    const onFindStringChange = useDebounceFn((findString: string) => {
+        return findReplaceService.changeFindString(findString);
+    }, 500);
 
     useFindInputFocus(findReplaceService, ref);
 
@@ -77,7 +79,7 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                 matchesPosition={matchesPosition}
                 findReplaceService={findReplaceService}
                 localeService={localeService}
-                findString={findString}
+                initialFindString={findString}
                 onChange={onFindStringChange}
             />
             <div className="univer-mt-4 univer-text-center">
@@ -183,7 +185,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                     matchesPosition={matchesPosition}
                     findReplaceService={findReplaceService}
                     localeService={localeService}
-                    findString={inputtingFindString}
+                    initialFindString={inputtingFindString}
                     onChange={onFindStringChange}
                 />
             </FormLayout>

@@ -18,6 +18,7 @@ import type { LocaleService } from '@univerjs/core';
 import type { IInputProps } from '@univerjs/design';
 import type { IFindReplaceService } from '../../services/find-replace.service';
 import { Input, Pager } from '@univerjs/design';
+import { useState } from 'react';
 
 export interface ISearchInputProps extends Pick<IInputProps, 'onFocus' | 'onBlur' | 'className' | 'onChange'> {
     findCompleted: boolean;
@@ -25,11 +26,12 @@ export interface ISearchInputProps extends Pick<IInputProps, 'onFocus' | 'onBlur
     findReplaceService: IFindReplaceService;
     matchesPosition: number;
     matchesCount: number;
-    findString: string;
+    initialFindString: string;
 }
 
 export function SearchInput(props: ISearchInputProps) {
-    const { findCompleted: findComplete, localeService, matchesCount, matchesPosition, findString, findReplaceService, onChange, ...rest } = props;
+    const { findCompleted: findComplete, localeService, matchesCount, matchesPosition, initialFindString, findReplaceService, onChange, ...rest } = props;
+    const [value, setValue] = useState(initialFindString);
     const noResult = findComplete && matchesCount === 0;
     const text = noResult
         ? localeService.t('find-replace.dialog.no-result')
@@ -43,8 +45,11 @@ export function SearchInput(props: ISearchInputProps) {
                 data-u-comp="search-input"
                 autoFocus
                 placeholder={localeService.t('find-replace.dialog.find-placeholder')}
-                value={findString}
-                onChange={(value) => onChange?.(value)}
+                value={value}
+                onChange={(value) => {
+                    setValue(value);
+                    onChange?.(value);
+                }}
                 slot={(
                     <Pager
                         loop

@@ -265,13 +265,12 @@ export function useColor(): IColorMap {
             themeService.getColorFromTheme('loop-color.10'),
             themeService.getColorFromTheme('loop-color.11'),
             themeService.getColorFromTheme('loop-color.12'),
-        ];
+        ].map((e) => e.includes('.') ? themeService.getColorFromTheme(e) : e);
         const numberColor = themeService.getColorFromTheme('blue.700');
         const stringColor = themeService.getColorFromTheme('jiqing.800');
         const plainTextColor = themeService.getColorFromTheme('black');
         return { formulaRefColors, numberColor, stringColor, plainTextColor };
     }, [theme]);
-
     return result;
 }
 

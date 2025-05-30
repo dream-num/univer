@@ -185,7 +185,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                     matchesPosition={matchesPosition}
                     findReplaceService={findReplaceService}
                     localeService={localeService}
-                    findString={inputtingFindString}
+                    initialFindString={inputtingFindString}
                     onChange={onFindStringChange}
                 />
             </FormLayout>

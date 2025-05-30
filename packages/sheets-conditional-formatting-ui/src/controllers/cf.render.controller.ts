@@ -24,6 +24,8 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { merge } from 'rxjs';
 import { bufferTime, filter } from 'rxjs/operators';
 
+const isEmptyObject = (obj: any) => Object.keys(obj).length === 0;
+
 export class SheetsCfRenderController extends Disposable {
     /**
      * When a set operation is triggered multiple times over a short period of time, it may result in some callbacks not being disposed,and caused a render cache exception.
@@ -68,15 +70,20 @@ export class SheetsCfRenderController extends Disposable {
             effect: InterceptorEffectEnum.Style,
             handler: (cell, context, next) => {
                 const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
-                if (!result) {
+                if (!result || isEmptyObject(result)) {
                     return next(cell);
                 }
                 const styleMap = context.workbook.getStyles();
                 const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                 const cloneCell = (cell === context.rawData ? { ...context.rawData } : cell) as IConditionalFormattingCellData & ICellDataForSheetInterceptor;
                 if (result.style) {
-                    Object.assign(cloneCell, defaultStyle);
+                    const activeStyle = {
+                        ...defaultStyle,
+                        ...result.style,
+                    };
+                    Object.assign(cloneCell, { s: activeStyle });
                 }
+
                 if (!cloneCell.fontRenderExtension) {
                     cloneCell.fontRenderExtension = {};
                     if (result.isShowValue !== undefined) {

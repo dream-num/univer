@@ -26,12 +26,12 @@ export interface ISearchInputProps extends Pick<IInputProps, 'onFocus' | 'onBlur
     findReplaceService: IFindReplaceService;
     matchesPosition: number;
     matchesCount: number;
-    findString: string;
+    initialFindString: string;
 }
 
 export function SearchInput(props: ISearchInputProps) {
-    const { findCompleted: findComplete, localeService, matchesCount, matchesPosition, findString, findReplaceService, onChange, ...rest } = props;
-    const [value, setValue] = useState(findString);
+    const { findCompleted: findComplete, localeService, matchesCount, matchesPosition, initialFindString, findReplaceService, onChange, ...rest } = props;
+    const [value, setValue] = useState(initialFindString);
     const noResult = findComplete && matchesCount === 0;
     const text = noResult
         ? localeService.t('find-replace.dialog.no-result')

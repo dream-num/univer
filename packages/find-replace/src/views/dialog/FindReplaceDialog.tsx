@@ -79,7 +79,7 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                 matchesPosition={matchesPosition}
                 findReplaceService={findReplaceService}
                 localeService={localeService}
-                findString={findString}
+                initialFindString={findString}
                 onChange={onFindStringChange}
             />
             <div className="univer-mt-4 univer-text-center">

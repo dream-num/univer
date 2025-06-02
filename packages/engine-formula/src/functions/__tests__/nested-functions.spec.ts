@@ -18,7 +18,7 @@ import type { ICellData, ICustomRange, IDocumentData, IHyperLinkCustomRange, Inj
 import type { LexerNode } from '../../engine/analysis/lexer-node';
 
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
-import { CustomRangeType, LocaleType, RichTextValue } from '@univerjs/core';
+import { CellValueType, CustomRangeType, LocaleType, RichTextValue } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';
@@ -38,6 +38,9 @@ import { Address } from '../lookup/address';
 import { Choose } from '../lookup/choose';
 import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
 import { Hyperlink } from '../lookup/hyperlink';
+import { Index } from '../lookup/index';
+import { Match } from '../lookup/match';
+import { Row } from '../lookup/row';
 import { Xlookup } from '../lookup/xlookup';
 import { Xmatch } from '../lookup/xmatch';
 import { Fact } from '../math/fact';
@@ -318,6 +321,109 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             },
                         },
                     },
+                    20: {
+                        0: {
+                            v: 'ID',
+                            t: CellValueType.STRING,
+                        },
+                        1: {
+                            v: 'Months',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'LIstMonths',
+                        },
+                    },
+                    21: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'January',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    22: {
+                        0: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'February',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    23: {
+                        0: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'March',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    24: {
+                        0: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'April',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    26: {
+                        0: {
+                            v: 5,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'June',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    27: {
+                        0: {
+                            v: 6,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'July',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    28: {
+                        0: {
+                            v: 7,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'August',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    30: {
+                        0: {
+                            v: 8,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'October',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    32: {
+                        0: {
+                            v: 9,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 'December',
+                            t: CellValueType.STRING,
+                        },
+                    },
                 },
             },
         },
@@ -400,7 +506,10 @@ describe('Test nested functions', () => {
             new Fact(FUNCTION_NAMES_MATH.FACT),
             new T(FUNCTION_NAMES_TEXT.T),
             new Text(FUNCTION_NAMES_TEXT.TEXT),
-            new Hyperlink(FUNCTION_NAMES_LOOKUP.HYPERLINK)
+            new Hyperlink(FUNCTION_NAMES_LOOKUP.HYPERLINK),
+            new Row(FUNCTION_NAMES_LOOKUP.ROW),
+            new Match(FUNCTION_NAMES_LOOKUP.MATCH),
+            new Index(FUNCTION_NAMES_LOOKUP.INDEX)
         );
 
         calculate = (formula: string) => {
@@ -587,6 +696,35 @@ describe('Test nested functions', () => {
             const result5 = calculateByRuntime('=HYPERLINK("")');
             expect(result5?.v).toBe('');
             expect(result5?.p).toBeUndefined();
+        });
+
+        it('Index formula test', () => {
+            const result = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(22-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result).toStrictEqual([['January']]);
+
+            const result2 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(23-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result2).toStrictEqual([['February']]);
+
+            const result3 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(24-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result3).toStrictEqual([['March']]);
+
+            const result4 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(25-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result4).toStrictEqual([['April']]);
+
+            const result5 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(26-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result5).toStrictEqual([['June']]);
+
+            const result6 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(27-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result6).toStrictEqual([['July']]);
+
+            const result7 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(28-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result7).toStrictEqual([['August']]);
+
+            const result8 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(29-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result8).toStrictEqual([['October']]);
+
+            const result9 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(30-ROW($D$21),$A$22:$A$33,0)),"")');
+            expect(result9).toStrictEqual([['December']]);
         });
     });
 });

@@ -41,6 +41,14 @@ export class CubeValueObject extends BaseValueObject {
         this._values = [];
     }
 
+    getCubeValues(): ArrayValueObject[] {
+        return this._values;
+    }
+
+    getCubeCount(): number {
+        return this._values.length;
+    }
+
     override sum() {
         const result = NumberValueObject.create(0);
         this._values.forEach((arr) => {

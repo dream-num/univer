@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ThemeService } from '../../../../services/theme/theme.service';
 import type { Nullable } from '../../../../shared';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { CustomRangeType, IDocumentBody, ITextRun } from '../../../../types/interfaces';
@@ -338,8 +339,12 @@ function isTextRunsEqual(textRuns: ITextRun[] | undefined, oldTextRuns: ITextRun
     return false;
 }
 
-export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) => {
-    const { selection, body: insertBody, doc } = params;
+export interface IReplaceSelectionTextRunsParams extends IReplaceSelectionTextXParams {
+    themeService: ThemeService;
+}
+
+export const replaceSelectionTextRuns = (params: IReplaceSelectionTextRunsParams) => {
+    const { selection, body: insertBody, doc, themeService } = params;
     const segmentId = selection.segmentId;
     const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) return false;
@@ -358,7 +363,15 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) =
                     body: isTextRunsEqual(textRunsSlice, oldTextRunsSlice)
                         ? undefined
                         : {
-                            textRuns: textRunsSlice,
+                            textRuns: textRunsSlice?.map((textRun) => ({
+                                ...textRun,
+                                ts: {
+                                    ...textRun.ts,
+                                    cl: textRun.ts?.cl?.rgb?.includes('.')
+                                        ? { rgb: themeService.getColorFromTheme(textRun.ts?.cl?.rgb ?? '') }
+                                        : textRun.ts?.cl,
+                                },
+                            })),
                             dataStream: '',
                         },
                     len: text.length,

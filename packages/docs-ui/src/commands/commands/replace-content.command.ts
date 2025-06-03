@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, IMutationInfo, ITextRange, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
@@ -357,6 +357,7 @@ export const ReplaceTextRunsCommand: ICommand<IReplaceContentCommandParams> = {
         const { unitId, body, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
+        const themeService = accessor.get(ThemeService);
         // const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -374,6 +375,7 @@ export const ReplaceTextRunsCommand: ICommand<IReplaceContentCommandParams> = {
                 endOffset: prevBody.dataStream.length - 2,
                 collapsed: false,
             },
+            themeService,
         });
 
         if (!textX) {

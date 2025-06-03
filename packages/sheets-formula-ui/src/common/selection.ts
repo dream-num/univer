@@ -22,10 +22,11 @@ export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_pl
 
 export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
+
     return {
         id,
         strokeWidth: 1,
-        stroke: themeService.getColorFromTheme(refColor),
+        stroke: refColor,
         fill,
         widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgetSize: 6,

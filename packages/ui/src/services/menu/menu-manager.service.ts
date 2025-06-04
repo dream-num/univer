@@ -286,7 +286,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 }
 
                 if (menuItem.item || menuItem.children) {
-                    result.push(menuItem as IMenuSchema); // 使用类型断言补充缺失字段
+                    result.push(menuItem as IMenuSchema);
                 }
             }
         }

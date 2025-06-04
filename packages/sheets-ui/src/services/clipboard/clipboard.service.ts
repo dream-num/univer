@@ -691,22 +691,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const colManager = pasteFromWorksheet.getColumnManager();
         const rowManager = pasteFromWorksheet.getRowManager();
-        const defaultColumnWidth = pasteFromWorksheet.getConfig().defaultColumnWidth;
-        const defaultRowHeight = pasteFromWorksheet.getConfig().defaultRowHeight;
 
         const colProperties: IClipboardPropertyItem[] = [];
         const rowProperties: IClipboardPropertyItem[] = [];
 
         range.cols.forEach((i) => {
-            const column = colManager.getColumnOrCreate(i);
-            colProperties.push({ width: `${column.w || defaultColumnWidth}` });
+            colProperties.push({ width: `${colManager.getColumnWidth(i)}` });
         });
 
         range.rows.forEach((j) => {
-            const row = rowManager.getRowOrCreate(j);
-            const { ah = defaultRowHeight, h = defaultRowHeight } = row;
-            const height = Math.max(ah, h);
-            rowProperties.push({ height: `${height}` });
+            rowProperties.push({ height: `${rowManager.getRowHeight(j)}` });
         });
 
         if (cachedData.copyType === COPY_TYPE.CUT) {

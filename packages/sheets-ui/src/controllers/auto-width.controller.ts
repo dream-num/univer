@@ -41,8 +41,7 @@ export const createAutoColWidthUndoMutationsByRedos = (
     for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i];
         for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-            const col = manager.getColumnOrCreate(j);
-            colWidthObj[j] = col.w;
+            colWidthObj[j] = manager.getColumnWidth(j);
         }
     }
 

@@ -121,6 +121,12 @@ test('memory', async ({ page }) => {
     test.setTimeout(60_000);
     const client = await page.context().newCDPSession(page);
 
+    let errored = false;
+    page.on('pageerror', (error) => {
+        console.error('Page error:', error);
+        errored = true;
+    });
+
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(5000);
     const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
@@ -153,6 +159,9 @@ test('memory', async ({ page }) => {
     expect(unitMemoryOverflow).toBeLessThanOrEqual(MAX_UNIT_MEMORY_OVERFLOW);
     expect(instanceMemoryOverflow).toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
     expect(univerMemoryOverflow).toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
+
+    // TODO: enable this when the memory leak is fixed
+    // expect(errored).toBeFalsy();
 });
 
 declare global {

@@ -29,6 +29,7 @@ import {
     ComponentContainer,
     ContextMenu,
     GlobalZone,
+    ThemeSwitcherService,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
     useDependency,
@@ -41,7 +42,7 @@ import {
     ReactFlowProvider,
     useNodesState,
 } from '@xyflow/react';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
 import { FlowManagerService } from '../../services/flow/flow-manager.service';
@@ -76,6 +77,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const renderManagerService = useDependency(IRenderManagerService);
     const flowManagerService = useDependency(FlowManagerService);
     const commandService = useDependency(ICommandService);
+    const themeSwitcherService = useDependency(ThemeSwitcherService);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
@@ -92,6 +94,16 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             onRendered?.(contentRef.current);
         }
     }, [onRendered]);
+
+    useLayoutEffect(() => {
+        const sub = themeService.currentTheme$.subscribe((theme) => {
+            themeSwitcherService.injectThemeToHead(theme);
+        });
+
+        return () => {
+            sub.unsubscribe();
+        };
+    }, []);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
     const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);

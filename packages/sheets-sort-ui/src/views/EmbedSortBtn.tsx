@@ -50,7 +50,7 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
 
     return (
         <ButtonGroup
-            className="univer-mb-3 univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-2 univer-gap-2"
+            className="univer-mb-3 univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-2"
         >
             <Button onClick={() => apply(true)}>
                 <AscendingIcon />

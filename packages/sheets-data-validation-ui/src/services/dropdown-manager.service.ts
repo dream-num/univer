@@ -453,7 +453,13 @@ export class DataValidationDropdownManagerService extends Disposable {
                 throw new Error('[DataValidationDropdownManagerService]: unknown type!');
         }
 
-        popupDisposable = this._cellDropdownManagerService.showDropdown(dropdownParam);
+        popupDisposable = this._cellDropdownManagerService.showDropdown({
+            ...dropdownParam,
+            onHide: () => {
+                this._activeDropdown = null;
+                this._activeDropdown$.next(null);
+            },
+        });
         if (!popupDisposable) {
             throw new Error('[DataValidationDropdownManagerService]: cannot show dropdown!');
         }

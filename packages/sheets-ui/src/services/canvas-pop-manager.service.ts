@@ -652,6 +652,14 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         const canvasElement = engine.getCanvasElement();
+        if (!canvasElement) {
+            return {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+            };
+        }
         const canvasClientRect = canvasElement.getBoundingClientRect();
 
         // We should take the scale into account when canvas is scaled by CSS.

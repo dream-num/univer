@@ -38,7 +38,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/Picture1.jpg',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/jYGEpeogMHxvwoiSqIMMn_Picture1.jpg',
                 },
             },
         },

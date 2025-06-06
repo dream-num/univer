@@ -123,7 +123,7 @@ test('memory', async ({ page }) => {
 
     let errored = false;
     page.on('pageerror', (error) => {
-        console.error('Page error:', error);
+        console.error('Page error:', error.name, error.message, error.stack);
         errored = true;
     });
 
@@ -160,8 +160,7 @@ test('memory', async ({ page }) => {
     expect(instanceMemoryOverflow).toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
     expect(univerMemoryOverflow).toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
 
-    // TODO: enable this when the memory leak is fixed
-    // expect(errored).toBeFalsy();
+    expect(errored).toBeFalsy();
 });
 
 declare global {

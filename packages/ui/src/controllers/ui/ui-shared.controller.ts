@@ -17,7 +17,7 @@
 import type { IDisposable, Injector, IUniverInstanceService, LifecycleService } from '@univerjs/core';
 import type { IRenderManagerService } from '@univerjs/engine-render';
 import type { ILayoutService } from '../../services/layout/layout.service';
-import { Disposable, isInternalEditorID, LifecycleStages } from '@univerjs/core';
+import { Disposable, isInternalEditorID, LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
 
 const STEADY_TIMEOUT = 3000;
 
@@ -52,33 +52,41 @@ export abstract class SingleUnitUIController extends Disposable {
                 this.disposeWithMe(this._layoutService.registerContentElement(contentElement));
             }
 
-            await this._lifecycleService.onStage(LifecycleStages.Ready);
-            this._renderTimeout = window.setTimeout(() => {
-                // First render
-                const allRenders = this._renderManagerService.getRenderAll();
-                for (const [key, render] of allRenders) {
-                    if (this._changeRenderUnit(key, contentElement)) break;
+            try {
+                await this._lifecycleService.onStage(LifecycleStages.Ready);
+                this._renderTimeout = window.setTimeout(() => {
+                    // First render.
+                    const allRenders = this._renderManagerService.getRenderAll();
+                    for (const [key] of allRenders) {
+                        if (this._changeRenderUnit(key, contentElement)) break;
+                    }
+
+                    // Render as focus shifts.
+                    this.disposeWithMe(this._instanceService.focused$.subscribe((unit) => {
+                        if (unit) this._changeRenderUnit(unit, contentElement);
+                    }));
+
+                    // When renderer created, check if matches the focused.
+                    this.disposeWithMe(this._renderManagerService.created$.subscribe((renderer) => {
+                        if (renderer.unitId === this._instanceService.getFocusedUnit()?.getUnitId()) this._changeRenderUnit(renderer.unitId, contentElement);
+                    }));
+
+                    this.disposeWithMe(this._renderManagerService.disposed$.subscribe((renderer) => {
+                        if (this._currentRenderId === renderer) this._currentRenderId = null;
+                    }));
+
+                    this._lifecycleService.stage = LifecycleStages.Rendered;
+                    this._steadyTimeout = window.setTimeout(() => {
+                        this._lifecycleService.stage = LifecycleStages.Steady;
+                    }, STEADY_TIMEOUT);
+                }, 300);
+            } catch (error) {
+                if (error instanceof LifecycleUnreachableError) {
+                    return;
                 }
 
-                // Render as focus shifts
-                this.disposeWithMe(this._instanceService.focused$.subscribe((unit) => {
-                    if (unit) this._changeRenderUnit(unit, contentElement);
-                }));
-
-                // When renderer created, check if matches the focused.
-                this.disposeWithMe(this._renderManagerService.created$.subscribe((renderer) => {
-                    if (renderer.unitId === this._instanceService.getFocusedUnit()?.getUnitId()) this._changeRenderUnit(renderer.unitId, contentElement);
-                }));
-
-                this.disposeWithMe(this._renderManagerService.disposed$.subscribe((renderer) => {
-                    if (this._currentRenderId === renderer) this._currentRenderId = null;
-                }));
-
-                this._lifecycleService.stage = LifecycleStages.Rendered;
-                this._steadyTimeout = window.setTimeout(() => {
-                    this._lifecycleService.stage = LifecycleStages.Steady;
-                }, STEADY_TIMEOUT);
-            }, 300);
+                throw error;
+            }
         }));
     }
 

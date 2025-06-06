@@ -1,5 +1,30 @@
 # Changelog
 
+# [0.8.0](https://github.com/dream-num/univer/compare/v0.8.0-beta.1...v0.8.0) (2025-06-06)
+
+
+### Bug Fixes
+
+* change image cdn ([#5330](https://github.com/dream-num/univer/issues/5330)) ([d355217](https://github.com/dream-num/univer/commit/d355217046e44740e1c58e3bc9b08526c63eaaf1))
+* **core:** update comments for td and pd properties to indicate incomplete implementation ([#5301](https://github.com/dream-num/univer/issues/5301)) ([a3e9020](https://github.com/dream-num/univer/commit/a3e9020822cb6d5160c1fd5b86b882dbaefebbc8))
+* **debugger:** conditionally include useUser() based on unitType ([#5296](https://github.com/dream-num/univer/issues/5296)) ([973d536](https://github.com/dream-num/univer/commit/973d53670ba8550f23225f8eeaa27623337ee1f8))
+* **find-replace:** debounce find string input to improve performance ([#5306](https://github.com/dream-num/univer/issues/5306)) ([c03143e](https://github.com/dream-num/univer/commit/c03143e15955adfc03f1be9e0481209121ec3fa2))
+* **formula:** fix INDEX formula calculation error ([#5311](https://github.com/dream-num/univer/issues/5311)) ([499a44a](https://github.com/dream-num/univer/commit/499a44af48d65b08b61cbdbacf26d28c5013612f))
+* **formula:** fix INDEX formula description ([#5315](https://github.com/dream-num/univer/issues/5315)) ([0c68bc3](https://github.com/dream-num/univer/commit/0c68bc3480dc7e6747e585d24ffcdcd118ade90d))
+* optimize the storage of worksheet rowData and columnData ([#5317](https://github.com/dream-num/univer/issues/5317)) ([46279d4](https://github.com/dream-num/univer/commit/46279d4fe0df82f9690e08b458bfcca5de422734))
+* **sheets-conditional-format-ui:** conditional-format rendering error ([#5304](https://github.com/dream-num/univer/issues/5304)) ([9f8c6b8](https://github.com/dream-num/univer/commit/9f8c6b8fa143b8d1adb12c9cb77c19654a5f1e2a))
+* **sheets-formula-ui:** formula-editor highlight error ([#5303](https://github.com/dream-num/univer/issues/5303)) ([3ecfa8a](https://github.com/dream-num/univer/commit/3ecfa8acfcb6fc6adbdccc8df4d9413ee80265d8))
+* **sheets-ui:** dispose univer error ([#5328](https://github.com/dream-num/univer/issues/5328)) ([9569055](https://github.com/dream-num/univer/commit/95690553cccfe461ef2b719cf0814b85ae135c6b))
+* **ui:** improve hidden state management for menu items ([#5320](https://github.com/dream-num/univer/issues/5320)) ([4711874](https://github.com/dream-num/univer/commit/47118746896b578b5c5d73082fc54bbe0ac8eff0))
+* **ui:** refactor tooltip handling and improve element reference management ([#5331](https://github.com/dream-num/univer/issues/5331)) ([ae09799](https://github.com/dream-num/univer/commit/ae097998c77348ae8bb7ac57aa1cd2d9196556ee))
+* **ui:** resetting active state on hide ([#5325](https://github.com/dream-num/univer/issues/5325)) ([243bb39](https://github.com/dream-num/univer/commit/243bb39ec5de93fc0d8d409dca0939caec957948))
+* **uni:** partially fix some uni mode feature ([#5326](https://github.com/dream-num/univer/issues/5326)) ([c1738d8](https://github.com/dream-num/univer/commit/c1738d8653203cae581dbf3c49726305c7e807ed))
+
+
+### Features
+
+* **core:** cell editor highlight color calc ([#5312](https://github.com/dream-num/univer/issues/5312)) ([5c0734c](https://github.com/dream-num/univer/commit/5c0734c870f1470b152235231608fa201253a3ad))
+
 # [0.8.0-beta.1](https://github.com/dream-num/univer/compare/v0.8.0-beta.0...v0.8.0-beta.1) (2025-05-29)
 
 

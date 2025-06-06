@@ -116,4 +116,17 @@ describe('Test LifecycleService', () => {
         expect(lifecycleStages4).toEqual(steadyStages);
         expect(lifecycleStages5).toEqual(steadyStages);
     });
+
+    it('Should "onStage" reject with LifecycleUnreachableError if stage is unreachable', async () => {
+        injector = createLifecycleTestBed().injector;
+        lifecycleService = injector.get(LifecycleService);
+
+        lifecycleService.stage = LifecycleStages.Starting;
+        lifecycleService.stage = LifecycleStages.Ready;
+
+        injector.dispose();
+        await expect(lifecycleService.onStage(LifecycleStages.Rendered)).rejects.toThrowError(
+            '[LifecycleService]: lifecycle stage "Rendered" will never be reached!'
+        );
+    });
 });

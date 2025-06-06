@@ -179,6 +179,7 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
         title: 'formula.insert.more',
+        tooltip: 'formula.insert.tooltip',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {

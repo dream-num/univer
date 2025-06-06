@@ -37,6 +37,7 @@ export interface ITooltipWrapperRef {
 
 export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((props, ref) => {
     const { children, ...tooltipProps } = props;
+
     const spanRef = useRef<HTMLSpanElement>(null);
 
     const [tooltipVisible, setTooltipVisible] = useState(false);
@@ -65,19 +66,25 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
         el: spanRef.current,
     }));
 
-    return (
-        <Tooltip
-            visible={tooltipVisible}
-            onVisibleChange={handleChangeTooltipVisible}
-            {...tooltipProps}
-        >
+    return tooltipProps.title
+        ? (
+            <Tooltip
+                visible={tooltipVisible}
+                onVisibleChange={handleChangeTooltipVisible}
+                {...tooltipProps}
+            >
+                <span ref={spanRef}>
+                    <TooltipWrapperContext.Provider value={contextValue}>
+                        {children}
+                    </TooltipWrapperContext.Provider>
+                </span>
+            </Tooltip>
+        )
+        : (
             <span ref={spanRef}>
-                <TooltipWrapperContext.Provider value={contextValue}>
-                    {children}
-                </TooltipWrapperContext.Provider>
+                {children}
             </span>
-        </Tooltip>
-    );
+        );
 });
 
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {

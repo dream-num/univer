@@ -64,7 +64,7 @@ export function Ribbon(props: IRibbonProps) {
 
     const containerRef = useRef<HTMLDivElement>(null!);
     const toolbarItemRefs = useRef<Record<string, {
-        width: number;
+        el: HTMLElement;
         key: string;
         order: number;
         groupOrder: number;
@@ -217,7 +217,8 @@ export function Ribbon(props: IRibbonProps) {
                     const gapWidth = (allGroups.length - 1) * 8;
                     totalWidth += gapWidth;
 
-                    for (const { width, key } of sortedToolbarItems) {
+                    for (const { el, key } of sortedToolbarItems) {
+                        const { width } = el.getBoundingClientRect();
                         totalWidth += width + 8;
 
                         if (totalWidth > avaliableWidth) {
@@ -249,7 +250,7 @@ export function Ribbon(props: IRibbonProps) {
                   univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
                 `, {
                     'univer-hidden': !fakeToolbarVisible,
-                }, borderBottomClassName)}
+                }, divideXClassName, borderBottomClassName)}
             >
                 {activeGroup.allGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
                     <Fragment key={groupItem.key}>
@@ -262,7 +263,7 @@ export function Ribbon(props: IRibbonProps) {
                                         ref={(ref) => {
                                             if (ref?.el) {
                                                 toolbarItemRefs.current[child.key] = {
-                                                    width: ref.el.getBoundingClientRect().width,
+                                                    el: ref.el,
                                                     key: child.key,
                                                     order: index,
                                                     groupOrder: groupItem.order,

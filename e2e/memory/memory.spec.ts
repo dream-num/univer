@@ -123,7 +123,7 @@ test('memory', async ({ page }) => {
 
     let errored = false;
     page.on('pageerror', (error) => {
-        console.error('Page error:', error);
+        console.error('Page error:', error.name, error.message, error.stack);
         errored = true;
     });
 

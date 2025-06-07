@@ -61,6 +61,7 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
+    numfmt,
     ObjectMatrix,
     RxDisposable,
     Tools,
@@ -611,6 +612,8 @@ export class SheetClipboardController extends RxDisposable {
                 [range.rows[0]]: {
                     [range.cols[0]]: {
                         p,
+                        v: null,
+                        f: null,
                     },
                 },
             };
@@ -620,17 +623,37 @@ export class SheetClipboardController extends RxDisposable {
                     [range.rows[0]]: {
                         [range.cols[0]]: {
                             f: text,
+                            v: null,
+                            p: null,
                         },
                     },
                 };
             } else {
-                cellValue = {
-                    [range.rows[0]]: {
-                        [range.cols[0]]: {
-                            v: text,
+                const pattern = numfmt.parseNumber(text);
+                if (pattern?.z) {
+                    cellValue = {
+                        [range.rows[0]]: {
+                            [range.cols[0]]: {
+                                v: pattern.v,
+                                s: {
+                                    n: {
+                                        pattern: pattern.z,
+                                    },
+                                },
+                                f: null,
+                            },
                         },
-                    },
-                };
+                    };
+                } else {
+                    cellValue = {
+                        [range.rows[0]]: {
+                            [range.cols[0]]: {
+                                v: text,
+                                f: null,
+                            },
+                        },
+                    };
+                }
             }
         }
 

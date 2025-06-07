@@ -24,6 +24,9 @@ import { CellValueType, isSafeNumeric } from '@univerjs/core';
  * @returns
  */
 export function getCellValue(type: Nullable<CellValueType>, cell: ICellData) {
+    if (cell.v === undefined || cell.v === null) {
+        return cell.v;
+    }
     if (type === CellValueType.NUMBER) {
         return Number(cell.v);
     }

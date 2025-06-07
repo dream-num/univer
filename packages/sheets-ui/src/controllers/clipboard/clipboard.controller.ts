@@ -61,6 +61,7 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
+    numfmt,
     ObjectMatrix,
     RxDisposable,
     Tools,
@@ -624,13 +625,30 @@ export class SheetClipboardController extends RxDisposable {
                     },
                 };
             } else {
-                cellValue = {
-                    [range.rows[0]]: {
-                        [range.cols[0]]: {
-                            v: text,
+                const pattern = numfmt.parseNumber(text);
+                if (pattern?.z) {
+                    cellValue = {
+                        [range.rows[0]]: {
+                            [range.cols[0]]: {
+                                v: pattern.v,
+                                s: {
+                                    n: {
+                                        pattern: pattern.z
+                                    }
+                                },
+                                f: null,
+                            },
                         },
-                    },
-                };
+                    };
+                } else {
+                    cellValue = {
+                        [range.rows[0]]: {
+                            [range.cols[0]]: {
+                                v: text,
+                            },
+                        },
+                    };
+                }
             }
         }
 
@@ -662,9 +680,9 @@ export class SheetClipboardController extends RxDisposable {
         data: ObjectMatrix<ICellDataWithSpanInfo>,
         payload: ICopyPastePayload
     ): {
-            redos: IMutationInfo[];
-            undos: IMutationInfo[];
-        } {
+        redos: IMutationInfo[];
+        undos: IMutationInfo[];
+    } {
         return this._injector.invoke((accessor) => {
             return getDefaultOnPasteCellMutations(pasteFrom, pasteTo, data, payload, accessor);
         });

@@ -613,7 +613,7 @@ export class SheetClipboardController extends RxDisposable {
                     [range.cols[0]]: {
                         p,
                         v: null,
-                        f: null
+                        f: null,
                     },
                 },
             };
@@ -624,7 +624,7 @@ export class SheetClipboardController extends RxDisposable {
                         [range.cols[0]]: {
                             f: text,
                             v: null,
-                            p: null
+                            p: null,
                         },
                     },
                 };
@@ -637,8 +637,8 @@ export class SheetClipboardController extends RxDisposable {
                                 v: pattern.v,
                                 s: {
                                     n: {
-                                        pattern: pattern.z
-                                    }
+                                        pattern: pattern.z,
+                                    },
                                 },
                                 f: null,
                             },
@@ -685,9 +685,9 @@ export class SheetClipboardController extends RxDisposable {
         data: ObjectMatrix<ICellDataWithSpanInfo>,
         payload: ICopyPastePayload
     ): {
-        redos: IMutationInfo[];
-        undos: IMutationInfo[];
-    } {
+            redos: IMutationInfo[];
+            undos: IMutationInfo[];
+        } {
         return this._injector.invoke((accessor) => {
             return getDefaultOnPasteCellMutations(pasteFrom, pasteTo, data, payload, accessor);
         });

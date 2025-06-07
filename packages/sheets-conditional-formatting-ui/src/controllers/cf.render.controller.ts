@@ -80,6 +80,14 @@ export class SheetsCfRenderController extends Disposable {
                         ...result.style,
                     };
                     Object.assign(cloneCell, { s: activeStyle });
+                    
+                    // Merge conditional formatting styles with existing interceptorStyle to ensure CF text color takes precedence
+                    if (cloneCell.interceptorStyle || result.style.cl) {
+                        cloneCell.interceptorStyle = {
+                            ...cloneCell.interceptorStyle,
+                            ...result.style,
+                        };
+                    }
                 }
 
                 if (!cloneCell.fontRenderExtension) {

@@ -43,6 +43,8 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
             const urlWithParams = request.getUrlWithParams();
             const fetchParams = parseFetchParamsFromRequest(request);
 
+            const { responseType } = request;
+
             xhr.open(request.method, urlWithParams);
             if (request.withCredentials) {
                 xhr.withCredentials = true;
@@ -53,7 +55,6 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
             }
 
             let responseHeader: Nullable<ResponseHeader>;
-
             const buildResponseHeader = () => {
                 if (responseHeader) {
                     return responseHeader;
@@ -66,7 +67,6 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
 
             const onLoadHandler = () => {
                 const { headers, statusText, status } = buildResponseHeader();
-                const { responseType } = request;
 
                 let body: any = null;
                 let error: any = null;
@@ -92,6 +92,13 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                         body = originalBody;
                         error = e;
                     }
+                }
+
+                if (responseType === 'blob' && !(body instanceof Blob)) {
+                    // If the responseType is blob, we should convert the response to a Blob object.
+                    // If the response is not a Blob object, we will make success as false to emit a HTTPResponseError.
+                    success = false;
+                    error = new Error('Response is not a Blob object');
                 }
 
                 if (success) {
@@ -131,6 +138,8 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
 
                 observer.error(e);
             };
+
+            xhr.responseType = responseType || '';
 
             xhr.addEventListener('load', onLoadHandler);
             xhr.addEventListener('error', onErrorHandler);

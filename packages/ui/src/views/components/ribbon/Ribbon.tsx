@@ -88,7 +88,7 @@ export function Ribbon(props: IRibbonProps) {
         const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
 
         // Collect all hidden$ Observables and their corresponding paths
-        const hiddenObservaleMap: Observable<boolean>[] = [];
+        const hiddenObservableMap: Observable<boolean>[] = [];
         const hiddenKeyMap: string[] = [];
         for (const group of ribbon) {
             if (group.children) {
@@ -96,7 +96,7 @@ export function Ribbon(props: IRibbonProps) {
                     if (item.children) {
                         for (const child of item.children) {
                             if (child.item?.hidden$) {
-                                hiddenObservaleMap.push(child.item.hidden$);
+                                hiddenObservableMap.push(child.item.hidden$);
                                 hiddenKeyMap.push(`${group.key}/${item.key}/${child.key}`);
                             }
                         }
@@ -106,7 +106,7 @@ export function Ribbon(props: IRibbonProps) {
         }
 
         // Only get the current value once, not continuously subscribe
-        combineLatest(hiddenObservaleMap)
+        combineLatest(hiddenObservableMap)
             .subscribe((hiddenMap) => {
                 const newRibbon: IMenuSchema[] = [];
 

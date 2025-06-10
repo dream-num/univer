@@ -458,14 +458,53 @@ export class Rectangle {
      * // moved = { startRow: 3, startColumn: 2, endRow: 4, endColumn: 3 }
      * ```
      */
-    static moveOffset = (range: IRange, offsetX: number, offsetY: number): IRange =>
-        ({
-            ...range,
-            startRow: range.startRow + offsetY,
-            endRow: range.endRow + offsetY,
-            startColumn: range.startColumn + offsetX,
-            endColumn: range.endColumn + offsetX,
-        });
+    static moveOffset = (range: IRange, offsetX: number, offsetY: number): IRange => {
+        const _range = { ...range };
+
+        // The start absolute reference type determines whether the range start position needs to be moved
+        switch (range.startAbsoluteRefType) {
+            // The start absolute reference type is row absolute reference, then only the start column position is moved
+            case AbsoluteRefType.ROW:
+                _range.startColumn += offsetX;
+                break;
+            // The start absolute reference type is column absolute reference, then only the start row position is moved
+            case AbsoluteRefType.COLUMN:
+                _range.startRow += offsetY;
+                break;
+            // The start absolute reference type is both row and column absolute reference, then the start position is not moved
+            case AbsoluteRefType.ALL:
+                break;
+            // The start absolute reference type is not absolute reference, then both the start row and start column positions are moved
+            case AbsoluteRefType.NONE:
+            default:
+                _range.startRow += offsetY;
+                _range.startColumn += offsetX;
+                break;
+        }
+
+        // The end absolute reference type determines whether the range end position needs to be moved
+        switch (range.endAbsoluteRefType) {
+            // The end absolute reference type is row absolute reference, then only the end column position is moved
+            case AbsoluteRefType.ROW:
+                _range.endColumn += offsetX;
+                break;
+            // The end absolute reference type is column absolute reference, then only the end row position is moved
+            case AbsoluteRefType.COLUMN:
+                _range.endRow += offsetY;
+                break;
+            // The end absolute reference type is both row and column absolute reference, then the end position is not moved
+            case AbsoluteRefType.ALL:
+                break;
+            // The end absolute reference type is not absolute reference, then both the end row and end column positions are moved
+            case AbsoluteRefType.NONE:
+            default:
+                _range.endRow += offsetY;
+                _range.endColumn += offsetX;
+                break;
+        }
+
+        return _range;
+    };
 
     /**
      * Subtracts one range from another, returning the remaining areas as separate ranges

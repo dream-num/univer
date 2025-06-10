@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
-
 import type { Injector } from '@univerjs/core';
-import { HTTPService } from '../../http.service';
-import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
-import { IHTTPImplementation } from '../../implementations/implementation';
-import { HTTPResponse } from '../../response';
+
+import type { MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+import { createHTTPTestBed } from '../../__testing__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
-import { MergeInterceptorFactory } from '../merge-interceptor';
+import { HTTPService } from '../../http.service';
+import { IHTTPImplementation } from '../../implementations/implementation';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION, HTTPRequest } from '../../request';
+import { HTTPResponse } from '../../response';
+import { MergeInterceptorFactory } from '../merge-interceptor';
 
 describe('test "HTTPMergeInterceptor"', () => {
     let httpService: HTTPService;
@@ -90,10 +91,10 @@ describe('test "HTTPMergeInterceptor"', () => {
         const request2 = httpService.post<Response>(path, { body: { ids: [2] } });
 
         request1.then((e) => {
-            expect((e as HTTPResponse<Response>).body.list).toEqual(response.list);
+            expect(e.body.list).toEqual(response.list);
         });
         request2.then((e) => {
-            expect((e as HTTPResponse<Response>).body.list).toEqual(response.list);
+            expect(e.body.list).toEqual(response.list);
         });
 
         await vitest.advanceTimersByTimeAsync(1200);

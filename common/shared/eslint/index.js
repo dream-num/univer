@@ -9,7 +9,6 @@ exports.baseRules = {
     'antfu/if-newline': 'off',
     'no-param-reassign': ['warn'],
     'eol-last': ['error', 'always'],
-    'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',
     'style/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'style/brace-style': ['warn', '1tbs', { allowSingleLine: true }],
@@ -77,7 +76,6 @@ exports.baseRules = {
     'react/no-unstable-default-props': 'warn',
     'command/command': 'off',
     'jsdoc/tag-lines': 'off',
-    'import/consistent-type-specifier-style': 'warn',
 
     'no-restricted-imports': [
         'error',
@@ -98,7 +96,6 @@ exports.baseRules = {
     'react/no-use-context': 'off',
 
     // TODO: debatable rules
-    'react/no-duplicate-key': 'warn',
     'test/prefer-lowercase-title': 'off',
     'antfu/top-level-function': 'off',
     'style/operator-linebreak': 'off',
@@ -119,7 +116,6 @@ exports.baseRules = {
     'unicorn/prefer-dom-node-text-content': 'warn',
     'unicorn/prefer-number-properties': 'warn',
     'no-prototype-builtins': 'warn',
-    // 'style/no-tabs': 'warn',
     'style/quotes': ['warn', 'single', { avoidEscape: true }],
     'react/display-name': 'off',
     'react-hooks/rules-of-hooks': 'off',

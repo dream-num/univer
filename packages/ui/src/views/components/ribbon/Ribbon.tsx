@@ -18,14 +18,14 @@ import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { LocaleService, throttle } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
 import { DatabaseIcon, EyeIcon, FunctionIcon, HomeIcon, InsertIcon, MoreDownIcon, MoreFunctionIcon } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
-import { useDependency } from '../../../utils/di';
+import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
@@ -49,8 +49,11 @@ export function Ribbon(props: IRibbonProps) {
     const { ribbonType, headerMenuComponents, headerMenu = true } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
     const [menuChangedTimes, setMenuChangedTimes] = useState(0);
+
+    const focusedUnit = useObservable(univerInstanceService.focused$);
 
     useEffect(() => {
         const subscription = menuManagerService.menuChanged$.subscribe(() => {
@@ -164,7 +167,7 @@ export function Ribbon(props: IRibbonProps) {
                 }
             })
             .unsubscribe();
-    }, [menuChangedTimes]);
+    }, [menuChangedTimes, focusedUnit]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];

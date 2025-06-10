@@ -348,7 +348,37 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
             },
             name: 'Sheet4',
         },
-
+        sheet5: {
+            id: 'sheet5',
+            name: 'Sheet5',
+            cellData: {
+                1: {
+                    1: { // B2
+                        v: 5,
+                        t: CellValueType.NUMBER,
+                    },
+                    3: { // D2
+                        f: '=$B2',
+                    },
+                    4: { // E2
+                        f: '=$B2',
+                        si: 'MFYkBI',
+                    },
+                    5: { // F2
+                        si: 'MFYkBI',
+                    },
+                    6: { // G2
+                        si: 'MFYkBI',
+                    },
+                    7: { // H2
+                        si: 'MFYkBI',
+                    },
+                    8: { // I2
+                        si: 'MFYkBI',
+                    },
+                },
+            },
+        },
     },
     locale: LocaleType.ZH_CN,
     name: '',
@@ -915,6 +945,81 @@ describe('Test update formula ', () => {
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(10, 0, 13, 0);
             expect(valuesRedo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }], [{ f: '=SUM(A8)' }], [{ f: '=SUM(A10)' }], [{ f: '=SUM(A11)' }]]);
+        });
+
+        it('Insert row, update range of absolute reference type', async () => {
+            const result = await commandService.executeCommand(InsertRowCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet5',
+                range: {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+                direction: Direction.UP,
+            });
+            expect(result).toBeTruthy();
+
+            const cellB3 = getValues(2, 1, 2, 1, 'sheet5');
+            expect(cellB3).toStrictEqual([
+                [{ v: 5, t: CellValueType.NUMBER }],
+            ]);
+            const cellD3 = getValues(2, 3, 2, 3, 'sheet5');
+            expect(cellD3).toStrictEqual([
+                [{ f: '=$B3' }],
+            ]);
+            const cellE3 = getValues(2, 4, 2, 4, 'sheet5');
+            expect(cellE3).toStrictEqual([
+                [{ f: '=$B3' }],
+            ]);
+            const cellF3 = getValues(2, 5, 2, 5, 'sheet5');
+            expect(cellF3).toStrictEqual([
+                [{ f: '=$B3' }],
+            ]);
+            const cellG3 = getValues(2, 6, 2, 6, 'sheet5');
+            expect(cellG3).toStrictEqual([
+                [{ f: '=$B3' }],
+            ]);
+            const cellH3 = getValues(2, 7, 2, 7, 'sheet5');
+            expect(cellH3).toStrictEqual([
+                [{ f: '=$B3' }],
+            ]);
+            const cellI3 = getValues(2, 8, 2, 8, 'sheet5');
+            expect(cellI3).toStrictEqual([
+                [{ f: '=$B3' }],
+            ]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+            const cellB2 = getValues(1, 1, 1, 1, 'sheet5');
+            expect(cellB2).toStrictEqual([
+                [{ v: 5, t: CellValueType.NUMBER }],
+            ]);
+            const cellD2 = getValues(1, 3, 1, 3, 'sheet5');
+            expect(cellD2).toStrictEqual([
+                [{ f: '=$B2' }],
+            ]);
+            const cellE2 = getValues(1, 4, 1, 4, 'sheet5');
+            expect(cellE2).toStrictEqual([
+                [{ f: '=$B2', si: 'MFYkBI' }],
+            ]);
+            const cellF2 = getValues(1, 5, 1, 5, 'sheet5');
+            expect(cellF2).toStrictEqual([
+                [{ si: 'MFYkBI' }],
+            ]);
+            const cellG2 = getValues(1, 6, 1, 6, 'sheet5');
+            expect(cellG2).toStrictEqual([
+                [{ si: 'MFYkBI' }],
+            ]);
+            const cellH2 = getValues(1, 7, 1, 7, 'sheet5');
+            expect(cellH2).toStrictEqual([
+                [{ si: 'MFYkBI' }],
+            ]);
+            const cellI2 = getValues(1, 8, 1, 8, 'sheet5');
+            expect(cellI2).toStrictEqual([
+                [{ si: 'MFYkBI' }],
+            ]);
         });
 
         it('Insert column, update reference', async () => {

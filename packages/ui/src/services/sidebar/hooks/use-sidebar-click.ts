@@ -17,6 +17,7 @@
 import { useEffect } from 'react';
 import { useDependency } from '../../../utils/di';
 import { ISidebarService } from '../sidebar.service';
+
 /**
  * Response panel to a click event.
  */

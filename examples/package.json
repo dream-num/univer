@@ -92,7 +92,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "cross-env": "^7.0.3",
         "detect-port": "^2.1.0",
-        "esbuild": "^0.25.4",
+        "esbuild": "^0.25.5",
         "esbuild-plugin-alias": "^0.2.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
@@ -100,7 +100,7 @@
         "esbuild-style-plugin": "^1.6.3",
         "fs-extra": "^11.3.0",
         "minimist": "^1.2.8",
-        "postcss": "^8.5.3",
+        "postcss": "^8.5.4",
         "tailwindcss": "^3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.3"

@@ -1101,8 +1101,8 @@ importers:
         specifier: workspace:*
         version: link:../themes
       '@wendellhu/redi':
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.18.3
+        version: 0.18.3
       async-lock:
         specifier: ^1.4.1
         version: 1.4.1
@@ -3395,8 +3395,8 @@ importers:
         specifier: ^0.4.4
         version: 0.4.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@wendellhu/redi':
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.18.3
+        version: 0.18.3
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -6119,8 +6119,8 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
-  '@wendellhu/redi@0.18.0':
-    resolution: {integrity: sha512-xYpa1d2BPZ/NO9URpS1h+l310mKYaMUQbFMZ4YYguq6M0fLWGR7ZYclnQEE4zpfl8ys5wprx5wro06Sfqnkb/A==}
+  '@wendellhu/redi@0.18.3':
+    resolution: {integrity: sha512-0o57fGpzid62p4UsXv/vAWnkKW+vqkUjsjFDkFt68yZrIVCFPmcR2761YIfrzUqmUjkrySURd8Qu1CQ2NPDkBw==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -14191,7 +14191,7 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@wendellhu/redi@0.18.0': {}
+  '@wendellhu/redi@0.18.3': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

@@ -16,8 +16,9 @@
 
 import type { Injector } from '@univerjs/core';
 
+import type { MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
-import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import { createHTTPTestBed } from '../../__testing__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
 import { HTTPService } from '../../http.service';
 import { IHTTPImplementation } from '../../implementations/implementation';
@@ -76,7 +77,7 @@ describe('test "HTTPRetryInterceptor"', () => {
 
         const request = httpService.get('http://example.com');
         request.then((response) => {
-            expect((response as HTTPResponse<{ text: string }>).body).toEqual({ text: 'Succeeded' });
+            expect(response.body).toEqual({ text: 'Succeeded' });
             done();
         });
 

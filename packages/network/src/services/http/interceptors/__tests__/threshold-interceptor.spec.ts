@@ -15,9 +15,10 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import type { MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { awaitTime } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import { createHTTPTestBed } from '../../__testing__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
 import { HTTPService } from '../../http.service';
 import { IHTTPImplementation } from '../../implementations/implementation';
@@ -70,22 +71,22 @@ describe('test "HTTPThresholdInterceptor"', () => {
             interceptor: ThresholdInterceptorFactory(),
         });
 
-        const request0 = httpService.get('http://example.com');
-        const request1 = httpService.get('http://example.com');
+        const request0 = httpService.get<{ text: string }>('http://example.com');
+        const request1 = httpService.get<{ text: string }>('http://example.com');
 
         expect(httpImplementation.getHandler(0)).toBeDefined();
         expect(() => httpImplementation.getHandler(1)).toThrowError(); // due to threshold, the second request should not be sent
 
         emitSuccess(0); // when the first request is completed, the second request should be sent
-        expect((await request0 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+        expect((await request0).body.text).toBe('Succeeded');
         expect(httpImplementation.getHandler(1)).toBeDefined();
         emitSuccess(1); // let the second request get completed
-        expect((await request1 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+        expect((await request1).body.text).toBe('Succeeded');
 
-        const request2 = httpService.get('http://example.com'); // when the third request is sent, it should not be threshold
+        const request2 = httpService.get<{ text: string }>('http://example.com'); // when the third request is sent, it should not be threshold
         expect(httpImplementation.getHandler(2)).toBeDefined();
         emitSuccess(2);
-        expect((await request2 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+        expect((await request2).body.text).toBe('Succeeded');
     });
 
     it('should support threshold params', async () => {
@@ -94,8 +95,8 @@ describe('test "HTTPThresholdInterceptor"', () => {
             interceptor: ThresholdInterceptorFactory({ maxParallel: 2 }),
         });
 
-        const request0 = httpService.get('http://example.com');
-        const request1 = httpService.get('http://example.com');
+        const request0 = httpService.get<{ text: string }>('http://example.com');
+        const request1 = httpService.get<{ text: string }>('http://example.com');
 
         // since the threshold is 2, the second should be sent simultaneously
         const handler0 = httpImplementation.getHandler(0);
@@ -105,8 +106,8 @@ describe('test "HTTPThresholdInterceptor"', () => {
 
         emitSuccess(0);
         emitSuccess(1);
-        expect((await request0 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
-        expect((await request1 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+        expect((await request0).body.text).toBe('Succeeded');
+        expect((await request1).body.text).toBe('Succeeded');
     });
 
     it('should support threshold params with errors', async () => {

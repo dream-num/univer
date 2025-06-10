@@ -101,23 +101,23 @@ export class HTTPService extends Disposable {
     }
 
     get<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
-        return this.request<T>('GET', url, params) as Promise<HTTPResponse<T>>;
+        return this.request<T>('GET', url, params);
     }
 
     post<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
-        return this.request<T>('POST', url, params) as Promise<HTTPResponse<T>>;
+        return this.request<T>('POST', url, params);
     }
 
     put<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
-        return this.request<T>('PUT', url, params) as Promise<HTTPResponse<T>>;
+        return this.request<T>('PUT', url, params);
     }
 
     delete<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
-        return this.request<T>('DELETE', url, params) as Promise<HTTPResponse<T>>;
+        return this.request<T>('DELETE', url, params);
     }
 
     patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
-        return this.request<T>('PATCH', url, params) as Promise<HTTPResponse<T>>;
+        return this.request<T>('PATCH', url, params);
     }
 
     /**

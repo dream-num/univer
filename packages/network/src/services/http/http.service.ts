@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 import type { HTTPResponseType } from './http';
 import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 import type { HTTPRequestMethod } from './request';
-import type { HTTPEvent } from './response';
+import type { HTTPEvent, HTTPResponse } from './response';
 import { Disposable, remove, toDisposable } from '@univerjs/core';
 import { firstValueFrom, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
@@ -100,54 +100,39 @@ export class HTTPService extends Disposable {
         return toDisposable(() => remove(this._interceptors, interceptor));
     }
 
-    get<T>(url: string, params?: IRequestParams): Promise<HTTPEvent<T>> {
-        return this._request<T>('GET', url, params);
+    get<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
+        return this.request<T>('GET', url, params) as Promise<HTTPResponse<T>>;
     }
 
-    post<T>(url: string, params?: IPostRequestParams): Promise<HTTPEvent<T>> {
-        return this._request<T>('POST', url, params);
+    post<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
+        return this.request<T>('POST', url, params) as Promise<HTTPResponse<T>>;
     }
 
-    put<T>(url: string, params?: IPostRequestParams): Promise<HTTPEvent<T>> {
-        return this._request<T>('PUT', url, params);
+    put<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
+        return this.request<T>('PUT', url, params) as Promise<HTTPResponse<T>>;
     }
 
-    delete<T>(url: string, params?: IRequestParams): Promise<HTTPEvent<T>> {
-        return this._request<T>('DELETE', url, params);
+    delete<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
+        return this.request<T>('DELETE', url, params) as Promise<HTTPResponse<T>>;
     }
 
-    patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPEvent<T>> {
-        return this._request<T>('PATCH', url, params);
+    patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
+        return this.request<T>('PATCH', url, params) as Promise<HTTPResponse<T>>;
     }
 
-    getSSE<T>(
-        method: HTTPRequestMethod,
-        url: string,
-        _params?: IPostRequestParams
-    ): Observable<HTTPEvent<T>> {
-        // Things to do when sending a HTTP request:
-        // 1. Generate HTTPRequest/HTTPHeader object
-        // 2. Call interceptors and finally the HTTP implementation.
-        const headers = new HTTPHeaders(_params?.headers);
-        const params = new HTTPParams(_params?.params);
-        const request = new HTTPRequest(method, url, {
-            headers,
-            params,
-            withCredentials: _params?.withCredentials ?? false,
-            reportProgress: true,
-            responseType: _params?.responseType ?? 'json',
-            body: (['GET', 'DELETE'].includes(method)) ? undefined : (_params as IPostRequestParams)?.body,
-        });
-
-        return of(request).pipe(concatMap((request) => this._runInterceptorsAndImplementation(request)));
-    }
-
-    /** The HTTP request implementations */
-    private async _request<T>(
+    /**
+     * The HTTP request implementations. Normally you should use the `get`, `post`, `put`, `delete`,
+     * `patch` methods instead.
+     * @param method HTTP request method, e.g. GET, POST, PUT, DELETE, etc.
+     * @param url The URL to send the request to.
+     * @param options Optional parameters for the request.
+     * @returns A promise that resolves to the HTTP response.
+     */
+    async request<T>(
         method: HTTPRequestMethod,
         url: string,
         options?: IRequestParams
-    ): Promise<HTTPEvent<T>> {
+    ): Promise<HTTPResponse<T>> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object
         // 2. Call interceptors and finally the HTTP implementation.
@@ -169,7 +154,55 @@ export class HTTPService extends Disposable {
         // The event$ may emit multiple values, but we only care about the first one.
         // We may need to care about other events (especially progress events) in the future.
         const result = await firstValueFrom(events$);
-        return result;
+        return result as HTTPResponse<T>;
+    }
+
+    /**
+     * Send an HTTP request. It returns an observable that emits HTTP events. For example, it can be used to
+     * send Server-Sent Events (SSE) requests.
+     * @deprecated Please use `stream` method instead.
+     * @param method HTTP request method, e.g. GET, POST, PUT, DELETE, etc.
+     * @param url The URL to send the request to.
+     * @param _params Optional parameters for the request.
+     * @returns An observable of the HTTP event.
+     */
+    stream<T>(
+        method: HTTPRequestMethod,
+        url: string,
+        _params?: IRequestParams
+    ): Observable<HTTPEvent<T>> {
+        return this.getSSE<T>(method, url, _params);
+    }
+
+    /**
+     * Send a Server-Sent Events (SSE) request. It returns an observable that emits HTTP events. It is the observable
+     * pair of the `request` method.
+     * @deprecated Please use `stream` method instead.
+     * @param method HTTP request method, e.g. GET, POST, PUT, DELETE, etc.
+     * @param url The URL to send the request to.
+     * @param _params Optional parameters for the request.
+     * @returns An observable of the HTTP event.
+     */
+    getSSE<T>(
+        method: HTTPRequestMethod,
+        url: string,
+        _params?: IPostRequestParams
+    ): Observable<HTTPEvent<T>> {
+        // Things to do when sending a HTTP request:
+        // 1. Generate HTTPRequest/HTTPHeader object
+        // 2. Call interceptors and finally the HTTP implementation.
+        const headers = new HTTPHeaders(_params?.headers);
+        const params = new HTTPParams(_params?.params);
+        const request = new HTTPRequest(method, url, {
+            headers,
+            params,
+            withCredentials: _params?.withCredentials ?? false,
+            reportProgress: true,
+            responseType: _params?.responseType ?? 'json',
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : (_params as IPostRequestParams)?.body,
+        });
+
+        return of(request).pipe(concatMap((request) => this._runInterceptorsAndImplementation(request)));
     }
 
     // eslint-disable-next-line ts/no-explicit-any

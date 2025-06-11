@@ -38,8 +38,8 @@ const DialogOverlay = forwardRef<
         className={clsx(
             `
               univer-bg-black/80 univer-fixed univer-inset-0 univer-z-[1050]
-              data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
               data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
+              data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
             `,
             className
         )}
@@ -62,17 +62,17 @@ const DialogContent = forwardRef<
             ref={ref}
             className={clsx(
                 `
-                  univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1050] univer-box-border univer-grid
-                  univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
-                  univer-bg-white univer-px-6 univer-py-4 univer-text-gray-500 univer-shadow-md univer-duration-200
-                  dark:!univer-bg-gray-700 dark:!univer-text-gray-400
-                  data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
-                  data-[state=closed]:univer-zoom-out-95 data-[state=closed]:univer-slide-out-to-left-1/2
-                  data-[state=closed]:univer-slide-out-to-top-[48%]
                   data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                   data-[state=open]:univer-zoom-in-95 data-[state=open]:univer-slide-in-from-left-1/2
                   data-[state=open]:univer-slide-in-from-top-[48%]
+                  data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
+                  data-[state=closed]:univer-zoom-out-95 data-[state=closed]:univer-slide-out-to-left-1/2
+                  data-[state=closed]:univer-slide-out-to-top-[48%]
+                  univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1050] univer-box-border univer-grid
+                  univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
+                  univer-bg-white univer-px-6 univer-py-4 univer-text-gray-500 univer-shadow-md univer-duration-200
                   sm:!univer-rounded-lg
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-400
                 `,
                 borderClassName,
                 className
@@ -85,8 +85,8 @@ const DialogContent = forwardRef<
                     className={`
                       univer-absolute univer-right-4 univer-top-4 univer-size-6 univer-cursor-pointer univer-rounded-sm
                       univer-border-none univer-bg-transparent univer-p-0 univer-transition-opacity
-                      disabled:univer-pointer-events-none
                       hover:univer-opacity-100
+                      disabled:univer-pointer-events-none
                     `}
                     onClick={onClickClose}
                 >

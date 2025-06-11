@@ -110,8 +110,8 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                 <div
                     className={clsx(`
                       univer-flex univer-items-center univer-gap-2 univer-rounded univer-p-1
-                      dark:hover:!univer-bg-gray-800
                       hover:univer-bg-gray-100
+                      dark:hover:!univer-bg-gray-800
                     `, borderClassName, {
                         'univer-bg-gray-100 dark:!univer-bg-gray-800': visible,
                         'univer-bg-white dark:!univer-bg-gray-900': !visible,

@@ -129,8 +129,8 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
                                         <a
                                             className={`
                                               univer-cursor-pointer univer-rounded
-                                              dark:hover:!univer-bg-gray-700
                                               hover:univer-bg-gray-100
+                                              dark:hover:!univer-bg-gray-700
                                             `}
                                         >
                                             {groupItem.list.map((base64, index) => (
@@ -193,8 +193,8 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
                         className={`
                           univer-mb-2 univer-mr-2 univer-flex univer-cursor-pointer univer-items-center
                           univer-justify-center univer-rounded
-                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
                         `}
                     >
                         <img
@@ -309,8 +309,8 @@ const IconSetRuleEdit = (props: {
                                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
                                       univer-justify-between univer-rounded-md univer-bg-white univer-px-4 univer-py-2
                                       univer-text-xs univer-text-gray-600 univer-transition-all
-                                      dark:!univer-text-gray-200
                                       hover:univer-border-primary-600
+                                      dark:!univer-text-gray-200
                                     `, borderClassName)}
                                 >
                                     {icon

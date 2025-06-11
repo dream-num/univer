@@ -101,8 +101,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     >
                         <a
                             className={`
-                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-700
                             `}
                         >
                             <FontColorDoubleIcon extend={{ colorChannel1: config.color ?? '#2c53f1' }} />
@@ -110,8 +110,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     </Dropdown>
                     <a
                         className={clsx(`
-                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
                         `, {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': config.bold,
                         })}
@@ -121,8 +121,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     </a>
                     <a
                         className={clsx(`
-                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
                         `, {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': config.italic,
                         })}

@@ -36,16 +36,16 @@ const HoverCardContent = forwardRef<
         sideOffset={sideOffset}
         className={clsx(
             `
-              univer-z-[1080] univer-w-64 univer-origin-[--radix-hover-card-content-transform-origin] univer-rounded-md
-              univer-bg-white univer-text-gray-900 univer-shadow-md univer-outline-none
-              dark:!univer-bg-gray-900 dark:!univer-text-white
+              data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0 data-[state=open]:univer-zoom-in-95
+              data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
+              data-[state=closed]:univer-zoom-out-95
               data-[side=bottom]:univer-slide-in-from-top-2
               data-[side=left]:univer-slide-in-from-right-2
               data-[side=right]:univer-slide-in-from-left-2
               data-[side=top]:univer-slide-in-from-bottom-2
-              data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
-              data-[state=closed]:univer-zoom-out-95
-              data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0 data-[state=open]:univer-zoom-in-95
+              univer-z-[1080] univer-w-64 univer-origin-[--radix-hover-card-content-transform-origin] univer-rounded-md
+              univer-bg-white univer-text-gray-900 univer-shadow-md univer-outline-none
+              dark:!univer-bg-gray-900 dark:!univer-text-white
             `,
             borderClassName,
             className

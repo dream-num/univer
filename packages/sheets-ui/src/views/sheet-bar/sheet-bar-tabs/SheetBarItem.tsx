@@ -67,8 +67,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                 `
                 : `
                   univer-font-medium univer-text-gray-900
-                  dark:hover:!univer-bg-gray-700
                   hover:univer-bg-gray-100
+                  dark:hover:!univer-bg-gray-700
                 `)}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',

@@ -103,8 +103,8 @@ export function DefinedNameOverlay() {
                             key={index}
                             className={`
                               univer-cursor-pointer univer-px-2 univer-transition-colors univer-duration-200
-                              dark:hover:!univer-bg-gray-600
                               hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-600
                             `}
                             onClick={() => { focusDefinedName(definedName); }}
                         >
@@ -141,8 +141,8 @@ export function DefinedNameOverlay() {
             <div
                 className={`
                   univer-cursor-pointer univer-p-2 univer-transition-colors univer-duration-200
-                  dark:hover:!univer-bg-gray-600
                   hover:univer-bg-gray-100
+                  dark:hover:!univer-bg-gray-600
                 `}
                 onClick={openSlider}
             >

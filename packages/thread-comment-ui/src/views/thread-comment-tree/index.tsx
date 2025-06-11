@@ -418,8 +418,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             className={clsx(`
                               univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                               univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
-                              dark:hover:!univer-bg-gray-800
                               hover:univer-bg-gray-50
+                              dark:hover:!univer-bg-gray-800
                             `, {
                                 'univer-text-green-500': resolved,
                             })}
@@ -433,8 +433,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     className={`
                                       univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
-                                      dark:hover:!univer-bg-gray-800
                                       hover:univer-bg-gray-50
+                                      dark:hover:!univer-bg-gray-800
                                     `}
                                     onClick={handleDeleteRoot}
                                 >

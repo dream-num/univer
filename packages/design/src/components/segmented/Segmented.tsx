@@ -106,8 +106,8 @@ export function Segmented<T extends ItemValue = ItemValue>({
         >
             <div
                 className={`
-                  univer-absolute univer-h-6 univer-rounded-md univer-bg-white univer-shadow-sm univer-transition-all
-                  univer-duration-200 univer-animate-univer-slide
+                  univer-animate-univer-slide univer-absolute univer-h-6 univer-rounded-md univer-bg-white
+                  univer-shadow-sm univer-transition-all univer-duration-200
                   dark:!univer-bg-gray-700 dark:!univer-text-gray-400
                 `}
                 style={slideStyle}
@@ -125,7 +125,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
                       univer-transition-colors
                     `, {
                         'univer-text-gray-900 dark:!univer-text-white': selectedItem === item.value,
-                        'univer-text-gray-500 dark:hover:!univer-text-white hover:univer-text-gray-900': selectedItem !== item.value,
+                        'univer-text-gray-500 hover:univer-text-gray-900 dark:hover:!univer-text-white': selectedItem !== item.value,
                     })}
                     type="button"
                     onClick={() => handleClick(item.value)}

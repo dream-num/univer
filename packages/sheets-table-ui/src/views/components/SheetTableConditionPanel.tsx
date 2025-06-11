@@ -110,9 +110,9 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-between
                       univer-rounded-md univer-bg-white univer-px-2 univer-text-sm univer-transition-colors
                       univer-duration-200
-                      dark:!univer-bg-gray-700 dark:!univer-text-white
-                      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2
                       hover:univer-border-primary-600
+                      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2
+                      dark:!univer-bg-gray-700 dark:!univer-text-white
                     `, borderClassName)}
                 >
                     <span>

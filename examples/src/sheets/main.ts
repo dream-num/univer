@@ -137,6 +137,9 @@ function createNewInstance() {
     const userManagerService = injector.get(UserManagerService);
     userManagerService.setCurrentUser(mockUser);
 
+    // @ts-ignore
+    window.injector = injector;
+
     // create univer sheet instance
     if (!IS_E2E) {
         univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);

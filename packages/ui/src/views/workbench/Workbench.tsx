@@ -126,7 +126,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>

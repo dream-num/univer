@@ -18,8 +18,9 @@ import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigProvider } from '@univerjs/design';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
+import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
 import { useDependency } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
@@ -44,6 +45,8 @@ export function MobileWorkbench(props: IUniverAppProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
+    const themeSwitcherService = useDependency(ThemeSwitcherService);
+
     const contentRef = useRef<HTMLDivElement>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
@@ -74,6 +77,16 @@ export function MobileWorkbench(props: IUniverAppProps) {
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
 
+    useLayoutEffect(() => {
+        const sub = themeService.currentTheme$.subscribe((theme) => {
+            themeSwitcherService.injectThemeToHead(theme);
+        });
+
+        return () => {
+            sub.unsubscribe();
+        };
+    }, []);
+
     useEffect(() => {
         document.body.appendChild(portalContainer);
 
@@ -90,7 +103,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>

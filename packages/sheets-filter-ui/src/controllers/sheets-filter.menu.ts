@@ -34,7 +34,16 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
         tooltip: 'sheets-filter.toolbar.smart-toggle-filter-tooltip',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: sheetsFilterService.activeFilterModel$.pipe(map((model) => !!model)),
-        disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission], rangeTypes: [RangeProtectionPermissionViewPoint] })),
+        disabled$: getObservableWithExclusiveRange$(
+            accessor,
+            getCurrentRangeDisable$(
+                accessor,
+                {
+                    worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
+                    rangeTypes: [RangeProtectionPermissionViewPoint],
+                }
+            )
+        ),
     };
 }
 

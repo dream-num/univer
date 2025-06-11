@@ -32,9 +32,9 @@ function Separator({
             className={clsx(
                 `
                   univer-shrink-0 univer-bg-gray-200
-                  dark:!univer-bg-gray-600
                   data-[orientation=horizontal]:univer-h-px data-[orientation=horizontal]:univer-w-full
                   data-[orientation=vertical]:univer-h-full data-[orientation=vertical]:univer-w-px
+                  dark:!univer-bg-gray-600
                 `,
                 className
             )}

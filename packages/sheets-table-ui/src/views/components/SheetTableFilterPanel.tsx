@@ -201,7 +201,7 @@ export function SheetTableFilterPanel() {
             </div>
             <div
                 className={`
-                  univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-wrap-nowrap
+                  univer-flex-wrap-nowrap univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0
                   univer-justify-between univer-overflow-hidden
                 `}
             >

@@ -1,5 +1,6 @@
+const path = require('node:path');
+const eslintPluginBetterTailwindcss = require('eslint-plugin-better-tailwindcss');
 const jsdoc = require('eslint-plugin-jsdoc');
-const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
 const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
 const noFacadeImportsOutsideFacade = require('./plugins/no-facade-imports-outside-facade');
 const noSelfPackageImports = require('./plugins/no-self-package-imports');
@@ -234,14 +235,21 @@ exports.tailwindcssPreset = () => {
             },
         },
         plugins: {
-            'readable-tailwind': eslintPluginReadableTailwind,
+            'better-tailwindcss': eslintPluginBetterTailwindcss,
+        },
+        settings: {
+            'better-tailwindcss': {
+                tailwindConfig: path.resolve(__dirname, '../tailwind/tailwind.config.ts'),
+            },
         },
         rules: {
-            ...eslintPluginReadableTailwind.configs.warning.rules,
-            ...eslintPluginReadableTailwind.configs.error.rules,
-            'jsonc/sort-keys': ['warn'],
-            'readable-tailwind/multiline': ['warn', { printWidth: 120, group: 'newLine' }],
-            'react-hooks/rules-of-hooks': 'off',
+            // enable all recommended rules to warn
+            ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
+            // enable all recommended rules to error
+            ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
+            'better-tailwindcss/multiline': ['warn', { printWidth: 120, group: 'newLine' }],
+            'better-tailwindcss/no-unregistered-classes': 'off',
+            'better-tailwindcss/no-conflicting-classes': 'off',
         },
     };
 };

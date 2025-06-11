@@ -152,8 +152,8 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                                   univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-py-1
                                   univer-pl-9 univer-text-gray-900 univer-no-underline univer-transition-colors
                                   univer-duration-200
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-700
                                   hover:univer-bg-gray-100
+                                  dark:!univer-text-white dark:hover:!univer-bg-gray-700
                                 `, item === zoomPercent ? 'univer-bg-gray-100' : '')}
                                 onClick={() => onZoomMenuChange(item)}
                             >
@@ -180,8 +180,8 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
                       univer-h-7 univer-w-[55px] univer-cursor-pointer univer-rounded univer-text-center univer-text-xs
                       univer-leading-loose univer-text-gray-700 univer-no-underline univer-transition-all
                       univer-duration-200
-                      group-data-[open=true]:univer-bg-gray-200
                       hover:univer-bg-gray-200
+                      group-data-[open=true]:univer-bg-gray-200
                     `}
                 >
                     {zoomPercent}

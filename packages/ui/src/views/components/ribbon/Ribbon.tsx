@@ -331,8 +331,8 @@ export function Ribbon(props: IRibbonProps) {
                                             className={`
                                               univer-box-border univer-flex univer-cursor-pointer univer-items-center
                                               univer-gap-2.5 univer-rounded-lg univer-px-2 univer-py-1.5
-                                              dark:hover:!univer-bg-gray-700
                                               hover:univer-bg-gray-100
+                                              dark:hover:!univer-bg-gray-700
                                             `}
                                             onClick={() => handleSelectTab(group)}
                                         >

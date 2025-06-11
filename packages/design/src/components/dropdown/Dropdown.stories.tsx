@@ -57,8 +57,8 @@ export const Playground = {
                     <a
                         className={clsx(`
                           univer-cursor-pointer univer-rounded-lg univer-px-4 univer-py-2 univer-transition-all
-                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
                         `, borderClassName)}
                     >
                         Click me

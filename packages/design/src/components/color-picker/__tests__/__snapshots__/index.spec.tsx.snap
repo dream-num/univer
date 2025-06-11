@@ -265,8 +265,8 @@ exports[`ColorPicker > should render correctly 1`] = `
       <a
         class="
                       univer-cursor-pointer univer-gap-2 univer-text-sm univer-text-gray-900 univer-transition-opacity
-                      dark:!univer-text-white
                       hover:univer-opacity-80
+                      dark:!univer-text-white
                     "
       />
     </div>
@@ -539,8 +539,8 @@ exports[`ColorPicker > should render with value 1`] = `
       <a
         class="
                       univer-cursor-pointer univer-gap-2 univer-text-sm univer-text-gray-900 univer-transition-opacity
-                      dark:!univer-text-white
                       hover:univer-opacity-80
+                      dark:!univer-text-white
                     "
       />
     </div>

@@ -135,8 +135,8 @@ export const SheetTableAnchor = () => {
                     <div
                         key={item.tableId}
                         className={clsx(`
-                          univer-absolute univer-box-border univer-cursor-pointer univer-items-center univer-rounded-xl
-                          univer-pl-2 univer-pr-2 univer-shadow-xs
+                          univer-shadow-xs univer-absolute univer-box-border univer-cursor-pointer univer-items-center
+                          univer-rounded-xl univer-pl-2 univer-pr-2
                         `, borderClassName, {
                             'univer-flex': !shouldHidden,
                             'univer-hidden': shouldHidden,

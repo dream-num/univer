@@ -71,8 +71,8 @@ export function Pager(props: IPagerProps) {
                             data-u-comp="pager-left-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
-                              dark:hover:!univer-bg-gray-600
                               hover:univer-bg-gray-50
+                              dark:hover:!univer-bg-gray-600
                             `}
                             role="button"
                             onClick={onClickLeftArrow}
@@ -84,8 +84,8 @@ export function Pager(props: IPagerProps) {
                             data-u-comp="pager-right-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
-                              dark:hover:!univer-bg-gray-600
                               hover:univer-bg-gray-50
+                              dark:hover:!univer-bg-gray-600
                             `}
                             role="button"
                             onClick={onClickRightArrow}

@@ -112,8 +112,8 @@ const SelectList = (props: ISelectListProps) => {
                             className={`
                               univer-mt-1 univer-flex univer-cursor-pointer univer-flex-row univer-items-center
                               univer-justify-between univer-rounded-md univer-px-1.5 univer-py-1
-                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-50
+                              dark:hover:!univer-bg-gray-700
                             `}
                             onClick={handleClick}
                         >
@@ -162,8 +162,8 @@ const SelectList = (props: ISelectListProps) => {
                                 className={`
                                   univer-block univer-cursor-pointer univer-rounded univer-px-1.5 univer-py-1
                                   univer-text-xs
-                                  dark:hover:!univer-bg-gray-700
                                   hover:univer-bg-gray-200
+                                  dark:hover:!univer-bg-gray-700
                                 `}
                                 onClick={onEdit}
                             >

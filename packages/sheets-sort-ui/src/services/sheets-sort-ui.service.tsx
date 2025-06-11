@@ -21,7 +21,6 @@ import type { ISortOption } from '@univerjs/sheets-sort';
 import {
     Disposable,
     ICommandService,
-    ILogService,
     Inject,
     IUniverInstanceService,
     LocaleService,
@@ -65,7 +64,6 @@ export class SheetsSortUIService extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IConfirmService private readonly _confirmService: IConfirmService,
-        @ILogService private readonly _logService: ILogService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetsSortService) private readonly _sheetsSortService: SheetsSortService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -165,6 +163,8 @@ export class SheetsSortUIService extends Disposable {
             children: {
                 title: <div>{this._localeService.t(content)}</div>,
             },
+            cancelText: this._localeService.t('sheets-sort.dialog.cancel'),
+            confirmText: this._localeService.t('sheets-sort.dialog.confirm'),
         });
     }
 
@@ -185,7 +185,8 @@ export class SheetsSortUIService extends Disposable {
                 ),
             },
             width: 400,
-
+            cancelText: this._localeService.t('sheets-sort.dialog.cancel'),
+            confirmText: this._localeService.t('sheets-sort.dialog.confirm'),
         });
         if (confirm) {
             return shouldExtend ? EXTEND_TYPE.EXTEND : EXTEND_TYPE.KEEP;

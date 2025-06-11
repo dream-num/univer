@@ -128,8 +128,8 @@ const locale: typeof enUS = {
             title: 'Continuer la fusion ne conserverait que la valeur de la cellule en haut à gauche, les autres valeurs seront supprimées. Voulez-vous continuer ?',
             cancel: 'Annuler la fusion',
             confirm: 'Continuer la fusion',
-            waring: 'Avertissement',
-            dismantleMergeCellWaring: 'Cela entraînera la division de certaines cellules fusionnées. Voulez-vous continuer ?',
+            warning: 'Avertissement',
+            dismantleMergeCellWarning: 'Cela entraînera la division de certaines cellules fusionnées. Voulez-vous continuer ?',
         },
     },
     filter: {

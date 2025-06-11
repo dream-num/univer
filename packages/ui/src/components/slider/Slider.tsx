@@ -178,7 +178,7 @@ export function Slider(props: ISliderProps) {
             <div
                 className={`
                   univer-relative univer-hidden univer-h-0.5 univer-rounded-2xl univer-bg-gray-400 univer-px-1.5
-                  sm:univer-block
+                  sm:!univer-block
                 `}
                 style={{
                     width: `${SLIDER_WIDTH}px`,

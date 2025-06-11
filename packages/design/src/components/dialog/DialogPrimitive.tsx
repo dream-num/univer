@@ -37,7 +37,7 @@ const DialogOverlay = forwardRef<
         ref={ref}
         className={clsx(
             `
-              univer-fixed univer-inset-0 univer-z-[1050] univer-bg-black/80
+              univer-bg-black/80 univer-fixed univer-inset-0 univer-z-[1050]
               data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
               data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
             `,
@@ -72,7 +72,7 @@ const DialogContent = forwardRef<
                   data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                   data-[state=open]:univer-zoom-in-95 data-[state=open]:univer-slide-in-from-left-1/2
                   data-[state=open]:univer-slide-in-from-top-[48%]
-                  sm:univer-rounded-lg
+                  sm:!univer-rounded-lg
                 `,
                 borderClassName,
                 className
@@ -107,7 +107,7 @@ const DialogHeader = ({
         className={clsx(
             `
               univer-flex univer-flex-col univer-space-y-1.5 univer-text-center
-              sm:univer-text-left
+              sm:!univer-text-left
             `,
             className
         )}
@@ -124,7 +124,7 @@ const DialogFooter = ({
         className={clsx(
             `
               univer-flex univer-flex-col-reverse
-              sm:univer-flex-row sm:univer-justify-end sm:univer-space-x-2
+              sm:!univer-flex-row sm:!univer-justify-end sm:!univer-space-x-2
             `,
             className
         )}

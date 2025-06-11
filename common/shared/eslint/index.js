@@ -1,3 +1,4 @@
+const os = require('node:os');
 const path = require('node:path');
 const eslintPluginBetterTailwindcss = require('eslint-plugin-better-tailwindcss');
 const jsdoc = require('eslint-plugin-jsdoc');
@@ -225,6 +226,9 @@ exports.facadePreset = () => {
 };
 
 exports.tailwindcssPreset = () => {
+    const isWindows = os.platform() === 'win32';
+    const lineBreakStyle = isWindows ? 'windows' : 'unix';
+
     return {
         files: ['**/*.{jsx,tsx}'],
         languageOptions: {
@@ -247,7 +251,11 @@ exports.tailwindcssPreset = () => {
             ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
             // enable all recommended rules to error
             ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
-            'better-tailwindcss/multiline': ['warn', { printWidth: 120, group: 'newLine' }],
+            'better-tailwindcss/multiline': ['warn', {
+                printWidth: 120,
+                group: 'newLine',
+                lineBreakStyle,
+            }],
             'better-tailwindcss/no-unregistered-classes': 'off',
             'better-tailwindcss/no-conflicting-classes': 'off',
         },

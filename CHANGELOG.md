@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.8.1](https://github.com/dream-num/univer/compare/v0.8.0...v0.8.1) (2025-06-12)
+
+
+### Bug Fixes
+
+* **formula:** fix the calculation error of formula range absolute reference type moving offset ([#5349](https://github.com/dream-num/univer/issues/5349)) ([8e8e59c](https://github.com/dream-num/univer/commit/8e8e59c6ae674232d6b8e247c0e52eba5ef9ab0b))
+* **numfmt:** fix the numfmt func change the null to string ([#5344](https://github.com/dream-num/univer/issues/5344)) ([c57b4d0](https://github.com/dream-num/univer/commit/c57b4d07de572d428a059661b8194aab3c5c6f42))
+* **sheets-formula-ui:** highlight issues on across workbook editing ([#5360](https://github.com/dream-num/univer/issues/5360)) ([827acfd](https://github.com/dream-num/univer/commit/827acfd3c2d3a6731265c7019a3e38d38b21c35d))
+* **sheets-sort-ui:** remove unused log service and add localized dialog texts ([#5357](https://github.com/dream-num/univer/issues/5357)) ([61ff824](https://github.com/dream-num/univer/commit/61ff82417443dcef466e7cee6e10c13893b36705))
+* **ui:** update MobileMenu for clarity and adjust button class order ([a78bc5c](https://github.com/dream-num/univer/commit/a78bc5c25a46012166ceebc4b89852b168db2812))
+* **value:** fix set range value change the null value to string null ([#5332](https://github.com/dream-num/univer/issues/5332)) ([19978f8](https://github.com/dream-num/univer/commit/19978f8fc0797297605dade54d7a273f10fac7bb))
+* **zen-editor:** add dark mode support for ZenEditor background ([#5350](https://github.com/dream-num/univer/issues/5350)) ([0c7b42d](https://github.com/dream-num/univer/commit/0c7b42d13de375fd00524dd9fdb71c0d1a939b61))
+
+
+### Features
+
+* **network:** add stream method for SSE ([#5347](https://github.com/dream-num/univer/issues/5347)) ([079196d](https://github.com/dream-num/univer/commit/079196d57aee81d7ee096404f8c7ecccd0a4be57))
+* **network:** xhr request enable responseType ([#5346](https://github.com/dream-num/univer/issues/5346)) ([ec5ddfc](https://github.com/dream-num/univer/commit/ec5ddfc5f264d3982d5f015c07cece29a83ca305))
+
 # [0.8.0](https://github.com/dream-num/univer/compare/v0.8.0-beta.1...v0.8.0) (2025-06-06)
 
 

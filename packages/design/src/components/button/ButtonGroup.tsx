@@ -40,14 +40,10 @@ export const ButtonGroup = ({
 
     return (
         <div
-            className={clsx(
-                'univer-flex',
-                {
-                    'univer-flex-col': isVertical,
-                    'univer-w-fit': isVertical,
-                },
-                className
-            )}
+            className={clsx('univer-grid', {
+                'univer-grid-flow-row': isVertical,
+                'univer-w-fit': isVertical,
+            }, className)}
         >
             {Children.map(children, (child, index) => {
                 const isFirst = index === 0;

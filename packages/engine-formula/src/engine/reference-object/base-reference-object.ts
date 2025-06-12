@@ -199,6 +199,10 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getFirstCell() {
+        if (this._checkIfWorksheetMiss()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const { startRow, startColumn } = this.getRangePosition();
         const cell = this.getCellData(startRow, startColumn);
 

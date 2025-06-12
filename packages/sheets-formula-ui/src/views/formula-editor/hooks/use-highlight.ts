@@ -87,6 +87,10 @@ export function calcHighlightRanges(opts: {
         const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
         const refSheetId = getSheetIdByName(sheetName);
 
+        if (!refSheetId && sheetName) {
+            continue;
+        }
+
         if (currentUnitId !== unitId && refUnitId !== currentUnitId) {
             continue;
         }

@@ -39,6 +39,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { SwitchUnits } from './switch-units';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -297,3 +298,8 @@ declare global {
         univerAPI?: ReturnType<typeof FUniver.newAPI>;
     }
 }
+
+univerAPI.registerUIPart(
+    univerAPI.Enum.BuiltInUIPart.CUSTOM_HEADER,
+    SwitchUnits
+);

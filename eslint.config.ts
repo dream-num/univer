@@ -1,3 +1,4 @@
+/* eslint-disable header/header */
 import antfu from '@antfu/eslint-config';
 import { baseRules, facadePreset, specPreset, tailwindcssPreset, typescriptPreset, univerSourcePreset } from '@univerjs-infra/shared/eslint';
 import header from 'eslint-plugin-header';

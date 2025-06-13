@@ -1,7 +1,7 @@
-// no-external-imports-in-facade.js
-const path = require('node:path');
+/* eslint-disable header/header */
+import path from 'node:path';
 
-const rule = {
+export default {
     meta: {
         type: 'problem',
         docs: {
@@ -44,5 +44,3 @@ const rule = {
         };
     },
 };
-
-module.exports = rule;

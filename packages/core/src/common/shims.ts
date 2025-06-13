@@ -16,6 +16,9 @@
 
 const glob = typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : window;
 
+/**
+ * Polyfill for requestIdleCallback and cancelIdleCallback
+ */
 function installRequestIdleCallback() {
     const TIME_WINDOW = 50;
 
@@ -54,6 +57,37 @@ function installRequestIdleCallback() {
     }
 }
 
+/**
+ * Polyfill for Array.prototype.findLastIndex and Array.prototype.findLast
+ */
+function installArrayFindLastIndex() {
+    if (typeof glob.Array.prototype.findLastIndex !== 'function') {
+        glob.Array.prototype.findLastIndex = function findLastIndex(callback: (value: any, index: number, array: any[]) => boolean, thisArg?: any): number {
+            if (this == null) {
+                throw new TypeError('Array.prototype.findLastIndex called on null or undefined');
+            }
+            if (typeof callback !== 'function') {
+                throw new TypeError('callback must be a function');
+            }
+
+            const len = this.length >>> 0;
+            for (let i = len - 1; i >= 0; i--) {
+                if (i in this && callback.call(thisArg, this[i], i, this)) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+    }
+    if (typeof glob.Array.prototype.findLast !== 'function') {
+        glob.Array.prototype.findLast = function findLast(callback: (value: any, index: number, array: any[]) => boolean, thisArg?: any): any {
+            const index = this.findLastIndex(callback, thisArg);
+            return index !== -1 ? this[index] : undefined;
+        };
+    }
+}
+
 export function installShims() {
     installRequestIdleCallback();
+    installArrayFindLastIndex();
 }

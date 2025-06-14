@@ -49,10 +49,11 @@ export class SuffixNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        let value = children[0].getValue();
+        let value = children[0]?.getValue();
         let result: FunctionVariantType;
         if (value == null) {
-            throw new Error('object is null');
+            this.setValue(ErrorValueObject.create(ErrorType.ERROR));
+            return;
         }
 
         if (this._operatorString === suffixToken.PERCENTAGE) {

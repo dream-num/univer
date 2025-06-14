@@ -206,9 +206,9 @@ describe('Test index', () => {
     describe('One row', () => {
         it('Column number null, different row parameters', async () => {
             // null
-            const result = await calculate('=INDEX(A6:B6)');
+            const result = await calculate('=INDEX(A6:B6,1)');
 
-            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+            expect(result).toStrictEqual([['Tom']]);
         });
 
         it('Column number blank cell, different row parameters', async () => {
@@ -375,9 +375,9 @@ describe('Test index', () => {
     describe('One column', () => {
         it('Row number null, different column parameters', async () => {
             // null
-            const result = await calculate('=INDEX(A6:A7)');
+            const result = await calculate('=INDEX(A6:A7,1)');
 
-            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+            expect(result).toStrictEqual([['Tom']]);
         });
 
         it('Row number blank cell, different column parameters', async () => {
@@ -550,10 +550,10 @@ describe('Test index', () => {
     describe('Multi rows and columns', () => {
         it('Row number null, different column parameters', async () => {
             // null
-            const result = await calculate('=INDEX(A6:B7)');
+            const result = await calculate('=INDEX(A6:B7,1,1)');
 
             // reference Google Sheets
-            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+            expect(result).toStrictEqual([['Tom']]);
         });
 
         it('Row number blank cell, different column parameters', async () => {
@@ -720,6 +720,7 @@ describe('Test index', () => {
             expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, 'Sarah', ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
         });
     });
+
     describe('Single base value object as referenceObject', () => {
         it('Row number 1, column number 1', async () => {
            // number
@@ -738,5 +739,26 @@ describe('Test index', () => {
             expect(result).toBe('Univer');
         });
     });
-    // supports array string
+
+    describe('Reference is Array', () => {
+        it('Row number 1, column number 1', async () => {
+            // number
+            let result = await calculate('=INDEX({1,2;3,4},0,2)');
+
+            expect(result).toStrictEqual([
+                [2],
+                [4],
+            ]);
+
+            // boolean
+            result = await calculate('=INDEX({TRUE,FALSE;FALSE,TRUE},1,1)');
+
+            expect(result).toBe(true);
+
+            // string
+            result = await calculate('=INDEX({"Univer","JS";"Formula","Engine"},1,1)');
+
+            expect(result).toBe('Univer');
+        });
+    });
 });

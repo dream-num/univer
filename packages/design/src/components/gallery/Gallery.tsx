@@ -83,18 +83,20 @@ export function Gallery(props: IGalleryProps) {
 
             {/* Content */}
             <div className="univer-relative">
-                <img
-                    className={`
-                      univer-max-h-[40vh] univer-max-w-[60vw] univer-transition-transform univer-duration-300
-                      univer-ease-out
-                    `}
-                    style={{
-                        transform: `scale(${zoomLevel})`,
-                    }}
-                    src={activeImage}
-                    alt="gallery"
-                    draggable={false}
-                />
+                {activeImage && (
+                    <img
+                        className={`
+                          univer-max-h-[40vh] univer-max-w-[60vw] univer-transition-transform univer-duration-300
+                          univer-ease-out
+                        `}
+                        style={{
+                            transform: `scale(${zoomLevel})`,
+                        }}
+                        src={activeImage}
+                        alt="gallery"
+                        draggable={false}
+                    />
+                )}
             </div>
 
             {/* Toolbar */}

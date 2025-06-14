@@ -95,7 +95,7 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
                     </div>
                 </div>
             </div>
-            <div className="univer-mt-4 label">
+            <div className="label univer-mt-4">
                 {t('sheet.numfmt.negType')}
             </div>
 

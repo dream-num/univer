@@ -1,6 +1,7 @@
 name: 🚀 Feature request
 description: Suggest an idea
 type: Feature
+labels: enhancement 🚀
 title: '[Feature] '
 
 body:

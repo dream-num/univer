@@ -79,6 +79,9 @@ export const AddWorksheetMergeCommand: ICommand = {
             const result = await confirmService.confirm({
                 id: 'merge.confirm.add-worksheet-merge',
                 title: {
+                    title: 'merge.confirm.warning',
+                },
+                children: {
                     title: 'merge.confirm.title',
                 },
                 cancelText: localeService.t('merge.confirm.cancel'),

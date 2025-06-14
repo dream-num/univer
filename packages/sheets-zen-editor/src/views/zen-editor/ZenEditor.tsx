@@ -113,7 +113,12 @@ export function ZenEditor() {
     const containerClassName = 'univer-flex univer-w-7 univer-cursor-pointer univer-items-center univer-justify-center univer-transition-colors';
 
     return (
-        <div className="univer-absolute univer-inset-0 univer-size-full univer-bg-white">
+        <div
+            className={`
+              univer-absolute univer-inset-0 univer-size-full univer-bg-white
+              dark:!univer-bg-gray-800
+            `}
+        >
             <div
                 className={`
                   univer-absolute univer-right-6 univer-top-2 univer-z-10 univer-flex univer-items-center

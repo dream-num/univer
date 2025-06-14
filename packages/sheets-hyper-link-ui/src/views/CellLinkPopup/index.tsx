@@ -113,8 +113,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         className={clsx(`
                           univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
                           univer-items-center univer-justify-center univer-rounded univer-text-base
-                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
                         `, { 'univer-text-red-500': isError })}
                         onClick={() => {
                             if (isError) {
@@ -144,8 +144,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             className={`
                               univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
                               univer-items-center univer-justify-center univer-rounded univer-text-base
-                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-700
                             `}
                             onClick={() => {
                                 commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
@@ -166,8 +166,8 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             className={`
                               univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-flex-row
                               univer-items-center univer-justify-center univer-rounded univer-text-base
-                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-700
                             `}
                             onClick={() => {
                                 const commandId = (type === HyperLinkEditSourceType.EDITING || type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;

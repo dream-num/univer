@@ -15,10 +15,8 @@
  */
 
 import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Worksheet } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
-
-const MAXIMUM_ROW_HEIGHT = 2000;
 
 export interface ISetWorksheetRowHeightMutationParams {
     unitId: string;
@@ -51,8 +49,7 @@ export const SetWorksheetRowHeightMutationFactory = (
 
     for (const { startRow, endRow } of ranges) {
         for (let rowIndex = startRow; rowIndex < endRow + 1; rowIndex++) {
-            const row = manager.getRowOrCreate(rowIndex);
-            rowHeight[rowIndex] = row.h;
+            rowHeight[rowIndex] = manager.getRow(rowIndex)?.h ?? worksheet.getConfig().defaultRowHeight;
         }
     }
 
@@ -75,9 +72,7 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
 
     for (const { startRow, endRow } of ranges) {
         for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
-            const row = manager.getRowOrCreate(rowIndex);
-
-            autoHeightHash[rowIndex] = row.ia;
+            autoHeightHash[rowIndex] = manager.getRow(rowIndex)?.ia;
         }
     }
 
@@ -99,9 +94,10 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
 
     for (const rowInfo of rowsAutoHeightInfo) {
         const { row } = rowInfo;
-        const { ah } = manager.getRowOrCreate(row);
-
-        results.push({ row, autoHeight: ah! });
+        results.push({
+            row,
+            autoHeight: manager.getRow(row)?.ah ?? worksheet.getConfig().defaultRowHeight,
+        });
     }
 
     return {
@@ -122,18 +118,14 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
 
         const { worksheet } = target;
         const manager = worksheet.getRowManager();
-        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+
         for (const { startRow, endRow } of ranges) {
             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
-                const row = manager.getRowOrCreate(rowIndex);
-
                 if (typeof rowHeight === 'number') {
-                    row.h = rowHeight;
-                } else {
-                    row.h = rowHeight[rowIndex] ?? defaultRowHeight; // Start from startRow
+                    manager.setRowHeight(rowIndex, rowHeight);
+                } else if (Tools.isDefine(rowHeight[rowIndex])) {
+                    manager.setRowHeight(rowIndex, rowHeight[rowIndex] as number);
                 }
-
-                row.h = Math.min(MAXIMUM_ROW_HEIGHT, row.h);
             }
         }
 

@@ -81,7 +81,7 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             const stripped = color.slice(4, -1).split(',');
             const invertedColor = this._invertAlgo(stripped.map(Number) as RGBColorType);
             cachedColor = `rgb(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]})`;
-        } else if (color.includes('.')) {
+        } else if (this._themeService.isValidThemeColor(color)) {
             // If the color is a theme token, we can get the color from the theme service
             return this._themeService.getColorFromTheme(color);
         } else if (new ColorKit(color).isValid) {

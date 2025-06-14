@@ -66,8 +66,8 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 className={clsx(`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-px-2.5 univer-py-0
-                  dark:hover:!univer-bg-gray-600
                   hover:univer-bg-gray-100
+                  dark:hover:!univer-bg-gray-600
                 `, borderClassName, {
                     'univer-bg-gray-100 dark:!univer-bg-gray-700': visible,
                     'univer-bg-white dark:!univer-bg-gray-700': !visible,

@@ -256,8 +256,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                           univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
                                           univer-list-none univer-items-center univer-justify-between univer-rounded
                                           univer-px-2 univer-text-sm univer-transition-all
-                                          dark:hover:!univer-bg-gray-700
                                           hover:univer-bg-gray-100
+                                          dark:hover:!univer-bg-gray-700
                                         `}
                                     >
                                         <span className="univer-max-w-[220px] univer-truncate">
@@ -305,7 +305,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                     <Radio value={SortType.DESC}>{localeService.t('sheets-sort.general.sort-desc')}</Radio>
                 </RadioGroup>
             </div>
-            <div className="univer-absolute univer-right-0 univer-cursor-pointer univer-text-sm univer-s-[14px]">
+            <div className="univer-s-[14px] univer-absolute univer-right-0 univer-cursor-pointer univer-text-sm">
                 {showDelete && <DeleteEmptyIcon onClick={() => onChange(null, currentIndex)} />}
             </div>
         </div>

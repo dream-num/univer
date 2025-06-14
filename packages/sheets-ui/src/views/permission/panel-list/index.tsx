@@ -382,9 +382,8 @@ export function SheetPermissionPanelList() {
                                             <Tooltip title={rule.description}>
                                                 <div
                                                     className={`
-                                                      univer-text-3 univer-max-w-64 univer-overflow-hidden
+                                                      univer-text-3 univer-mt-2] univer-max-w-64 univer-overflow-hidden
                                                       univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-400
-                                                      univer-mt-2]
                                                     `}
                                                 >
                                                     {rule.description}

@@ -16,7 +16,6 @@
 
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { DocUIController, UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -68,9 +67,6 @@ registerUniPlugins(univer);
 univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_EN);
 univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
-
-// debugger plugin
-univer.registerPlugin(UniverDebuggerPlugin);
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

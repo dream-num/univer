@@ -64,7 +64,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/title.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/E1MC_gxuoxED7as5FCVcH_title.png',
                 },
             },
         },
@@ -116,7 +116,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P1.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/ITU9ANLPCLVZayK4cai3F_P1.png',
                 },
             },
         },
@@ -132,7 +132,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P2.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/SPY91aael53o6PASWMISg_P2.png',
                 },
             },
         },
@@ -148,7 +148,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P3.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/ejART8fy6hJATqRPEwv0i_P3.png',
                 },
             },
         },
@@ -164,7 +164,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/P4.jpg',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/dMWplOwGie39Rduf0IFlm_P4.jpg',
                 },
             },
         },
@@ -234,7 +234,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/icon1.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/_Ae7XkF1f13c2bkxomlfV_icon1.png',
                 },
             },
         },
@@ -269,7 +269,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/icon2.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/G-OVAn8THqr-7u4OXZKJm_icon2.png',
                 },
             },
         },
@@ -304,7 +304,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/icon3.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/MPQJUz-b6yYfF-fa4TSSz_icon3.png',
                 },
             },
         },

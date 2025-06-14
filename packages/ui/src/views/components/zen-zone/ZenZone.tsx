@@ -55,7 +55,7 @@ export function ZenZone() {
     return (
         <section
             className={clsx('univer-absolute univer-z-[-1] univer-flex', {
-                'univer-inset-0 univer-z-[100] univer-bg-gray-100 univer-animate-in univer-fade-in': visible,
+                'univer-animate-in univer-fade-in univer-inset-0 univer-z-[100] univer-bg-gray-100': visible,
                 'univer-hidden': hidden,
             })}
         >

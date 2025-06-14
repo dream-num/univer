@@ -52,8 +52,8 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 className={clsx(`
                   univer-box-border univer-h-full univer-w-full univer-appearance-none univer-px-1.5
                   univer-text-gray-900
-                  dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white
                   focus:univer-outline-none
+                  dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white
                 `, borderRightClassName, {
                     'univer-cursor-not-allowed': disable,
                 })}
@@ -74,10 +74,10 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     className={clsx(`
                       univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
-                      dark:!univer-text-white dark:hover:!univer-bg-gray-800
                       hover:univer-bg-gray-100
+                      dark:!univer-text-white dark:hover:!univer-bg-gray-800
                     `, {
-                        'univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-700 hover:univer-bg-transparent': disable,
+                        'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent dark:!univer-text-gray-700': disable,
                     })}
                 >
                     <MoreDownIcon />

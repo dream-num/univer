@@ -107,11 +107,11 @@ export function Checkbox(props: ICheckboxProps) {
                     className={clsx(`
                       univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
                       univer-justify-center univer-overflow-hidden univer-rounded univer-border univer-border-solid
-                      univer-border-gray-300 univer-bg-gray-50 univer-transition-colors
-                      dark:!univer-border-gray-500 dark:!univer-bg-gray-600
+                      univer-transition-colors
                     `, {
                         'univer-opacity-50': disabled,
                         'univer-border-primary-600 univer-bg-primary-600': checked || indeterminate,
+                        'univer-border-gray-300 univer-bg-gray-50 dark:!univer-border-gray-500 dark:!univer-bg-gray-600': !checked && !indeterminate,
                     })}
                 >
                     {checked && (

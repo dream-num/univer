@@ -80,9 +80,9 @@ export const FormLayout = (props: IFormLayoutProps) => {
                                 ? (
                                     <div
                                         className={clsx(`
+                                          last:univer-mb-0
                                           [&_[data-u-comp=input]]:univer-w-full
                                           [&_[data-u-comp=select]]:univer-w-full
-                                          last:univer-mb-0
                                         `, {
                                             '[&_[data-u-comp=input]]:univer-border-red-500': error,
                                             '[&_[data-u-comp=select]]:univer-border-red-500': error,

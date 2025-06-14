@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IRange, IRowData, IWorksheetData } from './typedef';
 import type { SheetViewModel } from './view-model';
-import { getArrayLength, type IObjectArrayPrimitiveType } from '../shared/object-matrix';
+import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
 import { RANGE_TYPE } from './typedef';
+
+const MAXIMUM_ROW_HEIGHT = 2000;
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -38,7 +41,7 @@ export class RowManager {
 
     /**
      * Get height and hidden status of columns in the sheet
-     * @returns
+     * @returns {IObjectArrayPrimitiveType<Partial<IRowData>>} Row data, including height, hidden status, etc.
      */
     getRowData(): IObjectArrayPrimitiveType<Partial<IRowData>> {
         return this._rowData;
@@ -67,8 +70,11 @@ export class RowManager {
         const rowData: IObjectArrayPrimitiveType<Partial<IRowData>> = {};
         let index = 0;
         for (let i = rowPos; i < rowPos + numRows; i++) {
-            const data = this.getRowOrCreate(i);
-            rowData[index] = data;
+            const data = this.getRow(i);
+            rowData[index] = data ?? {
+                h: this._config.defaultRowHeight,
+                hd: BooleanNumber.FALSE,
+            };
             index++;
         }
         return rowData;
@@ -95,6 +101,29 @@ export class RowManager {
     }
 
     /**
+     * Set row height of given row
+     * @param rowPos row index
+     * @param height row height
+     */
+    setRowHeight(rowPos: number, height: number) {
+        const row = this._rowData[rowPos];
+
+        // To prevent data redundancy, we only set the height when it is different from the default row height.
+        if (height === this._config.defaultRowHeight) {
+            if (row) {
+                delete row.h;
+
+                if (Object.keys(row).length === 0) {
+                    delete this._rowData[rowPos];
+                }
+            }
+        } else {
+            const _height = Math.min(height, MAXIMUM_ROW_HEIGHT);
+            this._rowData[rowPos] = row ? { ...row, h: _height } : { h: _height };
+        }
+    }
+
+    /**
      * Get row data of given row
      * @param rowPos row index
      * @returns {Nullable<Partial<IRowData>>} rowData
@@ -113,6 +142,8 @@ export class RowManager {
 
     /**
      * Get given row data or create a row data when it's null
+     * This method is used to ensure that the row data should not be null when setting row properties.
+     * To prevent data redundancy, if is not setting row properties, you can use `getRow` method to get row data. don't use this method.
      * @param rowPos row index
      * @returns {Partial<IRowData>} rowData
      */

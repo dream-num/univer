@@ -26,7 +26,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useDependency, useEvent } from '@univerjs/ui';
+import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
@@ -87,6 +87,10 @@ export function calcHighlightRanges(opts: {
         const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
         const refSheetId = getSheetIdByName(sheetName);
 
+        if (!refSheetId && sheetName) {
+            continue;
+        }
+
         if (currentUnitId !== unitId && refUnitId !== currentUnitId) {
             continue;
         }
@@ -134,9 +138,10 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
     const themeService = useDependency(ThemeService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const render = renderManagerService.getRenderById(unitId);
-    const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
-    const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
+    const currentWorkbook = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
+    const currentRender = currentWorkbook ? renderManagerService.getRenderById(currentWorkbook.getUnitId()) : null;
+    const refSelectionsRenderService = currentRender?.with(RefSelectionsRenderService);
+    const sheetSkeletonManagerService = currentRender?.with(SheetSkeletonManagerService);
 
     const highlightSheet = useEvent((refSelections: IRefSelection[], editor?: Editor) => {
         const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -154,13 +159,9 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
             themeService,
             univerInstanceService,
         });
+
         if (!selectionWithStyle) return;
-        const allControls = refSelectionsRenderService?.getSelectionControls() || [];
-        if (allControls.length === selectionWithStyle.length) {
-            refSelectionsRenderService?.resetSelectionsByModelData(selectionWithStyle);
-        } else {
-            refSelectionsService.setSelections(selectionWithStyle);
-        }
+        refSelectionsService.setSelections(selectionWithStyle);
     });
 
     useEffect(() => {
@@ -211,6 +212,7 @@ export function useDocHight(_leadingCharacter: string = '') {
                     e.st = e.st + leadingCharacterLength;
                 });
             }
+
             cloneBody.textRuns = [{ st: 0, ed: 1, ts: { fs: 11 } }, ...textRuns];
             const text = sequenceNodes.reduce((pre, cur) => {
                 if (typeof cur === 'string') {
@@ -265,7 +267,7 @@ export function useColor(): IColorMap {
             themeService.getColorFromTheme('loop-color.10'),
             themeService.getColorFromTheme('loop-color.11'),
             themeService.getColorFromTheme('loop-color.12'),
-        ].map((e) => e.includes('.') ? themeService.getColorFromTheme(e) : e);
+        ].map((color) => themeService.isValidThemeColor(color) ? themeService.getColorFromTheme(color) : color);
         const numberColor = themeService.getColorFromTheme('blue.700');
         const stringColor = themeService.getColorFromTheme('jiqing.800');
         const plainTextColor = themeService.getColorFromTheme('black');

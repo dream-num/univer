@@ -128,8 +128,8 @@ const locale: typeof enUS = {
             title: 'Hợp nhất ô chỉ giữ giá trị của ô trên cùng bên trái, bạn có muốn tiếp tục không?',
             cancel: 'Hủy hợp nhất',
             confirm: 'Tiếp tục hợp nhất',
-            waring: 'Cảnh báo',
-            dismantleMergeCellWaring: 'Thao tác này sẽ làm rời một số ô đã hợp nhất, bạn có muốn tiếp tục không?',
+            warning: 'Cảnh báo',
+            dismantleMergeCellWarning: 'Thao tác này sẽ làm rời một số ô đã hợp nhất, bạn có muốn tiếp tục không?',
         },
     },
     filter: {

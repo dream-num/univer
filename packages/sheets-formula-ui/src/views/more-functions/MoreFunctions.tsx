@@ -65,7 +65,7 @@ export function MoreFunctions() {
     return (
         <div
             data-u-comp="sheets-formula-functions-panel"
-            className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-2"
+            className="univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-2"
         >
             {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
             {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}

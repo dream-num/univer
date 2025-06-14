@@ -24276,6 +24276,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             }),
         },
         {
+            name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
+            data: '{"sheet-0011":[{"cfId":"mdFMCQle","ranges":[{"startRow":0,"startColumn":10,"endRow":7,"endColumn":11,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":"123"},"stopIfTrue":false}]}',
+        },
+        {
             name: 'SHEET_RANGE_PROTECTION_PLUGIN',
             data: '{"sheet-0011":[{"ranges":[{"startRow":26,"startColumn":6,"endRow":30,"endColumn":8,"rangeType":0,"unitId":"workbook-01","sheetId":"sheet-0011"}],"permissionId":"nLNP3ABg","id":"IYg5","name":"工作表11(G27:I31)","unitType":3,"unitId":"workbook-01","subUnitId":"sheet-0011"}]}',
         },

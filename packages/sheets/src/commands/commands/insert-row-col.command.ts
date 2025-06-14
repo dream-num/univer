@@ -134,7 +134,7 @@ export const InsertRowByRangeCommand: ICommand = {
         const undos: IMutationInfo[] = [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }];
 
         // set range values
-        if (cellValue) {
+        if (cellValue && Object.keys(cellValue).length > 0) {
             redos.push({
                 id: SetRangeValuesMutation.id,
                 params: {

@@ -37,7 +37,7 @@ export class ColumnManager {
 
     /**
      * Get width and hidden status of columns in the sheet
-     * @returns
+     * @returns {IObjectArrayPrimitiveType<Partial<IColumnData>>} Column data, including width, hidden status, etc.
      */
     getColumnData(): IObjectArrayPrimitiveType<Partial<IColumnData>> {
         return this._columnData;
@@ -159,8 +159,11 @@ export class ColumnManager {
         const columnData: IObjectArrayPrimitiveType<Partial<IColumnData>> = {};
         let index = 0;
         for (let i = columnPos; i < columnPos + numColumns; i++) {
-            const data = this.getColumnOrCreate(i);
-            columnData[index] = data;
+            const data = this.getColumn(i);
+            columnData[index] = data ?? {
+                w: this._config.defaultColumnWidth,
+                hd: BooleanNumber.FALSE,
+            };
             index++;
         }
         return columnData;
@@ -168,7 +171,7 @@ export class ColumnManager {
 
     /**
      * Get count of column in the sheet
-     * @returns
+     * @returns {number} count of column
      */
     getSize(): number {
         return getArrayLength(this._columnData);
@@ -177,31 +180,40 @@ export class ColumnManager {
     /**
      * Get the width of column
      * @param columnPos column index
-     * @returns
+     * @returns {number} width of column
      */
     getColumnWidth(columnPos: number): number {
-        const { _columnData } = this;
-        const config = this._config;
-        let width: number = 0;
-
-        const column = _columnData[columnPos] || {
-            hd: BooleanNumber.FALSE,
-            w: config.defaultColumnWidth,
-        };
-        width = column.w || config.defaultColumnWidth;
-
-        return width;
+        return this._columnData[columnPos]?.w ?? this._config.defaultColumnWidth;
     }
 
     /**
-     * get given column data
+     * Set the width of column
+     * @param columnPos column index
+     * @param width width of column
+     */
+    setColumnWidth(columnPos: number, width: number) {
+        const column = this._columnData[columnPos];
+
+        // To prevent data redundancy, we only set the width when it is different from the default column width.
+        if (width === this._config.defaultColumnWidth) {
+            if (column) {
+                delete column.w;
+
+                if (Object.keys(column).length === 0) {
+                    delete this._columnData[columnPos];
+                }
+            }
+        } else {
+            this._columnData[columnPos] = column ? { ...column, w: width } : { w: width };
+        }
+    }
+
+    /**
+     * Get given column data
      * @param columnPos column index
      */
     getColumn(columnPos: number): Nullable<Partial<IColumnData>> {
-        const column = this._columnData[columnPos];
-        if (column) {
-            return column;
-        }
+        return this._columnData[columnPos];
     }
 
     /**
@@ -213,7 +225,9 @@ export class ColumnManager {
     }
 
     /**
-     * get given column data or create a column data when it's null
+     * Get given column data or create a column data when it's null
+     * This method is used to ensure that the column data should not be null when setting column properties.
+     * To prevent data redundancy, if is not setting column properties, you can use `getColumn` method to get column data. don't use this method.
      * @param columnPos column index
      * @returns {Partial<IColumnData>} columnData
      */

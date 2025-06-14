@@ -23,6 +23,17 @@ import { ILogService } from '../log/log.service';
 import { LifecycleNameMap, LifecycleStages } from './lifecycle';
 
 /**
+ * An error that indicates a lifecycle stage will never be reached, mostly due to the Univer instance is
+ * disposed.
+ */
+export class LifecycleUnreachableError extends Error {
+    constructor(stage: LifecycleStages) {
+        super(`[LifecycleService]: lifecycle stage "${LifecycleNameMap[stage]}" will never be reached!`);
+        this.name = 'LifecycleUnreachableError';
+    }
+}
+
+/**
  * This service controls the lifecycle of a Univer instance. Other modules can
  * inject this service to read the current lifecycle stage or subscribe to
  * lifecycle changes.
@@ -59,18 +70,33 @@ export class LifecycleService extends Disposable {
         super.dispose();
     }
 
+    /**
+     * Wait for a specific lifecycle stage to be reached.
+     * @param stage The lifecycle stage to wait for.
+     * If the current stage is already at or beyond the specified stage, it will
+     * resolve immediately.
+     * If the specified stage is unreachable, it will reject with a
+     * `LifecycleUnreachableError`.
+     * @returns A promise that resolves when the specified stage is reached.
+     */
     onStage(stage: LifecycleStages): Promise<void> {
         return firstValueFrom(this.lifecycle$.pipe(
             filter((s) => s >= stage),
             takeAfter((s) => s === stage),
             map(() => void 0)
-        ));
+        )).catch((err) => {
+            if (err.name === 'EmptyError') {
+                return Promise.reject(new LifecycleUnreachableError(stage));
+            }
+
+            return Promise.reject(err);
+        });
     }
 
     /**
      * Subscribe to lifecycle changes and all previous stages and the current
      * stage will be emitted immediately.
-     * @returns
+     * @returns An observable that emits the lifecycle stages, including the current
      */
     subscribeWithPrevious(): Observable<LifecycleStages> {
         return merge(getLifecycleStagesAndBefore(this.stage), this._lifecycle$.pipe(skip(1)))

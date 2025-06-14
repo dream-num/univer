@@ -26,40 +26,40 @@ export const buttonVariants = cva(
       univer-box-border univer-inline-flex univer-cursor-pointer univer-select-none univer-items-center
       univer-justify-center univer-gap-2 univer-whitespace-nowrap univer-rounded-md univer-border univer-border-solid
       univer-text-sm univer-font-medium univer-transition-colors
-      [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
       disabled:univer-pointer-events-none disabled:univer-cursor-not-allowed disabled:univer-opacity-50
+      [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
     `,
     {
         variants: {
             variant: {
                 default: `
                   univer-border-gray-200 univer-bg-white univer-text-gray-700
+                  hover:univer-bg-gray-100
                   active:univer-bg-gray-200
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-700 dark:!univer-text-white
                   dark:hover:!univer-bg-gray-600 dark:active:!univer-bg-gray-700
-                  hover:univer-bg-gray-100
                 `,
                 primary: `
                   univer-border-primary-600 univer-bg-primary-600 univer-text-white
-                  active:univer-bg-primary-700
                   hover:univer-bg-primary-500
+                  active:univer-bg-primary-700
                 `,
                 danger: `
                   univer-border-red-500 univer-bg-red-500 univer-text-white
-                  active:univer-border-red-600 active:univer-bg-red-600
                   hover:univer-border-red-400 hover:univer-bg-red-400
+                  active:univer-border-red-600 active:univer-bg-red-600
                 `,
                 text: `
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
+                  hover:univer-bg-gray-100
                   active:univer-bg-gray-200
                   dark:!univer-text-white dark:hover:!univer-bg-gray-700 dark:active:!univer-bg-gray-600
-                  hover:univer-bg-gray-100
                 `,
                 link: `
                   univer-underline-current univer-border-transparent univer-bg-transparent univer-text-primary-600
                   univer-underline-offset-4
-                  active:univer-text-primary-700
                   hover:univer-text-primary-500 hover:univer-underline
+                  active:univer-text-primary-700
                 `,
             },
             size: {

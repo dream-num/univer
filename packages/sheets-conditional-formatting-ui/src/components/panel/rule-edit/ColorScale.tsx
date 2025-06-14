@@ -71,10 +71,10 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
                     className={clsx(`
                       univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
                       univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
+                      hover:univer-border-primary-600
+                      dark:!univer-bg-gray-700 dark:!univer-text-white
                       [&>div:first-child]:univer-px-2.5
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                      dark:!univer-bg-gray-700 dark:!univer-text-white
-                      hover:univer-border-primary-600
                     `, borderClassName)}
                     initValue={formulaInitValue as any}
                     unitId={unitId}
@@ -306,8 +306,8 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div
                 className={`
-                  univer-mt-3 univer-text-xs
                   univer-text-gray-600dark:!univer-text-gray-200
+                  univer-mt-3 univer-text-xs
                 `}
             >
                 {localeService.t('sheet.cf.panel.medianValue')}

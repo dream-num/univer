@@ -16,6 +16,7 @@
 
 import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
+import type { Subscription } from 'rxjs';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
@@ -36,6 +37,7 @@ export interface ITooltipWrapperRef {
 
 export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((props, ref) => {
     const { children, ...tooltipProps } = props;
+
     const spanRef = useRef<HTMLSpanElement>(null);
 
     const [tooltipVisible, setTooltipVisible] = useState(false);
@@ -64,19 +66,25 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
         el: spanRef.current,
     }));
 
-    return (
-        <Tooltip
-            visible={tooltipVisible}
-            onVisibleChange={handleChangeTooltipVisible}
-            {...tooltipProps}
-        >
+    return tooltipProps.title
+        ? (
+            <Tooltip
+                visible={tooltipVisible}
+                onVisibleChange={handleChangeTooltipVisible}
+                {...tooltipProps}
+            >
+                <span ref={spanRef}>
+                    <TooltipWrapperContext.Provider value={contextValue}>
+                        {children}
+                    </TooltipWrapperContext.Provider>
+                </span>
+            </Tooltip>
+        )
+        : (
             <span ref={spanRef}>
-                <TooltipWrapperContext.Provider value={contextValue}>
-                    {children}
-                </TooltipWrapperContext.Provider>
+                {children}
             </span>
-        </Tooltip>
-    );
+        );
 });
 
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
@@ -169,7 +177,9 @@ export function DropdownMenuWrapper({
 
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
-            if (!item.children) return item;
+            if (!item.children) {
+                return !hiddenStates[item.key];
+            }
 
             const itemKey = item.key?.toString() || '';
             return !hiddenStates[itemKey];
@@ -181,18 +191,32 @@ export function DropdownMenuWrapper({
     }
 
     useEffect(() => {
-        const subscriptions = menuItems.map((item) => {
-            if (!item.children) return null;
+        const subscriptions: Subscription[] = [];
 
-            const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$ ?? of(false));
+        menuItems.forEach((item) => {
+            if (!item.children) {
+                if (item.item?.hidden$) {
+                    const sub = item.item.hidden$.subscribe((hidden) => {
+                        setHiddenStates((prev) => ({
+                            ...prev,
+                            [item.key]: hidden,
+                        }));
+                    });
+                    subscriptions.push(sub);
+                }
+            } else {
+                const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$ ?? of(false));
 
-            return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
-                const isAllHidden = hiddenValues.every((hidden) => hidden === true);
-                setHiddenStates((prev) => ({
-                    ...prev,
-                    [item.key]: isAllHidden,
-                }));
-            });
+                const sub = combineLatest(hiddenObservables).subscribe((hiddenValues) => {
+                    const isAllHidden = hiddenValues.every((hidden) => hidden === true);
+                    setHiddenStates((prev) => ({
+                        ...prev,
+                        [item.key]: isAllHidden,
+                    }));
+                });
+
+                subscriptions.push(sub);
+            }
         });
 
         return () => {

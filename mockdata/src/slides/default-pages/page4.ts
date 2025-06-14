@@ -70,7 +70,7 @@ export const DEFAULT_FORTH_PAGE = {
             type: PageElementType.IMAGE,
             image: {
                 imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/title.png',
+                    contentUrl: 'https://release-univer.oss-cn-shenzhen.aliyuncs.com/template-resource/E1MC_gxuoxED7as5FCVcH_title.png',
                 },
             },
         },

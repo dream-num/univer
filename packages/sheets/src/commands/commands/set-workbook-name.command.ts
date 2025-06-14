@@ -15,10 +15,11 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetWorkbookNameMutationParams } from '../mutations/set-workbook-name.mutation';
+import { CommandType, ICommandService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetWorkbookNameMutation } from '../mutations/set-workbook-name.mutation';
+import { getSheetCommandTargetWorkbook } from './utils/target-util';
 
 export interface ISetWorkbookNameCommandParams {
     name: string;
@@ -31,12 +32,13 @@ export interface ISetWorkbookNameCommandParams {
 export const SetWorkbookNameCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-workbook-name',
-    handler: async (accessor: IAccessor, params: ISetWorkbookNameCommandParams) => {
-        const instanceService = accessor.get(IUniverInstanceService);
-        const workbook = instanceService.getUnit(params.unitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return false;
-
+    handler: (accessor: IAccessor, params: ISetWorkbookNameCommandParams) => {
+        const commandService = accessor.get(ICommandService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const target = getSheetCommandTargetWorkbook(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
+
         const interceptedCommands = sheetInterceptorService.onCommandExecute({
             id: SetWorkbookNameCommand.id,
             params,
@@ -53,7 +55,6 @@ export const SetWorkbookNameCommand: ICommand = {
             ...interceptedCommands.redos,
         ];
 
-        const commandService = accessor.get(ICommandService);
         return sequenceExecute(redos, commandService).result;
     },
 };

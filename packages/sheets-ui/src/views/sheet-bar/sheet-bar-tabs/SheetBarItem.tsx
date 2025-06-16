@@ -59,17 +59,13 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             className={clsx(`
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
               univer-flex-row univer-items-center univer-rounded univer-text-xs univer-transition-[colors,box-shadow]
-              dark:!univer-text-white
-            `, currentSelected
-                ? `
-                  univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700 univer-shadow
-                  dark:!univer-bg-gray-900
-                `
-                : `
-                  univer-font-medium univer-text-gray-900
-                  hover:univer-bg-gray-100
-                  dark:hover:!univer-bg-gray-700
-                `)}
+            `, {
+                'dark:!univer-text-white': !color || (color && !getTextColor(color)),
+                'univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700 univer-shadow': currentSelected,
+                'dark:!univer-bg-gray-900': currentSelected && !color,
+                'univer-font-medium univer-text-gray-900 hover:univer-bg-gray-100': !currentSelected,
+                'dark:hover:!univer-bg-gray-700': !currentSelected && !color,
+            })}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',
                 color: !currentSelected && color ? getTextColor(color) : '',

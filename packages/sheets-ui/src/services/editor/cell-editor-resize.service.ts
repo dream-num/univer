@@ -16,12 +16,16 @@
 
 import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import type { IUniverUIConfig } from '@univerjs/ui';
+import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
+import { IConfigService } from '@univerjs/core';
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
+import { ILayoutService, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SHEET_FOOTER_BAR_HEIGHT } from '../../views/sheet-container/SheetContainer';
 import { IEditorBridgeService } from '../editor-bridge.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -42,7 +46,8 @@ export class SheetCellEditorResizeService extends Disposable {
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
     }
@@ -237,10 +242,18 @@ export class SheetCellEditorResizeService extends Disposable {
         const { startX, startY, endX } = position;
         const enginWidth = engine.width;
 
+        const footerBarHeight = (
+            (this._configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY)?.footer ?? true)
+            &&
+            (this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.footer ?? true)
+        )
+            ? SHEET_FOOTER_BAR_HEIGHT
+            : 0;
+
         const clientHeight =
             document.body.clientHeight -
             startY -
-            SHEET_FOOTER_BAR_HEIGHT -
+            footerBarHeight -
             canvasOffset.top -
             EDITOR_BORDER_SIZE * 2;
 

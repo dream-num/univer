@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
@@ -24,6 +23,8 @@ import {
     merge,
     Optional,
     Plugin,
+    registerDependencies,
+    touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
@@ -65,11 +66,11 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        ([
+        registerDependencies(this._injector, [
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],
             [SheetsFilterUIDesktopController],
-        ] as Dependency[]).forEach((d) => this._injector.add(d));
+        ]);
 
         if (this._config.useRemoteFilterValuesGenerator && this._rpcChannelService) {
             this._injector.add([ISheetsGenerateFilterValuesService, {
@@ -82,10 +83,14 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(SheetsFilterPermissionController);
+        touchDependencies(this._injector, [
+            [SheetsFilterPermissionController],
+        ]);
     }
 
     override onRendered(): void {
-        this._injector.get(SheetsFilterUIDesktopController);
+        touchDependencies(this._injector, [
+            [SheetsFilterUIDesktopController],
+        ]);
     }
 }

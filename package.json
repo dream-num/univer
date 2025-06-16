@@ -72,7 +72,7 @@
         "fs-extra": "^11.3.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.1.0",
-        "posthog-node": "^4.18.0",
+        "posthog-node": "^5.1.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "release-it": "^17.11.0",

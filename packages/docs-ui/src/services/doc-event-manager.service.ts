@@ -714,10 +714,14 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             };
         }
 
-        const paragraph = this._paragraphBounds.values().find((bounds) => {
-            return bounds.rects.some((rect) => isPointInRect(x, y, rect));
-        });
-
+        let paragraph: IMutiPageParagraphBound | undefined;
+        for (const bounds of this._paragraphBounds) {
+            const bound = bounds[1];
+            if (bound.rects.some((rect) => isPointInRect(x, y, rect))) {
+                paragraph = bound;
+                break;
+            }
+        }
         return paragraph;
     }
 

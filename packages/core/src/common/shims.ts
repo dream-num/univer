@@ -87,7 +87,29 @@ function installArrayFindLastIndex() {
     }
 }
 
+/**
+ * Polyfill for String.prototype.at
+ */
+function installStringAt() {
+    if (typeof glob.String.prototype.at !== 'function') {
+        glob.String.prototype.at = function at(index: number): string | undefined {
+            if (this == null) {
+                throw new TypeError('String.prototype.at called on null or undefined');
+            }
+            const len = this.length;
+            if (index < 0) {
+                index = len + index;
+            }
+            if (index < 0 || index >= len) {
+                return undefined;
+            }
+            return this.charAt(index);
+        };
+    }
+}
+
 export function installShims() {
     installRequestIdleCallback();
     installArrayFindLastIndex();
+    installStringAt();
 }

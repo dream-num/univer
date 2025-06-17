@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import type { IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
+import type { ICellData, ICommandInfo } from '@univerjs/core';
+import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
-import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum } from '@univerjs/core';
-import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
+import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, ObjectMatrix } from '@univerjs/core';
+import { FormulaDataModel, serializeRange, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
@@ -59,14 +59,35 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                 this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
                 this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
 
+                // Note the logic should only be executed in exporting and hence shall be set once.
                 if (this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.writeArrayFormulaToSnapshot) {
-                    this._writeArrayFormulaToSnapshot(arrayFormulaCellData);
+                    this._writeArrayFormulaToSnapshot(arrayFormulaRange, arrayFormulaCellData);
                 }
             })
         );
     }
 
-    private _writeArrayFormulaToSnapshot(arrayFormulaCellData: IArrayFormulaUnitCellType) {
+    private _writeArrayFormulaToSnapshot(arrayFormulaRange: IArrayFormulaRangeType, arrayFormulaCellData: IArrayFormulaUnitCellType) {
+        // Write values to the `ref` property of the array formula range.
+        Object.entries(arrayFormulaRange).forEach(([unitId, subUnitData]) => {
+            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
+                // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
+                const cellValue = new ObjectMatrix<ICellData>();
+                const matrix = new ObjectMatrix(rangeData);
+                matrix.forValue((row, col, value) => {
+                    cellValue.setValue(row, col, { ref: serializeRange(value) }); // convert to ref string
+                });
+
+                // Keep this local to avoid triggering re-calculate in the worker.
+                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                    unitId,
+                    subUnitId,
+                    cellValue: cellValue.getMatrix(),
+                }, { onlyLocal: true });
+            });
+        });
+
+        // Write values to the 'v' property of the cell data.
         Array.from(Object.entries(arrayFormulaCellData)).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rowData]) => {
                 // Keep this local to avoid triggering re-calculate in the worker.

@@ -141,8 +141,8 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
+const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref']);
 function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles) {
-    const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom']);
     const type = getCellType(styles, newValue, oldValue);
     Object.keys(newValue).forEach((key) => {
         const cellPropertyKey = key as keyof ICellData;
@@ -162,6 +162,7 @@ function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles)
         oldValue.t = type;
         oldValue.v = getCellValue(type, oldValue);
     }
+
     if (oldValue.v === null) {
         delete oldValue.t;
         delete oldValue.v;

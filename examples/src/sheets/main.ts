@@ -110,7 +110,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverSheetsNumfmtPlugin);
     univer.registerPlugin(UniverSheetsZenEditorPlugin);
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
-    univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+    univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true, writeArrayFormulaToSnapshot: true });
     univer.registerPlugin(UniverSheetsDataValidationPlugin);
     univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);

@@ -52,7 +52,7 @@ export interface IUniverSheetsFormulaBaseConfig {
     initialFormulaComputing?: CalculationMode;
 
     /**
-     * If true, the plugin will write array formula results to the snapshot. Normally you should not set this to true.
+     * If true, the plugin will write array formula results to the snapshot. Normally you should not set this value.
      */
     writeArrayFormulaToSnapshot?: boolean;
 }
@@ -66,8 +66,7 @@ export const PLUGIN_CONFIG_KEY_REMOTE = 'sheets-formula.remote.config';
 
 export const configSymbolRemote = Symbol(PLUGIN_CONFIG_KEY_REMOTE);
 
-export interface IUniverSheetsFormulaRemoteConfig {
-}
+export interface IUniverSheetsFormulaRemoteConfig {}
 
 export const defaultPluginRemoteConfig: IUniverSheetsFormulaRemoteConfig = {};
 

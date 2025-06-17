@@ -260,7 +260,7 @@ export interface ICellData {
     f?: Nullable<string>;
 
     /**
-     * Reference to a range. If the formula is a formula array, this field is used to store the referenced range.
+     * If the formula is a formula array, this field is used to store the referencing range.
      * @ignore
      */
     ref?: Nullable<string>;

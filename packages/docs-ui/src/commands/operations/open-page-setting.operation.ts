@@ -53,6 +53,8 @@ export const DocOpenPageSettingCommand: ICommand = {
                     pageSize: paperSize,
                 } as IDocPageSetupCommandParams);
             },
+            confirmText: localeService.t('page-settings.confirm'),
+            cancelText: localeService.t('page-settings.cancel'),
         });
 
         return true;

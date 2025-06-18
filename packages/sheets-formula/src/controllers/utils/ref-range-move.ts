@@ -66,7 +66,7 @@ export function getNewRangeByMoveParam(
     currentFormulaUnitId: string,
     currentFormulaSheetId: string
 ) {
-    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to } = formulaReferenceMoveParam;
+    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to, rangeFilteredRows } = formulaReferenceMoveParam;
 
     const {
         range: unitRange,
@@ -241,7 +241,8 @@ export function getNewRangeByMoveParam(
                     id: EffectRefRangId.RemoveRowCommandId,
                     params: { range },
                 },
-                sequenceRange
+                sequenceRange,
+                rangeFilteredRows
             );
 
             const result = runRefRangeMutations(operators, sequenceRange);

@@ -287,6 +287,7 @@ function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, w
         range,
         unitId,
         sheetId,
+        rangeFilteredRows: workbook.getSheetBySheetId(sheetId)?.getRangeFilterRows(range) ?? [],
     };
 }
 

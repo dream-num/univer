@@ -581,6 +581,23 @@ export class Worksheet {
     }
 
     /**
+     * Get the filtered out rows in a given range. used for remove rows operation, etc.
+     * @param range - The range to get filtered rows from.
+     * @returns {number[]} An array of row indices that are filtered out within the specified range.
+     */
+    getRangeFilterRows(range: IRange): number[] {
+        const rangeFilteredRows = [];
+
+        for (let r = range.startRow; r <= range.endRow; r++) {
+            if (this.getRowFiltered(r)) {
+                rangeFilteredRows.push(r);
+            }
+        }
+
+        return rangeFilteredRows;
+    }
+
+    /**
      * Get cell matrix from a given range and pick out non-first cells of merged cells.
      *
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be

@@ -141,7 +141,7 @@ export function getActiveWorksheet(instanceService: UniverInstanceService): [Nul
     return [workbook, worksheet];
 }
 
-export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string, considerHide?: boolean): IDiscreteRange | null {
+export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string): IDiscreteRange | null {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = unitId
         ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
@@ -156,23 +156,11 @@ export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?
     const cols = [];
     for (let r = startRow; r <= endRow; r++) {
         if (!worksheet.getRowFiltered(r)) {
-            if (considerHide) {
-                if (worksheet.getRowRawVisible(r)) {
-                    rows.push(r);
-                }
-            } else {
-                rows.push(r);
-            }
+            rows.push(r);
         }
     }
     for (let c = startColumn; c <= endColumn; c++) {
-        if (considerHide) {
-            if (worksheet.getColVisible(c)) {
-                cols.push(c);
-            }
-        } else {
-            cols.push(c);
-        }
+        cols.push(c);
     }
     return {
         rows,
@@ -185,7 +173,7 @@ export function getVisibleRanges(ranges: IRange[], accessor: IAccessor, unitId?:
     const allCols: number[] = [];
 
     for (const range of ranges) {
-        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId, true);
+        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId);
 
         if (discreteRange) {
             allRows.push(...discreteRange.rows);

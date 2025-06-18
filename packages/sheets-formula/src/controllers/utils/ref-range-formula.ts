@@ -48,9 +48,18 @@ export interface IFormulaReferenceMoveParam {
     from?: IRange;
     to?: IRange;
     sheetName?: string;
-    definedNameId?: string; // defined name id
-    definedName?: string; // new defined name
-    rangeFilteredRows?: number[]; // the filtered rows contained in the range, used for remove rows operation, etc.
+    /**
+     * defined name id
+     */
+    definedNameId?: string;
+    /**
+     * new defined name
+     */
+    definedName?: string;
+    /**
+     * The filtered rows contained in the range, used for remove rows operation, etc.
+     */
+    rangeFilteredRows?: number[];
 }
 
 const formulaReferenceSheetList = [

@@ -134,10 +134,13 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                const type = checkCellValueType(originCellValue.v);
-                // just handle number or number string
-                if (type !== CellValueType.NUMBER) {
-                    return next(cell);
+                // If the cell not specified number type, then check the cell value type
+                if (originCellValue.t !== CellValueType.NUMBER) {
+                    const type = checkCellValueType(originCellValue.v);
+                    // just handle number or number string
+                    if (type !== CellValueType.NUMBER) {
+                        return next(cell);
+                    }
                 }
 
                 if (!cell || cell === location.rawData) {

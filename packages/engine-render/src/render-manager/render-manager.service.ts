@@ -18,10 +18,11 @@ import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel
 import type { Observable } from 'rxjs';
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
-
 import type { SheetComponent } from '../components/sheets/sheet-component';
+
 import type { Slide } from '../components/slides/slide';
 import type { IRender } from './render-unit';
+import { ThemeService } from '@univerjs/core';
 import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { Engine } from '../engine';
@@ -107,9 +108,12 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
-        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
+
+        this._initDarkModeListener();
     }
 
     override dispose(): void {
@@ -172,6 +176,17 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      */
     private _getRenderDepsByType(type: UnitType): Array<Dependency> {
         return Array.from(this._renderDependencies.get(type) ?? []);
+    }
+
+    private _initDarkModeListener(): void {
+        this.disposeWithMe(this._themeService.darkMode$.subscribe(() => {
+            this.getRenderAll().forEach((renderer) => {
+                renderer.components.forEach((component) => {
+                    component.makeForceDirty(true);
+                    component.makeDirty(true);
+                });
+            });
+        }));
     }
 
     create(unitId: string) {

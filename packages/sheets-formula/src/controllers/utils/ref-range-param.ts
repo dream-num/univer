@@ -281,21 +281,13 @@ function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, w
 
     const { range } = params;
     const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-    const worksheet = workbook.getSheetBySheetId(sheetId);
-    const rangeFilteredRows = [];
-
-    for (let r = range.startRow; r <= range.endRow; r++) {
-        if (worksheet?.getRowFiltered(r)) {
-            rangeFilteredRows.push(r);
-        }
-    }
 
     return {
         type: FormulaReferenceMoveType.RemoveRow,
         range,
         unitId,
         sheetId,
-        rangeFilteredRows,
+        rangeFilteredRows: workbook.getSheetBySheetId(sheetId)?.getRangeFilterRows(range) ?? [],
     };
 }
 

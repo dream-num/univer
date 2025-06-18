@@ -3545,6 +3545,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../../packages/sheets-data-validation
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../../packages/sheets-filter
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../../packages/sheets-formula

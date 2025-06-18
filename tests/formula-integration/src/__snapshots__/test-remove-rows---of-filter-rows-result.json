@@ -1,0 +1,327 @@
+{
+    "id": "YoRIim",
+    "sheetOrder": [
+        "_P52izs4-QQtg1AbFSjwH"
+    ],
+    "name": "",
+    "appVersion": "0.8.1",
+    "locale": "zhCN",
+    "styles": {},
+    "sheets": {
+        "_P52izs4-QQtg1AbFSjwH": {
+            "id": "_P52izs4-QQtg1AbFSjwH",
+            "name": "Sheet1",
+            "tabColor": "",
+            "hidden": 0,
+            "rowCount": 998,
+            "columnCount": 20,
+            "zoomRatio": 1,
+            "freeze": {
+                "xSplit": 0,
+                "ySplit": 0,
+                "startRow": -1,
+                "startColumn": -1
+            },
+            "scrollTop": 0,
+            "scrollLeft": 0,
+            "defaultColumnWidth": 88,
+            "defaultRowHeight": 24,
+            "mergeData": [],
+            "cellData": {
+                "0": {
+                    "0": {
+                        "v": 1,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 2,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 3,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 4,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 5,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 6,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 7,
+                        "t": 2
+                    }
+                },
+                "1": {
+                    "0": {
+                        "v": 3,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 4,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 5,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 6,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 7,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 8,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 9,
+                        "t": 2
+                    }
+                },
+                "2": {
+                    "0": {
+                        "v": 4,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 5,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 6,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 7,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 8,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 9,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 10,
+                        "t": 2
+                    }
+                },
+                "3": {
+                    "0": {
+                        "v": 6,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 7,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 8,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 9,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 10,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 11,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 12,
+                        "t": 2
+                    }
+                },
+                "4": {
+                    "0": {
+                        "v": 7,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 8,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 9,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 10,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 11,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 12,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 13,
+                        "t": 2
+                    }
+                },
+                "5": {
+                    "0": {
+                        "v": 8,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 9,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 10,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 11,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 12,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 13,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 14,
+                        "t": 2
+                    }
+                },
+                "6": {
+                    "0": {
+                        "v": 9,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 10,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 11,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 12,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 13,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 14,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 15,
+                        "t": 2
+                    }
+                },
+                "7": {
+                    "0": {
+                        "v": 10,
+                        "t": 2
+                    },
+                    "1": {
+                        "v": 11,
+                        "t": 2
+                    },
+                    "2": {
+                        "v": 12,
+                        "t": 2
+                    },
+                    "3": {
+                        "v": 13,
+                        "t": 2
+                    },
+                    "4": {
+                        "v": 14,
+                        "t": 2
+                    },
+                    "5": {
+                        "v": 15,
+                        "t": 2
+                    },
+                    "6": {
+                        "v": 16,
+                        "t": 2
+                    }
+                },
+                "9": {
+                    "1": {
+                        "f": "=SUM(B8)",
+                        "v": 11,
+                        "t": 2
+                    }
+                }
+            },
+            "rowData": {},
+            "columnData": {
+                "5": {
+                    "hd": 1
+                }
+            },
+            "showGridlines": 1,
+            "rowHeader": {
+                "width": 46,
+                "hidden": 0
+            },
+            "columnHeader": {
+                "height": 20,
+                "hidden": 0
+            },
+            "rightToLeft": 0
+        }
+    },
+    "resources": [
+        {
+            "name": "SHEET_RANGE_PROTECTION_PLUGIN",
+            "data": ""
+        },
+        {
+            "name": "SHEET_AuthzIoMockService_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_WORKSHEET_PROTECTION_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_DEFINED_NAME_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_RANGE_THEME_MODEL_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_FILTER_PLUGIN",
+            "data": "{\"_P52izs4-QQtg1AbFSjwH\":{\"ref\":{\"startRow\":0,\"startColumn\":0,\"endRow\":3,\"endColumn\":6,\"rangeType\":0},\"filterColumns\":[{\"colId\":3,\"filters\":{\"filters\":[\"5\",\"8\",\"9\"]}}],\"cachedFilteredOut\":[1,2]}}"
+        }
+    ]
+}

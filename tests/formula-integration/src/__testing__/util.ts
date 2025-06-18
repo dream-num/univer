@@ -20,7 +20,7 @@ import path from 'node:path';
 import { expect } from 'vitest';
 import { createFormulaTestBed } from './univer';
 
-function getTestName(): string {
+export function getTestName(): string {
     const testName = expect.getState().currentTestName;
     if (!testName) {
         throw new Error('Cannot get test name. Maybe you call the method outside a test case?');

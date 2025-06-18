@@ -516,23 +516,60 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
     return operators;
 };
 
-export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRange) => {
+export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRange, rangeFilteredRows?: number[]) => {
     const range = param.params?.range;
     if (!range) {
         return [];
     }
+
     const operators: IOperator[] = [];
-    const result = handleBaseRemoveRange(rotateRange(range), rotateRange(targetRange));
-    if (!result) {
-        operators.push({ type: OperatorType.Delete });
+
+    // check the remove range contains the filtered rows, if so, we need to skip the filtered rows
+    if (rangeFilteredRows && rangeFilteredRows.length > 0) {
+        let startRow = range.startRow;
+
+        for (let r = range.startRow; r <= range.endRow; r++) {
+            if (rangeFilteredRows.includes(r)) {
+                if (r === startRow) {
+                    startRow = r + 1;
+                    continue;
+                }
+
+                _handleBaseRemoveRange({
+                    ...range,
+                    startRow,
+                    endRow: r - 1,
+                });
+                startRow = r + 1;
+                continue;
+            }
+
+            if (r === range.endRow) {
+                _handleBaseRemoveRange({
+                    ...range,
+                    startRow,
+                    endRow: range.endRow,
+                });
+            }
+        }
     } else {
-        const { step, length } = result;
-        operators.push({
-            type: OperatorType.VerticalMove,
-            step,
-            length,
-        });
+        _handleBaseRemoveRange(range);
     }
+
+    function _handleBaseRemoveRange(removeRange: IRange) {
+        const result = handleBaseRemoveRange(rotateRange(removeRange), rotateRange(targetRange));
+        if (!result) {
+            operators.push({ type: OperatorType.Delete });
+        } else {
+            const { step, length } = result;
+            operators.push({
+                type: OperatorType.VerticalMove,
+                step,
+                length,
+            });
+        }
+    }
+
     return operators;
 };
 

@@ -562,13 +562,17 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             if (cell?.v === undefined || cell?.v === null) {
                 return undefined;
             }
+            const paddingLeft = style.pd?.l ?? DEFAULT_PADDING_DATA.l;
+            const paddingRight = style.pd?.r ?? DEFAULT_PADDING_DATA.r;
+            const paddingTop = style.pd?.t ?? DEFAULT_PADDING_DATA.t;
+            const paddingBottom = style.pd?.b ?? DEFAULT_PADDING_DATA.b;
 
             if (style?.tb === WrapStrategy.WRAP) {
                 const skeleton = new DocSimpleSkeleton(
                     `${cell!.v!}`,
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
-                    colWidth - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r,
+                    colWidth - paddingLeft - paddingRight,
                     Infinity
                 );
                 skeleton.calculate();
@@ -577,7 +581,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 // For same fontStyle, the height of the text is fixed.
                 // So we can use a fixed text to calculate the height to make a speed up.
                 const textSize = FontCache.getMeasureText('A', getFontStyleString(style).fontCache);
-                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent + DEFAULT_PADDING_DATA.t + DEFAULT_PADDING_DATA.b;
+                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent + paddingTop + paddingBottom;
             }
         }
     }

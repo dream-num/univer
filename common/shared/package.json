@@ -28,7 +28,7 @@
         "@typescript-eslint/parser": "^8.34.1",
         "@vitejs/plugin-react": "^4.5.2",
         "@vitejs/plugin-vue": "^5.2.4",
-        "@vitest/coverage-istanbul": "^3.1.4",
+        "@vitest/coverage-istanbul": "^3.2.4",
         "autoprefixer": "^10.4.21",
         "eslint-plugin-better-tailwindcss": "^3.3.0",
         "fs-extra": "^11.3.0",

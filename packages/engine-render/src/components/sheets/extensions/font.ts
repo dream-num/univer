@@ -453,13 +453,17 @@ export class Font extends SheetExtension {
     ) {
         const { fontCache } = renderFontCtx;
         if (!fontCache) return;
-
+        const padding = fontCache.style?.pd ?? DEFAULT_PADDING_DATA;
+        const paddingLeft = padding.l ?? DEFAULT_PADDING_DATA.l;
+        const paddingRight = padding.r ?? DEFAULT_PADDING_DATA.r;
+        const paddingTop = padding.t ?? DEFAULT_PADDING_DATA.t;
+        const paddingBottom = padding.b ?? DEFAULT_PADDING_DATA.b;
         const { vertexAngle = 0, wrapStrategy, cellData } = fontCache;
         if (cellData?.v === undefined || cellData?.v === null) return;
         const text = String(cellData.v) as string;
         let { startX, startY, endX, endY } = renderFontCtx;
-        let cellWidth = endX - startX - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r;
-        const cellHeight = endY - startY - DEFAULT_PADDING_DATA.t - DEFAULT_PADDING_DATA.b;
+        let cellWidth = endX - startX - paddingLeft - paddingRight;
+        const cellHeight = endY - startY - paddingTop - paddingBottom;
 
         const overflowRectangle = overflowCache.getValue(row, col);
         const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0);
@@ -475,10 +479,11 @@ export class Font extends SheetExtension {
             const startCell = renderFontCtx.spreadsheetSkeleton.getCellWithCoordByIndex(startRow, startColumn);
             startX = startCell.startX;
             startY = startCell.startY;
-            cellWidth = endX - startX - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r;
+            cellWidth = endX - startX - paddingLeft - paddingRight;
         }
 
         const isNumber = cellData.t === CellValueType.NUMBER && typeof cellData.v === 'number';
+
         Text.drawWith(ctx, {
             text,
             fontStyle: fontCache.fontString,
@@ -487,8 +492,8 @@ export class Font extends SheetExtension {
             vAlign: fontCache.verticalAlign,
             width: cellWidth,
             height: cellHeight,
-            left: DEFAULT_PADDING_DATA.l,
-            top: DEFAULT_PADDING_DATA.t,
+            left: paddingLeft,
+            top: paddingTop,
             color: fontCache.style?.cl?.rgb,
             strokeLine: Boolean(fontCache.style?.st?.s),
             underline: Boolean(fontCache.style?.ul?.s),

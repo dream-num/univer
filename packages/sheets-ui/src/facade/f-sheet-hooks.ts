@@ -146,7 +146,10 @@ export class FSheetHooksUIMixin extends FSheetHooks implements IFSheetHooksUIMix
                     return next(cell);
                 }
 
-                cell.customRender = [...(cell.customRender || []), ...(customRender || [])];
+                if (!cell.customRender && customRender) {
+                    cell.customRender = [...customRender];
+                }
+
                 return next(cell);
             },
             priority,

@@ -103,10 +103,9 @@ export const useSheetSelectionChange = (
                 const range = selections[selections.length - 1];
                 const lastNodes = sequenceNodes.splice(nodeIndex + 1);
                 const rangeSheetId = range.sheetId ?? subUnitId;
-                const unitId = range.unitId ?? currentUnit!.getUnitId();
                 const unitRangeName = {
                     range,
-                    unitId,
+                    unitId: range.unitId ?? currentUnit!.getUnitId(),
                     sheetName: getSheetNameById(unitId, rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
@@ -196,14 +195,14 @@ export const useSheetSelectionChange = (
             for (let index = currentRefIndex; index <= selections.length - 1; index++) {
                 const selection = selections[index];
                 const rangeSheetId = selection.sheetId ?? subUnitId;
-                const unitId = selection.unitId ?? currentUnit!.getUnitId();
                 const unitRangeName = {
                     range: selection,
-                    unitId,
+                    unitId: selection.unitId ?? currentUnit!.getUnitId(),
                     sheetName: getSheetNameById(unitId, rangeSheetId),
                 };
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 theLastList.push(refRanges[0]);
             }
             const preNode = sequenceNodes[sequenceNodes.length - 1];

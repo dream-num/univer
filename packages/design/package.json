@@ -87,8 +87,8 @@
         "rc-virtual-list": "^3.16.1",
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
-        "sonner": "^2.0.3",
-        "tailwind-merge": "^3.3.0"
+        "sonner": "^2.0.5",
+        "tailwind-merge": "^3.3.1"
     },
     "devDependencies": {
         "@testing-library/react": "^16.3.0",
@@ -96,7 +96,7 @@
         "@types/react-transition-group": "^4.4.12",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/core": "workspace:*",
-        "postcss": "^8.5.4",
+        "postcss": "^8.5.6",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "tailwindcss": "^3.4.17",

@@ -16,7 +16,6 @@
 
 import type { Config } from 'tailwindcss';
 import scrollbar from 'tailwind-scrollbar';
-import remToPx from 'tailwindcss-rem-to-px';
 
 const config: Omit<Config, 'content'> = {
     prefix: 'univer-',
@@ -173,7 +172,6 @@ const config: Omit<Config, 'content'> = {
     },
     plugins: [
         scrollbar,
-        remToPx,
     ],
 };
 

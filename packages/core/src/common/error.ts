@@ -21,7 +21,7 @@ export class CustomCommandExecutionError extends Error {
     }
 }
 
-export class CanceledError extends Error {
+export class CanceledError extends CustomCommandExecutionError {
     constructor() {
         super('Canceled by facade');
         this.name = 'CanceledError';

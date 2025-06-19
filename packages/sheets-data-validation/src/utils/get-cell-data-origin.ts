@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { getOriginCellValue, type ICellData, type Nullable } from '@univerjs/core';
+import type { ICellData, Nullable } from '@univerjs/core';
+import { getOriginCellValue } from '@univerjs/core';
 
 export function getCellValueOrigin(cell: Nullable<ICellData>) {
     return getOriginCellValue(cell);

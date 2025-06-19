@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData } from '@univerjs/core';
 import fs from 'node:fs';
 import path from 'node:path';
-import { IUniverInstanceService, type IWorkbookData, LocaleType, Univer } from '@univerjs/core';
+import { IUniverInstanceService, LocaleType, Univer } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';

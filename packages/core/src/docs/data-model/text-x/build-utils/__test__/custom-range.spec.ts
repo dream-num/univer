@@ -15,8 +15,9 @@
  */
 
 import type { ITextRange } from '../../../../../sheets/typedef';
+import type { ICustomRange } from '../../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { CustomRangeType, type ICustomRange } from '../../../../../types/interfaces';
+import { CustomRangeType } from '../../../../../types/interfaces';
 import { excludePointsFromRange, getCustomRangesInterestsWithSelection } from '../custom-range';
 
 describe('excludePointsFromRange function', () => {

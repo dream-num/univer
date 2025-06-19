@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../../types/interfaces';
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
-import { CustomRangeType, type IDocumentBody } from '../../../../types/interfaces';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { Nullable } from '../shared';
+import type { ISlideData, ISlidePage } from '../types/interfaces';
+import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { generateRandomId, Tools } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
 import { PageType } from '../types/interfaces';
-import type { Nullable } from '../shared';
-import type { ISlideData, ISlidePage } from '../types/interfaces';
 
 export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNIVER_SLIDE> {
     override type: UniverInstanceType.UNIVER_SLIDE = UniverInstanceType.UNIVER_SLIDE;

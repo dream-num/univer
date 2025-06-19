@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-import type {
-    IRange,
-    IUnitRange,
-    Nullable,
-} from '@univerjs/core';
-import {
-    Direction,
-    getIntersectRange,
-    RANGE_TYPE,
-    Rectangle,
-} from '@univerjs/core';
-
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { IFormulaReferenceMoveParam } from './ref-range-formula';
+import { Direction, getIntersectRange, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { ErrorType, serializeRangeToRefString } from '@univerjs/engine-formula';
-
 import {
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
@@ -43,7 +33,7 @@ import {
     handleMoveRows,
     runRefRangeMutations,
 } from '@univerjs/sheets';
-import { checkIsSameUnitAndSheet, FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
+import { checkIsSameUnitAndSheet, FormulaReferenceMoveType } from './ref-range-formula';
 
 export interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;

@@ -16,11 +16,12 @@
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { createNewArray } from '../../../engine/utils/array-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
 import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Averageif extends BaseFunction {

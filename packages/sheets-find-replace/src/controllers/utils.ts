@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { type IRange, Rectangle, type Worksheet } from '@univerjs/core';
+import type { IRange, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { Rectangle } from '@univerjs/core';
 
 export function isSamePosition(range1: IRange, range2: IRange): boolean {
     return range1.startRow === range2.startRow && range1.startColumn === range2.startColumn;

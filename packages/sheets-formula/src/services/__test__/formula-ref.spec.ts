@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import type { ITestBed } from './util';
-import { ICommandService, type IRange } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';

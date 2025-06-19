@@ -15,8 +15,9 @@
  */
 
 import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { BuildTextUtils, CellValueType, CommandType, DocumentDataModel, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { type ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface IToggleCellCheckboxCommandParams {
     unitId: string;

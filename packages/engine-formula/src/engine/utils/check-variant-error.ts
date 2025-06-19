@@ -15,8 +15,9 @@
  */
 
 import type { ArrayValueObject } from '../value-object/array-value-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
-import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 
 export function checkVariantErrorIsArray(variant: BaseValueObject): BaseValueObject {
     let _variant = variant;

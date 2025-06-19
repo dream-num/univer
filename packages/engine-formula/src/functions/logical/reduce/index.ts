@@ -15,13 +15,14 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { ErrorType } from '../../../basics/error-type';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Reduce extends BaseFunction {
     override minParams = 3;

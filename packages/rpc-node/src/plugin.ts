@@ -16,7 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IMessageProtocol } from '@univerjs/rpc';
-import { fork, type Serializable } from 'node:child_process';
+import type { Serializable } from 'node:child_process';
+import { fork } from 'node:child_process';
 import process from 'node:process';
 import { IConfigService, ILogService, Inject, Injector, Plugin } from '@univerjs/core';
 import {

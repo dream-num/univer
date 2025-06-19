@@ -19,11 +19,9 @@ import type { Observable } from 'rxjs';
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
 import type { SheetComponent } from '../components/sheets/sheet-component';
-
 import type { Slide } from '../components/slides/slide';
 import type { IRender } from './render-unit';
-import { ThemeService } from '@univerjs/core';
-import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { Engine } from '../engine';
 import { Scene } from '../scene';

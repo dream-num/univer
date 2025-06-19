@@ -15,7 +15,8 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { EditStateEnum, type IRangeProtectionRule, type IWorksheetProtectionRule, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
+import { EditStateEnum, UnitObject, ViewStateEnum } from '@univerjs/sheets';
 
 export const DEFAULT_RANGE_RULE: IRangeProtectionRule = {
     unitId: '',

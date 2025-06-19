@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-
+import type { ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -36,9 +30,8 @@ import type {
     IRemoveSheetCommandParams,
     ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
-import {
-    RANGE_TYPE,
-} from '@univerjs/core';
+import type { IFormulaReferenceMoveParam } from './ref-range-formula';
+import { RANGE_TYPE } from '@univerjs/core';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
@@ -56,7 +49,7 @@ import {
     SetDefinedNameCommand,
     SetWorksheetNameCommand,
 } from '@univerjs/sheets';
-import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
+import { FormulaReferenceMoveType } from './ref-range-formula';
 
 export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo) {
     const { id } = command;

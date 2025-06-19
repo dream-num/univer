@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateMinverse } from '../../../basics/math';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Minverse extends BaseFunction {

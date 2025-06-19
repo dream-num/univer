@@ -15,7 +15,22 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
+import type {
+    Documents,
+    Engine,
+    IDocSelectionInnerParam,
+    IFindNodeRestrictions,
+    IMouseEvent,
+    INodeInfo,
+    INodePosition,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    IScrollObserverParam,
+    ISuccinctDocRangeParam,
+    ITextRangeWithStyle,
+    ITextSelectionStyle,
+} from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
@@ -23,7 +38,16 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
+import {
+    getCanvasOffsetByEngine,
+    getParagraphInfoByGlyph,
+    getRangeListFromCharIndex,
+    getRangeListFromSelection,
+    getRectRangeFromCharIndex,
+    getTextRangeFromCharIndex,
+    serializeRectRange,
+    serializeTextRange,
+} from './selection-utils';
 import { TextRange } from './text-range';
 
 export interface IEditorInputConfig {

@@ -17,9 +17,10 @@
 /* eslint-disable no-param-reassign */
 
 import type { Nullable } from '../../../shared';
+import type { ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
-import { CustomDecorationType, type ICustomDecoration, type ICustomRange, type IDocumentBody, type IParagraph, type IParagraphStyle, type ITextRun, type ITextStyle } from '../../../types/interfaces';
+import { CustomDecorationType } from '../../../types/interfaces';
 import { normalizeTextRuns } from './apply-utils/common';
 
 enum TextXTransformType {

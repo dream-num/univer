@@ -20,7 +20,7 @@ import type { ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
 import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { IBeforeOverGridImageChangeParamObject } from './f-event';
-import { ICommandService } from '@univerjs/core';
+import { CanceledError, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
@@ -78,7 +78,7 @@ export class FUniverDrawingMixin extends FUniver {
                 this.fireEvent(this.Event.BeforeOverGridImageInsert, eventParams);
 
                 if (eventParams.cancel) {
-                    throw new Error('Canceled by BeforeOverGridImageInsert event');
+                    throw new CanceledError();
                 }
             })
         );
@@ -109,7 +109,7 @@ export class FUniverDrawingMixin extends FUniver {
                 this.fireEvent(this.Event.BeforeOverGridImageRemove, eventParams);
 
                 if (eventParams.cancel) {
-                    throw new Error('Canceled by BeforeOverGridImageRemove event');
+                    throw new CanceledError();
                 }
             })
         );
@@ -150,7 +150,7 @@ export class FUniverDrawingMixin extends FUniver {
 
                 if (eventParams.cancel) {
                     drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
-                    throw new Error('Canceled by BeforeOverGridImageChange event');
+                    throw new CanceledError();
                 }
             })
         );
@@ -181,7 +181,7 @@ export class FUniverDrawingMixin extends FUniver {
                 this.fireEvent(this.Event.BeforeOverGridImageSelect, eventParams);
 
                 if (eventParams.cancel) {
-                    throw new Error('Canceled by BeforeOverGridImageSelect event');
+                    throw new CanceledError();
                 }
             })
         );

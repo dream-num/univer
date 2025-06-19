@@ -11,7 +11,7 @@ body:
               **感谢您帮助我们改进 Univer！**
 
               > [!CAUTION]
-              > 在提交 Bug 报告之前，请确保您已阅读 [Univer GitHub Issues 社区手册](https://github.com/dream-num/univer/wiki/Univer-GitHub-Issues-%E7%A4%BE%E5%8C%BA%E6%89%8B%E5%86%8C）。
+              > 在提交 Bug 报告之前，请确保您已阅读 [Univer GitHub Issues 社区手册](https://github.com/dream-num/univer/wiki/Univer-GitHub-Issues-%E7%A4%BE%E5%8C%BA%E6%89%8B%E5%86%8C)。
 
     - type: checkboxes
       id: initial-checklist

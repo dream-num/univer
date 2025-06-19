@@ -17,7 +17,7 @@
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, IRangeChange, ISequenceNode } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle, Tools } from '@univerjs/core';
+import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
@@ -155,14 +155,6 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData, newFormul
 
 export function getFormulaReferenceRange(oldFormulaData: IFormulaData, newFormulaData: IFormulaData, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
-
-        // If the formula data is the same, no operation is required
-    if (Tools.diffValue(redoFormulaData, undoFormulaData)) {
-        return {
-            undos: [],
-            redos: [],
-        };
-    }
 
     const redos: IMutationInfo[] = [];
     const undos: IMutationInfo[] = [];
@@ -528,22 +520,22 @@ function handleRefInsertMoveRight(range: IRange, oldCell: IRange) {
 function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, newFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>) {
     const redoFormulaData = new ObjectMatrix<Nullable<ICellData>>({});
 
-    rangeList.forEach((item) => {
-        const { oldCell, newCell } = item;
+    for (let i = 0; i < rangeList.length; i++) {
+        const { oldCell, newCell } = rangeList[i];
 
-        const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-
-        const newFormula = newFormulaMatrix.getValue(oldStartRow, oldStartColumn) || oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
-        // Use the formula result value to update the data to ensure accuracy, otherwise the new formula cannot be inferred from #REF
-        const newValue = formulaDataItemToCellData(newFormula);
-
-        redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
+        // Clear the old position formula data, if the position of redoFormulaData has set a new formula, no additional processing is required
+        if (!(redoFormulaData.getValue(oldCell.startRow, oldCell.startColumn)?.f || redoFormulaData.getValue(oldCell.startRow, oldCell.startColumn)?.si)) {
+            redoFormulaData.setValue(oldCell.startRow, oldCell.startColumn, { f: null, si: null });
+        }
 
         if (newCell) {
-            const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-            redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
+            // Save the new position formula data to redoFormulaData
+            // newFormulaMatrix.getValue(oldCell.startRow, oldCell.startColumn) may be null, it means that the formula is not offset, so use the old value
+            const newFormula = newFormulaMatrix.getValue(oldCell.startRow, oldCell.startColumn) ?? oldFormulaMatrix.getValue(oldCell.startRow, oldCell.startColumn);
+            const newValue = formulaDataItemToCellData(newFormula);
+            redoFormulaData.setValue(newCell.startRow, newCell.startColumn, newValue);
         }
-    });
+    }
 
     return redoFormulaData.getMatrix();
 }
@@ -557,22 +549,22 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
 function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>) {
     const undoFormulaData = new ObjectMatrix<Nullable<ICellData>>({});
 
-    // Maintaining the correct assignment order prevents overwriting data
-    rangeList.reverse().forEach((item) => {
-        const { oldCell, newCell } = item;
+    for (let i = rangeList.length - 1; i >= 0; i--) {
+        const { oldCell, newCell } = rangeList[i];
 
-        const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-
-        const oldFormula = oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
-        const oldValue = formulaDataItemToCellData(oldFormula);
+        // Save old position old formula data to undoFormulaData
+        const oldCellOldFormula = oldFormulaMatrix.getValue(oldCell.startRow, oldCell.startColumn);
+        const oldCellOldValue = formulaDataItemToCellData(oldCellOldFormula);
+        undoFormulaData.setValue(oldCell.startRow, oldCell.startColumn, oldCellOldValue);
 
         if (newCell) {
-            const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-            undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
+            // If the newCell is not null, save new position old formula data to undoFormulaData.
+            // If the new position old formula data is null, clear the new position formula data
+            const newCellOldFormula = oldFormulaMatrix.getValue(newCell.startRow, newCell.startColumn);
+            const newCellOldValue = formulaDataItemToCellData(newCellOldFormula);
+            undoFormulaData.setValue(newCell.startRow, newCell.startColumn, newCellOldValue ?? { f: null, si: null });
         }
-
-        undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
-    });
+    }
 
     return undoFormulaData.getMatrix();
 }

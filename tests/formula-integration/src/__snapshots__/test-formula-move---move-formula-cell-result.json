@@ -1,0 +1,109 @@
+{
+    "id": "Czx9Y5",
+    "sheetOrder": [
+        "lXnRfcI9sd18sz0D_6OmT"
+    ],
+    "name": "",
+    "appVersion": "0.8.1",
+    "locale": "zhCN",
+    "styles": {},
+    "sheets": {
+        "lXnRfcI9sd18sz0D_6OmT": {
+            "id": "lXnRfcI9sd18sz0D_6OmT",
+            "name": "Sheet1",
+            "tabColor": "",
+            "hidden": 0,
+            "rowCount": 1000,
+            "columnCount": 20,
+            "zoomRatio": 1,
+            "freeze": {
+                "xSplit": 0,
+                "ySplit": 0,
+                "startRow": -1,
+                "startColumn": -1
+            },
+            "scrollTop": 0,
+            "scrollLeft": 0,
+            "defaultColumnWidth": 88,
+            "defaultRowHeight": 24,
+            "mergeData": [],
+            "cellData": {
+                "3": {
+                    "2": {
+                        "v": 1,
+                        "t": 2
+                    }
+                },
+                "4": {
+                    "2": {
+                        "v": 2,
+                        "t": 2
+                    }
+                },
+                "5": {
+                    "2": {
+                        "v": 3,
+                        "t": 2
+                    },
+                    "3": {
+                        "f": "=C6",
+                        "v": 3,
+                        "t": 2
+                    }
+                },
+                "12": {
+                    "6": {
+                        "f": "=C4",
+                        "v": 1,
+                        "t": 2
+                    }
+                },
+                "13": {
+                    "6": {
+                        "f": "=C5",
+                        "v": 2,
+                        "t": 2
+                    }
+                }
+            },
+            "rowData": {},
+            "columnData": {},
+            "showGridlines": 1,
+            "rowHeader": {
+                "width": 46,
+                "hidden": 0
+            },
+            "columnHeader": {
+                "height": 20,
+                "hidden": 0
+            },
+            "rightToLeft": 0
+        }
+    },
+    "resources": [
+        {
+            "name": "SHEET_RANGE_PROTECTION_PLUGIN",
+            "data": ""
+        },
+        {
+            "name": "SHEET_AuthzIoMockService_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_WORKSHEET_PROTECTION_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_DEFINED_NAME_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_RANGE_THEME_MODEL_PLUGIN",
+            "data": "{}"
+        }
+    ]
+}

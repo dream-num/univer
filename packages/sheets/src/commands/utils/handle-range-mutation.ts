@@ -15,22 +15,15 @@
  */
 
 import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../basics/interfaces/mutation-interface';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { Dimension, getArrayLength, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
-
-import type {
-    IDeleteRangeMutationParams,
-    IInsertRangeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
+import { generateNullCell } from '../../basics/utils';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getMoveRangeUndoRedoMutations } from '../commands/move-range.command';
 import { SetRangeValuesCommand } from '../commands/set-range-values.command';
-import {
-    type ISetRangeValuesMutationParams,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-} from '../mutations/set-range-values.mutation';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
-import { generateNullCell } from '../../basics/utils';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 /**
  * Generate undo mutation of a `InsertRangeMutation`

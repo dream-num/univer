@@ -15,8 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetGridlinesColorMutationParams } from '../mutations/set-gridlines-color.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { type ISetGridlinesColorMutationParams, SetGridlinesColorMutation } from '../mutations/set-gridlines-color.mutation';
+import { SetGridlinesColorMutation } from '../mutations/set-gridlines-color.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetGridlinesColorCommandParams {

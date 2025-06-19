@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { TabCommand } from '../commands/commands/auto-format.command';
 import { whenDocAndEditorFocused } from './utils';
 

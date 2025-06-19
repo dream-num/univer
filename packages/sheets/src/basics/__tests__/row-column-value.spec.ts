@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, type IColumnData, type IRowData } from '@univerjs/core';
+import type { IColumnData, IRowData } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { getOldColumnData, getOldRowData } from '../row-column-value';
 

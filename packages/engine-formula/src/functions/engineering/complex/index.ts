@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex as COMPLEX } from '../../../basics/complex';
+import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Complex extends BaseFunction {
     override minParams = 2;

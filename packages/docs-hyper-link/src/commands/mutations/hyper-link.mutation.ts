@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
 export const AddHyperLinkMuatation: ICommand = {
     id: 'docs.mutation.add-hyper-link',

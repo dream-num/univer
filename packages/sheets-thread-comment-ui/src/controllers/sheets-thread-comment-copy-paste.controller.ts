@@ -15,11 +15,12 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import { Disposable, Inject, Range } from '@univerjs/core';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
-import { AddCommentMutation, DeleteCommentMutation, type IThreadComment, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SHEETS_THREAD_COMMENT } from '../types/const';
 
 const transformRef = (ref: string, source: { row: number; column: number }, target: { row: number; column: number }) => {

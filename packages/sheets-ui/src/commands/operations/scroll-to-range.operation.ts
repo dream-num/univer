@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommand } from '@univerjs/core';
 import type { IScrollToCellCommandParams } from '../commands/set-scroll.command';
-import { CommandType, type ICommand, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 

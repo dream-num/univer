@@ -16,10 +16,11 @@
 
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Disposable, Inject } from '@univerjs/core';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
-import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { throttleTime } from 'rxjs';
 

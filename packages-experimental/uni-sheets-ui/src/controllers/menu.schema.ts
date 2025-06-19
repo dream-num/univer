@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { MenuSchemaType } from '@univerjs/ui';
 import { SheetsUIMenuSchema } from '@univerjs/sheets-ui';
-import { type MenuSchemaType, RibbonStartGroup } from '@univerjs/ui';
+import { RibbonStartGroup } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '@univerjs/uniui';
 import {
     SHEET_BOLD_MUTATION_ID,

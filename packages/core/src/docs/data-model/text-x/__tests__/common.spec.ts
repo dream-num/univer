@@ -15,7 +15,6 @@
  */
 
 import type { ITextRun } from '../../../../types/interfaces/i-document-data';
-
 import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { normalizeTextRuns } from '../apply-utils/common';

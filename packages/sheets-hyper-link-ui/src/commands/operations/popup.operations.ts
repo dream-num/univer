@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ICommand } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';

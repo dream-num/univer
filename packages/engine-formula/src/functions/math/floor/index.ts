@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
-import { floor } from '../../../engine/utils/math-kit';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { floor } from '../../../engine/utils/math-kit';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Floor extends BaseFunction {
     override minParams = 2;

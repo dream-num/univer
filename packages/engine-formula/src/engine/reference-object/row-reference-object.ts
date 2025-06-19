@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IRange, RANGE_TYPE } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { RANGE_TYPE } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';

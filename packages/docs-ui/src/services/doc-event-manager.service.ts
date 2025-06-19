@@ -15,7 +15,16 @@
  */
 
 import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonSection, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    IBoundRectNoAngle,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IRenderContext,
+    IRenderModule,
+} from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';

@@ -16,9 +16,10 @@
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';

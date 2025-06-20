@@ -106,7 +106,7 @@ export const useSheetSelectionChange = (
                 const unitRangeName = {
                     range,
                     unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(unitId, rangeSheetId),
+                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
@@ -121,7 +121,7 @@ export const useSheetSelectionChange = (
                 const unitRangeName = {
                     range,
                     unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(unitId, rangeSheetId),
+                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
@@ -173,7 +173,7 @@ export const useSheetSelectionChange = (
                     const unitRangeName = {
                         range: selection,
                         unitId: selection.unitId ?? currentUnit!.getUnitId(),
-                        sheetName: getSheetNameById(unitId, rangeSheetId),
+                        sheetName: getSheetNameById(selection.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                     };
                     const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
                     const isAcrossSheet = rangeSheetId !== subUnitId;
@@ -198,7 +198,7 @@ export const useSheetSelectionChange = (
                 const unitRangeName = {
                     range: selection,
                     unitId: selection.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(unitId, rangeSheetId),
+                    sheetName: getSheetNameById(selection.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
                 const isAcrossSheet = rangeSheetId !== subUnitId;

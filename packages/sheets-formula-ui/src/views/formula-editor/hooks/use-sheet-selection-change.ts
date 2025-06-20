@@ -81,13 +81,12 @@ export const useSheetSelectionChange = (
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-    const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
-    const sheetName = useMemo(() => getSheetNameById(subUnitId), [getSheetNameById, subUnitId]);
+    const getSheetNameById = useEvent((unitId: string, sheetId: string) => univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() ?? '');
+    const sheetName = useMemo(() => getSheetNameById(unitId, subUnitId), [getSheetNameById, subUnitId, unitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
     const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
     const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
-
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
@@ -107,7 +106,7 @@ export const useSheetSelectionChange = (
                 const unitRangeName = {
                     range,
                     unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(rangeSheetId),
+                    sheetName: getSheetNameById(unitId, rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
@@ -121,11 +120,12 @@ export const useSheetSelectionChange = (
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,
-                    unitId: range.unitId ?? unitId,
-                    sheetName: getSheetNameById(rangeSheetId),
+                    unitId: range.unitId ?? currentUnit!.getUnitId(),
+                    sheetName: getSheetNameById(unitId, rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const result = sequenceNodeToText(sequenceNodes);
                 handleRangeChange(result, refRanges[0].length, isEnd);
@@ -172,10 +172,12 @@ export const useSheetSelectionChange = (
                     const rangeSheetId = selection.sheetId ?? subUnitId;
                     const unitRangeName = {
                         range: selection,
-                        unitId: selection.unitId ?? unitId,
-                        sheetName: getSheetNameById(rangeSheetId),
+                        unitId: selection.unitId ?? currentUnit!.getUnitId(),
+                        sheetName: getSheetNameById(unitId, rangeSheetId),
                     };
-                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
+                    const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                    const isAcrossSheet = rangeSheetId !== subUnitId;
+                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                     return refRanges[0];
                 }
                 return item.token;
@@ -195,11 +197,12 @@ export const useSheetSelectionChange = (
                 const rangeSheetId = selection.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range: selection,
-                    unitId: selection.unitId ?? unitId,
-                    sheetName: getSheetNameById(rangeSheetId),
+                    unitId: selection.unitId ?? currentUnit!.getUnitId(),
+                    sheetName: getSheetNameById(unitId, rangeSheetId),
                 };
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 theLastList.push(refRanges[0]);
             }
             const preNode = sequenceNodes[sequenceNodes.length - 1];

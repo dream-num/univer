@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.8.2](https://github.com/dream-num/univer/compare/v0.8.1...v0.8.2) (2025-06-20)
+
+
+### Bug Fixes
+
+* **design:** fix the styling issue of ButtonGroup ([#5363](https://github.com/dream-num/univer/issues/5363)) ([2480eec](https://github.com/dream-num/univer/commit/2480eec0fd90f477a4d656e300553971e7cf793b))
+* **docs-ui:** add localized confirm and cancel text for `DocOpenPageSettingCommand` ([#5388](https://github.com/dream-num/univer/issues/5388)) ([2aa4b06](https://github.com/dream-num/univer/commit/2aa4b0681e6c3f257a022a72af5d0b8d913ccf61))
+* **editor:** fix footerBarHeight calculation ([#5385](https://github.com/dream-num/univer/issues/5385)) ([f5301fc](https://github.com/dream-num/univer/commit/f5301fc521c3c272d54046a8e399d7cc110889c5))
+* **facade:** fix FWorkbook.setName implementation ([#5375](https://github.com/dream-num/univer/issues/5375)) ([48e31ef](https://github.com/dream-num/univer/commit/48e31ef4175d16c2dd2097905cd0d297558b823f))
+* fix compatibility ([#5378](https://github.com/dream-num/univer/issues/5378)) ([11e97f2](https://github.com/dream-num/univer/commit/11e97f27efad24510df19d065fd5d7aac585d104))
+* fix dark mode for docs ([#5400](https://github.com/dream-num/univer/issues/5400)) ([c9218b3](https://github.com/dream-num/univer/commit/c9218b3078829b8c7347d2c0e37d11633ab42667))
+* fix issues related to remove rows ([#5398](https://github.com/dream-num/univer/issues/5398)) ([54c0ef5](https://github.com/dream-num/univer/commit/54c0ef5a3f3c8d2f9011aa10fdb4eb15623ce428))
+* **formula:** fixed the issue of formula range reference calculating offset when moving rows, columns or ranges ([#5412](https://github.com/dream-num/univer/issues/5412)) ([563b215](https://github.com/dream-num/univer/commit/563b215bf57b3b945ef1070baef4aa72b1cd6999))
+* **formula:** update suffix ([#5305](https://github.com/dream-num/univer/issues/5305)) ([f265fda](https://github.com/dream-num/univer/commit/f265fda124d0fd88ac0d0687fcdada6e57797e76))
+* **numfmt:** if cell type specified number type, do not determine the type of v ([#5402](https://github.com/dream-num/univer/issues/5402)) ([3552d20](https://github.com/dream-num/univer/commit/3552d207043344d8a43092a7c1c92508ebd10a5a))
+* padding rendering & not throw cancel error ([#5406](https://github.com/dream-num/univer/issues/5406)) ([14345ec](https://github.com/dream-num/univer/commit/14345ec1d77a866617be68ea20ccc947445a18b7))
+* **sheet-formula-ui:** correct sheet name retrieval in selection ([#5414](https://github.com/dream-num/univer/issues/5414)) ([37a3fe0](https://github.com/dream-num/univer/commit/37a3fe0e4650106959268ccd432f13fd3ac3907b))
+* **sheet-formula-ui:** select selection across workbook ([#5413](https://github.com/dream-num/univer/issues/5413)) ([63451ab](https://github.com/dream-num/univer/commit/63451ab6ec523d439ce9d0b37966a3d36ad9bbca))
+* **sheet-ui:** optimize the styling of the SheetBarItem ([#5380](https://github.com/dream-num/univer/issues/5380)) ([3649c0c](https://github.com/dream-num/univer/commit/3649c0c2470adaa5cf9793b846b126ad65ed75d4))
+* **sheets-formula-ui:** adjust styles for layout consistency in SelectFunction ([#5370](https://github.com/dream-num/univer/issues/5370)) ([e425d0d](https://github.com/dream-num/univer/commit/e425d0d7b4c830bb522fd356861da17e301b79a0))
+* **sheets-table-ui:** hide table entry in Zen mode ([#5374](https://github.com/dream-num/univer/issues/5374)) ([b96c16d](https://github.com/dream-num/univer/commit/b96c16db645e45cf12f425887866ef931560281a))
+* **sheets-ui:** ensure `customRender` is set correctly when initializing cell ([#5407](https://github.com/dream-num/univer/issues/5407)) ([4099c91](https://github.com/dream-num/univer/commit/4099c91d58d6958fab4cf807b91605d3e2f8a5cb))
+* **ui:** add overflow hidden to header for better layout ([#5392](https://github.com/dream-num/univer/issues/5392)) ([89996bf](https://github.com/dream-num/univer/commit/89996bfeee36fd1941d796e70ea187262903415c))
+
+
+### Features
+
+* add ref property of cell data type ([#5393](https://github.com/dream-num/univer/issues/5393)) ([da360af](https://github.com/dream-num/univer/commit/da360afa660a1ea773b8204a18688e59a62cf85b))
+* **core:** add polyfills for Array.prototype.findLast and Array.prototype.findLastIndex ([#5373](https://github.com/dream-num/univer/issues/5373)) ([33afa8b](https://github.com/dream-num/univer/commit/33afa8b92f6d79b9395397b7061bea743277f3b9))
+
 ## [0.8.1](https://github.com/dream-num/univer/compare/v0.8.0...v0.8.1) (2025-06-12)
 
 

@@ -119,7 +119,10 @@ export function getNewRangeByMoveParam(
 
         if (
             remainRange == null &&
-            ((from.endRow < sequenceRange.startRow && to.endRow < sequenceRange.startRow) || (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow))
+            (
+                (from.endRow < sequenceRange.startRow && to.endRow <= sequenceRange.startRow) ||
+                (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow)
+            )
         ) {
             return;
         }
@@ -157,7 +160,10 @@ export function getNewRangeByMoveParam(
 
         if (
             remainRange == null &&
-            ((from.endColumn < sequenceRange.startColumn && to.endColumn < sequenceRange.startColumn) || (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn))
+            (
+                (from.endColumn < sequenceRange.startColumn && to.endColumn <= sequenceRange.startColumn) ||
+                (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn)
+            )
         ) {
             return;
         }

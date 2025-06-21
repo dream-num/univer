@@ -106,9 +106,9 @@ export function ParagraphSetting() {
                         <Tooltip title={item.label} key={item.value} placement="bottom">
                             <span
                                 className={clsx(`
-                                  hover:univer-bg-black/60
                                   univer-flex univer-cursor-pointer univer-items-center univer-justify-center
                                   univer-rounded univer-bg-none univer-px-3 univer-py-1
+                                  hover:univer-bg-black/60
                                 `, {
                                     'univer-bg-blend-color-dodge/90': horizontalAlignValue === item.value,
                                 })}

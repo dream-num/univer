@@ -306,8 +306,8 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div
                 className={`
-                  univer-text-gray-600dark:!univer-text-gray-200
                   univer-mt-3 univer-text-xs
+                  univer-text-gray-600dark:!univer-text-gray-200
                 `}
             >
                 {localeService.t('sheet.cf.panel.medianValue')}

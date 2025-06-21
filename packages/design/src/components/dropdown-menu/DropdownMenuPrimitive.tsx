@@ -126,6 +126,9 @@ function DropdownMenuSubContent({
             data-slot="dropdown-menu-sub-content"
             className={clsx(
                 `
+                  univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
+                  univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
+                  univer-shadow-md
                   data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                   data-[state=open]:univer-zoom-in-95
                   data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
@@ -134,9 +137,6 @@ function DropdownMenuSubContent({
                   data-[side=left]:univer-slide-in-from-right-2
                   data-[side=right]:univer-slide-in-from-left-2
                   data-[side=top]:univer-slide-in-from-bottom-2
-                  univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
-                  univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
-                  univer-shadow-md
                   dark:!univer-bg-gray-700 dark:!univer-text-white
                 `,
                 borderClassName,
@@ -160,6 +160,9 @@ function DropdownMenuContent({
                 sideOffset={sideOffset}
                 className={clsx(
                     `
+                      univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
+                      univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
+                      univer-shadow-md
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                       data-[state=open]:univer-zoom-in-95
                       data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
@@ -168,9 +171,6 @@ function DropdownMenuContent({
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2
                       data-[side=top]:univer-slide-in-from-bottom-2
-                      univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
-                      univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
-                      univer-shadow-md
                       dark:!univer-bg-gray-700 dark:!univer-text-white
                     `,
                     borderClassName,

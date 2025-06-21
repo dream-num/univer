@@ -158,8 +158,8 @@ export function ColorInput({ hsv, onChange }: IColorInputProps) {
     return (
         <div
             className={`
-              dark:![&_input]:univer-border-gray-600 dark:![&_input]:univer-text-white
               univer-flex univer-gap-2
+              dark:![&_input]:univer-border-gray-600 dark:![&_input]:univer-text-white
               [&_input]:univer-box-border [&_input]:univer-flex [&_input]:univer-h-7 [&_input]:univer-items-center
               [&_input]:univer-rounded [&_input]:univer-border [&_input]:univer-border-solid
               [&_input]:univer-border-gray-200 [&_input]:univer-bg-transparent [&_input]:univer-px-1.5

@@ -85,8 +85,8 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
             <div className="univer-mt-4 univer-text-center">
                 <a
                     className={`
-                      hover:univer-text-primary-500/80
                       univer-cursor-pointer univer-text-sm univer-text-primary-500 univer-transition-colors
+                      hover:univer-text-primary-500/80
                     `}
                     onClick={revealReplace}
                 >

@@ -252,7 +252,7 @@ export const tailwindcssPreset = (): any => {
             ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
             // enable all recommended rules to error
             ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
-            'better-tailwindcss/multiline': ['warn', {
+            'better-tailwindcss/enforce-consistent-line-wrapping': ['error', {
                 printWidth: 120,
                 group: 'newLine',
                 lineBreakStyle,

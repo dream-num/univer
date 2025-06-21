@@ -41,9 +41,9 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
                     <div
                         key={color}
                         className={clsx(`
-                          hover:univer-ring-primary-600/40 hover:univer-ring-[1.5px]
                           univer-box-border univer-size-5 univer-cursor-pointer univer-rounded univer-ring-offset-1
                           univer-transition-shadow
+                          hover:univer-ring-primary-600/40 hover:univer-ring-[1.5px]
                         `, borderClassName, {
                             'univer-ring-[1.5px] univer-ring-primary-600 hover:univer-ring-primary-600': color === currentColor,
                         })}

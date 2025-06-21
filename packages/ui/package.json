@@ -88,7 +88,7 @@
         "localforage": "^1.10.0"
     },
     "optionalDependencies": {
-        "vue": ">=3.0.0"
+        "vue": "^3.5.17"
     },
     "devDependencies": {
         "@testing-library/react": "^16.3.0",
@@ -102,7 +102,7 @@
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
-        "vitest": "^3.1.4",
+        "vitest": "^3.2.4",
         "vue": "^3.5.13"
     }
 }

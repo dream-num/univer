@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Acot } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test acot function', () => {
     const testFunction = new Acot(FUNCTION_NAMES_MATH.ACOT);
@@ -81,7 +80,21 @@ describe('Test acot function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.7853981633974483, ErrorType.VALUE, 0.682622552417217, 0.7853981633974483, 1.5707963267948966, 1.5707963267948966], [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, ErrorType.VALUE, 2.819842099193151, ErrorType.NAME]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[
+                0.7853981633974483,
+                ErrorType.VALUE,
+                0.682622552417217,
+                0.7853981633974483,
+                1.5707963267948966,
+                1.5707963267948966,
+            ], [
+                1.5707963267948966,
+                0.009999666686665238,
+                0.40385979490737667,
+                ErrorType.VALUE,
+                2.819842099193151,
+                ErrorType.NAME,
+            ]]);
         });
     });
 });

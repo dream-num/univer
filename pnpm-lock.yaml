@@ -3439,7 +3439,7 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.0.3)(happy-dom@18.0.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.87.0)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.0)
     optionalDependencies:
       vue:
-        specifier: ^3.5.17
+        specifier: '>=3.0.0'
         version: 3.5.17(typescript@5.8.3)
 
   packages/uniscript:

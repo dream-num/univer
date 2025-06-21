@@ -37,7 +37,7 @@ interface IBuildExecuterOptions {
 }
 
 async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
-    const { pkg, entry } = options;
+    const { entry } = options;
 
     await Promise.all(Object.keys(entry).map((key) => {
         const basicConfig: InlineConfig = {

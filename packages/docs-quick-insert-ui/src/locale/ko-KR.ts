@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    docQuickInsert: {
+        menu: {
+            numberedList: '번호가 매겨진 목록',
+            bulletedList: '글머리 기호 목록',
+            divider: '구분선',
+            text: '텍스트',
+            table: '표',
+            image: '이미지',
+        },
+        group: {
+            basics: '기본',
+        },
+        placeholder: '결과가 없습니다',
+        keywordInputPlaceholder: '키워드 입력',
+    },
+};
+
+export default locale;

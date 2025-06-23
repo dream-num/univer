@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'sheet-find-replace': {
+        replace: {
+            'partial-failure': '일부 셀 교체에 실패했습니다',
+            failure: '모든 셀 교체에 실패했습니다',
+        },
+    },
+};
+
+export default locale;

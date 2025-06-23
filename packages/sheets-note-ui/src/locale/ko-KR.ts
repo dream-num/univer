@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    rightClick: {
+        addNote: '노트 추가',
+        deleteNote: '노트 삭제',
+        toggleNote: '노트 표시/숨기기',
+    },
+    note: {
+        placeholder: '여기에 입력',
+    },
+};
+
+export default locale;

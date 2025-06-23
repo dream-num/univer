@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'script-panel': {
+        title: 'Uniscript',
+        tooltip: {
+            'menu-button': 'Uniscript 패널 전환',
+        },
+        panel: {
+            execute: '스크립트 실행',
+        },
+    },
+    uniscript: {
+        message: {
+            success: '실행 성공',
+            failed: '실행 실패',
+        },
+    },
+};
+
+export default locale;

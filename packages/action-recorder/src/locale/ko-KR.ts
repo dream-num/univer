@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'action-recorder': {
+        menu: {
+            title: '동작 기록',
+            record: '동작 기록 시작...',
+            'replay-local': '로컬 기록 대체...',
+            'replay-local-name': '하위 단위로 로컬 기록 대체...',
+            'replay-local-active': '현재 하위 단위로 로컬 기록 대체...',
+        },
+    },
+};
+
+export default locale;

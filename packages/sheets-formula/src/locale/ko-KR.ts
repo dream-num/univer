@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    formula: {
+        progress: {
+            analyzing: '분석 중',
+            calculating: '계산 중',
+            'array-analysis': '배열 분석',
+            'array-calculation': '배열 계산',
+            done: '완료',
+        },
+    },
+};
+
+export default locale;

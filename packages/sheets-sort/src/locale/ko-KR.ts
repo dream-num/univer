@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    sheetsSort: {
+        title: '정렬',
+        toolbar: {
+            'sort-asc': '오름차순',
+            'sort-desc': '내림차순',
+            'sort-custom': '사용자 정의 순서',
+        },
+        'context-menu': {
+            'sort-asc': '오름차순',
+            'sort-desc': '내림차순',
+            'sort-custom': '사용자 정의 순서',
+        },
+    },
+};
+
+export default locale;

@@ -19,7 +19,7 @@
         "@chromatic-com/storybook": "^3.2.6",
         "@storybook/addon-essentials": "8.6.14",
         "@storybook/addon-interactions": "8.6.14",
-        "@storybook/addon-links": "8.6.14",
+        "@storybook/addon-links": "9.0.12",
         "@storybook/addon-styling-webpack": "^1.0.1",
         "@storybook/addon-webpack5-compiler-swc": "^3.0.0",
         "@storybook/blocks": "8.6.14",

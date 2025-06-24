@@ -28,6 +28,7 @@ const locales = [
     'zh-TW',
     'vi-VN',
     'fa-IR',
+    'ko-KR',
 ];
 
 /**

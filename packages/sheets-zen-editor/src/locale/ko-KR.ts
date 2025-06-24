@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    rightClick: {
+        zenEditor: '전체 화면 편집기',
+    },
+    shortcut: {
+        sheet: {
+            'zen-edit-cancel': '전체 화면 편집 취소',
+            'zen-edit-confirm': '전체 화면 편집 확인',
+        },
+    },
+};
+
+export default locale;

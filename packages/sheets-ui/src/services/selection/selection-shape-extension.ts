@@ -779,6 +779,7 @@ export class SelectionShapeExtension {
         this._control.selectionFilling$.next(this._targetSelection);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _autoFillForPointerdown(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
@@ -906,10 +907,13 @@ export class SelectionShapeExtension {
                 }
 
                 if (this._isSelectionInViewport(movingRange, currentViewport)) {
-                    viewportMain.scrollToBarPos({
-                        x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
-                        y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
-                    });
+                    if (this._viewportMainScrollBarNeedResetPosition(scrollTimer.scrollTimerType, this._activeViewport.viewportKey, currentViewport.viewportKey)) {
+                        viewportMain.scrollToBarPos({
+                            x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
+                            y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
+                        });
+                    }
+
                     this._activeViewport = currentViewport;
                 }
             }
@@ -935,6 +939,29 @@ export class SelectionShapeExtension {
             });
             this._fillControlColors = [];
         });
+    }
+
+    private _viewportMainScrollBarNeedResetPosition(scrollTimerType: ScrollTimerType, activeViewportKey: string, currentViewportKey: string): boolean {
+        // When the auto fill operation will pass through freeze position, the viewport main scroll bar needs to be reset to the left or top position.
+        // The viewport main scroll bar needs to be reset to the left position only when the auto fill operation direction is from left to right.
+        if (
+            scrollTimerType === ScrollTimerType.X &&
+            (activeViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT || activeViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP) &&
+            (currentViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN || currentViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP)
+        ) {
+            return true;
+        }
+
+        // The viewport main scroll bar needs to be reset to the top position only when the auto fill operation direction is from top to bottom.
+        if (
+            scrollTimerType === ScrollTimerType.Y &&
+            (activeViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP || activeViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP) &&
+            (currentViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN || currentViewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     private _hasMergeInRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {

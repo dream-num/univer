@@ -534,17 +534,6 @@ export class EditingRenderController extends Disposable {
             });
         }
 
-        // If neither the formula bar editor nor the cell editor has been edited,
-        // it is considered that the content has not changed and returns directly.
-        const editorIsDirty = this._editorBridgeService.getEditorDirty();
-        if (editorIsDirty === false) {
-            if (this._editorBridgeService.isForceKeepVisible()) {
-                this._editorBridgeService.disableForceKeepVisible();
-            }
-            this._moveSelection(keycode, currentUnitId, worksheetId);
-            return;
-        }
-
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
             if (this._editorBridgeService.isForceKeepVisible()) {

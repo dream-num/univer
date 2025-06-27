@@ -335,11 +335,16 @@ export class Font extends SheetExtension {
                     ctx.save();
                     ctx.translate(x + rotatedWidth / 2, y + rotatedHeight / 2);
                     ctx.rotate(angleRadians);
-                    try {
-                        ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
-                    } catch (e) {
-                        console.error(e);
+                    const isError = image.getAttribute('data-error') === 'true';
+                    if (isError) {
                         ctx.drawImage(IMAGE_FALLBACK, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                    } else {
+                        try {
+                            ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                        } catch (e) {
+                            console.error(e);
+                            ctx.drawImage(IMAGE_FALLBACK, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                        }
                     }
                     ctx.restore();
                 }

@@ -60,10 +60,4 @@ export const peerDepsMap = {
         name: 'monaco-editor',
         version: '>=0.50.0',
     },
-    vue: {
-        global: 'Vue',
-        name: 'vue',
-        version: '>=3.0.0',
-        optional: true,
-    },
 };

@@ -39,6 +39,8 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
+import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-component';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
 import '@univerjs/sheets/facade';
@@ -100,6 +102,8 @@ function createNewInstance() {
         container: 'app',
         // ribbonType: 'simple',
     });
+    univer.registerPlugin(UniverWebComponentAdapterPlugin);
+    univer.registerPlugin(UniverVue3AdapterPlugin);
     univer.registerPlugin(UniverDocsUIPlugin);
 
     univer.registerPlugin(UniverSheetsPlugin, {

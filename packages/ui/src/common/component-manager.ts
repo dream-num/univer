@@ -16,7 +16,6 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { ForwardRefExoticComponent } from 'react';
-import type { defineComponent } from 'vue';
 import { Disposable, toDisposable } from '@univerjs/core';
 import {
     AddDigitsIcon,
@@ -127,26 +126,21 @@ import {
     VerticalIntegrationIcon,
     VerticalTextIcon,
 } from '@univerjs/icons';
-import { cloneElement, createElement, useEffect, useRef } from 'react';
 
-type ComponentFramework = 'vue3' | 'react';
+type ComponentFramework = string;
 
 export interface IComponentOptions {
     framework?: ComponentFramework;
 }
 
-export interface IVue3Component<T extends Record<string, any> = Record<string, any>> {
-    framework: 'vue3';
-    component: ReturnType<typeof defineComponent<T>>;
-}
-export interface IReactComponent<T extends Record<string, any> = Record<string, any>> {
-    framework: 'react';
-    component: ForwardRefExoticComponent<T>;
+export interface IComponent<T = any> {
+    framework: string;
+    component: any;
 };
 
-export type ComponentType<T extends Record<string, any> = Record<string, any>> = ForwardRefExoticComponent<T> | ReturnType<typeof defineComponent>;
+export type ComponentType<T = any> = any;
 
-export type ComponentList = Map<string, IVue3Component | IReactComponent>;
+export type ComponentList = Map<string, IComponent>;
 
 const iconList: Record<string, ForwardRefExoticComponent<any>> = {
     AddDigitsIcon,
@@ -280,6 +274,10 @@ export class ComponentManager extends Disposable {
     register(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
         const { framework = 'react' } = options || {};
 
+        if (framework === 'vue3' && !this._handler.vue3) {
+            throw new Error('[ComponentManager] Vue3 support is no longer built-in since v0.9.0, please install @univerjs/ui-adapter-vue3 plugin.');
+        }
+
         if (this._components.has(name)) {
             console.warn(`Component ${name} already exists.`);
         }
@@ -300,62 +298,33 @@ export class ComponentManager extends Disposable {
         return this._componentsReverse.get(component);
     }
 
+    private _handler: Record<string, (component: IComponent['component'], name?: string) => any> = {
+        react: (component: IComponent['component']) => {
+            return component;
+        },
+    };
+
+    setHandler(framework: string, handler: (component: IComponent['component'], name?: string) => any) {
+        this._handler[framework] = handler;
+    }
+
     get(name: string) {
         if (!name) return;
 
         const value = this._components.get(name);
 
-        if (value?.framework === 'react') {
-            return value.component;
-        } else if (value?.framework === 'vue3') {
-            // TODO: slot support
-            // eslint-disable-next-line ts/no-explicit-any, react/no-clone-element
-            return (props: Record<string, any>) => cloneElement(
-                createElement(VueComponentWrapper, {
-                    component: value.component,
-                    props,
-                })
-            );
-        } else {
-            // throw new Error(`ComponentManager: Component ${name} not found.`);
+        if (!value) return;
+
+        const frameworkHandler = this._handler[value.framework];
+
+        if (!frameworkHandler) {
+            throw new Error(`[ComponentManager] No handler found for framework: ${value.framework}`);
         }
+
+        return frameworkHandler(value.component, name);
     }
 
     delete(name: string) {
         this._components.delete(name);
     }
-}
-
-async function renderVue3Component(VueComponent: ReturnType<typeof defineComponent>, element: HTMLElement, args: Record<string, any>) {
-    try {
-        const { h, render } = await import('vue');
-        const vnode = h(VueComponent, args);
-        const container = document.createElement('div');
-
-        document.body.appendChild(container);
-        render(vnode, element);
-
-        return () => {
-            document.body.removeChild(container);
-        };
-    } catch (error) {
-        console.warn('Vue3 component render error', error);
-    }
-}
-
-export function VueComponentWrapper(options: { component: ReturnType<typeof defineComponent>; props: Record<string, any> }) {
-    const domRef = useRef(null);
-    const { component, props } = options;
-
-    useEffect(() => {
-        if (!domRef.current) return;
-
-        const render = renderVue3Component(component, domRef.current, props);
-
-        return () => {
-            render.then((d) => d?.());
-        };
-    }, [props]);
-
-    return createElement('div', { ref: domRef });
 }

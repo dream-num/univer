@@ -18,7 +18,7 @@ export const SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY = 'sheets-thread-comment.co
 
 export const configSymbol = Symbol(SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY);
 
-export interface IUniverSheetsThreadCommentBaseConfig {
+export interface IUniverSheetsThreadCommentConfig {
 }
 
-export const defaultPluginConfig: IUniverSheetsThreadCommentBaseConfig = {};
+export const defaultPluginConfig: IUniverSheetsThreadCommentConfig = {};

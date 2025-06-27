@@ -16,21 +16,11 @@
 
 import './global.css';
 
-export { UniverDocsQuickInsertUIPlugin } from './plugin';
-
-export type {
-    DocPopupMenu,
-    IDocPopup,
-    IDocPopupGroupItem,
-    IDocPopupMenuItem,
-} from './services/doc-quick-insert-popup.service';
-
-export { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
+export type { IUniverDocsQuickInsertUIConfig } from './controllers/config.schema';
 export { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 export { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
-export { QuickInsertPlaceholderComponentKey } from './views/QuickInsertPlaceholder';
+export { UniverDocsQuickInsertUIPlugin } from './plugin';
+export type { DocPopupMenu, IDocPopup, IDocPopupGroupItem, IDocPopupMenuItem } from './services/doc-quick-insert-popup.service';
+export { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
 export { KeywordInputPlaceholderComponentKey } from './views/KeywordInputPlaceholder';
-
-// #region - all commands
-
-// #endregion
+export { QuickInsertPlaceholderComponentKey } from './views/QuickInsertPlaceholder';

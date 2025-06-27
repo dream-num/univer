@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-export { HyperLinkModel } from './models/hyper-link.model';
-export { SheetHyperLinkType } from './types/enums/hyper-link-type';
-export { UniverSheetsHyperLinkPlugin } from './plugin';
-export type { ICellLinkContent, ISheetHyperLink } from './types/interfaces/i-hyper-link';
-export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';
-export { ERROR_RANGE } from './types/const';
-
-// #region - all commands
-
 export { AddHyperLinkCommand, AddRichHyperLinkCommand, type IAddHyperLinkCommandParams, type IAddRichHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
 export { CancelHyperLinkCommand, CancelRichHyperLinkCommand, type ICancelHyperLinkCommandParams, type ICancelRichHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
 export { type IUpdateHyperLinkCommandParams, type IUpdateRichHyperLinkCommandParams, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from './commands/commands/update-hyper-link.command';
@@ -34,5 +25,10 @@ export {
     UpdateHyperLinkMutation,
     UpdateHyperLinkRefMutation,
 } from './commands/mutations/update-hyper-link.mutation';
-
-// #endregion
+export type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
+export { HyperLinkModel } from './models/hyper-link.model';
+export { UniverSheetsHyperLinkPlugin } from './plugin';
+export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';
+export { ERROR_RANGE } from './types/const';
+export { SheetHyperLinkType } from './types/enums/hyper-link-type';
+export type { ICellLinkContent, ISheetHyperLink } from './types/interfaces/i-hyper-link';

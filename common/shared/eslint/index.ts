@@ -184,6 +184,7 @@ export const typescriptPreset = (): any => {
                     leadingUnderscore: 'require',
                 },
             ],
+            // 'ts/consistent-type-exports': 'warn',
         },
         languageOptions: {
             parser: typescriptParser,

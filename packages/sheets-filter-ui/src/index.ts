@@ -16,17 +16,9 @@
 
 import './global.css';
 
-export { UniverSheetsFilterUIPlugin } from './plugin';
+export { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from './commands/operations/sheets-filter.operation';
+export type { IOpenFilterPanelOperationParams } from './commands/operations/sheets-filter.operation';
+export type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
+export { UniverSheetsFilterUIPlugin } from './plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
-
-// #region - all commands
-
-export {
-    ChangeFilterByOperation,
-    CloseFilterPanelOperation,
-    type IOpenFilterPanelOperationParams,
-    OpenFilterPanelOperation,
-} from './commands/operations/sheets-filter.operation';
-
-// #endregion

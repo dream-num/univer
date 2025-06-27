@@ -16,23 +16,16 @@
 
 import './global.css';
 
-export type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
-export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
-export { InsertLinkShortcut } from './controllers/menu';
-export { UniverSheetsHyperLinkUIPlugin } from './plugin';
-
-export { SheetsHyperLinkPopupService } from './services/popup.service';
-
-export { SheetsHyperLinkResolverService } from './services/resolver.service';
-export { type ICustomHyperLinkView, SheetsHyperLinkSidePanelService } from './services/side-panel.service';
-
-// #region - all commands
-
 export {
     CloseHyperLinkPopupOperation,
     InsertHyperLinkOperation,
     type IOpenHyperLinkEditPanelOperationParams,
     OpenHyperLinkEditPanelOperation,
 } from './commands/operations/popup.operations';
-
-// #endregion
+export type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
+export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
+export { InsertLinkShortcut } from './controllers/menu';
+export { UniverSheetsHyperLinkUIPlugin } from './plugin';
+export { SheetsHyperLinkPopupService } from './services/popup.service';
+export { SheetsHyperLinkResolverService } from './services/resolver.service';
+export { type ICustomHyperLinkView, SheetsHyperLinkSidePanelService } from './services/side-panel.service';

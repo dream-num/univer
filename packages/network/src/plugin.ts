@@ -14,33 +14,13 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import { ILogService, Inject, Injector, LookUp, mergeOverrideWithDependencies, Plugin, Quantity, registerDependencies } from '@univerjs/core';
+import type { IUniverNetworkConfig } from './controllers/config.schema';
+import { IConfigService, ILogService, Inject, Injector, LookUp, merge, mergeOverrideWithDependencies, Plugin, Quantity, registerDependencies } from '@univerjs/core';
+import { defaultPluginConfig, NETWORK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { HTTPService } from './services/http/http.service';
 import { FetchHTTPImplementation } from './services/http/implementations/fetch';
 import { IHTTPImplementation } from './services/http/implementations/implementation';
 import { XHRHTTPImplementation } from './services/http/implementations/xhr';
-
-export interface IUniverNetworkPluginConfig {
-    /**
-     * Use fetch instead of XMLHttpRequest. By default, Univer will use fetch on Node.js and XMLHttpRequest in browser.
-     */
-    useFetchImpl?: boolean;
-
-    /**
-     * Build in dependencies that can be overridden:
-     *
-     * - {@link HTTPService}
-     * - {@link IHTTPImplementation}
-     */
-    override?: DependencyOverride;
-
-    /**
-     * Force to use a new instance of {@link HTTPService} and {@link IHTTPImplementation} even if
-     * an ancestor injector already has them registered.
-     */
-    forceUseNewInstance?: boolean;
-}
 
 /**
  * This plugin add network services to the Univer instance.
@@ -49,11 +29,20 @@ export class UniverNetworkPlugin extends Plugin {
     static override pluginName = 'UNIVER_NETWORK_PLUGIN';
 
     constructor(
-        private readonly _config: Partial<IUniverNetworkPluginConfig> | undefined = undefined,
+        private readonly _config: Partial<IUniverNetworkConfig> = defaultPluginConfig,
         @ILogService private readonly _logger: ILogService,
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(NETWORK_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

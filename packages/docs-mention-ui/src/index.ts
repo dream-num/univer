@@ -16,5 +16,6 @@
 
 import './global.css';
 
-export { DocMentionPopupService } from './services/doc-mention-popup.service';
+export type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
 export { UniverDocsMentionUIPlugin } from './plugin';
+export { DocMentionPopupService } from './services/doc-mention-popup.service';

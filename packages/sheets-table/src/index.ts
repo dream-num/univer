@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
-export { UniverSheetsTablePlugin } from './plugin';
-export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
-export { SheetTableService } from '../src/services/table-service';
-export { TableManager } from '../src/model/table-manager';
-export { isConditionFilter, isManualFilter } from '../src/util';
-export { SheetsTableController } from '../src/controllers/sheets-table.controller';
-
 export { AddSheetTableCommand } from '../src/commands/commands/add-sheet-table.command';
-export { AddSheetTableMutation } from '../src/commands/mutations/add-sheet-table.mutation';
-export { SetSheetTableFilterCommand } from '../src/commands/commands/set-table-filter.command';
-export { SetSheetTableFilterMutation } from '../src/commands/mutations/set-table-filter.mutation';
 export { DeleteSheetTableCommand } from '../src/commands/commands/delete-sheet-table.command';
-export { DeleteSheetTableMutation } from '../src/commands/mutations/delete-sheet-table.mutation';
-
-export type { ISetSheetTableParams } from '../src/commands/mutations/set-table-filter.mutation';
+export { SetSheetTableFilterCommand } from '../src/commands/commands/set-table-filter.command';
+export { AddSheetTableMutation } from '../src/commands/mutations/add-sheet-table.mutation';
 export type { IAddSheetTableParams } from '../src/commands/mutations/add-sheet-table.mutation';
+export { DeleteSheetTableMutation } from '../src/commands/mutations/delete-sheet-table.mutation';
 export type { IDeleteSheetTableParams } from '../src/commands/mutations/delete-sheet-table.mutation';
-
+export { SetSheetTableFilterMutation } from '../src/commands/mutations/set-table-filter.mutation';
+export type { ISetSheetTableParams } from '../src/commands/mutations/set-table-filter.mutation';
+export { SheetsTableController } from '../src/controllers/sheets-table.controller';
+export { TableManager } from '../src/model/table-manager';
+export { SheetTableService } from '../src/services/table-service';
+export { isConditionFilter, isManualFilter } from '../src/util';
 export type { IAddSheetTableCommandParams } from './commands/commands/add-sheet-table.command';
-export { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
-export type { ISetSheetTableCommandParams } from './commands/commands/set-sheet-table.command';
-export type { ITableSetConfig } from './types/type';
-export { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
-export type { ISetSheetTableMutationParams } from './commands/mutations/set-sheet-table.mutation';
 export type { IAddTableThemeCommandParams } from './commands/commands/add-table-theme.command';
 export { AddTableThemeCommand } from './commands/commands/add-table-theme.command';
 export { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.command';
+export { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
+export type { ISetSheetTableCommandParams } from './commands/commands/set-sheet-table.command';
 export { SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from './commands/commands/sheet-table-row-col.command';
-export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
+export { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
+export type { ISetSheetTableMutationParams } from './commands/mutations/set-sheet-table.mutation';
 export { SHEET_TABLE_CUSTOM_THEME_PREFIX } from './const';
+export type { IUniverSheetsTableConfig } from './controllers/config.schema';
+export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './controllers/table-theme.factory';
+export { UniverSheetsTablePlugin } from './plugin';
+export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
+export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
+export type { ITableSetConfig } from './types/type';

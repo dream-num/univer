@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-import './global.css';
+export const PLUGIN_CONFIG_KEY_MAIN_THREAD = 'rpc-node.main-thread.config';
 
-export { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from './commands/commands/zen-editor.command';
-export type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
-export { UniverSheetsZenEditorPlugin } from './plugin';
+export const configSymbolMainThread = Symbol(PLUGIN_CONFIG_KEY_MAIN_THREAD);
+
+export interface IUniverRPCNodeMainConfig {
+    workerSrc?: string;
+}
+
+export const defaultPluginMainThreadConfig: IUniverRPCNodeMainConfig = {};
+
+export const PLUGIN_CONFIG_KEY_WORKER_THREAD = 'rpc-node.worker-thread.config';
+
+export const configSymbolWorkerThread = Symbol(PLUGIN_CONFIG_KEY_WORKER_THREAD);
+
+export interface IUniverRPCNodeWorkerThreadConfig {
+}
+
+export const defaultPluginWorkerThreadConfig: IUniverRPCNodeWorkerThreadConfig = {};

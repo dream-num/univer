@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import './global.css';
+import type { MenuConfig } from '@univerjs/ui';
 
-export { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from './commands/commands/zen-editor.command';
-export type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
-export { UniverSheetsZenEditorPlugin } from './plugin';
+export const DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY = 'docs-quick-insert-ui.config';
+
+export const configSymbol = Symbol(DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY);
+
+export interface IUniverDocsQuickInsertUIConfig {
+    menu?: MenuConfig;
+}
+
+export const defaultPluginConfig: IUniverDocsQuickInsertUIConfig = {};

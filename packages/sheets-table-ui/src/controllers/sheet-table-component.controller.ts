@@ -97,6 +97,7 @@ export class SheetsTableComponentController extends Disposable {
                 this._contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);
             },
             offset: [5, 0],
+            portal: true,
         });
     }
 

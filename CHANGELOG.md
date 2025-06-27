@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.8.3](https://github.com/dream-num/univer/compare/v0.8.2...v0.8.3) (2025-06-27)
+
+
+### Bug Fixes
+
+*  fixed the issue where scrolling was reset when the auto fill passed through the freeze line ([#5437](https://github.com/dream-num/univer/issues/5437)) ([6494b00](https://github.com/dream-num/univer/commit/6494b004314be62142d50d2f3dc2e281bfd4a410))
+* **eslint:** update rule to enforce consistent line wrapping in better-tailwindcss ([#5423](https://github.com/dream-num/univer/issues/5423)) ([5569118](https://github.com/dream-num/univer/commit/556911823c9344fa1c0c0b3d953fd82094fc36e6))
+* fixed the issue where the SheetEditEnded event listener returned incorrect row and column ([#5442](https://github.com/dream-num/univer/issues/5442)) ([e4fbd4c](https://github.com/dream-num/univer/commit/e4fbd4ca0d68f55b89342efca83d7dda2bfa28ab))
+* **render:** fixed numbers were not right-aligned by default after applying a number format ([#5421](https://github.com/dream-num/univer/issues/5421)) ([67cc34c](https://github.com/dream-num/univer/commit/67cc34ce22f8eb04d5078c581ddda47d400988d6))
+* **sheets-formula-ui:** update configuration interface and default config for sheets formula UI ([#5447](https://github.com/dream-num/univer/issues/5447)) ([7e14a21](https://github.com/dream-num/univer/commit/7e14a21391c5fd36ded5a980a1aa7bf0efe52b72))
+* **ui:** fix plugin override config ([#5435](https://github.com/dream-num/univer/issues/5435)) ([20cad29](https://github.com/dream-num/univer/commit/20cad29426564120a0d03798b274f8890758fdba))
+
+
+### Features
+
+* add locale support for Korean(ko-KR) ([#5434](https://github.com/dream-num/univer/issues/5434)) ([000ad6a](https://github.com/dream-num/univer/commit/000ad6a38db3ef14e3847925629815bcad258e34))
+* add type exports for configurations ([#5445](https://github.com/dream-num/univer/issues/5445)) ([d9989e7](https://github.com/dream-num/univer/commit/d9989e79956f4baae1b1865fa753347e74271627))
+
 ## [0.8.2](https://github.com/dream-num/univer/compare/v0.8.1...v0.8.2) (2025-06-20)
 
 

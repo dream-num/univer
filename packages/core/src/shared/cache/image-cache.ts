@@ -53,6 +53,7 @@ export class ImageCacheMap {
                 }
 
                 newImageElement.onload = () => {
+                    newImageElement.removeAttribute('data-error');
                     onLoad?.();
                 };
                 newImageElement.onerror = () => {

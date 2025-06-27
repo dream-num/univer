@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
+export type { IUniverSlidesConfig } from './controllers/config.schema';
 export { UniverSlidesPlugin } from './plugin';
 export * from './views/render';

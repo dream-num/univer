@@ -15,13 +15,15 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { IUniverDocsQuickInsertUIConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { defaultPluginConfig, DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocQuickInsertMenuController } from './controllers/doc-quick-insert-menu.controller';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 import { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
@@ -35,10 +37,23 @@ export class UniverDocsQuickInsertUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
+        private readonly _config: Partial<IUniverDocsQuickInsertUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @Inject(IRenderManagerService) private _renderManagerSrv: IRenderManagerService
+        @Inject(IRenderManagerService) private _renderManagerSrv: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

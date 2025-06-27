@@ -488,13 +488,11 @@ export class Font extends SheetExtension {
             cellWidth = endX - startX - paddingLeft - paddingRight;
         }
 
-        const isNumber = cellData.t === CellValueType.NUMBER && typeof cellData.v === 'number';
-
         Text.drawWith(ctx, {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,
-            hAlign: isNumber && fontCache.horizontalAlign === HorizontalAlign.UNSPECIFIED ? HorizontalAlign.RIGHT : fontCache.horizontalAlign,
+            hAlign: (cellData.t === CellValueType.NUMBER && fontCache.horizontalAlign === HorizontalAlign.UNSPECIFIED) ? HorizontalAlign.RIGHT : fontCache.horizontalAlign,
             vAlign: fontCache.verticalAlign,
             width: cellWidth,
             height: cellHeight,

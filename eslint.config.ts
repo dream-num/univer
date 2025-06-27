@@ -97,12 +97,6 @@ export default antfu(
             'penetrating/no-penetrating-import': 2,
         },
     },
-    {
-        files: ['**/*/src/index.ts'],
-        rules: {
-            'perfectionist/sort-exports': 'off',
-        },
-    },
     typescriptPreset(),
     univerSourcePreset(),
     facadePreset(),

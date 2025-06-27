@@ -16,12 +16,8 @@
 
 import './global.css';
 
+export { ToggleScriptPanelOperation } from './commands/operations/panel.operation';
+export type { IUniverUniscriptConfig } from './controllers/config.schema';
 export { UniverUniscriptPlugin } from './plugin';
 export { ScriptEditorService } from './services/script-editor.service';
 export { IUniscriptExecutionService } from './services/script-execution.service';
-
-// #region - all commands
-
-export { ToggleScriptPanelOperation } from './commands/operations/panel.operation';
-
-// #endregion

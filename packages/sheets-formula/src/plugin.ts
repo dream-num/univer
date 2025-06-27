@@ -15,15 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type {
-    IUniverSheetsFormulaBaseConfig,
-    IUniverSheetsFormulaRemoteConfig,
-} from './controllers/config.schema';
+import type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
-
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';

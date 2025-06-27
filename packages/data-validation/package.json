@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/data-validation",
-    "version": "0.8.1",
+    "version": "0.8.3",
     "private": false,
     "description": "Data validation library for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -71,6 +71,6 @@
         "rxjs": "^7.8.2",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
-        "vitest": "^3.1.4"
+        "vitest": "^3.2.4"
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs-infra/shared",
-    "version": "0.8.1",
+    "version": "0.8.3",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -28,9 +28,9 @@
         "@typescript-eslint/parser": "^8.34.1",
         "@vitejs/plugin-react": "^4.5.2",
         "@vitejs/plugin-vue": "^5.2.4",
-        "@vitest/coverage-istanbul": "^3.1.4",
+        "@vitest/coverage-istanbul": "^3.2.4",
         "autoprefixer": "^10.4.21",
-        "eslint-plugin-better-tailwindcss": "^3.3.0",
+        "eslint-plugin-better-tailwindcss": "^3.4.0",
         "fs-extra": "^11.3.0",
         "happy-dom": "18.0.1",
         "javascript-obfuscator": "^4.1.1",
@@ -41,7 +41,7 @@
         "vite": "^6.3.5",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
-        "vitest": "^3.1.4"
+        "vitest": "^3.2.4"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

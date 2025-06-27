@@ -17,13 +17,11 @@
 import './global.css';
 
 export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
+export type { IUniverSheetsThreadCommentUIConfig } from './controllers/config.schema';
 export { UniverSheetsThreadCommentUIPlugin } from './plugin';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { SHEETS_THREAD_COMMENT } from './types/const';
 export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
-export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-
-// #region - all commands
 export {
     AddCommentCommand,
     DeleteCommentCommand,
@@ -38,5 +36,4 @@ export type {
     IResolveCommentCommandParams,
     IUpdateCommentCommandParams,
 } from '@univerjs/thread-comment';
-
-// #endregion
+export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';

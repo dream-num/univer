@@ -15,11 +15,16 @@
  */
 
 export {
-    getRuleOptions,
-    getRuleSetting,
-} from './common/util';
+    AddDataValidationMutation,
+    type IAddDataValidationMutationParams,
+    type IRemoveDataValidationMutationParams,
+    type IUpdateDataValidationMutationParams,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+} from './commands/mutations/data-validation.mutation';
+export { getRuleOptions, getRuleSetting } from './common/util';
+export { type IUniverDataValidationConfig } from './controllers/config.schema';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
-
 export { type DataValidationChangeSource, type DataValidationChangeType, DataValidationModel, type IRuleChange } from './models/data-validation-model';
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryScope, DataValidatorRegistryService } from './services/data-validator-registry.service';
@@ -33,18 +38,7 @@ export type { IUpdateRuleOptionsPayload, IUpdateRulePayload, IUpdateRuleRangePay
 export { BaseDataValidator } from './validators/base-data-validator';
 export type { IFormulaResult, IValidatorCellInfo } from './validators/base-data-validator';
 export type { IFormulaValidResult } from './validators/base-data-validator';
-export type { IBaseDataValidationWidget } from './validators/base-widget';
 export { DataValidatorDropdownType } from './validators/base-data-validator';
 export { FORMULA1, FORMULA2, TYPE } from './validators/base-data-validator';
 
-// #region - all commands
-export {
-    AddDataValidationMutation,
-    type IAddDataValidationMutationParams,
-    type IRemoveDataValidationMutationParams,
-    type IUpdateDataValidationMutationParams,
-    RemoveDataValidationMutation,
-    UpdateDataValidationMutation,
-} from './commands/mutations/data-validation.mutation';
-
-// #endregion
+export type { IBaseDataValidationWidget } from './validators/base-widget';

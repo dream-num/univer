@@ -16,14 +16,11 @@
 
 import './global.css';
 
-export { UniverDocsThreadCommentUIPlugin } from './plugin';
-
-// #region - all commands
 export { AddDocCommentComment } from './commands/commands/add-doc-comment.command';
 export type { IAddDocCommentComment } from './commands/commands/add-doc-comment.command';
-export { ShowCommentPanelOperation, StartAddCommentOperation } from './commands/operations/show-comment-panel.operation';
-export type { IShowCommentPanelOperationParams } from './commands/operations/show-comment-panel.operation';
 export { DeleteDocCommentComment } from './commands/commands/delete-doc-comment.command';
 export type { IDeleteDocCommentComment } from './commands/commands/delete-doc-comment.command';
-
-// #endregion
+export { ShowCommentPanelOperation, StartAddCommentOperation } from './commands/operations/show-comment-panel.operation';
+export type { IShowCommentPanelOperationParams } from './commands/operations/show-comment-panel.operation';
+export type { IUniverDocsThreadCommentUIConfig } from './controllers/config.schema';
+export { UniverDocsThreadCommentUIPlugin } from './plugin';

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-crosshair-highlight",
-    "version": "0.8.1",
+    "version": "0.8.3",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -93,6 +93,6 @@
         "tailwindcss": "^3.4.17",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
-        "vitest": "^3.1.4"
+        "vitest": "^3.2.4"
     }
 }

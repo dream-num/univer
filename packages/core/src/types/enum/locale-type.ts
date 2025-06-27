@@ -25,4 +25,5 @@ export enum LocaleType {
     ZH_TW = 'zhTW',
     VI_VN = 'viVN',
     FA_IR = 'faIR',
+    KO_KR = 'koKR',
 }

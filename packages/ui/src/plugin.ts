@@ -127,7 +127,7 @@ export class UniverUIPlugin extends Plugin {
             [SharedController],
             [ErrorController],
             [ShortcutPanelController],
-        ]));
+        ], this._config.override));
 
         touchDependencies(this._injector, [
             [IUIController],

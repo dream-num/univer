@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-export type { BaseAstNode } from './engine/ast-node/base-ast-node.js';
-export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
-export { getObjectValue } from './functions/util';
-
 export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -35,16 +31,17 @@ export type {
     IUnitSheetNameMap,
 } from './basics/common';
 export { BooleanValue } from './basics/common';
+export { type IOtherFormulaData } from './basics/common';
+export { type IUnitRowData } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
+export { matchRefDrawToken } from './basics/match-token';
+export { isReferenceString } from './basics/regex';
 export { convertUnitDataToRuntime } from './basics/runtime';
 export { compareToken, matchToken, operatorToken } from './basics/token';
-export { matchRefDrawToken } from './basics/match-token';
-
-export { isReferenceString } from './basics/regex';
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export { type ISetArrayFormulaDataMutationParams, SetArrayFormulaDataMutation } from './commands/mutations/set-array-formula-data.mutation';
 export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from './commands/mutations/set-defined-name.mutation';
@@ -63,11 +60,13 @@ export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './co
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export { CalculateController } from './controller/calculate.controller';
+export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, type IUniverEngineFormulaConfig } from './controller/config.schema';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 export { AstTreeBuilder } from './engine/analysis/parser';
 export { AstRootNodeFactory } from './engine/ast-node/ast-root-node';
+export type { BaseAstNode } from './engine/ast-node/base-ast-node.js';
 export { FunctionNodeFactory } from './engine/ast-node/function-node';
 export { LambdaNodeFactory } from './engine/ast-node/lambda-node';
 export { LambdaParameterNodeFactory } from './engine/ast-node/lambda-parameter-node';
@@ -77,11 +76,17 @@ export { ReferenceNodeFactory } from './engine/ast-node/reference-node';
 export { SuffixNodeFactory } from './engine/ast-node/suffix-node';
 export { UnionNodeFactory } from './engine/ast-node/union-node';
 export { ValueNodeFactory } from './engine/ast-node/value-node';
+export { FormulaDependencyTree, type IFormulaDependencyTree } from './engine/dependency/dependency-tree';
+export { FormulaDependencyTreeType } from './engine/dependency/dependency-tree';
+export { FormulaDependencyTreeVirtual } from './engine/dependency/dependency-tree';
 export { FormulaDependencyGenerator, IFormulaDependencyGenerator } from './engine/dependency/formula-dependency';
+export { generateRandomDependencyTreeId } from './engine/dependency/formula-dependency';
 export { Interpreter } from './engine/interpreter/interpreter';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
 export { AsyncArrayObject, AsyncObject } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
+export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
+export { generateAstNode } from './engine/utils/generate-ast-node';
 export { strip, stripErrorMargin } from './engine/utils/math-kit';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';
 export { deserializeRangeForR1C1 } from './engine/utils/r1c1-reference';
@@ -100,9 +105,11 @@ export {
     singleReferenceToGrid,
 } from './engine/utils/reference';
 export { handleRefStringInfo } from './engine/utils/reference';
+export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
+export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
 export type { FormulaFunctionResultValueType, FormulaFunctionValueType, PrimitiveValueType } from './engine/value-object/primitive-object';
 export { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './engine/value-object/primitive-object';
 export { functionArray } from './functions/array/function-map';
@@ -121,10 +128,8 @@ export { functionEngineering } from './functions/engineering/function-map';
 export { FUNCTION_NAMES_ENGINEERING } from './functions/engineering/function-names';
 export { functionFinancial } from './functions/financial/function-map';
 export { FUNCTION_NAMES_FINANCIAL } from './functions/financial/function-names';
-
 export { functionInformation } from './functions/information/function-map';
 export { FUNCTION_NAMES_INFORMATION } from './functions/information/function-names';
-
 export { functionLogical } from './functions/logical/function-map';
 export { FUNCTION_NAMES_LOGICAL } from './functions/logical/function-names';
 export { functionLookup } from './functions/lookup/function-map';
@@ -138,40 +143,29 @@ export { functionText } from './functions/text/function-map';
 export { FUNCTION_NAMES_TEXT } from './functions/text/function-names';
 export { functionUniver } from './functions/univer/function-map';
 export { FUNCTION_NAMES_UNIVER } from './functions/univer/function-names';
+export { getObjectValue } from './functions/util';
 export { functionWeb } from './functions/web/function-map';
 export { FUNCTION_NAMES_WEB } from './functions/web/function-names';
 export { FormulaDataModel } from './models/formula-data.model';
 export { initSheetFormulaData } from './models/formula-data.model';
 export type { IRangeChange } from './models/formula-data.model';
 export { UniverFormulaEnginePlugin } from './plugin';
-export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
-export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';
+export { DEFAULT_INTERVAL_COUNT } from './services/calculate-formula.service';
 export { FormulaCurrentConfigService, IFormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
 export { DefinedNamesService, type IDefinedNameMapItem, IDefinedNamesService, type IDefinedNamesServiceParam } from './services/defined-names.service';
 export { IDependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerService } from './services/dependency-manager.service';
+export { DependencyManagerBaseService } from './services/dependency-manager.service';
 export { FeatureCalculationManagerService, IFeatureCalculationManagerService } from './services/feature-calculation-manager.service';
+export type { IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
+export { GlobalComputingStatusService } from './services/global-computing-status.service';
+export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, type IAllRuntimeData, type IExecutionInProgressParams, IFormulaRuntimeService } from './services/runtime.service';
+export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';
-export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';
-export { FormulaDependencyTree, type IFormulaDependencyTree } from './engine/dependency/dependency-tree';
-export { type IOtherFormulaData } from './basics/common';
-export { FormulaDependencyTreeType } from './engine/dependency/dependency-tree';
-export { FormulaDependencyTreeVirtual } from './engine/dependency/dependency-tree';
-export { generateAstNode } from './engine/utils/generate-ast-node';
-export { type IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
-export { DEFAULT_INTERVAL_COUNT } from './services/calculate-formula.service';
-export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, type IUniverEngineFormulaConfig } from './controller/config.schema';
-
-export { generateRandomDependencyTreeId } from './engine/dependency/formula-dependency';
-export { DependencyManagerBaseService } from './services/dependency-manager.service';
-export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
-export { type IUnitRowData } from './basics/common';
-
-export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';

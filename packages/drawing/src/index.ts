@@ -15,24 +15,26 @@
  */
 
 export { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT } from './basics/config';
-export { DrawingManagerService, type IDrawingJson1Type, type IDrawingJsonUndo1, UnitDrawingService } from './services/drawing-manager-impl.service';
+export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
+export type { IUniverDrawingConfig } from './controllers/config.schema';
+export type { IDocFloatDomData, IDocFloatDomDataBase, IImageData } from './models/image-model-interface';
+export { UniverDrawingPlugin } from './plugin';
+export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager-impl.service';
+export type { IDrawingJson1Type, IDrawingJsonUndo1 } from './services/drawing-manager-impl.service';
+export type {
+    IDrawingGroupUpdateParam,
+    IDrawingMap,
+    IDrawingMapItem,
+    IDrawingMapItemData,
+    IDrawingOrderMapParam,
+    IDrawingOrderUpdateParam,
+    IDrawingSubunitMap,
+    IDrawingVisibleParam,
+    IUnitDrawingService,
+} from './services/drawing-manager.service';
+export { IDrawingManagerService } from './services/drawing-manager.service';
+export { ImageIoService } from './services/image-io-impl.service';
+export { IImageIoService, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
+export type { IImageIoServiceParam } from './services/image-io.service';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
-export { UniverDrawingPlugin } from './plugin';
-export { type IDocFloatDomData, type IDocFloatDomDataBase, type IImageData } from './models/image-model-interface';
-export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
-export { ImageIoService } from './services/image-io-impl.service';
-export {
-    type IDrawingGroupUpdateParam,
-    IDrawingManagerService,
-    type IDrawingMap,
-    type IDrawingMapItem,
-    type IDrawingMapItemData,
-    type IDrawingOrderMapParam,
-    type IDrawingOrderUpdateParam,
-    type IDrawingSubunitMap,
-    type IDrawingVisibleParam,
-    type IUnitDrawingService,
-} from './services/drawing-manager.service';
-
-export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';

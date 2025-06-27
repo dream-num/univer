@@ -16,11 +16,6 @@
 
 import './global.css';
 
-export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
-export { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from './services/crosshair.service';
-
-// #region commands
-
 export {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
@@ -28,5 +23,6 @@ export {
     SetCrosshairHighlightColorOperation,
     ToggleCrosshairHighlightOperation,
 } from './commands/operations/operation';
-
-// #endregion
+export type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config.schema';
+export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
+export { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from './services/crosshair.service';

@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
+import type { IUniverSheetsFormulaUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -24,7 +24,7 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } 
 import { BuiltInUIPart, ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
-    defaultPluginBaseConfig,
+    defaultPluginConfig,
     PLUGIN_CONFIG_KEY_BASE,
 } from './controllers/config.schema';
 import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
@@ -50,7 +50,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsFormulaBaseConfig> = defaultPluginBaseConfig,
+        private readonly _config: Partial<IUniverSheetsFormulaUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
@@ -60,7 +60,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { menu, ...rest } = merge(
-            defaultPluginBaseConfig,
+            defaultPluginConfig,
             this._config
         );
         if (menu) {

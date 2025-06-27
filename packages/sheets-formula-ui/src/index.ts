@@ -23,7 +23,7 @@ export { InsertFunctionOperation } from './commands/operations/insert-function.o
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
-export type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
+export type { IUniverSheetsFormulaUIConfig } from './controllers/config.schema';
 export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { UniverSheetsFormulaUIPlugin } from './plugin';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';

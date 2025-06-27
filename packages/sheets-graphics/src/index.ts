@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export { UniverSheetsGraphicsPlugin } from './plugin';
+export type { IUniverSheetsGraphicsConfig } from './controllers/config.schema';
 export { SheetGraphicsRenderController } from './controllers/graphics-render.controller';
+export { UniverSheetsGraphicsPlugin } from './plugin';

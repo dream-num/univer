@@ -15,50 +15,12 @@
  */
 
 export * from './base/const';
-export * from './models/conditional-formatting-rule-model';
-export * from './models/conditional-formatting-view-model';
-export * from './models/icon-map';
-export * from './models/type';
-export { UniverSheetsConditionalFormattingPlugin } from './plugin';
-export * from './render/data-bar.render';
-export * from './render/icon.render';
-export * from './render/type';
-export * from './services/conditional-formatting.service';
-export * from './services/conditional-formatting-formula.service';
-export * from './models/calculate-unit-v2/utils';
-export * from './utils/anchor';
-export * from './utils/create-cf-id';
-export * from './utils/is-ranges-equal';
-export * from './utils/remove-undefined-attr';
-export * from './utils/type';
-
-// #region - all commands
-
-export {
-    AddCfCommand,
-    type IAddCfCommandParams,
-} from './commands/commands/add-cf.command';
-export {
-    ClearRangeCfCommand,
-    type IClearRangeCfParams,
-} from './commands/commands/clear-range-cf.command';
-export {
-    ClearWorksheetCfCommand,
-    type IClearWorksheetCfParams,
-} from './commands/commands/clear-worksheet-cf.command';
-export {
-    DeleteCfCommand,
-    type IDeleteCfCommandParams,
-} from './commands/commands/delete-cf.command';
-export {
-    type IMoveCfCommandParams,
-    MoveCfCommand,
-} from './commands/commands/move-cf.command';
-export {
-    type ISetCfCommandParams,
-    SetCfCommand,
-} from './commands/commands/set-cf.command';
-
+export { AddCfCommand, type IAddCfCommandParams } from './commands/commands/add-cf.command';
+export { ClearRangeCfCommand, type IClearRangeCfParams } from './commands/commands/clear-range-cf.command';
+export { ClearWorksheetCfCommand, type IClearWorksheetCfParams } from './commands/commands/clear-worksheet-cf.command';
+export { DeleteCfCommand, type IDeleteCfCommandParams } from './commands/commands/delete-cf.command';
+export { type IMoveCfCommandParams, MoveCfCommand } from './commands/commands/move-cf.command';
+export { type ISetCfCommandParams, SetCfCommand } from './commands/commands/set-cf.command';
 export {
     AddConditionalRuleMutation,
     AddConditionalRuleMutationUndoFactory,
@@ -75,10 +37,22 @@ export {
     MoveConditionalRuleMutation,
     MoveConditionalRuleMutationUndoFactory,
 } from './commands/mutations/move-conditional-rule.mutation';
-export {
-    type ISetConditionalRuleMutationParams,
-    SetConditionalRuleMutation,
-    setConditionalRuleMutationUndoFactory,
-} from './commands/mutations/set-conditional-rule.mutation';
-
-// #endregion
+export type { ISetConditionalRuleMutationParams } from './commands/mutations/set-conditional-rule.mutation';
+export { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from './commands/mutations/set-conditional-rule.mutation';
+export type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
+export * from './models/calculate-unit-v2/utils';
+export * from './models/conditional-formatting-rule-model';
+export * from './models/conditional-formatting-view-model';
+export * from './models/icon-map';
+export * from './models/type';
+export { UniverSheetsConditionalFormattingPlugin } from './plugin';
+export * from './render/data-bar.render';
+export * from './render/icon.render';
+export * from './render/type';
+export * from './services/conditional-formatting-formula.service';
+export * from './services/conditional-formatting.service';
+export * from './utils/anchor';
+export * from './utils/create-cf-id';
+export * from './utils/is-ranges-equal';
+export * from './utils/remove-undefined-attr';
+export * from './utils/type';

@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsNoteUIPluginConfig } from './controllers/config.schema';
+import type { IUniverSheetsNoteUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import { defaultPluginConfig, SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -33,7 +33,7 @@ export class UniverSheetsNoteUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsNoteUIPluginConfig> = defaultPluginConfig,
+        private readonly _config: Partial<IUniverSheetsNoteUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected override readonly _injector: Injector,
         @IConfigService private readonly _configService: IConfigService
     ) {

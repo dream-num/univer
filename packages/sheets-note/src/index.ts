@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-export { UniverSheetsNotePlugin } from './plugin';
-export * from './models/sheets-note.model';
-export * from './controllers/sheets-note-resource.controller';
-export * from './commands/mutations/note.mutation';
 export * from './commands/commands/note.command';
+export * from './commands/mutations/note.mutation';
+export type { IUniverSheetsNoteConfig } from './controllers/config.schema';
+export * from './controllers/sheets-note-resource.controller';
+export * from './models/sheets-note.model';
+export { UniverSheetsNotePlugin } from './plugin';

@@ -17,9 +17,10 @@
 import type { Dependency } from '@univerjs/core';
 import type { IMessageProtocol } from '@univerjs/rpc';
 import type { Serializable } from 'node:child_process';
+import type { IUniverRPCNodeMainConfig, IUniverRPCNodeWorkerThreadConfig } from './controllers/config.schema';
 import { fork } from 'node:child_process';
 import process from 'node:process';
-import { IConfigService, ILogService, Inject, Injector, Plugin } from '@univerjs/core';
+import { IConfigService, ILogService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import {
     ChannelService,
     DataSyncPrimaryController,
@@ -31,29 +32,33 @@ import {
     WebWorkerRemoteInstanceService,
 } from '@univerjs/rpc';
 import { Observable, shareReplay } from 'rxjs';
-
-export interface IUniverRPCNodeMainConfig {
-    /** Path of the computing worker scripts. */
-    workerSrc: string;
-}
-
-const UNIVER_RPC_NODE_MAIN_PLUGIN_CONFIG_KEY = 'node-rpc.main.config';
+import { defaultPluginMainThreadConfig, defaultPluginWorkerThreadConfig, PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './controllers/config.schema';
 
 export class UniverRPCNodeMainPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_NODE_MAIN_PLUGIN';
 
     constructor(
-        private readonly _config: IUniverRPCNodeMainConfig,
+        private readonly _config: Partial<IUniverRPCNodeMainConfig> = defaultPluginMainThreadConfig,
         @Inject(Injector) protected readonly _injector: Injector,
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._configService.setConfig(UNIVER_RPC_NODE_MAIN_PLUGIN_CONFIG_KEY, this._config);
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginMainThreadConfig,
+            this._config
+        );
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_MAIN_THREAD, rest);
     }
 
     override onStarting(): void {
         const { workerSrc } = this._config;
+        if (!workerSrc) {
+            throw new Error('[UniverRPCNodeMainPlugin] workerSrc is required for UniverRPCNodeMainPlugin');
+        }
+
         const messageProtocol = createNodeMessagePortOnMain(this._injector, workerSrc);
 
         const dependencies: Dependency[] = [
@@ -74,10 +79,19 @@ export class UniverRPCNodeWorkerPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_NODE_WORKER_PLUGIN';
 
     constructor(
-        private readonly _config: undefined,
-        @Inject(Injector) protected readonly _injector: Injector
+        private readonly _config: Partial<IUniverRPCNodeWorkerThreadConfig> = defaultPluginWorkerThreadConfig,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginWorkerThreadConfig,
+            this._config
+        );
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_WORKER_THREAD, rest);
     }
 
     override onStarting(): void {

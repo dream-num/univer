@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-export { type IUniverNetworkPluginConfig, UniverNetworkPlugin } from './plugin';
+export type { IUniverNetworkConfig } from './controllers/config.schema';
+export { UniverNetworkPlugin } from './plugin';
 export { HTTPHeaders } from './services/http/headers';
-export { HTTPService } from './services/http/http.service';
-export { IHTTPImplementation } from './services/http/implementations/implementation';
-export { FetchHTTPImplementation } from './services/http/implementations/fetch';
-export { XHRHTTPImplementation } from './services/http/implementations/xhr';
-export { HTTPRequest, type HTTPRequestMethod } from './services/http/request';
 export { type HTTPResponseType, HTTPStatusCode } from './services/http/http';
+export { HTTPService } from './services/http/http.service';
+export type { IPostRequestParams, IRequestParams } from './services/http/http.service';
+export { FetchHTTPImplementation } from './services/http/implementations/fetch';
+export { IHTTPImplementation } from './services/http/implementations/implementation';
+export { XHRHTTPImplementation } from './services/http/implementations/xhr';
+export type { HTTPHandlerFn, HTTPInterceptorFn, HTTPInterceptorFnFactory } from './services/http/interceptor';
+export { AuthInterceptorFactory, type IAuthInterceptorParams } from './services/http/interceptors/auth-interceptor';
+export { MergeInterceptorFactory } from './services/http/interceptors/merge-interceptor';
+export { type IRetryInterceptorFactoryParams, RetryInterceptorFactory } from './services/http/interceptors/retry-interceptor';
+export { ThresholdInterceptorFactory } from './services/http/interceptors/threshold-interceptor';
+export { HTTPRequest, type HTTPRequestMethod } from './services/http/request';
 export {
     type HTTPEvent,
     HTTPEventType,
@@ -37,9 +44,3 @@ export {
     type SocketBodyType,
     WebSocketService,
 } from './services/web-socket/web-socket.service';
-export type { IPostRequestParams, IRequestParams } from './services/http/http.service';
-export type { HTTPHandlerFn, HTTPInterceptorFn, HTTPInterceptorFnFactory } from './services/http/interceptor';
-export { type IRetryInterceptorFactoryParams, RetryInterceptorFactory } from './services/http/interceptors/retry-interceptor';
-export { ThresholdInterceptorFactory } from './services/http/interceptors/threshold-interceptor';
-export { AuthInterceptorFactory, type IAuthInterceptorParams } from './services/http/interceptors/auth-interceptor';
-export { MergeInterceptorFactory } from './services/http/interceptors/merge-interceptor';

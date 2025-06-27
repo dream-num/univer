@@ -20,7 +20,7 @@ export const SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY = 'sheets-note-ui.config';
 
 export const configSymbol = Symbol(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
 
-export interface IUniverSheetsNoteUIPluginConfig {
+export interface IUniverSheetsNoteUIConfig {
     menu?: MenuConfig;
 
     defaultNoteSize?: {
@@ -29,4 +29,4 @@ export interface IUniverSheetsNoteUIPluginConfig {
     };
 }
 
-export const defaultPluginConfig: IUniverSheetsNoteUIPluginConfig = {};
+export const defaultPluginConfig: IUniverSheetsNoteUIConfig = {};

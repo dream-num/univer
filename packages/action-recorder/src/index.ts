@@ -16,6 +16,7 @@
 
 import './global.css';
 
+export type { IUniverActionRecorderConfig } from './controllers/config.schema';
 export { UniverActionRecorderPlugin } from './plugin';
 export { ActionRecorderService } from './services/action-recorder.service';
 export { ActionReplayService } from './services/replay.service';

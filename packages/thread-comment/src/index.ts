@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-export { type CommentUpdate, type IThreadInfo, ThreadCommentModel } from './models/thread-comment.model';
-export { SHEET_UNIVER_THREAD_COMMENT_PLUGIN, ThreadCommentResourceController } from './controllers/tc-resource.controller';
-export { TC_PLUGIN_NAME } from './types/const';
-export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
-export { UniverThreadCommentPlugin } from './plugin';
-export { getDT } from './common/utils';
-
 export {
-    type IThreadCommentDataSource,
-    IThreadCommentDataSourceService,
-    ThreadCommentDataSourceService,
-    type ThreadCommentJSON,
-} from './services/tc-datasource.service';
-// #region - all commands
-
+    AddCommentCommand,
+    DeleteCommentCommand,
+    DeleteCommentTreeCommand,
+    ResolveCommentCommand,
+    UpdateCommentCommand,
+} from './commands/commands/comment.command';
+export type {
+    IAddCommentCommandParams,
+    IDeleteCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
+    IResolveCommentCommandParams,
+    IUpdateCommentCommandParams,
+} from './commands/commands/comment.command';
 export {
     AddCommentMutation,
     DeleteCommentMutation,
@@ -44,20 +43,16 @@ export type {
     IUpdateCommentPayload,
     IUpdateCommentRefMutationParams,
 } from './commands/mutations/comment.mutation';
-
+export { getDT } from './common/utils';
+export type { IUniverThreadCommentConfig } from './controllers/config.schema';
+export { SHEET_UNIVER_THREAD_COMMENT_PLUGIN, ThreadCommentResourceController } from './controllers/tc-resource.controller';
+export { type CommentUpdate, type IThreadInfo, ThreadCommentModel } from './models/thread-comment.model';
+export { UniverThreadCommentPlugin } from './plugin';
 export {
-    AddCommentCommand,
-    DeleteCommentCommand,
-    DeleteCommentTreeCommand,
-    ResolveCommentCommand,
-    UpdateCommentCommand,
-} from './commands/commands/comment.command';
-export type {
-    IAddCommentCommandParams,
-    IDeleteCommentCommandParams,
-    IDeleteCommentTreeCommandParams,
-    IResolveCommentCommandParams,
-    IUpdateCommentCommandParams,
-} from './commands/commands/comment.command';
-
-// #endregion
+    type IThreadCommentDataSource,
+    IThreadCommentDataSourceService,
+    ThreadCommentDataSourceService,
+    type ThreadCommentJSON,
+} from './services/tc-datasource.service';
+export { TC_PLUGIN_NAME } from './types/const';
+export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';

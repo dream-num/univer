@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
+export { type ISortRangeCommandParams, SortRangeCommand } from './commands/commands/sheets-sort.command';
+export type { IUniverSheetsSortConfig } from './controllers/config.schema';
 export { UniverSheetsSortPlugin } from './plugin';
-
-export { SheetsSortService } from './services/sheets-sort.service';
 export { type IOrderRule, type ISortOption, SortType } from './services/interface';
-
-// #region - all commands
-
-export {
-    type ISortRangeCommandParams,
-    SortRangeCommand,
-} from './commands/commands/sheets-sort.command';
-
-// #endregion
+export { SheetsSortService } from './services/sheets-sort.service';

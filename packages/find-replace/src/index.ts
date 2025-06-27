@@ -16,8 +16,11 @@
 
 import './global.css';
 
-export { UniverFindReplacePlugin } from './plugin';
+export { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from './commands/commands/replace.command';
+export { GoToNextMatchOperation, GoToPreviousMatchOperation, OpenFindDialogOperation, OpenReplaceDialogOperation } from './commands/operations/find-replace.operation';
+export type { IUniverFindReplaceConfig } from './controllers/config.schema';
 export { FindReplaceController } from './controllers/find-replace.controller';
+export { UniverFindReplacePlugin } from './plugin';
 export type {
     IFindComplete,
     IFindMatch,
@@ -27,12 +30,4 @@ export type {
     IFindReplaceState,
     IReplaceAllResult,
 } from './services/find-replace.service';
-
 export { createInitFindReplaceState, FindBy, FindDirection, FindModel, FindReplaceModel, FindReplaceState, FindScope, IFindReplaceService } from './services/find-replace.service';
-
-// #region - all commands
-
-export { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from './commands/commands/replace.command';
-export { GoToNextMatchOperation, GoToPreviousMatchOperation, OpenFindDialogOperation, OpenReplaceDialogOperation } from './commands/operations/find-replace.operation';
-
-// #endregion

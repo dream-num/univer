@@ -16,12 +16,6 @@
 
 import './global.css';
 
-export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
-export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
-export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
-
-// #region - all commands
-
 export { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 export { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 export { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
@@ -31,7 +25,8 @@ export { AddRankCfCommand } from './commands/commands/add-rank-cf.command';
 export { AddTextCfCommand } from './commands/commands/add-text-cf.command';
 export { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
 export { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
-
 export { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
-
-// #endregion
+export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
+export type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/config.schema';
+export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
+export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';

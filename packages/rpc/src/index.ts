@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from './controllers/config.schema';
+export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
+export { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 export {
     UniverRPCMainThreadPlugin,
     UniverRPCWorkerThreadPlugin,
 } from './plugin';
-export { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
-export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 export {
     IRemoteInstanceService,
     RemoteInstanceServiceName,
@@ -27,8 +28,6 @@ export {
     RemoteSyncServiceName,
     WebWorkerRemoteInstanceService,
 } from './services/remote-instance/remote-instance.service';
+export { IRemoteSyncService } from './services/remote-instance/remote-instance.service';
 export { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 export { ChannelClient, ChannelServer, fromModule, type IMessageProtocol, toModule } from './services/rpc/rpc.service';
-export { IRemoteSyncService } from './services/remote-instance/remote-instance.service';
-
-export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from './controllers/config.schema';

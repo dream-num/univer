@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export { UniverDocsDrawingPlugin } from './plugin';
-export { DocDrawingService, type IDocDrawing, IDocDrawingService, type IDocImage } from './services/doc-drawing.service';
-
+export type { IUniverDocsDrawingConfig } from './controllers/config.schema';
 export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';
+export { UniverDocsDrawingPlugin } from './plugin';
+export { DocDrawingService, type IDocDrawing, IDocDrawingService, type IDocImage } from './services/doc-drawing.service';
 export { type IDocFloatDom } from './services/doc-drawing.service';

@@ -73,6 +73,8 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
+        "@univerjs/ui-adapter-vue3": "workspace:*",
+        "@univerjs/ui-adapter-web-component": "workspace:*",
         "@univerjs/uni-docs-ui": "workspace:*",
         "@univerjs/uni-formula": "workspace:*",
         "@univerjs/uni-formula-ui": "workspace:*",

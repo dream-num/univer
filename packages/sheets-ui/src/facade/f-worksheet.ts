@@ -200,53 +200,55 @@ export interface IFWorksheetSkeletonMixin {
     autoResizeRows(startRow: number, numRows: number): FWorksheet;
 
     /**
-     * Customize the column header of the spreadsheet.
+     * Customize the column header of the worksheet.
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
      * @example
      * ```typescript
-        const fWorkbook = univerAPI.getActiveWorkbook();
-        const fWorksheet = fWorkbook.getActiveSheet();
-        fWorksheet.customizeColumnHeader({
-            headerStyle: {
-                fontColor: '#fff',
-                backgroundColor: '#4e69ee',
-                fontSize: 9
-            },
-            columnsCfg: {
-                0: 'kuma II',
-                3: {
-                    text: 'Size',
-                    textAlign: 'left', // CanvasTextAlign
-                    fontColor: '#fff',
-                    fontSize: 12,
-                    borderColor: 'pink',
-                    backgroundColor: 'pink',
-                },
-                4: 'Wow'
-            }
-        });
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.customizeColumnHeader({
+     *   headerStyle: {
+     *     fontColor: '#fff',
+     *     backgroundColor: '#4e69ee',
+     *     fontSize: 9
+     *   },
+     *   columnsCfg: {
+     *     0: 'kuma II',
+     *     3: {
+     *       text: 'Size',
+     *       textAlign: 'left', // CanvasTextAlign
+     *       fontColor: '#fff',
+     *       fontSize: 12,
+     *       borderColor: 'pink',
+     *       backgroundColor: 'pink',
+     *     },
+     *     4: 'Wow'
+     *   }
+     * });
      * ```
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
 
     /**
-     * Customize the row header of the spreadsheet.
+     * Customize the row header of the worksheet.
      * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
      * @example
      * ```typescript
-        univerAPI.customizeRowHeader({
-            headerStyle: {
-                backgroundColor: 'pink',
-                fontSize: 12
-            },
-            rowsCfg: {
-                0: 'MokaII',
-                3: {
-                    text: 'Size',
-                    textAlign: 'left'
-                }
-            }
-        });
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.customizeRowHeader({
+     *   headerStyle: {
+     *     backgroundColor: 'pink',
+     *     fontSize: 12
+     *   },
+     *   rowsCfg: {
+     *     0: 'Moka II',
+     *     3: {
+     *       text: 'Size',
+     *       textAlign: 'left', // CanvasTextAlign
+     *     },
+     *   }
+     * });
      * ```
      */
     customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
@@ -447,61 +449,56 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 
     override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
-        const activeSheet = this;
-        const unitId = this._fWorkbook.getId();
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const subUnitId = activeSheet.getSheetId();
         const render = renderManagerService.getRenderById(unitId);
         if (render && cfg.headerStyle?.size) {
             const skm = render.with(SheetSkeletonManagerService);
             skm.setColumnHeaderSize(render, subUnitId, cfg.headerStyle?.size);
-            activeSheet?.refreshCanvas();
         }
 
         const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        if (sheetColumn) {
-            sheetColumn.setCustomHeader(cfg);
-            activeSheet?.refreshCanvas();
-        }
+        sheetColumn.setCustomHeader(cfg, subUnitId);
     }
 
     override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
-        const unitId = this._fWorkbook.getId();
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (render && cfg.headerStyle?.size) {
+            const skm = render.with(SheetSkeletonManagerService);
+            skm.setRowHeaderSize(render, subUnitId, cfg.headerStyle?.size);
+        }
+
         const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
-        sheetRow.setCustomHeader(cfg);
+        sheetRow.setCustomHeader(cfg, subUnitId);
     }
 
     override setColumnHeaderHeight(height: number): FWorksheet {
-        const activeSheet = this;
-        const unitId = this._fWorkbook.getId();
-        const subUnitId = activeSheet.getSheetId();
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
 
         this._commandService.executeCommand(SetColumnHeaderHeightCommand.id, {
             unitId,
             subUnitId,
             size: height,
         });
-
-        activeSheet?.refreshCanvas();
         return this;
     }
 
     override setRowHeaderWidth(width: number): FWorksheet {
-        const activeSheet = this;
-        const unitId = this._fWorkbook.getId();
-        const subUnitId = activeSheet.getSheetId();
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
 
         this._commandService.executeCommand(SetRowHeaderWidthCommand.id, {
             unitId,
             subUnitId,
             size: width,
         });
-
-        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
-        if (sheetRow) {
-            sheetRow.setCustomHeader({ headerStyle: { size: width } });
-        }
-        activeSheet?.refreshCanvas();
         return this;
     }
 

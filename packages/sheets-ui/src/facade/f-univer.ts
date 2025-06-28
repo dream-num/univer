@@ -45,24 +45,12 @@ import { combineLatest, filter } from 'rxjs';
  */
 export interface IFUniverSheetsUIMixin {
     /**
-     * @deprecated use same API in FWorkSheet.
-     * Customize the column header of the spreadsheet.
-     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
-     * @example
-     * ```typescript
-     * univerAPI.customizeColumnHeader({ headerStyle: { fontColor: '#fff', size: 40, backgroundColor: '#4e69ee', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
-     * ```
+     * @deprecated use same API in FWorkbook and FWorkSheet.
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
 
     /**
-     * @deprecated use same API in FWorkSheet.
-     * Customize the row header of the spreadsheet.
-     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
-     * @example
-     * ```typescript
-     * univerAPI.customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
-     * ```
+     * @deprecated use same API in FWorkbook and FWorkSheet.
      */
     customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
 

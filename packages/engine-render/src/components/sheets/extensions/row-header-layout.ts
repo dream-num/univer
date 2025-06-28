@@ -15,7 +15,6 @@
  */
 
 import type { IScale } from '@univerjs/core';
-
 import type { UniverRenderingContext } from '../../../context';
 import type { IARowCfg, IARowCfgObj, IHeaderStyleCfg, IRowStyleCfg } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
@@ -28,7 +27,7 @@ const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';
 
 export interface IRowsHeaderCfgParam {
     headerStyle?: Partial<IRowStyleCfg>;
-    rowsCfg?: IARowCfg[];
+    rowsCfg?: Record<number, IARowCfg>;
 }
 
 const DEFAULT_ROW_STYLE = {
@@ -44,16 +43,12 @@ const DEFAULT_ROW_STYLE = {
 export class RowHeaderLayout extends SheetExtension {
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
-    rowsCfg: IARowCfg[] = [];
-    headerStyle: IRowStyleCfg = {
-        fontSize: DEFAULT_ROW_STYLE.fontSize,
-        fontFamily: DEFAULT_ROW_STYLE.fontFamily,
-        fontColor: DEFAULT_ROW_STYLE.fontColor,
-        backgroundColor: DEFAULT_ROW_STYLE.backgroundColor,
-        borderColor: DEFAULT_ROW_STYLE.borderColor,
-        textAlign: DEFAULT_ROW_STYLE.textAlign,
-        textBaseline: DEFAULT_ROW_STYLE.textBaseline,
-    };
+    // The workbook rows configuration and header style
+    rowsCfg: Record<number, IARowCfg> = {};
+    headerStyle: Partial<IRowStyleCfg> = {};
+    // Map of row configurations and header styles for each worksheet, where the key is worksheet id
+    rowsCfgOfWorksheet: Map<string, Record<number, IARowCfg>> = new Map();
+    headerStyleOfWorksheet: Map<string, Partial<IRowStyleCfg>> = new Map();
 
     constructor(cfg?: IRowsHeaderCfgParam) {
         super();
@@ -62,24 +57,38 @@ export class RowHeaderLayout extends SheetExtension {
         }
     }
 
-    configHeaderRow(cfg: IRowsHeaderCfgParam) {
-        this.rowsCfg = cfg.rowsCfg || [];
-        this.headerStyle = { ...this.headerStyle, ...cfg.headerStyle };
+    configHeaderRow(cfg: IRowsHeaderCfgParam, sheetId?: string) {
+        if (sheetId) {
+            this.rowsCfgOfWorksheet.set(sheetId, cfg.rowsCfg ?? {});
+            this.headerStyleOfWorksheet.set(sheetId, cfg.headerStyle ?? {});
+        } else {
+            this.rowsCfg = cfg.rowsCfg ?? {};
+            this.headerStyle = cfg.headerStyle ?? {};
+        }
     }
 
-    getCfgOfCurrentRow(rowIndex: number) {
+    getRowsCfg(sheetId: string): Record<number, IARowCfg> {
+        const rowsCfg = this.rowsCfgOfWorksheet.get(sheetId) ?? {};
+        return { ...this.rowsCfg, ...rowsCfg };
+    }
+
+    getHeaderStyle(sheetId: string): IRowStyleCfg {
+        const headerStyle = this.headerStyleOfWorksheet.get(sheetId) ?? {};
+        return { ...DEFAULT_ROW_STYLE, ...this.headerStyle, ...headerStyle };
+    }
+
+    getCfgOfCurrentRow(rowsCfg: Record<number, IARowCfg>, headerStyle: IHeaderStyleCfg, rowIndex: number) {
         let mergeWithSpecCfg;
         let curRowSpecCfg;
-        const rowsCfg = this.rowsCfg || [];
 
         if (rowsCfg[rowIndex]) {
             if (typeof rowsCfg[rowIndex] == 'string') {
                 rowsCfg[rowIndex] = { text: rowsCfg[rowIndex] } as IARowCfgObj;
             }
             curRowSpecCfg = rowsCfg[rowIndex] as IRowStyleCfg & { text: string };
-            mergeWithSpecCfg = { ...this.headerStyle, ...curRowSpecCfg };
+            mergeWithSpecCfg = { ...headerStyle, ...curRowSpecCfg };
         } else {
-            mergeWithSpecCfg = { ...this.headerStyle, text: `${rowIndex + 1}` };
+            mergeWithSpecCfg = { ...headerStyle, text: `${rowIndex + 1}` };
         }
         const specStyle = Object.keys(curRowSpecCfg || {}).length > 1; // if cfg have more keys than 'text', means there would be special style config for this row.
         return [mergeWithSpecCfg, specStyle] as [IARowCfgObj, boolean];
@@ -102,7 +111,7 @@ export class RowHeaderLayout extends SheetExtension {
             return;
         }
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight, worksheet } =
             spreadsheetSkeleton;
 
         if (
@@ -114,12 +123,15 @@ export class RowHeaderLayout extends SheetExtension {
             return;
         }
 
+        const rowsCfg = this.getRowsCfg(worksheet.getSheetId());
+        const headerStyle = this.getHeaderStyle(worksheet.getSheetId());
+
         const scale = this._getScale(parentScale);
-        this.setStyleToCtx(ctx, this.headerStyle);
+        this.setStyleToCtx(ctx, headerStyle);
 
         // background
         ctx.save();
-        ctx.fillStyle = this.headerStyle.backgroundColor;
+        ctx.fillStyle = headerStyle.backgroundColor;
         ctx.fillRectByPrecision(0, 0, rowHeaderWidth, rowTotalHeight);
         ctx.restore();
 
@@ -144,7 +156,7 @@ export class RowHeaderLayout extends SheetExtension {
                 width: rowHeaderWidth,
                 height: rowEndPosition - preRowPosition,
             };
-            const [curRowCfg, specStyle] = this.getCfgOfCurrentRow(r);
+            const [curRowCfg, specStyle] = this.getCfgOfCurrentRow(rowsCfg, headerStyle, r);
 
             // background
             if (specStyle && curRowCfg.backgroundColor) {

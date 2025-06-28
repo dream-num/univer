@@ -96,8 +96,8 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
      * Customize column header, such as custom header text and background.
      * @param cfg
      */
-    setCustomHeader(cfg: IColumnsHeaderCfgParam): void {
+    setCustomHeader(cfg: IColumnsHeaderCfgParam, sheetId?: string): void {
         this.makeDirty(true);
-        this._columnHeaderLayoutExtension.configHeaderColumn(cfg);
+        this._columnHeaderLayoutExtension.configHeaderColumn(cfg, sheetId);
     }
 }

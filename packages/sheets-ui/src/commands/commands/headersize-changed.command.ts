@@ -49,7 +49,7 @@ export const SetRowHeaderWidthCommand: ICommand<ISetHeaderSizeParams> = {
             const { components } = render;
             const renderComponent = components.get(SHEET_VIEW_KEY.ROW);
             if (renderComponent) {
-                (renderComponent as SpreadsheetRowHeader).setCustomHeader({ headerStyle: { size } });
+                (renderComponent as SpreadsheetRowHeader).setCustomHeader({ headerStyle: { size } }, subUnitId);
             }
         }
 
@@ -77,7 +77,7 @@ export const SetColumnHeaderHeightCommand: ICommand<ISetHeaderSizeParams> = {
             const { components } = render;
             const renderComponent = components.get(SHEET_VIEW_KEY.COLUMN);
             if (renderComponent) {
-                (renderComponent as SpreadsheetColumnHeader).setCustomHeader({ headerStyle: { size } });
+                (renderComponent as SpreadsheetColumnHeader).setCustomHeader({ headerStyle: { size } }, subUnitId);
             }
         }
 

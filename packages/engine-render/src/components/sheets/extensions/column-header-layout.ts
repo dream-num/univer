@@ -16,7 +16,6 @@
 
 import type { IScale } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
-
 import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { numberToABC } from '@univerjs/core';
@@ -26,10 +25,12 @@ import { SheetColumnHeaderExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultColumnHeaderLayoutExtension';
+
 export interface IColumnsHeaderCfgParam {
     headerStyle?: Partial<IHeaderStyleCfg>;
-    columnsCfg?: IAColumnCfg[];
+    columnsCfg?: Record<number, IAColumnCfg>;
 }
+
 const DEFAULT_COLUMN_STYLE = {
     fontSize: 13,
     fontFamily: DEFAULT_FONTFACE_PLANE,
@@ -46,16 +47,12 @@ const DEFAULT_COLUMN_STYLE = {
 export class ColumnHeaderLayout extends SheetExtension {
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
-    columnsCfg: IAColumnCfg[] = [];
-    headerStyle: IHeaderStyleCfg = {
-        fontSize: DEFAULT_COLUMN_STYLE.fontSize,
-        fontFamily: DEFAULT_COLUMN_STYLE.fontFamily,
-        fontColor: DEFAULT_COLUMN_STYLE.fontColor,
-        backgroundColor: DEFAULT_COLUMN_STYLE.backgroundColor,
-        borderColor: DEFAULT_COLUMN_STYLE.borderColor,
-        textAlign: DEFAULT_COLUMN_STYLE.textAlign,
-        textBaseline: DEFAULT_COLUMN_STYLE.textBaseline,
-    };
+    // The workbook columns configuration and header style
+    columnsCfg: Record<number, IAColumnCfg> = {};
+    headerStyle: Partial<IHeaderStyleCfg> = {};
+    // Map of column configurations and header styles for each worksheet, where the key is worksheet id
+    columnsCfgOfWorksheet: Map<string, Record<number, IAColumnCfg>> = new Map();
+    headerStyleOfWorksheet: Map<string, Partial<IHeaderStyleCfg>> = new Map();
 
     constructor(cfg?: IColumnsHeaderCfgParam) {
         super();
@@ -64,24 +61,38 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
     }
 
-    configHeaderColumn(cfg: IColumnsHeaderCfgParam): void {
-        this.columnsCfg = cfg.columnsCfg || [];
-        this.headerStyle = { ...this.headerStyle, ...cfg.headerStyle };
+    configHeaderColumn(cfg: IColumnsHeaderCfgParam, sheetId?: string): void {
+        if (sheetId) {
+            this.columnsCfgOfWorksheet.set(sheetId, cfg.columnsCfg ?? {});
+            this.headerStyleOfWorksheet.set(sheetId, cfg.headerStyle ?? {});
+        } else {
+            this.columnsCfg = cfg.columnsCfg ?? {};
+            this.headerStyle = cfg.headerStyle ?? {};
+        }
     }
 
-    getCfgOfCurrentColumn(colIndex: number): [IAColumnCfgObj, boolean] {
+    getColumnsCfg(sheetId: string): Record<number, IAColumnCfg> {
+        const columnsCfg = this.columnsCfgOfWorksheet.get(sheetId) ?? {};
+        return { ...this.columnsCfg, ...columnsCfg };
+    }
+
+    getHeaderStyle(sheetId: string): IHeaderStyleCfg {
+        const headerStyle = this.headerStyleOfWorksheet.get(sheetId) ?? {};
+        return { ...DEFAULT_COLUMN_STYLE, ...this.headerStyle, ...headerStyle };
+    }
+
+    getCfgOfCurrentColumn(columnsCfg: Record<number, IAColumnCfg>, headerStyle: IHeaderStyleCfg, colIndex: number): [IAColumnCfgObj, boolean] {
         let mergeWithSpecCfg;
         let curColSpecCfg;
-        const columnsCfg = this.columnsCfg || [];
 
         if (columnsCfg[colIndex]) {
             if (typeof columnsCfg[colIndex] == 'string') {
                 columnsCfg[colIndex] = { text: columnsCfg[colIndex] } as IAColumnCfgObj;
             }
             curColSpecCfg = columnsCfg[colIndex] as IHeaderStyleCfg & { text: string };
-            mergeWithSpecCfg = { ...this.headerStyle, ...curColSpecCfg };
+            mergeWithSpecCfg = { ...headerStyle, ...curColSpecCfg };
         } else {
-            mergeWithSpecCfg = { ...this.headerStyle, text: numberToABC(colIndex) };
+            mergeWithSpecCfg = { ...headerStyle, text: numberToABC(colIndex) };
         }
         const specStyle = Object.keys(curColSpecCfg || {}).length > 1; // if cfg have more keys than 'text', means there would be special style config for this column.
         return [mergeWithSpecCfg, specStyle] as [IAColumnCfgObj, boolean];
@@ -104,7 +115,7 @@ export class ColumnHeaderLayout extends SheetExtension {
             return;
         }
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight, worksheet } = spreadsheetSkeleton;
 
         if (
             !rowHeightAccumulation ||
@@ -115,12 +126,15 @@ export class ColumnHeaderLayout extends SheetExtension {
             return;
         }
 
+        const columnsCfg = this.getColumnsCfg(worksheet.getSheetId());
+        const headerStyle = this.getHeaderStyle(worksheet.getSheetId());
+
         const scale = this._getScale(parentScale);
-        this.setStyleToCtx(ctx, this.headerStyle);
+        this.setStyleToCtx(ctx, headerStyle);
 
         // background
         ctx.save();
-        ctx.fillStyle = this.headerStyle.backgroundColor;
+        ctx.fillStyle = headerStyle.backgroundColor;
         ctx.fillRectByPrecision(0, 0, columnTotalWidth, columnHeaderHeight);
         ctx.restore();
 
@@ -139,7 +153,7 @@ export class ColumnHeaderLayout extends SheetExtension {
                 continue;// Skip hidden columns
             }
             const cellBound = { left: preColumnPosition, top: 0, right: columnEndPosition, bottom: columnHeaderHeight, width: columnEndPosition - preColumnPosition, height: columnHeaderHeight };
-            const [curColumnCfg, specStyle] = this.getCfgOfCurrentColumn(c);
+            const [curColumnCfg, specStyle] = this.getCfgOfCurrentColumn(columnsCfg, headerStyle, c);
 
             // background
             if (specStyle && curColumnCfg.backgroundColor) {

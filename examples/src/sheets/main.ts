@@ -172,6 +172,14 @@ function createNewInstance() {
 
 createNewInstance();
 window.createNewInstance = createNewInstance;
+window.onload = () => {
+    window.univerAPI?.getActiveWorkbook()?.getActiveSheet().customizeColumnHeader({
+        headerStyle: {
+            backgroundColor: 'yellow',
+        },
+        columnsCfg: ['Custom'],
+    });
+};
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

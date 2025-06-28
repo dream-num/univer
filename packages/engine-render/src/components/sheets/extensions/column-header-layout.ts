@@ -69,10 +69,10 @@ export class ColumnHeaderLayout extends SheetExtension {
         this.headerStyle = { ...this.headerStyle, ...cfg.headerStyle };
     }
 
-    getCfgOfCurrentColumn(colIndex: number): [IAColumnCfgObj, boolean] {
+    getCfgOfCurrentColumn(colIndex: number, sheetColumnsCfg: IAColumnCfg[] | undefined): [IAColumnCfgObj, boolean] {
         let mergeWithSpecCfg;
         let curColSpecCfg;
-        const columnsCfg = this.columnsCfg || [];
+        const columnsCfg = sheetColumnsCfg || this.columnsCfg || [];
 
         if (columnsCfg[colIndex]) {
             if (typeof columnsCfg[colIndex] == 'string') {
@@ -97,9 +97,9 @@ export class ColumnHeaderLayout extends SheetExtension {
 
     // eslint-disable-next-line max-lines-per-function
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton): void {
-        const { rowColumnSegment, columnHeaderHeight = 0 } = spreadsheetSkeleton;
+        const { rowColumnSegment, columnHeaderHeight = 0, customConfig = null } = spreadsheetSkeleton;
         const { startColumn, endColumn } = rowColumnSegment;
-
+        const hStyle = customConfig?.headerStyle || this.headerStyle;
         if (!spreadsheetSkeleton || columnHeaderHeight === 0) {
             return;
         }
@@ -116,11 +116,11 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
 
         const scale = this._getScale(parentScale);
-        this.setStyleToCtx(ctx, this.headerStyle);
+        this.setStyleToCtx(ctx, hStyle);
 
         // background
         ctx.save();
-        ctx.fillStyle = this.headerStyle.backgroundColor;
+        ctx.fillStyle = hStyle.backgroundColor ? hStyle.backgroundColor : this.headerStyle.backgroundColor;
         ctx.fillRectByPrecision(0, 0, columnTotalWidth, columnHeaderHeight);
         ctx.restore();
 
@@ -139,7 +139,7 @@ export class ColumnHeaderLayout extends SheetExtension {
                 continue;// Skip hidden columns
             }
             const cellBound = { left: preColumnPosition, top: 0, right: columnEndPosition, bottom: columnHeaderHeight, width: columnEndPosition - preColumnPosition, height: columnHeaderHeight };
-            const [curColumnCfg, specStyle] = this.getCfgOfCurrentColumn(c);
+            const [curColumnCfg, specStyle] = this.getCfgOfCurrentColumn(c, customConfig?.columnsCfg);
 
             // background
             if (specStyle && curColumnCfg.backgroundColor) {

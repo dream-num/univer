@@ -300,6 +300,30 @@ export class HoverManagerService extends Disposable {
         }
 
         const rect = customRange?.rects.pop() ?? bullet?.rect ?? drawing?.rect;
+        const displayRect = rect && (() => {
+            const absoluteTop = rect.top + cell.mergeInfo.startY + topOffset;
+            const absoluteBottom = rect.bottom + cell.mergeInfo.startY + topOffset;
+            const absoluteLeft = rect.left + cell.mergeInfo.startX + leftOffset;
+            const absoluteRight = rect.right + cell.mergeInfo.startX + leftOffset;
+
+            const cellTop = cell.mergeInfo.startY + topOffset;
+            const cellBottom = cell.mergeInfo.endY + topOffset;
+            const cellLeft = cell.mergeInfo.startX + leftOffset;
+            const cellRight = cell.mergeInfo.endX + leftOffset;
+
+            const clampedTop = Math.min(Math.max(absoluteTop, cellTop), cellTop);
+            const clampedBottom = Math.min(absoluteBottom, cellBottom);
+            const clampedLeft = Math.min(Math.max(absoluteLeft, cellLeft), cellLeft);
+            const clampedRight = Math.min(absoluteRight, cellRight);
+
+            return {
+                top: clampedTop,
+                bottom: clampedBottom,
+                left: clampedLeft,
+                right: clampedRight,
+            };
+        })();
+
         return {
             location,
             position,
@@ -307,12 +331,7 @@ export class HoverManagerService extends Disposable {
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
             drawing,
-            rect: rect && {
-                top: rect.top + cell.mergeInfo.startY + topOffset,
-                bottom: rect.bottom + cell.mergeInfo.startY + topOffset,
-                left: rect.left + cell.mergeInfo.startX + leftOffset,
-                right: rect.right + cell.mergeInfo.startX + leftOffset,
-            },
+            rect: displayRect,
         };
     }
 

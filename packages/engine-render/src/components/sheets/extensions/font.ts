@@ -106,7 +106,6 @@ export class Font extends SheetExtension {
         if (this._imageFallback.complete && this._imageFallback.naturalWidth > 0) {
             try {
                 ctx.drawImage(this._imageFallback, x, y, width, height);
-                return;
             } catch (e) {
                 console.error('Failed to draw fallback image:', e);
             }

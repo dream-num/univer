@@ -80,6 +80,7 @@ import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
+import type {IColumnsHeaderCfgParam} from "./extensions";
 
 interface ICellDocumentModelOption {
     isDeepClone?: boolean;
@@ -162,7 +163,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
     private _scene: Nullable<Scene> = null;
-
+    private _customConfig: IColumnsHeaderCfgParam;
     constructor(
         worksheet: Worksheet,
         _styles: Styles,
@@ -1639,6 +1640,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     ): number {
         const { y: scrollY } = scrollXY;
         return (offsetY - scrollY) * scaleY;
+    }
+    get customConfig(): IColumnsHeaderCfgParam{
+        return this._customConfig;
+    }
+    setCustomConfig(customConfig: IColumnsHeaderCfgParam){
+        this._customConfig = customConfig;
     }
 }
 

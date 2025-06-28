@@ -98,6 +98,15 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
      */
     setCustomHeader(cfg: IColumnsHeaderCfgParam): void {
         this.makeDirty(true);
-        this._columnHeaderLayoutExtension.configHeaderColumn(cfg);
+        const skeleton = this.getSkeleton();
+        if (skeleton) {
+            if (cfg.headerStyle) {
+                cfg.headerStyle = { ...this._columnHeaderLayoutExtension.headerStyle, ...cfg.headerStyle };
+            }
+            if (cfg.columnsCfg) {
+                cfg.columnsCfg = { ...this._columnHeaderLayoutExtension.columnsCfg, ...cfg.columnsCfg };
+            }
+            skeleton.setCustomConfig(cfg);
+        }
     }
 }

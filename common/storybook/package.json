@@ -16,7 +16,7 @@
         "build:storybook": "storybook build"
     },
     "dependencies": {
-        "@chromatic-com/storybook": "^3.2.6",
+        "@chromatic-com/storybook": "^4.0.1",
         "@storybook/addon-essentials": "8.6.14",
         "@storybook/addon-interactions": "8.6.14",
         "@storybook/addon-links": "8.6.14",

@@ -83,7 +83,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
     return (
         <div
             data-u-comp="sheets-filter-panel-conditions-container"
-            className="univer-flex univer-h-full univer-flex-col"
+            className="univer-flex univer-h-full univer-min-h-[300px] univer-flex-col"
         >
             {/* primary condition */}
             {(condition && formParams) && (

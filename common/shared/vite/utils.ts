@@ -54,7 +54,9 @@ export function obfuscator(): Plugin {
             for (const file in bundle) {
                 if (bundle[file].type === 'chunk' && /\.js$/.test(file)) {
                     const code = bundle[file].code;
-                    const obfuscationResult = JavaScriptObfuscator.obfuscate(code);
+                    const obfuscationResult = JavaScriptObfuscator.obfuscate(code, {
+                        ignoreImports: true,
+                    });
                     bundle[file].code = obfuscationResult.getObfuscatedCode();
                 }
             }

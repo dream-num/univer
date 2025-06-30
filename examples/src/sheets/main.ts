@@ -41,6 +41,7 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
 import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-component';
+import { UniverSheetsCustomShortcutPlugin } from './custom-plugin/custom-shortcut';
 import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
 
 import '@univerjs/sheets/facade';
@@ -126,6 +127,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverNetworkPlugin);
     univer.registerPlugin(UniverSheetsNotePlugin);
     univer.registerPlugin(ImportCSVButtonPlugin);
+    univer.registerPlugin(UniverSheetsCustomShortcutPlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {

@@ -15,14 +15,14 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, RenderManagerService } from '@univerjs/engine-render';
+import type { IColumnsHeaderCfgParam, IMouseEvent, IPointerEvent, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
-
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+
 import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { IDialogService, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -91,6 +91,58 @@ export interface IFWorkbookSheetsUIMixin {
      * ```
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
+
+    /**
+     * Customize the column header of the all worksheets in the workbook.
+     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.customizeColumnHeader({
+     *   headerStyle: {
+     *     fontColor: '#fff',
+     *     backgroundColor: '#4e69ee',
+     *     fontSize: 9
+     *   },
+     *   columnsCfg: {
+     *     0: 'kuma II',
+     *     3: {
+     *       text: 'Size',
+     *       textAlign: 'left', // CanvasTextAlign
+     *       fontColor: '#fff',
+     *       fontSize: 12,
+     *       borderColor: 'pink',
+     *       backgroundColor: 'pink',
+     *     },
+     *     4: 'Wow'
+     *   }
+     * });
+     * ```
+     */
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
+
+    /**
+     * Customize the row header of the all worksheets in the workbook.
+     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.customizeRowHeader({
+     *   headerStyle: {
+     *     backgroundColor: 'pink',
+     *     fontSize: 12
+     *   },
+     *   rowsCfg: {
+     *     0: 'Moka II',
+     *     3: {
+     *       text: 'Size',
+     *       textAlign: 'left', // CanvasTextAlign
+     *     },
+     *   }
+     * });
+     * ```
+     */
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
 
     /**
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellClicked, (params) => {})` instead
@@ -253,6 +305,41 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         });
 
         return disposable;
+    }
+
+    override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
+        const unitId = this._workbook.getUnitId();
+        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        sheetColumn.setCustomHeader(cfg);
+    }
+
+    override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
+        const unitId = this._workbook.getUnitId();
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        sheetRow.setCustomHeader(cfg);
+    }
+
+    /**
+     * Get sheet render component from render by unitId and view key.
+     * @private
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
+     * @returns {Nullable<RenderComponentType>} The render component.
+     */
+    private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) {
+            throw new Error(`Render Unit with unitId ${unitId} not found`);
+        }
+
+        const { components } = render;
+        const renderComponent = components.get(viewKey);
+        if (!renderComponent) {
+            throw new Error('Render component not found');
+        }
+
+        return renderComponent;
     }
 
     private _logDeprecation(name: string): void {

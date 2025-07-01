@@ -46,30 +46,30 @@ export class DebuggerController extends Disposable {
         super();
 
         this._initCustomComponents();
-        this._menuManagerService.mergeMenu({
+        // this._menuManagerService.mergeMenu({
         //     [RibbonStartGroup.OTHERS]: {
         //         EMOJI: {
-        //             order: 0,
+        //             order: 9999,
         //             menuItemFactory: () => {
         //                 return {
         //                     id: 'EMOJI',
         //                     icon: 'VueComponent',
-        //                     type: MenuItemType.SELECTOR,
+        //                     type: MenuItemType.BUTTON,
         //                 };
         //             },
         //         },
         //         COUNTER: {
-        //             order: 1,
+        //             order: 9999,
         //             menuItemFactory: () => {
         //                 return {
         //                     id: 'COUNTER',
         //                     icon: 'counter-component',
-        //                     type: MenuItemType.SELECTOR,
+        //                     type: MenuItemType.BUTTON,
         //                 };
         //             },
         //         },
         //     },
-        });
+        // });
 
         this._injector.add([RecordController]);
     }

@@ -17,7 +17,6 @@
 import type { IComponent } from '@univerjs/ui';
 import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
-import { cloneElement, createElement, useEffect, useRef } from 'react';
 
 /**
  * The plugin that allows Univer to use web components as UI components.
@@ -35,23 +34,28 @@ export class UniverWebComponentAdapterPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        const { createElement, useEffect, useRef } = this._componentManager.reactUtils;
+
         this._componentManager.setHandler('web-component', (component: IComponent['component'], name?: string) => {
-            // eslint-disable-next-line react/no-clone-element
-            return () => cloneElement(
-                createElement(WebComponentComponentWrapper, {
-                    component,
-                    props: {
-                        name,
-                    },
-                })
-            );
+            return () => createElement(WebComponentComponentWrapper, {
+                component,
+                props: {
+                    name,
+                },
+                reactUtils: { createElement, useEffect, useRef },
+            });
         });
     }
 }
 
-export function WebComponentComponentWrapper(options: { component: CustomElementConstructor; props?: Record<string, any> }) {
-    const { component, props } = options;
+export function WebComponentComponentWrapper(options: {
+    component: CustomElementConstructor;
+    props?: Record<string, any>;
+    reactUtils: typeof ComponentManager.prototype.reactUtils;
+}) {
+    const { component, props, reactUtils } = options;
     const { name } = props ?? {};
+    const { createElement, useEffect, useRef } = reactUtils;
 
     if (!name) {
         throw new Error('WebComponentComponentWrapper requires a name prop to define the custom element.');

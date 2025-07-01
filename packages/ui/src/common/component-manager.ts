@@ -126,6 +126,7 @@ import {
     VerticalIntegrationIcon,
     VerticalTextIcon,
 } from '@univerjs/icons';
+import { createElement, useEffect, useRef } from 'react';
 
 type ComponentFramework = string;
 
@@ -297,6 +298,16 @@ export class ComponentManager extends Disposable {
     getKey(component: ComponentType) {
         return this._componentsReverse.get(component);
     }
+
+    reactUtils: {
+        createElement: typeof createElement;
+        useEffect: typeof useEffect;
+        useRef: typeof useRef;
+    } = {
+        createElement,
+        useEffect,
+        useRef,
+    };
 
     private _handler: Record<string, (component: IComponent['component'], name?: string) => any> = {
         react: (component: IComponent['component']) => {

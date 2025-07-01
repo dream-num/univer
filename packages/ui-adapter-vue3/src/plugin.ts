@@ -38,13 +38,19 @@ export class UniverVue3AdapterPlugin extends Plugin {
 
     override onStarting(): void {
         this._componentManager.setHandler('vue3', (component: IComponent['component']) => {
-            // eslint-disable-next-line react/no-clone-element
-            return (props: Record<string, any>) => cloneElement(
-                createElement(VueComponentWrapper, {
-                    component,
-                    props,
-                })
-            );
+            return (props: Record<string, any>) => {
+                // eslint-disable-next-line react/no-clone-element
+                cloneElement(
+                    createElement(VueComponentWrapper, {
+                        component,
+                        // Prevent passing undefined or null props to Vue component
+                        props: Object.keys(props).filter((key) => props[key] !== undefined && props[key] !== null).reduce<Record<string, any>>((acc, key) => {
+                            acc[key] = props[key];
+                            return acc;
+                        }, {}),
+                    })
+                );
+            };
         });
     }
 }

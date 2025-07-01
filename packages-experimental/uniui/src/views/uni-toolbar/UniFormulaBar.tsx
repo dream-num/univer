@@ -80,8 +80,8 @@ export const UniFormulaBar = () => {
             </div>
             <div
                 className={clsx(`
-                  univer-absolute univer-left-0 univer-top-0 univer-z-10 univer-h-full univer-w-full univer-bg-white
                   dark:!univer-bg-dark
+                  univer-absolute univer-left-0 univer-top-0 univer-z-10 univer-h-full univer-w-full univer-bg-white
                 `, {
                     'univer-hidden': !visible,
                 })}

@@ -26,6 +26,7 @@ export class UniverSheetsCustomShortcutPlugin extends Plugin {
     static override pluginName = SHEET_CUSTOM_SHORTCUT_PLUGIN;
 
     constructor(
+        _config = undefined,
         @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService

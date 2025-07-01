@@ -129,6 +129,7 @@ function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
+        { label: localeService.t('sheets-filter.panel.by-colors'), value: FilterBy.COLORS },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
     ], [locale, localeService]);
 }

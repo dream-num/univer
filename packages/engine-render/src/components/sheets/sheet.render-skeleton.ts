@@ -485,7 +485,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
         const cell = this.worksheet.getCell(row, col);
-        const style = this.worksheet.getComposedCellStyle(row, col);
+        const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         if (cell?.interceptorAutoHeight) {
             const cellHeight = cell.interceptorAutoHeight();
@@ -742,7 +742,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return cellWidth;
             }
         }
-        const style = this.worksheet.getComposedCellStyle(row, column);
+        const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
         const modelObject = this.worksheet.getCellDocumentModel(cell, style);
         if (modelObject == null) {
             return measuredWidth;
@@ -1446,7 +1446,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        const style = this.worksheet.getComposedCellStyle(row, col);
+        const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
@@ -1504,7 +1504,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             const themeStyleBackground = cell.themeStyle?.bd;
 
-            const style = this.worksheet.getComposedCellStyle(row, column);
+            const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
             if (!style && !themeStyleBackground) {
                 isAddBorders = false;
                 break;

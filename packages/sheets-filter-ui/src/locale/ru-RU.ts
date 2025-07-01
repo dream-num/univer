@@ -34,6 +34,7 @@ const locale: typeof enUS = {
             cancel: 'Отмена',
             confirm: 'Подтвердить',
             'by-values': 'По значениям',
+            'by-colors': 'По цветам',
             'by-conditions': 'По условиям',
             'filter-only': 'Только фильтр',
             'search-placeholder': 'Используйте пробел для разделения ключевых слов',

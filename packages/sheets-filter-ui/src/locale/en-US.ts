@@ -32,6 +32,7 @@ const locale = {
             cancel: 'Cancel',
             confirm: 'Confirm',
             'by-values': 'By Values',
+            'by-colors': 'By Colors',
             'by-conditions': 'By Conditions',
             'filter-only': 'Filter Only',
             'search-placeholder': 'Use space to separate keywords',

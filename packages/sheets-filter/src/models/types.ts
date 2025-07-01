@@ -43,6 +43,7 @@ export interface IAutoFilter {
 export interface IFilterColumn {
     colId: number;
     filters?: IFilters;
+    colorFilters?: IColorFilters;
     customFilters?: ICustomFilters;
 };
 
@@ -55,6 +56,13 @@ export interface IFilterColumn {
 export interface IFilters {
     blank?: true;
     filters?: Array<string>;
+}
+
+/**
+ * Color filters.
+ */
+export interface IColorFilters {
+
 }
 
 /**

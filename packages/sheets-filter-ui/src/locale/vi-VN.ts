@@ -34,6 +34,7 @@ const locale: typeof enUS = {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
             'by-values': 'Theo giá trị',
+            'by-colors': 'Theo màu sắc',
             'by-conditions': 'Theo điều kiện',
             'filter-only': 'Chỉ lọc',
             'search-placeholder': 'Sử dụng khoảng trắng để tách các từ khóa',

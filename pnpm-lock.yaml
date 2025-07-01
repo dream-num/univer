@@ -3455,13 +3455,13 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -3483,13 +3483,13 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

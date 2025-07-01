@@ -18,11 +18,10 @@ import type { IComponent } from '@univerjs/ui';
 import type { defineComponent } from 'vue';
 import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
-import { cloneElement, createElement, useEffect, useRef } from 'react';
 import { h, render } from 'vue';
 
 /**
- * The plugin that allows Univer to use web components as UI components.
+ * The plugin that allows Univer to use Vue 3 components as UI components.
  */
 @DependentOn(UniverUIPlugin)
 export class UniverVue3AdapterPlugin extends Plugin {
@@ -37,26 +36,30 @@ export class UniverVue3AdapterPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        const { createElement, useEffect, useRef } = this._componentManager.reactUtils;
+
         this._componentManager.setHandler('vue3', (component: IComponent['component']) => {
-            return (props: Record<string, any>) => {
-                // eslint-disable-next-line react/no-clone-element
-                cloneElement(
-                    createElement(VueComponentWrapper, {
-                        component,
-                        // Prevent passing undefined or null props to Vue component
-                        props: Object.keys(props).filter((key) => props[key] !== undefined && props[key] !== null).reduce<Record<string, any>>((acc, key) => {
-                            acc[key] = props[key];
-                            return acc;
-                        }, {}),
-                    })
-                );
-            };
+            return (props: Record<string, any>) => createElement(VueComponentWrapper, {
+                component,
+                props: Object.keys(props).reduce<Record<string, any>>((acc, key) => {
+                    if (key !== 'key') {
+                        acc[key] = props[key];
+                    }
+                    return acc;
+                }, {}),
+                reactUtils: { createElement, useEffect, useRef },
+            });
         });
     }
 }
 
-export function VueComponentWrapper(options: { component: ReturnType<typeof defineComponent>; props: Record<string, any> }) {
-    const { component, props } = options;
+export function VueComponentWrapper(options: {
+    component: ReturnType<typeof defineComponent>;
+    props: Record<string, any>;
+    reactUtils: typeof ComponentManager.prototype.reactUtils;
+}) {
+    const { component, props, reactUtils } = options;
+    const { createElement, useEffect, useRef } = reactUtils;
 
     const domRef = useRef<HTMLDivElement>(null);
 
@@ -65,13 +68,10 @@ export function VueComponentWrapper(options: { component: ReturnType<typeof defi
 
         const vnode = h(component, props);
 
-        const container = document.createElement('div');
-        document.body.appendChild(container);
-
         render(vnode, domRef.current);
 
         return () => {
-            document.body.removeChild(container);
+            domRef.current && render(null, domRef.current);
         };
     }, [props]);
 

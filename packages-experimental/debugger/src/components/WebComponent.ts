@@ -27,10 +27,11 @@ export class CounterComponent extends HTMLElement {
         countDisplay.setAttribute('class', 'count-display');
         countDisplay.textContent = '0';
 
-        const button = document.createElement('button');
-        button.textContent = 'Increment';
+        const a = document.createElement('a');
+        a.textContent = '🍔';
 
-        button.addEventListener('click', () => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
             const currentCount = Number.parseInt(countDisplay.textContent || '0', 10);
             countDisplay.textContent = (currentCount + 1).toString();
         });
@@ -39,33 +40,24 @@ export class CounterComponent extends HTMLElement {
         style.textContent = `
         .counter-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            font-family: Arial, sans-serif;
+            justify-content: center;
         }
 
         .count-display {
-            font-size: 1.5rem;
-            font-weight: bold;
+            position: relative;
+            top: 2px;
+            font-size: 10px;
         }
 
-        button {
-            padding: 5px 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
+        a {
+            font-size: 10px;
         }`;
 
         shadow.appendChild(style);
         shadow.appendChild(container);
         container.appendChild(countDisplay);
-        container.appendChild(button);
+        container.appendChild(a);
     }
 }

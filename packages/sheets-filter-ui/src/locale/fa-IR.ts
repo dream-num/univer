@@ -34,6 +34,7 @@ const locale: typeof enUS = {
             cancel: 'انصراف',
             confirm: 'تایید',
             'by-values': 'بر اساس مقادیر',
+            'by-colors': 'بر اساس رنگ‌ها',
             'by-conditions': 'بر اساس شرایط',
             'filter-only': 'فقط فیلتر',
             'search-placeholder': 'برای جداسازی کلیدواژه‌ها از فاصله استفاده کنید',

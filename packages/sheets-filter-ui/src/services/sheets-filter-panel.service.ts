@@ -18,7 +18,7 @@ import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
-import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools } from '@univerjs/core';
+import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools } from '@univerjs/core';
 import { RefRangeService } from '@univerjs/sheets';
 import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 
@@ -30,6 +30,7 @@ import { areAllLeafNodesChecked, findObjectByKey, searchTree, updateLeafNodesChe
 
 export enum FilterBy {
     VALUES,
+    COLORS,
     CONDITIONS,
 }
 
@@ -53,6 +54,11 @@ export interface IFilterByValueWithTreeItem {
     leaf: boolean;
     originValues?: Set<string>;
     children?: IFilterByValueWithTreeItem[];
+}
+
+export interface IFilterByColorItem {
+    color: string;
+    checked?: boolean;
 }
 
 export interface ISheetsFilterPanelService {
@@ -137,6 +143,12 @@ export class SheetsFilterPanelService extends Disposable {
                 return;
             }
 
+            if (info.colorFilters) {
+                this._hasCriteria$.next(true);
+                this._setupByColors(filterModel, col);
+                return;
+            }
+
             if (info.filters) {
                 this._hasCriteria$.next(true);
                 this._setupByValues(filterModel, col);
@@ -159,10 +171,16 @@ export class SheetsFilterPanelService extends Disposable {
             return false;
         }
 
-        if (filterBy === FilterBy.VALUES) {
-            this._setupByValues(this._filterModel, this.col);
-        } else {
-            this._setupByConditions(this._filterModel, this.col);
+        switch (filterBy) {
+            case FilterBy.VALUES:
+                this._setupByValues(this._filterModel, this.col);
+                break;
+            case FilterBy.COLORS:
+                this._setupByColors(this._filterModel, this.col);
+                break;
+            case FilterBy.CONDITIONS:
+                this._setupByConditions(this._filterModel, this.col);
+                break;
         }
 
         return true;
@@ -222,6 +240,25 @@ export class SheetsFilterPanelService extends Disposable {
 
         this.filterByModel = filterByModel;
         this._filterBy$.next(FilterBy.VALUES);
+
+        this._listenToFilterHeaderChange(filterModel, col);
+        return true;
+    }
+
+    private async _setupByColors(filterModel: FilterModel, col: number): Promise<boolean> {
+        this._disposePreviousModel();
+
+        const range = filterModel.getRange();
+        if (range.startRow === range.endRow) return false;
+
+        const filterByModel = await ByColorsModel.fromFilterColumn(
+            this._injector,
+            filterModel,
+            col
+        );
+
+        this.filterByModel = filterByModel;
+        this._filterBy$.next(FilterBy.COLORS);
 
         this._listenToFilterHeaderChange(filterModel, col);
         return true;
@@ -621,6 +658,155 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
                 criteria.filters.blank = true;
             }
         }
+
+        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            unitId: this._filterModel.unitId,
+            subUnitId: this._filterModel.subUnitId,
+            col: this.col,
+            criteria,
+        } as ISetSheetsFilterCriteriaCommandParams);
+    }
+
+    // #endregion
+}
+
+// #endregion
+
+// #region - ByColorsModel
+
+/**
+ * This model would be used to control the "Filter By Colors" panel. It should be reconstructed in the following
+ * situations:
+ *
+ * 1. The target `FilterColumn` object is changed
+ * 2. User toggles "Filter By"
+ */
+export class ByColorsModel extends Disposable implements IFilterByModel {
+    /**
+     * Create a model with targeting filter column. If there is not a filter column, the model would be created with
+     * default values.
+     *
+     * @param injector
+     * @param filterModel
+     * @param col
+     *
+     * @returns the model to control the panel's state
+     */
+    static async fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): Promise<ByColorsModel> {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+
+        const { unitId, subUnitId } = filterModel;
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        if (!workbook) throw new Error(`[ByColorsModel]: Workbook not found for filter model with unitId: ${unitId}!`);
+
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        if (!worksheet) throw new Error(`[ByColorsModel]: Worksheet not found for filter model with unitId: ${unitId} and subUnitId: ${subUnitId}!`);
+
+        const range = filterModel.getRange();
+        const column = col;
+        const colorFilters = filterModel.getFilterColumn(col)?.getColumnData().colorFilters;
+        const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
+        const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
+
+        const bgColors = new Map<string, IFilterByColorItem>();
+        const fontColors = new Map<string, IFilterByColorItem>();
+
+        for (const cell of worksheet.iterateByColumn(iterateRange, false, true)) {
+            const { row, col, value } = cell;
+
+            if (filteredOutRowsByOtherColumns.has(row)) {
+                // If the row is filtered out by other columns, we skip it.
+                continue;
+            }
+
+            const style = worksheet.getComposedCellStyleByCellData(row, col, value);
+
+            if (style.bg && style.bg.rgb) {
+                const bg = new ColorKit(style.bg.rgb).toRgbString();
+
+                if (!bgColors.has(bg)) {
+                    bgColors.set(bg, { color: bg });
+                }
+            } else {
+                bgColors.set('no-bg-color', { color: '' });
+            }
+
+            if (style.cl && style.cl.rgb) {
+                const font = new ColorKit(style.cl.rgb).toRgbString();
+
+                if (!fontColors.has(font)) {
+                    fontColors.set(font, { color: font });
+                }
+            }
+        }
+
+        return injector.createInstance(ByColorsModel, filterModel, col, bgColors, fontColors);
+    }
+
+    canApply$: Observable<boolean> = of(true);
+
+    readonly bgColors$: Observable<IFilterByColorItem[]>;
+    private _bgColors: IFilterByColorItem[] = [];
+    get bgColors() { return this._bgColors; }
+
+    readonly fontColors$: Observable<IFilterByColorItem[]>;
+    private _fontColors: IFilterByColorItem[] = [];
+    get fontColors() { return this._fontColors; }
+
+    constructor(
+        private readonly _filterModel: FilterModel,
+        public col: number,
+        /**
+         * Filter items would remain unchanged after we create them,
+         * though data may change after.
+         */
+        bgColors: Map<string, IFilterByColorItem>,
+        fontColors: Map<string, IFilterByColorItem>,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
+
+        // this.bgColors$ = of(Array.from(bgColors.values())).pipe(
+        //     map((items) => items),
+        //     shareReplay(1)
+        // );
+        this._bgColors = Array.from(bgColors.values());
+        this._fontColors = Array.from(fontColors.values());
+
+        // this.disposeWithMe(this.bgColors$.subscribe((items) => this._bgColors = items));
+    }
+
+    override dispose(): void {
+        super.dispose();
+    }
+
+    deltaCol(offset: number): void {
+        this.col += offset;
+    }
+
+    // expose method here to let the panel change filter items
+
+    // #region ByValuesModel apply methods
+    clear(): Promise<boolean> {
+        if (this._disposed) return Promise.resolve(false);
+
+        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            unitId: this._filterModel.unitId,
+            subUnitId: this._filterModel.subUnitId,
+            col: this.col,
+            criteria: null,
+        } as ISetSheetsFilterCriteriaCommandParams);
+    }
+
+    /**
+     * Apply the filter condition to the target filter column.
+     */
+    async apply(): Promise<boolean> {
+        if (this._disposed) {
+            return false;
+        }
+
+        const criteria: IFilterColumn = { colId: this.col };
 
         return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._filterModel.unitId,

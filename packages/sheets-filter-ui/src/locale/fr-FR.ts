@@ -34,6 +34,7 @@ const locale: typeof enUS = {
             cancel: 'Annuler',
             confirm: 'Confirmer',
             'by-values': 'Par valeurs',
+            'by-colors': 'Par couleurs',
             'by-conditions': 'Par conditions',
             'filter-only': 'Filtrer uniquement',
             'search-placeholder': 'Utilisez un espace pour séparer les mots-clés',

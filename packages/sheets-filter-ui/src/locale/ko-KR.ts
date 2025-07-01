@@ -34,6 +34,7 @@ const locale: typeof enUS = {
             cancel: '취소',
             confirm: '확인',
             'by-values': '값으로 필터',
+            'by-colors': '색상으로 필터',
             'by-conditions': '조건으로 필터',
             'filter-only': '필터만 보기',
             'search-placeholder': '검색어는 공백으로 구분',

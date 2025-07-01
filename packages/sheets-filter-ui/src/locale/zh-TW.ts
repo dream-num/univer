@@ -34,6 +34,7 @@ const locale: typeof enUS = {
             cancel: '取消',
             confirm: '確認',
             'by-values': '按值',
+            'by-colors': '按顏色',
             'by-conditions': '按條件',
             'filter-only': '僅篩選',
             'search-placeholder': '使用空格分隔關鍵字',

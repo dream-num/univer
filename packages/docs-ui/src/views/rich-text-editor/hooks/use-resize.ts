@@ -22,8 +22,13 @@ import { ScrollBar } from '@univerjs/engine-render';
 import { useCallback, useEffect, useMemo } from 'react';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 
+interface IUseResizeReturn {
+    resize: () => void;
+    checkScrollBar: () => void;
+}
+
 // eslint-disable-next-line max-lines-per-function
-export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: boolean, autoScroll?: boolean) => {
+export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: boolean, autoScroll?: boolean): IUseResizeReturn => {
     const resize = useCallback(() => {
         if (editor) {
             const { scene, mainComponent } = editor.render;

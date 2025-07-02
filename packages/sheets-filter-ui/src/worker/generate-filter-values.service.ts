@@ -146,9 +146,9 @@ export function getFilterTreeByValueItems(
     blankChecked: boolean,
     styles: Styles
 ): {
-        filterTreeItems: IFilterByValueWithTreeItem[];
-        filterTreeMapCache: Map<string, string[]>;
-    } {
+    filterTreeItems: IFilterByValueWithTreeItem[];
+    filterTreeMapCache: Map<string, string[]>;
+} {
     const items: Map<string, IFilterByValueWithTreeItem> = new Map();
     const treeMap: Map<string, string[]> = new Map();
 

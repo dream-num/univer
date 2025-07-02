@@ -5,3 +5,6 @@ packages:
     - packages-experimental/*
     - packages/*
     - tests/*
+publicHoistPattern:
+    - '@storybook/react'
+    - tsx

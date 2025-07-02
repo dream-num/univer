@@ -17,11 +17,11 @@
 import type { Meta } from '@storybook/react';
 import { Button, Toaster } from '@univerjs/design';
 
-import { notification } from './Notification';
+import { notification, Notification } from './Notification';
 
 const meta: Meta<typeof Notification> = {
     title: 'Components / Notification',
-    component: Toaster,
+    component: Notification,
     parameters: {
         layout: 'centered',
     },

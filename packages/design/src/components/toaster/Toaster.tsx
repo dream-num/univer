@@ -19,7 +19,7 @@ import { Toaster as Sonner, toast } from 'sonner';
 
 export type IToasterProps = ComponentProps<typeof Sonner>;
 
-const Toaster = ({ visibleToasts, ...props }: IToasterProps) => {
+function Toaster({ visibleToasts, ...props }: IToasterProps) {
     return (
         <Sonner
             className={`

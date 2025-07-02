@@ -83,7 +83,10 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     unitId,
                     subUnitId,
                     cellValue: cellValue.getMatrix(),
-                }, { onlyLocal: true });
+                }, {
+                    onlyLocal: true,
+                    fromFormula: true,
+                });
             });
         });
 
@@ -95,7 +98,10 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     unitId,
                     subUnitId,
                     cellValue: rowData,
-                }, { onlyLocal: true });
+                }, {
+                    onlyLocal: true,
+                    fromFormula: true,
+                });
             });
         });
     }

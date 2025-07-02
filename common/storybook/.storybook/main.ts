@@ -15,7 +15,7 @@
  */
 
 import type { StorybookConfig } from '@storybook/react-webpack5';
-import type { StoriesEntry } from '@storybook/types';
+import type { StoriesEntry } from 'storybook/internal/types';
 import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -27,14 +27,14 @@ const tsconfigPathsPlugin = new TsconfigPathsPlugin({
 });
 
 const config: StorybookConfig = {
-    stories: async (): Promise<StoriesEntry[]> => {
+    stories: async () => {
         const rootPaths = ['../../../packages'];
         const isSubmodules = __dirname.includes('submodules');
         if (isSubmodules) {
             rootPaths.push('../../../../../packages');
         }
 
-        const stories: StoriesEntry[] = [];
+        const stories: StoriesEntry[] | PromiseLike<StoriesEntry[]> = [];
         rootPaths.forEach((rootPath) => {
             const rootDir = resolve(__dirname, rootPath);
             if (existsSync(rootDir)) {
@@ -56,9 +56,7 @@ const config: StorybookConfig = {
     },
     addons: [
         '@storybook/addon-links',
-        '@storybook/addon-essentials',
         '@chromatic-com/storybook',
-        '@storybook/addon-interactions',
         '@storybook/addon-webpack5-compiler-swc',
         {
             name: '@storybook/addon-styling-webpack',
@@ -86,6 +84,7 @@ const config: StorybookConfig = {
                 ],
             },
         },
+        '@storybook/addon-docs',
     ],
     framework: {
         name: '@storybook/react-webpack5',
@@ -121,7 +120,6 @@ const config: StorybookConfig = {
         };
     },
     docs: {
-        autodocs: 'tag',
         defaultName: 'documentatie',
     },
     async webpackFinal(config) {

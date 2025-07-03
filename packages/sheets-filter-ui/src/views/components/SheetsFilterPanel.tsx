@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
+import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -24,6 +24,7 @@ import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
 
@@ -96,7 +97,9 @@ export function FilterPanel() {
                     >
                         {filterBy === FilterBy.VALUES
                             ? <FilterByValue model={filterByModel as ByValuesModel} />
-                            : <FilterByCondition model={filterByModel as ByConditionsModel} />}
+                            : filterBy === FilterBy.COLORS
+                                ? <FilterByColor model={filterByModel as ByColorsModel} />
+                                : <FilterByCondition model={filterByModel as ByConditionsModel} />}
                     </div>
                 )
                 : (

@@ -35,6 +35,8 @@ const locale: typeof enUS = {
             confirm: '确认',
             'by-values': '按值',
             'by-colors': '按颜色',
+            'filter-by-cell-fill-color': '按单元格填充颜色筛选',
+            'filter-by-cell-text-color': '按单元格文本颜色筛选',
             'by-conditions': '按条件',
             'filter-only': '仅筛选',
             'search-placeholder': '使用空格分隔关键字',

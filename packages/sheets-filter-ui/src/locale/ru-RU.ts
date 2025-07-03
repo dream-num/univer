@@ -35,6 +35,8 @@ const locale: typeof enUS = {
             confirm: 'Подтвердить',
             'by-values': 'По значениям',
             'by-colors': 'По цветам',
+            'filter-by-cell-fill-color': 'Фильтр по цвету заливки ячейки',
+            'filter-by-cell-text-color': 'Фильтр по цвету текста ячейки',
             'by-conditions': 'По условиям',
             'filter-only': 'Только фильтр',
             'search-placeholder': 'Используйте пробел для разделения ключевых слов',

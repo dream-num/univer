@@ -340,7 +340,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     </div>
                 )
                 : null}
-            {editor
+            {editor && formulaWithoutEqualSymbol !== ''
                 ? (
                     <HelpFunction
                         editor={editor}

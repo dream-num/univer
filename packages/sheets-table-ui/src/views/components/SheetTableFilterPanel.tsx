@@ -153,7 +153,7 @@ export function SheetTableFilterPanel() {
         >
             {editable && (
                 <div className="univer-mb-3 univer-flex">
-                    <ButtonGroup className="univer-mb-3 univer-w-full">
+                    <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
                         <Button className="univer-w-1/2" onClick={() => applySort(true)}>
                             <AscendingIcon className="univer-mr-1" />
                             {localeService.t('sheets-sort.general.sort-asc')}

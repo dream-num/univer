@@ -19,9 +19,9 @@ import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteria
 import type { Observable } from 'rxjs';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
 import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools } from '@univerjs/core';
+import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { RefRangeService } from '@univerjs/sheets';
 import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
-
 import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { FilterConditionItems } from '../models/conditions';
 import { statisticFilterByValueItems } from '../models/utils';
@@ -708,8 +708,8 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
         const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
         const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
-        const bgColors = new Map<string, IFilterByColorItem>();
-        const fontColors = new Map<string, IFilterByColorItem>();
+        const cellFillColors = new Map<string, IFilterByColorItem>();
+        const cellTextColors = new Map<string, IFilterByColorItem>();
 
         for (const cell of worksheet.iterateByColumn(iterateRange, false, true)) {
             const { row, col, value } = cell;
@@ -724,34 +724,36 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
             if (style.bg && style.bg.rgb) {
                 const bg = new ColorKit(style.bg.rgb).toRgbString();
 
-                if (!bgColors.has(bg)) {
-                    bgColors.set(bg, { color: bg });
+                if (!cellFillColors.has(bg)) {
+                    cellFillColors.set(bg, { color: bg });
                 }
             } else {
-                bgColors.set('no-bg-color', { color: '' });
+                cellFillColors.set('default-fill-color', { color: '' });
             }
 
             if (style.cl && style.cl.rgb) {
                 const font = new ColorKit(style.cl.rgb).toRgbString();
 
-                if (!fontColors.has(font)) {
-                    fontColors.set(font, { color: font });
+                if (!cellTextColors.has(font)) {
+                    cellTextColors.set(font, { color: font });
                 }
+            } else {
+                cellTextColors.set('default-font-color', { color: COLOR_BLACK_RGB });
             }
         }
 
-        return injector.createInstance(ByColorsModel, filterModel, col, bgColors, fontColors);
+        return injector.createInstance(ByColorsModel, filterModel, col, cellFillColors, cellTextColors);
     }
 
     canApply$: Observable<boolean> = of(true);
 
-    readonly bgColors$: Observable<IFilterByColorItem[]>;
-    private _bgColors: IFilterByColorItem[] = [];
-    get bgColors() { return this._bgColors; }
+    private readonly _cellFillColors$: BehaviorSubject<IFilterByColorItem[]>;
+    readonly cellFillColors$: Observable<IFilterByColorItem[]>;
+    get cellFillColors(): IFilterByColorItem[] { return this._cellFillColors$.getValue(); }
 
-    readonly fontColors$: Observable<IFilterByColorItem[]>;
-    private _fontColors: IFilterByColorItem[] = [];
-    get fontColors() { return this._fontColors; }
+    private readonly _cellTextColors$: BehaviorSubject<IFilterByColorItem[]>;
+    readonly cellTextColors$: Observable<IFilterByColorItem[]>;
+    get cellTextColors(): IFilterByColorItem[] { return this._cellTextColors$.getValue(); }
 
     constructor(
         private readonly _filterModel: FilterModel,
@@ -760,24 +762,23 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
          * Filter items would remain unchanged after we create them,
          * though data may change after.
          */
-        bgColors: Map<string, IFilterByColorItem>,
-        fontColors: Map<string, IFilterByColorItem>,
+        cellFillColors: Map<string, IFilterByColorItem>,
+        cellTextColors: Map<string, IFilterByColorItem>,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
-        // this.bgColors$ = of(Array.from(bgColors.values())).pipe(
-        //     map((items) => items),
-        //     shareReplay(1)
-        // );
-        this._bgColors = Array.from(bgColors.values());
-        this._fontColors = Array.from(fontColors.values());
+        this._cellFillColors$ = new BehaviorSubject<IFilterByColorItem[]>(Array.from(cellFillColors.values()));
+        this.cellFillColors$ = this._cellFillColors$.asObservable();
 
-        // this.disposeWithMe(this.bgColors$.subscribe((items) => this._bgColors = items));
+        this._cellTextColors$ = new BehaviorSubject<IFilterByColorItem[]>(Array.from(cellTextColors.values()));
+        this.cellTextColors$ = this._cellTextColors$.asObservable();
     }
 
     override dispose(): void {
         super.dispose();
+
+        this._cellFillColors$.complete();
     }
 
     deltaCol(offset: number): void {
@@ -796,6 +797,21 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
             col: this.col,
             criteria: null,
         } as ISetSheetsFilterCriteriaCommandParams);
+    }
+
+    onFilterCheckToggled(item: IFilterByColorItem, isFillColor: boolean = true): void {
+        const items = Tools.deepClone(isFillColor ? this.cellFillColors : this.cellTextColors);
+        const changedItem = items.find((i) => i.color === item.color);
+        if (!changedItem) {
+            return;
+        }
+
+        changedItem.checked = !changedItem.checked;
+        if (isFillColor) {
+            this._cellFillColors$.next([...items]);
+        } else {
+            this._cellTextColors$.next([...items]);
+        }
     }
 
     /**

@@ -35,6 +35,8 @@ const locale: typeof enUS = {
             confirm: 'Xác nhận',
             'by-values': 'Theo giá trị',
             'by-colors': 'Theo màu sắc',
+            'filter-by-cell-fill-color': 'Lọc theo màu nền ô',
+            'filter-by-cell-text-color': 'Lọc theo màu chữ ô',
             'by-conditions': 'Theo điều kiện',
             'filter-only': 'Chỉ lọc',
             'search-placeholder': 'Sử dụng khoảng trắng để tách các từ khóa',

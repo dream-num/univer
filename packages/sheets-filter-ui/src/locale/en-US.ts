@@ -33,6 +33,8 @@ const locale = {
             confirm: 'Confirm',
             'by-values': 'By Values',
             'by-colors': 'By Colors',
+            'filter-by-cell-fill-color': 'Filter By Cell Fill Color',
+            'filter-by-cell-text-color': 'Filter By Cell Text Color',
             'by-conditions': 'By Conditions',
             'filter-only': 'Filter Only',
             'search-placeholder': 'Use space to separate keywords',

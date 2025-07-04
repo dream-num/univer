@@ -264,7 +264,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     <div className="univer-mt-2 univer-flex univer-flex-row">
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
-                                            {localeService.t('threadCommentUI.panel.add')}
+                                            {localeService.t('threadCommentUI.panel.addComment')}
                                         </Button>
                                     </div>
                                 )

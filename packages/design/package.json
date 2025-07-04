@@ -87,7 +87,7 @@
         "rc-virtual-list": "^3.16.1",
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
-        "sonner": "^2.0.5",
+        "sonner": "^2.0.6",
         "tailwind-merge": "^3.3.1"
     },
     "devDependencies": {
@@ -99,7 +99,7 @@
         "postcss": "^8.5.6",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "tailwindcss": "^3.4.17",
+        "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",

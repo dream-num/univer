@@ -482,11 +482,13 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         }
 
         const paragraphStyle = paragraphConfig?.paragraphStyle;
-        const lastDivide = line.divides[line.divides.length - 1];
-        const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];
+        if (line.divides.length > 0) {
+            const lastDivide = line.divides[line.divides.length - 1];
+            const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];
 
-        if (lastGlyph.streamType === DataStreamTreeTokenType.PARAGRAPH && paragraphStyle?.borderBottom) {
-            line.borderBottom = paragraphStyle.borderBottom;
+            if (lastGlyph.streamType === DataStreamTreeTokenType.PARAGRAPH && paragraphStyle?.borderBottom) {
+                line.borderBottom = paragraphStyle.borderBottom;
+            }
         }
     });
 }

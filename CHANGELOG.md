@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.1](https://github.com/dream-num/univer/compare/v0.9.0...v0.9.1) (2025-07-04)
+
+
+### Bug Fixes
+
+* add postcss-replace plugin and update global styles ([#5488](https://github.com/dream-num/univer/issues/5488)) ([e7facd8](https://github.com/dream-num/univer/commit/e7facd847b1b88e7323483abeab76496f161b352))
+* fix thread-comment-ui add comment i18n ([#5487](https://github.com/dream-num/univer/issues/5487)) ([2cba0f9](https://github.com/dream-num/univer/commit/2cba0f95c048b1500e2f5e44031add7a72665b60))
+
 # [0.9.0](https://github.com/dream-num/univer/compare/v0.8.3...v0.9.0) (2025-07-04)
 
 

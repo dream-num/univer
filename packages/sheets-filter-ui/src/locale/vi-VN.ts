@@ -37,6 +37,7 @@ const locale: typeof enUS = {
             'by-colors': 'Theo màu sắc',
             'filter-by-cell-fill-color': 'Lọc theo màu nền ô',
             'filter-by-cell-text-color': 'Lọc theo màu chữ ô',
+            'filter-by-color-none': 'Cột này chỉ chứa một màu',
             'by-conditions': 'Theo điều kiện',
             'filter-only': 'Chỉ lọc',
             'search-placeholder': 'Sử dụng khoảng trắng để tách các từ khóa',

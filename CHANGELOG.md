@@ -1,5 +1,28 @@
 # Changelog
 
+# [0.9.0](https://github.com/dream-num/univer/compare/v0.8.3...v0.9.0) (2025-07-04)
+
+
+### Bug Fixes
+
+* **design:** remove unused [@tailwind](https://github.com/tailwind) base directive from global.css ([#5472](https://github.com/dream-num/univer/issues/5472)) ([d1c481e](https://github.com/dream-num/univer/commit/d1c481ee4b7592b1d499051fbf6761bcfc84c658))
+* **docs-ui:** add return type to useResize function ([#5473](https://github.com/dream-num/univer/issues/5473)) ([a57a58d](https://github.com/dream-num/univer/commit/a57a58d3184f02030becd7d6596908c34272c2ef))
+* **engine-render:** handle broken image state in font rendering ([#5459](https://github.com/dream-num/univer/issues/5459)) ([054ec77](https://github.com/dream-num/univer/commit/054ec7701fc61328a384b58f016680dee4e96c4e))
+* **engine-render:** render fallback image when cell image renderer-error ([#5449](https://github.com/dream-num/univer/issues/5449)) ([cca2971](https://github.com/dream-num/univer/commit/cca2971fefddd9594240c33a50666eb4139b7315))
+* **facade:** fix customizeColumnHeader and customizeRowHeader api ([#5460](https://github.com/dream-num/univer/issues/5460)) ([58de0a4](https://github.com/dream-num/univer/commit/58de0a4614adb7a7be6d40de351b05e509c562a2))
+* fix BackSpace cannot fallback and delete after triggering formula through fx ([#5477](https://github.com/dream-num/univer/issues/5477)) ([26953b1](https://github.com/dream-num/univer/commit/26953b1bbcf9598837bfafa8f388a765acf8c2b5))
+* fix the issue where formula helpfunction does not display ([#5481](https://github.com/dream-num/univer/issues/5481)) ([ef5409b](https://github.com/dream-num/univer/commit/ef5409b84377e04df71cd164c8b40ba2e2c125ea))
+* fixed the auto-fill handle button cannot appear ([#5478](https://github.com/dream-num/univer/issues/5478)) ([eac4483](https://github.com/dream-num/univer/commit/eac4483d555dcdfae32c433502e79b2866dfdb07))
+* **plugin:** prevent passing undefined or null props to Vue component ([#5470](https://github.com/dream-num/univer/issues/5470)) ([ed67b48](https://github.com/dream-num/univer/commit/ed67b4825e411ea470abc198da209051ee984345))
+* **sheets-hyper-link-ui:** hyper-link tooltip display far away of the cell bound ([#5456](https://github.com/dream-num/univer/issues/5456)) ([12974da](https://github.com/dream-num/univer/commit/12974daf6b2adca5955ea315aaa94e7c61d4ea2d))
+* **ui-adapter:** remove react dependency from ui adapter packages ([#5474](https://github.com/dream-num/univer/issues/5474)) ([0b7cab6](https://github.com/dream-num/univer/commit/0b7cab60aeea748d413dec5ca3d48c639103efe8))
+
+
+### Features
+
+* **ui:** support the registration of custom components built with vue3 / web component ([#5440](https://github.com/dream-num/univer/issues/5440)) ([649385c](https://github.com/dream-num/univer/commit/649385c9cd157ed661fa2c3d6f37aecc86103e03))
+* use portal to show filter panel ([#5446](https://github.com/dream-num/univer/issues/5446)) ([5156a42](https://github.com/dream-num/univer/commit/5156a42968e48433fd122c166cdb63600348d621))
+
 ## [0.8.3](https://github.com/dream-num/univer/compare/v0.8.2...v0.8.3) (2025-06-27)
 
 

@@ -62,7 +62,7 @@
 
 Univer 提供了丰富的电子表格、文档和幻灯片功能。以下是一些主要功能：
 
-### 📊 Univer Sheet
+### 📊 Univer Sheets
 
 - **核心功能**：Univer 支持电子表格的核心功能，包括单元格、行、列、工作表和工作簿。
 - **公式**：支持各种公式，包括数学、统计、逻辑、文本、日期和时间、查找和引用、工程、金融和信息公式。
@@ -77,13 +77,16 @@ Univer 提供了丰富的电子表格、文档和幻灯片功能。以下是一�
 - **条件格式**：支持根据特定条件对单元格应用格式。
 - **评论**：允许向单元格添加评论以提供额外信息。
 - **十字高亮**：支持在电子表格中显示十字高亮，以帮助用户快速定位选中的单元格。
+- **禅模式**：提供一个无干扰的编辑体验，具有干净的界面和最小的干扰。
 - **数据透视表**[^1]：支持数据透视表，允许用户对数据进行汇总和分析。
-- **协同编辑**[^1]：支持多个用户同时编辑电子表格，同时支持历史记录与恢复。
+- **迷你图**[^1]：支持迷你图，它是适合单元格内的小型图表，用于提供数据的可视化表示。
 - **打印**[^1]：允许打印电子表格或将其导出为 PDF。
 - **导入和导出**[^1]：支持导入导出 XLSX 格式的数据。
-- **图表**[^2]：由 [VChart][vchart-link] 支持第三方图表。
+- **图表**[^1]：支持各种类型的图表，包括柱状图、折线图、饼图、散点图等。
+- **协同编辑**[^1]：支持多个用户同时编辑电子表格，同时支持历史记录与恢复。
+- **编辑历史**[^1]：允许用户查看和恢复电子表格的先前版本。
 
-### 📝 Univer Doc（beta 测试中）
+### 📝 Univer Docs（rc）
 
 - **核心功能**：Univer 支持文档的核心功能，包括段落、标题、列表、上标、下标等。
 - **列表**：支持有序列表、无序列表和任务列表。
@@ -91,10 +94,11 @@ Univer 提供了丰富的电子表格、文档和幻灯片功能。以下是一�
 - **浮动图片**：允许将图片插入到文档中，并支持图文混合排版。
 - **页眉 & 页脚**：允许向文档添加页眉和页脚。
 - **评论**：允许向文档添加评论以提供额外信息。
-- **导入**[^1]：支持导入 DOCX 格式的数据。
+- **打印**[^1]：允许打印文档或将其导出为 PDF。
+- **导入和导出**[^1]：支持导入导出 DOCX 格式的数据。
 - **协同编辑**[^1]：支持多个用户同时编辑文档。
 
-### 📽️ Univer Slide（积极开发中）
+### 📽️ Univer Slides（开发中）
 
 - **核心功能**：Univer 将支持幻灯片的核心功能，包括幻灯片、形状、文本、图片等。
 
@@ -108,6 +112,7 @@ Univer 内置多种语言支持，包括：
 - `ru-RU`
 - `vi-VN`
 - `fa-IR`
+- `ko-KR`
 
 其中 `zh-CN` 和 `en-US` 由官方支持，其余为社区贡献。
 
@@ -192,13 +197,12 @@ Univer 持续稳定发展离不开它的支持者和赞助者，如果你想要�
 
 ## 📄 许可
 
-Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
+Copyright © 2021-2025 DreamNum Co,Ltd. All Rights Reserved.
 
 基于 [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) 协议分发.
 
 <!-- Footnotes -->
 [^1]: 这些功能是由 Univer 的闭源部分提供的，该版本亦可用于商业用途，还包括付费升级计划。
-[^2]: VChart 是为 Univer 提供图表支持的第三方库。你可以在这里找到更多信息：[univer-vchart-plugin][vchart-univer-link].
 
 <!-- Links -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
@@ -227,9 +231,9 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [readme-ja-link]: ./README-ja.md
 
 [official-site-link]: https://univer.ai/zh-CN
-[documentation-link]: https://univer.ai/zh-CN/guides/sheet/introduction
-[playground-link]: https://univer.ai/zh-CN/playground
-[blog-link]: https://univer.ai/zh-CN/blog/post/this-is-univer
+[documentation-link]: https://docs.univer.ai/zh-CN
+[playground-link]: https://docs.univer.ai/zh-CN/playground
+[blog-link]: https://docs.univer.ai/zh-CN/blog
 
 [stackoverflow-community-link]: https://stackoverflow.com/questions/tagged/univer
 [stackoverflow-community-badge]: https://img.shields.io/badge/stackoverflow-univer-ef8236?labelColor=black&logo=stackoverflow&logoColor=white&style=for-the-badge
@@ -271,9 +275,6 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [backer-badge-4]: https://opencollective.com/univer/backer/4/avatar.svg
 [backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
 [backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
-
-[vchart-link]: https://github.com/VisActor/VChart
-[vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
 
 [examples-preview-biaoda]: ./docs/img/examples-sheets-biaoda.gif
 [examples-preview-0]: ./docs/img/examples-sheets.gif

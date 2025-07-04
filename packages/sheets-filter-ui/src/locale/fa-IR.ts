@@ -37,6 +37,7 @@ const locale: typeof enUS = {
             'by-colors': 'بر اساس رنگ‌ها',
             'filter-by-cell-fill-color': 'فیلتر بر اساس رنگ پر کردن سلول',
             'filter-by-cell-text-color': 'فیلتر بر اساس رنگ متن سلول',
+            'filter-by-color-none': 'این ستون فقط شامل یک رنگ است',
             'by-conditions': 'بر اساس شرایط',
             'filter-only': 'فقط فیلتر',
             'search-placeholder': 'برای جداسازی کلیدواژه‌ها از فاصله استفاده کنید',

@@ -37,6 +37,7 @@ const locale: typeof enUS = {
             'by-colors': '색상으로 필터',
             'filter-by-cell-fill-color': '셀 채우기 색상으로 필터',
             'filter-by-cell-text-color': '셀 텍스트 색상으로 필터',
+            'filter-by-color-none': '이 열은 단일 색상만 포함합니다',
             'by-conditions': '조건으로 필터',
             'filter-only': '필터만 보기',
             'search-placeholder': '검색어는 공백으로 구분',

@@ -57,7 +57,7 @@ export interface IFilterByValueWithTreeItem {
 }
 
 export interface IFilterByColorItem {
-    color: string;
+    color: string | null;
     checked?: boolean;
 }
 
@@ -728,7 +728,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
                     cellFillColors.set(bg, { color: bg });
                 }
             } else {
-                cellFillColors.set('default-fill-color', { color: '' });
+                cellFillColors.set('default-fill-color', { color: null });
             }
 
             if (style.cl && style.cl.rgb) {
@@ -787,7 +787,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
 
     // expose method here to let the panel change filter items
 
-    // #region ByValuesModel apply methods
+    // #region ByColorsModel apply methods
     clear(): Promise<boolean> {
         if (this._disposed) return Promise.resolve(false);
 
@@ -806,7 +806,19 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
             return;
         }
 
+        this._resetColorsCheckedStatus(!isFillColor);
+
         changedItem.checked = !changedItem.checked;
+        if (isFillColor) {
+            this._cellFillColors$.next([...items]);
+        } else {
+            this._cellTextColors$.next([...items]);
+        }
+    }
+
+    private _resetColorsCheckedStatus(isFillColor: boolean = true): void {
+        const items = Tools.deepClone(isFillColor ? this.cellFillColors : this.cellTextColors);
+        items.forEach((item) => item.checked = false);
         if (isFillColor) {
             this._cellFillColors$.next([...items]);
         } else {

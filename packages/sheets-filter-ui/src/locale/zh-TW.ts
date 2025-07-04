@@ -37,6 +37,7 @@ const locale: typeof enUS = {
             'by-colors': '按顏色',
             'filter-by-cell-fill-color': '按單元格填充顏色篩選',
             'filter-by-cell-text-color': '按單元格文本顏色篩選',
+            'filter-by-color-none': '該列僅包含一種顏色',
             'by-conditions': '按條件',
             'filter-only': '僅篩選',
             'search-placeholder': '使用空格分隔關鍵字',

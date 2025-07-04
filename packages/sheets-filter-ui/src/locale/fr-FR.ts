@@ -37,6 +37,7 @@ const locale: typeof enUS = {
             'by-colors': 'Par couleurs',
             'filter-by-cell-fill-color': 'Filtrer par couleur de remplissage de cellule',
             'filter-by-cell-text-color': 'Filtrer par couleur de texte de cellule',
+            'filter-by-color-none': 'Cette colonne ne contient qu\'une seule couleur',
             'by-conditions': 'Par conditions',
             'filter-only': 'Filtrer uniquement',
             'search-placeholder': 'Utilisez un espace pour séparer les mots-clés',

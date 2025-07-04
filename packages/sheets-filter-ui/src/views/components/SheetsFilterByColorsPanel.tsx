@@ -17,7 +17,7 @@
 import type { ByColorsModel, IFilterByColorItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
-import { SuccessIcon } from '@univerjs/icons';
+import { FontColorDoubleIcon, SuccessIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 
@@ -34,6 +34,10 @@ export function FilterByColor(props: { model: ByColorsModel }) {
         model.onFilterCheckToggled(color);
     }, [model]);
 
+    const handleSelectCellTextColor = useCallback((color: IFilterByColorItem) => {
+        model.onFilterCheckToggled(color, false);
+    }, [model]);
+
     return (
         <div
             data-u-comp="sheets-filter-panel-colors-container"
@@ -43,7 +47,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                 data-u-comp="sheets-filter-panel"
                 className={clsx(`
                   univer-mt-2 univer-box-border univer-flex univer-h-[300px] univer-flex-grow univer-flex-col
-                  univer-overflow-auto univer-rounded-md univer-px-2 univer-py-2.5
+                  univer-gap-4 univer-overflow-auto univer-rounded-md univer-px-2 univer-py-2.5
                 `, borderClassName)}
             >
                 {cellFillColors.length > 1 && (
@@ -56,11 +60,11 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                         >
                             {cellFillColors.map((color, index) => (
                                 <div
-                                    key={`sheets-filter-bg-color-${index}`}
+                                    key={`sheets-filter-cell-fill-color-${index}`}
                                     className="univer-relative univer-h-6 univer-w-6"
                                     onClick={() => handleSelectCellFillColor(color)}
                                 >
-                                    {color.color === ''
+                                    {!color.color
                                         ? (
                                             <svg
                                                 width="24"
@@ -110,6 +114,57 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {cellTextColors.length > 1 && (
+                    <div>
+                        <div className="univer-mb-2 univer-text-sm univer-text-gray-900">{localeService.t('sheets-filter.panel.filter-by-cell-text-color')}</div>
+                        <div
+                            className={`
+                              univer-grid univer-grid-cols-8 univer-items-center univer-justify-start univer-gap-2
+                            `}
+                        >
+                            {cellTextColors.map((color, index) => (
+                                <div
+                                    key={`sheets-filter-cell-text-color-${index}`}
+                                    className="univer-relative univer-h-6 univer-w-6"
+                                    onClick={() => handleSelectCellTextColor(color)}
+                                >
+                                    <div
+                                        className={`
+                                          univer-box-border univer-flex univer-h-full univer-w-full
+                                          univer-cursor-pointer univer-items-center univer-justify-center
+                                          univer-rounded-full univer-border univer-border-solid
+                                          univer-border-[rgba(13,13,13,0.06)] univer-p-0.5
+                                          hover:univer-ring-2 hover:univer-ring-offset-2 hover:univer-ring-offset-white
+                                        `}
+                                    >
+                                        <FontColorDoubleIcon extend={{ colorChannel1: color.color as string }} />
+                                    </div>
+
+                                    {color.checked && (
+                                        <SuccessIcon
+                                            className={`
+                                              univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-h-3 univer-w-3
+                                              univer-cursor-pointer univer-text-[#418F1F]
+                                            `}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {cellFillColors.length <= 1 && cellTextColors.length <= 1 && (
+                    <div
+                        className={`
+                          univer-flex univer-h-full univer-w-full univer-items-center univer-justify-center
+                          univer-text-sm univer-text-gray-900
+                        `}
+                    >
+                        {localeService.t('sheets-filter.panel.filter-by-color-none')}
                     </div>
                 )}
             </div>

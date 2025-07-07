@@ -47,7 +47,7 @@
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@univerjs/icons": "^0.4.4",
-        "@univerjs/icons-svg": "^0.4.4",
+        "@univerjs/icons-svg": "^0.4.5",
         "@univerjs/protocol": "0.1.46"
     }
 }

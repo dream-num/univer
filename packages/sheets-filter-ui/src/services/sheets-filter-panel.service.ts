@@ -21,18 +21,12 @@ import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem }
 import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { RefRangeService } from '@univerjs/sheets';
-import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
+import { FilterBy, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { FilterConditionItems } from '../models/conditions';
 import { statisticFilterByValueItems } from '../models/utils';
 import { getFilterTreeByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
 import { areAllLeafNodesChecked, findObjectByKey, searchTree, updateLeafNodesCheckedStatus } from './util';
-
-export enum FilterBy {
-    VALUES,
-    COLORS,
-    CONDITIONS,
-}
 
 export interface IFilterByValueItem {
     value: string;
@@ -709,7 +703,9 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
         const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
         const cellFillColors = new Map<string, IFilterByColorItem>();
+        const cellFillColorsChecked = new Set<string | null>(colorFilters?.cellFillColors ?? []);
         const cellTextColors = new Map<string, IFilterByColorItem>();
+        const cellTextColorsChecked = new Set<string>(colorFilters?.cellTextColors ?? []);
 
         for (const cell of worksheet.iterateByColumn(iterateRange, false, true)) {
             const { row, col, value } = cell;
@@ -725,20 +721,20 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
                 const bg = new ColorKit(style.bg.rgb).toRgbString();
 
                 if (!cellFillColors.has(bg)) {
-                    cellFillColors.set(bg, { color: bg });
+                    cellFillColors.set(bg, { color: bg, checked: cellFillColorsChecked.has(bg) });
                 }
             } else {
-                cellFillColors.set('default-fill-color', { color: null });
+                cellFillColors.set('default-fill-color', { color: null, checked: cellFillColorsChecked.has(null) });
             }
 
             if (style.cl && style.cl.rgb) {
-                const font = new ColorKit(style.cl.rgb).toRgbString();
+                const cl = new ColorKit(style.cl.rgb).toRgbString();
 
-                if (!cellTextColors.has(font)) {
-                    cellTextColors.set(font, { color: font });
+                if (!cellTextColors.has(cl)) {
+                    cellTextColors.set(cl, { color: cl, checked: cellTextColorsChecked.has(cl) });
                 }
             } else {
-                cellTextColors.set('default-font-color', { color: COLOR_BLACK_RGB });
+                cellTextColors.set('default-font-color', { color: COLOR_BLACK_RGB, checked: cellTextColorsChecked.has(COLOR_BLACK_RGB) });
             }
         }
 
@@ -834,7 +830,30 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
             return false;
         }
 
+        const cellFillColorsChecked = this.cellFillColors.filter((item) => item.checked).map((item) => item.color);
+        const cellTextColorsChecked = this.cellTextColors.filter((item) => item.checked).map((item) => item.color);
+
+        if (cellFillColorsChecked.length === 0 && cellTextColorsChecked.length === 0) {
+            // If no colors are checked, we clear the filter.
+            return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+                unitId: this._filterModel.unitId,
+                subUnitId: this._filterModel.subUnitId,
+                col: this.col,
+                criteria: null,
+            } as ISetSheetsFilterCriteriaCommandParams);
+        }
+
         const criteria: IFilterColumn = { colId: this.col };
+
+        if (cellFillColorsChecked.length > 0) {
+            criteria.colorFilters = {
+                cellFillColors: cellFillColorsChecked,
+            };
+        } else if (cellTextColorsChecked.length > 0) {
+            criteria.colorFilters = {
+                cellTextColors: cellTextColorsChecked as string[],
+            };
+        }
 
         return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._filterModel.unitId,

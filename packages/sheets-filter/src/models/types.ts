@@ -17,6 +17,15 @@
 import type { BooleanNumber, IRange } from '@univerjs/core';
 
 /**
+ * The filter types.
+ */
+export enum FilterBy {
+    VALUES,
+    COLORS,
+    CONDITIONS,
+}
+
+/**
  * Data of a filter in a {@link Worksheet}.
  *
  * Please refer to 18.3.2 AutoFilter Settings. Properties of this interface would be added in the future.
@@ -60,9 +69,13 @@ export interface IFilters {
 
 /**
  * Color filters.
+ *
+ * @property {Array<string | null>} [cellFillColor] The cell fill colors to filter by. If this field is present, cells with these fill colors would be visible.
+ * @property {Array<string>} [cellTextColor] The cell text colors to filter by. If this field is present, cells with these text colors would be visible.
  */
 export interface IColorFilters {
-
+    cellFillColors?: Array<string | null>;
+    cellTextColors?: Array<string>;
 }
 
 /**

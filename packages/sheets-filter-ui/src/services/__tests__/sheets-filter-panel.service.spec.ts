@@ -22,14 +22,14 @@ import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service'
 import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { CustomFilterOperator, FilterBy, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { E_ITEMS, ITEMS, ITEMS_WITH_EMPTY, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
-import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
+import { ByConditionsModel, ByValuesModel, SheetsFilterPanelService } from '../sheets-filter-panel.service';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',

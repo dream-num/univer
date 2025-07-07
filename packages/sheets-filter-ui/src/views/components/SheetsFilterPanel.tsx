@@ -17,13 +17,13 @@
 import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { FilterBy, SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
-import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';

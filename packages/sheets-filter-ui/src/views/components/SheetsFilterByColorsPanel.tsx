@@ -17,7 +17,7 @@
 import type { ByColorsModel, IFilterByColorItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
-import { FontColorDoubleIcon, SuccessIcon } from '@univerjs/icons';
+import { AIcon, BanIcon, SuccessIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 
@@ -52,7 +52,14 @@ export function FilterByColor(props: { model: ByColorsModel }) {
             >
                 {cellFillColors.length > 1 && (
                     <div>
-                        <div className="univer-mb-2 univer-text-sm univer-text-gray-900">{localeService.t('sheets-filter.panel.filter-by-cell-fill-color')}</div>
+                        <div
+                            className={`
+                              univer-mb-2 univer-text-sm univer-text-gray-900
+                              dark:!univer-text-white
+                            `}
+                        >
+                            {localeService.t('sheets-filter.panel.filter-by-cell-fill-color')}
+                        </div>
                         <div
                             className={`
                               univer-grid univer-grid-cols-8 univer-items-center univer-justify-start univer-gap-2
@@ -66,28 +73,13 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                 >
                                     {!color.color
                                         ? (
-                                            <svg
-                                                width="24"
-                                                height="24"
-                                                viewBox="0 0 16 16"
-                                                fill="none"
+                                            <BanIcon
                                                 className={`
-                                                  univer-cursor-pointer univer-rounded-full
+                                                  univer-h-6 univer-w-6 univer-cursor-pointer univer-rounded-full
                                                   hover:univer-ring-2 hover:univer-ring-offset-2
                                                   hover:univer-ring-offset-white
                                                 `}
-                                            >
-                                                <g>
-                                                    <path
-                                                        d="M12.5962 3.40382L3.4038 12.5962M1.5 8C1.5 11.5899 4.41015 14.5 8 14.5C11.5899 14.5 14.5 11.5899 14.5 8C14.5 4.41015 11.5899 1.5 8 1.5C4.41015 1.5 1.5 4.41015 1.5 8Z"
-                                                        stroke="#333333"
-                                                        strokeWidth="1"
-                                                        strokeLinejoin="round"
-                                                        fill="none"
-                                                        vectorEffect="non-scaling-stroke"
-                                                    />
-                                                </g>
-                                            </svg>
+                                            />
                                         )
                                         : (
                                             <button
@@ -103,14 +95,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                             />
                                         )}
 
-                                    {color.checked && (
-                                        <SuccessIcon
-                                            className={`
-                                              univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-h-3 univer-w-3
-                                              univer-cursor-pointer univer-text-[#418F1F]
-                                            `}
-                                        />
-                                    )}
+                                    {color.checked && <CheckedIcon />}
                                 </div>
                             ))}
                         </div>
@@ -119,7 +104,14 @@ export function FilterByColor(props: { model: ByColorsModel }) {
 
                 {cellTextColors.length > 1 && (
                     <div>
-                        <div className="univer-mb-2 univer-text-sm univer-text-gray-900">{localeService.t('sheets-filter.panel.filter-by-cell-text-color')}</div>
+                        <div
+                            className={`
+                              univer-mb-2 univer-text-sm univer-text-gray-900
+                              dark:!univer-text-white
+                            `}
+                        >
+                            {localeService.t('sheets-filter.panel.filter-by-cell-text-color')}
+                        </div>
                         <div
                             className={`
                               univer-grid univer-grid-cols-8 univer-items-center univer-justify-start univer-gap-2
@@ -138,19 +130,13 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                           univer-rounded-full univer-border univer-border-solid
                                           univer-border-[rgba(13,13,13,0.06)] univer-p-0.5
                                           hover:univer-ring-2 hover:univer-ring-offset-2 hover:univer-ring-offset-white
+                                          dark:!univer-border-[rgba(255,255,255,0.06)]
                                         `}
                                     >
-                                        <FontColorDoubleIcon extend={{ colorChannel1: color.color as string }} />
+                                        <AIcon style={{ color: color.color as string }} />
                                     </div>
 
-                                    {color.checked && (
-                                        <SuccessIcon
-                                            className={`
-                                              univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-h-3 univer-w-3
-                                              univer-cursor-pointer univer-text-[#418F1F]
-                                            `}
-                                        />
-                                    )}
+                                    {color.checked && <CheckedIcon />}
                                 </div>
                             ))}
                         </div>
@@ -168,6 +154,21 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+function CheckedIcon() {
+    return (
+        <div
+            className={`
+              univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-flex univer-h-3 univer-w-3
+              univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
+            `}
+        >
+            <SuccessIcon
+                className="univer-h-full univer-w-full univer-font-bold univer-text-[#418F1F]"
+            />
         </div>
     );
 }

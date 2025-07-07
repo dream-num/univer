@@ -141,8 +141,8 @@ importers:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.6)
       eslint-plugin-better-tailwindcss:
-        specifier: ^3.4.3
-        version: 3.4.3(eslint@9.30.1(jiti@2.4.2))(tailwindcss@3.4.17)
+        specifier: ^3.4.4
+        version: 3.4.4(eslint@9.30.1(jiti@2.4.2))(tailwindcss@3.4.17)
       fs-extra:
         specifier: ^11.3.0
         version: 11.3.0
@@ -3760,6 +3760,10 @@ packages:
 
   '@babel/runtime@7.27.1':
     resolution: {integrity: sha512-1x3D2xEk2fRo3PAhwQwu5UubzgiVWSXTBfWpVd2Mx2AzRqJuDJCsgaDVZ7HB5iGzDW1Hl1sWN2mFyKjmR9uAog==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.27.6':
+    resolution: {integrity: sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.27.2':
@@ -7627,8 +7631,8 @@ packages:
     peerDependencies:
       eslint: '*'
 
-  eslint-plugin-better-tailwindcss@3.4.3:
-    resolution: {integrity: sha512-gw2d3rrVAXw7qwzPZs9CYRA32baGJiJCDM3R/65OgDgHEi4IF1JX9CDqRxmcKhbAHTfQjY0GtS6s04ZVjEpaEQ==}
+  eslint-plugin-better-tailwindcss@3.4.4:
+    resolution: {integrity: sha512-Zi3B0sKOm8o6R7ezytjdubpDmF9RmSEej8ikteuCY/eUKECc/FFP/ldPuceuEWmYZzX9KiEaJwKt9kmzSR2B0w==}
     engines: {node: ^20.11.0 || >=21.2.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -10704,6 +10708,10 @@ packages:
     resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}
     engines: {node: '>=6'}
 
+  tapable@2.2.2:
+    resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
+    engines: {node: '>=6'}
+
   terser-webpack-plugin@5.3.14:
     resolution: {integrity: sha512-vkZjpUjb6OMS7dhV+tILUW6BhpDR7P2L/aQSAv+Uwk+m8KATX9EccViHTJR2qDtACKPIYndLGCyl3FMo+r2LMw==}
     engines: {node: '>= 10.13.0'}
@@ -11556,6 +11564,8 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
 
   '@babel/runtime@7.27.1': {}
+
+  '@babel/runtime@7.27.6': {}
 
   '@babel/template@7.27.2':
     dependencies:
@@ -13518,7 +13528,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.27.1
+      '@babel/runtime': 7.27.6
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
@@ -15251,7 +15261,7 @@ snapshots:
   enhanced-resolve@5.18.2:
     dependencies:
       graceful-fs: 4.2.11
-      tapable: 2.2.1
+      tapable: 2.2.2
 
   ensure-posix-path@1.1.1: {}
 
@@ -15607,7 +15617,7 @@ snapshots:
     dependencies:
       eslint: 9.30.1(jiti@2.4.2)
 
-  eslint-plugin-better-tailwindcss@3.4.3(eslint@9.30.1(jiti@2.4.2))(tailwindcss@3.4.17):
+  eslint-plugin-better-tailwindcss@3.4.4(eslint@9.30.1(jiti@2.4.2))(tailwindcss@3.4.17):
     dependencies:
       '@eslint/css-tree': 3.6.1
       enhanced-resolve: 5.18.2
@@ -16210,7 +16220,7 @@ snapshots:
       node-abort-controller: 3.1.1
       schema-utils: 3.3.0
       semver: 7.7.2
-      tapable: 2.2.1
+      tapable: 2.2.2
       typescript: 5.8.3
       webpack: 5.99.8(@swc/core@1.11.24)(esbuild@0.25.5)
 
@@ -16482,7 +16492,7 @@ snapshots:
       html-minifier-terser: 6.1.0
       lodash: 4.17.21
       pretty-error: 4.0.0
-      tapable: 2.2.1
+      tapable: 2.2.2
     optionalDependencies:
       webpack: 5.99.8(@swc/core@1.11.24)(esbuild@0.25.5)
 
@@ -19313,6 +19323,8 @@ snapshots:
 
   tapable@2.2.1: {}
 
+  tapable@2.2.2: {}
+
   terser-webpack-plugin@5.3.14(@swc/core@1.11.24)(esbuild@0.25.5)(webpack@5.99.8(@swc/core@1.11.24)(esbuild@0.25.5)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -19859,7 +19871,7 @@ snapshots:
       mime-types: 2.1.35
       neo-async: 2.6.2
       schema-utils: 4.3.2
-      tapable: 2.2.1
+      tapable: 2.2.2
       terser-webpack-plugin: 5.3.14(@swc/core@1.11.24)(esbuild@0.25.5)(webpack@5.99.8(@swc/core@1.11.24)(esbuild@0.25.5))
       watchpack: 2.4.2
       webpack-sources: 3.2.3

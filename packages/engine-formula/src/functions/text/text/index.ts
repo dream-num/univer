@@ -29,6 +29,10 @@ export class Text extends BaseFunction {
 
     override maxParams = 2;
 
+    override isArgumentsIgnoreNumberPattern() {
+        return true;
+    }
+
     override calculate(text: BaseValueObject, formatText: BaseValueObject) {
         if (text.isError()) {
             return text;
@@ -53,7 +57,7 @@ export class Text extends BaseFunction {
         const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text);
         const formatTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, formatText);
 
-        return textArray.map((textValue, rowIndex, columnIndex) => {
+        const resultArray = textArray.map((textValue, rowIndex, columnIndex) => {
             if (textValue.isError()) {
                 return textValue;
             }
@@ -96,5 +100,11 @@ export class Text extends BaseFunction {
 
             return StringValueObject.create(formatTextValueString === ' ' ? previewText.trimEnd() : previewText);
         });
+
+        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        return resultArray;
     }
 }

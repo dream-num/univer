@@ -1953,7 +1953,7 @@ export class ArrayValueObject extends BaseValueObject {
 }
 
 export class ValueObjectFactory {
-    static create(rawValue: string | number | boolean | null) {
+    static create(rawValue: string | number | boolean | null, isIgnoreNumberPattern: boolean = false): BaseValueObject {
         if (rawValue == null) {
             return NullValueObject.create();
         }
@@ -1972,9 +1972,12 @@ export class ValueObjectFactory {
                 return NumberValueObject.create(Number(rawValue));
             }
 
-            const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue);
-            if (isNumberPattern) {
-                return NumberValueObject.create(value as number, pattern as string);
+            // value ignore whether it is a number pattern
+            if (!isIgnoreNumberPattern) {
+                const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue);
+                if (isNumberPattern) {
+                    return NumberValueObject.create(value as number, pattern as string);
+                }
             }
 
             const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');

@@ -148,9 +148,13 @@ export class FunctionNode extends BaseAstNode {
         this.setValue(resultVariant as FunctionVariantType);
     }
 
-     /**
-      * Compatibility handling for special functions.
-      */
+    isFunctionExecutorArgumentsIgnoreNumberPattern() {
+        return this._functionExecutor.isArgumentsIgnoreNumberPattern();
+    }
+
+    /**
+     * Compatibility handling for special functions.
+     */
     private _compatibility() {
         this._lookupCompatibility();
     }

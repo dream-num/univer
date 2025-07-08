@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { IRange, Styles, Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
+import type { FilterColumn } from '@univerjs/sheets-filter';
 import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
 import { createIdentifier, Disposable, extractPureTextFromCell, ILogService, Inject, IUniverInstanceService, LocaleService, numfmt } from '@univerjs/core';
+import { FilterBy } from '@univerjs/sheets-filter';
 
 export interface ISheetsGenerateFilterValuesService {
     getFilterValues(params: {
         unitId: string;
         subUnitId: string;
         filteredOutRowsByOtherColumns: number[];
+        filterColumn: Nullable<FilterColumn>;
         filters: boolean;
         blankChecked: boolean;
         iterateRange: IRange;
@@ -49,12 +52,13 @@ export class SheetsGenerateFilterValuesService extends Disposable {
         unitId: string;
         subUnitId: string;
         filteredOutRowsByOtherColumns: number[];
+        filterColumn: Nullable<FilterColumn>;
         filters: boolean;
         blankChecked: boolean;
         iterateRange: IRange;
         alreadyChecked: string[];
     }) {
-        const { unitId, subUnitId, filteredOutRowsByOtherColumns, filters, blankChecked, iterateRange, alreadyChecked } = params;
+        const { unitId, subUnitId, filteredOutRowsByOtherColumns, filterColumn, filters, blankChecked, iterateRange, alreadyChecked } = params;
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
 
@@ -62,7 +66,17 @@ export class SheetsGenerateFilterValuesService extends Disposable {
 
         this._logService.debug('[SheetsGenerateFilterValuesService]', 'getFilterValues for', { unitId, subUnitId });
 
-        return getFilterTreeByValueItems(filters, this._localeService, iterateRange, worksheet, new Set(filteredOutRowsByOtherColumns), new Set(alreadyChecked.map(String)), blankChecked, workbook.getStyles());
+        return getFilterTreeByValueItems(
+            filters,
+            this._localeService,
+            iterateRange,
+            worksheet,
+            new Set(filteredOutRowsByOtherColumns),
+            filterColumn,
+            new Set(alreadyChecked.map(String)),
+            blankChecked,
+            workbook.getStyles()
+        );
     }
 }
 
@@ -142,6 +156,7 @@ export function getFilterTreeByValueItems(
     iterateRange: IRange,
     worksheet: Worksheet,
     filteredOutRowsByOtherColumns: Set<number>,
+    filterColumn: Nullable<FilterColumn>,
     alreadyChecked: Set<string>,
     blankChecked: boolean,
     styles: Styles
@@ -155,6 +170,12 @@ export function getFilterTreeByValueItems(
     const DefaultPattern = 'yyyy-mm-dd';
     const canSplitPatternSet = new Set(CAN_PARSE_DATE_FORMAT);
     const EmptyKey = 'empty';
+    // filter column is the column that is currently being filtered.
+    // If the filter column is filter by colors or conditions, it means that the tab is switched from filter by colors or conditions to filter by values,
+    // so if the filter column has filtered out rows, we need clear all values checked status, refer to excel and wps.
+    const isNeedClearCheckedStatus = !filters
+        && (filterColumn?.filterBy === FilterBy.COLORS || filterColumn?.filterBy === FilterBy.CONDITIONS)
+        && filterColumn.filteredOutRows?.size;
 
     let emptyCount = 0;
     for (const cell of worksheet.iterateByColumn(iterateRange, false, false)) { // iterate and do not skip empty cells
@@ -221,7 +242,11 @@ export function getFilterTreeByValueItems(
                         count: 1,
                         originValues: new Set([value]),
                         leaf: true,
-                        checked: alreadyChecked.size ? alreadyChecked.has(value) : !blankChecked,
+                        checked: isNeedClearCheckedStatus
+                            ? false
+                            : alreadyChecked.size
+                                ? alreadyChecked.has(value)
+                                : !blankChecked,
                     });
                     monthItem.count++;
                     yearItem.count++;
@@ -239,7 +264,11 @@ export function getFilterTreeByValueItems(
                     item = {
                         title: value,
                         leaf: true,
-                        checked: alreadyChecked.size ? alreadyChecked.has(value) : !blankChecked,
+                        checked: isNeedClearCheckedStatus
+                            ? false
+                            : alreadyChecked.size
+                                ? alreadyChecked.has(value)
+                                : !blankChecked,
                         key,
                         count: 1,
                     };
@@ -253,7 +282,11 @@ export function getFilterTreeByValueItems(
         }
     }
 
-    const initialBlankChecked = filters ? blankChecked : true;
+    const initialBlankChecked = isNeedClearCheckedStatus
+        ? false
+        : filters
+            ? blankChecked
+            : true;
     if (emptyCount > 0) {
         const item: IFilterByValueWithTreeItem = {
             title: localeService.t('sheets-filter.panel.empty'),

@@ -44,7 +44,7 @@ export {
     notEquals,
 } from './models/custom-filters';
 export { FilterColumn, FilterModel } from './models/filter-model';
-export type { IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './models/types';
-export { CustomFilterOperator } from './models/types';
+export type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './models/types';
+export { CustomFilterOperator, FilterBy } from './models/types';
 export { UniverSheetsFilterPlugin } from './plugin';
 export { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';

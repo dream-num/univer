@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
+import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { FilterBy, SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
-import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
 
@@ -96,7 +97,9 @@ export function FilterPanel() {
                     >
                         {filterBy === FilterBy.VALUES
                             ? <FilterByValue model={filterByModel as ByValuesModel} />
-                            : <FilterByCondition model={filterByModel as ByConditionsModel} />}
+                            : filterBy === FilterBy.COLORS
+                                ? <FilterByColor model={filterByModel as ByColorsModel} />
+                                : <FilterByCondition model={filterByModel as ByConditionsModel} />}
                     </div>
                 )
                 : (
@@ -129,6 +132,7 @@ function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
+        { label: localeService.t('sheets-filter.panel.by-colors'), value: FilterBy.COLORS },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
     ], [locale, localeService]);
 }

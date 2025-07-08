@@ -61,17 +61,29 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             v: 1,
                             t: 2,
                         },
+                        4: { // E1
+                            v: 1,
+                            t: 2,
+                        },
                     },
                     1: {
                         0: {
                             v: 'B2',
                             t: 1,
                         },
+                        4: { // E2
+                            v: 2,
+                            t: 2,
+                        },
                     },
                     2: {
                         0: {
                             v: 'B3',
                             t: 1,
+                        },
+                        4: { // E3
+                            v: 3,
+                            t: 2,
                         },
                     },
                     3: {
@@ -83,11 +95,17 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             v: 3,
                             t: 2,
                         },
+                        4: { // E4
+                            f: '=SUM(SUBTOTAL(9,E1:E3),TRUE())',
+                        },
                     },
                     4: {
                         0: {
                             v: 'B2',
                             t: 1,
+                        },
+                        4: { // E5
+                            f: '=SUBTOTAL(9,E1:E4)',
                         },
                     },
                     5: {
@@ -361,6 +379,13 @@ describe('Test inverted index cache', () => {
 
             result = calculate('=SUMIF($A$1:A13,A13,$B$1:B13)');
             expect(result).toBe(25);
+        });
+
+        it('Subtotal formula test', async () => {
+            // E4 cell formula: =SUM(SUBTOTAL(9,E1:E3),TRUE())
+            expect(getCellValue(3, 4)).toBe(7);
+            // E5 cell formula: =SUBTOTAL(9,E1:E4)
+            expect(getCellValue(4, 4)).toBe(6);
         });
     });
 });

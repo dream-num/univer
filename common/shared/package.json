@@ -25,12 +25,12 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.35.1",
+        "@typescript-eslint/parser": "^8.36.0",
         "@vitejs/plugin-react": "^4.6.0",
         "@vitejs/plugin-vue": "^6.0.0",
         "@vitest/coverage-istanbul": "^3.2.4",
         "autoprefixer": "^10.4.21",
-        "eslint-plugin-better-tailwindcss": "^3.4.3",
+        "eslint-plugin-better-tailwindcss": "^3.4.4",
         "fs-extra": "^11.3.0",
         "happy-dom": "18.0.1",
         "javascript-obfuscator": "^4.1.1",

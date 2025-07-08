@@ -76,7 +76,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/rpc": "workspace:*",
-        "decimal.js": "^10.5.0"
+        "decimal.js": "^10.6.0"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

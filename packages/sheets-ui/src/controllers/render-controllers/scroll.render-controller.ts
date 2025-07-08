@@ -15,7 +15,7 @@
  */
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
@@ -98,23 +98,55 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
                 this._context.scene.makeDirty(true);
 
-                // add offset on scroll position to check whether scrolling is reaching limit
-                const isLimitedStore = viewMain.limitedScroll(viewMain.scrollX + offsetX, viewMain.scrollY + offsetY);
-
-                // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
-                // if scrolling is reaching limit, let scrolling event do the default behavior.
-                if (isLimitedStore && !isLimitedStore.isLimitedX && !isLimitedStore.isLimitedY) {
+                if (this._checkShouldPreventEvent(viewMain, offsetX, offsetY)) {
                     evt.preventDefault();
                     if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                         state.stopPropagation();
                     }
                 }
-
                 if (viewMain.isWheelPreventDefaultX && viewMain.isWheelPreventDefaultY) {
                     evt.preventDefault();
                 }
             })
         );
+    }
+
+    private _checkShouldPreventEvent(
+        viewMain: Viewport,
+        offsetX: number,
+        offsetY: number
+    ) {
+        const scrollBar = viewMain.getScrollBar();
+        if (!scrollBar) {
+            return false;
+        }
+        const { limitX, limitY, scrollHorizonThumbThickness } = scrollBar;
+        const xRemain = Math.floor(offsetX > 0 ? limitX - viewMain.scrollX - scrollHorizonThumbThickness : viewMain.scrollX);
+        const yRemain = Math.floor(offsetY > 0 ? limitY - viewMain.scrollY : viewMain.scrollY);
+        const isXReachLimit = xRemain - Math.abs(offsetX) < 0;
+        const isYReachLimit = yRemain - Math.abs(offsetY) < 0;
+
+        const tolerance = 1;
+
+        const checkPrevent = (remain: number, offset: number, otherOffset: number) => {
+            // 主运动方向保留量大于主运动偏移量，阻止事件冒泡
+            if ((remain > offset) && offset / (otherOffset || 0.1) >= tolerance) {
+                return true;
+            }
+            return false;
+        };
+
+        if (isXReachLimit) {
+            if (!checkPrevent(yRemain, Math.abs(offsetY), Math.abs(offsetX))) {
+                return false;
+            }
+        }
+        if (isYReachLimit) {
+            if (!checkPrevent(xRemain, Math.abs(offsetX), Math.abs(offsetY))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // eslint-disable-next-line max-lines-per-function

@@ -73,6 +73,9 @@ function Examples() {
     }, {
         title: '📱 Mobile',
         href: './mobile-s/',
+    }, {
+        title: '🗂️ Sheets Embed In Page',
+        href: './sheets-embed-in-page/',
     }];
 
     return (

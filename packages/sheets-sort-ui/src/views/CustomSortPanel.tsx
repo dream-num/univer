@@ -17,7 +17,7 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
 import type { ICustomSortState } from '../services/sheets-sort-ui.service';
-import { LocaleService, LocaleType, throttle } from '@univerjs/core';
+import { LocaleService, throttle } from '@univerjs/core';
 import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, DeleteEmptyIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
@@ -153,6 +153,10 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                     }}
                 >
                     <DraggableList
+                        className={`
+                          [&_.react-grid-item]:univer-transition-none
+                          [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
+                        `}
                         list={dragList}
                         onListChange={setList}
                         idKey="id"
@@ -223,9 +227,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
     const showDelete = list.length > 1;
     const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
 
-    const radioClass = localeService.getCurrentLocale() === LocaleType.ZH_CN ? 'univer-flex univer-px-5' : 'univer-flex univer-px-2.5';
     return (
-        <div className="univer-flex univer-items-center">
+        <div className="univer-grid univer-grid-flow-col univer-grid-cols-2 univer-items-center univer-gap-2">
             <div className="univer-flex univer-items-center">
                 <div
                     data-u-comp="sort-panel-item-handler"
@@ -236,66 +239,62 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                 >
                     <SequenceIcon />
                 </div>
-                <div>
-                    {/* TODO@wzhudev: change it to the Select component later. */}
-                    <Dropdown
-                        align="start"
-                        overlay={(
-                            <ul
-                                className={clsx(`
-                                  univer-my-0 univer-box-border univer-grid univer-max-h-[310px] univer-items-center
-                                  univer-gap-1 univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg
-                                  univer-border univer-bg-white univer-p-1 univer-text-base univer-shadow-lg
-                                `, scrollbarClassName)}
-                            >
-                                {availableMenu.map((menuItem) => (
-                                    <li
-                                        key={menuItem.index}
-                                        onClick={() => handleChangeColIndex(menuItem)}
-                                        className={`
-                                          univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
-                                          univer-list-none univer-items-center univer-justify-between univer-rounded
-                                          univer-px-2 univer-text-sm univer-transition-all
-                                          hover:univer-bg-gray-100
-                                          dark:hover:!univer-bg-gray-700
-                                        `}
-                                    >
-                                        <span className="univer-max-w-[220px] univer-truncate">
-                                            {menuItem.label}
-                                        </span>
-                                        <span>
-                                            {menuItem.index === item.colIndex && (
-                                                <CheckMarkIcon />
-                                            )}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        open={visible}
-                        onOpenChange={onVisibleChange}
-                    >
-                        <div
-                            className={`
-                              univer-ml-2 univer-flex univer-w-[236px] univer-items-center univer-justify-between
-                              univer-overflow-hidden univer-rounded-md univer-border univer-border-gray-200
-                              univer-px-2.5 univer-py-1.5 univer-text-sm univer-text-gray-900
-                              dark:!univer-text-white
-                            `}
+                {/* TODO@wzhudev: change it to the Select component later. */}
+                <Dropdown
+                    overlay={(
+                        <ul
+                            className={clsx(`
+                              univer-my-0 univer-box-border univer-grid univer-max-h-[310px]
+                              univer-w-[var(--radix-popper-anchor-width)] univer-items-center univer-gap-1
+                              univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg univer-border
+                              univer-bg-white univer-p-1 univer-text-base univer-shadow-lg
+                            `, scrollbarClassName)}
                         >
-                            <span
-                                className="univer-max-w-[220px] univer-truncate"
-                            >
-                                {itemLabel}
-                            </span>
-                            <MoreDownIcon />
-                        </div>
-                    </Dropdown>
-                </div>
+                            {availableMenu.map((menuItem) => (
+                                <li
+                                    key={menuItem.index}
+                                    onClick={() => handleChangeColIndex(menuItem)}
+                                    className={`
+                                      univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
+                                      univer-list-none univer-items-center univer-justify-between univer-rounded
+                                      univer-px-2 univer-text-sm univer-transition-all
+                                      hover:univer-bg-gray-100
+                                      dark:hover:!univer-bg-gray-700
+                                    `}
+                                >
+                                    <span className="univer-max-w-[220px] univer-truncate">
+                                        {menuItem.label}
+                                    </span>
+                                    <span>
+                                        {menuItem.index === item.colIndex && (
+                                            <CheckMarkIcon />
+                                        )}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    open={visible}
+                    onOpenChange={onVisibleChange}
+                >
+                    <div
+                        className={clsx(`
+                          univer-ml-2 univer-flex univer-w-full univer-items-center univer-justify-between
+                          univer-overflow-hidden univer-rounded-md univer-py-1.5 univer-text-sm univer-text-gray-900
+                          dark:!univer-text-white
+                        `)}
+                    >
+                        <span
+                            className="univer-max-w-[220px] univer-truncate"
+                        >
+                            {itemLabel}
+                        </span>
+                        <MoreDownIcon />
+                    </div>
+                </Dropdown>
             </div>
-            <div>
+            <div className="univer-flex univer-items-center univer-justify-end univer-gap-2">
                 <RadioGroup
-                    className={radioClass}
                     value={item.type}
                     onChange={(value) => {
                         onChange({ ...item, type: value as SortType }, currentIndex);
@@ -304,9 +303,15 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                     <Radio value={SortType.ASC}>{localeService.t('sheets-sort.general.sort-asc')}</Radio>
                     <Radio value={SortType.DESC}>{localeService.t('sheets-sort.general.sort-desc')}</Radio>
                 </RadioGroup>
-            </div>
-            <div className="univer-s-[14px] univer-absolute univer-right-0 univer-cursor-pointer univer-text-sm">
-                {showDelete && <DeleteEmptyIcon onClick={() => onChange(null, currentIndex)} />}
+                <a
+                    className={`
+                      univer-flex univer-cursor-pointer univer-items-center univer-text-sm univer-transition-colors
+                      hover:univer-text-red-500
+                    `}
+                    onClick={() => onChange(null, currentIndex)}
+                >
+                    {!showDelete && <DeleteEmptyIcon />}
+                </a>
             </div>
         </div>
     );

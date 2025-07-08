@@ -448,7 +448,8 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
 
         const range = filterModel.getRange();
         const column = col;
-        const filters = filterModel.getFilterColumn(col)?.getColumnData().filters;
+        const filterColumn = filterModel.getFilterColumn(col);
+        const filters = filterColumn?.getColumnData().filters;
         const alreadyChecked = new Set(filters?.filters);
         const blankChecked = !!(filters && filters.blank);
         const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
@@ -461,6 +462,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
                 unitId,
                 subUnitId,
                 filteredOutRowsByOtherColumns: Array.from(filteredOutRowsByOtherColumns),
+                filterColumn,
                 filters: !!filters,
                 blankChecked,
                 iterateRange,
@@ -470,7 +472,17 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
             cache = res.filterTreeMapCache;
         } else {
             // the first row is filter header and should be added to options
-            const res = getFilterTreeByValueItems(!!filters, localeService, iterateRange, worksheet, filteredOutRowsByOtherColumns, alreadyChecked, blankChecked, workbook.getStyles());
+            const res = getFilterTreeByValueItems(
+                !!filters,
+                localeService,
+                iterateRange,
+                worksheet,
+                filteredOutRowsByOtherColumns,
+                filterColumn,
+                alreadyChecked,
+                blankChecked,
+                workbook.getStyles()
+            );
             items = res.filterTreeItems;
             cache = res.filterTreeMapCache;
         }
@@ -796,15 +808,36 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
     }
 
     onFilterCheckToggled(item: IFilterByColorItem, isFillColor: boolean = true): void {
-        const items = Tools.deepClone(isFillColor ? this.cellFillColors : this.cellTextColors);
-        const changedItem = items.find((i) => i.color === item.color);
-        if (!changedItem) {
+        const colors = isFillColor ? this.cellFillColors : this.cellTextColors;
+        const items: IFilterByColorItem[] = [];
+
+        let found = false;
+
+        for (let i = 0; i < colors.length; i++) {
+            const colorItem = colors[i];
+
+            if (colorItem.color === item.color) {
+                found = true;
+                items.push({
+                    color: colorItem.color,
+                    checked: !colorItem.checked,
+                });
+                continue;
+            }
+
+            items.push({
+                color: colorItem.color,
+                checked: colorItem.checked,
+            });
+        }
+
+        if (!found) {
             return;
         }
 
+        // fill color and text color are mutually exclusive
         this._resetColorsCheckedStatus(!isFillColor);
 
-        changedItem.checked = !changedItem.checked;
         if (isFillColor) {
             this._cellFillColors$.next([...items]);
         } else {
@@ -813,8 +846,16 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
     }
 
     private _resetColorsCheckedStatus(isFillColor: boolean = true): void {
-        const items = Tools.deepClone(isFillColor ? this.cellFillColors : this.cellTextColors);
-        items.forEach((item) => item.checked = false);
+        const colors = isFillColor ? this.cellFillColors : this.cellTextColors;
+        const items: IFilterByColorItem[] = [];
+
+        for (let i = 0; i < colors.length; i++) {
+            items.push({
+                color: colors[i].color,
+                checked: false,
+            });
+        }
+
         if (isFillColor) {
             this._cellFillColors$.next([...items]);
         } else {

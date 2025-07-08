@@ -304,6 +304,7 @@ export class FilterColumn extends Disposable {
     private _column: number = 0;
 
     private _filterBy: FilterBy = FilterBy.VALUES;
+    get filterBy(): Readonly<FilterBy> { return this._filterBy; }
 
     constructor(
         public readonly unitId: string,

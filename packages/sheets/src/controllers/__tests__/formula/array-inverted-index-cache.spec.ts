@@ -23,6 +23,7 @@ import {
     functionLogical,
     functionMath,
     functionMeta,
+    functionText,
     generateExecuteAstNodeData,
     IFormulaCurrentConfigService,
     IFormulaRuntimeService,
@@ -285,6 +286,7 @@ describe('Test inverted index cache', () => {
             ...functionMath,
             ...functionMeta,
             ...functionLogical,
+            ...functionText,
         ]
             .map((registerObject) => {
                 const Func = registerObject[0] as Ctor<BaseFunction>;
@@ -386,6 +388,11 @@ describe('Test inverted index cache', () => {
             expect(getCellValue(3, 4)).toBe(7);
             // E5 cell formula: =SUBTOTAL(9,E1:E4)
             expect(getCellValue(4, 4)).toBe(6);
+        });
+
+        it('TEXT formula test', () => {
+            const result = calculate('=TEXT(1.23,"$0.00")');
+            expect(result).toBe('$1.23');
         });
     });
 });

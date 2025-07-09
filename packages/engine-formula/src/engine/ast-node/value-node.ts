@@ -15,6 +15,7 @@
  */
 
 import type { ErrorType } from '../../basics/error-type';
+import type { FunctionNode } from './';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { LexerNode } from '../analysis/lexer-node';
@@ -33,7 +34,8 @@ export class ValueNode extends BaseAstNode {
     }
 
     override execute(): void {
-        this.setValue(ValueObjectFactory.create(this.getToken()));
+        const isIgnoreNumberPattern = this.getParent()?.nodeType === NodeType.FUNCTION && (this.getParent() as FunctionNode).isFunctionExecutorArgumentsIgnoreNumberPattern();
+        this.setValue(ValueObjectFactory.create(this.getToken(), isIgnoreNumberPattern));
     }
 }
 

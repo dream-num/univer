@@ -649,9 +649,7 @@ describe('Test nested functions', () => {
 
         it('Text formula test', () => {
             const result = calculate('=TEXT(1234, "000000")');
-            expect(result).toStrictEqual([
-                ['001234'],
-            ]);
+            expect(result).toBe('001234');
         });
 
         it('T formula test', () => {

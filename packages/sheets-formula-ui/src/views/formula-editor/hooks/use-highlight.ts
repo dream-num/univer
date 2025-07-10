@@ -161,7 +161,13 @@ export function useSheetHighlight(unitId: string, subUnitId: string) {
         });
 
         if (!selectionWithStyle) return;
-        refSelectionsService.setSelections(selectionWithStyle);
+        const allControls = refSelectionsRenderService?.getSelectionControls() || [];
+        // If the number are same, try to reuse the current controls
+        if (allControls.length === selectionWithStyle.length) {
+            refSelectionsRenderService?.resetSelectionsByModelData(selectionWithStyle);
+        } else {
+            refSelectionsService.setSelections(selectionWithStyle);
+        }
     });
 
     useEffect(() => {

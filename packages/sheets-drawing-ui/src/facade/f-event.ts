@@ -37,6 +37,8 @@ interface IFDrawingEventNameMixin {
      *   // Cancel the insertion operation
      *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeFloatDomAdd: 'BeforeFloatDomAdd';
@@ -51,6 +53,8 @@ interface IFDrawingEventNameMixin {
      *   // do something
      *   const { workbook, drawings } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly FloatDomAdded: 'FloatDomAdded';
@@ -67,6 +71,8 @@ interface IFDrawingEventNameMixin {
      *   // Cancel the update operation
      *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeFloatDomUpdate: 'BeforeFloatDomUpdate';
@@ -81,6 +87,8 @@ interface IFDrawingEventNameMixin {
      *   // do something
      *   const { workbook, drawings } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly FloatDomUpdated: 'FloatDomUpdated';
@@ -97,6 +105,8 @@ interface IFDrawingEventNameMixin {
      *   // Cancel the deletion operation
      *   params.cancel = true;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly BeforeFloatDomDelete: 'BeforeFloatDomDelete';
@@ -111,6 +121,8 @@ interface IFDrawingEventNameMixin {
      *   // do something
      *   const { workbook, drawings } = params;
      * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
     readonly FloatDomDeleted: 'FloatDomDeleted';

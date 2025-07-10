@@ -31,10 +31,11 @@ import { ComponentManager } from '@univerjs/ui';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
 // why omit this key? if componentKey is missing, then which component should be used?
-export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
+export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey { }
 
 export interface IFCanvasFloatDomResult extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId' | 'initPosition'>, IFComponentKey {
     position: ITransformState;
+    id: string;
 }
 
 /**
@@ -613,6 +614,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             componentKey: drawingParm.componentKey,
             allowTransform: drawingParm.allowTransform,
             data: drawingParm.data,
+            id: info.id,
         };
     }
 
@@ -647,6 +649,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                     componentKey: drawingParm.componentKey,
                     allowTransform: drawingParm.allowTransform,
                     data: drawingParm.data,
+                    id: info.id,
                 };
             });
     }
@@ -754,8 +757,25 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const info = floatDomService.getFloatDomInfo(id);
         if (!info) return this;
 
-        const { dispose } = info;
-        dispose.dispose();
+        const { unitId, subUnitId } = info;
+        const drawingService = this._injector.get(ISheetDrawingService);
+        const drawing = drawingService.getDrawingByParam({
+            unitId,
+            subUnitId,
+            drawingId: id,
+        });
+
+        if (!drawing) return this;
+
+        // Then delete it
+        const res = this._commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, {
+            unitId,
+            drawings: [drawing],
+        });
+
+        if (!res) {
+            throw new Error('removeFloatDom failed');
+        }
         return this;
     }
 
@@ -978,5 +998,5 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
 FWorksheet.extend(FWorksheetLegacy);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetLegacy {}
+    interface FWorksheet extends IFWorksheetLegacy { }
 }

@@ -620,12 +620,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(data.unitId);
                     if (renderObject) {
                         const { scene } = renderObject;
-                        const rectShape = scene.getObject(data.drawingId);
-                        if (rectShape) {
+                        const floatDomInfo = this._domLayerInfoMap.get(data.drawingId);
+                        if (floatDomInfo?.rect) {
                             if (sheetDrawing.allowTransform === false) {
-                                scene.detachTransformerFrom(rectShape);
+                                scene.detachTransformerFrom(floatDomInfo.rect);
                             } else {
-                                scene.attachTransformerTo(rectShape);
+                                scene.attachTransformerTo(floatDomInfo.rect);
                             }
                         }
                     }

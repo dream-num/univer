@@ -674,7 +674,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const skeleton = this.getSkeleton();
         if (!skeleton) return this;
 
-        const selectionRenderService = this._injector.get(IRenderManagerService).getRenderById(this.getWorkbook().getUnitId())?.with(ISheetSelectionRenderService);
+        const selectionRenderService = renderManagerService.getRenderById(this.getWorkbook().getUnitId())?.with(ISheetSelectionRenderService);
         if (!selectionRenderService) return this;
 
         const newParam: ISheetFloatDom = {
@@ -702,7 +702,6 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const drawingService = this._injector.get(ISheetDrawingService);
         const renderManagerService = this._injector.get(IRenderManagerService);
-        const selectionRenderService = this._injector.get(ISheetSelectionRenderService);
 
         const drawings: ISheetFloatDom[] = [];
 
@@ -723,6 +722,9 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
 
             const skeleton = this.getSkeleton();
             if (!skeleton) continue;
+
+            const selectionRenderService = renderManagerService.getRenderById(this.getWorkbook().getUnitId())?.with(ISheetSelectionRenderService);
+            if (!selectionRenderService) return this;
 
             const newParam: ISheetFloatDom = {
                 ...drawingParm,

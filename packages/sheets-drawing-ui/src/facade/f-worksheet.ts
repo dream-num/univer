@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IDisposable, ITransformState, Nullable } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import type { ICanvasFloatDom, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
 import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
+import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
@@ -31,10 +33,139 @@ import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 // why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 
+export interface IFCanvasFloatDomResult extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId' | 'initPosition'>, IFComponentKey {
+    position: ITransformState;
+}
+
 /**
  * @ignore
  */
 export interface IFWorksheetLegacy {
+    /**
+     * Get float dom by id
+     * @param {string} id - float dom id
+     * @returns {IFCanvasFloatDomResult | null} float dom info or null if not found
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const floatDom = fWorksheet.getFloatDomById('myFloatDomId');
+     * if (floatDom) {
+     *   console.log('Float dom position:', floatDom.position);
+     *   console.log('Component key:', floatDom.componentKey);
+     *   console.log('Custom data:', floatDom.data);
+     * }
+     * ```
+     */
+    getFloatDomById(id: string): Nullable<IFCanvasFloatDomResult>;
+
+    /**
+     * Get all float doms in current worksheet
+     * @returns {IFCanvasFloatDomResult[]} array of float dom info
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const allFloatDoms = fWorksheet.getAllFloatDoms();
+     * allFloatDoms.forEach(floatDom => {
+     *   console.log('Float dom ID:', floatDom.componentKey);
+     *   console.log('Position:', floatDom.position);
+     * });
+     * ```
+     */
+    getAllFloatDoms(): IFCanvasFloatDomResult[];
+
+    /**
+     * Update float dom position and properties
+     * @param {string} id - float dom id
+     * @param {Partial<IFCanvasFloatDomResult>} config - new float dom config
+     * @returns {boolean} true if update successful
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // Update position and size
+     * const updated = fWorksheet.updateFloatDom('myFloatDomId', {
+     *   position: {
+     *     left: 100,
+     *     top: 100,
+     *     width: 200,
+     *     height: 150,
+     *     angle: 45, // rotate 45 degrees
+     *   }
+     * });
+     *
+     * // Update component data
+     * fWorksheet.updateFloatDom('myFloatDomId', {
+     *   data: {
+     *     label: 'Updated Label',
+     *     color: '#ff0000'
+     *   }
+     * });
+     *
+     * // Disable transform
+     * fWorksheet.updateFloatDom('myFloatDomId', {
+     *   allowTransform: false
+     * });
+     * ```
+     */
+    updateFloatDom(id: string, config: Partial<IFCanvasFloatDomResult>): this;
+
+    /**
+     * Batch update float doms
+     * @param {Array<{id: string, config: Partial<IFCanvasFloatDomResult>}>} updates - array of update configs
+     * @returns {number} number of successful updates
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // Update multiple float doms at once
+     * const successCount = fWorksheet.batchUpdateFloatDoms([
+     *   {
+     *     id: 'floatDom1',
+     *     config: {
+     *       position: {
+     *         left: 100,
+     *         top: 100
+     *       }
+     *     }
+     *   },
+     *   {
+     *     id: 'floatDom2',
+     *     config: {
+     *       position: {
+     *         left: 300,
+     *         top: 100
+     *       },
+     *       data: {
+     *         label: 'Updated'
+     *       }
+     *     }
+     *   }
+     * ]);
+     *
+     * console.log(`Successfully updated ${successCount} float doms`);
+     * ```
+     */
+    batchUpdateFloatDoms(updates: Array<{ id: string; config: Partial<IFCanvasFloatDomResult> }>): this;
+
+    /**
+     * Remove float dom by id
+     * @param {string} id - float dom id
+     * @returns {boolean} true if removal successful
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     *
+     * // Remove a float dom
+     * const removed = fWorksheet.removeFloatDom('myFloatDomId');
+     * if (removed) {
+     *   console.log('Float dom successfully removed');
+     * } else {
+     *   console.log('Float dom not found or could not be removed');
+     * }
+     * ```
+     */
+    removeFloatDom(id: string): this;
+
     /**
      * Add a float dom to position.
      * @param {IFICanvasFloatDom} layer - The float dom layer configuration.
@@ -450,6 +581,183 @@ export interface IFWorksheetLegacy {
 }
 
 export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
+    override getFloatDomById(id: string): Nullable<IFCanvasFloatDomResult> {
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const info = floatDomService.getFloatDomInfo(id);
+        if (!info) return null;
+
+        const { unitId, subUnitId } = info;
+        const { rect } = info;
+        const state = rect.getState();
+        const { left = 0, top = 0, width = 0, height = 0, flipX = false, flipY = false, angle = 0, skewX = 0, skewY = 0 } = state;
+        const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
+            drawingId: info.id,
+            unitId,
+            subUnitId,
+        })! as ISheetFloatDom;
+
+        if (!drawingParm) return null;
+
+        return {
+            position: {
+                left,
+                top,
+                width,
+                height,
+                flipX,
+                flipY,
+                angle,
+                skewX,
+                skewY,
+            },
+            componentKey: drawingParm.componentKey,
+            allowTransform: drawingParm.allowTransform,
+            data: drawingParm.data,
+        };
+    }
+
+    override getAllFloatDoms(): IFCanvasFloatDomResult[] {
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        return Array.from(floatDomService.getFloatDomsBySubUnitId(unitId, subUnitId).values())
+            .map((info) => {
+                const { rect } = info;
+                const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
+                    drawingId: info.id,
+                    unitId,
+                    subUnitId,
+                })! as ISheetFloatDom;
+
+                const { left, top, width, height, flipX, flipY, angle, skewX, skewY } = rect.getState();
+
+                return {
+                    position: {
+                        left,
+                        top,
+                        width,
+                        height,
+                        flipX,
+                        flipY,
+                        angle,
+                        skewX,
+                        skewY,
+                    },
+                    componentKey: drawingParm.componentKey,
+                    allowTransform: drawingParm.allowTransform,
+                    data: drawingParm.data,
+                };
+            });
+    }
+
+    override updateFloatDom(id: string, config: Partial<IFCanvasFloatDomResult>): this {
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const info = floatDomService.getFloatDomInfo(id);
+        if (!info) return this;
+
+        const { unitId, subUnitId } = info;
+
+        const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
+            unitId,
+            subUnitId,
+            drawingId: id,
+        })! as ISheetFloatDom;
+
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) return this;
+
+        const skeleton = this.getSkeleton();
+        if (!skeleton) return this;
+
+        const selectionRenderService = this._injector.get(ISheetSelectionRenderService);
+
+        const newParam: ISheetFloatDom = {
+            ...drawingParm,
+            componentKey: config.componentKey || drawingParm.componentKey,
+            allowTransform: config.allowTransform !== undefined ? config.allowTransform : drawingParm.allowTransform,
+            data: config.data || drawingParm.data,
+            sheetTransform: config.position
+                ? transformToDrawingPosition(
+                    config.position,
+                    selectionRenderService
+                ) ?? drawingParm.sheetTransform
+                : drawingParm.sheetTransform,
+        };
+
+        const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
+        if (!res) {
+            throw new Error('updateFloatDom failed');
+        }
+
+        return this;
+    }
+
+    override batchUpdateFloatDoms(updates: Array<{ id: string; config: Partial<IFCanvasFloatDomResult> }>): this {
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const drawingService = this._injector.get(ISheetDrawingService);
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const selectionRenderService = this._injector.get(ISheetSelectionRenderService);
+
+        const drawings: ISheetFloatDom[] = [];
+
+        for (const update of updates) {
+            const info = floatDomService.getFloatDomInfo(update.id);
+            if (!info) continue;
+
+            const { unitId, subUnitId } = info;
+            const drawingParm = drawingService.getDrawingByParam({
+                unitId,
+                subUnitId,
+                drawingId: update.id,
+            }) as ISheetFloatDom;
+            if (!drawingParm) continue;
+
+            const render = renderManagerService.getRenderById(unitId);
+            if (!render) continue;
+
+            const skeleton = this.getSkeleton();
+            if (!skeleton) continue;
+
+            const newParam: ISheetFloatDom = {
+                ...drawingParm,
+                componentKey: update.config.componentKey || drawingParm.componentKey,
+                allowTransform: update.config.allowTransform !== undefined ? update.config.allowTransform : drawingParm.allowTransform,
+                data: update.config.data || drawingParm.data,
+                sheetTransform: update.config.position
+                    ? transformToDrawingPosition(
+                        update.config.position,
+                        selectionRenderService
+                    ) ?? drawingParm.sheetTransform
+                    : drawingParm.sheetTransform,
+            };
+
+            drawings.push(newParam);
+        }
+
+        if (drawings.length > 0) {
+            const unitId = this._workbook.getUnitId();
+            const subUnitId = this._worksheet.getSheetId();
+            const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings });
+            if (!res) {
+                throw new Error('batchUpdateFloatDoms failed');
+            }
+        }
+
+        return this;
+    }
+
+    override removeFloatDom(id: string): this {
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const info = floatDomService.getFloatDomInfo(id);
+        if (!info) return this;
+
+        const { dispose } = info;
+        dispose.dispose();
+        return this;
+    }
+
     override addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
         id: string;
         dispose: () => void;

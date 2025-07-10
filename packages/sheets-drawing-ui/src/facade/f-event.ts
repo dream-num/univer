@@ -488,9 +488,9 @@ export interface IFloatDomDeletedParam extends IEventBase {
     workbook: FWorkbook;
 
     /**
-     * Collection of float dom drawings that were deleted.
+     * Collection of float dom drawing ids that were deleted.
      */
-    drawings: ISheetFloatDom[];
+    drawings: string[];
 }
 
 interface IFSheetsUIEventParamConfig {

@@ -344,22 +344,11 @@ export class FUniverDrawingMixin extends FUniver {
                     return;
                 }
 
-                const drawingManagerService = injector.get(IDrawingManagerService);
-
                 const { drawings } = params;
-                const floatDomDrawings = drawings
-                    .map((drawing) => drawingManagerService.getDrawingByParam(drawing))
-                    .filter((drawing): drawing is ISheetFloatDom =>
-                        drawing?.drawingType === DrawingTypeEnum.DRAWING_DOM
-                    );
-
-                if (floatDomDrawings.length === 0) {
-                    return;
-                }
 
                 this.fireEvent(this.Event.FloatDomDeleted, {
                     workbook,
-                    drawings: floatDomDrawings,
+                    drawings: drawings.filter((i) => i.drawingType === DrawingTypeEnum.DRAWING_DOM).map((i) => i.drawingId),
                 });
             })
         );

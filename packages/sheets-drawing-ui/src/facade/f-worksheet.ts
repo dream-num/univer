@@ -671,7 +671,8 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const skeleton = this.getSkeleton();
         if (!skeleton) return this;
 
-        const selectionRenderService = this._injector.get(ISheetSelectionRenderService);
+        const selectionRenderService = this._injector.get(IRenderManagerService).getRenderById(this.getWorkbook().getUnitId())?.with(ISheetSelectionRenderService);
+        if (!selectionRenderService) return this;
 
         const newParam: ISheetFloatDom = {
             ...drawingParm,
@@ -684,8 +685,8 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                     selectionRenderService
                 ) ?? drawingParm.sheetTransform
                 : drawingParm.sheetTransform,
+            transform: config.position,
         };
-
         const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
         if (!res) {
             throw new Error('updateFloatDom failed');

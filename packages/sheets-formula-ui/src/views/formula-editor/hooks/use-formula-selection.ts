@@ -45,6 +45,7 @@ export enum FormulaSelectingType {
     CAN_EDIT = 2,
     // editing cross sheet reference
     EDIT_OTHER_SHEET_REFERENCE = 3,
+    EDIT_OTHER_WORKBOOK_REFERENCE = 4,
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -67,7 +68,7 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
 
     const setIsSelecting = useEvent((v: FormulaSelectingType) => {
         if (refSelectionsRenderService) {
-            refSelectionsRenderService.setSkipLastEnabled(v === FormulaSelectingType.NEED_ADD || v === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE);
+            refSelectionsRenderService.setSkipLastEnabled(v === FormulaSelectingType.NEED_ADD || v === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE || v === FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE);
         }
         isSelectingRef.current = v;
         innerSetIsSelecting(v);
@@ -75,8 +76,9 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
 
     // eslint-disable-next-line complexity
     const calculateSelectingType = useEvent(() => {
-        if (!workbook) return;
-        const currentSheet = workbook.getActiveSheet();
+        const currentWorkbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!currentWorkbook) return;
+        const currentSheet = currentWorkbook.getActiveSheet();
         const activeRange = docSelectionRenderService?.getActiveTextRange();
         const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
         const config = getCurrentBodyDataStreamAndOffset(injector);
@@ -110,9 +112,13 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
                 if (isDisabledByPointer.current) {
                     return;
                 }
-                if (
-                    (!focusingNode.range.sheetName && currentSheet.getSheetId() === sourceSheet?.getSheetId()) ||
-                    focusingNode.range.sheetName === currentSheet.getName()
+
+                const { sheetName, unitId } = focusingNode.range;
+                if (unitId !== univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId()) {
+                    setIsSelecting(FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE);
+                } else if (
+                    (!sheetName && currentSheet.getSheetId() === sourceSheet?.getSheetId()) ||
+                    sheetName === currentSheet.getName()
                 ) {
                     setIsSelecting(FormulaSelectingType.CAN_EDIT);
                 } else {
@@ -159,9 +165,15 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
         const sub = workbook?.activeSheet$.subscribe(() => {
             calculateSelectingType();
         });
+        const sub2 = univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
+            calculateSelectingType();
+        });
 
-        return () => sub?.unsubscribe();
-    }, [calculateSelectingType, isFocus, workbook?.activeSheet$]);
+        return () => {
+            sub?.unsubscribe();
+            sub2?.unsubscribe();
+        };
+    }, [calculateSelectingType, isFocus, workbook?.activeSheet$, univerInstanceService.getCurrentTypeOfUnit$]);
 
     return { isSelecting, isSelectingRef };
 }

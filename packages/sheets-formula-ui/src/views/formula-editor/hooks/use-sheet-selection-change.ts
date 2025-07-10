@@ -23,7 +23,7 @@ import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -130,13 +130,18 @@ export const useSheetSelectionChange = (
                 const result = sequenceNodeToText(sequenceNodes);
                 handleRangeChange(result, refRanges[0].length, isEnd);
             }
-        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE) {
+        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE || isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE) {
             const last = selections.pop();
             if (!last) return;
             const node = sequenceNodes[nodeIndex];
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const oldToken = node.token;
-                node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                if (isAcrossWorkbook) {
+                    node.token = serializeRangeWithSpreadsheet(currentUnit?.getUnitId() ?? '', sheetName, last);
+                } else {
+                    node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
+                }
                 const newOffset = offset + (node.token.length - oldToken.length);
                 handleRangeChange(generateStringWithSequence(sequenceNodes), newOffset, isEnd);
             }
@@ -156,6 +161,10 @@ export const useSheetSelectionChange = (
                     const nodeRange = deserializeRangeWithSheet(item.token);
                     if (!nodeRange.sheetName) {
                         nodeRange.sheetName = sheetName;
+                    }
+
+                    if (((nodeRange.unitId || unitId) !== currentUnit?.getUnitId())) {
+                        return item.token;
                     }
 
                     if (isSupportAcrossSheet) {

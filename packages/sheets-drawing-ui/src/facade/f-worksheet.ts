@@ -17,7 +17,7 @@
 import type { IDisposable, ITransformState, Nullable } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
 import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
-import type { ICanvasFloatDom, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
+import type { ICanvasFloatDom, ICanvasFloatDomInfo, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
 import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
@@ -33,7 +33,9 @@ import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 // why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey { }
 
-export interface IFCanvasFloatDomResult extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId' | 'initPosition'>, IFComponentKey {
+export interface IFCanvasFloatDomResult extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId' | 'initPosition'>,
+    IFComponentKey,
+    Pick<ICanvasFloatDomInfo, 'id'> {
     position: ITransformState;
     id: string;
 }
@@ -67,7 +69,7 @@ export interface IFWorksheetLegacy {
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const allFloatDoms = fWorksheet.getAllFloatDoms();
      * allFloatDoms.forEach(floatDom => {
-     *   console.log('Float dom ID:', floatDom.componentKey);
+     *   console.log('Float dom ID:', floatDom.id);
      *   console.log('Position:', floatDom.position);
      * });
      * ```
@@ -78,13 +80,16 @@ export interface IFWorksheetLegacy {
      * Update float dom position and properties
      * @param {string} id - float dom id
      * @param {Partial<IFCanvasFloatDomResult>} config - new float dom config
-     * @returns {boolean} true if update successful
+     * @returns {FWorksheet} The worksheet instance for chaining
      * @example
      * ```ts
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const firstFloatDom = fWorksheet.getAllFloatDoms()[0];
      *
-     * // Update position and size
-     * const updated = fWorksheet.updateFloatDom('myFloatDomId', {
+     * if (!firstFloatDom) return;
+     *
+     * // Update first float dom position and size
+     * fWorksheet.updateFloatDom(firstFloatDom.id, {
      *   position: {
      *     left: 100,
      *     top: 100,
@@ -94,16 +99,16 @@ export interface IFWorksheetLegacy {
      *   }
      * });
      *
-     * // Update component data
-     * fWorksheet.updateFloatDom('myFloatDomId', {
+     * // Update first float dom data
+     * fWorksheet.updateFloatDom(firstFloatDom.id, {
      *   data: {
      *     label: 'Updated Label',
      *     color: '#ff0000'
      *   }
      * });
      *
-     * // Disable transform
-     * fWorksheet.updateFloatDom('myFloatDomId', {
+     * // Disable the first float dom from transform
+     * fWorksheet.updateFloatDom(firstFloatDom.id, {
      *   allowTransform: false
      * });
      * ```
@@ -113,37 +118,39 @@ export interface IFWorksheetLegacy {
     /**
      * Batch update float doms
      * @param {Array<{id: string, config: Partial<IFCanvasFloatDomResult>}>} updates - array of update configs
-     * @returns {number} number of successful updates
+     * @returns {FWorksheet} The worksheet instance for chaining
      * @example
      * ```ts
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
      *
      * // Update multiple float doms at once
-     * const successCount = fWorksheet.batchUpdateFloatDoms([
-     *   {
-     *     id: 'floatDom1',
-     *     config: {
-     *       position: {
-     *         left: 100,
-     *         top: 100
+     * const allFloatDoms = fWorksheet.getAllFloatDoms();
+     * fWorksheet.batchUpdateFloatDoms(allFloatDoms.map((floatDom, index) => {
+     *   if (floatDom.id === 'MyFloatDomId') {
+     *     return {
+     *       id: floatDom.id,
+     *       config: {
+     *         position: {
+     *           left: 100,
+     *           top: 100
+     *         },
+     *         data: {
+     *           label: 'Updated'
+     *         }
      *       }
      *     }
-     *   },
-     *   {
-     *     id: 'floatDom2',
+     *   }
+     *
+     *   return {
+     *     id: floatDom.id,
      *     config: {
      *       position: {
      *         left: 300,
      *         top: 100
-     *       },
-     *       data: {
-     *         label: 'Updated'
      *       }
      *     }
      *   }
-     * ]);
-     *
-     * console.log(`Successfully updated ${successCount} float doms`);
+     * }));
      * ```
      */
     batchUpdateFloatDoms(updates: Array<{ id: string; config: Partial<IFCanvasFloatDomResult> }>): this;
@@ -151,18 +158,16 @@ export interface IFWorksheetLegacy {
     /**
      * Remove float dom by id
      * @param {string} id - float dom id
-     * @returns {boolean} true if removal successful
+     * @returns {FWorksheet} The worksheet instance for chaining
      * @example
      * ```ts
      * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const firstFloatDom = fWorksheet.getAllFloatDoms()[0];
      *
-     * // Remove a float dom
-     * const removed = fWorksheet.removeFloatDom('myFloatDomId');
-     * if (removed) {
-     *   console.log('Float dom successfully removed');
-     * } else {
-     *   console.log('Float dom not found or could not be removed');
-     * }
+     * if (!firstFloatDom) return;
+     *
+     * // Remove the first float dom
+     * fWorksheet.removeFloatDom(firstFloatDom.id);
      * ```
      */
     removeFloatDom(id: string): this;
@@ -191,7 +196,7 @@ export interface IFWorksheetLegacy {
      *
      * // Add a floating DOM
      * // If disposable is null, floating DOM addition failed
-     * const disposeable = fWorksheet.addFloatDomToPosition({
+     * const disposable = fWorksheet.addFloatDomToPosition({
      *   componentKey: 'myFloatDom',
      *   initPosition: {
      *     startX: 100,
@@ -205,10 +210,11 @@ export interface IFWorksheetLegacy {
      *     label: 'hahah',
      *   },
      * });
+     * console.log(disposable?.id); // The id of the floating DOM
      *
      * // Remove the floating DOM after 2 seconds
      * setTimeout(() => {
-     *   disposeable?.dispose();
+     *   disposable?.dispose();
      * }, 2000);
      * ```
      */
@@ -253,11 +259,12 @@ export interface IFWorksheetLegacy {
      *
      * // Add the range loading component covering the range A1:C3
      * const fRange = fWorksheet.getRange('A1:C3');
-     * const disposeable = fWorksheet.addFloatDomToRange(fRange, { componentKey: 'RangeLoading' }, {}, 'myRangeLoading');
+     * const disposable = fWorksheet.addFloatDomToRange(fRange, { componentKey: 'RangeLoading' }, {}, 'myRangeLoading');
+     * console.log(disposable?.id); // The id of the floating DOM
      *
      * // Remove the floating DOM after 2 seconds
      * setTimeout(() => {
-     *   disposeable?.dispose();
+     *   disposable?.dispose();
      * }, 2000);
      *
      * // another example-------------------
@@ -290,7 +297,7 @@ export interface IFWorksheetLegacy {
      *
      * // Add the float button to the range A5:C7, position is start from A5 cell, and width is 100px, height is 30px, margin is 100% of range width and height
      * const fRange2 = fWorksheet.getRange('A5:C7');
-     * const disposeable2 = fWorksheet.addFloatDomToRange(
+     * const disposable2 = fWorksheet.addFloatDomToRange(
      *   fRange2,
      *   {
      *     componentKey: 'FloatButton',
@@ -303,6 +310,7 @@ export interface IFWorksheetLegacy {
      *   },
      *   'myFloatButton'
      * );
+     * console.log(disposable2?.id); // The id of the floating DOM
      * ```
      */
     addFloatDomToRange(range: FRange, layer: Partial<IFICanvasFloatDom>, domLayout: Partial<IDOMAnchor>, id?: string): Nullable<{
@@ -349,7 +357,7 @@ export interface IFWorksheetLegacy {
      * univerAPI.registerComponent('FloatButton', FloatButton);
      *
      * // Add the float button to the column D header, position is right align, width is 100px, height is 30px, margin is 0
-     * const disposeable = fWorksheet.addFloatDomToColumnHeader(
+     * const disposable = fWorksheet.addFloatDomToColumnHeader(
      *   3,
      *   {
      *     componentKey: 'FloatButton',
@@ -364,10 +372,11 @@ export interface IFWorksheetLegacy {
      *   },
      *   'myFloatButton'
      * );
+     * console.log(disposable?.id); // The id of the floating DOM
      *
      * // Remove the float button after 2 seconds
      * setTimeout(() => {
-     *   disposeable?.dispose();
+     *   disposable?.dispose();
      * }, 2000);
      * ```
      */
@@ -654,7 +663,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             });
     }
 
-    override updateFloatDom(id: string, config: Partial<IFCanvasFloatDomResult>): this {
+    override updateFloatDom(id: string, config: Partial<Omit<IFCanvasFloatDomResult, 'id'>>): this {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const info = floatDomService.getFloatDomInfo(id);
         if (!info) return this;
@@ -688,7 +697,10 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                     selectionRenderService
                 ) ?? drawingParm.sheetTransform
                 : drawingParm.sheetTransform,
-            transform: config.position,
+            transform: {
+                ...drawingParm.transform,
+                ...config.position, // Merge with existing transform
+            },
         };
         const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
         if (!res) {
@@ -698,7 +710,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return this;
     }
 
-    override batchUpdateFloatDoms(updates: Array<{ id: string; config: Partial<IFCanvasFloatDomResult> }>): this {
+    override batchUpdateFloatDoms(updates: Array<{ id: string; config: Partial<Omit<IFCanvasFloatDomResult, 'id'>> }>): this {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const drawingService = this._injector.get(ISheetDrawingService);
         const renderManagerService = this._injector.get(IRenderManagerService);
@@ -723,7 +735,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             const skeleton = this.getSkeleton();
             if (!skeleton) continue;
 
-            const selectionRenderService = renderManagerService.getRenderById(this.getWorkbook().getUnitId())?.with(ISheetSelectionRenderService);
+            const selectionRenderService = render.with(ISheetSelectionRenderService);
             if (!selectionRenderService) return this;
 
             const newParam: ISheetFloatDom = {
@@ -737,6 +749,10 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                         selectionRenderService
                     ) ?? drawingParm.sheetTransform
                     : drawingParm.sheetTransform,
+                transform: {
+                    ...drawingParm.transform,
+                    ...update.config.position, // Merge with existing transform
+                },
             };
 
             drawings.push(newParam);

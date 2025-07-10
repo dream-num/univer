@@ -16,11 +16,16 @@
 
 import type { IDrawingSearch, Injector } from '@univerjs/core';
 import type { IEventBase } from '@univerjs/core/facade';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
 import type { FWorkbook } from '@univerjs/sheets/facade';
-import type { IBeforeOverGridImageChangeParamObject } from './f-event';
-import { CanceledError, ICommandService } from '@univerjs/core';
+import type {
+    IBeforeFloatDomAddParam,
+    IBeforeFloatDomDeleteParam,
+    IBeforeFloatDomUpdateParam,
+    IBeforeOverGridImageChangeParamObject,
+} from './f-event';
+import { CanceledError, DrawingTypeEnum, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
@@ -57,6 +62,67 @@ export class FUniverDrawingMixin extends FUniver {
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
+
+        // Float DOM Add Events
+        this.registerEventHandler(
+            this.Event.BeforeFloatDomAdd,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
+
+                const params = commandInfo.params as IInsertDrawingCommandParams;
+                const workbook = this.getActiveWorkbook();
+                if (workbook == null || params == null) {
+                    return;
+                }
+
+                const { drawings } = params;
+                const floatDomDrawings = drawings.filter(
+                    (drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_DOM
+                ) as ISheetFloatDom[];
+
+                if (floatDomDrawings.length === 0) {
+                    return;
+                }
+
+                const eventParams: IBeforeFloatDomAddParam = {
+                    workbook,
+                    drawings: floatDomDrawings,
+                };
+
+                this.fireEvent(this.Event.BeforeFloatDomAdd, eventParams);
+
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.FloatDomAdded,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
+
+                const params = commandInfo.params as IInsertDrawingCommandParams;
+                const workbook = this.getActiveWorkbook();
+                if (workbook == null || params == null) {
+                    return;
+                }
+
+                const { drawings } = params;
+                const floatDomDrawings = drawings.filter(
+                    (drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_DOM
+                ) as ISheetFloatDom[];
+
+                if (floatDomDrawings.length === 0) {
+                    return;
+                }
+
+                this.fireEvent(this.Event.FloatDomAdded, {
+                    workbook,
+                    drawings: floatDomDrawings,
+                });
+            })
+        );
 
         this.registerEventHandler(
             this.Event.BeforeOverGridImageInsert,
@@ -152,6 +218,149 @@ export class FUniverDrawingMixin extends FUniver {
                     drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
                     throw new CanceledError();
                 }
+            })
+        );
+
+        // Float DOM Update Events
+        this.registerEventHandler(
+            this.Event.BeforeFloatDomUpdate,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SetSheetDrawingCommand.id) return;
+
+                const params = commandInfo.params as ISetDrawingCommandParams;
+                const workbook = this.getActiveWorkbook();
+                if (workbook == null || params == null) {
+                    return;
+                }
+
+                const { drawings } = params;
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
+                const floatDomDrawings: ISheetFloatDom[] = [];
+                drawings.forEach((drawing) => {
+                    const dom = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetFloatDom;
+                    if (dom?.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                        floatDomDrawings.push(dom);
+                    }
+                });
+
+                if (floatDomDrawings.length === 0) {
+                    return;
+                }
+
+                const eventParams: IBeforeFloatDomUpdateParam = {
+                    workbook,
+                    drawings: floatDomDrawings,
+                };
+
+                this.fireEvent(this.Event.BeforeFloatDomUpdate, eventParams);
+
+                if (eventParams.cancel) {
+                    drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
+                    throw new CanceledError();
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.FloatDomUpdated,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SetSheetDrawingCommand.id) return;
+
+                const params = commandInfo.params as ISetDrawingCommandParams;
+                const workbook = this.getActiveWorkbook();
+                if (workbook == null || params == null) {
+                    return;
+                }
+
+                const { drawings } = params;
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
+                const floatDomDrawings: ISheetFloatDom[] = [];
+                drawings.forEach((drawing) => {
+                    const dom = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetFloatDom;
+                    if (dom?.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                        floatDomDrawings.push(dom);
+                    }
+                });
+
+                if (floatDomDrawings.length === 0) {
+                    return;
+                }
+
+                this.fireEvent(this.Event.FloatDomUpdated, {
+                    workbook,
+                    drawings: floatDomDrawings,
+                });
+            })
+        );
+
+        // Float DOM Delete Events
+        this.registerEventHandler(
+            this.Event.BeforeFloatDomDelete,
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
+
+                const params = commandInfo.params as IDeleteDrawingCommandParams;
+                const workbook = this.getActiveWorkbook();
+                if (workbook == null || params == null) {
+                    return;
+                }
+
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
+                const { drawings } = params;
+                const floatDomDrawings = drawings
+                    .map((drawing) => drawingManagerService.getDrawingByParam(drawing))
+                    .filter((drawing): drawing is ISheetFloatDom =>
+                        drawing?.drawingType === DrawingTypeEnum.DRAWING_DOM
+                    );
+
+                if (floatDomDrawings.length === 0) {
+                    return;
+                }
+
+                const eventParams: IBeforeFloatDomDeleteParam = {
+                    workbook,
+                    drawings: floatDomDrawings,
+                };
+
+                this.fireEvent(this.Event.BeforeFloatDomDelete, eventParams);
+
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                }
+            })
+        );
+
+        this.registerEventHandler(
+            this.Event.FloatDomDeleted,
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
+
+                const params = commandInfo.params as IDeleteDrawingCommandParams;
+                const workbook = this.getActiveWorkbook();
+                if (workbook == null || params == null) {
+                    return;
+                }
+
+                const drawingManagerService = injector.get(IDrawingManagerService);
+
+                const { drawings } = params;
+                const floatDomDrawings = drawings
+                    .map((drawing) => drawingManagerService.getDrawingByParam(drawing))
+                    .filter((drawing): drawing is ISheetFloatDom =>
+                        drawing?.drawingType === DrawingTypeEnum.DRAWING_DOM
+                    );
+
+                if (floatDomDrawings.length === 0) {
+                    return;
+                }
+
+                this.fireEvent(this.Event.FloatDomDeleted, {
+                    workbook,
+                    drawings: floatDomDrawings,
+                });
             })
         );
 

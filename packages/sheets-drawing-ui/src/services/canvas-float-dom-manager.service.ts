@@ -613,6 +613,22 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         ...sheetDrawing.transform,
                     };
                     this._transformChange$.next({ id: data.drawingId, value: newValue });
+                    this._canvasFloatDomService.updateFloatDom(data.drawingId, {
+                        ...sheetDrawing,
+                    });
+
+                    const renderObject = this._getSceneAndTransformerByDrawingSearch(data.unitId);
+                    if (renderObject) {
+                        const { scene } = renderObject;
+                        const floatDomInfo = this._domLayerInfoMap.get(data.drawingId);
+                        if (floatDomInfo?.rect) {
+                            if (sheetDrawing.allowTransform === false) {
+                                scene.detachTransformerFrom(floatDomInfo.rect);
+                            } else {
+                                scene.attachTransformerTo(floatDomInfo.rect);
+                            }
+                        }
+                    }
                 });
             })
         );
@@ -626,19 +642,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 });
             })
         );
-    }
-
-    updateFloatDomProps(unitId: string, subUnitId: string, id: string, props: Record<string, any>) {
-        const info = this._domLayerInfoMap.get(id);
-        const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-        if (info && renderObject) {
-            const { scene } = renderObject;
-            const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: id });
-            const rectShape = scene.getObject(rectShapeKey);
-            if (rectShape && rectShape instanceof Rect) {
-                rectShape.setProps(props);
-            }
-        }
     }
 
     // CreateFloatDomCommand --> floatDomService.addFloatDomToPosition

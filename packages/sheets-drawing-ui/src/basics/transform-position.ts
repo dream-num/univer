@@ -20,6 +20,7 @@ import type { ISheetSelectionRenderService, SheetSkeletonManagerService } from '
 import { precisionTo } from '@univerjs/engine-render';
 import { convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets-ui';
 
+// eslint-disable-next-line max-lines-per-function
 export function drawingPositionToTransform(
     position: ISheetDrawingPosition,
     selectionRenderService: ISheetSelectionRenderService,

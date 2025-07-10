@@ -56,6 +56,19 @@ export class CanvasFloatDomService {
         this._domLayers$.next(Array.from(this._domLayerMap.entries()));
     }
 
+    updateFloatDom(id: string, item: Partial<IFloatDom>) {
+        const current = this._domLayerMap.get(id);
+        if (!current) {
+            return;
+        }
+        this._domLayerMap.set(id, {
+            ...current,
+            ...item,
+        });
+
+        this._notice();
+    }
+
     addFloatDom(item: IFloatDom) {
         this._domLayerMap.set(item.id, item);
         this._notice();

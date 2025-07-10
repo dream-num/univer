@@ -16,6 +16,7 @@
 
 import './global.css';
 
+export { drawingPositionToTransform, transformToDrawingPosition } from './basics/transform-position';
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
 export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
 export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';
@@ -32,5 +33,6 @@ export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing
 export type { IUniverSheetsDrawingUIConfig } from './controllers/config.schema';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
-export { type ICanvasFloatDom, type IDOMAnchor, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+export { calcSheetFloatDomPosition, type ICanvasFloatDom, type ICanvasFloatDomInfo, type IDOMAnchor, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+
 export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';

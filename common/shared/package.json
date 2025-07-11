@@ -1,6 +1,6 @@
 {
     "name": "@univerjs-infra/shared",
-    "version": "0.8.0",
+    "version": "0.9.2",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -12,7 +12,7 @@
     },
     "keywords": [],
     "exports": {
-        "./eslint": "./eslint/index.js",
+        "./eslint": "./eslint/index.ts",
         "./tsconfigs/*": "./tsconfigs/*.json",
         "./vite": "./vite/index.ts",
         "./vitest": "./vitest/index.js",
@@ -25,29 +25,29 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.32.1",
-        "@vitejs/plugin-react": "^4.5.0",
-        "@vitejs/plugin-vue": "^5.2.4",
-        "@vitest/coverage-istanbul": "^3.1.4",
+        "@typescript-eslint/parser": "^8.36.0",
+        "@vitejs/plugin-react": "^4.6.0",
+        "@vitejs/plugin-vue": "^6.0.0",
+        "@vitest/coverage-istanbul": "^3.2.4",
         "autoprefixer": "^10.4.21",
-        "eslint-plugin-readable-tailwind": "^1.9.1",
+        "eslint-plugin-better-tailwindcss": "^3.4.4",
         "fs-extra": "^11.3.0",
-        "happy-dom": "17.4.7",
+        "happy-dom": "18.0.1",
         "javascript-obfuscator": "^4.1.1",
-        "postcss-preset-env": "^10.1.6",
+        "postcss-preset-env": "^10.2.4",
+        "postcss-replace": "^2.0.1",
         "sort-keys": "^5.1.0",
         "tailwind-scrollbar": "^4.0.2",
-        "tailwindcss": "^3.4.17",
-        "tailwindcss-rem-to-px": "^0.1.1",
+        "tailwindcss": "3.4.17",
         "vite": "^6.3.5",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
-        "vitest": "^3.1.4"
+        "vitest": "^3.2.4"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@univerjs/icons": "^0.4.4",
-        "@univerjs/icons-svg": "^0.4.4",
+        "@univerjs/icons": "^0.4.6",
+        "@univerjs/icons-svg": "^0.4.6",
         "@univerjs/protocol": "0.1.46"
     }
 }

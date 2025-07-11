@@ -40,14 +40,10 @@ export const ButtonGroup = ({
 
     return (
         <div
-            className={clsx(
-                'univer-flex',
-                {
-                    'univer-flex-col': isVertical,
-                    'univer-w-fit': isVertical,
-                },
-                className
-            )}
+            className={clsx('univer-grid', {
+                'univer-grid-flow-row': isVertical,
+                'univer-w-fit': isVertical,
+            }, className)}
         >
             {Children.map(children, (child, index) => {
                 const isFirst = index === 0;
@@ -56,13 +52,13 @@ export const ButtonGroup = ({
                 return cloneElement(child, {
                     className: clsx(
                         {
-                            'univer-rounded-l-none': isHorizontal && !isFirst,
-                            'univer-rounded-r-none': isHorizontal && !isLast,
-                            'univer-border-l-0': isHorizontal && !isFirst,
+                            '!univer-rounded-l-none': isHorizontal && !isFirst,
+                            '!univer-rounded-r-none': isHorizontal && !isLast,
+                            '!univer-border-l-0': isHorizontal && !isFirst,
 
-                            'univer-rounded-t-none': isVertical && !isFirst,
-                            'univer-rounded-b-none': isVertical && !isLast,
-                            'univer-border-t-0': isVertical && !isFirst,
+                            '!univer-rounded-t-none': isVertical && !isFirst,
+                            '!univer-rounded-b-none': isVertical && !isLast,
+                            '!univer-border-t-0': isVertical && !isFirst,
                         },
                         child.props.className
                     ),

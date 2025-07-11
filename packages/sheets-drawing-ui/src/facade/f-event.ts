@@ -16,7 +16,7 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import type { IEventBase } from '@univerjs/core/facade';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
+import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import type { FWorkbook } from '@univerjs/sheets/facade';
 import type { FOverGridImage } from './f-over-grid-image';
 import { FEventName } from '@univerjs/core/facade';
@@ -25,6 +25,108 @@ import { FEventName } from '@univerjs/core/facade';
  * @ignore
  */
 interface IFDrawingEventNameMixin {
+    /**
+     * Triggered before float dom insertion.
+     * @see {@link IBeforeFloatDomAddParam}
+     * @example
+     * ```ts
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeFloatDomAdd, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, drawings } = params;
+     *   // Cancel the insertion operation
+     *   params.cancel = true;
+     * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
+     * ```
+     */
+    readonly BeforeFloatDomAdd: 'BeforeFloatDomAdd';
+
+    /**
+     * Triggered after float dom insertion.
+     * @see {@link IFloatDomAddedParam}
+     * @example
+     * ```ts
+     * const disposable = univerAPI.addEvent(univerAPI.Event.FloatDomAdded, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, drawings } = params;
+     * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
+     * ```
+     */
+    readonly FloatDomAdded: 'FloatDomAdded';
+
+    /**
+     * Triggered before float dom update.
+     * @see {@link IBeforeFloatDomUpdateParam}
+     * @example
+     * ```ts
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeFloatDomUpdate, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, drawings } = params;
+     *   // Cancel the update operation
+     *   params.cancel = true;
+     * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
+     * ```
+     */
+    readonly BeforeFloatDomUpdate: 'BeforeFloatDomUpdate';
+
+    /**
+     * Triggered after float dom update.
+     * @see {@link IFloatDomUpdatedParam}
+     * @example
+     * ```ts
+     * const disposable = univerAPI.addEvent(univerAPI.Event.FloatDomUpdated, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, drawings } = params;
+     * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
+     * ```
+     */
+    readonly FloatDomUpdated: 'FloatDomUpdated';
+
+    /**
+     * Triggered before float dom deletion.
+     * @see {@link IBeforeFloatDomDeleteParam}
+     * @example
+     * ```ts
+     * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeFloatDomDelete, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, drawings } = params;
+     *   // Cancel the deletion operation
+     *   params.cancel = true;
+     * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
+     * ```
+     */
+    readonly BeforeFloatDomDelete: 'BeforeFloatDomDelete';
+
+    /**
+     * Triggered after float dom deletion.
+     * @see {@link IFloatDomDeletedParam}
+     * @example
+     * ```ts
+     * const disposable = univerAPI.addEvent(univerAPI.Event.FloatDomDeleted, (params) => {
+     *   console.log(params);
+     *   // do something
+     *   const { workbook, drawings } = params;
+     * })
+     *
+     * // Remove the event listener, use `disposable.dispose()`
+     * ```
+     */
+    readonly FloatDomDeleted: 'FloatDomDeleted';
+
     /**
      * Triggered before floating image insertion.
      * @see {@link IBeforeOverGridImageInsertParam}
@@ -163,6 +265,30 @@ interface IFDrawingEventNameMixin {
 }
 
 export class FDrawingEventNameMixin extends FEventName implements IFDrawingEventNameMixin {
+    override get BeforeFloatDomAdd(): 'BeforeFloatDomAdd' {
+        return 'BeforeFloatDomAdd' as const;
+    }
+
+    override get FloatDomAdded(): 'FloatDomAdded' {
+        return 'FloatDomAdded' as const;
+    }
+
+    override get BeforeFloatDomUpdate(): 'BeforeFloatDomUpdate' {
+        return 'BeforeFloatDomUpdate' as const;
+    }
+
+    override get FloatDomUpdated(): 'FloatDomUpdated' {
+        return 'FloatDomUpdated' as const;
+    }
+
+    override get BeforeFloatDomDelete(): 'BeforeFloatDomDelete' {
+        return 'BeforeFloatDomDelete' as const;
+    }
+
+    override get FloatDomDeleted(): 'FloatDomDeleted' {
+        return 'FloatDomDeleted' as const;
+    }
+
     override get BeforeOverGridImageChange(): 'BeforeOverGridImageChange' {
         return 'BeforeOverGridImageChange' as const;
     }
@@ -307,6 +433,78 @@ export interface IOverGridImageSelectedParam extends IEventBase {
 /**
  * @ignore
  */
+export interface IBeforeFloatDomAddParam extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+
+    /**
+     * Collection of float dom drawings to be added.
+     */
+    drawings: ISheetFloatDom[];
+}
+
+export interface IFloatDomAddedParam extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+
+    /**
+     * Collection of float dom drawings that were added.
+     */
+    drawings: ISheetFloatDom[];
+}
+
+export interface IBeforeFloatDomUpdateParam extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+
+    /**
+     * Collection of float dom drawings to be updated.
+     */
+    drawings: ISheetFloatDom[];
+}
+
+export interface IFloatDomUpdatedParam extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+
+    /**
+     * Collection of float dom drawings that were updated.
+     */
+    drawings: ISheetFloatDom[];
+}
+
+export interface IBeforeFloatDomDeleteParam extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+
+    /**
+     * Collection of float dom drawings to be deleted.
+     */
+    drawings: ISheetFloatDom[];
+}
+
+export interface IFloatDomDeletedParam extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+
+    /**
+     * Collection of float dom drawing ids that were deleted.
+     */
+    drawings: string[];
+}
+
 interface IFSheetsUIEventParamConfig {
     BeforeOverGridImageChange: IBeforeOverGridImageChangeParam;
     OverGridImageChanged: IOverGridImageChangedParam;
@@ -319,6 +517,15 @@ interface IFSheetsUIEventParamConfig {
 
     BeforeOverGridImageSelect: IBeforeOverGridImageSelectParam;
     OverGridImageSelected: IOverGridImageSelectedParam;
+
+    BeforeFloatDomAdd: IBeforeFloatDomAddParam;
+    FloatDomAdded: IFloatDomAddedParam;
+
+    BeforeFloatDomUpdate: IBeforeFloatDomUpdateParam;
+    FloatDomUpdated: IFloatDomUpdatedParam;
+
+    BeforeFloatDomDelete: IBeforeFloatDomDeleteParam;
+    FloatDomDeleted: IFloatDomDeletedParam;
 }
 
 FEventName.extend(FDrawingEventNameMixin);

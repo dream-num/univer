@@ -21,7 +21,7 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsTableController, SheetTableInsertColCommand, SheetTableInsertRowCommand, SheetTableRemoveColCommand, SheetTableRemoveRowCommand } from '@univerjs/sheets-table';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
 import { OpenTableSelectorOperation } from '../commands/operations/open-table-selector.operation';
 import { TABLE_TOOLBAR_BUTTON } from '../const';
@@ -36,6 +36,7 @@ export function sheetTableToolbarInsertMenuFactory(accessor: IAccessor): IMenuIt
         icon: TABLE_TOOLBAR_BUTTON,
         tooltip: 'sheets-table.title',
         title: 'sheets-table.title',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {}, true),
     };
 }

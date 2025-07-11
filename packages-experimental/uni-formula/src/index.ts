@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-export { UniverDocUniFormulaPlugin } from './plugin';
-export { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
-export { UNI_FORMULA_PLUGIN_NAME as DOC_FORMULA_PLUGIN_NAME } from './const';
-export type { IDocFormulaCache, IDocFormulaData, IDocFormulaReference } from './models/doc-formula';
-export type { ISlideFormulaCache, ISlideFormulaData, ISlideFormulaReference } from './models/slide-formula';
-
-// #region - all commands
-
 export {
     AddDocUniFormulaMutation,
     type IAddDocUniFormulaMutationParams,
@@ -30,5 +22,8 @@ export {
     RemoveDocUniFormulaMutation,
     UpdateDocUniFormulaMutation,
 } from './commands/mutations/doc-formula.mutation';
-
-// #endregion
+export { UNI_FORMULA_PLUGIN_NAME as DOC_FORMULA_PLUGIN_NAME } from './const';
+export type { IDocFormulaCache, IDocFormulaData, IDocFormulaReference } from './models/doc-formula';
+export type { ISlideFormulaCache, ISlideFormulaData, ISlideFormulaReference } from './models/slide-formula';
+export { UniverDocUniFormulaPlugin } from './plugin';
+export { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { CellValue, ICellData, IRange, IStyleData, Nullable, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
-import { CellValueType, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
+import type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
+import { CellValueType, ColorKit, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
+import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { ensureNumeric, getCustomFilterFn, isNumericFilterFn, notEquals } from './custom-filters';
-import { CustomFilterOperator } from './types';
+import { CustomFilterOperator, FilterBy } from './types';
 
 const EMPTY = () => new Set<number>();
 
@@ -297,12 +298,13 @@ export class FilterColumn extends Disposable {
     get filteredOutRows(): Readonly<Nullable<Set<number>>> { return this._filteredOutRows; }
 
     /** Cache the filter function.  */
-    private _filterFn: Nullable<FilterFn> = null;
+    private _filterFn: Nullable<FilterFn | ColorFilterFn> = null;
 
     private _range: Nullable<IRange> = null;
     private _column: number = 0;
 
-    private _filterByValues = false;
+    private _filterBy: FilterBy = FilterBy.VALUES;
+    get filterBy(): Readonly<FilterBy> { return this._filterBy; }
 
     constructor(
         public readonly unitId: string,
@@ -403,10 +405,13 @@ export class FilterColumn extends Disposable {
                 continue;
             }
 
-            const value = this._filterByValues
-                ? extractPureTextFromCell(this._worksheet.getCell(row, col))
-                : getFilterValueForConditionalFiltering(this._worksheet, row, col);
-            if (!this._filterFn(value)) {
+            const filterResult = this._filterBy === FilterBy.VALUES
+                ? (this._filterFn as FilterFn)(extractPureTextFromCell(this._worksheet.getCell(row, col)))
+                : this._filterBy === FilterBy.COLORS
+                    ? (this._filterFn as ColorFilterFn)(this._worksheet.getComposedCellStyle(row, col))
+                    : (this._filterFn as FilterFn)(getFilterValueForConditionalFiltering(this._worksheet, row, col));
+
+            if (!filterResult) {
                 filteredOutRows.add(row);
 
                 // Add all rows into filtered out rows if the cell is a merged cell.
@@ -427,7 +432,11 @@ export class FilterColumn extends Disposable {
         }
 
         this._filterFn = generateFilterFn(this._criteria);
-        this._filterByValues = !!this._criteria.filters;
+        this._filterBy = this._criteria.filters
+            ? FilterBy.VALUES
+            : this._criteria.colorFilters
+                ? FilterBy.COLORS
+                : FilterBy.CONDITIONS;
     }
 }
 
@@ -436,15 +445,20 @@ export class FilterColumn extends Disposable {
  * "matched" and the corresponding row would not be filtered out.
  */
 export type FilterFn = (value: Nullable<CellValue>) => boolean;
+export type ColorFilterFn = (value: Nullable<IStyleData>) => boolean;
 
 /**
  * This functions take a `IFilterColumn` as input and return a function that can be used to filter rows.
  * @param column
  * @returns the filter function that takes the cell's value and return a boolean.
  */
-export function generateFilterFn(column: IFilterColumn): FilterFn {
+export function generateFilterFn(column: IFilterColumn): FilterFn | ColorFilterFn {
     if (column.filters) {
         return filterByValuesFnFactory(column.filters);
+    }
+
+    if (column.colorFilters) {
+        return filterByColorsFnFactory(column.colorFilters);
     }
 
     if (column.customFilters) {
@@ -462,6 +476,37 @@ function filterByValuesFnFactory(values: IFilters): FilterFn {
         if (value === undefined || value === '') return includeBlank;
         return valuesSet.has(typeof value === 'string' ? value : `${value}`);
     };
+}
+
+function filterByColorsFnFactory(colorFilters: IColorFilters): ColorFilterFn {
+    if (colorFilters.cellFillColors) {
+        const fillColorsSet = new Set(colorFilters.cellFillColors);
+        return (cellStyle) => {
+            // default cell fill color is save as null in the color filters.
+            if (!cellStyle || !cellStyle.bg?.rgb) {
+                if (fillColorsSet.has(null)) return true;
+                return false;
+            }
+
+            const bg = new ColorKit(cellStyle.bg.rgb).toRgbString();
+            return fillColorsSet.has(bg);
+        };
+    }
+
+    if (colorFilters.cellTextColors) {
+        const textColorsSet = new Set(colorFilters.cellTextColors);
+        return (cellStyle) => {
+            if (!cellStyle || !cellStyle.cl?.rgb) {
+                if (textColorsSet.has(COLOR_BLACK_RGB)) return true;
+                return false;
+            }
+
+            const cl = new ColorKit(cellStyle.cl.rgb).toRgbString();
+            return textColorsSet.has(cl);
+        };
+    }
+
+    throw new Error('[FilterModel]: color filters are not supported yet.');
 }
 
 function customFilterFnFactory(customFilters: ICustomFilters): FilterFn {

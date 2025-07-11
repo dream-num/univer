@@ -16,10 +16,6 @@
 
 import './global.css';
 
-export { UniverSheetsSortUIPlugin } from './plugin';
-
-// #region - all commands
-
 export {
     SortRangeAscCommand,
     SortRangeAscExtCommand,
@@ -32,5 +28,5 @@ export {
     SortRangeDescExtInCtxMenuCommand,
     SortRangeDescInCtxMenuCommand,
 } from './commands/commands/sheets-sort.command';
-
-// #endregion
+export type { IUniverSheetsSortUIConfig } from './controllers/config.schema';
+export { UniverSheetsSortUIPlugin } from './plugin';

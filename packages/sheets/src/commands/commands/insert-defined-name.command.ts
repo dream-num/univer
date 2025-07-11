@@ -15,12 +15,13 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 
 /**
  * The command to insert new defined name

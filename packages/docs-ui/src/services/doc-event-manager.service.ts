@@ -15,7 +15,16 @@
  */
 
 import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonSection, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    IBoundRectNoAngle,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IRenderContext,
+    IRenderModule,
+} from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
@@ -714,10 +723,14 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             };
         }
 
-        const paragraph = this._paragraphBounds.values().find((bounds) => {
-            return bounds.rects.some((rect) => isPointInRect(x, y, rect));
-        });
-
+        let paragraph: IMutiPageParagraphBound | undefined;
+        for (const bounds of this._paragraphBounds) {
+            const bound = bounds[1];
+            if (bound.rects.some((rect) => isPointInRect(x, y, rect))) {
+                paragraph = bound;
+                break;
+            }
+        }
         return paragraph;
     }
 

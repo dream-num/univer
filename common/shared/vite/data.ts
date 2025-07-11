@@ -48,7 +48,7 @@ export const peerDepsMap = {
     '@wendellhu/redi': {
         global: '@wendellhu/redi',
         name: '@wendellhu/redi',
-        version: '0.18.3',
+        version: '0.19.2',
     },
     '@wendellhu/redi/react-bindings': {
         global: '@wendellhu/redi/react-bindings',
@@ -64,6 +64,5 @@ export const peerDepsMap = {
         global: 'Vue',
         name: 'vue',
         version: '>=3.0.0',
-        optional: true,
     },
 };

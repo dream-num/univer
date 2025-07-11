@@ -16,20 +16,16 @@
 
 import './global.css';
 
-export { UniverThreadCommentUIPlugin } from './plugin';
-export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
-export { ThreadCommentPanel } from './views/thread-comment-panel';
-export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
-export { ThreadCommentTree } from './views/thread-comment-tree';
-export type { IThreadCommentTreeProps } from './views/thread-comment-tree';
-export { THREAD_COMMENT_PANEL } from './types/const';
-
-// #region - all commands
-
 export {
     type ISetActiveCommentOperationParams,
     SetActiveCommentOperation,
     ToggleSheetCommentPanelOperation,
 } from './commands/operations/comment.operations';
-
-// #endregion
+export type { IUniverThreadCommentUIConfig } from './controllers/config.schema';
+export { UniverThreadCommentUIPlugin } from './plugin';
+export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
+export { THREAD_COMMENT_PANEL } from './types/const';
+export { ThreadCommentPanel } from './views/thread-comment-panel';
+export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
+export { ThreadCommentTree } from './views/thread-comment-tree';
+export type { IThreadCommentTreeProps } from './views/thread-comment-tree';

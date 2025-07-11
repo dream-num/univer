@@ -15,7 +15,11 @@
  */
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
+import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
+import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
+import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
 import type { ISetWorksheetNameMutationParams } from '../../commands/mutations/set-worksheet-name.mutation';
 import { CustomCommandExecutionError, Disposable, DisposableCollection, ICommandService, IContextService, Inject, IPermissionService, isICellData, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
@@ -27,11 +31,11 @@ import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../../commands/commands/insert-range-move-right.command';
-import { type IMoveRangeCommandParams, MoveRangeCommand } from '../../commands/commands/move-range.command';
-import { type IMoveColsCommandParams, type IMoveRowsCommandParams, MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
+import { MoveRangeCommand } from '../../commands/commands/move-range.command';
+import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { SetSelectedColsVisibleCommand, SetSpecificColsVisibleCommand } from '../../commands/commands/set-col-visible.command';
-import { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
-import { type ISetSpecificRowsVisibleCommandParams, SetSelectedRowsVisibleCommand, SetSpecificRowsVisibleCommand } from '../../commands/commands/set-row-visible.command';
+import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
+import { SetSelectedRowsVisibleCommand, SetSpecificRowsVisibleCommand } from '../../commands/commands/set-row-visible.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetNameCommand } from '../../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../../commands/commands/set-worksheet-order.command';

@@ -190,6 +190,10 @@ export class BaseFunction {
         return false;
     }
 
+    isArgumentsIgnoreNumberPattern() {
+        return false;
+    }
+
     setRefInfo(unitId: string, subUnitId: string, row: number, column: number) {
         this._unitId = unitId;
         this._subUnitId = subUnitId;

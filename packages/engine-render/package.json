@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "0.8.0",
+    "version": "0.9.2",
     "private": false,
     "description": "UniverSheet normal base-render",
     "author": "DreamNum <developer@univer.ai>",
@@ -61,8 +61,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@floating-ui/dom": "^1.6.13",
-        "@floating-ui/utils": "^0.2.9",
+        "@floating-ui/dom": "^1.7.2",
+        "@floating-ui/utils": "^0.2.10",
         "@univerjs/core": "workspace:*",
         "cjk-regex": "^3.3.0",
         "franc-min": "^6.2.0",
@@ -74,7 +74,7 @@
         "rxjs": "^7.8.2",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
-        "vitest": "^3.1.4"
+        "vitest": "^3.2.4"
     },
     "browser": {
         "fs": false

@@ -38,8 +38,8 @@ export function MobileMenu(props: IBaseMenuProps) {
     // There is no submenu on mobile devices, so if there are sub menu items, we should flat them.
     const flattedMenuItems = useMemo(() => {
         const menuItems = menuManagerService.getMenuByPositionKey(menuType);
-        // 递归把所有的子菜单项都展开
 
+        // Flat all menu items recursively.
         function flatMenuItems(items: IMenuSchema[]): IMenuSchema[] {
             return items.reduce((acc, item) => {
                 if (item.children) {
@@ -59,7 +59,7 @@ export function MobileMenu(props: IBaseMenuProps) {
               univer-bg-gray-900 univer-px-2 univer-py-1
             `}
             style={{
-                gridTemplateColumns: `repeat(${Math.min(2, flattedMenuItems.length)}, 48px)`,
+                gridTemplateColumns: `repeat(${Math.min(2, flattedMenuItems.length)},  72px)`,
             }}
         >
             {flattedMenuItems.map((item) => item.item && (
@@ -95,7 +95,7 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
         <button
             type="button"
             className={clsx(`
-              univer-flex univer-w-12 univer-flex-col univer-items-center univer-justify-center univer-border-none
+              univer-w-18 univer-flex univer-flex-col univer-items-center univer-justify-center univer-border-none
               univer-bg-transparent univer-text-white
               [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-sm
               [&>svg]:univer-size-[18px] [&>svg]:univer-text-lg

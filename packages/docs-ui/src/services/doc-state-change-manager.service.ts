@@ -15,8 +15,9 @@
  */
 
 import type { JSONXActions, Nullable } from '@univerjs/core';
+import type { IDocStateChangeParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
-import { DocStateEmitService, type IDocStateChangeParams, type IRichTextEditingMutationParams } from '@univerjs/docs';
+import { DocStateEmitService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from './doc-ime-input-manager.service';

@@ -27,9 +27,9 @@ type InputProps = InputHTMLAttributes<HTMLInputElement>;
 export const inputVariants = cva(
     `
       univer-box-border univer-w-full univer-rounded-md univer-bg-white univer-transition-colors univer-duration-200
-      dark:!univer-bg-gray-700 dark:!univer-text-white dark:focus:!univer-ring-primary-900
-      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50
       placeholder:univer-text-gray-400
+      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50
+      dark:!univer-bg-gray-700 dark:!univer-text-white dark:focus:!univer-ring-primary-900
     `,
     {
         variants: {
@@ -170,8 +170,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                                   univer-flex univer-size-4 univer-cursor-pointer univer-items-center
                                   univer-rounded-full univer-border-none univer-bg-transparent univer-p-1
                                   univer-text-gray-400 univer-transition-colors univer-duration-200
-                                  focus:univer-outline-none
                                   hover:univer-text-gray-500
+                                  focus:univer-outline-none
                                 `}
                             >
                                 <CloseIcon className="univer-size-3" />

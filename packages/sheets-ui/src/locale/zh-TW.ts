@@ -129,8 +129,8 @@ const locale: typeof enUS = {
             title: '合併儲存格僅儲存左上角儲存格的值，是否繼續？ ',
             cancel: '取消合併',
             confirm: '繼續合併',
-            waring: '警告',
-            dismantleMergeCellWaring: '此操作會導致一些合併單元格被拆散，是否繼續?',
+            warning: '警告',
+            dismantleMergeCellWarning: '此操作會導致一些合併單元格被拆散，是否繼續?',
         },
     },
     filter: {

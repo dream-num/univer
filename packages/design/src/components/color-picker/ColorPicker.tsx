@@ -99,8 +99,8 @@ export function ColorPicker({ format = 'hex', value = '#000000', onChange }: ICo
                 <a
                     className={`
                       univer-cursor-pointer univer-gap-2 univer-text-sm univer-text-gray-900 univer-transition-opacity
-                      dark:!univer-text-white
                       hover:univer-opacity-80
+                      dark:!univer-text-white
                     `}
                     onClick={() => setVisible(true)}
                 >

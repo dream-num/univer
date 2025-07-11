@@ -43,6 +43,10 @@ const locales = [
         label: 'Tiếng Việt',
         value: LocaleType.VI_VN,
     },
+    {
+        label: '한국어',
+        value: LocaleType.KO_KR,
+    },
 ];
 
 export function useLocale() {
@@ -65,6 +69,9 @@ export function useLocale() {
                 break;
             case LocaleType.VI_VN:
                 locales = await import('@univerjs/mockdata/locales/vi-VN');
+                break;
+            case LocaleType.KO_KR:
+                locales = await import('@univerjs/mockdata/locales/ko-KR');
                 break;
             case LocaleType.EN_US:
             default:

@@ -15,23 +15,19 @@
  */
 
 export { countryCurrencyMap } from './base/const/currency-symbols';
-export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
-export { UniverSheetsNumfmtPlugin } from './plugin';
-export { MenuCurrencyService } from './service/menu.currency.service';
-export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';
-export { getDecimalFromPattern, getDecimalString, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
-export { getCurrencyType } from './utils/currency';
 export { currencySymbols } from './base/const/currency-symbols';
-export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
-export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';
-export { type IUniverSheetsNumfmtConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-
-// #region - all commands
-
+export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';
 export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 export { SetPercentCommand } from './commands/commands/set-percent.command';
 export { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
-
-// #endregion
+export { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+export type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
+export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
+export { UniverSheetsNumfmtPlugin } from './plugin';
+export { MenuCurrencyService } from './service/menu.currency.service';
+export { getCurrencyType } from './utils/currency';
+export { getDecimalFromPattern, getDecimalString, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
+export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';
+export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';

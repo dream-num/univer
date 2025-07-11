@@ -21,7 +21,7 @@ import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@
 import { CloseIcon, MoreIcon } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaDescribe } from '../hooks/use-formula-describe';
@@ -95,7 +95,6 @@ const noop = () => { };
 export function HelpFunction(props: IHelpFunctionProps) {
     const { onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
-    const visible = useMemo(() => !!functionInfo && paramIndex >= 0, [functionInfo, paramIndex]);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
     const [contentVisible, setContentVisible] = useState(true);
@@ -103,7 +102,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
     const editorId = editor.getEditorId();
-    const [position$] = useEditorPosition(editorId, visible, [functionInfo, paramIndex]);
+    const [position$] = useEditorPosition(editorId, !!functionInfo, [functionInfo, paramIndex]);
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }
@@ -117,7 +116,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
         propColose();
     };
 
-    return visible && functionInfo
+    return functionInfo
         ? hidden
             ? (
                 <RectPopup key="hidden" portal anchorRect$={position$} direction="left-center">
@@ -135,8 +134,9 @@ export function HelpFunction(props: IHelpFunctionProps) {
                     >
                         <div
                             className={clsx(`
-                              univer-box-border univer-flex univer-items-center univer-justify-between univer-px-4
-                              univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900 univer-wrap-anywhere
+                              univer-wrap-anywhere univer-box-border univer-flex univer-items-center
+                              univer-justify-between univer-px-4 univer-py-3 univer-text-xs univer-font-medium
+                              univer-text-gray-900
                               dark:!univer-text-white
                             `, borderTopClassName)}
                         >
@@ -153,8 +153,8 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                       univer-items-center univer-justify-center univer-rounded univer-bg-transparent
                                       univer-p-0 univer-text-xs univer-text-gray-500 univer-outline-none
                                       univer-transition-colors
-                                      dark:hover:!univer-bg-gray-600
                                       hover:univer-bg-gray-200
+                                      dark:hover:!univer-bg-gray-600
                                     `}
                                     style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
                                     onClick={() => setContentVisible(!contentVisible)}
@@ -167,8 +167,8 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                       univer-items-center univer-justify-center univer-rounded univer-bg-transparent
                                       univer-p-0 univer-text-xs univer-text-gray-600 univer-outline-none
                                       univer-transition-colors
-                                      dark:!univer-text-gray-200 dark:hover:!univer-bg-gray-600
                                       hover:univer-bg-gray-300
+                                      dark:!univer-text-gray-200 dark:hover:!univer-bg-gray-600
                                     `}
                                     onClick={onClose}
                                 >

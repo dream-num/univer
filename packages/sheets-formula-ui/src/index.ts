@@ -23,15 +23,11 @@ export { InsertFunctionOperation } from './commands/operations/insert-function.o
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
+export type { IUniverSheetsFormulaUIConfig } from './controllers/config.schema';
+export { FormulaReorderController } from './controllers/formula-reorder.controller';
+export { UniverSheetsFormulaUIPlugin } from './plugin';
+export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
+export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
+export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 export { FormulaEditor, type IFormulaEditorRef } from './views/formula-editor/index';
 export { type IRangeSelectorInstance, type IRangeSelectorProps, RangeSelector } from './views/range-selector/index';
-export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
-export { GlobalRangeSelectorService, type IShowRangeSelectorDialogOptions } from './services/range-selector.service';
-// #region - all commands
-
-export { FormulaReorderController } from './controllers/formula-reorder.controller';
-
-export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
-export { UniverSheetsFormulaUIPlugin } from './plugin';
-
-// #endregion

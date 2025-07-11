@@ -225,8 +225,7 @@ export interface IStyleData extends IStyleBase {
      */
     tb?: Nullable<WrapStrategy>;
     /**
-     * padding @TODO
-     * @description The `pd` property has not been fully implemented yet.
+     * padding
      */
     pd?: Nullable<IPaddingData>;
 }

@@ -949,11 +949,11 @@ export class SheetSkeleton extends Skeleton {
         offsetX: number,
         offsetY: number
     ): {
-            row: number;
-            column: number;
-            columnOffset: number;
-            rowOffset: number;
-        } {
+        row: number;
+        column: number;
+        columnOffset: number;
+        rowOffset: number;
+    } {
         const column = searchArray(this.columnWidthAccumulation, offsetX);
         let columnOffset = 0;
         if (column === 0) {

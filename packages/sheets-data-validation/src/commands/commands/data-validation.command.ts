@@ -14,18 +14,56 @@
  * limitations under the License.
  */
 
-import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, Injector, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
+import type {
+    CellValue,
+    IAccessor,
+    ICellData,
+    ICommand,
+    IDataValidationRuleBase,
+    IDataValidationRuleOptions,
+    IMutationInfo,
+    Injector,
+    IRange,
+    ISheetDataValidationRule,
+    Nullable,
+} from '@univerjs/core';
+import type {
+    DataValidationChangeSource,
+    IAddDataValidationMutationParams,
+    IRemoveDataValidationMutationParams,
+    IUpdateDataValidationMutationParams,
+} from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { RangeMutation } from '../../models/rule-matrix';
-import { CommandType, DataValidationType, ICommandService, isFormulaString, isRangesEqual, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
-import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import type { CheckboxValidator } from '../../validators';
+import {
+    CommandType,
+    DataValidationType,
+    ICommandService,
+    isFormulaString,
+    isRangesEqual,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Range,
+    sequenceExecute,
+    Tools,
+} from '@univerjs/core';
+import {
+    AddDataValidationMutation,
+    DataValidatorRegistryService,
+    getRuleOptions,
+    getRuleSetting,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+    UpdateRuleType,
+} from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { shouldOffsetFormulaByRange } from '../../utils/formula';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../../validators';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;

@@ -16,9 +16,9 @@
 
 import './global.css';
 
+export type { IUniverSheetsNoteUIConfig } from './controllers/config.schema';
+export { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
+export { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
 export { UniverSheetsNoteUIPlugin } from './plugin';
-export { type IUniverSheetsNoteUIPluginConfig } from './controllers/config.schema';
 export { SheetsNotePopupService } from './services/sheets-note-popup.service';
 export { SheetsNote } from './views/note';
-export { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
-export { SheetsCellContentController } from './controllers/sheets-cell-content.controller';

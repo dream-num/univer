@@ -17,7 +17,7 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
-import type { IUniverSheetsNoteUIPluginConfig } from '../controllers/config.schema';
+import type { IUniverSheetsNoteUIConfig } from '../controllers/config.schema';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -31,7 +31,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const config = useConfigValue<IUniverSheetsNoteUIPluginConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
+    const config = useConfigValue<IUniverSheetsNoteUIConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
     const activePopup = props.popup.extraProps?.location;
     if (!activePopup) {
         console.error('Popup extraProps or location is undefined.');
@@ -131,8 +131,8 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             className={clsx(`
               univer-resize-both univer-ml-px univer-rounded-md univer-bg-white univer-p-2 univer-text-gray-900
               univer-shadow
-              dark:!univer-bg-gray-800 dark:!univer-text-white
               focus:univer-outline-none
+              dark:!univer-bg-gray-800 dark:!univer-text-white
             `, borderClassName, scrollbarClassName)}
             style={{ width: note.width, height: note.height }}
             value={note.note}

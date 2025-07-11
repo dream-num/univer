@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { CustomRangeType, type IDocumentBody } from '../../../../types/interfaces';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { deleteCustomRanges } from '../apply-utils/common';
 
 function getBodyWithCustomRanges() {

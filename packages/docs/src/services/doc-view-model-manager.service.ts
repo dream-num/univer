@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 
@@ -60,7 +60,8 @@ export class DocViewModelManagerService extends RxDisposable implements IRenderM
     private _init() {
         this._univerInstanceService
             .getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
-            .pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((documentModel) => {
                 this._create(documentModel);
             });
 

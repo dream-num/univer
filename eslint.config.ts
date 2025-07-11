@@ -1,3 +1,4 @@
+/* eslint-disable header/header */
 import antfu from '@antfu/eslint-config';
 import { baseRules, facadePreset, specPreset, tailwindcssPreset, typescriptPreset, univerSourcePreset } from '@univerjs-infra/shared/eslint';
 import header from 'eslint-plugin-header';
@@ -43,20 +44,43 @@ export default antfu(
             '**/*.test.ts',
             '**/*.test.tsx',
         ], // do not check test files
+        plugins: {
+            barrel,
+        },
         rules: {
+            'barrel/no-barrel-import': 2,
             complexity: ['warn', { max: 20 }],
             'max-lines-per-function': ['warn', 80],
         },
     },
     {
+        // Not penetrating for source files
         files: ['**/*.ts', '**/*.tsx'],
-        ignores: ['**/*.d.ts', '**/vite.config.ts', '**/vitest.config.ts', '**/vitest.workspace.ts', 'playwright.config.ts'],
+        plugins: {
+            penetrating,
+        },
+        ignores: [
+            '**/__tests__/**/*',
+            '**/__testing__/**/*',
+            'examples/**/*',
+        ],
+        rules: {
+            'penetrating/no-penetrating-import': 2,
+        },
+    },
+    {
+        files: ['**/*.ts', '**/*.tsx'],
+        ignores: [
+            '**/*.d.ts',
+            '**/vite.config.ts',
+            '**/vitest.config.ts',
+            '**/vitest.workspace.ts',
+            'playwright.config.ts',
+        ],
         plugins: {
             header,
-            barrel,
         },
         rules: {
-            'barrel/no-barrel-import': 2,
             'header/header': [
                 2,
                 'block',
@@ -79,27 +103,6 @@ export default antfu(
                 ],
                 2,
             ],
-        },
-    },
-    {
-        // Not penetrating for source files
-        files: ['**/*.ts', '**/*.tsx'],
-        plugins: {
-            penetrating,
-        },
-        ignores: [
-            '**/__tests__/**/*',
-            '**/__testing__/**/*',
-            'examples/**/*',
-        ],
-        rules: {
-            'penetrating/no-penetrating-import': 2,
-        },
-    },
-    {
-        files: ['**/*/src/index.ts'],
-        rules: {
-            'perfectionist/sort-exports': 'off',
         },
     },
     typescriptPreset(),

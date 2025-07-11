@@ -381,8 +381,8 @@ export const RuleList = (props: IRuleListProps) => {
                                         className={clsx(`
                                           univer-group univer-relative univer-flex univer-items-center
                                           univer-justify-between univer-rounded univer-py-2 univer-pl-5 univer-pr-8
-                                          dark:hover:!univer-bg-gray-700
                                           hover:univer-bg-gray-100
+                                          dark:hover:!univer-bg-gray-700
                                         `, {
                                             'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === index,
                                         })}
@@ -430,8 +430,8 @@ export const RuleList = (props: IRuleListProps) => {
                                               univer-absolute univer-right-1 univer-hidden univer-size-6
                                               univer-cursor-pointer univer-items-center univer-justify-center
                                               univer-rounded
-                                              group-hover:univer-flex
                                               hover:univer-bg-gray-200
+                                              group-hover:univer-flex
                                             `, {
                                                 'univer-flex univer-items-center univer-justify-center': draggingId === index,
                                             })}

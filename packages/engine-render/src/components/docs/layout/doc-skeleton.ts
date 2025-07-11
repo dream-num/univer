@@ -422,10 +422,10 @@ export class DocumentSkeleton extends Skeleton {
         pageMarginLeft: number,
         pageMarginTop: number
     ): {
-            editArea: DocumentEditArea;
-            pageNumber: number;
-            page: Nullable<IDocumentSkeletonPage>;
-        } {
+        editArea: DocumentEditArea;
+        pageNumber: number;
+        page: Nullable<IDocumentSkeletonPage>;
+    } {
         const { x, y } = coord;
         let editArea = DocumentEditArea.BODY;
         let pageNumber = -1;

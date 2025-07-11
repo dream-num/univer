@@ -153,7 +153,7 @@ export function SheetTableFilterPanel() {
         >
             {editable && (
                 <div className="univer-mb-3 univer-flex">
-                    <ButtonGroup className="univer-mb-3 univer-w-full">
+                    <ButtonGroup className="univer-mb-3 !univer-flex univer-w-full">
                         <Button className="univer-w-1/2" onClick={() => applySort(true)}>
                             <AscendingIcon className="univer-mr-1" />
                             {localeService.t('sheets-sort.general.sort-asc')}
@@ -201,7 +201,7 @@ export function SheetTableFilterPanel() {
             </div>
             <div
                 className={`
-                  univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-wrap-nowrap
+                  univer-flex-wrap-nowrap univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0
                   univer-justify-between univer-overflow-hidden
                 `}
             >

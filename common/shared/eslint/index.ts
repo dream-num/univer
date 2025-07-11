@@ -1,10 +1,15 @@
-const jsdoc = require('eslint-plugin-jsdoc');
-const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
-const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
-const noFacadeImportsOutsideFacade = require('./plugins/no-facade-imports-outside-facade');
-const noSelfPackageImports = require('./plugins/no-self-package-imports');
+/* eslint-disable header/header */
+import type { Rules } from '@antfu/eslint-config';
+import os from 'node:os';
+import path from 'node:path';
+import typescriptParser from '@typescript-eslint/parser';
+import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
+import jsdoc from 'eslint-plugin-jsdoc';
+import noExternalImportsInFacade from './plugins/no-external-imports-in-facade';
+import noFacadeImportsOutsideFacade from './plugins/no-facade-imports-outside-facade';
+import noSelfPackageImports from './plugins/no-self-package-imports';
 
-exports.baseRules = {
+export const baseRules: Partial<Rules> = {
     curly: ['error', 'multi-line'],
     'antfu/if-newline': 'off',
     'no-param-reassign': ['warn'],
@@ -49,7 +54,7 @@ exports.baseRules = {
     'style/arrow-parens': ['error', 'always'],
     'ts/no-redeclare': 'off',
     'style/spaced-comment': 'off',
-    'tunicorn/number-literal-case': 'off',
+    'accessor-pairs': 'warn',
     'style/indent-binary-ops': 'off',
     'ts/method-signature-style': 'off',
     'style/indent': ['error', 4, {
@@ -59,7 +64,7 @@ exports.baseRules = {
     }],
     'perfectionist/sort-imports': 'warn',
     'perfectionist/sort-named-exports': 'warn',
-    'antfu/consistent-chaining': 'warn',
+    // 'antfu/consistent-chaining': 'error',
     'react-hooks/exhaustive-deps': 'off',
     'sort-imports': [
         'error',
@@ -74,7 +79,7 @@ exports.baseRules = {
     ],
     'react/no-unstable-context-value': 'warn',
     'react/no-unstable-default-props': 'warn',
-    'command/command': 'off',
+    // 'command/command': 'off',
     'jsdoc/tag-lines': 'off',
 
     'no-restricted-imports': [
@@ -117,7 +122,7 @@ exports.baseRules = {
     'unicorn/prefer-number-properties': 'warn',
     'no-prototype-builtins': 'warn',
     'style/quotes': ['warn', 'single', { avoidEscape: true }],
-    'react/display-name': 'off',
+    // 'react/display-name': 'off',
     'react-hooks/rules-of-hooks': 'off',
     'eslint-comments/no-unlimited-disable': 'off',
     'ts/prefer-ts-expect-error': 'off',
@@ -125,7 +130,6 @@ exports.baseRules = {
     'ts/no-duplicate-enum-values': 'off',
     'no-cond-assign': 'warn',
     'ts/no-use-before-define': 'warn',
-    'intunicorn/number-literal-case': 'off',
     'test/no-identical-title': 'warn',
     'ts/no-non-null-asserted-optional-chain': 'warn',
     'no-restricted-syntax': 'warn',
@@ -145,11 +149,10 @@ exports.baseRules = {
     'style/jsx-curly-brace-presence': 'warn',
     'style/multiline-ternary': 'warn',
     'unicorn/prefer-type-error': 'warn',
-    'accessor-pairs': 'warn',
     'react/no-create-ref': 'warn',
 };
 
-exports.typescriptPreset = () => {
+export const typescriptPreset = (): any => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
         plugins: {
@@ -181,14 +184,15 @@ exports.typescriptPreset = () => {
                     leadingUnderscore: 'require',
                 },
             ],
+            // 'ts/consistent-type-exports': 'warn',
         },
         languageOptions: {
-            parser: require('@typescript-eslint/parser'),
+            parser: typescriptParser,
         },
     };
 };
 
-exports.univerSourcePreset = () => {
+export const univerSourcePreset = (): any => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
@@ -201,12 +205,12 @@ exports.univerSourcePreset = () => {
             'univer/no-facade-imports-outside-facade': 'error',
         },
         languageOptions: {
-            parser: require('@typescript-eslint/parser'),
+            parser: typescriptParser,
         },
     };
 };
 
-exports.facadePreset = () => {
+export const facadePreset = (): any => {
     return {
         files: ['**/src/facade/**/*.ts'],
         ignores: [
@@ -217,13 +221,16 @@ exports.facadePreset = () => {
         rules: {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',
-            ...jsdoc.configs.recommended.rules,
+            ...jsdoc.configs.rules,
             'jsdoc/tag-lines': 'off',
         },
     };
 };
 
-exports.tailwindcssPreset = () => {
+export const tailwindcssPreset = (): any => {
+    const isWindows = os.platform() === 'win32';
+    const lineBreakStyle = isWindows ? 'windows' : 'unix';
+
     return {
         files: ['**/*.{jsx,tsx}'],
         languageOptions: {
@@ -234,19 +241,30 @@ exports.tailwindcssPreset = () => {
             },
         },
         plugins: {
-            'readable-tailwind': eslintPluginReadableTailwind,
+            'better-tailwindcss': eslintPluginBetterTailwindcss,
+        },
+        settings: {
+            'better-tailwindcss': {
+                tailwindConfig: path.resolve(__dirname, '../tailwind/tailwind.config.ts'),
+            },
         },
         rules: {
-            ...eslintPluginReadableTailwind.configs.warning.rules,
-            ...eslintPluginReadableTailwind.configs.error.rules,
-            'jsonc/sort-keys': ['warn'],
-            'readable-tailwind/multiline': ['warn', { printWidth: 120, group: 'newLine' }],
-            'react-hooks/rules-of-hooks': 'off',
+            // enable all recommended rules to warn
+            ...eslintPluginBetterTailwindcss.configs['recommended-warn'].rules,
+            // enable all recommended rules to error
+            ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
+            'better-tailwindcss/enforce-consistent-line-wrapping': ['error', {
+                printWidth: 120,
+                group: 'newLine',
+                lineBreakStyle,
+            }],
+            'better-tailwindcss/no-unregistered-classes': 'off',
+            'better-tailwindcss/no-conflicting-classes': 'off',
         },
     };
 };
 
-exports.specPreset = () => {
+export const specPreset = (): any => {
     return {
         files: [
             '**/*.spec.ts',

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
-import { CustomDecorationType, type IDocumentBody } from '../../../../types/interfaces/i-document-data';
+import { CustomDecorationType } from '../../../../types/interfaces/i-document-data';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 

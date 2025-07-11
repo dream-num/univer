@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_ENGINEERING, FunctionType, type IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_ENGINEERING, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_ENGINEERING: IFunctionInfo[] = [
     {

@@ -25,7 +25,7 @@ import esbuild from 'esbuild';
 import aliasPlugin from 'esbuild-plugin-alias';
 import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
-import vue from 'esbuild-plugin-vue3';
+import vue3 from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
 import React from 'react';
@@ -172,7 +172,7 @@ const config: SameShape<BuildOptions, BuildOptions> = {
                 },
             },
         }),
-        vue() as unknown as Plugin,
+        vue3() as unknown as Plugin,
     ],
     entryPoints,
     outdir: './local',

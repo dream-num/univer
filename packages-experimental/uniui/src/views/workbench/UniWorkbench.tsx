@@ -140,7 +140,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer]);
 
     const nodeTypes: NodeTypes = {
         customNode: UnitNode,

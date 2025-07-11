@@ -5,8 +5,8 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-次世代のオフィススイート。 <br />
-拡張可能・組み込み可能・高性能
+Univer は、開発者に強力で柔軟かつ使いやすいオフィススイートソリューションを提供することを目的としたオープンソースのオフィススイートエンジンです。スプレッドシート、ドキュメント、スライドなど、さまざまなタイプのドキュメントをサポートし、豊富な機能と高い拡張性を提供します。<br />
+**拡張可能・組み込み可能・高性能**
 
 > 日本語の開発ドキュメントはまだ未完成です。英語のドキュメントをご参照ください。
 
@@ -62,7 +62,7 @@
 
 Univer はスプレッドシート、ドキュメント、プレゼンテーションのための幅広い機能を提供しています。以下は、いくつかの主要な機能です。
 
-### 📊 Univer Sheet
+### 📊 Univer Sheets
 
 - **コア機能**：セル、行、列、ワークシート、ワークブックなど、スプレッドシートの基本機能をサポートしています。
 - **数式**：数学、統計、論理、テキスト、日付と時刻、検索と参照、エンジニアリング、金融、情報の各種数式を広範にサポートしています。
@@ -77,13 +77,16 @@ Univer はスプレッドシート、ドキュメント、プレゼンテーシ�
 - **条件付き書式**：特定の基準に基づいてセルに書式を適用する機能をサポートしています。
 - **コメント**：セルにコメントを追加して追加情報を提供することができます。
 - **十字型ハイライト**：選択したセルを素早く特定するために、スプレッドシートに十字ハイライトを表示することができます。
+- **禅モード**：シンプルで集中できるインターフェースを提供し、ユーザーがスプレッドシートに集中できるようにします。
 - **ピボットテーブル**[^1]：データを集計して分析するためのピボットテーブルをサポートします。
-- **共同編集**[^1]：複数のユーザーが同時にスプレッドシートを編集することをサポートします。
+- **スパークライン**[^1]：データの傾向を視覚化するためのスパークラインをサポートします。
 - **印刷**[^1]：スプレッドシートを印刷したり、PDF にエクスポートしたりすることができます。
 - **インポート＆エクスポート**[^1]：XLSX 形式でのデータのインポートとエクスポートをサポートしています。
-- **チャート**[^2]：[VChart][vchart-link] を介したサードパーティチャートのサポート。
+- **チャート**[^1]：棒グラフ、折れ線グラフ、円グラフ、散布図など、さまざまな種類のチャートをサポートします。
+- **共同編集**[^1]：複数のユーザーが同時にスプレッドシートを編集することをサポートします。
+- **編集履歴**[^1]：ユーザーがスプレッドシートの以前のバージョンを表示および復元できるようにします。
 
-### 📝 Univer Doc（開発中）
+### 📝 Univer Docs（rc）
 
 - **コア機能**：段落、見出し、リスト、上付き文字、下付き文字など、ドキュメントの基本機能をサポートしています。
 - **リスト**：順序付きリスト、順不同リスト、タスクリストをサポートします。
@@ -91,7 +94,8 @@ Univer はスプレッドシート、ドキュメント、プレゼンテーシ�
 - **浮動画像**：ドキュメントに画像を挿入し、テキストと画像を組み合わせて配置することができます。
 - **ヘッダー＆フッター**：ドキュメントにヘッダーとフッターを追加することができます。
 - **コメント**：追加情報を提供するために、ドキュメントにコメントを追加することができます。
-- **インポート**[^1]：DOCX 形式でのデータのインポートをサポートしています。
+- **印刷**[^1]：ドキュメントを印刷したり、PDF にエクスポートしたりすることができます。
+- **インポート＆エクスポート**[^1]：DOCX 形式でのデータのインポートとエクスポートをサポートしています。
 - **共同編集**[^1]：複数のユーザーが同時にドキュメントを編集することをサポートします。
 
 ### 📽️ Univer Slide（開発中）
@@ -108,6 +112,7 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 - `ru-RU`
 - `vi-VN`
 - `fa-IR`
+- `ko-KR`
 
 `zh-CN` と `en-US` は公式サポート言語であり、その他の言語はコミュニティによって提供されています。
 
@@ -189,13 +194,12 @@ Univer プロジェクトの成長と開発は、バッカーやスポンサー�
 
 ## 📄 ライセンス
 
-Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
+Copyright © 2021-2025 DreamNum Co,Ltd. All Rights Reserved.
 
 [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0)ライセンスの下で配布されています。
 
 <!-- Footnotes -->
 [^1]: これらの機能は、Univer の非 OSS バージョンによって提供されています。非 OSS バージョンは商用利用には無料であり、有料のアップグレードプランも提供されています。
-[^2]: VChart は Univer にチャート機能を提供するサードパーティライブラリです。詳細はこちらをご覧ください：[univer-vchart-plugin][vchart-univer-link].
 
 <!-- Links -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
@@ -224,9 +228,9 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [readme-ja-link]: ./README-ja.md
 
 [official-site-link]: https://univer.ai
-[documentation-link]: https://univer.ai/guides/sheet/introduction
-[playground-link]: https://univer.ai/playground
-[blog-link]: https://univer.ai/blog/post/this-is-univer
+[documentation-link]: https://docs.univer.ai/en-US
+[playground-link]: https://docs.univer.ai/en-US/showcase
+[blog-link]: https://docs.univer.ai/en-US/blog
 
 [stackoverflow-community-link]: https://stackoverflow.com/questions/tagged/univer
 [stackoverflow-community-badge]: https://img.shields.io/badge/stackoverflow-univer-ef8236?labelColor=black&logo=stackoverflow&logoColor=white&style=for-the-badge
@@ -269,9 +273,6 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
 [backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
 
-[vchart-link]: https://github.com/VisActor/VChart
-[vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
-
 [examples-preview-capalyze]: ./docs/img/examples-sheets-capalyze.gif
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
@@ -291,20 +292,20 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
 [examples-link-capalyze]: https://capalyze.ai/
-[examples-link-0]: https://univer.ai/examples/sheets/
-[examples-link-1]: https://univer.ai/examples/sheets-multi/
-[examples-link-2]: https://univer.ai/examples/sheets-uniscript/
-[examples-link-3]: https://univer.ai/examples/sheets-big-data/
-[examples-link-4]: https://univer.ai/pro/examples/sheets-collaboration/
-[examples-link-5]: https://univer.ai/pro/examples/sheets-collaboration-playground/
-[examples-link-6]: https://univer.ai/pro/examples/sheets-exchange/
-[examples-link-7]: https://univer.ai/pro/examples/sheets-print/
-[examples-link-8]: https://univer.ai/examples/docs/
-[examples-link-9]: https://univer.ai/examples/docs-multi/
-[examples-link-10]: https://univer.ai/examples/docs-uniscript/
-[examples-link-11]: https://univer.ai/examples/docs-big-data/
-[examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
-[examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
-[examples-link-14]: https://univer.ai/examples/slides/
+[examples-link-0]: https://docs.univer.ai/showcase
+[examples-link-1]: https://docs.univer.ai/showcase
+[examples-link-2]: https://docs.univer.ai/showcase
+[examples-link-3]: https://docs.univer.ai/showcase
+[examples-link-4]: https://docs.univer.ai/showcase
+[examples-link-5]: https://docs.univer.ai/showcase
+[examples-link-6]: https://docs.univer.ai/showcase
+[examples-link-7]: https://docs.univer.ai/showcase
+[examples-link-8]: https://docs.univer.ai/showcase
+[examples-link-9]: https://docs.univer.ai/showcase
+[examples-link-10]: https://docs.univer.ai/showcase
+[examples-link-11]: https://docs.univer.ai/showcase
+[examples-link-12]: https://docs.univer.ai/showcase
+[examples-link-13]: https://docs.univer.ai/showcase
+[examples-link-14]: https://docs.univer.ai/showcase
 [examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

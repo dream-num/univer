@@ -16,10 +16,21 @@
 
 import type { IUniverDebuggerConfig } from './config.schema';
 import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
-import { BuiltInUIPart, ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
+import {
+    BuiltInUIPart,
+    ComponentManager,
+    connectInjector,
+    IMenuManagerService,
+    IUIPartsService,
+    // MenuItemType,
+    // RibbonStartGroup,
+} from '@univerjs/ui';
 import { AIButton, FloatButton } from '../components/FloatButton';
 import { ImageDemo } from '../components/Image';
 import { RangeLoading } from '../components/RangeLoading';
+// @ts-ignore
+// import VueComponent from '../components/VueComponent.vue';
+// import { CounterComponent } from '../components/WebComponent';
 import { Fab } from '../views/Fab';
 import { DEBUGGER_PLUGIN_CONFIG_KEY } from './config.schema';
 import { RecordController } from './local-save/record.controller';
@@ -29,11 +40,36 @@ export class DebuggerController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 
         this._initCustomComponents();
+        // this._menuManagerService.mergeMenu({
+        //     [RibbonStartGroup.OTHERS]: {
+        //         EMOJI: {
+        //             order: 9999,
+        //             menuItemFactory: () => {
+        //                 return {
+        //                     id: 'EMOJI',
+        //                     icon: 'VueComponent',
+        //                     type: MenuItemType.BUTTON,
+        //                 };
+        //             },
+        //         },
+        //         COUNTER: {
+        //             order: 9999,
+        //             menuItemFactory: () => {
+        //                 return {
+        //                     id: 'COUNTER',
+        //                     icon: 'counter-component',
+        //                     type: MenuItemType.BUTTON,
+        //                 };
+        //             },
+        //         },
+        //     },
+        // });
 
         this._injector.add([RecordController]);
     }
@@ -49,6 +85,14 @@ export class DebuggerController extends Disposable {
                 this._componentManager.register(key, comp)
             );
         });
+
+        // this.disposeWithMe(this._componentManager.register('VueComponent', VueComponent, {
+        //     framework: 'vue3',
+        // }));
+
+        // this.disposeWithMe(this._componentManager.register('counter-component', CounterComponent, {
+        //     framework: 'web-component',
+        // }));
 
         const configs = this._configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
 

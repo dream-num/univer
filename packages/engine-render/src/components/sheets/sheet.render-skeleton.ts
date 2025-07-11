@@ -485,7 +485,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
         const cell = this.worksheet.getCell(row, col);
-        const style = this.worksheet.getComposedCellStyle(row, col);
+        const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         if (cell?.interceptorAutoHeight) {
             const cellHeight = cell.interceptorAutoHeight();
@@ -562,13 +562,17 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             if (cell?.v === undefined || cell?.v === null) {
                 return undefined;
             }
+            const paddingLeft = style.pd?.l ?? DEFAULT_PADDING_DATA.l;
+            const paddingRight = style.pd?.r ?? DEFAULT_PADDING_DATA.r;
+            const paddingTop = style.pd?.t ?? DEFAULT_PADDING_DATA.t;
+            const paddingBottom = style.pd?.b ?? DEFAULT_PADDING_DATA.b;
 
             if (style?.tb === WrapStrategy.WRAP) {
                 const skeleton = new DocSimpleSkeleton(
                     `${cell!.v!}`,
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
-                    colWidth - DEFAULT_PADDING_DATA.l - DEFAULT_PADDING_DATA.r,
+                    colWidth - paddingLeft - paddingRight,
                     Infinity
                 );
                 skeleton.calculate();
@@ -577,7 +581,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 // For same fontStyle, the height of the text is fixed.
                 // So we can use a fixed text to calculate the height to make a speed up.
                 const textSize = FontCache.getMeasureText('A', getFontStyleString(style).fontCache);
-                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent + DEFAULT_PADDING_DATA.t + DEFAULT_PADDING_DATA.b;
+                return textSize.fontBoundingBoxAscent + textSize.fontBoundingBoxDescent + paddingTop + paddingBottom;
             }
         }
     }
@@ -738,7 +742,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return cellWidth;
             }
         }
-        const style = this.worksheet.getComposedCellStyle(row, column);
+        const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
         const modelObject = this.worksheet.getCellDocumentModel(cell, style);
         if (modelObject == null) {
             return measuredWidth;
@@ -1442,7 +1446,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        const style = this.worksheet.getComposedCellStyle(row, col);
+        const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
@@ -1500,7 +1504,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             const themeStyleBackground = cell.themeStyle?.bd;
 
-            const style = this.worksheet.getComposedCellStyle(row, column);
+            const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
             if (!style && !themeStyleBackground) {
                 isAddBorders = false;
                 break;

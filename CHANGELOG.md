@@ -1,5 +1,124 @@
 # Changelog
 
+## [0.9.2](https://github.com/dream-num/univer/compare/v0.9.1...v0.9.2) (2025-07-11)
+
+
+### Bug Fixes
+
+* **doc:** fix some code error ([#5489](https://github.com/dream-num/univer/issues/5489)) ([674fd6e](https://github.com/dream-num/univer/commit/674fd6ebe8e112ef89d18484268bb2f6812eeaf8))
+* **dts:** simplify interface declarations and improve method overrides in event and range modules ([#5516](https://github.com/dream-num/univer/issues/5516)) ([edea4eb](https://github.com/dream-num/univer/commit/edea4ebeae3ec64fde4b692666b746ef52464a8d))
+* fix render of true and false, and TEXT formula error ([#5504](https://github.com/dream-num/univer/issues/5504)) ([ec740ba](https://github.com/dream-num/univer/commit/ec740ba578880a03c5a5ee584815c3ae83c680a7))
+* fix SUBTOTAL formula need ignore other SUBTOTAL formula results ([#5506](https://github.com/dream-num/univer/issues/5506)) ([732bcec](https://github.com/dream-num/univer/commit/732bcec66441e38c84940e6a20093aaac6731dbf))
+* **sheets-filter-ui:** adjust width of filter panel component ([#5518](https://github.com/dream-num/univer/issues/5518)) ([bb719f2](https://github.com/dream-num/univer/commit/bb719f20d5b3a30e9db8b90303ad9172df92d8e8))
+* **sheets-formula-ui:** can't drag selections when edit formula ([#5512](https://github.com/dream-num/univer/issues/5512)) ([cd39795](https://github.com/dream-num/univer/commit/cd3979593285c7cbc79ebfb3c1f7b2e39c38dab1))
+* **sheets-sort-ui:** improve layout and styling of `CustomSortPanel` ([#5507](https://github.com/dream-num/univer/issues/5507)) ([16d234d](https://github.com/dream-num/univer/commit/16d234d8a9745c0eb23d9044b2bee92ed89a3138))
+* **ui-adapter-vue3:** update peerDependencies to require Vue 3.0.0 or higher ([#5495](https://github.com/dream-num/univer/issues/5495)) ([b72b49a](https://github.com/dream-num/univer/commit/b72b49a06d31094f72f39eb461777f30d8e2cea1))
+
+
+### Features
+
+* add float-dom update & delete & event api ([#5515](https://github.com/dream-num/univer/issues/5515)) ([a4e177a](https://github.com/dream-num/univer/commit/a4e177a1407c674277e7d95ccccf823795502000))
+* add support for filter by colors ([#5501](https://github.com/dream-num/univer/issues/5501)) ([45f389b](https://github.com/dream-num/univer/commit/45f389b0f73ccad3733666cbe6b4deb136625fa0))
+* **sheets-drawing-ui:** add updateFloatDomProps ([#5517](https://github.com/dream-num/univer/issues/5517)) ([bb051e2](https://github.com/dream-num/univer/commit/bb051e29748c4a5ec57d690432377c3d6386e472))
+
+## [0.9.1](https://github.com/dream-num/univer/compare/v0.9.0...v0.9.1) (2025-07-04)
+
+
+### Bug Fixes
+
+* add postcss-replace plugin and update global styles ([#5488](https://github.com/dream-num/univer/issues/5488)) ([e7facd8](https://github.com/dream-num/univer/commit/e7facd847b1b88e7323483abeab76496f161b352))
+* fix thread-comment-ui add comment i18n ([#5487](https://github.com/dream-num/univer/issues/5487)) ([2cba0f9](https://github.com/dream-num/univer/commit/2cba0f95c048b1500e2f5e44031add7a72665b60))
+
+# [0.9.0](https://github.com/dream-num/univer/compare/v0.8.3...v0.9.0) (2025-07-04)
+
+
+### Bug Fixes
+
+* **design:** remove unused [@tailwind](https://github.com/tailwind) base directive from global.css ([#5472](https://github.com/dream-num/univer/issues/5472)) ([d1c481e](https://github.com/dream-num/univer/commit/d1c481ee4b7592b1d499051fbf6761bcfc84c658))
+* **docs-ui:** add return type to useResize function ([#5473](https://github.com/dream-num/univer/issues/5473)) ([a57a58d](https://github.com/dream-num/univer/commit/a57a58d3184f02030becd7d6596908c34272c2ef))
+* **engine-render:** handle broken image state in font rendering ([#5459](https://github.com/dream-num/univer/issues/5459)) ([054ec77](https://github.com/dream-num/univer/commit/054ec7701fc61328a384b58f016680dee4e96c4e))
+* **engine-render:** render fallback image when cell image renderer-error ([#5449](https://github.com/dream-num/univer/issues/5449)) ([cca2971](https://github.com/dream-num/univer/commit/cca2971fefddd9594240c33a50666eb4139b7315))
+* **facade:** fix customizeColumnHeader and customizeRowHeader api ([#5460](https://github.com/dream-num/univer/issues/5460)) ([58de0a4](https://github.com/dream-num/univer/commit/58de0a4614adb7a7be6d40de351b05e509c562a2))
+* fix BackSpace cannot fallback and delete after triggering formula through fx ([#5477](https://github.com/dream-num/univer/issues/5477)) ([26953b1](https://github.com/dream-num/univer/commit/26953b1bbcf9598837bfafa8f388a765acf8c2b5))
+* fix the issue where formula helpfunction does not display ([#5481](https://github.com/dream-num/univer/issues/5481)) ([ef5409b](https://github.com/dream-num/univer/commit/ef5409b84377e04df71cd164c8b40ba2e2c125ea))
+* fixed the auto-fill handle button cannot appear ([#5478](https://github.com/dream-num/univer/issues/5478)) ([eac4483](https://github.com/dream-num/univer/commit/eac4483d555dcdfae32c433502e79b2866dfdb07))
+* **plugin:** prevent passing undefined or null props to Vue component ([#5470](https://github.com/dream-num/univer/issues/5470)) ([ed67b48](https://github.com/dream-num/univer/commit/ed67b4825e411ea470abc198da209051ee984345))
+* **sheets-hyper-link-ui:** hyper-link tooltip display far away of the cell bound ([#5456](https://github.com/dream-num/univer/issues/5456)) ([12974da](https://github.com/dream-num/univer/commit/12974daf6b2adca5955ea315aaa94e7c61d4ea2d))
+* **ui-adapter:** remove react dependency from ui adapter packages ([#5474](https://github.com/dream-num/univer/issues/5474)) ([0b7cab6](https://github.com/dream-num/univer/commit/0b7cab60aeea748d413dec5ca3d48c639103efe8))
+
+
+### Features
+
+* **ui:** support the registration of custom components built with vue3 / web component ([#5440](https://github.com/dream-num/univer/issues/5440)) ([649385c](https://github.com/dream-num/univer/commit/649385c9cd157ed661fa2c3d6f37aecc86103e03))
+* use portal to show filter panel ([#5446](https://github.com/dream-num/univer/issues/5446)) ([5156a42](https://github.com/dream-num/univer/commit/5156a42968e48433fd122c166cdb63600348d621))
+
+## [0.8.3](https://github.com/dream-num/univer/compare/v0.8.2...v0.8.3) (2025-06-27)
+
+
+### Bug Fixes
+
+*  fixed the issue where scrolling was reset when the auto fill passed through the freeze line ([#5437](https://github.com/dream-num/univer/issues/5437)) ([6494b00](https://github.com/dream-num/univer/commit/6494b004314be62142d50d2f3dc2e281bfd4a410))
+* **eslint:** update rule to enforce consistent line wrapping in better-tailwindcss ([#5423](https://github.com/dream-num/univer/issues/5423)) ([5569118](https://github.com/dream-num/univer/commit/556911823c9344fa1c0c0b3d953fd82094fc36e6))
+* fixed the issue where the SheetEditEnded event listener returned incorrect row and column ([#5442](https://github.com/dream-num/univer/issues/5442)) ([e4fbd4c](https://github.com/dream-num/univer/commit/e4fbd4ca0d68f55b89342efca83d7dda2bfa28ab))
+* **render:** fixed numbers were not right-aligned by default after applying a number format ([#5421](https://github.com/dream-num/univer/issues/5421)) ([67cc34c](https://github.com/dream-num/univer/commit/67cc34ce22f8eb04d5078c581ddda47d400988d6))
+* **sheets-formula-ui:** update configuration interface and default config for sheets formula UI ([#5447](https://github.com/dream-num/univer/issues/5447)) ([7e14a21](https://github.com/dream-num/univer/commit/7e14a21391c5fd36ded5a980a1aa7bf0efe52b72))
+* **ui:** fix plugin override config ([#5435](https://github.com/dream-num/univer/issues/5435)) ([20cad29](https://github.com/dream-num/univer/commit/20cad29426564120a0d03798b274f8890758fdba))
+
+
+### Features
+
+* add locale support for Korean(ko-KR) ([#5434](https://github.com/dream-num/univer/issues/5434)) ([000ad6a](https://github.com/dream-num/univer/commit/000ad6a38db3ef14e3847925629815bcad258e34))
+* add type exports for configurations ([#5445](https://github.com/dream-num/univer/issues/5445)) ([d9989e7](https://github.com/dream-num/univer/commit/d9989e79956f4baae1b1865fa753347e74271627))
+
+## [0.8.2](https://github.com/dream-num/univer/compare/v0.8.1...v0.8.2) (2025-06-20)
+
+
+### Bug Fixes
+
+* **design:** fix the styling issue of ButtonGroup ([#5363](https://github.com/dream-num/univer/issues/5363)) ([2480eec](https://github.com/dream-num/univer/commit/2480eec0fd90f477a4d656e300553971e7cf793b))
+* **docs-ui:** add localized confirm and cancel text for `DocOpenPageSettingCommand` ([#5388](https://github.com/dream-num/univer/issues/5388)) ([2aa4b06](https://github.com/dream-num/univer/commit/2aa4b0681e6c3f257a022a72af5d0b8d913ccf61))
+* **editor:** fix footerBarHeight calculation ([#5385](https://github.com/dream-num/univer/issues/5385)) ([f5301fc](https://github.com/dream-num/univer/commit/f5301fc521c3c272d54046a8e399d7cc110889c5))
+* **facade:** fix FWorkbook.setName implementation ([#5375](https://github.com/dream-num/univer/issues/5375)) ([48e31ef](https://github.com/dream-num/univer/commit/48e31ef4175d16c2dd2097905cd0d297558b823f))
+* fix compatibility ([#5378](https://github.com/dream-num/univer/issues/5378)) ([11e97f2](https://github.com/dream-num/univer/commit/11e97f27efad24510df19d065fd5d7aac585d104))
+* fix dark mode for docs ([#5400](https://github.com/dream-num/univer/issues/5400)) ([c9218b3](https://github.com/dream-num/univer/commit/c9218b3078829b8c7347d2c0e37d11633ab42667))
+* fix issues related to remove rows ([#5398](https://github.com/dream-num/univer/issues/5398)) ([54c0ef5](https://github.com/dream-num/univer/commit/54c0ef5a3f3c8d2f9011aa10fdb4eb15623ce428))
+* **formula:** fixed the issue of formula range reference calculating offset when moving rows, columns or ranges ([#5412](https://github.com/dream-num/univer/issues/5412)) ([563b215](https://github.com/dream-num/univer/commit/563b215bf57b3b945ef1070baef4aa72b1cd6999))
+* **formula:** update suffix ([#5305](https://github.com/dream-num/univer/issues/5305)) ([f265fda](https://github.com/dream-num/univer/commit/f265fda124d0fd88ac0d0687fcdada6e57797e76))
+* **numfmt:** if cell type specified number type, do not determine the type of v ([#5402](https://github.com/dream-num/univer/issues/5402)) ([3552d20](https://github.com/dream-num/univer/commit/3552d207043344d8a43092a7c1c92508ebd10a5a))
+* padding rendering & not throw cancel error ([#5406](https://github.com/dream-num/univer/issues/5406)) ([14345ec](https://github.com/dream-num/univer/commit/14345ec1d77a866617be68ea20ccc947445a18b7))
+* **sheet-formula-ui:** correct sheet name retrieval in selection ([#5414](https://github.com/dream-num/univer/issues/5414)) ([37a3fe0](https://github.com/dream-num/univer/commit/37a3fe0e4650106959268ccd432f13fd3ac3907b))
+* **sheet-formula-ui:** select selection across workbook ([#5413](https://github.com/dream-num/univer/issues/5413)) ([63451ab](https://github.com/dream-num/univer/commit/63451ab6ec523d439ce9d0b37966a3d36ad9bbca))
+* **sheet-ui:** optimize the styling of the SheetBarItem ([#5380](https://github.com/dream-num/univer/issues/5380)) ([3649c0c](https://github.com/dream-num/univer/commit/3649c0c2470adaa5cf9793b846b126ad65ed75d4))
+* **sheets-formula-ui:** adjust styles for layout consistency in SelectFunction ([#5370](https://github.com/dream-num/univer/issues/5370)) ([e425d0d](https://github.com/dream-num/univer/commit/e425d0d7b4c830bb522fd356861da17e301b79a0))
+* **sheets-table-ui:** hide table entry in Zen mode ([#5374](https://github.com/dream-num/univer/issues/5374)) ([b96c16d](https://github.com/dream-num/univer/commit/b96c16db645e45cf12f425887866ef931560281a))
+* **sheets-ui:** ensure `customRender` is set correctly when initializing cell ([#5407](https://github.com/dream-num/univer/issues/5407)) ([4099c91](https://github.com/dream-num/univer/commit/4099c91d58d6958fab4cf807b91605d3e2f8a5cb))
+* **ui:** add overflow hidden to header for better layout ([#5392](https://github.com/dream-num/univer/issues/5392)) ([89996bf](https://github.com/dream-num/univer/commit/89996bfeee36fd1941d796e70ea187262903415c))
+
+
+### Features
+
+* add ref property of cell data type ([#5393](https://github.com/dream-num/univer/issues/5393)) ([da360af](https://github.com/dream-num/univer/commit/da360afa660a1ea773b8204a18688e59a62cf85b))
+* **core:** add polyfills for Array.prototype.findLast and Array.prototype.findLastIndex ([#5373](https://github.com/dream-num/univer/issues/5373)) ([33afa8b](https://github.com/dream-num/univer/commit/33afa8b92f6d79b9395397b7061bea743277f3b9))
+
+## [0.8.1](https://github.com/dream-num/univer/compare/v0.8.0...v0.8.1) (2025-06-12)
+
+
+### Bug Fixes
+
+* **formula:** fix the calculation error of formula range absolute reference type moving offset ([#5349](https://github.com/dream-num/univer/issues/5349)) ([8e8e59c](https://github.com/dream-num/univer/commit/8e8e59c6ae674232d6b8e247c0e52eba5ef9ab0b))
+* **numfmt:** fix the numfmt func change the null to string ([#5344](https://github.com/dream-num/univer/issues/5344)) ([c57b4d0](https://github.com/dream-num/univer/commit/c57b4d07de572d428a059661b8194aab3c5c6f42))
+* **sheets-formula-ui:** highlight issues on across workbook editing ([#5360](https://github.com/dream-num/univer/issues/5360)) ([827acfd](https://github.com/dream-num/univer/commit/827acfd3c2d3a6731265c7019a3e38d38b21c35d))
+* **sheets-sort-ui:** remove unused log service and add localized dialog texts ([#5357](https://github.com/dream-num/univer/issues/5357)) ([61ff824](https://github.com/dream-num/univer/commit/61ff82417443dcef466e7cee6e10c13893b36705))
+* **ui:** update MobileMenu for clarity and adjust button class order ([a78bc5c](https://github.com/dream-num/univer/commit/a78bc5c25a46012166ceebc4b89852b168db2812))
+* **value:** fix set range value change the null value to string null ([#5332](https://github.com/dream-num/univer/issues/5332)) ([19978f8](https://github.com/dream-num/univer/commit/19978f8fc0797297605dade54d7a273f10fac7bb))
+* **zen-editor:** add dark mode support for ZenEditor background ([#5350](https://github.com/dream-num/univer/issues/5350)) ([0c7b42d](https://github.com/dream-num/univer/commit/0c7b42d13de375fd00524dd9fdb71c0d1a939b61))
+
+
+### Features
+
+* **network:** add stream method for SSE ([#5347](https://github.com/dream-num/univer/issues/5347)) ([079196d](https://github.com/dream-num/univer/commit/079196d57aee81d7ee096404f8c7ecccd0a4be57))
+* **network:** xhr request enable responseType ([#5346](https://github.com/dream-num/univer/issues/5346)) ([ec5ddfc](https://github.com/dream-num/univer/commit/ec5ddfc5f264d3982d5f015c07cece29a83ca305))
+
 # [0.8.0](https://github.com/dream-num/univer/compare/v0.8.0-beta.1...v0.8.0) (2025-06-06)
 
 

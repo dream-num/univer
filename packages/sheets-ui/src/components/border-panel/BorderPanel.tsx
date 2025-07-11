@@ -104,8 +104,8 @@ export function BorderPanel(props: IBorderPanelProps) {
                         className={clsx(`
                           univer-flex univer-size-6 univer-cursor-pointer univer-items-center univer-justify-center
                           univer-justify-self-center univer-rounded
-                          dark:hover:!univer-bg-gray-700
                           hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
                         `, {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': borderStyleManagerService.getBorderInfo().type === item.value,
                         })}
@@ -134,8 +134,8 @@ export function BorderPanel(props: IBorderPanelProps) {
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
                               univer-border-none univer-bg-transparent univer-p-1
-                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-700
                             `}
                             type="button"
                         >
@@ -162,8 +162,8 @@ export function BorderPanel(props: IBorderPanelProps) {
                                             className={`
                                               univer-flex univer-cursor-pointer univer-items-center
                                               univer-justify-center univer-rounded univer-px-1 univer-py-2
-                                              dark:hover:!univer-bg-gray-700
                                               hover:univer-bg-gray-100
+                                              dark:hover:!univer-bg-gray-700
                                             `}
                                             onClick={() => handleClick(item.value, 'style')}
                                         >
@@ -184,8 +184,8 @@ export function BorderPanel(props: IBorderPanelProps) {
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
                               univer-border-none univer-bg-transparent univer-p-1
-                              dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-700
                             `}
                             type="button"
                         >

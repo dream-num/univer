@@ -128,12 +128,12 @@ export function UniSlideSideBar() {
             <button
                 type="button"
                 className={`
+                  before:absolute before:left-0 before:top-0 before:h-px before:content-[''] before:univer-bg-gray-200
                   univer-relative univer-mt-4 univer-flex univer-h-8 univer-cursor-pointer univer-items-center
                   univer-justify-center univer-rounded-lg univer-border-0 univer-bg-transparent univer-px-1
                   univer-text-primary-500
-                  before:absolute before:left-0 before:top-0 before:h-px before:content-[''] before:univer-bg-gray-200
-                  dark:hover:!univer-bg-gray-700
                   hover:univer-bg-gray-100
+                  dark:hover:!univer-bg-gray-700
                 `}
                 onClick={handleAppendSlide}
             >

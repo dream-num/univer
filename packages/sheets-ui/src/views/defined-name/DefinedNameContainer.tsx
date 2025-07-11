@@ -218,8 +218,8 @@ export const DefinedNameContainer = () => {
                                 className={clsx(`
                                   univer-group univer-relative univer-flex univer-cursor-default univer-select-none
                                   univer-items-center univer-justify-between univer-rounded-md univer-p-2
-                                  dark:hover:!univer-bg-gray-700
                                   hover:univer-bg-gray-50
+                                  dark:hover:!univer-bg-gray-700
                                 `, {
                                     'univer-hidden': definedName.id === editorKey,
                                 })}
@@ -254,9 +254,9 @@ export const DefinedNameContainer = () => {
                                           -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
                                           univer-justify-center univer-rounded univer-p-1 univer-text-xs
                                           univer-text-primary-600
-                                          dark:hover:!univer-bg-gray-600
-                                          group-hover:univer-flex
                                           hover:univer-bg-gray-100
+                                          group-hover:univer-flex
+                                          dark:hover:!univer-bg-gray-600
                                         `}
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -269,13 +269,13 @@ export const DefinedNameContainer = () => {
                                 <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
                                     <a
                                         className={`
-                                          univer-absolute univer-text-xs univer-text-error univer-right-5 univer-top-1/2
-                                          univer-hidden -univer-translate-y-1/2 univer-cursor-pointer
-                                          univer-items-center univer-justify-center univer-rounded univer-p-1
+                                          univer-text-error univer-absolute univer-right-5 univer-top-1/2 univer-hidden
+                                          -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
+                                          univer-justify-center univer-rounded univer-p-1 univer-text-xs
                                           univer-text-red-600
-                                          dark:hover:!univer-bg-gray-600
-                                          group-hover:univer-flex
                                           hover:univer-bg-gray-100
+                                          group-hover:univer-flex
+                                          dark:hover:!univer-bg-gray-600
                                         `}
                                         onClick={(e) => {
                                             e.stopPropagation();

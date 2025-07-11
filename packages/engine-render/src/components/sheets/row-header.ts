@@ -102,8 +102,8 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
         this._rowHeaderLayoutExtension = this.getExtensionByKey('DefaultRowHeaderLayoutExtension') as RowHeaderLayout;
     }
 
-    setCustomHeader(cfg: IRowsHeaderCfgParam) {
+    setCustomHeader(cfg: IRowsHeaderCfgParam, sheetId?: string) {
         this.makeDirty(true);
-        this._rowHeaderLayoutExtension.configHeaderRow(cfg);
+        this._rowHeaderLayoutExtension.configHeaderRow(cfg, sheetId);
     }
 }

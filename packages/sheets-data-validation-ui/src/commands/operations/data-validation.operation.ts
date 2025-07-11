@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';

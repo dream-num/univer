@@ -16,9 +16,10 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
+import type { IDocDrawing } from '../services/doc-drawing.service';
 import { Disposable, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
+import { IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
 export interface IDocDrawingModel { drawings?: IDocumentData['drawings']; drawingsOrder?: IDocumentData['drawingsOrder'] };

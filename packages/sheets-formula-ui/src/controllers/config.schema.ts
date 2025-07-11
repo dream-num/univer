@@ -25,11 +25,11 @@ export const PLUGIN_CONFIG_KEY_BASE = 'sheets-formula-ui.base.config';
 
 export const configSymbolBase = Symbol(PLUGIN_CONFIG_KEY_BASE);
 
-export interface IUniverSheetsFormulaBaseConfig {
+export interface IUniverSheetsFormulaUIConfig {
     menu?: MenuConfig;
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 
-export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};
+export const defaultPluginConfig: IUniverSheetsFormulaUIConfig = {};

@@ -21,9 +21,12 @@ import { IDescriptionService } from '@univerjs/sheets-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs';
+import { IFormulaPromptService } from '../../../services/prompt.service';
 import { useStateRef } from './use-state-ref';
 
+// eslint-disable-next-line max-lines-per-function
 export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?: Editor) => {
+    const formulaPromptService = useDependency(IFormulaPromptService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
@@ -41,19 +44,36 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
     };
 
     useEffect(() => {
+        const nodes = lexerTreeBuilder.sequenceNodesBuilder(formulaText.slice(1));
+        formulaPromptService.setSequenceNodes(nodes ?? []);
+    }, [formulaText]);
+
+    useEffect(() => {
         if (editor && isNeed) {
             const d = editor.selectionChange$.pipe(debounceTime(50)).subscribe((e) => {
                 if (e.textRanges.length === 1) {
                     const [range] = e.textRanges;
                     if (range.collapsed && isShowRef.current) {
-                        // 为什么减1,因为nodes是不包含初始 ‘=’ 字符的,但是 selection 会包含 '='
-                        const res = lexerTreeBuilder.getFunctionAndParameter(`${formulaTextRef.current}A`, range.startOffset - 1);
-                        if (res) {
-                            const { functionName, paramIndex } = res;
-                            const info = descriptionService.getFunctionInfo(functionName);
-                            setFunctionInfo(info);
-                            setParamIndex(paramIndex);
-                            return;
+                        const { startOffset } = range;
+                        const currentSequenceNode = formulaPromptService.getCurrentSequenceNode(startOffset - 2);
+
+                        if (currentSequenceNode) {
+                            if (typeof currentSequenceNode !== 'string' && currentSequenceNode.nodeType === 3 && !descriptionService.hasDefinedNameDescription(currentSequenceNode.token.trim())) {
+                                const info = descriptionService.getFunctionInfo(currentSequenceNode.token);
+                                setFunctionInfo(info);
+                                setParamIndex(-1);
+                                return;
+                            } else {
+                                // 为什么减1,因为nodes是不包含初始 ‘=’ 字符的,但是 selection 会包含 '='
+                                const res = lexerTreeBuilder.getFunctionAndParameter(`${formulaTextRef.current}A`, startOffset - 1);
+                                if (res) {
+                                    const { functionName, paramIndex } = res;
+                                    const info = descriptionService.getFunctionInfo(functionName);
+                                    setFunctionInfo(info);
+                                    setParamIndex(paramIndex);
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
@@ -61,7 +81,6 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                 setParamIndex(-1);
             });
             const d2 = editor.selectionChange$.pipe(
-                filter((e) => e.isEditing),
                 filter((e) => e.textRanges.length === 1),
                 map((e) => e.textRanges[0].startOffset),
                 distinctUntilChanged()

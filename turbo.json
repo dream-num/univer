@@ -16,10 +16,6 @@
 
         "build:e2e": {},
 
-        "dev:demo": {
-            "cache": false
-        },
-
         "lint:types": {}
     }
 }

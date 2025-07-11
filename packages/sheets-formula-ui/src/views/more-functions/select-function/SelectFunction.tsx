@@ -200,7 +200,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
             )}
 
             {functionInfo && (
-                <div className={clsx('univer-mx-0 univer-my-2 univer-max-h-80 univer-overflow-y-auto', scrollbarClassName)}>
+                <div className={clsx('univer-mx-0 univer-my-2 univer-overflow-y-auto', scrollbarClassName)}>
                     <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
 
                     <FunctionParams

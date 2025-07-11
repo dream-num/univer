@@ -58,7 +58,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
     const subUnitId = worksheet.getSheetId();
 
     return (
-        <div className="univer-mt-auto univer-flex univer-flex-row-reverse univer-py-5 univer-gap-2">
+        <div className="univer-mt-auto univer-flex univer-flex-row-reverse univer-gap-2 univer-py-5">
             <Button
                 variant="primary"
                 onClick={async () => {

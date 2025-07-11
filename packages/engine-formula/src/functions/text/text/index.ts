@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Text extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 2;
+
+    override isArgumentsIgnoreNumberPattern() {
+        return true;
+    }
 
     override calculate(text: BaseValueObject, formatText: BaseValueObject) {
         if (text.isError()) {
@@ -52,7 +57,7 @@ export class Text extends BaseFunction {
         const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text);
         const formatTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, formatText);
 
-        return textArray.map((textValue, rowIndex, columnIndex) => {
+        const resultArray = textArray.map((textValue, rowIndex, columnIndex) => {
             if (textValue.isError()) {
                 return textValue;
             }
@@ -95,5 +100,11 @@ export class Text extends BaseFunction {
 
             return StringValueObject.create(formatTextValueString === ' ' ? previewText.trimEnd() : previewText);
         });
+
+        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        return resultArray;
     }
 }

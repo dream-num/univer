@@ -514,6 +514,10 @@ export class UpdateFormulaController extends Disposable {
                             shouldModify = true;
                             refChangeIds.push(i);
                             // newRefString = ErrorType.REF;
+                        } else if (type === FormulaReferenceMoveType.MoveRange && si) {
+                            // If the operation is a move range and the formula has si, unpack the si to f.
+                            // This is to ensure that the si formula can be recalculated correctly after the move.
+                            shouldModify = true;
                         }
                     }
 

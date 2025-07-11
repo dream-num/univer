@@ -19,16 +19,16 @@ import { Toaster as Sonner, toast } from 'sonner';
 
 export type IToasterProps = ComponentProps<typeof Sonner>;
 
-const Toaster = ({ visibleToasts, ...props }: IToasterProps) => {
+function Toaster({ visibleToasts, ...props }: IToasterProps) {
     return (
         <Sonner
             className={`
+              dark:![&_[data-description]]:univer-text-gray-200
               [&_[data-description]]:univer-text-sm [&_[data-description]]:univer-text-gray-600
-              [&_[data-icon]]:univer-self-baseline
               [&_[data-icon]>svg]:univer-relative [&_[data-icon]>svg]:univer-top-1
+              [&_[data-icon]]:univer-self-baseline
               [&_[data-sonner-toast]]:univer-shadow-md
               [&_[data-title]]:univer-text-sm [&_[data-title]]:univer-text-gray-900
-              dark:![&_[data-description]]:univer-text-gray-200
             `}
             toastOptions={{
                 classNames: {

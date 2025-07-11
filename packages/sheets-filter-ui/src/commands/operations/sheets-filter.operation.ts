@@ -15,11 +15,11 @@
  */
 
 import type { IOperation } from '@univerjs/core';
+import type { FilterBy } from '@univerjs/sheets-filter';
 import { CommandType, ICommandService, IContextService, Quantity } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { ILayoutService } from '@univerjs/ui';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import type { FilterBy } from '../../services/sheets-filter-panel.service';
+import { ILayoutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 
 export const FILTER_PANEL_OPENED_KEY = 'FILTER_PANEL_OPENED';

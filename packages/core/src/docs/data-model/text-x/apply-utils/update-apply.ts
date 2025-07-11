@@ -15,18 +15,9 @@
  */
 
 import type { Nullable } from '../../../../shared';
+import type { ICustomBlock, ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
-import {
-    CustomDecorationType,
-    type ICustomBlock,
-    type ICustomDecoration,
-    type ICustomRange,
-    type ICustomTable,
-    type IDocumentBody,
-    type IParagraph,
-    type ISectionBreak,
-    type ITextRun,
-} from '../../../../types/interfaces';
+import { CustomDecorationType } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,

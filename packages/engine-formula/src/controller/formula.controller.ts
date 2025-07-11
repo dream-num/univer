@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
+import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 import type { IUniverEngineFormulaConfig } from './config.schema';
-
-import { Disposable, ICommandService, IConfigService } from '@univerjs/core';
-import { type Ctor, Optional } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
-import {
-    RemoveFeatureCalculationMutation,
-    SetFeatureCalculationMutation,
-} from '../commands/mutations/set-feature-calculation.mutation';
+import { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
@@ -36,11 +32,7 @@ import {
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
-import {
-    RemoveSuperTableMutation,
-    SetSuperTableMutation,
-    SetSuperTableOptionMutation,
-} from '../commands/mutations/set-super-table.mutation';
+import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
 import { functionArray } from '../functions/array/function-map';
 import { functionCompatibility } from '../functions/compatibility/function-map';
 import { functionCube } from '../functions/cube/function-map';

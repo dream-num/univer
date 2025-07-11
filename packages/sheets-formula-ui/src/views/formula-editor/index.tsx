@@ -315,6 +315,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     return (
         <div className={className}>
             <div
+                ref={sheetEmbeddingRef}
                 className={clsx(
                     `
                       univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-items-center
@@ -325,7 +326,6 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                         'univer-ring-red-500': isError,
                     }
                 )}
-                ref={sheetEmbeddingRef}
             >
                 <div
                     ref={formulaEditorContainerRef}
@@ -340,7 +340,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     </div>
                 )
                 : null}
-            {editor
+            {editor && formulaWithoutEqualSymbol !== ''
                 ? (
                     <HelpFunction
                         editor={editor}

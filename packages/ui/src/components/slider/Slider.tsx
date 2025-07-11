@@ -178,7 +178,7 @@ export function Slider(props: ISliderProps) {
             <div
                 className={`
                   univer-relative univer-hidden univer-h-0.5 univer-rounded-2xl univer-bg-gray-400 univer-px-1.5
-                  sm:univer-block
+                  sm:!univer-block
                 `}
                 style={{
                     width: `${SLIDER_WIDTH}px`,
@@ -203,7 +203,7 @@ export function Slider(props: ISliderProps) {
                           univer-absolute univer-top-[calc(50%-6px)] univer-size-3 -univer-translate-x-1/2
                           univer-rounded-full univer-border-none univer-bg-white univer-shadow univer-transition-colors
                         `, {
-                            'univer-cursor-pointer hover:univer-gray-200': !disabled,
+                            'hover:univer-gray-200 univer-cursor-pointer': !disabled,
                             'univer-cursor-not-allowed': disabled,
                         })}
                         role="handle"

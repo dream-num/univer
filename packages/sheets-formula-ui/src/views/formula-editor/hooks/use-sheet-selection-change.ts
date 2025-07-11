@@ -23,7 +23,7 @@ import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
 import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -81,13 +81,12 @@ export const useSheetSelectionChange = (
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-    const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
-    const sheetName = useMemo(() => getSheetNameById(subUnitId), [getSheetNameById, subUnitId]);
+    const getSheetNameById = useEvent((unitId: string, sheetId: string) => univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() ?? '');
+    const sheetName = useMemo(() => getSheetNameById(unitId, subUnitId), [getSheetNameById, subUnitId, unitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
     const currentUnit = useObservable(useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]));
     const render = renderManagerService.getRenderById(currentUnit?.getUnitId() ?? '');
-
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
@@ -107,7 +106,7 @@ export const useSheetSelectionChange = (
                 const unitRangeName = {
                     range,
                     unitId: range.unitId ?? currentUnit!.getUnitId(),
-                    sheetName: getSheetNameById(rangeSheetId),
+                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
                 const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
@@ -121,22 +120,28 @@ export const useSheetSelectionChange = (
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,
-                    unitId: range.unitId ?? unitId,
-                    sheetName: getSheetNameById(rangeSheetId),
+                    unitId: range.unitId ?? currentUnit!.getUnitId(),
+                    sheetName: getSheetNameById(range.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                 };
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                 const result = sequenceNodeToText(sequenceNodes);
                 handleRangeChange(result, refRanges[0].length, isEnd);
             }
-        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE) {
+        } else if (isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_SHEET_REFERENCE || isSelectingRef.current === FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE) {
             const last = selections.pop();
             if (!last) return;
             const node = sequenceNodes[nodeIndex];
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const oldToken = node.token;
-                node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                if (isAcrossWorkbook) {
+                    node.token = serializeRangeWithSpreadsheet(currentUnit?.getUnitId() ?? '', sheetName, last);
+                } else {
+                    node.token = sheetName === activeSheet?.getName() ? serializeRange(last) : serializeRangeWithSheet(activeSheet!.getName(), last);
+                }
                 const newOffset = offset + (node.token.length - oldToken.length);
                 handleRangeChange(generateStringWithSequence(sequenceNodes), newOffset, isEnd);
             }
@@ -158,6 +163,10 @@ export const useSheetSelectionChange = (
                         nodeRange.sheetName = sheetName;
                     }
 
+                    if (((nodeRange.unitId || unitId) !== currentUnit?.getUnitId())) {
+                        return item.token;
+                    }
+
                     if (isSupportAcrossSheet) {
                         // 直接跳过非当前表的 node 节点
                         if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
@@ -172,10 +181,12 @@ export const useSheetSelectionChange = (
                     const rangeSheetId = selection.sheetId ?? subUnitId;
                     const unitRangeName = {
                         range: selection,
-                        unitId: selection.unitId ?? unitId,
-                        sheetName: getSheetNameById(rangeSheetId),
+                        unitId: selection.unitId ?? currentUnit!.getUnitId(),
+                        sheetName: getSheetNameById(selection.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                     };
-                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
+                    const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
+                    const isAcrossSheet = rangeSheetId !== subUnitId;
+                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                     return refRanges[0];
                 }
                 return item.token;
@@ -195,11 +206,12 @@ export const useSheetSelectionChange = (
                 const rangeSheetId = selection.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range: selection,
-                    unitId: selection.unitId ?? unitId,
-                    sheetName: getSheetNameById(rangeSheetId),
+                    unitId: selection.unitId ?? currentUnit!.getUnitId(),
+                    sheetName: getSheetNameById(selection.unitId ?? currentUnit!.getUnitId(), rangeSheetId),
                 };
+                const isAcrossWorkbook = currentUnit?.getUnitId() !== unitId;
                 const isAcrossSheet = rangeSheetId !== subUnitId;
-                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
+                const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && (isAcrossSheet || isAcrossWorkbook), sheetName, isAcrossWorkbook);
                 theLastList.push(refRanges[0]);
             }
             const preNode = sequenceNodes[sequenceNodes.length - 1];

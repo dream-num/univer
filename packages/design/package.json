@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.8.0",
+    "version": "0.9.2",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -76,7 +76,7 @@
         "@radix-ui/react-slot": "^1.2.3",
         "@radix-ui/react-tooltip": "^1.2.7",
         "@rc-component/trigger": "^2.2.6",
-        "@univerjs/icons": "^0.4.4",
+        "@univerjs/icons": "^0.4.6",
         "@univerjs/themes": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -87,8 +87,8 @@
         "rc-virtual-list": "^3.16.1",
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
-        "sonner": "^2.0.3",
-        "tailwind-merge": "^3.3.0"
+        "sonner": "^2.0.6",
+        "tailwind-merge": "^3.3.1"
     },
     "devDependencies": {
         "@testing-library/react": "^16.3.0",
@@ -96,13 +96,13 @@
         "@types/react-transition-group": "^4.4.12",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/core": "workspace:*",
-        "postcss": "^8.5.4",
+        "postcss": "^8.5.6",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "tailwindcss": "^3.4.17",
+        "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
-        "vitest": "^3.1.4"
+        "vitest": "^3.2.4"
     }
 }

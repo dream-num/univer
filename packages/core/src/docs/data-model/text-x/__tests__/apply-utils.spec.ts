@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '../../../../shared';
-
 import type { IDocumentBody, ITextRun } from '../../../../types/interfaces';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';

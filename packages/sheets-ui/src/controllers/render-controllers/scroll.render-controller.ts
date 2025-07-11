@@ -129,7 +129,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const tolerance = 1;
 
         const checkPrevent = (remain: number, offset: number, otherOffset: number) => {
-            // 主运动方向保留量大于主运动偏移量，阻止事件冒泡
+            // When scrolling in both the x and y directions simultaneously,
+            // check whether the main scrolling direction requires the event to be prevented.
+            // This is not entirely accurate. Perhaps there are more effective methods to verify this.
             if ((remain > offset) && offset / (otherOffset || 0.1) >= tolerance) {
                 return true;
             }

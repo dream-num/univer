@@ -35,7 +35,7 @@ export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 |
         handler: (keycode: KeyCode) => {
             if (keycode === KeyCode.ENTER || keycode === KeyCode.ESC || keycode === KeyCode.TAB) {
                 editorBridgeService.disableForceKeepVisible();
-                commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode,

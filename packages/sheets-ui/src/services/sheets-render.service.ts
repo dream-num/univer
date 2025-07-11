@@ -72,18 +72,6 @@ export class SheetsRenderService extends RxDisposable {
     private _init() {
         this._initWorkbookListener();
         this._initContextListener();
-        this._initDarkModeListener();
-    }
-
-    private _initDarkModeListener(): void {
-        this.disposeWithMe(this._themeService.darkMode$.subscribe(() => {
-            this._renderManagerService.getRenderAll().forEach((renderer) => {
-                renderer.components.forEach((component) => {
-                    component.makeForceDirty(true);
-                    component.makeDirty(true);
-                });
-            });
-        }));
     }
 
     private _initWorkbookListener(): void {

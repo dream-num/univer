@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
@@ -96,7 +95,7 @@ export class UniverUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        const dependencies: Dependency[] = mergeOverrideWithDependencies([
+        registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ComponentManager],
             [ThemeSwitcherService],
             [ZIndexManager],
@@ -128,18 +127,23 @@ export class UniverUIPlugin extends Plugin {
             [SharedController],
             [ErrorController],
             [ShortcutPanelController],
-        ], this._config.override);
-        dependencies.forEach((dependency) => this._injector.add(dependency));
+        ], this._config.override));
 
-        this._injector.get(IUIController);
-        this._injector.get(ErrorController);
+        touchDependencies(this._injector, [
+            [IUIController],
+            [ErrorController],
+        ]);
     }
 
     override onReady(): void {
-        this._injector.get(SharedController);
+        touchDependencies(this._injector, [
+            [SharedController],
+        ]);
     }
 
     override onSteady(): void {
-        this._injector.get(ShortcutPanelController);
+        touchDependencies(this._injector, [
+            [ShortcutPanelController],
+        ]);
     }
 }

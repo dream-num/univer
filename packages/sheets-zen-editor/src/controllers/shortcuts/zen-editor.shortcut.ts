@@ -15,9 +15,9 @@
  */
 
 import type { IContextService } from '@univerjs/core';
+import type { IShortcutItem } from '@univerjs/ui';
 import { EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
-import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
-
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
 
 export const ZenEditorConfirmShortcut: IShortcutItem = {

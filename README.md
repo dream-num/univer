@@ -5,8 +5,8 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-Univer: An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server <br />
-Extensible. High-performance. Embedded to your application.
+An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server<br />
+**Extensible. High-performance. Embedded to your application.**
 
 **English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] <br />
 [Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]
@@ -62,7 +62,7 @@ Extensible. High-performance. Embedded to your application.
 
 Univer provides a wide range of features for spreadsheets, documents and presentations. Here are some of the key features:
 
-### 📊 Univer Sheet
+### 📊 Univer Sheets
 
 - **Core Features**: Univer supports core spreadsheet functionality, including cells, rows, columns, worksheets, and workbooks.
 - **Formulas**: Extensive support for various formulas, including mathematical, statistical, logical, text, date and time, lookup and reference, engineering, financial, and information formulas.
@@ -77,13 +77,16 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Conditional Formatting**: Supports applying formatting to cells based on specific criteria.
 - **Comments**: Enables adding comments to cells to provide additional information.
 - **Cross-highlighting**: Supports displaying cross-highlighting in spreadsheets to help users quickly locate selected cells.
+- **Zen Editor**: Provides a distraction-free editing experience with a clean interface and minimal distractions.
 - **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
-- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
+- **Sparklines**[^1]: Supports sparklines, which are small charts that fit within a cell to provide a visual representation of data.
 - **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
 - **Import & Export**[^1]: Support for importing and exporting data in XLSX.
-- **Charts**[^2]: Third-party chart support via [VChart][vchart-link].
+- **Charts**[^1]: Supports various types of charts, including bar charts, line charts, pie charts, scatter plots, and more.
+- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
+- **Editing History**[^1]: Allows users to view and restore previous versions of a spreadsheet.
 
-### 📝 Univer Doc (beta)
+### 📝 Univer Docs (rc)
 
 - **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
 - **Lists**: Supports ordered lists, unordered lists, and task lists.
@@ -91,10 +94,11 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Floating Images**: Allows inserting images into a document and supporting text and image layout.
 - **Headers & Footers**: Allows adding headers and footers to a document.
 - **Comments**: Enables adding comments to a document to provide additional information.
-- **Import**[^1]: Supports importing data in DOCX format.
+- **Printing**[^1]: Allows printing a document or exporting it to PDF.
+- **Import & Export**[^1]: Supports importing and exporting data in DOCX format.
 - **Collaborative Editing**[^1]: Supports multiple users editing a document simultaneously.
 
-### 📽️ Univer Slide (Under Development)
+### 📽️ Univer Slides (Under Development)
 
 - **Core Features**: Univer will support core presentation features, including slides, shapes, text, images, and more.
 
@@ -108,6 +112,7 @@ Univer supports multiple languages, including:
 - `ru-RU`
 - `vi-VN`
 - `fa-IR`
+- `ko-KR`
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 
@@ -195,13 +200,12 @@ Thanks to our sponsors, just part of them are listed here because of the space l
 
 ## 📄 License
 
-Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
+Copyright © 2021-2025 DreamNum Co,Ltd. All Rights Reserved.
 
 Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) license.
 
 <!-- Footnotes -->
 [^1]: These features are provided by the non-OSS version of Univer, which is free for commercial use and also includes paid upgrade plans.
-[^2]: VChart is a third-party library that provides chart support for Univer. You can find more information here: [univer-vchart-plugin][vchart-univer-link].
 
 <!-- Links -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
@@ -230,9 +234,9 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [readme-ja-link]: ./README-ja.md
 
 [official-site-link]: https://univer.ai
-[documentation-link]: https://univer.ai/guides/sheet/introduction
-[playground-link]: https://univer.ai/playground
-[blog-link]: https://univer.ai/blog/post/this-is-univer
+[documentation-link]: https://docs.univer.ai/en-US
+[playground-link]: https://docs.univer.ai/en-US/showcase
+[blog-link]: https://docs.univer.ai/en-US/blog
 
 [stackoverflow-community-link]: https://stackoverflow.com/questions/tagged/univer
 [stackoverflow-community-badge]: https://img.shields.io/badge/stackoverflow-univer-ef8236?labelColor=black&logo=stackoverflow&logoColor=white&style=for-the-badge
@@ -275,9 +279,6 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
 [backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
 
-[vchart-link]: https://github.com/VisActor/VChart
-[vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
-
 [examples-preview-capalyze]: ./docs/img/examples-sheets-capalyze.gif
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
@@ -297,20 +298,20 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
 [examples-link-capalyze]: https://capalyze.ai/
-[examples-link-0]: https://univer.ai/examples/sheets/
-[examples-link-1]: https://univer.ai/examples/sheets-multi/
-[examples-link-2]: https://univer.ai/examples/sheets-uniscript/
-[examples-link-3]: https://univer.ai/examples/sheets-big-data/
-[examples-link-4]: https://univer.ai/pro/examples/sheets-collaboration/
-[examples-link-5]: https://univer.ai/pro/examples/sheets-collaboration-playground/
-[examples-link-6]: https://univer.ai/pro/examples/sheets-exchange/
-[examples-link-7]: https://univer.ai/pro/examples/sheets-print/
-[examples-link-8]: https://univer.ai/examples/docs/
-[examples-link-9]: https://univer.ai/examples/docs-multi/
-[examples-link-10]: https://univer.ai/examples/docs-uniscript/
-[examples-link-11]: https://univer.ai/examples/docs-big-data/
-[examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
-[examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
-[examples-link-14]: https://univer.ai/examples/slides/
+[examples-link-0]: https://docs.univer.ai/showcase
+[examples-link-1]: https://docs.univer.ai/showcase
+[examples-link-2]: https://docs.univer.ai/showcase
+[examples-link-3]: https://docs.univer.ai/showcase
+[examples-link-4]: https://docs.univer.ai/showcase
+[examples-link-5]: https://docs.univer.ai/showcase
+[examples-link-6]: https://docs.univer.ai/showcase
+[examples-link-7]: https://docs.univer.ai/showcase
+[examples-link-8]: https://docs.univer.ai/showcase
+[examples-link-9]: https://docs.univer.ai/showcase
+[examples-link-10]: https://docs.univer.ai/showcase
+[examples-link-11]: https://docs.univer.ai/showcase
+[examples-link-12]: https://docs.univer.ai/showcase
+[examples-link-13]: https://docs.univer.ai/showcase
+[examples-link-14]: https://docs.univer.ai/showcase
 [examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

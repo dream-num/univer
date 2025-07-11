@@ -63,7 +63,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
     return (
         <div
             data-u-comp="sheets-filter-panel-values-container"
-            className="univer-flex univer-h-full univer-flex-col"
+            className="univer-flex univer-h-full univer-min-h-[300px] univer-flex-col"
         >
             <Input
                 autoFocus
@@ -122,7 +122,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         data={items}
                         defaultExpandAll={false}
                         valueGroup={extractCheckedKeys(items)}
-                        height={180}
+                        // height={180}
                         onChange={(node) => {
                             model.onFilterCheckToggled(node as IFilterByValueWithTreeItem);
                         }}

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { AsyncObject } from '../../../engine/reference-object/base-reference-object';
-import { AsyncArrayObject } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { AsyncArrayObject } from '../../../engine/reference-object/base-reference-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 

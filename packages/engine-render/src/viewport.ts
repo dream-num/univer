@@ -970,16 +970,13 @@ export class Viewport {
             x: offsetX,
             y: offsetY,
         });
-        if (isLimitedStore) {
-            const limitX = offsetX !== 0 && !isLimitedStore.isLimitedX;
-            const limitY = offsetY !== 0 && !isLimitedStore.isLimitedY;
-            if (limitX || limitY) {
-                // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
-                // if scrolling is reaching limit, let scrolling event do the default behavior.
-                evt.preventDefault();
-                if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    state.stopPropagation();
-                }
+
+        if (isLimitedStore && !isLimitedStore.isLimitedX && !isLimitedStore.isLimitedY) {
+            // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
+            // if scrolling is reaching limit, let scrolling event do the default behavior.
+            evt.preventDefault();
+            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                state.stopPropagation();
             }
         }
 

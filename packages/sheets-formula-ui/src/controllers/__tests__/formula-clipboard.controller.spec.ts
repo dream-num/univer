@@ -15,13 +15,13 @@
  */
 
 import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { COPY_TYPE, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { getSetCellFormulaMutations } from '../formula-clipboard.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 

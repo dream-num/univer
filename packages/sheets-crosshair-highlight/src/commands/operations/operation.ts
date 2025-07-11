@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 
 /**

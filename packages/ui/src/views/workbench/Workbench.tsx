@@ -126,7 +126,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
@@ -156,7 +156,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 {header && toolbar && (
                     <header
                         data-u-comp="headerbar"
-                        className="univer-relative univer-z-10 univer-w-full"
+                        className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
                     >
                         <ComponentContainer
                             key="toolbar"

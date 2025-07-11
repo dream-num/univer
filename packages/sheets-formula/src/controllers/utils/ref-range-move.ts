@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-import type {
-    IRange,
-    IUnitRange,
-    Nullable,
-} from '@univerjs/core';
-import {
-    Direction,
-    getIntersectRange,
-    RANGE_TYPE,
-    Rectangle,
-} from '@univerjs/core';
-
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { IFormulaReferenceMoveParam } from './ref-range-formula';
+import { Direction, getIntersectRange, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { ErrorType, serializeRangeToRefString } from '@univerjs/engine-formula';
-
 import {
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
@@ -43,7 +33,7 @@ import {
     handleMoveRows,
     runRefRangeMutations,
 } from '@univerjs/sheets';
-import { checkIsSameUnitAndSheet, FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
+import { checkIsSameUnitAndSheet, FormulaReferenceMoveType } from './ref-range-formula';
 
 export interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -66,7 +56,7 @@ export function getNewRangeByMoveParam(
     currentFormulaUnitId: string,
     currentFormulaSheetId: string
 ) {
-    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to } = formulaReferenceMoveParam;
+    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to, rangeFilteredRows } = formulaReferenceMoveParam;
 
     const {
         range: unitRange,
@@ -129,7 +119,10 @@ export function getNewRangeByMoveParam(
 
         if (
             remainRange == null &&
-            ((from.endRow < sequenceRange.startRow && to.endRow < sequenceRange.startRow) || (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow))
+            (
+                (from.endRow < sequenceRange.startRow && to.endRow <= sequenceRange.startRow) ||
+                (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow)
+            )
         ) {
             return;
         }
@@ -167,7 +160,10 @@ export function getNewRangeByMoveParam(
 
         if (
             remainRange == null &&
-            ((from.endColumn < sequenceRange.startColumn && to.endColumn < sequenceRange.startColumn) || (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn))
+            (
+                (from.endColumn < sequenceRange.startColumn && to.endColumn <= sequenceRange.startColumn) ||
+                (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn)
+            )
         ) {
             return;
         }
@@ -241,7 +237,8 @@ export function getNewRangeByMoveParam(
                     id: EffectRefRangId.RemoveRowCommandId,
                     params: { range },
                 },
-                sequenceRange
+                sequenceRange,
+                rangeFilteredRows
             );
 
             const result = runRefRangeMutations(operators, sequenceRange);

@@ -18,6 +18,7 @@ import type { IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/co
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { FormulaDataModel } from '../../../models/formula-data.model';
 import { BooleanNumber } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { createNewArray } from '../../../engine/utils/array-object';
@@ -61,6 +62,8 @@ export class Subtotal extends BaseFunction {
     override needsReferenceObject = true;
 
     override needsFilteredOutRows = true;
+
+    override needsFormulaDataModel = true;
 
     override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
         if (functionNum.isError()) {
@@ -381,10 +384,14 @@ export class Subtotal extends BaseFunction {
 
             const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
             const rowData = (variant as BaseReferenceObject).getRowData();
+            const unitId = (variant as BaseReferenceObject).getUnitId();
+            const sheetId = (variant as BaseReferenceObject).getSheetId();
+            const unitData = (variant as BaseReferenceObject).getUnitData();
+            const cellData = unitData[unitId]?.[sheetId]?.cellData;
 
             let errorValue: Nullable<BaseValueObject>;
 
-            (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+            (variant as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
                 // Filtered rows are always excluded.
                 if (filteredOutRows.includes(rowIndex)) {
                     return true; // continue
@@ -392,6 +399,17 @@ export class Subtotal extends BaseFunction {
 
                 if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
                     return true; // continue
+                }
+
+                // Ignore other SUBTOTAL formula results
+                const cellValue = cellData.getValue(rowIndex, columnIndex);
+                if (cellValue?.f || cellValue?.si) {
+                    const formulaString = (this._formulaDataModel as FormulaDataModel).getFormulaStringByCell(rowIndex, columnIndex, sheetId, unitId);
+
+                    // match 'SUBTOTAL(' for simple check
+                    if (formulaString && formulaString.indexOf(`${this.name}(`) > -1) {
+                        return true; // continue
+                    }
                 }
 
                 // 'test', ' ',  blank cell, TRUE and FALSE are ignored

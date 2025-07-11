@@ -685,9 +685,9 @@ export class SheetClipboardController extends RxDisposable {
         data: ObjectMatrix<ICellDataWithSpanInfo>,
         payload: ICopyPastePayload
     ): {
-            redos: IMutationInfo[];
-            undos: IMutationInfo[];
-        } {
+        redos: IMutationInfo[];
+        undos: IMutationInfo[];
+    } {
         return this._injector.invoke((accessor) => {
             return getDefaultOnPasteCellMutations(pasteFrom, pasteTo, data, payload, accessor);
         });

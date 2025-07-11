@@ -16,10 +16,11 @@
 
 import type { ITextRange } from '../../../sheets/typedef';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
+import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { ActionIterator } from './action-iterator';
-import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from './action-types';
+import { TextXActionType } from './action-types';
 import { textXApply } from './apply';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';

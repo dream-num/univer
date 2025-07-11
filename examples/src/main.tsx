@@ -104,7 +104,7 @@ function Examples() {
                 </h1>
             </header>
 
-            <section className="univer-flex univer-flex-wrap univer-justify-center univer-gap-6">
+            <section className="univer-container univer-flex univer-flex-wrap univer-justify-center univer-gap-6">
                 {demos.map((demo) => (
                     <a
                         key={demo.title}

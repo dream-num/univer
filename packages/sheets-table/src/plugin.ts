@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverSheetsTableConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { AddSheetTableCommand } from './commands/commands/add-sheet-table.command';
 import { AddTableThemeCommand } from './commands/commands/add-table-theme.command';
@@ -41,7 +42,7 @@ export class UniverSheetsTablePlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config = defaultPluginConfig,
+        private readonly _config: Partial<IUniverSheetsTableConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
         @Inject(ICommandService) private _commandService: ICommandService

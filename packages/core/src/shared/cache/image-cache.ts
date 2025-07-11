@@ -34,32 +34,34 @@ export class ImageCacheMap {
 
     getImage(imageSourceType: ImageSourceType, source: string, onLoad?: () => void, onError?: () => void) {
         const imageCacheKey = this._getImageCacheKey(imageSourceType, source);
-        let imageElement = this._imageCacheMap.get(imageCacheKey);
+        const imageElement = this._imageCacheMap.get(imageCacheKey);
         if (imageElement) {
             return imageElement;
         } else {
             (async () => {
-                imageElement = new Image();
+                const newImageElement = new Image();
                 const imageIoService = this._injector.has(IImageIoService) ? this._injector.get(IImageIoService) : null;
 
                 if (imageSourceType === ImageSourceType.UUID) {
                     try {
-                        imageElement.src = await imageIoService?.getImage(source) || '';
+                        newImageElement.src = await imageIoService?.getImage(source) || '';
                     } catch (error) {
                         console.error(error);
                     }
                 } else {
-                    imageElement.src = source;
+                    newImageElement.src = source;
                 }
 
-                imageElement.onload = () => {
+                newImageElement.onload = () => {
+                    newImageElement.removeAttribute('data-error');
                     onLoad?.();
                 };
-                imageElement.onerror = () => {
+                newImageElement.onerror = () => {
+                    newImageElement.setAttribute('data-error', 'true');
                     onError?.();
                 };
 
-                this._imageCacheMap.set(imageCacheKey, imageElement);
+                this._imageCacheMap.set(imageCacheKey, newImageElement);
             })();
 
             return null;

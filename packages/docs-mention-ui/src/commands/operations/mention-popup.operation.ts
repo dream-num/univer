@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { DocMentionService } from '../../services/doc-mention.service';
 
 export interface IShowMentionInfoPopupOperationParams {

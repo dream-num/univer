@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-export { type IValidStatusChange, SheetDataValidationModel } from './models/sheet-data-validation-model';
-export { UniverSheetsDataValidationPlugin } from './plugin';
-export { DataValidationCacheService } from './services/dv-cache.service';
-export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
-export { DataValidationFormulaService } from './services/dv-formula.service';
-export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-export { createDefaultNewRule } from './utils/create';
-export { DataValidationFormulaController } from './controllers/dv-formula.controller';
-export { getFormulaCellData, getFormulaResult } from './utils/formula';
-export { getCellValueOrigin } from './utils/get-cell-data-origin';
-export { ListValidator } from './validators/list-validator';
-export { DateValidator } from './validators/date-validator';
-export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator, transformCheckboxValue } from './validators/checkbox-validator';
-export { ListMultipleValidator } from './validators/list-multiple-validator';
-export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
-export { isLegalFormulaResult } from './utils/formula';
-export { getCellValueNumber } from './validators/decimal-validator';
-export { getTransformedFormula } from './validators/util';
-// #region - all commands
-
 export {
     AddSheetDataValidationCommand,
     ClearRangeDataValidationCommand,
@@ -52,9 +31,26 @@ export {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
-
-// #endregion
-
+export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
+export type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
+export { DataValidationFormulaController } from './controllers/dv-formula.controller';
+export { type IValidStatusChange, SheetDataValidationModel } from './models/sheet-data-validation-model';
+export { UniverSheetsDataValidationPlugin } from './plugin';
+export { DataValidationCacheService } from './services/dv-cache.service';
+export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
+export { DataValidationFormulaService } from './services/dv-formula.service';
+export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+export { createDefaultNewRule } from './utils/create';
+export { getFormulaCellData, getFormulaResult } from './utils/formula';
+export { isLegalFormulaResult } from './utils/formula';
+export { getCellValueOrigin } from './utils/get-cell-data-origin';
+export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator, transformCheckboxValue } from './validators/checkbox-validator';
+export { DateValidator } from './validators/date-validator';
+export { getCellValueNumber } from './validators/decimal-validator';
+export { ListMultipleValidator } from './validators/list-multiple-validator';
+export { ListValidator } from './validators/list-validator';
+export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
+export { getTransformedFormula } from './validators/util';
 export const CUSTOM_FORMULA_INPUT_NAME = 'data-validation.custom-formula-input';
 export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';
 export const LIST_FORMULA_INPUT_NAME = 'data-validation.list-formula-input';

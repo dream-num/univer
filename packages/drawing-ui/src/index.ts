@@ -16,18 +16,14 @@
 
 import './global.css';
 
-export { DrawingRenderService } from './services/drawing-render.service';
-export { getUpdateParams } from './utils/get-update-params';
-export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';
-export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
-export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
-export { UniverDrawingUIPlugin } from './plugin';
-export { ImageCropperObject } from './views/crop/image-cropper-object';
-
-// #region - all commands
-
 export { SetDrawingAlignOperation } from './commands/operations/drawing-align.operation';
 export { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
-
-// #endregion
+export type { IUniverDrawingUIConfig } from './controllers/config.schema';
+export { UniverDrawingUIPlugin } from './plugin';
+export { DrawingRenderService } from './services/drawing-render.service';
+export { getUpdateParams } from './utils/get-update-params';
+export { ImageCropperObject } from './views/crop/image-cropper-object';
+export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
+export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
+export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';

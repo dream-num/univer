@@ -35,15 +35,15 @@ const TooltipContent = forwardRef<
             sideOffset={sideOffset}
             className={clsx(
                 `
-                  univer-z-[1080] univer-box-border univer-w-fit univer-text-balance univer-rounded-lg
-                  univer-bg-gray-700 univer-px-3 univer-py-2.5 univer-text-xs univer-font-medium univer-text-white
-                  univer-animate-in univer-fade-in-0 univer-zoom-in-95
+                  univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-z-[1080] univer-box-border univer-w-fit
+                  univer-text-balance univer-rounded-lg univer-bg-gray-700 univer-px-3 univer-py-2.5 univer-text-xs
+                  univer-font-medium univer-text-white
+                  data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
+                  data-[state=closed]:univer-zoom-out-95
                   data-[side=bottom]:univer-slide-in-from-top-2
                   data-[side=left]:univer-slide-in-from-right-2
                   data-[side=right]:univer-slide-in-from-left-2
                   data-[side=top]:univer-slide-in-from-bottom-2
-                  data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
-                  data-[state=closed]:univer-zoom-out-95
                 `,
                 className
             )}

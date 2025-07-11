@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, type IMutation } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
 import type { IWorksheetProtectionRule } from '../../services/permission/type';
+import { CommandType } from '@univerjs/core';
 import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export interface ISetWorksheetProtectionParams {

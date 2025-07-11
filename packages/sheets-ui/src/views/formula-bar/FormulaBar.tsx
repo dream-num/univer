@@ -18,6 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    EDITOR_ACTIVATED,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
     IContextService,
@@ -86,7 +87,7 @@ export function FormulaBar(props: IProps) {
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);
     useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
-    const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+    const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) || contextService.getContextValue(EDITOR_ACTIVATED);
     const ref = useRef<HTMLDivElement>(null);
     const editorService = useDependency(IEditorService);
 
@@ -298,7 +299,7 @@ export function FormulaBar(props: IProps) {
                               univer-text-base
                               dark:!univer-text-white
                             `, {
-                                'univer-cursor-pointer univer-text-green-600 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
+                                'univer-cursor-pointer univer-text-green-600 hover:univer-bg-gray-100 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700': iconActivated,
                             })}
                             onClick={handleCloseBtnClick}
                         >
@@ -310,7 +311,7 @@ export function FormulaBar(props: IProps) {
                               univer-text-base
                               dark:!univer-text-white
                             `, {
-                                'univer-cursor-pointer univer-text-red-600 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700 hover:univer-bg-gray-100': iconActivated,
+                                'univer-cursor-pointer univer-text-red-600 hover:univer-bg-gray-100 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700': iconActivated,
                             })}
                             onClick={handleConfirmBtnClick}
                         >
@@ -320,8 +321,8 @@ export function FormulaBar(props: IProps) {
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
                               univer-p-1 univer-text-base
-                              dark:!univer-text-white dark:hover:!univer-bg-gray-700
                               hover:univer-bg-gray-100
+                              dark:!univer-text-white dark:hover:!univer-bg-gray-700
                             `}
                             onClick={handlerFxBtnClick}
                         >

@@ -71,8 +71,8 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
 
         const result = await confirmService.confirm({
             id: InsertRangeMoveDownConfirmCommand.id,
-            title: { title: localeService.t('merge.confirm.waring') },
-            children: { title: localeService.t('merge.confirm.dismantleMergeCellWaring') },
+            title: { title: localeService.t('merge.confirm.warning') },
+            children: { title: localeService.t('merge.confirm.dismantleMergeCellWarning') },
             cancelText: localeService.t('button.cancel'),
             confirmText: localeService.t('button.confirm'),
         });

@@ -39,10 +39,10 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                 className={clsx(`
                   univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center univer-rounded-lg
                   univer-bg-white univer-pt-2 univer-transition-colors
+                  hover:univer-border-primary-600
+                  dark:!univer-bg-gray-700 dark:!univer-text-white
                   [&>div:first-child]:univer-px-2.5
                   [&>div]:univer-h-5 [&>div]:univer-ring-transparent
-                  dark:!univer-bg-gray-700 dark:!univer-text-white
-                  hover:univer-border-primary-600
                 `, borderClassName)}
                 initValue={value?.formula1 ?? '=' as any}
                 unitId={unitId}

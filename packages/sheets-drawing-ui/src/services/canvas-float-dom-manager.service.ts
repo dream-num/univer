@@ -558,6 +558,19 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         //# endregion
     }
 
+    updateFloatDomProps(unitId: string, subUnitId: string, id: string, props: Record<string, any>) {
+        const info = this._domLayerInfoMap.get(id);
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+        if (info && renderObject) {
+            const { scene } = renderObject;
+            const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: id });
+            const rectShape = scene.getObject(rectShapeKey);
+            if (rectShape && rectShape instanceof Rect) {
+                rectShape.setProps(props);
+            }
+        }
+    }
+
     private _getPosition(position: IPosition, unitId: string): Nullable<ISheetDrawingPosition> {
         const { startX, endX, startY, endY } = position;
         const selectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);

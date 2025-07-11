@@ -19,6 +19,9 @@ import type { ISheetNote } from '@univerjs/sheets-note';
 import { RemoveNoteMutation, SheetsNoteModel, UpdateNoteMutation } from '@univerjs/sheets-note';
 import { FRange } from '@univerjs/sheets/facade';
 
+/**
+ * @ignore
+ */
 export interface IFSheetsNoteRange {
     /**
      * Get the annotation of the top-left cell in the range
@@ -71,8 +74,8 @@ export interface IFSheetsNoteRange {
     deleteNote(): FRange;
 }
 
-export class FSheetsNoteRange extends FRange implements IFSheetsNoteRange {
-    createOrUpdateNote(note: ISheetNote): FRange {
+export class FSheetsNoteRangeMixin extends FRange implements IFSheetsNoteRange {
+    override createOrUpdateNote(note: ISheetNote): FRange {
         this._commandService.syncExecuteCommand(
             UpdateNoteMutation.id,
             {
@@ -87,7 +90,7 @@ export class FSheetsNoteRange extends FRange implements IFSheetsNoteRange {
         return this;
     }
 
-    deleteNote(): FRange {
+    override deleteNote(): FRange {
         this._commandService.syncExecuteCommand(
             RemoveNoteMutation.id,
             {
@@ -101,14 +104,14 @@ export class FSheetsNoteRange extends FRange implements IFSheetsNoteRange {
         return this;
     }
 
-    getNote(): Nullable<ISheetNote> {
+    override getNote(): Nullable<ISheetNote> {
         const model = this._injector.get(SheetsNoteModel);
         return model.getNote(this.getUnitId(), this.getSheetId(), this.getRow(), this.getColumn());
     }
 }
 
+FRange.extend(FSheetsNoteRangeMixin);
 declare module '@univerjs/sheets/facade' {
-    interface IRange extends FSheetsNoteRange { }
+    // eslint-disable-next-line ts/naming-convention
+    interface FRange extends IFSheetsNoteRange { }
 }
-
-FRange.extend(FSheetsNoteRange);

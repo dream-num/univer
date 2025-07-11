@@ -52,13 +52,13 @@ export const ButtonGroup = ({
                 return cloneElement(child, {
                     className: clsx(
                         {
-                            'univer-rounded-l-none': isHorizontal && !isFirst,
-                            'univer-rounded-r-none': isHorizontal && !isLast,
-                            'univer-border-l-0': isHorizontal && !isFirst,
+                            '!univer-rounded-l-none': isHorizontal && !isFirst,
+                            '!univer-rounded-r-none': isHorizontal && !isLast,
+                            '!univer-border-l-0': isHorizontal && !isFirst,
 
-                            'univer-rounded-t-none': isVertical && !isFirst,
-                            'univer-rounded-b-none': isVertical && !isLast,
-                            'univer-border-t-0': isVertical && !isFirst,
+                            '!univer-rounded-t-none': isVertical && !isFirst,
+                            '!univer-rounded-b-none': isVertical && !isLast,
+                            '!univer-border-t-0': isVertical && !isFirst,
                         },
                         child.props.className
                     ),

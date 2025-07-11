@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-adapter-vue3",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "private": false,
     "description": "Vue adapter for Univer UI",
     "author": "DreamNum <developer@univer.ai>",

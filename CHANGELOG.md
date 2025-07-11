@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.9.2](https://github.com/dream-num/univer/compare/v0.9.1...v0.9.2) (2025-07-11)
+
+
+### Bug Fixes
+
+* **doc:** fix some code error ([#5489](https://github.com/dream-num/univer/issues/5489)) ([674fd6e](https://github.com/dream-num/univer/commit/674fd6ebe8e112ef89d18484268bb2f6812eeaf8))
+* **dts:** simplify interface declarations and improve method overrides in event and range modules ([#5516](https://github.com/dream-num/univer/issues/5516)) ([edea4eb](https://github.com/dream-num/univer/commit/edea4ebeae3ec64fde4b692666b746ef52464a8d))
+* fix render of true and false, and TEXT formula error ([#5504](https://github.com/dream-num/univer/issues/5504)) ([ec740ba](https://github.com/dream-num/univer/commit/ec740ba578880a03c5a5ee584815c3ae83c680a7))
+* fix SUBTOTAL formula need ignore other SUBTOTAL formula results ([#5506](https://github.com/dream-num/univer/issues/5506)) ([732bcec](https://github.com/dream-num/univer/commit/732bcec66441e38c84940e6a20093aaac6731dbf))
+* **sheets-filter-ui:** adjust width of filter panel component ([#5518](https://github.com/dream-num/univer/issues/5518)) ([bb719f2](https://github.com/dream-num/univer/commit/bb719f20d5b3a30e9db8b90303ad9172df92d8e8))
+* **sheets-formula-ui:** can't drag selections when edit formula ([#5512](https://github.com/dream-num/univer/issues/5512)) ([cd39795](https://github.com/dream-num/univer/commit/cd3979593285c7cbc79ebfb3c1f7b2e39c38dab1))
+* **sheets-sort-ui:** improve layout and styling of `CustomSortPanel` ([#5507](https://github.com/dream-num/univer/issues/5507)) ([16d234d](https://github.com/dream-num/univer/commit/16d234d8a9745c0eb23d9044b2bee92ed89a3138))
+* **ui-adapter-vue3:** update peerDependencies to require Vue 3.0.0 or higher ([#5495](https://github.com/dream-num/univer/issues/5495)) ([b72b49a](https://github.com/dream-num/univer/commit/b72b49a06d31094f72f39eb461777f30d8e2cea1))
+
+
+### Features
+
+* add float-dom update & delete & event api ([#5515](https://github.com/dream-num/univer/issues/5515)) ([a4e177a](https://github.com/dream-num/univer/commit/a4e177a1407c674277e7d95ccccf823795502000))
+* add support for filter by colors ([#5501](https://github.com/dream-num/univer/issues/5501)) ([45f389b](https://github.com/dream-num/univer/commit/45f389b0f73ccad3733666cbe6b4deb136625fa0))
+* **sheets-drawing-ui:** add updateFloatDomProps ([#5517](https://github.com/dream-num/univer/issues/5517)) ([bb051e2](https://github.com/dream-num/univer/commit/bb051e29748c4a5ec57d690432377c3d6386e472))
+
 ## [0.9.1](https://github.com/dream-num/univer/compare/v0.9.0...v0.9.1) (2025-07-04)
 
 

@@ -15,10 +15,26 @@
  */
 
 import type { IRangeThemeStyleJSON } from '@univerjs/sheets';
-import type { IAddSheetTableCommandParams, IDeleteSheetTableParams, ISetSheetTableCommandParams, ISetSheetTableParams, ITableFilterItem, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
+import type {
+    IAddSheetTableCommandParams,
+    IDeleteSheetTableParams,
+    ISetSheetTableCommandParams,
+    ISetSheetTableParams,
+    ITableFilterItem,
+    ITableInfoWithUnitId,
+    ITableOptions,
+    ITableRange,
+} from '@univerjs/sheets-table';
 import { cellToRange, Rectangle } from '@univerjs/core';
 import { RangeThemeStyle } from '@univerjs/sheets';
-import { AddSheetTableCommand, AddTableThemeCommand, DeleteSheetTableCommand, SetSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
+import {
+    AddSheetTableCommand,
+    AddTableThemeCommand,
+    DeleteSheetTableCommand,
+    SetSheetTableCommand,
+    SetSheetTableFilterCommand,
+    SheetTableService,
+} from '@univerjs/sheets-table';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**

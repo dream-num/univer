@@ -28,6 +28,7 @@ export interface IFUniverSheetNoteMixin {
 }
 
 export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteMixin {
+    // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         this.registerEventHandler(
             this.Event.SheetNoteAdd,

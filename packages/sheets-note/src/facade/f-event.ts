@@ -306,9 +306,6 @@ export interface ISheetNoteEventConfig {
 FEventName.extend(FSheetNoteEvent);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends ISheetNoteEvent {
-    }
-
-    interface IEventParamConfig extends ISheetNoteEventConfig {
-    }
+    interface FEventName extends ISheetNoteEvent {}
+    interface IEventParamConfig extends ISheetNoteEventConfig {}
 }

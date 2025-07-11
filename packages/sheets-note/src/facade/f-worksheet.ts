@@ -23,6 +23,9 @@ export interface ISheetNoteInfo extends ISheetNote {
     col: number;
 }
 
+/**
+ * @ignore
+ */
 export interface IFSheetsNoteWorksheet {
     /**
      * Get all annotations in the worksheet
@@ -44,7 +47,7 @@ export interface IFSheetsNoteWorksheet {
 }
 
 export class FSheetsNoteWorksheet extends FWorksheet implements IFSheetsNoteWorksheet {
-    getNotes(): ISheetNoteInfo[] {
+    override getNotes(): ISheetNoteInfo[] {
         const model = this._injector.get(SheetsNoteModel);
         const notes = model.getSheetNotes(this.getWorkbook().getUnitId(), this.getSheetId());
         const arr: ISheetNoteInfo[] = [];
@@ -61,8 +64,8 @@ export class FSheetsNoteWorksheet extends FWorksheet implements IFSheetsNoteWork
     }
 }
 
-declare module '@univerjs/sheets/facade' {
-    interface IWorksheet extends FSheetsNoteWorksheet { }
-}
-
 FWorksheet.extend(FSheetsNoteWorksheet);
+declare module '@univerjs/sheets/facade' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FWorksheet extends IFSheetsNoteWorksheet { }
+}

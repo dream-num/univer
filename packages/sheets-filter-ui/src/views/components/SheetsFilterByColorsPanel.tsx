@@ -148,6 +148,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                         className={`
                           univer-flex univer-h-full univer-w-full univer-items-center univer-justify-center
                           univer-text-sm univer-text-gray-900
+                          dark:!univer-text-gray-200
                         `}
                     >
                         {localeService.t('sheets-filter.panel.filter-by-color-none')}

@@ -16,10 +16,22 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IMutationInfo, IStyleData, Nullable, Styles, Workbook } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICellData,
+    ICommandInfo,
+    IDisposable,
+    IDocumentBody,
+    IDocumentData,
+    IDocumentStyle,
+    IMutationInfo,
+    IStyleData,
+    Nullable,
+    Styles,
+    Workbook,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
-
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType,
@@ -39,6 +51,7 @@ import {
     IContextService,
     Inject,
     isFormulaString,
+    isTextFormat,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -47,22 +60,27 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
-import {
-    DocSelectionManagerService,
-    DocSkeletonManagerService,
-    RichTextEditingMutation,
-} from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-import { isTextFormat } from '@univerjs/engine-numfmt';
-
+import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
-    convertTextRotation,
-    DeviceInputEventType,
-    IRenderManagerService,
-} from '@univerjs/engine-render';
-
-import { adjustRangeOnMutation, COMMAND_LISTENER_SKELETON_CHANGE, InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRowsMutation, REF_SELECTIONS_ENABLED, RemoveColMutation, RemoveRowMutation, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+    adjustRangeOnMutation,
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    InsertColMutation,
+    InsertRowMutation,
+    MoveColsMutation,
+    MoveRowsMutation,
+    REF_SELECTIONS_ENABLED,
+    RemoveColMutation,
+    RemoveRowMutation,
+    SetRangeValuesCommand,
+    SetSelectionsOperation,
+    SetWorksheetActivateCommand,
+    SetWorksheetActiveOperation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';

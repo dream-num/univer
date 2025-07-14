@@ -26,9 +26,21 @@ import type {
 } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import type { IDiscreteRange } from '../utils/range-tools';
-
-import { cellToRange, CellValueType, CustomRangeType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools, willLoseNumericPrecision } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
+import {
+    cellToRange,
+    CellValueType,
+    CustomRangeType,
+    DEFAULT_STYLES,
+    generateRandomId,
+    isTextFormat,
+    IUniverInstanceService,
+    numfmt,
+    ObjectMatrix,
+    Range,
+    Rectangle,
+    Tools,
+    willLoseNumericPrecision,
+} from '@univerjs/core';
 import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,

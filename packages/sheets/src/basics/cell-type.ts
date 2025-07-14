@@ -15,8 +15,7 @@
  */
 
 import type { CellValue, ICellData, IStyleData, Nullable, Styles } from '@univerjs/core';
-import { CellValueType, isBooleanString, isRealNum, willLoseNumericPrecision } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
+import { CellValueType, isBooleanString, isRealNum, isTextFormat, willLoseNumericPrecision } from '@univerjs/core';
 
 /**
  * Get cell value type by style, new value and old value.

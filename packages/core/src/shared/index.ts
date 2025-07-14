@@ -31,7 +31,16 @@ export * from './hash-algorithm';
 export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';
-export { type INumfmtLocalTag, isPatternEqualWithoutDecimal, numfmt } from './numfmt';
+export type { INumfmtLocalTag } from './numfmt';
+export {
+    DEFAULT_NUMBER_FORMAT,
+    DEFAULT_TEXT_FORMAT,
+    DEFAULT_TEXT_FORMAT_EXCEL,
+    isDefaultFormat,
+    isPatternEqualWithoutDecimal,
+    isTextFormat,
+    numfmt,
+} from './numfmt';
 export * from './object-matrix';
 export { queryObjectMatrix } from './object-matrix-query';
 export { moveRangeByOffset, splitIntoGrid } from './range';

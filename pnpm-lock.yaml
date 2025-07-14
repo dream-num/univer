@@ -1756,9 +1756,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/engine-numfmt':
-        specifier: workspace:*
-        version: link:../engine-numfmt
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -1772,21 +1769,6 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-      vite:
-        specifier: ^6.3.5
-        version: 6.3.5(@types/node@24.0.13)(jiti@2.4.2)(sass@1.87.0)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.0)
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.0.13)(happy-dom@18.0.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.87.0)(terser@5.39.0)(tsx@4.20.3)(yaml@2.8.0)
-
-  packages/engine-numfmt:
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1957,9 +1939,6 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/engine-numfmt':
-        specifier: workspace:*
-        version: link:../engine-numfmt
       '@univerjs/protocol':
         specifier: 0.1.46
         version: 0.1.46(@grpc/grpc-js@1.13.3)(rxjs@7.8.2)
@@ -2752,9 +2731,6 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/engine-numfmt':
-        specifier: workspace:*
-        version: link:../engine-numfmt
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2783,9 +2759,6 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
-      '@univerjs/engine-numfmt':
-        specifier: workspace:*
-        version: link:../engine-numfmt
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -3105,9 +3078,6 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/engine-numfmt':
-        specifier: workspace:*
-        version: link:../engine-numfmt
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

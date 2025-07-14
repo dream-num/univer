@@ -25,7 +25,7 @@ pnpm add @univerjs/engine-render
 ```
 
 <!-- Links -->
-[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/engine-numfmt?style=flat-square
-[npm-version-link]: https://npmjs.com/package/@univerjs/engine-numfmt
-[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/engine-numfmt?style=flat-square
-[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/engine-numfmt?style=flat-square
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/engine-render?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/engine-render
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/engine-render?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/engine-render?style=flat-square

@@ -69,13 +69,13 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "@wendellhu/redi": "0.19.2",
+        "@wendellhu/redi": "1.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/protocol": "0.1.46",
         "@univerjs/themes": "workspace:*",
-        "@wendellhu/redi": "0.19.2",
+        "@wendellhu/redi": "1.0.0",
         "async-lock": "^1.4.1",
         "dayjs": "^1.11.13",
         "fast-diff": "1.3.0",

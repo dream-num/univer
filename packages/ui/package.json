@@ -84,7 +84,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.4.6",
-        "@wendellhu/redi": "0.19.2",
+        "@wendellhu/redi": "1.0.0",
         "localforage": "^1.10.0"
     },
     "devDependencies": {

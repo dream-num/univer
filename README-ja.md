@@ -226,6 +226,7 @@ Copyright © 2021-2025 DreamNum Co,Ltd. All Rights Reserved.
 [readme-en-link]: ./README.md
 [readme-zh-link]: ./README-zh.md
 [readme-ja-link]: ./README-ja.md
+[readme-es-link]: ./README-es.md
 
 [official-site-link]: https://univer.ai
 [documentation-link]: https://docs.univer.ai/en-US

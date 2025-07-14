@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+const locale = {
+    rightClick: {
+        zenEditor: 'Editor a pantalla completa',
+    },
+    shortcut: {
+        sheet: {
+            'zen-edit-cancel': 'Cancel·la edició Zen',
+            'zen-edit-confirm': 'Confirma edició Zen',
+        },
+    },
+};
+
+export default locale;

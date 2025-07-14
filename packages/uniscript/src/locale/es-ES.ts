@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+const locale = {
+    'script-panel': {
+        title: 'Uniscript',
+        tooltip: {
+            'menu-button': 'Mostrar/Ocultar panel de Uniscript',
+        },
+        panel: {
+            execute: 'Ejecutar script',
+        },
+    },
+    uniscript: {
+        message: {
+            success: 'Ejecución exitosa',
+            failed: 'Ejecución fallida',
+        },
+    },
+};
+
+export default locale;

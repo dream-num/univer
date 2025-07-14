@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+const locale = {
+    rightClick: {
+        addNote: 'Afegeix nota',
+        deleteNote: 'Elimina nota',
+        toggleNote: 'Mostra/Amaga nota',
+    },
+    note: {
+        placeholder: 'Escriu aquí',
+    },
+};
+
+export default locale;

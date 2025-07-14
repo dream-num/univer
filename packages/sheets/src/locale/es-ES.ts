@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+const locale = {
+    sheets: {
+        tabs: {
+            sheetCopy: '(Copia{0})',
+            sheet: 'Hoja',
+        },
+        info: {
+            overlappingSelections: 'No se puede usar ese comando en selecciones superpuestas',
+            acrossMergedCell: 'A través de una celda combinada',
+            partOfCell: 'Solo una parte de una celda combinada está seleccionada',
+            hideSheet: 'No hay hojas visibles después de ocultar esta',
+        },
+    },
+};
+
+export default locale;

@@ -16,8 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { fromCallback, ICommandService, isPatternEqualWithoutDecimal, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT_EXCEL, isDefaultFormat } from '@univerjs/engine-numfmt';
+import { DEFAULT_TEXT_FORMAT_EXCEL, fromCallback, ICommandService, isDefaultFormat, isPatternEqualWithoutDecimal, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import {
     RangeProtectionPermissionEditPoint,
     RemoveNumfmtMutation,

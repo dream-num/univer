@@ -80,7 +80,6 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/protocol": "0.1.46",
         "@univerjs/rpc": "workspace:*"
     },

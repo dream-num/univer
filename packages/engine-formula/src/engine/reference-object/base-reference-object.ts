@@ -16,10 +16,8 @@
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
-
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
-import { CellValueType, moveRangeByOffset } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
+import { CellValueType, isTextFormat, moveRangeByOffset } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isNullCellForFormula } from '../../basics/is-null-cell';

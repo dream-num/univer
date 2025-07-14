@@ -26,6 +26,7 @@ import {
     Disposable,
     Inject,
     Injector,
+    isTextFormat,
     IUniverInstanceService,
     numfmt,
     Optional,
@@ -33,7 +34,6 @@ import {
     UniverInstanceType,
     willLoseNumericPrecision,
 } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
 import {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,

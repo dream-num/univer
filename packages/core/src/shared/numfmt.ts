@@ -18,6 +18,18 @@ import * as numfmt from 'numfmt';
 
 export * as numfmt from 'numfmt';
 
+export const DEFAULT_TEXT_FORMAT = '@@@'; // Compatible with old data
+export const DEFAULT_TEXT_FORMAT_EXCEL = '@'; // The default text format in Excel, recommended
+export const DEFAULT_NUMBER_FORMAT = 'General'; // null or General are considered the default format
+
+export function isTextFormat(pattern: string | undefined) {
+    return pattern === DEFAULT_TEXT_FORMAT || pattern === DEFAULT_TEXT_FORMAT_EXCEL;
+}
+
+export function isDefaultFormat(pattern?: string | null) {
+    return pattern === null || pattern === undefined || pattern === DEFAULT_NUMBER_FORMAT;
+}
+
 export type INumfmtLocalTag =
     | 'zh-CN'
     | 'zh-TW'

@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    ICellData,
-    ICellDataForSheetInterceptor,
-    INumfmtLocalTag,
-    Workbook,
-} from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocalTag, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsNumfmtConfig } from './config.schema';
 import {
@@ -29,6 +24,7 @@ import {
     IConfigService,
     Inject,
     InterceptorEffectEnum,
+    isTextFormat,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -37,8 +33,15 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
-import { checkCellValueType, InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    checkCellValueType,
+    InterceptCellContentPriority,
+    INTERCEPTOR_POINT,
+    INumfmtService,
+    SetNumfmtMutation,
+    SetRangeValuesMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './config.schema';
@@ -84,6 +87,9 @@ export class SheetsNumfmtCellContentController extends Disposable {
             }
             case LocaleType.ZH_CN: {
                 return 'zh-CN';
+            }
+            case LocaleType.KO_KR: {
+                return 'ko';
             }
             case LocaleType.ZH_TW: {
                 return 'zh-TW';

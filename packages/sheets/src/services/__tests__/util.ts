@@ -15,8 +15,19 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { CellValueType, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
+import {
+    CellValueType,
+    DEFAULT_TEXT_FORMAT_EXCEL,
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleType,
+    LogLevel,
+    Plugin,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 
 export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',

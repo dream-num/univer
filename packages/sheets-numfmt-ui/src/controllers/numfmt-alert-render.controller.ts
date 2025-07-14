@@ -17,8 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
-import { Disposable, IConfigService, Inject, isRealNum, LocaleService } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
+import { Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleService } from '@univerjs/core';
 import { INumfmtService } from '@univerjs/sheets';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '@univerjs/sheets-numfmt';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';

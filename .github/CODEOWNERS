@@ -24,7 +24,6 @@ packages/design @jikkai
 packages/drawing @weird94
 packages/drawing-ui @weird94
 packages/engine-formula @Dushusir @wpxp123456
-packages/engine-numfmt @VicKun4937
 packages/engine-render @Jocs
 packages/engine-render/components/docs @Jocs
 packages/find-replace @siam-ese

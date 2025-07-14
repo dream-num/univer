@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { CellValueType, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
-import { DEFAULT_TEXT_FORMAT_EXCEL } from '@univerjs/engine-numfmt';
+import { CellValueType, DEFAULT_TEXT_FORMAT_EXCEL, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,

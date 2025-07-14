@@ -17,8 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { CellValueType, IConfigService, Inject, InterceptorEffectEnum, isRealNum, RxDisposable } from '@univerjs/core';
-import { isTextFormat } from '@univerjs/engine-numfmt';
+import { CellValueType, IConfigService, Inject, InterceptorEffectEnum, isRealNum, isTextFormat, RxDisposable } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';

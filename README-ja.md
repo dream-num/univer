@@ -1,17 +1,23 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-    <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
-</picture>
+<a href="https://docs.univer.ai/en-US">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
+        <img src="./docs/img/banner-dark.png" alt="Univer" width="80%" />
+    </picture>
+</a>
 
-Univer は、開発者に強力で柔軟かつ使いやすいオフィススイートソリューションを提供することを目的としたオープンソースのオフィススイートエンジンです。スプレッドシート、ドキュメント、スライドなど、さまざまなタイプのドキュメントをサポートし、豊富な機能と高い拡張性を提供します。<br />
+<br />
+<br />
+
 **拡張可能・組み込み可能・高性能**
+
+Univer は、開発者に強力で柔軟かつ使いやすいオフィススイートソリューションを提供することを目的としたオープンソースのオフィススイートエンジンです。スプレッドシート、ドキュメント、スライドなど、さまざまなタイプのドキュメントをサポートし、豊富な機能と高い拡張性を提供します。
 
 > 日本語の開発ドキュメントはまだ未完成です。英語のドキュメントをご参照ください。
 
 [English][readme-en-link] | [简体中文][readme-zh-link] | **日本語** <br />
-[オフィシャルサイト][official-site-link] | [ドキュメント][documentation-link] | [プレイグラウンド][playground-link] | [ブログ][blog-link]
+[🏠 オフィシャルサイト][official-site-link] | [📚 ドキュメント][documentation-link] | [🎡 プレイグラウンド][playground-link] | [📝 ブログ][blog-link]
 
 [![][github-license-shield]][github-license-link]
 [![][github-actions-shield]][github-actions-link]

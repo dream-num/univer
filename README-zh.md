@@ -1,15 +1,20 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-    <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
-</picture>
+<a href="https://docs.univer.ai/zh-CN">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
+        <img src="./docs/img/banner-dark.png" alt="Univer" width="80%" />
+    </picture>
+</a>
 
-Univer 是一个开源的办公套件引擎，旨在为开发者提供一个强大、灵活且易于使用的办公套件解决方案。它支持电子表格、文档和幻灯片等多种类型的文档，并提供了丰富的功能和高度的可扩展性。<br />
+<br />
+
 **可扩展 · 可嵌入 · 高性能**
 
+Univer 是一个开源的办公套件引擎，旨在为开发者提供一个强大、灵活且易于使用的办公套件解决方案。它支持电子表格、文档和幻灯片等多种类型的文档，并提供了丰富的功能和高度的可扩展性。
+
 [English][readme-en-link] | **简体中文** | [日本語][readme-ja-link] <br />
-[官网][official-site-link] | [文档][documentation-link] | [在线体验][playground-link] | [博客][blog-link]
+[🏠 官网][official-site-link] | [📚 文档][documentation-link] | [🎡 在线体验][playground-link] | [📝 博客][blog-link]
 
 [![][github-license-shield]][github-license-link]
 [![][github-actions-shield]][github-actions-link]

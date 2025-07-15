@@ -1,15 +1,21 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-    <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
-</picture>
+<a href="https://docs.univer.ai/en-US">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
+        <img src="./docs/img/banner-dark.png" alt="Univer" width="80%" />
+    </picture>
+</a>
 
-An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server<br />
+<br />
+<br />
+
 **Extensible. High-performance. Embedded to your application.**
 
+An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server<br />
+
 **English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] <br />
-[Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]
+[🏠 Official Site][official-site-link] | [📚 Documentation][documentation-link] | [🎡 Online Playground][playground-link] | [📝 Blog][blog-link]
 
 [![][github-license-shield]][github-license-link]
 [![][github-actions-shield]][github-actions-link]

@@ -113,6 +113,8 @@ Univer soporta múltiples idiomas, incluyendo:
 - `vi-VN`
 - `fa-IR`
 - `ko-KR`
+- `es-ES`
+- `ca-ES`
 
 `zh-CN` y `en-US` son soportados oficialmente, los demás son contribuciones de la comunidad.
 

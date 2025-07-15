@@ -8,7 +8,7 @@
 An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server<br />
 **Extensible. High-performance. Embedded to your application.**
 
-**English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] <br />
+**English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | [Español][readme-es-link] <br />
 [Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]
 
 [![][github-license-shield]][github-license-link]
@@ -113,6 +113,8 @@ Univer supports multiple languages, including:
 - `vi-VN`
 - `fa-IR`
 - `ko-KR`
+- `es-ES`
+- `ca-ES`
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 

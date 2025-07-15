@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CUBEKPIMEMBER: {
         description: 'Retorna una propietat d\'indicador clau de rendiment (KPI) i mostra el nom del KPI a la cel·la. Un KPI és una mesura quantificable, com el benefici brut mensual o la rotació trimestral d\'empleats, que s\'utilitza per supervisar el rendiment d\'una organització.',
         abstract: 'Retorna una propietat d\'indicador clau de rendiment (KPI) i mostra el nom del KPI a la cel·la. Un KPI és una mesura quantificable, com el benefici brut mensual o la rotació trimestral d\'empleats, que s\'utilitza per supervisar el rendiment d\'una organització.',
@@ -114,3 +116,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
         abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します',
@@ -1662,3 +1664,5 @@ export default {
         },
     },
 };
+
+export default locale;

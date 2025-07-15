@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: 'Ràng buộc giá trị mảng vào một kích thước chỉ định sẵn.',
         abstract: 'Ràng buộc giá trị mảng vào một kích thước chỉ định sẵn.',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

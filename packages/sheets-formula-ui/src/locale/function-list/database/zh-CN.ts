@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DAVERAGE: {
         description: '返回所选数据库条目的平均值',
         abstract: '返回所选数据库条目的平均值',
@@ -196,3 +198,5 @@ export default {
         },
     },
 };
+
+export default locale;

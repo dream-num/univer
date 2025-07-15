@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-table': {
         title: 'Tableau',
         selectRange: 'Sélectionner la plage du tableau',

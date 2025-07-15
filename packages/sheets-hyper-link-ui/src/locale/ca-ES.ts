@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const caES: typeof zhCN = {
+const locale: typeof enUS = {
     hyperLink: {
         form: {
             editTitle: 'Edita l\'enllaç',
@@ -52,4 +52,4 @@ const caES: typeof zhCN = {
     },
 };
 
-export default caES;
+export default locale;

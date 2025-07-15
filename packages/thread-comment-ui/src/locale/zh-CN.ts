@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     threadCommentUI: {
         panel: {
             title: '评论管理',
@@ -48,3 +50,5 @@ export default {
         },
     },
 };
+
+export default locale;

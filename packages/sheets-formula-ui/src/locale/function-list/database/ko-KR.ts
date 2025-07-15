@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DAVERAGE: {
         description: '선택한 데이터베이스 항목의 평균을 반환합니다',
         abstract: '선택한 데이터베이스 항목의 평균을 반환합니다',
@@ -196,3 +198,5 @@ export default {
         },
     },
 };
+
+export default locale;

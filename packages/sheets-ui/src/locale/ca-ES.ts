@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     spreadsheetLabel: 'Full de càlcul',
     spreadsheetRightLabel: 'més Fulls',
 

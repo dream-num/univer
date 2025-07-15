@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ENCODEURL: {
         description: 'Trả về một chuỗi được mã hóa URL.',
         abstract: 'Trả về một chuỗi được mã hóa URL.',
@@ -29,3 +31,5 @@ export default {
         },
     },
 };
+
+export default locale;

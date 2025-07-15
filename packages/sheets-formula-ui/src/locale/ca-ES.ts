@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type enUS from './en-US';
 import array from './function-list/array/ca-ES';
 import compatibility from './function-list/compatibility/ca-ES';
 import cube from './function-list/cube/ca-ES';
@@ -30,7 +31,7 @@ import text from './function-list/text/ca-ES';
 import univer from './function-list/univer/ca-ES';
 import web from './function-list/web/ca-ES';
 
-export default {
+const locale: typeof enUS = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': 'Suma ràpida',
@@ -117,3 +118,5 @@ export default {
         },
     },
 };
+
+export default locale;

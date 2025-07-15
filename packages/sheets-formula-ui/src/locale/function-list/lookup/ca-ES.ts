@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export default {
-    ADDRESS: {
-        description: `Obté l'adreça d'una cel·la en un full de càlcul, donats uns números de fila i columna especificats. Per exemple, ADREÇA(2,3) retorna $C$2. Com a un altre exemple, ADREÇA(77,300) retorna $KN$77. Podeu utilitzar altres funcions, com les funcions FILA i COLUMNA, per proporcionar els arguments de número de fila i columna per a la funció ADREÇA.
+import type enUS from './en-US';
 
-        `,
+const locale: typeof enUS = {
+    ADDRESS: {
+        description: 'Obté l\'adreça d\'una cel·la en un full de càlcul, donats uns números de fila i columna especificats. Per exemple, ADREÇA(2,3) retorna $C$2. Com a un altre exemple, ADREÇA(77,300) retorna $KN$77. Podeu utilitzar altres funcions, com les funcions FILA i COLUMNA, per proporcionar els arguments de número de fila i columna per a la funció ADREÇA.',
         abstract: 'Retorna una referència com a text a una única cel·la en un full de càlcul',
         links: [
             {
@@ -627,3 +627,5 @@ export default {
         },
     },
 };
+
+export default locale;

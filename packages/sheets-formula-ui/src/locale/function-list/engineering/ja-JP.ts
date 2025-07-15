@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BESSELI: {
         description: '修正ベッセル関数 In(x) を返します。',
         abstract: '修正ベッセル関数 In(x) を返します。',
@@ -788,3 +790,5 @@ export default {
         },
     },
 };
+
+export default locale;

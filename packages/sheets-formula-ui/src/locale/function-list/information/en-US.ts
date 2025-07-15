@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     CELL: {
         description: 'Returns information about the formatting, location, or contents of a cell',
         abstract: 'Returns information about the formatting, location, or contents of a cell',
@@ -346,3 +346,5 @@ export default {
         },
     },
 };
+
+export default locale;

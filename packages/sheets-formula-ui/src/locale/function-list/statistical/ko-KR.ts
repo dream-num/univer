@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: '데이터 요소와 평균의 절대 편차의 평균을 반환합니다',
         abstract: '데이터 요소와 평균의 절대 편차의 평균을 반환합니다',
@@ -1574,3 +1576,5 @@ export default {
         },
     },
 };
+
+export default locale;

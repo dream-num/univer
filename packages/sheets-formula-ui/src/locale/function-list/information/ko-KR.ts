@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CELL: {
         description: '셀의 서식, 위치 또는 내용에 대한 정보를 반환합니다',
         abstract: '셀의 서식, 위치 또는 내용에 대한 정보를 반환합니다',
@@ -346,3 +348,5 @@ export default {
         },
     },
 };
+
+export default locale;

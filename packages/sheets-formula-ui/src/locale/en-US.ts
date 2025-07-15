@@ -30,7 +30,7 @@ import text from './function-list/text/en-US';
 import univer from './function-list/univer/en-US';
 import web from './function-list/web/en-US';
 
-export default {
+const locale = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': 'Quick Sum',
@@ -117,3 +117,5 @@ export default {
         },
     },
 };
+
+export default locale;

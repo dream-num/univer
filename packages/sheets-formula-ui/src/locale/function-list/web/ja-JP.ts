@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ENCODEURL: {
         description: 'URL 形式でエンコードされた文字列を返します。',
         abstract: 'URL 形式でエンコードされた文字列を返します。',
@@ -57,3 +59,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: '傳回 beta 累積分佈函數',
         abstract: '傳回 beta 累積分佈函數',
@@ -580,3 +582,5 @@ export default {
         },
     },
 };
+
+export default locale;

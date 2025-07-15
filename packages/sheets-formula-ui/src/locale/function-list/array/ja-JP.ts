@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: '配列の結果を指定したサイズに抑えます',
         abstract: '配列の結果を指定したサイズに抑えます',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

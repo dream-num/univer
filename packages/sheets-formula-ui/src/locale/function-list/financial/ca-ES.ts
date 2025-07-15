@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     // Traducció al català pendent per a cada funció
     ACCRINT: {
         description: '',
@@ -38,3 +40,5 @@ export default {
     },
     // ... (la resta de funcions seguiran el mateix patró)
 };
+
+export default locale;

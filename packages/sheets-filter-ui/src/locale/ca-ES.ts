@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     'sheets-filter': {
         toolbar: {
             'smart-toggle-filter-tooltip': 'Alterna el filtre',

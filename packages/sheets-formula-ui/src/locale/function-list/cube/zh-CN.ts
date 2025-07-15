@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CUBEKPIMEMBER: {
         description:
             '返回重要性能指示器 (KPI) 属性，并在单元格中显示 KPI 名称。 KPI 是一种用于监控单位绩效的可计量度量值，如每月总利润或季度员工调整。',
@@ -120,3 +122,5 @@ export default {
         },
     },
 };
+
+export default locale;

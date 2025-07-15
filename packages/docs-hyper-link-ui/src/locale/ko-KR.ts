@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const koKR: typeof zhCN = {
+const locale: typeof enUS = {
     docLink: {
         edit: {
             confirm: '확인',
@@ -40,4 +40,4 @@ const koKR: typeof zhCN = {
     },
 };
 
-export default koKR;
+export default locale;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     ACCRINT: {
         description: 'Returns the accrued interest for a security that pays periodic interest',
         abstract: 'Returns the accrued interest for a security that pays periodic interest',
@@ -936,3 +936,5 @@ export default {
         },
     },
 };
+
+export default locale;

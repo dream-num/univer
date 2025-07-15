@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CUBEKPIMEMBER: {
         description: 'Trả về các thuộc tính của Chỉ số Hiệu suất Chính (KPI) và hiển thị tên KPI trong ô. KPI là một thước đo có thể đo lường để theo dõi hiệu suất của đơn vị, như tổng lợi nhuận hàng tháng hoặc sự điều chỉnh của nhân viên hàng quý.',
         abstract: 'Trả về các thuộc tính của Chỉ số Hiệu suất Chính (KPI) và hiển thị tên KPI trong ô. KPI là một thước đo có thể đo lường để theo dõi hiệu suất của đơn vị, như tổng lợi nhuận hàng tháng hoặc sự điều chỉnh của nhân viên hàng quý.',
@@ -115,3 +117,5 @@ export default {
     },
 }
 ;
+
+export default locale;

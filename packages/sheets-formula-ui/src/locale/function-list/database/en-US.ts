@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     DAVERAGE: {
         description: 'Returns the average of selected database entries',
         abstract: 'Returns the average of selected database entries',
@@ -196,3 +196,5 @@ export default {
         },
     },
 };
+
+export default locale;

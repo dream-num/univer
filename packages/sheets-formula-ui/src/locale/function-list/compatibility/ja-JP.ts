@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: 'β分布の累積分布関数の値を返します。',
         abstract: 'β分布の累積分布関数の値を返します。',
@@ -582,3 +584,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: 'Задает размер массива, в который будут помещены результаты.',
         abstract: 'Задает размер массива, в который будут помещены результаты.',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

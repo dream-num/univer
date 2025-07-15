@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     AND: {
         description: 'Returns TRUE if all of its arguments are TRUE',
         abstract: 'Returns TRUE if all of its arguments are TRUE',
@@ -303,3 +303,5 @@ export default {
         },
     },
 };
+
+export default locale;

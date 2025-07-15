@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: 'Restringeix un resultat de matriu a una mida especificada.',
         abstract: 'Restringeix un resultat de matriu a una mida especificada.',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

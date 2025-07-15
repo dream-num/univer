@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: 'Chuyển các chữ cái hoặc ký tự Kana toàn chiều rộng (byte kép) trong một chuỗi thành ký tự nửa chiều rộng (byte đơn)',
         abstract: 'Chuyển các chữ cái hoặc ký tự Kana toàn chiều rộng (byte kép) trong một chuỗi thành ký tự nửa chiều rộng (byte đơn)',
@@ -717,3 +719,5 @@ export default {
         },
     },
 };
+
+export default locale;

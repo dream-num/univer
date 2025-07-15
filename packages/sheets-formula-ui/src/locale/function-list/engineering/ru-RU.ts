@@ -16,6 +16,6 @@
 
 import enUS from './en-US';
 
-export default enUS;
+const locale = enUS;
 
-// export default {};
+export default locale;

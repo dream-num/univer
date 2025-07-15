@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: 'Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters',
         abstract: 'Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters',
@@ -701,3 +703,5 @@ export default {
         },
     },
 };
+
+export default locale;

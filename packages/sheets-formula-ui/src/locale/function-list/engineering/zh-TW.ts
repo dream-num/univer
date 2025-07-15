@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BESSELI: {
         description: '傳回修正的貝賽耳函數 In(x)',
         abstract: '傳回修正的貝賽耳函數 In(x)',
@@ -788,3 +790,5 @@ export default {
         },
     },
 };
+
+export default locale;

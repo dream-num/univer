@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: 'Devuelve el valor absoluto de un número. El valor absoluto de un número es el número sin su signo.',
         abstract: 'Devuelve el valor absoluto de un número',
@@ -1169,3 +1171,5 @@ export default {
         },
     },
 };
+
+export default locale;

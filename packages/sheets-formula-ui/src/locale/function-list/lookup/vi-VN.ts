@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ADDRESS: {
         description: 'Trả về địa chỉ của một ô trong một trang tính dựa trên số hàng và cột đã chỉ định. Ví dụ: ADDRESS(2,3) trả về $C$2. Ví dụ khác: ADDRESS(77,300) trả về $KN$77. Bạn có thể sử dụng các hàm khác như ROW và COLUMN để cung cấp các tham số hàng và cột cho hàm ADDRESS.',
         abstract: 'Trả về tham chiếu đến một ô trong trang tính dưới dạng văn bản',
@@ -577,3 +579,5 @@ export default {
         },
     },
 };
+
+export default locale;

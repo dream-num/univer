@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DATE: {
         description: '指定された日付に対応するシリアル値を返します。',
         abstract: '指定された日付に対応するシリアル値を返します。',
@@ -391,3 +393,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const enUS: typeof zhCN = {
+const locale = {
     docLink: {
         edit: {
             confirm: 'Confirm',
@@ -40,4 +38,4 @@ const enUS: typeof zhCN = {
     },
 };
 
-export default enUS;
+export default locale;

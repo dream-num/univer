@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: 'Retorna la mitjana de les desviacions absolutes dels punts de dades respecte a la seva mitjana.',
         abstract: 'Retorna la mitjana de les desviacions absolutes dels punts de dades respecte a la seva mitjana',
@@ -1699,3 +1701,5 @@ export default {
         },
     },
 };
+
+export default locale;

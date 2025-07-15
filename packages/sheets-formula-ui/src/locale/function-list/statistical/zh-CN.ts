@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: '返回数据点与它们的平均值的绝对偏差平均值。',
         abstract: '返回数据点与它们的平均值的绝对偏差平均值',
@@ -1699,3 +1701,5 @@ export default {
         },
     },
 };
+
+export default locale;

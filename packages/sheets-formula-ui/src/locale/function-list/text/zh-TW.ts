@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: '將字串中的全角（雙位元組）英文字母或片假名改為半角（單字節）字元',
         abstract: '將字串中的全角（雙位元組）英文字母或片假名更改為半角（單字節）字元',
@@ -745,3 +747,5 @@ export default {
         },
     },
 };
+
+export default locale;

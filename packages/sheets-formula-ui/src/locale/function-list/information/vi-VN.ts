@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CELL: {
         description: 'Hàm CELL trả về thông tin về định dạng, vị trí hay nội dung của một ô.',
         abstract: 'Hàm CELL trả về thông tin về định dạng, vị trí hay nội dung của một ô.',
@@ -318,3 +320,5 @@ export default {
         },
     },
 };
+
+export default locale;

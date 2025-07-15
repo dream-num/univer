@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: '숫자의 절대값을 반환합니다. 숫자의 절대값은 부호가 없는 숫자입니다.',
         abstract: '숫자의 절대값을 반환합니다',
@@ -1126,3 +1128,5 @@ export default {
         },
     },
 };
+
+export default locale;

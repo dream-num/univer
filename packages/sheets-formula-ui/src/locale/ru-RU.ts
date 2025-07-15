@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type enUS from './en-US';
 import array from './function-list/array/ru-RU'; // TODO
 import compatibility from './function-list/compatibility/ru-RU'; // TODO
 import cube from './function-list/cube/ru-RU';
@@ -30,7 +31,7 @@ import text from './function-list/text/ru-RU';
 import univer from './function-list/univer/ru-RU';
 import web from './function-list/web/ru-RU';
 
-export default {
+const locale: typeof enUS = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': 'Быстрая сумма',
@@ -102,6 +103,7 @@ export default {
             array: 'Массив',
             univer: 'Универсальные',
             user: 'Пользовательские',
+            definedname: 'Defined Name',
         },
         moreFunctions: {
             confirm: 'Подтвердить',
@@ -116,3 +118,5 @@ export default {
         },
     },
 };
+
+export default locale;

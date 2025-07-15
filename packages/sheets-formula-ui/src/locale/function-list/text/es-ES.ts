@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: 'Cambia las letras inglesas o katakana de ancho completo (doble byte) dentro de una cadena de caracteres a caracteres de ancho medio (un solo byte)',
         abstract: 'Cambia las letras inglesas o katakana de ancho completo (doble byte) dentro de una cadena de caracteres a caracteres de ancho medio (un solo byte)',
@@ -743,3 +745,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: '배열 결과를 지정된 크기로 제한합니다.',
         abstract: '배열 결과를 지정된 크기로 제한합니다.',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

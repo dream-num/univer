@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: 'Trả về giá trị tuyệt đối của một số. Giá trị tuyệt đối của một số là số đó không có dấu.',
         abstract: 'Trả về giá trị tuyệt đối của một số.',
@@ -1124,3 +1126,5 @@ export default {
         },
     },
 };
+
+export default locale;

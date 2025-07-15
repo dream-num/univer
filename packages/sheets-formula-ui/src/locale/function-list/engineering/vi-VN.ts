@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BESSELI: {
         description: 'Trả về hàm Bessel sửa đổi In(x)',
         abstract: 'Trả về hàm Bessel sửa đổi In(x)',
@@ -790,3 +792,5 @@ export default {
         },
     },
 };
+
+export default locale;

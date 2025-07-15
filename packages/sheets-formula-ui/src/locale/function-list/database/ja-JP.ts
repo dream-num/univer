@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DAVERAGE: {
         description: 'リストまたはデータベースの指定された列を検索し、条件を満たすレコードの平均値を返します。',
         abstract: 'リストまたはデータベースの指定された列を検索し、条件を満たすレコードの平均値を返します。',
@@ -196,3 +198,5 @@ export default {
         },
     },
 };
+
+export default locale;

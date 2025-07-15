@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: 'Преобразует символы полного (двойного) байта английских букв или катаканы внутри строки символов в символы половинного (одинарного) байта',
         abstract: 'Преобразует символы полного (двойного) байта английских букв или катаканы внутри строки символов в символы половинного (одинарного) байта',
@@ -743,3 +745,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: '문자열의 전자(더블바이트) 영어 문자 또는 가타카나를 반자(싱글바이트) 문자로 변경합니다',
         abstract: '문자열의 전자(더블바이트) 영어 문자 또는 가타카나를 반자(싱글바이트) 문자로 변경합니다',
@@ -686,3 +688,5 @@ export default {
         },
     },
 };
+
+export default locale;

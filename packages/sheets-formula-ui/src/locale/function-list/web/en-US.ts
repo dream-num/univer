@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     ENCODEURL: {
         description: 'Returns a URL-encoded string',
         abstract: 'Returns a URL-encoded string',
@@ -57,3 +57,5 @@ export default {
         },
     },
 };
+
+export default locale;

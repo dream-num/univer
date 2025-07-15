@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: 'Retorna el valor absolut d\'un nombre. El valor absolut d\'un nombre és el nombre sense el seu signe.',
         abstract: 'Retorna el valor absolut d\'un nombre',
@@ -1169,3 +1171,5 @@ export default {
         },
     },
 };
+
+export default locale;

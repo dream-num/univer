@@ -15,8 +15,8 @@
  */
 
 import type { ILocale } from './interface';
-import dajsEnUS from 'dayjs/locale/en';
-import PickerEnUs from 'rc-picker/lib/locale/en_US';
+import dajsEsES from 'dayjs/locale/es';
+import PickerCaES from 'rc-picker/lib/locale/ca_ES';
 
 const locale: ILocale = {
     design: {
@@ -25,8 +25,8 @@ const locale: ILocale = {
             confirm: 'ok',
         },
         Picker: {
-            ...dajsEnUS,
-            ...PickerEnUs,
+            ...dajsEsES,
+            ...PickerCaES,
         },
         CascaderList: {
             empty: 'Cap',

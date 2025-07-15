@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ADDRESS: {
         description: 'ADDRESS 関数を使うと、行番号と列番号を指定して、ワークシート内のセルのアドレスを取得できます。 たとえば、ADDRESS(2,3) は $C$2 を返します。 また、ADDRESS(77,300) は $KN$77 を返します。 ROW 関数や COLUMN 関数などの他の関数を使って、ADDRESS 関数の行番号と列番号の引数を指定できます。',
         abstract: 'ワークシート上のセル参照を文字列として返します。',
@@ -616,3 +618,5 @@ export default {
         },
     },
 };
+
+export default locale;

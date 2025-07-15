@@ -15,28 +15,28 @@
  */
 
 import type { ILocale } from './interface';
-import dajsEnUS from 'dayjs/locale/en';
-import PickerEnUs from 'rc-picker/lib/locale/en_US';
+import dajsEsES from 'dayjs/locale/es';
+import PickerEsES from 'rc-picker/lib/locale/es_ES';
 
 const locale: ILocale = {
     design: {
         Confirm: {
-            cancel: 'cancelar',
+            cancel: 'cancel·la',
             confirm: 'ok',
         },
         Picker: {
-            ...dajsEnUS,
-            ...PickerEnUs,
+            ...dajsEsES,
+            ...PickerEsES,
         },
         CascaderList: {
-            empty: 'Ninguno',
+            empty: 'Cap',
         },
         Select: {
-            empty: 'Ninguno',
+            empty: 'Cap',
         },
         ColorPicker: {
-            more: 'Más colores',
-            cancel: 'cancelar',
+            more: 'Més colors',
+            cancel: 'cancel·la',
             confirm: 'ok',
         },
     },

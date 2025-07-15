@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CELL: {
         description: 'セルの書式、位置、内容についての情報を返します。',
         abstract: 'セルの書式、位置、内容についての情報を返します。',
@@ -346,3 +348,5 @@ export default {
         },
     },
 };
+
+export default locale;

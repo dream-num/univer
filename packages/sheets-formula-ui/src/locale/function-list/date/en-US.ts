@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     DATE: {
         description: 'Returns the serial number of a particular date',
         abstract: 'Returns the serial number of a particular date',
@@ -391,3 +391,5 @@ export default {
         },
     },
 };
+
+export default locale;

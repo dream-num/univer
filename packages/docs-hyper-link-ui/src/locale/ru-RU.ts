@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const ruRU: typeof zhCN = {
+const locale: typeof enUS = {
     docLink: {
         edit: {
             confirm: 'Подтвердить',
@@ -40,4 +40,4 @@ const ruRU: typeof zhCN = {
     },
 };
 
-export default ruRU;
+export default locale;

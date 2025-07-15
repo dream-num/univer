@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DAVERAGE: {
         description: 'Trả về giá trị trung bình của các mục được chọn trong cơ sở dữ liệu',
         abstract: 'Trả về giá trị trung bình của các mục được chọn trong cơ sở dữ liệu',
@@ -196,3 +198,5 @@ export default {
         },
     },
 };
+
+export default locale;

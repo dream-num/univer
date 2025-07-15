@@ -15,38 +15,54 @@
  */
 
 import type { Dependency, Workbook } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IUniverSheetsUIConfig } from './controllers/config.schema';
-import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
-
+import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-
-import { UniverMobileUIPlugin } from '@univerjs/ui';
+import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
+import { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
+import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
+import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { defaultPluginConfig } from './controllers/config.schema';
-// import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
+import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
+import { EditingRenderController } from './controllers/editor/editing.render-controller';
+import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
+import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
+import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
+import { SheetPermissionInitUIController } from './controllers/permission/sheet-permission-init-ui.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { ClipboardRenderController } from './controllers/render-controllers/clipboard.render-controller';
+import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
+import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
-import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
+import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
+// import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
+import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
@@ -58,6 +74,12 @@ import { CellPopupManagerService } from './services/cell-popup-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
+import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
+import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
+import {
+    FormulaEditorManagerService,
+    IFormulaEditorManagerService,
+} from './services/editor/formula-editor-manager.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
@@ -74,101 +96,177 @@ import { SheetsRenderService } from './services/sheets-render.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 
-/**
- * @ignore
- */
 @DependentOn(UniverSheetsPlugin, UniverMobileUIPlugin)
 export class UniverSheetsMobileUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
+    /** @ignore */
     constructor(
         private readonly _config: Partial<IUniverSheetsUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IConfigService private readonly _configService: IConfigService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+
+        const { customComponents = new Set() } = rest;
+        if (rest.protectedRangeShadow === false) {
+            customComponents.add(UNIVER_SHEET_PERMISSION_BACKGROUND);
+        }
+
+        if (rest.protectedRangeUserSelector) {
+            customComponents.add(UNIVER_SHEET_PERMISSION_USER_PART);
+
+            this.disposeWithMe(
+                this._componentManager.register(
+                    UNIVER_SHEET_PERMISSION_USER_PART,
+                    rest.protectedRangeUserSelector.component,
+                    {
+                        framework: rest.protectedRangeUserSelector.framework,
+                    }
+                )
+            );
+        }
+
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+
+        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest, customComponents });
     }
 
     override onStarting(): void {
-        (
-            [
-                [ShortcutExperienceService],
-                [ISheetClipboardService, { useClass: SheetClipboardService }],
-                [ISheetBarService, { useClass: SheetBarService }],
-                [IFormatPainterService, { useClass: FormatPainterService }],
-                [IAutoFillService, { useClass: AutoFillService }],
-                [SheetPrintInterceptorService],
-                [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
-                [IStatusBarService, { useClass: StatusBarService }],
-                [IMarkSelectionService, { useClass: MarkSelectionService }],
-                [IEditorBridgeService, { useClass: EditorBridgeService }],
-                [HoverManagerService],
-                [DragManagerService],
-                [SheetCanvasPopManagerService],
-                [CellPopupManagerService],
-                [CellAlertManagerService],
-                [SelectAllService],
-                [ISheetCellDropdownManagerService, { useClass: SheetCellDropdownManagerService }],
+        registerDependencies(this._injector, mergeOverrideWithDependencies([
+            [ShortcutExperienceService],
+            [IEditorBridgeService, { useClass: EditorBridgeService }],
+            [ISheetClipboardService, { useClass: SheetClipboardService }],
+            [ISheetBarService, { useClass: SheetBarService }],
+            [IFormatPainterService, { useClass: FormatPainterService }],
+            [ICellEditorManagerService, { useClass: CellEditorManagerService }],
+            [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
+            [IAutoFillService, { useClass: AutoFillService }],
+            [SheetPrintInterceptorService],
+            [IStatusBarService, { useClass: StatusBarService }],
+            [IMarkSelectionService, { useClass: MarkSelectionService }],
+            [HoverManagerService],
+            [DragManagerService],
+            [SheetCanvasPopManagerService],
+            [CellPopupManagerService],
+            [CellAlertManagerService],
+            [SelectAllService],
+            [ISheetCellDropdownManagerService, { useClass: SheetCellDropdownManagerService }],
+            [SheetCellEditorResizeService],
 
-                [ActiveWorksheetController],
-                [AutoHeightController],
-                [SheetClipboardController],
-                [SheetsRenderService],
-                [SheetUIMobileController],
-                [StatusBarController],
-                [IRefSelectionsService, { useClass: RefSelectionsService }],
+            // controllers
+            [ActiveWorksheetController],
+            [AutoHeightController],
+            [AutoWidthController],
+            [FormulaEditorController],
+            [SheetsRenderService],
+            [SheetUIMobileController],
+            [StatusBarController],
+            [AutoFillController],
+            [FormatPainterController],
+            [SheetsDefinedNameController],
+            [EditorDataSyncController],
+            [SheetCheckboxController],
+            [EditingRenderController],
 
-                // permission
-                [SheetPermissionPanelModel],
-                [SheetPermissionUserManagerService],
-                [WorksheetProtectionRenderController],
-                [SheetPermissionInterceptorClipboardController],
-                [SheetPermissionCheckUIController],
-                [SheetPermissionRenderManagerController],
-            ] as Dependency[]
-        ).forEach((d) => this._injector.add(d));
+            // permission
+            [SheetPermissionPanelModel],
+            [SheetPermissionInitUIController],
+            [SheetPermissionUserManagerService],
+            [SheetPermissionInterceptorClipboardController],
+            [SheetPermissionCheckUIController],
+            [SheetPermissionRenderManagerController],
+        ] as Dependency[], this._config.override));
     }
 
     override onReady(): void {
-        this._markSheetAsFocused();
+        if (!this._config.disableAutoFocus) {
+            this._initAutoFocus();
+        }
+
+        registerDependencies(this._injector, [
+            [SheetClipboardController],
+        ]);
+
         this._registerRenderBasics();
 
-        this._injector.get(SheetUIMobileController);
+        touchDependencies(this._injector, [
+            [SheetUIMobileController],
+            [SheetsRenderService],
+            [ActiveWorksheetController],
+            [SheetPermissionCheckUIController],
+            [SheetPermissionInitUIController],
+        ]);
     }
 
     override onRendered(): void {
         this._registerRenderModules();
+
+        touchDependencies(this._injector, [
+            [SheetPermissionRenderManagerController],
+            [SheetPermissionPanelModel],
+            [SheetClipboardController],
+            [FormulaEditorController],
+            [SheetsDefinedNameController],
+            [StatusBarController],
+            [AutoHeightController],
+            [AutoWidthController],
+            [EditorDataSyncController],
+            [SheetCheckboxController],
+            [EditingRenderController],
+        ]);
+    }
+
+    override onSteady(): void {
+        touchDependencies(this._injector, [
+            [FormatPainterController],
+            [AutoFillController],
+            [SheetPermissionInterceptorClipboardController],
+        ]);
     }
 
     private _registerRenderBasics(): void {
         ([
             [SheetSkeletonManagerService],
+            [SheetSkeletonRenderController],
             [SheetRenderController],
             [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
             [SheetScrollManagerService],
             [AutoHeightService],
-        ] as Dependency[]).forEach((renderDep) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, renderDep));
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 
     // We have to let render basics get bootstrapped before. Because some render controllers relies on
     // a correct skeleton when they get loaded.
     private _registerRenderModules(): void {
-        ([
-            // https://github.com/dream-num/univer-pro/issues/669
-            // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
-            // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
-            // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
+        const modules: Dependency[] = [
             [HeaderMoveRenderController],
-            [HeaderFreezeRenderController],
-            // Caution: ScrollRenderController should placed before ZoomRenderController
-            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$.
+            [HeaderUnhideRenderController],
+            [HeaderResizeRenderController],
+            // TODO: Should not register these two Controllers at the same time
+            [SheetsScrollRenderController],
             [MobileSheetsScrollRenderController],
+            [HeaderFreezeRenderController],
             [SheetsZoomRenderController],
+
             [FormatPainterRenderController],
+            [ClipboardRenderController],
             [CellAlertRenderController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],
@@ -176,23 +274,35 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [DragRenderController],
             [ForceStringRenderController],
             [CellCustomRenderController],
-            [SheetContextMenuMobileRenderController],
+            // [SheetContextMenuMobileRenderController],
+            [MoveRangeRenderController],
 
+            // editor
+            [EditorBridgeRenderController],
+
+            // permission
             [SheetPermissionInterceptorCanvasRenderController],
             [SheetPermissionInterceptorFormulaRenderController],
             [SheetPermissionRenderController],
-        ] as Dependency[]).forEach((renderModule) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, renderModule));
+            [WorksheetProtectionRenderController],
+        ];
+
+        // If the context menu is disabled, we don't need to register the context menu render controller.
+        const config = this._configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
+        const showContextMenu = config?.contextMenu ?? true;
+        if (showContextMenu) {
+            modules.push([HeaderMenuRenderController]);
+        }
+
+        modules.forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 
-    private _markSheetAsFocused(): void {
+    private _initAutoFocus(): void {
         const univerInstanceService = this._univerInstanceService;
         this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
-            .subscribe((workbook) => {
-                if (this._univerInstanceService.getFocusedUnit() === workbook) return;
-                univerInstanceService.focusUnit(workbook!.getUnitId());
-            }));
+            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId())));
     }
 }

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
+import { HideGridlinesDoubleIcon } from '@univerjs/icons';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -23,8 +26,15 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-
+import {
+    BuiltInUIPart,
+    ComponentManager,
+    connectInjector,
+    ILayoutService,
+    IMenuManagerService,
+    IShortcutService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -34,8 +44,10 @@ import {
 import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
+import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../../commands/commands/hide-row-col-confirm.command';
 import {
+    ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
@@ -69,6 +81,7 @@ import {
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
 } from '../../commands/commands/set-selection.command';
+import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
@@ -79,6 +92,7 @@ import {
     SetCellEditVisibleWithF2Operation,
 } from '../../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
+import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-range.operation';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SetFormatPainterOperation } from '../../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
@@ -88,17 +102,23 @@ import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-d
 import { BorderPanel } from '../../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../../components/menu-item-input';
+import { CellPopup } from '../../views/cell-popup';
+import { CELL_POPUP_COMPONENT_KEY } from '../../views/cell-popup/config';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
 import { DefinedNameContainer } from '../../views/defined-name/DefinedNameContainer';
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
+import { RenderSheetContent } from '../../views/sheet-container/SheetContainer';
 import {
     EditorBreakLineShortcut,
+    EditorCursorCtrlEnterShortcut,
     EditorCursorEnterShortcut,
     EditorCursorEscShortcut,
     EditorCursorTabShortcut,
     EditorDeleteLeftShortcut,
     EditorDeleteLeftShortcutInActive,
+    EditorDeleteRightShortcut,
     generateArrowSelectionShortCutItem,
+    ShiftEditorDeleteLeftShortcut,
     StartEditWithF2Shortcut,
 } from '../shortcuts/editor.shortcut';
 import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from '../shortcuts/operation.shortcut';
@@ -132,7 +152,7 @@ import {
     SetStrikeThroughShortcutItem,
     SetUnderlineShortcutItem,
 } from '../shortcuts/style.shortcut';
-import { ClearSelectionValueShortcutItem } from '../shortcuts/value.shortcut';
+import { ClearSelectionValueShortcutItem, ClearSelectionValueShortcutItemMac, ShiftClearSelectionValueShortcutItem, ShiftDeleteSelectionValueShortcutItem } from '../shortcuts/value.shortcut';
 import {
     PreventDefaultResetZoomShortcutItem,
     PreventDefaultZoomInShortcutItem,
@@ -145,13 +165,14 @@ import { menuSchema } from './menu.schema';
 
 export class SheetUIMobileController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @ILayoutService private readonly _layoutService: ILayoutService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @ILayoutService protected readonly _layoutService: ILayoutService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @IShortcutService protected readonly _shortcutService: IShortcutService,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
 
@@ -159,7 +180,7 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _init(): void {
-        this._initCustomComponents();
+        this._initComponents();
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
@@ -167,11 +188,17 @@ export class SheetUIMobileController extends Disposable {
         this._initFocusHandler();
     }
 
-    private _initCustomComponents(): void {
+    private _initComponents(): void {
         const componentManager = this._componentManager;
+
+        // init custom components
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
+        this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+
+        // init icons
+        this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
     }
 
     private _initCommands(): void {
@@ -207,6 +234,7 @@ export class SheetUIMobileController extends Disposable {
             SetRangeFontSizeCommand,
             SetRangeFontFamilyCommand,
             SetRangeTextColorCommand,
+            ResetRangeTextColorCommand,
             SetItalicCommand,
             SetStrikeThroughCommand,
             SetFontFamilyCommand,
@@ -220,6 +248,7 @@ export class SheetUIMobileController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
+            ScrollToRangeOperation,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,
@@ -245,6 +274,9 @@ export class SheetUIMobileController extends Disposable {
             DeleteRangeProtectionFromContextMenuCommand,
             SetRangeProtectionFromContextMenuCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
+            SetWorksheetColAutoWidthCommand,
+            SetRowHeaderWidthCommand,
+            SetColumnHeaderHeightCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -296,14 +328,20 @@ export class SheetUIMobileController extends Disposable {
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
+            ClearSelectionValueShortcutItemMac,
+            ShiftClearSelectionValueShortcutItem,
+            ShiftDeleteSelectionValueShortcutItem,
             ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
             StartEditWithF2Shortcut,
             EditorCursorTabShortcut,
             EditorBreakLineShortcut,
             EditorDeleteLeftShortcut,
+            EditorDeleteRightShortcut,
             EditorDeleteLeftShortcutInActive,
             EditorCursorEscShortcut,
+            EditorCursorCtrlEnterShortcut,
+            ShiftEditorDeleteLeftShortcut,
 
             // operation shortcuts
             SetRowHiddenShortcutItem,
@@ -314,13 +352,25 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _initWorkbenchParts(): void {
-        this._uiPartsService.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileSheetBar, this._injector));
+        const uiController = this._uiPartsService;
+        const injector = this._injector;
+
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileSheetBar, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
 
     private _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
+                // DEBT: `_unitId` is not used hence we cannot support Univer mode now
                 // TODO@wzhudev: focus is different on mobile devices
+
+                const renderManagerService = this._injector.get(IRenderManagerService);
+                const instanceService = this._injector.get(IUniverInstanceService);
+                const currentEditorRender = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC, instanceService, renderManagerService);
+                const docSelectionRenderService = currentEditorRender?.with(DocSelectionRenderService);
+
+                docSelectionRenderService?.focus();
             })
         );
     }

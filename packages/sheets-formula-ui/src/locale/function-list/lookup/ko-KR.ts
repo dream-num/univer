@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ADDRESS: {
         description: '지정된 행 및 열 번호가 주어진 워크시트에서 셀의 주소를 가져옵니다. 예를 들어 ADDRESS(2,3)은 $C$2를 반환합니다. 또 다른 예로 ADDRESS(77,300)은 $KN$77을 반환합니다. ROW 및 COLUMN 함수와 같은 다른 함수를 사용하여 ADDRESS 함수에 대한 행 및 열 번호 인수를 제공할 수 있습니다.',
         abstract: '워크시트의 단일 셀에 대한 참조를 텍스트로 반환합니다',
@@ -625,3 +627,5 @@ export default {
         },
     },
 };
+
+export default locale;

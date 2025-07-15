@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: '数値の絶対値を返します。 絶対値とは、数値から符号 (+、-) を除いた数の大きさのことです。',
         abstract: '数値の絶対値を返します。',
@@ -1160,3 +1162,5 @@ export default {
         },
     },
 };
+
+export default locale;

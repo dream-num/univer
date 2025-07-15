@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: '傳回 beta 累積分佈函數',
         abstract: '傳回 beta 累積分佈函數',
@@ -501,7 +503,7 @@ export default {
         ],
         functionParameter: {
             probability: { name: '機率', detail: '與學生的 t 分佈相關的機率。' },
-            dedegFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     TTEST: {
@@ -580,3 +582,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: 'Devuelve el promedio de las desviaciones absolutas de los puntos de datos con respecto a su media.',
         abstract: 'Devuelve el promedio de las desviaciones absolutas de los puntos de datos con respecto a su media',
@@ -1699,3 +1701,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AND: {
         description: 'すべての引数が TRUE のときに TRUE を返します。',
         abstract: 'すべての引数が TRUE のときに TRUE を返します。',
@@ -297,3 +299,5 @@ export default {
         },
     },
 };
+
+export default locale;

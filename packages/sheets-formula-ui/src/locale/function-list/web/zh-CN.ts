@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ENCODEURL: {
         description: '返回 URL 编码的字符串',
         abstract: '返回 URL 编码的字符串',
@@ -57,3 +59,5 @@ export default {
         },
     },
 };
+
+export default locale;

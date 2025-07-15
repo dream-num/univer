@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DATE: {
         description: '특정 날짜의 일련 번호를 반환합니다',
         abstract: '특정 날짜의 일련 번호를 반환합니다',
@@ -391,3 +393,5 @@ export default {
         },
     },
 };
+
+export default locale;

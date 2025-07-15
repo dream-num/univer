@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: 'Trả về hàm phân phối tích lũy beta',
         abstract: 'Trả về hàm phân phối tích lũy beta',
@@ -584,3 +586,5 @@ export default {
     },
 
 };
+
+export default locale;

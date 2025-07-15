@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: 'Restringe un resultado de matriz a un tamaño especificado.',
         abstract: 'Restringe un resultado de matriz a un tamaño especificado.',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

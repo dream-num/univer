@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ARRAY_CONSTRAIN: {
         description: '限制特定大小的陣列結果',
         abstract: '限制特定大小的陣列結果',
@@ -45,3 +47,5 @@ export default {
         },
     },
 };
+
+export default locale;

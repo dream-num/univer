@@ -16,7 +16,7 @@
 
 import type enUS from './en-US';
 
-const frFR: typeof enUS = {
+const locale: typeof enUS = {
     docLink: {
         edit: {
             confirm: 'Confirmer',
@@ -40,4 +40,4 @@ const frFR: typeof enUS = {
     },
 };
 
-export default frFR;
+export default locale;

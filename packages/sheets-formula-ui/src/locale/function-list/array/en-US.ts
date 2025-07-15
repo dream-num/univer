@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     ARRAY_CONSTRAIN: {
         description: 'Constrains an array result to a specified size.',
         abstract: 'Constrains an array result to a specified size.',
@@ -45,3 +45,5 @@ export default {
         },
     },
 };
+
+export default locale;

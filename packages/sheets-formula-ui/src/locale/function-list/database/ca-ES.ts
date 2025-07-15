@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DAVERAGE: {
         description: 'Retorna la mitjana de les entrades de base de dades seleccionades',
         abstract: 'Retorna la mitjana de les entrades de base de dades seleccionades',
@@ -196,3 +198,5 @@ export default {
         },
     },
 };
+
+export default locale;

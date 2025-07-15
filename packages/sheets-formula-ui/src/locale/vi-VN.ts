@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type enUS from './en-US';
 import array from './function-list/array/vi-VN';
 import compatibility from './function-list/compatibility/vi-VN';
 import cube from './function-list/cube/vi-VN';
@@ -30,7 +31,7 @@ import text from './function-list/text/vi-VN';
 import univer from './function-list/univer/vi-VN';
 import web from './function-list/web/vi-VN';
 
-export default {
+const locale: typeof enUS = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': 'Tổng nhanh',
@@ -122,3 +123,5 @@ export default {
     },
 
 };
+
+export default locale;

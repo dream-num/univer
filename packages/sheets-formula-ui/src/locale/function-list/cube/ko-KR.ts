@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CUBEKPIMEMBER: {
         description: 'KPI 속성을 반환하고 셀에 KPI 이름을 표시합니다. KPI는 조직의 성과를 모니터링하는 데 사용되는 측정 가능한 지표입니다, 예: 월간 총 이익 또는 분기별 직원 회전율.',
         abstract: 'KPI 속성을 반환하고 셀에 KPI 이름을 표시합니다. KPI는 조직의 성과를 모니터링하는 데 사용되는 측정 가능한 지표입니다, 예: 월간 총 이익 또는 분기별 직원 회전율.',
@@ -114,3 +116,5 @@ export default {
         },
     },
 };
+
+export default locale;

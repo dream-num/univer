@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: '傳回數字的絕對值。一個數字的絕對值是該數字不帶其符號的形式。 ',
         abstract: '傳回數字的絕對值',
@@ -1166,3 +1168,5 @@ export default {
         },
     },
 };
+
+export default locale;

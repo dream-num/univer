@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: '문자열의 전자(더블바이트) 영어 문자 또는 가타카나를 반자(싱글바이트) 문자로 변경합니다',
         abstract: '문자열의 전자(더블바이트) 영어 문자 또는 가타카나를 반자(싱글바이트) 문자로 변경합니다',
@@ -305,6 +307,20 @@ export default {
             numBytes: { name: 'num_bytes', detail: 'MIDB가 반환할 바이트 수를 지정합니다.' },
         },
     },
+    NUMBERSTRING: {
+        description: 'Convert numbers to Chinese strings',
+        abstract: 'Convert numbers to Chinese strings',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://www.wps.cn/learning/course/detail/id/340.html?chan=pc_kdocs_function',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'number', detail: 'The value converted to a Chinese string.' },
+            type: { name: 'type', detail: 'The type of the returned result. \n1. Chinese lowercase \n2. Chinese uppercase \n3. Reading and Writing Chinese Characters' },
+        },
+    },
     NUMBERVALUE: {
         description: '텍스트를 로캘 독립적인 방식으로 숫자로 변환합니다',
         abstract: '텍스트를 로캘 독립적인 방식으로 숫자로 변환합니다',
@@ -330,7 +346,8 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: 'reference', detail: '텍스트 문자열이 포함된 단일 셀 또는 셀 범위입니다.' },
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     PROPER: {
@@ -685,4 +702,48 @@ export default {
             format: { name: 'format', detail: '반환되는 데이터의 형식입니다. 0(기본값) 또는 1일 수 있습니다.' },
         },
     },
+    CALL: {
+        description: 'Calls a procedure in a dynamic link library or code resource',
+        abstract: 'Calls a procedure in a dynamic link library or code resource',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/call-function-32d58445-e646-4ffd-8d5e-b45077a5e995',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    EUROCONVERT: {
+        description: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        abstract: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/euroconvert-function-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    REGISTER_ID: {
+        description: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        abstract: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/register-id-function-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
 };
+
+export default locale;

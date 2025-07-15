@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocalTag, Workbook } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocaleTag, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsNumfmtConfig } from './config.schema';
 import {
@@ -53,8 +53,8 @@ const TEXT_FORMAT_MARK = {
     },
 };
 export class SheetsNumfmtCellContentController extends Disposable {
-    private _local$ = new BehaviorSubject<INumfmtLocalTag>('en');
-    public local$ = this._local$.asObservable();
+    private _locale$ = new BehaviorSubject<INumfmtLocaleTag>('en');
+    public locale$ = this._locale$.asObservable();
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -68,32 +68,29 @@ export class SheetsNumfmtCellContentController extends Disposable {
         this._initInterceptorCellContent();
     }
 
-    public get local(): INumfmtLocalTag {
-        const _local = this._local$.getValue();
-        if (_local) {
-            return _local;
+    public get locale(): INumfmtLocaleTag {
+        const _locale = this._locale$.getValue();
+        if (_locale) {
+            return _locale;
         }
         const currentLocale = this._localeService.getCurrentLocale();
 
         switch (currentLocale) {
-            case LocaleType.FR_FR: {
+            case LocaleType.FR_FR:
                 return 'fr';
-            }
-            case LocaleType.RU_RU: {
+            case LocaleType.RU_RU:
                 return 'ru';
-            }
-            case LocaleType.VI_VN: {
+            case LocaleType.VI_VN:
                 return 'vi';
-            }
-            case LocaleType.ZH_CN: {
+            case LocaleType.ZH_CN:
                 return 'zh-CN';
-            }
-            case LocaleType.KO_KR: {
+            case LocaleType.KO_KR:
                 return 'ko';
-            }
-            case LocaleType.ZH_TW: {
+            case LocaleType.ZH_TW:
                 return 'zh-TW';
-            }
+            case LocaleType.ES_ES:
+            case LocaleType.CA_ES:
+                return 'es';
             case LocaleType.EN_US:
             case LocaleType.FA_IR:
             default: {
@@ -106,7 +103,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
     private _initInterceptorCellContent() {
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
 
-        this.disposeWithMe(merge(this._local$, this._localeService.currentLocale$).subscribe(() => {
+        this.disposeWithMe(merge(this._locale$, this._localeService.currentLocale$).subscribe(() => {
             renderCache.reset();
         }));
 
@@ -172,7 +169,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next({ ...cell, ...cache.result });
                 }
 
-                const info = getPatternPreviewIgnoreGeneral(numfmtValue.pattern, Number(originCellValue.v), this.local);
+                const info = getPatternPreviewIgnoreGeneral(numfmtValue.pattern, Number(originCellValue.v), this.locale);
                 numfmtRes = info.result;
                 if (!numfmtRes) {
                     return next(cell);
@@ -226,7 +223,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         );
     }
 
-    setNumfmtLocal(local: INumfmtLocalTag) {
-        this._local$.next(local);
+    setNumfmtLocal(locale: INumfmtLocaleTag) {
+        this._locale$.next(locale);
     }
 }

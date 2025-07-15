@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     BETADIST: {
         description: 'Returns the beta cumulative distribution function',
         abstract: 'Returns the beta cumulative distribution function',
@@ -582,3 +582,5 @@ export default {
         },
     },
 };
+
+export default locale;

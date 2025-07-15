@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import type enUS from './en-US';
 
-const esES: typeof zhCN = {
+const locale: typeof enUS = {
     hyperLink: {
         form: {
             editTitle: 'Editar enlace',
@@ -52,4 +52,4 @@ const esES: typeof zhCN = {
     },
 };
 
-export default esES;
+export default locale;

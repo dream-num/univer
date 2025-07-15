@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ACCRINT: {
         description: '返回定期支付利息的債券的應計利息',
         abstract: '返回定期支付利息的債券的應計利息',
@@ -934,3 +936,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ABS: {
         description: '숫자의 절대값을 반환합니다. 숫자의 절대값은 부호가 없는 숫자입니다.',
         abstract: '숫자의 절대값을 반환합니다',
@@ -499,8 +501,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: '반올림할 값입니다.' },
-            significance: { name: 'significance', detail: 'number를 반올림할 선택적 배수입니다.' },
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     LCM: {
@@ -515,6 +517,20 @@ export default {
         functionParameter: {
             number1: { name: 'number1', detail: '최소공배수를 찾으려는 첫 번째 숫자로, 쉼표로 구분된 매개 변수 대신 단일 배열 또는 배열에 대한 참조를 사용할 수도 있습니다.' },
             number2: { name: 'number2', detail: '최소공배수를 찾으려는 두 번째 숫자입니다. 이런 방식으로 최대 255개의 숫자를 지정할 수 있습니다.' },
+        },
+    },
+    LET: {
+        description: 'Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula',
+        abstract: 'Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/let-function-34842dd8-b92b-4d3f-b325-b8b8f9908999',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     LN: {
@@ -635,8 +651,8 @@ export default {
             },
         ],
         functionParameter: {
-            value1: { name: 'value1', detail: '다항계수를 계산하려는 1에서 255 사이의 값입니다.' },
-            value2: { name: 'value2', detail: '다항계수를 계산하려는 1에서 255 사이의 값입니다.' },
+            number1: { name: 'number1', detail: 'The first value or range to use in the calculation.' },
+            number2: { name: 'number2', detail: 'Additional values ​​or ranges to use in calculations.' },
         },
     },
     MUNIT: {
@@ -801,6 +817,20 @@ export default {
         functionParameter: {
             number: { name: 'number', detail: '반올림하려는 숫자입니다.' },
             numDigits: { name: 'num_digits', detail: '반올림하려는 자릿수입니다.' },
+        },
+    },
+    ROUNDBANK: {
+        description: 'Rounds a number in banker\'s rounding',
+        abstract: 'Rounds a number in banker\'s rounding',
+        links: [
+            {
+                title: 'Instruction',
+                url: '',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'number', detail: 'The number that you want to round in banker\'s rounding.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round in banker\'s rounding.' },
         },
     },
     ROUNDDOWN: {
@@ -1126,3 +1156,5 @@ export default {
         },
     },
 };
+
+export default locale;

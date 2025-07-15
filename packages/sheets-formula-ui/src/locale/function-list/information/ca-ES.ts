@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CELL: {
         description: 'Retorna informació sobre el format, la ubicació o el contingut d\'una cel·la',
         abstract: 'Retorna informació sobre el format, la ubicació o el contingut d\'una cel·la',
@@ -346,3 +348,5 @@ export default {
         },
     },
 };
+
+export default locale;

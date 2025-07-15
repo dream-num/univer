@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export default {};
+const locale = {};
+
+export default locale;

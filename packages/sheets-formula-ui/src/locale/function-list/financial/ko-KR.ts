@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ACCRINT: {
         description: '정기적으로 이자를 지급하는 증권의 경과 이자를 반환합니다',
         abstract: '정기적으로 이자를 지급하는 증권의 경과 이자를 반환합니다',
@@ -936,3 +938,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: '傳回資料點與它們的平均值的絕對偏差平均值。 ',
         abstract: '返回資料點與它們的平均值的絕對偏差平均值',
@@ -1549,7 +1551,7 @@ export default {
         ],
         functionParameter: {
             probability: { name: '機率', detail: '與學生的 t 分佈相關的機率。' },
-            dedegFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     T_INV_2T: {
@@ -1563,7 +1565,7 @@ export default {
         ],
         functionParameter: {
             probability: { name: '機率', detail: '與學生的 t 分佈相關的機率。' },
-            dedegFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     T_TEST: {
@@ -1700,3 +1702,5 @@ export default {
         },
     },
 };
+
+export default locale;

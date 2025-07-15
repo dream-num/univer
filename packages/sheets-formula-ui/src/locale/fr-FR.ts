@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import array from './function-list/array/en-US';
-import compatibility from './function-list/compatibility/en-US';
-import cube from './function-list/cube/en-US';
-import database from './function-list/database/en-US';
-import date from './function-list/date/en-US';
-import engineering from './function-list/engineering/en-US';
-import financial from './function-list/financial/en-US';
-import information from './function-list/information/en-US';
-import logical from './function-list/logical/en-US';
-import lookup from './function-list/lookup/en-US';
-import math from './function-list/math/en-US';
-import statistical from './function-list/statistical/en-US';
-import text from './function-list/text/en-US';
-import univer from './function-list/univer/en-US';
-import web from './function-list/web/en-US';
+import type enUS from './en-US';
+import array from './function-list/array/fr-FR';
+import compatibility from './function-list/compatibility/fr-FR';
+import cube from './function-list/cube/fr-FR';
+import database from './function-list/database/fr-FR';
+import date from './function-list/date/fr-FR';
+import engineering from './function-list/engineering/fr-FR';
+import financial from './function-list/financial/fr-FR';
+import information from './function-list/information/fr-FR';
+import logical from './function-list/logical/fr-FR';
+import lookup from './function-list/lookup/fr-FR';
+import math from './function-list/math/fr-FR';
+import statistical from './function-list/statistical/fr-FR';
+import text from './function-list/text/fr-FR';
+import univer from './function-list/univer/fr-FR';
+import web from './function-list/web/fr-FR';
 
-export default {
+const locale: typeof enUS = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': 'Somme rapide',
@@ -117,3 +118,5 @@ export default {
         },
     },
 };
+
+export default locale;

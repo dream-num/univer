@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CUBEKPIMEMBER: {
         description: 'Devuelve una propiedad de indicador clave de rendimiento (KPI) y muestra el nombre del KPI en la celda. Un KPI es una medida cuantificable, como el beneficio bruto mensual o la rotación trimestral de empleados, que se utiliza para supervisar el rendimiento de una organización.',
         abstract: 'Devuelve una propiedad de indicador clave de rendimiento (KPI) y muestra el nombre del KPI en la celda. Un KPI es una medida cuantificable, como el beneficio bruto mensual o la rotación trimestral de empleados, que se utiliza para supervisar el rendimiento de una organización.',
@@ -114,3 +116,5 @@ export default {
         },
     },
 };
+
+export default locale;

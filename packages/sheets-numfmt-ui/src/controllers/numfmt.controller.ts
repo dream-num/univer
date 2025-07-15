@@ -85,7 +85,7 @@ export class SheetNumfmtUIController extends Disposable {
     }
 
     private _initNumfmtLocalChange() {
-        this.disposeWithMe(merge(this._sheetsNumfmtCellContentController.local$, this._localeService.currentLocale$).subscribe(() => {
+        this.disposeWithMe(merge(this._sheetsNumfmtCellContentController.locale$, this._localeService.currentLocale$).subscribe(() => {
             this._forceUpdate();
         }));
     }
@@ -268,7 +268,7 @@ export class SheetNumfmtUIController extends Disposable {
                                         ) {
                                             return defaultValue;
                                         }
-                                        const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._sheetsNumfmtCellContentController.local);
+                                        const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._sheetsNumfmtCellContentController.locale);
                                         if (info.color) {
                                             const color = this._themeService.getColorFromTheme(`${info.color}.500`) ?? info.color;
                                             return {

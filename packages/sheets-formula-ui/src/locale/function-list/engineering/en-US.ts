@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     BESSELI: {
         description: 'Returns the modified Bessel function In(x)',
         abstract: 'Returns the modified Bessel function In(x)',
@@ -788,3 +788,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ACCRINT: {
         description: 'Trả về lãi tích lũy của một trái phiếu trả lãi định kỳ',
         abstract: 'Trả về lãi tích lũy của một trái phiếu trả lãi định kỳ',
@@ -936,3 +938,5 @@ export default {
         },
     },
 };
+
+export default locale;

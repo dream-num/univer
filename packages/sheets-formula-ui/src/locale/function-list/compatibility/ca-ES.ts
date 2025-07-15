@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: 'Retorna la funció de distribució acumulada beta.',
         abstract: 'Retorna la funció de distribució acumulada beta.',
@@ -582,3 +584,5 @@ export default {
         },
     },
 };
+
+export default locale;

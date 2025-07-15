@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: 'Devuelve la función de distribución acumulativa beta.',
         abstract: 'Devuelve la función de distribución acumulativa beta.',
@@ -582,3 +584,5 @@ export default {
         },
     },
 };
+
+export default locale;

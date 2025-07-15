@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     sheetThreadComment: {
         menu: {
             addComment: 'Add Comment',
@@ -22,3 +22,5 @@ export default {
         },
     },
 };
+
+export default locale;

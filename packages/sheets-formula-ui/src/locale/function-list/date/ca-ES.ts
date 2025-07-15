@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DATE: {
         description: 'Retorna el número de sèrie d\'una data particular',
         abstract: 'Retorna el número de sèrie d\'una data particular',
@@ -391,3 +393,5 @@ export default {
         },
     },
 };
+
+export default locale;

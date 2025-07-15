@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DATE: {
         description: '採用三個單獨的值並將它們合併為一個日期。 ',
         abstract: '傳回特定日期的序號',
@@ -391,3 +393,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     sheetThreadComment: {
         menu: {
             addComment: '댓글 추가',
@@ -22,3 +24,5 @@ export default {
         },
     },
 };
+
+export default locale;

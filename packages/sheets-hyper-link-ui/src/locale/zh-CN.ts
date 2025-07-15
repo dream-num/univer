@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     hyperLink: {
         form: {
             editTitle: '编辑链接',
@@ -49,3 +51,5 @@ export default {
         },
     },
 };
+
+export default locale;

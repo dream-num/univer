@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export default {};
+import enUS from './en-US';
+
+const locale: typeof enUS = enUS;
+
+export default locale;

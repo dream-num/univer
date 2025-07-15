@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: '全角 (2 バイト) の英数カナ文字を半角 (1 バイト) の文字に変換します。',
         abstract: '全角 (2 バイト) の英数カナ文字を半角 (1 バイト) の文字に変換します。',
@@ -136,7 +138,6 @@ export default {
         },
     },
     DOLLAR: {
-        aliasFunctionName: 'YEN',
         description: '通貨形式を使用して数値をテキストに変換します',
         abstract: '通貨形式を使用して数値をテキストに変換します',
         links: [
@@ -744,3 +745,5 @@ export default {
         },
     },
 };
+
+export default locale;

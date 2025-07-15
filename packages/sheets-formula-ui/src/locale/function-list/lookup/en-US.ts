@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     ADDRESS: {
-        description: `Obtain the address of a cell in a worksheet, given specified row and column numbers. For example, ADDRESS(2,3) returns $C$2. As another example, ADDRESS(77,300) returns $KN$77. You can use other functions, such as the ROW and COLUMN functions, to provide the row and column number arguments for the ADDRESS function.
-
-        `,
+        description: 'Obtain the address of a cell in a worksheet, given specified row and column numbers. For example, ADDRESS(2,3) returns $C$2. As another example, ADDRESS(77,300) returns $KN$77. You can use other functions, such as the ROW and COLUMN functions, to provide the row and column number arguments for the ADDRESS function.',
         abstract: 'Returns a reference as text to a single cell in a worksheet',
         links: [
             {
@@ -627,3 +625,5 @@ export default {
         },
     },
 };
+
+export default locale;

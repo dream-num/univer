@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumfmtLocalTag } from '@univerjs/core';
+import type { INumfmtLocaleTag } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
 import { numfmt } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
@@ -25,7 +25,7 @@ interface IPatternPreview {
     color?: string;
 }
 
-export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocalTag = 'en'): IPatternPreview => {
+export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocaleTag = 'en'): IPatternPreview => {
     // in the source code of numfmt, the formatColor function will read the the partitions[3]
     const formatColor = numfmt.formatColor(pattern, value);
     const color = formatColor ? String(formatColor) : undefined;
@@ -43,7 +43,7 @@ export const getPatternPreview = (pattern: string, value: number, locale: INumfm
     };
 };
 
-export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, locale?: INumfmtLocalTag): IPatternPreview => {
+export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, locale?: INumfmtLocaleTag): IPatternPreview => {
     if (pattern === 'General') {
         return {
             result: String(stripErrorMargin(value)), // In Excel, the default General format also needs to handle numeric precision.

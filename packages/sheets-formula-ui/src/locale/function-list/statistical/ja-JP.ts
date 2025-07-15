@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AVEDEV: {
         description: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
         abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します',
@@ -904,8 +906,14 @@ export default {
             },
         ],
         functionParameter: {
-            value1: { name: '数値 1', detail: '最大の値を見つけるため、最初の数値引数を指定します。' },
-            value2: { name: '数値 2', detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。' },
+            number1: {
+                name: '数値 1',
+                detail: '最大の値を見つけるため、最初の数値引数を指定します。',
+            },
+            number2: {
+                name: '数値 2',
+                detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。',
+            },
         },
     },
     MAXA: {
@@ -1662,3 +1670,5 @@ export default {
         },
     },
 };
+
+export default locale;

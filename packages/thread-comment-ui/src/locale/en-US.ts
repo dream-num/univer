@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const enUS: typeof zhCN = {
+const locale = {
     threadCommentUI: {
         panel: {
             title: 'Comment Management',
@@ -51,4 +49,4 @@ const enUS: typeof zhCN = {
     },
 };
 
-export default enUS;
+export default locale;

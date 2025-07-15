@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ACCRINT: {
         description: '定期的に利息が支払われる証券の未収利息額を返します。',
         abstract: '定期的に利息が支払われる証券の未収利息額を返します。',
@@ -936,3 +938,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type enUS from './en-US';
 import array from './function-list/array/zh-TW';
 import compatibility from './function-list/compatibility/zh-TW';
 import cube from './function-list/cube/zh-TW';
@@ -30,7 +31,7 @@ import text from './function-list/text/zh-TW';
 import univer from './function-list/univer/zh-TW';
 import web from './function-list/web/zh-TW';
 
-export default {
+const locale: typeof enUS = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': '快速求和',
@@ -121,3 +122,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ASC: {
         description: 'Canvia les lletres angleses o katakana d\'amplada completa (doble byte) dins d\'una cadena de caràcters a caràcters d\'amplada mitjana (un sol byte)',
         abstract: 'Canvia les lletres angleses o katakana d\'amplada completa (doble byte) dins d\'una cadena de caràcters a caràcters d\'amplada mitjana (un sol byte)',
@@ -743,3 +745,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AND: {
         description: '모든 인수가 TRUE이면 TRUE를 반환합니다',
         abstract: '모든 인수가 TRUE이면 TRUE를 반환합니다',
@@ -154,7 +156,9 @@ export default {
         functionParameter: {
             name1: { name: 'name1', detail: '첫 번째 이름입니다. 유효한 Excel 이름으로 시작해야 합니다.' },
             nameValue1: { name: 'name_value1', detail: '이름 1에 할당된 값입니다.' },
-            calculation: { name: 'calculation', detail: '마지막 인수로 실행하고 함수의 결과를 반환하려는 계산입니다.' },
+            calculationOrName2: { name: 'calculation_or_name2', detail: 'One of the following:\n1.A calculation that uses all names within the LET function. This must be the last argument in the LET function.\n2.A second name to assign to a second name_value. If a name is specified, name_value2 and calculation_or_name3 become required.' },
+            nameValue2: { name: 'name_value2', detail: 'The value that is assigned to calculation_or_name2.' },
+            calculationOrName3: { name: 'calculation_or_name3', detail: 'One of the following:\n1.A calculation that uses all names within the LET function. The last argument in the LET function must be a calculation.\n2.A third name to assign to a third name_value. If a name is specified, name_value3 and calculation_or_name4 become required.' },
         },
     },
     MAKEARRAY: {
@@ -167,9 +171,12 @@ export default {
             },
         ],
         functionParameter: {
-            rows: { name: 'rows', detail: '배열의 행 수입니다. 0보다 커야 합니다.' },
-            cols: { name: 'cols', detail: '배열의 열 수입니다. 0보다 커야 합니다.' },
-            lambda: { name: 'lambda', detail: '배열을 만들기 위해 호출되는 LAMBDA입니다.' },
+            number1: { name: 'rows', detail: 'The number of rows in the array. Must be greater than zero.' },
+            number2: { name: 'cols', detail: 'The number of columns in the array. Must be greater than zero.' },
+            value3: {
+                name: 'lambda',
+                detail: ' A LAMBDA that is called to create the array. The LAMBDA takes two parameters: row (The row index of the array), col (The column index of the array).',
+            },
         },
     },
     MAP: {
@@ -183,6 +190,7 @@ export default {
         ],
         functionParameter: {
             array1: { name: 'array1', detail: '매핑할 배열입니다.' },
+            array2: { name: 'array2', detail: 'An array2 to be mapped.' },
             lambda: { name: 'lambda', detail: '각 배열에서 하나의 값을 받아들이고 하나의 결과를 반환하는 LAMBDA입니다.' },
         },
     },
@@ -287,3 +295,5 @@ export default {
         },
     },
 };
+
+export default locale;

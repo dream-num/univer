@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type enUS from './en-US';
 import array from './function-list/array/ko-KR';
 import compatibility from './function-list/compatibility/ko-KR';
 import cube from './function-list/cube/ko-KR';
@@ -30,7 +31,7 @@ import text from './function-list/text/ko-KR';
 import univer from './function-list/univer/ko-KR';
 import web from './function-list/web/ko-KR';
 
-export default {
+const locale: typeof enUS = {
     shortcut: {
         'sheets-formula-ui': {
             'quick-sum': '빠른 합계',
@@ -117,3 +118,5 @@ export default {
         },
     },
 };
+
+export default locale;

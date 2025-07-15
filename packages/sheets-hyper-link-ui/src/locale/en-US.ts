@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
-
-const enUS: typeof zhCN = {
+const locale = {
     hyperLink: {
         form: {
             editTitle: 'Edit Link',
@@ -52,4 +50,4 @@ const enUS: typeof zhCN = {
     },
 };
 
-export default enUS;
+export default locale;

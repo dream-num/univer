@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AND: {
         description: '如果其所有參數均為 TRUE，則傳回 TRUE',
         abstract: '如果其所有參數均為 TRUE，則傳回 TRUE',
@@ -300,3 +302,5 @@ export default {
         },
     },
 };
+
+export default locale;

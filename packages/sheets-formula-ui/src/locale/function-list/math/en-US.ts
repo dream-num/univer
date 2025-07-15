@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     ABS: {
         description: 'Returns the absolute value of a number. The absolute value of a number is the number without its sign.',
         abstract: 'Returns the absolute value of a number',
@@ -1169,3 +1169,5 @@ export default {
         },
     },
 };
+
+export default locale;

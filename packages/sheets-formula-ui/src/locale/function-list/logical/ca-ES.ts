@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     AND: {
         description: 'Retorna CERT si tots els seus arguments són CERT',
         abstract: 'Retorna CERT si tots els seus arguments són CERT',
@@ -303,3 +305,5 @@ export default {
         },
     },
 };
+
+export default locale;

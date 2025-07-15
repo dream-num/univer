@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     AVEDEV: {
         description: 'Returns the average of the absolute deviations of data points from their mean.',
         abstract: 'Returns the average of the absolute deviations of data points from their mean',
@@ -1699,3 +1699,5 @@ export default {
         },
     },
 };
+
+export default locale;

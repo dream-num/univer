@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BESSELI: {
         description: 'Devuelve la función de Bessel modificada In(x)',
         abstract: 'Devuelve la función de Bessel modificada In(x)',
@@ -788,3 +790,5 @@ export default {
         },
     },
 };
+
+export default locale;

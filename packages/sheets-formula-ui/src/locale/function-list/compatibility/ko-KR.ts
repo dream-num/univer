@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: '베타 누적 분포 함수를 반환합니다',
         abstract: '베타 누적 분포 함수를 반환합니다',
@@ -582,3 +584,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CELL: {
         description: '傳回有關儲存格格式、位置或內容的資訊',
         abstract: '傳回有關儲存格格式、位置或內容的資訊',
@@ -346,3 +348,5 @@ export default {
         },
     },
 };
+
+export default locale;

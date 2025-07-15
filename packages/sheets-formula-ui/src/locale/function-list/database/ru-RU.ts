@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DAVERAGE: {
         description: 'Возвращает среднее значение выбранных записей базы данных',
         abstract: 'Возвращает среднее значение выбранных записей базы данных',
@@ -196,3 +198,5 @@ export default {
         },
     },
 };
+
+export default locale;

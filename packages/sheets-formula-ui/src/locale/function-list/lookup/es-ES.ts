@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export default {
-    ADDRESS: {
-        description: `Obtiene la dirección de una celda en una hoja de cálculo, dados los números de fila y columna especificados. Por ejemplo, DIRECCION(2,3) devuelve $C$2. Como otro ejemplo, DIRECCION(77,300) devuelve $KN$77. Puede usar otras funciones, como las funciones FILA y COLUMNA, para proporcionar los argumentos de número de fila y columna para la función DIRECCION.
+import type enUS from './en-US';
 
-        `,
+const locale: typeof enUS = {
+    ADDRESS: {
+        description: 'Obtiene la dirección de una celda en una hoja de cálculo, dados los números de fila y columna especificados. Por ejemplo, DIRECCION(2,3) devuelve $C$2. Como otro ejemplo, DIRECCION(77,300) devuelve $KN$77. Puede usar otras funciones, como las funciones FILA y COLUMNA, para proporcionar los argumentos de número de fila y columna para la función DIRECCION.',
         abstract: 'Devuelve una referencia como texto a una celda única en una hoja de cálculo',
         links: [
             {
@@ -627,3 +627,5 @@ export default {
         },
     },
 };
+
+export default locale;

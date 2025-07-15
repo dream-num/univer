@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     DATE: {
         description: 'Kết hợp ba giá trị riêng biệt thành một ngày.',
         abstract: 'Trả về số sê-ri của ngày cụ thể',
@@ -453,3 +455,5 @@ export default {
         },
     },
 };
+
+export default locale;

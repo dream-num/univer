@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ENCODEURL: {
         description: 'Trả về một chuỗi được mã hóa URL.',
         abstract: 'Trả về một chuỗi được mã hóa URL.',
@@ -28,4 +30,34 @@ export default {
             text: { name: 'văn bản', detail: 'Một chuỗi cần mã hóa URL.' },
         },
     },
+    FILTERXML: {
+        description: 'Returns specific data from the XML content by using the specified XPath',
+        abstract: 'Returns specific data from the XML content by using the specified XPath',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    WEBSERVICE: {
+        description: 'Returns data from a web service',
+        abstract: 'Returns data from a web service',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
 };
+
+export default locale;

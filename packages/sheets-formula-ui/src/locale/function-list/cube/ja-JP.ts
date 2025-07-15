@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     CUBEKPIMEMBER: {
         description: '主要業績評価指標 (KPI) のプロパティを返し、KPI 名をセルに表示します。 KPI は、月間粗利益や四半期従業員退職率など、定量化が可能な測定値であり、組織の業績をモニタリングするために使用されます。',
         abstract: '主要業績評価指標 (KPI) のプロパティを返し、KPI 名をセルに表示します。 KPI は、月間粗利益や四半期従業員退職率など、定量化が可能な測定値であり、組織の業績をモニタリングするために使用されます。',
@@ -114,3 +116,5 @@ export default {
         },
     },
 };
+
+export default locale;

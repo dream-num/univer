@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     BETADIST: {
         description: '返回 beta 累积分布函数',
         abstract: '返回 beta 累积分布函数',
@@ -582,3 +584,5 @@ export default {
         },
     },
 };
+
+export default locale;

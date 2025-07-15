@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ADDRESS: {
-        description:
-            '根據指定行號和列號獲得工作表中的某個儲存格的位址。 例如，ADDRESS(2,3) 傳回 $C$2。 再例如，ADDRESS(77,300) 回傳 $KN$77。 可以使用其他函數（如 ROW 和 COLUMN 函數）為 ADDRESS 函數提供行號和列號參數。 ',
+        description: '根據指定行號和列號獲得工作表中的某個儲存格的位址。 例如，ADDRESS(2,3) 傳回 $C$2。 再例如，ADDRESS(77,300) 回傳 $KN$77。 可以使用其他函數（如 ROW 和 COLUMN 函數）為 ADDRESS 函數提供行號和列號參數。 ',
         abstract: '以文字形式將參考值傳回工作表的單一儲存格',
         links: [
             {
@@ -616,3 +617,5 @@ export default {
         },
     },
 };
+
+export default locale;

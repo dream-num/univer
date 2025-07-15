@@ -97,7 +97,7 @@ export const Options = () => {
                         <span>{localeService.t(item.label)}</span>
 
                         <span className="univer-text-xs univer-text-gray-500">
-                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.local).result.trim() : ''}
+                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.locale).result.trim() : ''}
                         </span>
                     </div>
                 );

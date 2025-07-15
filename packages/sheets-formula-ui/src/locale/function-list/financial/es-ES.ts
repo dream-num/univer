@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
     ACCRINT: {
         description: 'Devuelve el interés acumulado de un valor que paga intereses periódicos',
         abstract: 'Devuelve el interés acumulado de un valor que paga intereses periódicos',
@@ -936,3 +938,5 @@ export default {
         },
     },
 };
+
+export default locale;

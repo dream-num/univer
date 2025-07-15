@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+const locale = {
+    docQuickInsert: {
+        menu: {
+            numberedList: 'Llista numerada',
+            bulletedList: 'Llista amb vinyetes',
+            divider: 'Divisor',
+            text: 'Text',
+            table: 'Taula',
+            image: 'Imatge',
+        },
+        group: {
+            basics: 'Bàsics',
+        },
+        placeholder: 'No s\'han trobat resultats',
+        keywordInputPlaceholder: 'Introdueix paraules clau',
+    },
+};
+
+export default locale;

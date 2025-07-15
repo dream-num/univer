@@ -5,11 +5,11 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server<br />
-**Extensible. High-performance. Embedded to your application.**
+Univer es un motor de suite ofimática de código abierto, diseñado para ofrecer a los desarrolladores una solución potente, flexible y fácil de usar. Soporta hojas de cálculo, documentos y presentaciones, y proporciona una amplia gama de funciones y una alta extensibilidad.<br />
+**Extensible · Integrable · Alto rendimiento**
 
-**English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] <br />
-[Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]
+[English][readme-en-link] | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | **Español**<br />
+[Sitio oficial][official-site-link] | [Documentación][documentation-link] | [Demo en línea][playground-link] | [Blog][blog-link]
 
 [![][github-license-shield]][github-license-link]
 [![][github-actions-shield]][github-actions-link]
@@ -27,84 +27,84 @@ An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, 
 
 <details open>
 <summary>
-<strong>Table of contents</strong>
+<strong>Índice</strong>
 </summary>
 
-- [🌈 Highlights](#-highlights)
-- [✨ Features](#-features)
+- [🌈 Destacados](#-destacados)
+- [✨ Características](#-características)
     - [📊 Univer Sheet](#-univer-sheet)
-    - [📝 Univer Doc](#-univer-doc-under-development)
-    - [📽️ Univer Slide](#%EF%B8%8F-univer-slide-under-development)
-- [🌐 Internationalization](#-internationalization)
-- [👾 Showcase](#-showcase)<!-- - [📦 Ecosystem](#-ecosystem) -->
-- [💬 Community](#-community)
-- [🤝 Contribution](#-contribution)
-- [❤️ Sponsor](#%EF%B8%8F-sponsors)
-- [📄 License](#-license)
+    - [📝 Univer Doc](#-univer-doc-en-desarrollo)
+    - [📽️ Univer Slide](#%EF%B8%8F-univer-slide-en-desarrollo)
+- [🌐 Internacionalización](#-internacionalización)
+- [👾 Ejemplos](#-ejemplos)
+- [💬 Comunidad](#-comunidad)
+- [🤝 Contribución](#-contribución)
+- [❤️ Patrocinadores](#%EF%B8%8F-patrocinadores)
+- [📄 Licencia](#-licencia)
 
 </details>
 
-## 🌈 Highlights
+## 🌈 Destacados
 
-- 📈 Univer is designed to support **spreadsheets**, **documents** and **presentation**.
-- 🧙‍♀️ Univer is **isomorphic**. It can run both on browsers and Node.js (in the future, mobile devices as well), with the same API.
-- ⚙️ Univer is easily **embeddable**, allowing seamless integration into your applications.
-- 🎇 Univer is **powerful**, offering a wide range of features including **formulas**, **conditional formatting**, **data validation**, **filtering**, **collaborative editing**, **printing**, **import & export** and more features on the horizon.
-- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* that makes it a delight for developers to implement their unique requirements on the top of Univer.
-- 💄 Univer is **highly customizable**, allowing you to personalize its appearance using *themes*. It also provides support for internationalization (i18n).
-- 🥤 Univer is **easy to work with**. The *Presets* & *Facade API* make it easy to hands on.
-- ⚡ Univer in **performant**.
-  - ✏️ Univer boasts an efficient *rendering engine* based on canvas, capable of rendering various document types flawlessly. The rendering engines supports advanced typesetting features such as *punctuation squeezing*, *text and image layout* and *scroll buffering*.
-  - 🧮 Univer incorporates a lightning-fast *formula engine* that can operate in Web Workers or even on the server side.
-- 🌌 Univer is a **highly integrated** system. Documents, spreadsheets and slides can interoperate with each others and even rendered on the same canvas, allowing information and data flow within Univer.
+- 📈 **Soporte para múltiples tipos de documentos**: Univer soporta **hojas de cálculo**, **documentos de texto** y próximamente **presentaciones**.
+- 🧙‍♀️ **Isomorfismo multiplataforma**: Puede ejecutarse tanto en navegadores como en Node.js (y en el futuro, en dispositivos móviles), con la misma API.
+- ⚙️ **Fácil integración**: Univer se puede integrar perfectamente en tus aplicaciones.
+- 🎇 **Potente**: Univer ofrece una amplia gama de funciones, incluyendo **fórmulas**, **formato condicional**, **validación de datos**, **filtros**, **edición colaborativa**, **impresión**, **importación y exportación** y muchas más funciones en camino.
+- 🔌 **Altamente extensible**: Gracias a su *arquitectura de plugins*, es muy sencillo para los desarrolladores implementar requisitos personalizados sobre Univer.
+- 💄 **Altamente personalizable**: Puedes personalizar su apariencia mediante *temas* y también soporta internacionalización (i18n).
+- 🥤 **Fácil de usar**: Los *Presets* y la *API Facade* facilitan el inicio rápido.
+- ⚡ **Alto rendimiento**:
+  - ✏️ Univer cuenta con un eficiente *motor de renderizado* basado en canvas, capaz de renderizar varios tipos de documentos con precisión. El motor soporta características avanzadas como *ajuste de puntuación*, *maquetación de texto e imagen* y *buffer de scroll*.
+  - 🧮 Incorpora un *motor de fórmulas* ultrarrápido que puede funcionar en Web Workers o incluso en el servidor.
+- 🌌 **Sistema altamente integrado**: Documentos, hojas de cálculo y presentaciones pueden interoperar y renderizarse en el mismo canvas, permitiendo el flujo de información y datos dentro de Univer.
 
-## ✨ Features
+## ✨ Características
 
-Univer provides a wide range of features for spreadsheets, documents and presentations. Here are some of the key features:
+Univer proporciona una amplia gama de funciones para hojas de cálculo, documentos y presentaciones. Aquí algunas de las principales:
 
 ### 📊 Univer Sheets
 
-- **Core Features**: Univer supports core spreadsheet functionality, including cells, rows, columns, worksheets, and workbooks.
-- **Formulas**: Extensive support for various formulas, including mathematical, statistical, logical, text, date and time, lookup and reference, engineering, financial, and information formulas.
-- **Permissions**: Allows restricting access to specific elements.
-- **Number Formatting**: Supports formatting numbers based on specific criteria.
-- **Hyperlinks**: Enables linking to external websites, email addresses, and other locations within a spreadsheet.
-- **Floating Images**: Allows inserting images into a spreadsheet and positioning them anywhere on the sheet.
-- **Find & Replace**: Provides the ability to search for specific text within a spreadsheet and replace it with other text.
-- **Filtering**: Allows filtering data based on specific criteria.
-- **Sorting**: Allows sorting data based on specific criteria.
-- **Data Validation**: Supports restricting the type of data that can be entered into a cell.
-- **Conditional Formatting**: Supports applying formatting to cells based on specific criteria.
-- **Comments**: Enables adding comments to cells to provide additional information.
-- **Cross-highlighting**: Supports displaying cross-highlighting in spreadsheets to help users quickly locate selected cells.
-- **Zen Editor**: Provides a distraction-free editing experience with a clean interface and minimal distractions.
-- **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
-- **Sparklines**[^1]: Supports sparklines, which are small charts that fit within a cell to provide a visual representation of data.
-- **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
-- **Import & Export**[^1]: Support for importing and exporting data in XLSX.
-- **Charts**[^1]: Supports various types of charts, including bar charts, line charts, pie charts, scatter plots, and more.
-- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
-- **Editing History**[^1]: Allows users to view and restore previous versions of a spreadsheet.
+- **Funciones principales**: Soporte para celdas, filas, columnas, hojas y libros de trabajo.
+- **Fórmulas**: Soporte para fórmulas matemáticas, estadísticas, lógicas, de texto, fecha y hora, búsqueda y referencia, ingeniería, financieras e informativas.
+- **Permisos**: Permite restringir el acceso a elementos específicos.
+- **Formato de números**: Soporta el formateo de números según criterios específicos.
+- **Hipervínculos**: Permite enlazar a sitios web externos, correos electrónicos y otras ubicaciones dentro de la hoja.
+- **Imágenes flotantes**: Permite insertar imágenes y posicionarlas en cualquier parte de la hoja.
+- **Buscar y reemplazar**: Permite buscar texto específico y reemplazarlo.
+- **Filtrado**: Permite filtrar datos según criterios.
+- **Ordenación**: Permite ordenar datos según criterios.
+- **Validación de datos**: Restringe el tipo de datos que se pueden introducir en una celda.
+- **Formato condicional**: Aplica formato a celdas según criterios.
+- **Comentarios**: Permite añadir comentarios a las celdas.
+- **Resaltado cruzado**: Muestra resaltado cruzado para ayudar a localizar celdas seleccionadas.
+- **Editor Zen**: Experiencia de edición sin distracciones.
+- **Tablas dinámicas**[^1]: Permite resumir y analizar datos.
+- **Minigráficos**[^1]: Pequeños gráficos dentro de una celda para visualización rápida.
+- **Impresión**[^1]: Permite imprimir o exportar a PDF.
+- **Importación y exportación**[^1]: Soporte para XLSX.
+- **Gráficos**[^1]: Soporte para gráficos de barras, líneas, pastel, dispersión, etc.
+- **Edición colaborativa**[^1]: Varios usuarios pueden editar simultáneamente. Incluye historial y recuperación de archivos.
+- **Historial de edición**[^1]: Permite ver y restaurar versiones anteriores.
 
 ### 📝 Univer Docs (rc)
 
-- **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
-- **Lists**: Supports ordered lists, unordered lists, and task lists.
-- **Hyperlinks**: Supports inserting links to external websites, email addresses, and other locations within a document.
-- **Floating Images**: Allows inserting images into a document and supporting text and image layout.
-- **Headers & Footers**: Allows adding headers and footers to a document.
-- **Comments**: Enables adding comments to a document to provide additional information.
-- **Printing**[^1]: Allows printing a document or exporting it to PDF.
-- **Import & Export**[^1]: Supports importing and exporting data in DOCX format.
-- **Collaborative Editing**[^1]: Supports multiple users editing a document simultaneously.
+- **Funciones principales**: Soporte para párrafos, títulos, listas, superíndices, subíndices, etc.
+- **Listas**: Soporte para listas ordenadas, desordenadas y de tareas.
+- **Hipervínculos**: Permite insertar enlaces a sitios web, correos electrónicos y otras ubicaciones.
+- **Imágenes flotantes**: Permite insertar imágenes y maquetación mixta de texto e imagen.
+- **Encabezados y pies de página**: Permite añadir encabezados y pies de página.
+- **Comentarios**: Permite añadir comentarios.
+- **Impresión**[^1]: Permite imprimir o exportar a PDF.
+- **Importación y exportación**[^1]: Soporte para DOCX.
+- **Edición colaborativa**[^1]: Varios usuarios pueden editar simultáneamente.
 
-### 📽️ Univer Slides (Under Development)
+### 📽️ Univer Slides (En desarrollo)
 
-- **Core Features**: Univer will support core presentation features, including slides, shapes, text, images, and more.
+- **Funciones principales**: Univer soportará funciones principales de presentaciones, incluyendo diapositivas, formas, texto, imágenes y más.
 
-## 🌐 Internationalization
+## 🌐 Internacionalización
 
-Univer supports multiple languages, including:
+Univer soporta múltiples idiomas, incluyendo:
 
 - `zh-CN`
 - `zh-TW`
@@ -114,73 +114,73 @@ Univer supports multiple languages, including:
 - `fa-IR`
 - `ko-KR`
 
-`zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
+`zh-CN` y `en-US` son soportados oficialmente, los demás son contribuciones de la comunidad.
 
-You can add the language you want by [Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
+Puedes añadir el idioma que desees siguiendo la [guía de personalización de idiomas](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). También puedes ayudarnos a añadir nuevos idiomas consultando la [guía de contribución](./CONTRIBUTING.md).
 
-## 👾 Showcase
+## 👾 Ejemplos
 
-Embed Univer in AI products as a data presentation tool.
+Integra Univer en productos de IA como herramienta de presentación de datos.
 
 [![][examples-preview-capalyze]][examples-link-capalyze]
 
-You can find all the examples in the [Univer Examples](https://univer.ai/examples).
+Puedes encontrar todos los ejemplos en [Univer Examples](https://univer.ai/examples).
 
-| **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
+| **📊 Hojas de cálculo** | **📊 Multi-instancia** | **📊 Uniscript** |
 | :---: | :---: | :---: |
 | [![][examples-preview-0]][examples-link-0] | [![][examples-preview-1]][examples-link-1] | [![][examples-preview-2]][examples-link-2] |
-| **📊 Big data** | **📊 Collaboration** | **📊 Collaboration Playground** |
+| **📊 Big data** | **📊 Colaboración** | **📊 Playground colaborativo** |
 | [![][examples-preview-3]][examples-link-3] | [![][examples-preview-4]][examples-link-4] | [![][examples-preview-5]][examples-link-5] |
-| **📊 Import & Export** | **📊 Printing** | **📝 Documents** |
+| **📊 Importar & Exportar** | **📊 Impresión** | **📝 Documentos** |
 | [![][examples-preview-6]][examples-link-6] | [![][examples-preview-7]][examples-link-7] | [![][examples-preview-8]][examples-link-8] |
-| **📝 Multi-instance** | **📝 Uniscript** | **📝 Big data** |
+| **📝 Multi-instancia** | **📝 Uniscript** | **📝 Big data** |
 | [![][examples-preview-9]][examples-link-9] | [![][examples-preview-10]][examples-link-10] | [![][examples-preview-11]][examples-link-11] |
-| **📝 Collaboration** | **📝 Collaboration Playground** | **📽️ Presentations** |
+| **📝 Colaboración** | **📝 Playground colaborativo** | **📽️ Presentaciones** |
 | [![][examples-preview-12]][examples-link-12] | [![][examples-preview-13]][examples-link-13] | [![][examples-preview-14]][examples-link-14] |
-| **📊 Zen Editor** | **Univer Workspace (SaaS version)** | &nbsp; |
+| **📊 Editor Zen** | **Univer Workspace (versión SaaS)** | &nbsp; |
 | [![][examples-preview-15]][examples-link-15] | [![][examples-preview-16]][examples-link-16] | &nbsp; |
 
-<!-- ## 📦 Ecosystem
+<!-- ## 📦 Ecosistema
 
-Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
+Univer cuenta con un rico ecosistema de herramientas y recursos para ayudarte a empezar: -->
 
-## 🔗 Links
+## 🔗 Enlaces
 
-- [Latest Preview of the `dev` Branch](https://univer-preview.vercel.app/)
-- [Official Site](https://univer.ai)
-- [Presets Repository](https://github.com/dream-num/univer-presets)
+- [Última vista previa de la rama `dev`](https://univer-preview.vercel.app/)
+- [Sitio oficial](https://univer.ai)
+- [Repositorio de Presets](https://github.com/dream-num/univer-presets)
 
-## 🔒 Security
+## 🔒 Seguridad
 
-Univer is committed to maintaining a secure codebase. We follow best practices for security and regularly update our dependencies. For more information, please refer to our [Security Policy](./SECURITY.md).
+Univer se compromete a mantener un código seguro. Seguimos las mejores prácticas y actualizamos regularmente las dependencias. Más información en nuestra [Política de Seguridad](./SECURITY.md).
 
-## 💬 Community
+## 💬 Comunidad
 
 [![][github-community-badge]][github-community-link] [![][discord-community-badge]][discord-community-link] [![][stackoverflow-community-badge]][stackoverflow-community-link]
 
-Univer is an inclusive and welcoming project. Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before participating in the community.
+Univer es un proyecto inclusivo y acogedor. Por favor, lee nuestro [Código de Conducta](./CODE_OF_CONDUCT.md) antes de participar en la comunidad.
 
-Join the Univer community:
+Únete a la comunidad Univer:
 
-- Chat with us and other developers on [Discord][discord-community-link].
-- Start a discussion on [GitHub Discussions][github-community-link].
-- Open a topic on [Stack Overflow][stackoverflow-community-link] and tag it with `univer`.
+- Chatea con nosotros y otros desarrolladores en [Discord][discord-community-link].
+- Inicia una discusión en [GitHub Discussions][github-community-link].
+- Abre un tema en [Stack Overflow][stackoverflow-community-link] y etiquétalo con `univer`.
 
-You can also find Univer on:
+También puedes encontrar Univer en:
 
 [Twitter][twitter-community-link] | [YouTube][youtube-community-link]
 
-## 🤝 Contribution
+## 🤝 Contribución
 
-We appreciate any kinds of contributing. You can submit [issues or feature requests](https://github.com/dream-num/univer/issues) to us. Please read our [contributing guide](./CONTRIBUTING.md) first.
+Agradecemos cualquier tipo de contribución. Puedes enviar [incidencias o solicitudes de funciones](https://github.com/dream-num/univer/issues). Por favor, lee primero nuestra [guía de contribución](./CONTRIBUTING.md).
 
-If you would like to contribute code to Univer, please refer to the contributing guide as well. It would guide you through the process of setting up the development environment and submitting a pull request.
+Si deseas contribuir con código, consulta también la guía de contribución. Te guiará en el proceso de configuración del entorno de desarrollo y envío de pull requests.
 
-## ❤️ Sponsors
+## ❤️ Patrocinadores
 
-The growth and development of the Univer project rely on the support of its backers and sponsors. If you are interested in supporting our project, we kindly invite you to consider becoming a sponsor. You can sponsor us through [Open Collective](https://opencollective.com/univer).
+El crecimiento y desarrollo de Univer depende del apoyo de patrocinadores y colaboradores. Si deseas apoyar el proyecto, considera convertirte en patrocinador a través de [Open Collective](https://opencollective.com/univer).
 
-Thanks to our sponsors, just part of them are listed here because of the space limit, ranking is no particular order:
+Gracias a nuestros patrocinadores, aquí mostramos solo algunos por limitaciones de espacio, sin orden particular:
 
 [![][sponsor-badge-0]][sponsor-link-0]
 [![][sponsor-badge-1]][sponsor-link-1]
@@ -198,16 +198,16 @@ Thanks to our sponsors, just part of them are listed here because of the space l
 [![][backer-badge-5]][backer-link-5]
 [![][backer-badge-6]][backer-link-6]
 
-## 📄 License
+## 📄 Licencia
 
-Copyright © 2021-2025 DreamNum Co,Ltd. All Rights Reserved.
+Copyright © 2021-2025 DreamNum Co,Ltd. Todos los derechos reservados.
 
-Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) license.
+Distribuido bajo la licencia [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-<!-- Footnotes -->
-[^1]: These features are provided by the non-OSS version of Univer, which is free for commercial use and also includes paid upgrade plans.
+<!-- Notas -->
+[^1]: Estas funciones son proporcionadas por la versión no OSS de Univer, que es gratuita para uso comercial y también incluye planes de pago.
 
-<!-- Links -->
+<!-- Enlaces -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
 [github-license-link]: ./LICENSE
 [github-actions-shield]: https://img.shields.io/github/actions/workflow/status/dream-num/univer/build.yml?style=flat-square
@@ -247,9 +247,6 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [discord-community-badge]: https://img.shields.io/discord/1136129819961217077?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=for-the-badge
 [twitter-community-link]: https://twitter.com/univerhq
 [youtube-community-link]: https://www.youtube.com/@dreamNum
-[zhihu-community-link]: https://www.zhihu.com/org/meng-shu-ke-ji
-[segmentfault-community-link]: https://segmentfault.com/u/congrongdehongjinyu
-[juejin-community-link]: https://juejin.cn/user/4312146127850733
 
 [sponsor-link-0]: https://opencollective.com/univer/sponsor/0/website
 [sponsor-link-1]: https://opencollective.com/univer/sponsor/1/website

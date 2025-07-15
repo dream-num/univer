@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+const locale = {
+    'action-recorder': {
+        menu: {
+            title: 'Grabar acciones',
+            record: 'Grabar acciones...',
+            'replay-local': 'Reemplazar grabación local...',
+            'replay-local-name': 'Reemplazar grabación local por subunidad...',
+            'replay-local-active': 'Reemplazar grabación local por subunidad actual...',
+        },
+    },
+};
+
+export default locale;

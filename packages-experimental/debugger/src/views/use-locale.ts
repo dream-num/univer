@@ -47,6 +47,14 @@ const locales = [
         label: '한국어',
         value: LocaleType.KO_KR,
     },
+    {
+        label: 'Español',
+        value: 'es-ES',
+    },
+    {
+        label: 'Català',
+        value: 'ca-ES',
+    },
 ];
 
 export function useLocale() {
@@ -72,6 +80,12 @@ export function useLocale() {
                 break;
             case LocaleType.KO_KR:
                 locales = await import('@univerjs/mockdata/locales/ko-KR');
+                break;
+            case 'es-ES':
+                locales = await import('@univerjs/mockdata/locales/es-ES');
+                break;
+            case 'ca-ES':
+                locales = await import('@univerjs/mockdata/locales/ca-ES');
                 break;
             case LocaleType.EN_US:
             default:

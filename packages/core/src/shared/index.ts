@@ -31,7 +31,7 @@ export * from './hash-algorithm';
 export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';
-export type { INumfmtLocalTag } from './numfmt';
+export type { INumfmtLocaleTag } from './numfmt';
 export {
     DEFAULT_NUMBER_FORMAT,
     DEFAULT_TEXT_FORMAT,

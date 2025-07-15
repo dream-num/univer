@@ -30,7 +30,7 @@ export function isDefaultFormat(pattern?: string | null) {
     return pattern === null || pattern === undefined || pattern === DEFAULT_NUMBER_FORMAT;
 }
 
-export type INumfmtLocalTag =
+export type INumfmtLocaleTag =
     | 'zh-CN'
     | 'zh-TW'
     | 'cs'

@@ -45,6 +45,22 @@ const locale: typeof enUS = {
             number2: { name: 'number2', detail: '평균을 구하려는 추가 숫자, 셀 참조 또는 범위로 최대 255개입니다.' },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: 'Finds the weighted average of a set of values, given the values and the corresponding weights.',
+        abstract: 'Finds the weighted average of a set of values, given the values and the corresponding weights.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9084098?hl=en&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: 'values', detail: '要计算平均数的值。' },
+            weights: { name: 'weights', detail: '要应用的相应权重列表。' },
+            additionalValues: { name: 'additional_values', detail: '要计算平均数的其他值。' },
+            additionalWeights: { name: 'additional_weights', detail: '要应用的其他权重。' },
+        },
+    },
     AVERAGEA: {
         description: '인수의 평균(산술 평균)을 반환합니다(숫자, 텍스트 및 논리값 포함)',
         abstract: '인수의 평균(산술 평균)을 반환합니다(숫자, 텍스트 및 논리값 포함)',
@@ -312,8 +328,14 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            value1: { name: 'value1', detail: '개수를 구하려는 첫 번째 인수입니다.' },
-            value2: { name: 'value2', detail: '개수를 구하려는 추가 인수로 최대 255개입니다.' },
+            number1: {
+                name: 'value1',
+                detail: '개수를 구하려는 첫 번째 인수입니다.',
+            },
+            number2: {
+                name: 'value2',
+                detail: '개수를 구하려는 추가 인수로 최대 255개입니다.',
+            },
         },
     },
     COUNTBLANK: {
@@ -532,6 +554,62 @@ const locale: typeof enUS = {
             knownXs: { name: 'known_xs', detail: '독립 배열이나 데이터 범위입니다.' },
         },
     },
+    FORECAST_ETS: {
+        description: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
+        abstract: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    FORECAST_ETS_CONFINT: {
+        description: 'Returns a confidence interval for the forecast value at the specified target date',
+        abstract: 'Returns a confidence interval for the forecast value at the specified target date',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    FORECAST_ETS_SEASONALITY: {
+        description: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
+        abstract: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.SEASONALITY',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    FORECAST_ETS_STAT: {
+        description: 'Returns a statistical value as a result of time series forecasting',
+        abstract: 'Returns a statistical value as a result of time series forecasting',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.STAT',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
     FORECAST_LINEAR: {
         description: '기존 값을 기반으로 미래 값을 반환합니다',
         abstract: '기존 값을 기반으로 미래 값을 반환합니다',
@@ -671,7 +749,7 @@ const locale: typeof enUS = {
             knownYs: { name: 'known_ys', detail: '관계 b*m^x에서 이미 알고 있는 y 값의 집합입니다.' },
             knownXs: { name: 'known_xs', detail: '관계 b*m^x에서 이미 알고 있는 x 값의 선택적 집합입니다.' },
             newXs: { name: 'new_xs', detail: 'GROWTH가 해당 y 값을 반환하도록 하려는 새 x 값입니다.' },
-            const: { name: 'const', detail: '상수 b를 1과 같도록 강제할지 여부를 지정하는 논리값입니다.' },
+            constb: { name: 'const', detail: '상수 b를 1과 같도록 강제할지 여부를 지정하는 논리값입니다.' },
         },
     },
     HARMEAN: {
@@ -759,7 +837,7 @@ const locale: typeof enUS = {
         functionParameter: {
             knownYs: { name: 'known_ys', detail: 'y = mx + b 관계에서 이미 알고 있는 y 값의 집합입니다.' },
             knownXs: { name: 'known_xs', detail: 'y = mx + b 관계에서 이미 알고 있는 x 값의 선택적 집합입니다.' },
-            const: { name: 'const', detail: '상수 b를 0으로 강제할지 여부를 지정하는 논리값입니다.' },
+            constb: { name: 'const', detail: '상수 b를 0으로 강제할지 여부를 지정하는 논리값입니다.' },
             stats: { name: 'stats', detail: '추가 회귀 통계를 반환할지 여부를 지정하는 논리값입니다.' },
         },
     },
@@ -775,7 +853,7 @@ const locale: typeof enUS = {
         functionParameter: {
             knownYs: { name: 'known_ys', detail: 'y = b*m^x 관계에서 이미 알고 있는 y 값의 집합입니다.' },
             knownXs: { name: 'known_xs', detail: 'y = b*m^x 관계에서 이미 알고 있는 x 값의 선택적 집합입니다.' },
-            const: { name: 'const', detail: '상수 b를 1과 같도록 강제할지 여부를 지정하는 논리값입니다.' },
+            constb: { name: 'const', detail: '상수 b를 1과 같도록 강제할지 여부를 지정하는 논리값입니다.' },
             stats: { name: 'stats', detail: '추가 회귀 통계를 반환할지 여부를 지정하는 논리값입니다.' },
         },
     },
@@ -808,6 +886,20 @@ const locale: typeof enUS = {
             probability: { name: 'probability', detail: '로그 정규 분포와 연관된 확률입니다.' },
             mean: { name: 'mean', detail: 'ln(x)의 평균입니다.' },
             standardDev: { name: 'standard_dev', detail: 'ln(x)의 표준 편차입니다.' },
+        },
+    },
+    MARGINOFERROR: {
+        description: 'Calculates the margin of error from a range of values and a confidence level.',
+        abstract: 'Calculates the margin of error from a range of values and a confidence level.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/12487850?hl=en&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: 'range', detail: 'The range of values used to calculate the margin of error.' },
+            confidence: { name: 'confidence', detail: 'The desired confidence level between (0, 1).' },
         },
     },
     MAX: {
@@ -1228,8 +1320,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            knownYs: { name: 'known_ys', detail: '데이터 요소의 배열 또는 범위입니다.' },
-            knownXs: { name: 'known_xs', detail: '데이터 요소의 배열 또는 범위입니다.' },
+            array1: { name: 'array1', detail: 'The dependent array or range of data.' },
+            array2: { name: 'array2', detail: 'The independent array or range of data.' },
         },
     },
     SKEW: {
@@ -1456,6 +1548,8 @@ const locale: typeof enUS = {
         functionParameter: {
             array1: { name: 'array1', detail: '데이터의 첫 번째 집합입니다.' },
             array2: { name: 'array2', detail: '데이터의 두 번째 집합입니다.' },
+            tails: { name: 'tails', detail: 'Specifies the number of distribution tails. If tails = 1, T.TEST uses the one-tailed distribution. If tails = 2, T.TEST uses the two-tailed distribution.' },
+            type: { name: 'type', detail: 'The kind of t-Test to perform.' },
         },
     },
     TREND: {
@@ -1471,7 +1565,7 @@ const locale: typeof enUS = {
             knownYs: { name: 'known_ys', detail: '관계 y = mx + b에서 이미 알고 있는 y 값의 집합입니다.' },
             knownXs: { name: 'known_xs', detail: '관계 y = mx + b에서 이미 알고 있는 x 값의 선택적 집합입니다.' },
             newXs: { name: 'new_xs', detail: 'TREND가 해당 y 값을 반환하도록 하려는 새 x 값입니다.' },
-            const: { name: 'const', detail: '상수 b를 0으로 강제할지 여부를 지정하는 논리값입니다.' },
+            constb: { name: 'const', detail: '상수 b를 0으로 강제할지 여부를 지정하는 논리값입니다.' },
         },
     },
     TRIMMEAN: {

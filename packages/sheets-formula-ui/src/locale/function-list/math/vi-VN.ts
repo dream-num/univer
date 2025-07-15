@@ -82,9 +82,23 @@ const locale: typeof enUS = {
             number: { name: 'số', detail: 'Giá trị tuyệt đối của Số phải lớn hơn 1.' },
         },
     },
+    AGGREGATE: {
+        description: 'Returns an aggregate in a list or database',
+        abstract: 'Returns an aggregate in a list or database',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/aggregate-function-43b9278e-6aa7-4f17-92b6-e19993fa26df',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
     ARABIC: {
-        description: '将罗马数字转换为阿拉伯数字',
-        abstract: '将罗马数字转换为阿拉伯数字',
+        description: 'Converts a Roman number to Arabic, as a number',
+        abstract: 'Converts a Roman number to Arabic, as a number',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -474,6 +488,20 @@ const locale: typeof enUS = {
             number: { name: 'số', detail: 'Số thực mà bạn muốn làm tròn xuống một số nguyên.' },
         },
     },
+    ISO_CEILING: {
+        description: 'Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance',
+        abstract: 'Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/iso-ceiling-function-e587bb73-6cc2-4113-b664-ff5b09859a83',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
     LCM: {
         description: 'Trả về bội số chung ít nhất của các số nguyên.',
         abstract: 'Trả về bội số chung ít nhất của các số nguyên.',
@@ -486,6 +514,20 @@ const locale: typeof enUS = {
         functionParameter: {
             number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
             number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
+        },
+    },
+    LET: {
+        description: 'Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula',
+        abstract: 'Assigns names to calculation results to allow storing intermediate calculations, values, or defining names inside a formula',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/let-function-34842dd8-b92b-4d3f-b325-b8b8f9908999',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     LN: {

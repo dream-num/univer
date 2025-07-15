@@ -906,8 +906,14 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            value1: { name: '数値 1', detail: '最大の値を見つけるため、最初の数値引数を指定します。' },
-            value2: { name: '数値 2', detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。' },
+            number1: {
+                name: '数値 1',
+                detail: '最大の値を見つけるため、最初の数値引数を指定します。',
+            },
+            number2: {
+                name: '数値 2',
+                detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。',
+            },
         },
     },
     MAXA: {

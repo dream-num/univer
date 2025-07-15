@@ -189,6 +189,20 @@ const locale: typeof enUS = {
             reference: { name: 'tham khảo', detail: 'Tham chiếu đến một ô hoặc phạm vi ô.' },
         },
     },
+    GETPIVOTDATA: {
+        description: 'Returns data stored in a PivotTable report',
+        abstract: 'Returns data stored in a PivotTable report',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/getpivotdata-function-8c083b99-a922-4ca0-af5e-3af55960761f',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
     HLOOKUP: {
         description: 'Tìm kiếm một giá trị ở hàng đầu tiên của bảng hoặc trong một mảng số và trả về giá trị trong cột của hàng được chỉ định trong bảng hoặc mảng.',
         abstract: 'Tìm hàng đầu tiên của mảng và trả về giá trị của ô đã chỉ định',
@@ -243,6 +257,20 @@ const locale: typeof enUS = {
         functionParameter: {
             url: { name: 'url', detail: 'URL đầy đủ về vị trí liên kết được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa URL này.' },
             linkLabel: { name: 'nhãn_đường_liên_kết', detail: 'Văn bản cần hiển thị trong ô như là một đường liên kết, được đóng trong dấu ngoặc kép hoặc tham chiếu đến ô có chứa nhãn này.' },
+        },
+    },
+    IMAGE: {
+        description: 'Returns an image from a given source',
+        abstract: 'Returns an image from a given source',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     INDEX: {
@@ -352,6 +380,20 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             array: { name: 'mảng', detail: 'Một mảng, công thức mảng hay tham chiếu đến phạm vi ô mà bạn muốn lấy số hàng.' },
+        },
+    },
+    RTD: {
+        description: 'Retrieves real-time data from a program that supports COM automation',
+        abstract: 'Retrieves real-time data from a program that supports COM automation',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/rtd-function-e0cc001a-56f0-470a-9b19-9455dc0eb593',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     SORT: {

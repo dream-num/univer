@@ -510,22 +510,6 @@ const locale: typeof enUS = {
             startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
         },
     },
-    SPLIT: {
-        description: 'Chia một chuỗi văn bản thành một bảng con',
-        abstract: 'Chia một chuỗi văn bản thành một bảng con',
-        links: [
-            {
-                title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/split-%E5%87%BD%E6%95%B0-4357fb3e-7256-49ca-8711-94dbbcbe87c9',
-            },
-        ],
-        functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn chia thành các phần tử bảng con.' },
-            delimiter: { name: 'delimiter', detail: 'Ký tự hoặc chuỗi ký tự mà bạn muốn sử dụng làm dấu phân cách.' },
-            split_by_each: { name: 'split_by_each', detail: 'Giá trị logic để chỉ định liệu chia chuỗi bằng từng ký tự trong dấu phân cách.' },
-            remove_empty_text: { name: 'remove_empty_text', detail: 'Giá trị logic để chỉ định liệu xóa các chuỗi trống khỏi các kết quả phân chia.' },
-        },
-    },
     SUBSTITUTE: {
         description: 'Thay thế một hoặc tất cả các lần xuất hiện của một chuỗi văn bản trong một chuỗi văn bản khác',
         abstract: 'Thay thế một hoặc tất cả các lần xuất hiện của một chuỗi văn bản trong một chuỗi văn bản khác',
@@ -716,6 +700,48 @@ const locale: typeof enUS = {
         functionParameter: {
             value: { name: 'giá trị', detail: 'Giá trị cần trả về dưới dạng văn bản.' },
             format: { name: 'Định dạng của dữ', detail: 'Định dạng của dữ liệu trả về. Nó có thể là một trong hai giá trị: \n0 Mặc định. Định dạng ngắn gọn dễ đọc.\n1 Định dạng nghiêm ngặt bao gồm ký tự thoát và dấu tách hàng. Tạo một chuỗi có thể được phân tích khi nhập vào thanh công thức. Đóng gói các chuỗi trả về trong dấu ngoặc kép, ngoại trừ Booleans, Numbers và Errors.' },
+        },
+    },
+    CALL: {
+        description: 'Calls a procedure in a dynamic link library or code resource',
+        abstract: 'Calls a procedure in a dynamic link library or code resource',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/call-function-32d58445-e646-4ffd-8d5e-b45077a5e995',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    EUROCONVERT: {
+        description: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        abstract: 'Converts a number to euros, converts a number from euros to a euro member currency, or converts a number from one euro member currency to another by using the euro as an intermediary (triangulation)',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/euroconvert-function-79c8fd67-c665-450c-bb6c-15fc92f8345c',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    REGISTER_ID: {
+        description: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        abstract: 'Returns the register ID of the specified dynamic link library (DLL) or code resource that has been previously registered',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/register-id-function-f8f0af0f-fd66-4704-a0f2-87b27b175b50',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
 };

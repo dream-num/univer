@@ -138,7 +138,6 @@ const locale: typeof enUS = {
         },
     },
     DOLLAR: {
-        aliasFunctionName: 'YEN',
         description: '通貨形式を使用して数値をテキストに変換します',
         abstract: '通貨形式を使用して数値をテキストに変換します',
         links: [

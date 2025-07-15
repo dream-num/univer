@@ -561,6 +561,62 @@ const locale: typeof enUS = {
             knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
         },
     },
+    FORECAST_ETS: {
+        description: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
+        abstract: 'Returns a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    FORECAST_ETS_CONFINT: {
+        description: 'Returns a confidence interval for the forecast value at the specified target date',
+        abstract: 'Returns a confidence interval for the forecast value at the specified target date',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    FORECAST_ETS_SEASONALITY: {
+        description: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
+        abstract: 'Returns the length of the repetitive pattern Excel detects for the specified time series',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.SEASONALITY',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    FORECAST_ETS_STAT: {
+        description: 'Returns a statistical value as a result of time series forecasting',
+        abstract: 'Returns a statistical value as a result of time series forecasting',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.STAT',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
     FORECAST_LINEAR: {
         description: 'Trả về giá trị tương lai dựa trên giá trị hiện tại',
         abstract: 'Trả về giá trị tương lai dựa trên giá trị hiện tại',

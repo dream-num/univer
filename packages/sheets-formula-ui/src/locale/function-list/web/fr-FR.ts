@@ -14,51 +14,8 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
+import enUS from './en-US';
 
-const locale: typeof enUS = {
-    ENCODEURL: {
-        description: 'Returns a URL-encoded string',
-        abstract: 'Returns a URL-encoded string',
-        links: [
-            {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/fr-fr/office/encodeurl-function-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'nombre1', detail: 'premier' },
-            number2: { name: 'nombre2', detail: 'second' },
-        },
-    },
-    FILTERXML: {
-        description: 'Returns specific data from the XML content by using the specified XPath',
-        abstract: 'Returns specific data from the XML content by using the specified XPath',
-        links: [
-            {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/fr-fr/office/filterxml-function-4df72efc-11ec-4951-86f5-c1374812f5b7',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'nombre1', detail: 'premier' },
-            number2: { name: 'nombre2', detail: 'second' },
-        },
-    },
-    WEBSERVICE: {
-        description: 'Returns data from a web service',
-        abstract: 'Returns data from a web service',
-        links: [
-            {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/fr-fr/office/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
-            },
-        ],
-        functionParameter: {
-            number1: { name: 'nombre1', detail: 'premier' },
-            number2: { name: 'nombre2', detail: 'second' },
-        },
-    },
-};
+const locale: typeof enUS = enUS;
 
 export default locale;

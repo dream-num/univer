@@ -44,6 +44,20 @@ const locale: typeof enUS = {
             errorVal: { name: 'Giá trị lỗi', detail: 'Giá trị lỗi có số nhận dạng mà bạn muốn tìm.' },
         },
     },
+    INFO: {
+        description: 'Returns information about the current operating environment',
+        abstract: 'Returns information about the current operating environment',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/info-function-725f259a-0e4b-49b3-8b52-58815c69acae',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
+        },
+    },
     ISBETWEEN: {
         description: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác',
         abstract: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác',
@@ -215,6 +229,20 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             value: { name: 'Giá trị', detail: 'Giá trị cần kiểm tra. Nếu số không phải là số nguyên thì nó bị cắt cụt.' },
+        },
+    },
+    ISOMITTED: {
+        description: 'Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE',
+        abstract: 'Checks whether the value in a&nbsp;LAMBDA&nbsp;is missing and returns TRUE or FALSE',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.microsoft.com/en-us/office/isomitted-function-831d6fbc-0f07-40c4-9c5b-9c73fd1d60c1',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'number1', detail: 'first' },
+            number2: { name: 'number2', detail: 'second' },
         },
     },
     ISREF: {

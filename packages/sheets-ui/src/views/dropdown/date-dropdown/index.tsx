@@ -36,11 +36,11 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
     const defaultDate = useMemo(() => patternType !== 'time' ? dayjs() : dayjs('1900-01-01 00:00:00'), []);
     const date = localDate && localDate.isValid() ? localDate : defaultDate;
     const localeService = useDependency(LocaleService);
+
     const handleSave = async () => {
-        if (!date) {
-            return;
-        }
-        if ((await onChange?.(date)) !== false) {
+        if (!date) return;
+        const result = await onChange?.(date);
+        if (result) {
             hideFn();
         }
     };

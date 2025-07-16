@@ -206,12 +206,6 @@ export class DataValidationDropdownManagerService extends Disposable {
                     t: CellValueType.NUMBER,
                 }, rule))
             ) {
-                await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                    visible: false,
-                    eventType: DeviceInputEventType.Keyboard,
-                    unitId,
-                    keycode: KeyCode.ESC,
-                } as IEditorBridgeServiceVisibleParam);
                 await this._commandService.executeCommand(SetRangeValuesCommand.id, {
                     unitId,
                     subUnitId,
@@ -234,6 +228,12 @@ export class DataValidationDropdownManagerService extends Disposable {
                         },
                     },
                 });
+                await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                    visible: false,
+                    eventType: DeviceInputEventType.Keyboard,
+                    unitId,
+                    keycode: KeyCode.ESC,
+                } as IEditorBridgeServiceVisibleParam);
                 return true;
             } else {
                 if (this._injector.has(DataValidationRejectInputController)) {
@@ -316,6 +316,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         },
                     };
 
+                    this._commandService.executeCommand(SetRangeValuesCommand.id, params);
                     if (this._editorBridgeService.isVisible().visible) {
                         await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                             visible: false,
@@ -324,7 +325,6 @@ export class DataValidationDropdownManagerService extends Disposable {
                             keycode: KeyCode.ESC,
                         } as IEditorBridgeServiceVisibleParam);
                     }
-                    this._commandService.executeCommand(SetRangeValuesCommand.id, params);
 
                     if (multiple) {
                         return false;
@@ -382,6 +382,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         },
                     };
 
+                    this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
                     if (this._editorBridgeService.isVisible().visible) {
                         this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                             visible: false,
@@ -390,7 +391,6 @@ export class DataValidationDropdownManagerService extends Disposable {
                             keycode: KeyCode.ESC,
                         } as IEditorBridgeServiceVisibleParam);
                     }
-                    this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
 
                     return true;
                 };
@@ -425,6 +425,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         },
                     };
 
+                    this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
                     if (this._editorBridgeService.isVisible().visible) {
                         this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                             visible: false,
@@ -433,7 +434,6 @@ export class DataValidationDropdownManagerService extends Disposable {
                             keycode: KeyCode.ESC,
                         } as IEditorBridgeServiceVisibleParam);
                     }
-                    this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
 
                     return true;
                 };

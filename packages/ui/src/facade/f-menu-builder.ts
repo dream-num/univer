@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, MenuSchemaType } from '@univerjs/ui';
-import { CommandType, ICommandService, Inject, Injector, Tools } from '@univerjs/core';
+import { CommandType, generateRandomId, ICommandService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { IMenuManagerService, MenuItemType, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 
@@ -168,7 +168,7 @@ export class FMenu extends FMenuBase {
     ) {
         super();
 
-        const commandId = typeof _item.action === 'string' ? _item.action : Tools.generateRandomId(12);
+        const commandId = typeof _item.action === 'string' ? _item.action : generateRandomId(12);
         if (commandId !== _item.action) {
             this._commandToRegister.set(commandId, _item.action as unknown as () => void);
         }

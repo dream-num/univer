@@ -16,8 +16,7 @@
 
 import type { IUser } from '@univerjs/protocol';
 import { UnitRole } from '@univerjs/protocol';
-
-import { Tools } from '../../shared/tools';
+import { generateRandomId } from '../../shared/tools';
 
 const nameMap = {
     [UnitRole.Editor]: 'Editor',
@@ -36,7 +35,7 @@ export const createDefaultUser = (type?: UnitRole) => {
         } as IUser;
     }
     const user = {
-        userID: `${nameMap[type]}_${Tools.generateRandomId(8)}`,
+        userID: `${nameMap[type]}_${generateRandomId(8)}`,
         name: nameMap[type],
         avatar: '',
     } as IUser;

@@ -23,6 +23,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     LocaleType,
+    merge,
     RANGE_TYPE,
     RedoCommand,
     Tools,
@@ -710,7 +711,7 @@ describe('Test set range values commands', () => {
                     return paramsStyleData;
                 }
 
-                const allStyle = Tools.deepMerge({}, getParamsStyleBase(), getParamsStyleData());
+                const allStyle = merge({}, getParamsStyleBase(), getParamsStyleData());
                 expect(
                     await commandService.executeCommand(SetRangeValuesCommand.id, getParamsStyleData())
                 ).toBeTruthy();

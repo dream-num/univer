@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IRectPopupProps } from '../../views/components/popup/RectPopup';
-import { createIdentifier, Disposable, Tools } from '@univerjs/core';
+import { createIdentifier, Disposable, generateRandomId } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProps, 'children' | 'hidden' | 'excludeRects' | 'anchorRect$'> {
@@ -82,7 +82,7 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
     }
 
     addPopup(item: IPopup): string {
-        const id = Tools.generateRandomId();
+        const id = generateRandomId();
         this._popupMap.set(id, {
             ...item,
             onActiveChange: (active: boolean) => {

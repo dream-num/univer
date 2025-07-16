@@ -15,13 +15,13 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
 export function createDefaultNewRule(accessor: IAccessor) {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const currentRanges = selectionManagerService.getCurrentSelections().map((s) => s.range);
-    const uid = Tools.generateRandomId(6);
+    const uid = generateRandomId(6);
     const rule = {
         uid,
         type: DataValidationType.DECIMAL,

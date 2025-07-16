@@ -16,7 +16,7 @@
 
 import type { IDocumentStyle } from '@univerjs/core';
 import type { IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { BooleanNumber, generateRandomId, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
@@ -26,7 +26,16 @@ import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId } from '../../../co
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 
 function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea, pageIndex: number): string {
-    const { useFirstPageHeaderFooter, evenAndOddHeaders, defaultHeaderId, defaultFooterId, firstPageHeaderId, firstPageFooterId, evenPageHeaderId, evenPageFooterId } = documentStyle;
+    const {
+        useFirstPageHeaderFooter,
+        evenAndOddHeaders,
+        defaultHeaderId,
+        defaultFooterId,
+        firstPageHeaderId,
+        firstPageFooterId,
+        evenPageHeaderId,
+        evenPageFooterId,
+    } = documentStyle;
 
     if (editArea === DocumentEditArea.HEADER) {
         if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
@@ -115,7 +124,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
 
         if (needCreateHeaderFooter) {
             const SEGMENT_ID_LEN = 6;
-            const segmentId = Tools.generateRandomId(SEGMENT_ID_LEN);
+            const segmentId = generateRandomId(SEGMENT_ID_LEN);
             // Set segment id first, then exec command.
             if (needChangeSegmentId) {
                 docSelectionRenderService.setSegment(segmentId);

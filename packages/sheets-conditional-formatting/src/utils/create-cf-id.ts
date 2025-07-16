@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Tools } from '@univerjs/core';
+import { generateRandomId } from '@univerjs/core';
 
 // Given that unit and sunUnit will change in the case of replica creation, the ID will not be spelled in here
-export const createCfId = () => `${Tools.generateRandomId(8)}`;
+export const createCfId = () => `${generateRandomId(8)}`;

@@ -21,6 +21,7 @@ import {
     BooleanNumber,
     COLORS,
     Disposable,
+    generateRandomId,
     ICommandService,
     IUniverInstanceService,
     ObjectRelativeFromH,
@@ -863,7 +864,7 @@ export class DocDrawingTransformerController extends Disposable {
 
         const ID_LENGTH = 6;
 
-        const anchor = new Rect(INLINE_DRAWING_ANCHOR_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
+        const anchor = new Rect(INLINE_DRAWING_ANCHOR_KEY_PREFIX + generateRandomId(ID_LENGTH), {
             left,
             top,
             height,

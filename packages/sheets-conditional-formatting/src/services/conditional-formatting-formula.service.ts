@@ -18,8 +18,7 @@ import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
 import type { IConditionalFormattingRuleConfig } from '../models/type';
-
-import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, ObjectMatrix, RefAlias, Tools } from '@univerjs/core';
+import { BooleanNumber, CellValueType, Disposable, generateRandomId, ICommandService, Inject, ObjectMatrix, RefAlias } from '@univerjs/core';
 import {
     IActiveDirtyManagerService,
     RemoveOtherFormulaMutation,
@@ -284,7 +283,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
      * The external environment is not aware of`formulaId`;it communicates internally with the formula engine.
      */
     private _createFormulaId(unitId: string, subUnitId: string) {
-        return `sheet.cf_${unitId}_${subUnitId}_${Tools.generateRandomId(8)}`;
+        return `sheet.cf_${unitId}_${subUnitId}_${generateRandomId(8)}`;
     }
 
     /**

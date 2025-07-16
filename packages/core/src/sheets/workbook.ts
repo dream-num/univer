@@ -16,12 +16,11 @@
 
 import type { Observable } from 'rxjs';
 import type { Nullable } from '../shared';
-
 import type { CustomData, IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { ILogService } from '../services/log/log.service';
-import { Tools } from '../shared';
+import { generateRandomId, Tools } from '../shared';
 import { BooleanNumber } from '../types/enum';
 import { getEmptySnapshot } from './empty-snapshot';
 import { Styles } from './styles';
@@ -96,7 +95,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
         const { styles } = this._snapshot;
         if (this._snapshot.id == null || this._snapshot.id.length === 0) {
-            this._snapshot.id = Tools.generateRandomId(6);
+            this._snapshot.id = generateRandomId(6);
         }
 
         this._unitId = this._snapshot.id;
@@ -399,7 +398,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
         // If there's no sheets in the snapshot, we should create one.
         if (Tools.isEmptyObject(sheets)) {
-            const firstSheetId = Tools.generateRandomId();
+            const firstSheetId = generateRandomId();
             sheets[firstSheetId] = { id: firstSheetId };
         }
 

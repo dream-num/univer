@@ -20,13 +20,13 @@ import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, IPasteHo
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
+    generateRandomId,
     Inject,
     Injector,
     isFormulaId,
     isFormulaString,
     IUniverInstanceService,
     ObjectMatrix,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
@@ -353,7 +353,7 @@ function getSpecialPasteFormulaValueMatrix(
             let formulaId = formulaIdMap.get(index);
 
             if (!formulaId) {
-                formulaId = Tools.generateRandomId(6);
+                formulaId = generateRandomId(6);
                 formulaIdMap.set(index, formulaId);
 
                 const offsetX = range.cols[col] - pasteFrom.range.cols[col % pasteFrom.range.cols.length];
@@ -487,7 +487,7 @@ function getDefaultPasteValueMatrix(
                 let formulaId = formulaIdMap.get(index);
 
                 if (!formulaId) {
-                    formulaId = Tools.generateRandomId(6);
+                    formulaId = generateRandomId(6);
                     formulaIdMap.set(index, formulaId);
 
                     const offsetX = range.cols[col] - pasteFrom.range.cols[col % pasteFrom.range.cols.length];

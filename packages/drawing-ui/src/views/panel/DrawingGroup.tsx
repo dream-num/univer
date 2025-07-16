@@ -16,7 +16,7 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, LocaleService, Tools } from '@univerjs/core';
+import { DrawingTypeEnum, generateRandomId, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
@@ -45,7 +45,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const onGroupBtnClick = () => {
         const focusDrawings = drawingManagerService.getFocusDrawings();
         const { unitId, subUnitId } = focusDrawings[0];
-        const groupId = Tools.generateRandomId(10);
+        const groupId = generateRandomId(10);
         const groupTransform = getGroupState(0, 0, focusDrawings.map((o) => o.transform || {}));
         const groupParam = {
             unitId,

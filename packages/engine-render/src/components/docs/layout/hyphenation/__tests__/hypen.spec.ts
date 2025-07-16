@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from 'vitest';
+import type { Nullable } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Hyphen } from '../hyphen';
 import { Lang } from '../lang';

@@ -17,7 +17,7 @@
 import type { IKeyType, Nullable } from '../shared';
 import type { IStyleData } from '../types/interfaces';
 import type { ICellDataForSheetInterceptor } from './typedef';
-import { LRUMap, Tools } from '../shared';
+import { generateRandomId, LRUMap, Tools } from '../shared';
 
 /**
  * Styles in a workbook, cells locate styles based on style IDs
@@ -68,7 +68,7 @@ export class Styles {
     }
 
     add(data: IStyleData, styleObject: string): string {
-        const id = Tools.generateRandomId(6);
+        const id = generateRandomId(6);
         this._styles[id] = data;
         // update cache
         this._cacheMap.set(styleObject, id);

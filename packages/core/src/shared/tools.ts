@@ -237,15 +237,6 @@ export class Tools {
         return 'Unknown browser';
     }
 
-    /**
-     * Use this method without `Tools`.
-     *
-     * @deprecated
-     */
-    static generateRandomId(n: number = 21, alphabet?: string): string {
-        return generateRandomId(n, alphabet);
-    }
-
     static getClassName(instance: object): string {
         return instance.constructor.name;
     }

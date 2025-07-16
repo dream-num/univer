@@ -20,6 +20,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BuildTextUtils,
     CommandType,
+    generateRandomId,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -29,7 +30,6 @@ import {
     sortRulesFactory,
     TextX,
     TextXActionType,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -398,7 +398,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const bulletParagraphTextStyle = paragraphProperties.textStyle;
 
         const ID_LENGTH = 6;
-        let listId = Tools.generateRandomId(ID_LENGTH);
+        let listId = generateRandomId(ID_LENGTH);
         const paragraphs = docDataModel.getBody()?.paragraphs ?? [];
 
         const curIndex = paragraphs.findIndex((i) => i.startIndex === paragraph.startIndex);
@@ -508,7 +508,7 @@ function insertList(accessor: IAccessor, listType: PresetListType) {
                     },
                     bullet: {
                         listType,
-                        listId: paragraph.bullet?.listType === listType ? paragraph.bullet.listId : Tools.generateRandomId(6),
+                        listId: paragraph.bullet?.listType === listType ? paragraph.bullet.listId : generateRandomId(6),
                         nestingLevel: paragraph.bullet?.listType === listType ? paragraph.bullet.nestingLevel : 0,
                     },
                 },

@@ -16,7 +16,7 @@
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { Disposable, Inject, Injector, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, Injector, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { rangeToDiscreteRange } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
@@ -187,7 +187,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
 
                 const { row: startRow, col: startColumn } = mapFunc(range.startRow, range.startColumn);
                 const currentLink = this._hyperLinkModel.getHyperLinkByLocation(copyInfo.unitId, copyInfo.subUnitId, startRow, startColumn);
-                const id = Tools.generateRandomId();
+                const id = generateRandomId();
                 if (currentLink) {
                     redos.push({
                         id: RemoveHyperLinkMutation.id,

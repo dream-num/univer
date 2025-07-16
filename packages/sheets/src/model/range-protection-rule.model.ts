@@ -16,8 +16,7 @@
 
 import type { IDisposable, IRange } from '@univerjs/core';
 import type { UnitObject } from '@univerjs/protocol';
-import { Tools } from '@univerjs/core';
-
+import { generateRandomId } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export enum ViewStateEnum {
@@ -175,10 +174,10 @@ export class RangeProtectionRuleModel implements IDisposable {
     }
 
     createRuleId(unitId: string, subUnitId: string) {
-        let id = Tools.generateRandomId(4);
+        let id = generateRandomId(4);
         const ruleMap = this._ensureRuleMap(unitId, subUnitId);
         while (ruleMap.has(id)) {
-            id = Tools.generateRandomId(4);
+            id = generateRandomId(4);
         }
         return id;
     }

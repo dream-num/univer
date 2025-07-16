@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, INodePosition, IPoint, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
-import { COLORS, DOC_RANGE_TYPE, RANGE_DIRECTION, Rectangle, Tools } from '@univerjs/core';
+import { COLORS, DOC_RANGE_TYPE, generateRandomId, RANGE_DIRECTION, Rectangle } from '@univerjs/core';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RegularPolygon } from '@univerjs/engine-render';
 import { compareNodePositionInTable, NodePositionConvertToRectRange } from './convert-rect-range';
 import { TEXT_RANGE_LAYER_INDEX } from './text-range';
@@ -256,7 +256,7 @@ export class RectRange implements IDocRange {
         }
 
         const OPACITY = 0.3;
-        const polygon = new RegularPolygon(RECT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
+        const polygon = new RegularPolygon(RECT_RANGE_KEY_PREFIX + generateRandomId(ID_LENGTH), {
             pointsGroup,
             fill: this.style?.fill || getColor(COLORS.black, OPACITY),
             left,

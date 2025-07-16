@@ -15,12 +15,33 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, IReorderRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type {
+    IInsertColMutationParams,
+    IMoveColumnsMutationParams,
+    IMoveRangeMutationParams,
+    IMoveRowsMutationParams,
+    IRemoveRowsMutationParams,
+    IRemoveSheetCommandParams,
+    IReorderRangeMutationParams,
+    ISetRangeValuesMutationParams,
+} from '@univerjs/sheets';
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, IUniverInstanceService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, IUniverInstanceService, merge, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
+import {
+    InsertColMutation,
+    InsertRowMutation,
+    MoveColsMutation,
+    MoveRangeMutation,
+    MoveRowsMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
+    RemoveSheetCommand,
+    ReorderRangeMutation,
+    SetRangeValuesMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
@@ -61,7 +82,7 @@ export class ConditionalFormattingService extends Disposable {
                 const ruleCacheItem = cellCfs.find((cache) => cache.cfId === rule.cfId);
 
                 if (type === CFRuleType.highlightCell) {
-                    ruleCacheItem!.result && Tools.deepMerge(pre, { style: ruleCacheItem!.result });
+                    ruleCacheItem!.result && merge(pre, { style: ruleCacheItem!.result });
                 } else if (type === CFRuleType.colorScale) {
                     const ruleCache = ruleCacheItem?.result;
                     if (ruleCache && typeof ruleCache === 'string') {

@@ -18,7 +18,7 @@ import type { ITextRange } from '../../../../sheets/typedef';
 import type { ICustomTable, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
-import { Tools, UpdateDocsAttributeType } from '../../../../shared';
+import { generateRandomId, UpdateDocsAttributeType } from '../../../../shared';
 import { PRESET_LIST_TYPE, PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -39,7 +39,7 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
 
     const ID_LENGTH = 6;
 
-    let listId = Tools.generateRandomId(ID_LENGTH);
+    let listId = generateRandomId(ID_LENGTH);
 
     if (currentParagraphs.length === 1) {
         const curIndex = paragraphs.indexOf(currentParagraphs[0]);
@@ -184,7 +184,7 @@ export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
     }
 
     const ID_LENGTH = 6;
-    const listId = Tools.generateRandomId(ID_LENGTH);
+    const listId = generateRandomId(ID_LENGTH);
 
     const memoryCursor = new MemoryCursor();
 

@@ -19,7 +19,7 @@ import type { Nullable } from '../shared';
 import type { ISlideData, ISlidePage } from '../types/interfaces';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
-import { generateRandomId, Tools } from '../shared';
+import { generateRandomId } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
 import { PageType } from '../types/interfaces';
 
@@ -54,7 +54,7 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         super();
 
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
-        this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
+        this._unitId = this._snapshot.id ?? generateRandomId(6);
 
         this._name$ = new BehaviorSubject(this._snapshot.title);
         this.name$ = this._name$.asObservable();

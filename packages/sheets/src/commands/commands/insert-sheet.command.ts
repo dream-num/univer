@@ -15,20 +15,16 @@
  */
 
 import type { IAccessor, ICommand, IWorksheetData } from '@univerjs/core';
+import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
     CommandType,
+    generateRandomId,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     mergeWorksheetSnapshotWithDefault,
-    Tools,
 } from '@univerjs/core';
-
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import { getSheetCommandTargetWorkbook } from './utils/target-util';
@@ -62,10 +58,10 @@ export const InsertSheetCommand: ICommand = {
 
         if (params) {
             index = params.index ?? index;
-            sheetConfig.id = sheetId || Tools.generateRandomId();
+            sheetConfig.id = sheetId || generateRandomId();
             sheetConfig.name = sheet?.name || workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
         } else {
-            sheetConfig.id = Tools.generateRandomId();
+            sheetConfig.id = generateRandomId();
             sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
         }
 

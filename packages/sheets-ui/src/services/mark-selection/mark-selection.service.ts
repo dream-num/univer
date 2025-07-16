@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, generateRandomId, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';
@@ -66,7 +66,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const subUnitId = workbook.getActiveSheet()?.getSheetId();
         if (!subUnitId) return null;
-        const id = Tools.generateRandomId();
+        const id = generateRandomId();
 
         const markSelectionInfo: IMarkSelectionInfo = {
             selection,
@@ -86,7 +86,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const subUnitId = workbook.getActiveSheet()?.getSheetId();
         if (!subUnitId) return null;
-        const id = Tools.generateRandomId();
+        const id = generateRandomId();
         this._shapeMap.set(id, {
             selection,
             subUnitId,

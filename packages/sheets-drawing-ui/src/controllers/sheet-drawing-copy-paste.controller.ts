@@ -19,12 +19,19 @@ import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import type { IDeleteDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DrawingTypeEnum, ICommandService, Tools } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, generateRandomId, ICommandService } from '@univerjs/core';
 import { IDrawingManagerService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DrawingApplyType, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-
-import { COPY_TYPE, discreteRangeToRange, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import {
+    COPY_TYPE,
+    discreteRangeToRange,
+    ISheetClipboardService,
+    ISheetSelectionRenderService,
+    PREDEFINED_HOOK_NAME,
+    SheetSkeletonManagerService,
+    virtualizeDiscreteRanges,
+} from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { transformToDrawingPosition } from '../basics/transform-position';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
@@ -333,7 +340,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 ...drawing,
                 unitId,
                 subUnitId,
-                drawingId: isCut ? drawing.drawingId : Tools.generateRandomId(),
+                drawingId: isCut ? drawing.drawingId : generateRandomId(),
                 transform: transformContext.transform,
                 sheetTransform: transformContext.sheetTransform,
             };

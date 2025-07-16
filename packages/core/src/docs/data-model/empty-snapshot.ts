@@ -15,13 +15,13 @@
  */
 
 import type { IDocumentData } from '../../types/interfaces';
-import { Tools } from '../../shared/tools';
+import { generateRandomId } from '../../shared/tools';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor } from '../../types/interfaces';
 
 export function getEmptySnapshot(
-    unitID = Tools.generateRandomId(6),
+    unitID = generateRandomId(6),
     locale = LocaleType.EN_US,
     title = ''
 ): IDocumentData {

@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, SlideDataModel } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, merge } from '@univerjs/core';
 
 export interface IUpdateElementOperationParams {
     unitId: string;
@@ -36,7 +36,7 @@ export const UpdateSlideElementOperation: ICommand<IUpdateElementOperationParams
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
-        activePage.pageElements[oKey] = Tools.deepMerge(activePage.pageElements[oKey], props);
+        activePage.pageElements[oKey] = merge(activePage.pageElements[oKey], props);
         slideData.updatePage(activePage.id, activePage);
 
         return true;

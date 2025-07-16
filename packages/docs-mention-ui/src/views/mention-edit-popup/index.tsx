@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
-import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { generateRandomId, ICommandService, IMentionIOService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -65,10 +65,10 @@ export const MentionEditPopup = () => {
             mentions={mentions}
             onSelect={async (mention) => {
                 await commandService.executeCommand(AddDocMentionCommand.id, {
-                    unitId: univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!.getUnitId(),
+                    unitId: univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)!.getUnitId(),
                     mention: {
                         ...mention,
-                        id: Tools.generateRandomId(),
+                        id: generateRandomId(),
                     },
                     startIndex: editPopup.anchor,
                 });

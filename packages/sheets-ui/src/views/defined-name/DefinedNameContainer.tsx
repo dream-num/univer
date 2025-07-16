@@ -15,9 +15,8 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import { generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, PenIcon } from '@univerjs/icons';
@@ -36,7 +35,7 @@ import { DefinedNameInput } from './DefinedNameInput';
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
@@ -75,7 +74,7 @@ export const DefinedNameContainer = () => {
 
         let id = param.id;
         if (id == null || id.length === 0) {
-            id = Tools.generateRandomId(10);
+            id = generateRandomId(10);
             commandService.executeCommand(InsertDefinedNameCommand.id, { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden });
         } else {
             const newDefinedName: ISetDefinedNameMutationParam = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };

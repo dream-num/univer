@@ -19,6 +19,7 @@ import type { AutoFillService, IAutoFillLocation, IAutoFillRule, ICopyDataInType
 import {
     Direction,
     Disposable,
+    generateRandomId,
     Inject,
     isFormulaId,
     isFormulaString,
@@ -95,7 +96,7 @@ export class FormulaAutoFillController extends Disposable {
                     let formulaId = formulaIdMap.get(dataIndex);
 
                     if (!formulaId) {
-                        formulaId = Tools.generateRandomId(6);
+                        formulaId = generateRandomId(6);
                         formulaIdMap.set(dataIndex, formulaId);
 
                         const { offsetX, offsetY } = directionToOffset(step, len, direction, location, sourceIndex);

@@ -16,8 +16,17 @@
 
 import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
-
-import { CustomRangeType, DataStreamTreeTokenType, DrawingTypeEnum, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
+import {
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DrawingTypeEnum,
+    generateRandomId,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    skipParseTagNames,
+    Tools,
+} from '@univerjs/core';
 import { ImageSourceType } from '@univerjs/drawing';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
@@ -138,8 +147,8 @@ export class HtmlToUDMService {
                     const height = Number(element.dataset.height || 100);
                     const docTransformWidth = Number(element.dataset.docTransformWidth || width);
                     const docTransformHeight = Number(element.dataset.docTransformHeight || height);
-                    // 外部会进行替换.
-                    const id = Tools.generateRandomId(6);
+
+                    const id = generateRandomId(6);
                     doc.body?.customBlocks?.push({ startIndex: body.dataStream.length, blockId: id });
                     body.dataStream += '\b';
                     if (!doc.drawings) {

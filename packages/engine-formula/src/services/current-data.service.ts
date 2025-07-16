@@ -510,7 +510,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
                         rowCount: 0,
                         columnCount: 0,
                         rowData: {},
-                        columnData: {},
+                        columnManager: this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getColumnManager()!,
                     };
                 }
 

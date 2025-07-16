@@ -147,10 +147,12 @@ export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, from
 export { textDiff } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
+export { ColumnManager } from './sheets/column-manager';
 export { Range } from './sheets/range';
 export { getCellCoordByIndexSimple, getCellPositionByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
 export * from './sheets/sheet-skeleton';
+
 export {
     DEFAULT_WORKSHEET_COLUMN_COUNT,
     DEFAULT_WORKSHEET_COLUMN_COUNT_KEY,
@@ -166,7 +168,6 @@ export {
     DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY,
     mergeWorksheetSnapshotWithDefault,
 } from './sheets/sheet-snapshot-utils';
-
 export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
 export type { IPosition } from './sheets/typedef';

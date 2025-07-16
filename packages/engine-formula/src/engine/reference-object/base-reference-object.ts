@@ -369,8 +369,8 @@ export class BaseReferenceObject extends ObjectClassType {
         return this.getCurrentActiveSheetData()?.rowData || {};
     }
 
-    getColumnData() {
-        return this.getCurrentActiveSheetData()?.columnData || {};
+    getColumnManager() {
+        return this.getCurrentActiveSheetData()?.columnManager || {};
     }
 
     isCell() {

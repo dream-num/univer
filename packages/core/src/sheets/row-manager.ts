@@ -246,7 +246,7 @@ export class RowManager {
      * @returns {number} row count
      */
     getSize(): number {
-        return getArrayLength(this._rowData);
+        return getArrayLength(this._rowData) - 1;
     }
 
     setCustomMetadata(index: number, custom: CustomData | undefined) {

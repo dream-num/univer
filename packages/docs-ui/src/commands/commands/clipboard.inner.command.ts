@@ -30,6 +30,7 @@ import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from
 import {
     BuildTextUtils,
     CommandType,
+    generateRandomId,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -155,7 +156,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             if (hasTable) {
                 for (const t of cloneBody.tables!) {
                     const { tableId: oldTableId } = t;
-                    const tableId = Tools.generateRandomId(6);
+                    const tableId = generateRandomId(6);
 
                     t.tableId = tableId;
 
@@ -174,7 +175,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 for (const block of cloneBody.customBlocks!) {
                     const { blockId } = block;
 
-                    const drawingId = Tools.generateRandomId(6);
+                    const drawingId = generateRandomId(6);
 
                     block.blockId = drawingId;
 

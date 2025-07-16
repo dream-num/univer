@@ -15,13 +15,10 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-
+import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
 import {
     CommandType,
+    generateRandomId,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -57,7 +54,7 @@ export const CopySheetCommand: ICommand = {
         const { workbook, worksheet, unitId, subUnitId } = target;
         const config = Tools.deepClone(worksheet.getConfig());
         config.name = getCopyUniqueSheetName(workbook, localeService, config.name);
-        config.id = Tools.generateRandomId();
+        config.id = generateRandomId();
         const sheetIndex = workbook.getSheetIndex(worksheet);
 
         const insertSheetMutationParams: IInsertSheetMutationParams = {

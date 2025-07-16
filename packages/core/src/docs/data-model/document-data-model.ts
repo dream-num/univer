@@ -20,8 +20,7 @@ import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
-import { Tools } from '../../shared/tools';
-
+import { generateRandomId, Tools } from '../../shared/tools';
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
@@ -246,7 +245,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
         const UNIT_ID_LENGTH = 6;
 
-        this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
+        this._unitId = this.snapshot.id ?? generateRandomId(UNIT_ID_LENGTH);
 
         this._initializeHeaderFooterModel();
         this._name$.next(this.snapshot.title ?? '');

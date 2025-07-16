@@ -25,6 +25,7 @@ import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
+import { generateRandomId } from '../shared/tools';
 import { DEFAULT_STYLES } from '../types/const';
 import { CellValueType } from '../types/enum';
 import { ColumnManager } from './column-manager';
@@ -98,7 +99,7 @@ export class Worksheet {
         this._snapshot = mergeWorksheetSnapshotWithDefault(snapshot);
 
         const { columnData, rowData, cellData } = this._snapshot;
-        this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
+        this._sheetId = this._snapshot.id ?? generateRandomId(6);
         this._cellData = new ObjectMatrix<Nullable<ICellData>>(cellData as IObjectMatrixPrimitiveType<Nullable<ICellData>>);
 
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet is constructed.

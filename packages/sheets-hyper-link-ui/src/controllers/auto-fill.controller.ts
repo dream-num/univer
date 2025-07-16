@@ -16,7 +16,7 @@
 
 import type { IMutationInfo } from '@univerjs/core';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
-import { Disposable, Inject, Range, Rectangle, Tools } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, Range, Rectangle } from '@univerjs/core';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
@@ -87,7 +87,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
                         targetRange
                     );
                     const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
-                    const id = Tools.generateRandomId();
+                    const id = generateRandomId();
                     const currentLink = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, targetRow, targetCol);
                     if (currentLink) {
                         redos.push({

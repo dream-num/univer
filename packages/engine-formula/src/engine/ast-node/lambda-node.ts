@@ -16,8 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { LambdaPrivacyVarType } from './base-ast-node';
-
-import { Inject, Tools } from '@univerjs/core';
+import { generateRandomId, Inject } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
@@ -120,7 +119,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         }
 
         // const lambdaId = nanoid(8);
-        const lambdaId = Tools.generateRandomId(8);
+        const lambdaId = generateRandomId(8);
 
         // const lambdaRuntime = parserDataLoader.getLambdaRuntime();
         const currentLambdaPrivacyVar = new Map<string, Nullable<BaseAstNode>>();

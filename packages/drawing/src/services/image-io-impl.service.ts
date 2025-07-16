@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
-import { Tools } from '@univerjs/core';
+import { generateRandomId } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE } from '../basics/config';
 import { ImageSourceType, ImageUploadStatusType } from './image-io.service';
@@ -77,7 +77,7 @@ export class ImageIoService implements IImageIoService {
                     return;
                 }
 
-                const imageId = Tools.generateRandomId(6);
+                const imageId = generateRandomId(6);
                 resolve({
                     imageId,
                     imageSourceType: ImageSourceType.BASE64,

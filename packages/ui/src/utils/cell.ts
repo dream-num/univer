@@ -24,7 +24,7 @@ import type {
     ITextDecoration,
     ITextRun,
 } from '@univerjs/core';
-import { BaselineOffset, BorderStyleTypes, ColorKit, getBorderStyleType, Tools } from '@univerjs/core';
+import { BaselineOffset, BorderStyleTypes, ColorKit, generateRandomId, getBorderStyleType, Tools } from '@univerjs/core';
 import { ptToPx } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
@@ -83,7 +83,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
             const length = item.length;
             ed += length;
             st = ed - length;
-            const sId = Tools.generateRandomId(6);
+            const sId = generateRandomId(6);
 
             textRuns.push({
                 sId,
@@ -121,9 +121,8 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
         });
     }
 
-    const blockId = Tools.generateRandomId(6);
     const p: IDocumentData = {
-        id: Tools.generateRandomId(6),
+        id: generateRandomId(6),
         body: {
             dataStream,
             textRuns,

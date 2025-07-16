@@ -15,13 +15,13 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { LRUMap, Tools } from '@univerjs/core';
+import { generateRandomId, LRUMap } from '@univerjs/core';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;
 
 export function genId() {
-    return Tools.generateRandomId(ID_LENGTH);
+    return generateRandomId(ID_LENGTH);
 }
 
 export function extractId(html: string) {

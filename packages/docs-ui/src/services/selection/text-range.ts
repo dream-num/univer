@@ -17,7 +17,7 @@
 import type { ITextRange, Nullable } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonGlyph, INodePosition, IPoint, ISuccinctDocRangeParam, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
-import { BooleanNumber, COLORS, DOC_RANGE_TYPE, generateRandomId, RANGE_DIRECTION, Tools } from '@univerjs/core';
+import { BooleanNumber, COLORS, DOC_RANGE_TYPE, generateRandomId, RANGE_DIRECTION } from '@univerjs/core';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';
 import {
     compareNodePosition,
@@ -422,7 +422,7 @@ export class TextRange implements IDocRange {
         }
 
         const OPACITY = 0.3;
-        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
+        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + generateRandomId(ID_LENGTH), {
             pointsGroup,
             fill: this.style?.fill || getColor(COLORS.black, OPACITY),
             left,

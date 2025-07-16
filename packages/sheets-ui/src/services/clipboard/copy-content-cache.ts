@@ -18,7 +18,7 @@ import type { Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
-import { LRUMap, Tools } from '@univerjs/core';
+import { generateRandomId, LRUMap } from '@univerjs/core';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;
@@ -32,7 +32,7 @@ export interface ICopyContentCacheData {
 }
 
 export function genId() {
-    return Tools.generateRandomId(ID_LENGTH);
+    return generateRandomId(ID_LENGTH);
 }
 
 export function extractId(html: string) {

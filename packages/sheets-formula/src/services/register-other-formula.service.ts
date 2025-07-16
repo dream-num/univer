@@ -18,7 +18,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
-import { Disposable, ICommandService, Inject, LifecycleService, ObjectMatrix, Tools } from '@univerjs/core';
+import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
@@ -73,7 +73,7 @@ export class RegisterOtherFormulaService extends Disposable {
     }
 
     private _createFormulaId(unitId: string, subUnitId: string) {
-        return `formula.${unitId}_${subUnitId}_${Tools.generateRandomId(8)}`;
+        return `formula.${unitId}_${subUnitId}_${generateRandomId(8)}`;
     }
 
     private _initFormulaRegister() {

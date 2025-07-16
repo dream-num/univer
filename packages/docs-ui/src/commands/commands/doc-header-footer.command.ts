@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
+import { BooleanNumber, CommandType, generateRandomId, ICommandService, IUniverInstanceService, JSONX } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';
@@ -57,7 +57,7 @@ function getEmptyHeaderFooterBody(): IDocumentBody {
 function createHeaderFooterAction(segmentId: string, createType: HeaderFooterType, documentStyle: IHeaderFooterProps, actions: JSONXActions) {
     const jsonX = JSONX.getInstance();
     const ID_LEN = 6;
-    const firstSegmentId = segmentId ?? Tools.generateRandomId(ID_LEN);
+    const firstSegmentId = segmentId ?? generateRandomId(ID_LEN);
     const isHeader = createType === HeaderFooterType.DEFAULT_HEADER || createType === HeaderFooterType.FIRST_PAGE_HEADER || createType === HeaderFooterType.EVEN_PAGE_HEADER;
     const insertAction = jsonX.insertOp([isHeader ? 'headers' : 'footers', firstSegmentId], {
         [isHeader ? 'headerId' : 'footerId']: firstSegmentId,
@@ -67,7 +67,7 @@ function createHeaderFooterAction(segmentId: string, createType: HeaderFooterTyp
     actions!.push(insertAction!);
 
     // Also need to create an empty footer if you create a header, and vice versa. They  are always created in pairs.
-    const secondSegmentId = Tools.generateRandomId(ID_LEN);
+    const secondSegmentId = generateRandomId(ID_LEN);
     const insertPairAction = jsonX.insertOp([isHeader ? 'footers' : 'headers', secondSegmentId], {
         [isHeader ? 'footerId' : 'headerId']: secondSegmentId,
         body: getEmptyHeaderFooterBody(),

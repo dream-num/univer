@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICellData, ICommand, IRange } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
-import { CommandType, ICommandService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CommandType, generateRandomId, ICommandService, ObjectMatrix } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 
 export interface IInsertFunction {
@@ -56,7 +56,7 @@ export const InsertFunctionCommand: ICommand = {
         list.forEach((item) => {
             const { range, primary, formula } = item;
             const { row, column } = primary;
-            const formulaId = Tools.generateRandomId(6);
+            const formulaId = generateRandomId(6);
             cellMatrix.setValue(row, column, {
                 f: formula,
                 si: formulaId,

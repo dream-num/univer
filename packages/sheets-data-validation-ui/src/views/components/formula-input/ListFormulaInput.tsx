@@ -17,7 +17,7 @@
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import { DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
@@ -210,7 +210,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             label,
             color: strColors[i] || DROP_DOWN_DEFAULT_COLOR,
             isRef: false,
-            id: Tools.generateRandomId(4),
+            id: generateRandomId(4),
         }));
     });
 
@@ -261,7 +261,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 label: '',
                 color: DROP_DOWN_DEFAULT_COLOR,
                 isRef: false,
-                id: Tools.generateRandomId(4),
+                id: generateRandomId(4),
             },
         ]);
     };

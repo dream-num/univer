@@ -50,9 +50,6 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             return color;
         }
 
-        // TODO: if the color is background color from _themeService: do not invert it.
-        // Or maybe there should be a whitelist.
-
         if (this._cache.has(color)) {
             return this._cache.get(color)!;
         }

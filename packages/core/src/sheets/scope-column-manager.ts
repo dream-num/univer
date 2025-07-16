@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IObjectArrayPrimitiveType } from '../shared';
 import type { IColumnData, IScopeColumnDataInfo } from './typedef';
 
 //the first index is the index from left which elements is changed, the second index is the index from right which elements is changed
@@ -444,4 +445,70 @@ export class ScopeColumnManger {
         }
         return col;
     }
+}
+
+/**
+ * This function is used to convert the column data to scope column data info.
+ * @param colDatas The key value pair of column data, where the key is the column index and the value is the column data.
+ * @returns {IScopeColumnDataInfo[]} scopeColumnData
+ * @example
+ * ```typescript
+ * const colDatas = {
+ *   0: { w: 100, hd: 0, s: 'A' },
+ *   1: { w: 200, hd: 0, s: 'B' },
+ *   2: { w: 300, hd: 0, s: 'C' },
+ * };
+ * const scopeColumnData = transColumnDataToScopeColumnDataInfo(colDatas);
+ * // scopeColumnData will be:
+ * // [
+ * //   { s: 0, e: 0, d: { w: 100, hd: 0, s: 'A' } },
+ * //   { s: 1, e: 1, d: { w: 200, hd: 0, s: 'B' } },
+ * //   { s: 2, e: 2, d: { w: 300, hd: 0, s: 'C' } },
+ * // ]
+ *
+ * const colDataCanMerge = {
+ *   0: { w: 100, hd: 0, s: 'A' },
+ *   1: { w: 100, hd: 0, s: 'A' },
+ *   2: { w: 300, hd: 0, s: 'A' },
+ *   3: { w: 400, hd: 0, s: 'B' },
+ *   4: { w: 400, hd: 0, s: 'B' },
+ * };
+ * const scopeColumnDataCanMerge = transColumnDataToScopeColumnDataInfo(colDataCanMerge);
+ * // scopeColumnDataCanMerge will be:
+ * // [
+ * //   { s: 0, e: 1, d: { w: 100, hd: 0, s: 'A' } },
+ * //   { s: 2, e: 2, d: { w: 300, hd: 0, s: 'A' } },
+ * //   { s: 3, e: 4, d: { w: 400, hd: 0, s: 'B' } },
+ * // ]
+ * ```
+ */
+export function transColumnDataToScopeColumnDataInfo(
+    colDatas: IObjectArrayPrimitiveType<Partial<IColumnData>>
+): IScopeColumnDataInfo[] {
+    const scopeColumnData: IScopeColumnDataInfo[] = [];
+    // by default, all keys are number like string, it will be sorted in V8 engine, so we no need sort
+    const cols = Object.keys(colDatas);
+    for (const col of cols) {
+        const colIndex = Number.parseInt(col, 10);
+        const colData = colDatas[colIndex] as IColumnData;
+
+        if (colData) {
+            scopeColumnData.push({
+                s: colIndex,
+                e: colIndex,
+                d: ScopeColumnManger.formatColumnData(colData),
+            });
+        }
+    }
+    for (let i = scopeColumnData.length - 1; i > 0; i--) {
+        const current = scopeColumnData[i];
+        const prev = scopeColumnData[i - 1];
+
+        if (prev.e + 1 === current.s && ScopeColumnManger.isDataEqual(prev.d, current.d)) {
+            // Merge the previous and current items
+            prev.e = current.e;
+            scopeColumnData.splice(i, 1); // Remove the current item after merging
+        }
+    }
+    return scopeColumnData;
 }

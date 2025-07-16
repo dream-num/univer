@@ -16,7 +16,7 @@
 
 import type { IColumnData, IScopeColumnDataInfo } from '../typedef';
 import { describe, expect, it } from 'vitest';
-import { ScopeColumnManger } from '../scope-column-manager';
+import { ScopeColumnManger, transColumnDataToScopeColumnDataInfo } from '../scope-column-manager';
 
 describe('ScopeColumnManger - addOrUpdateScopeDataByCol', () => {
     it('should add a new scope when the column does not exist', () => {
@@ -444,6 +444,145 @@ describe('ScopeColumnManger - setScopeDataRange', () => {
 
         expect(manager.data).toEqual([
             { s: 1, e: 5, d: { w: 80, hd: 1 } },
+        ]);
+    });
+});
+
+// transColumnDataToScopeColumnDataInfo test
+describe('transColumnDataToScopeColumnDataInfo', () => {
+    it('should convert single column data to scope column data info', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0, s: 'A' },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 0, d: { w: 100, hd: 0, s: 'A' } },
+        ]);
+    });
+
+    it('should convert multiple columns with no merge', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0, s: 'A' },
+            1: { w: 200, hd: 0, s: 'B' },
+            2: { w: 300, hd: 0, s: 'C' },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 0, d: { w: 100, hd: 0, s: 'A' } },
+            { s: 1, e: 1, d: { w: 200, hd: 0, s: 'B' } },
+            { s: 2, e: 2, d: { w: 300, hd: 0, s: 'C' } },
+        ]);
+    });
+
+    it('should merge adjacent columns with the same data', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0, s: 'A' },
+            1: { w: 100, hd: 0, s: 'A' },
+            2: { w: 300, hd: 0, s: 'C' },
+            3: { w: 400, hd: 0, s: 'B' },
+            4: { w: 400, hd: 0, s: 'B' },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 1, d: { w: 100, hd: 0, s: 'A' } },
+            { s: 2, e: 2, d: { w: 300, hd: 0, s: 'C' } },
+            { s: 3, e: 4, d: { w: 400, hd: 0, s: 'B' } },
+        ]);
+    });
+
+    it('should handle columns with undefined values gracefully', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0 },
+            1: { w: undefined, hd: 0 },
+            2: { w: 300, hd: undefined },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 0, d: { w: 100, hd: 0 } },
+            { s: 1, e: 1, d: { hd: 0 } },
+            { s: 2, e: 2, d: { w: 300 } },
+        ]);
+    });
+
+    it('should handle empty input gracefully', () => {
+        const colDatas = {};
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([]);
+    });
+
+    it('should merge columns with custom data', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0, custom: { color: 'red' } },
+            1: { w: 100, hd: 0, custom: { color: 'red' } },
+            2: { w: 300, hd: 0, custom: { color: 'blue' } },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 1, d: { w: 100, hd: 0, custom: { color: 'red' } } },
+            { s: 2, e: 2, d: { w: 300, hd: 0, custom: { color: 'blue' } } },
+        ]);
+    });
+
+    it('should not merge columns with different custom data', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0, custom: { color: 'red' } },
+            1: { w: 100, hd: 0, custom: { color: 'blue' } },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 0, d: { w: 100, hd: 0, custom: { color: 'red' } } },
+            { s: 1, e: 1, d: { w: 100, hd: 0, custom: { color: 'blue' } } },
+        ]);
+    });
+
+    it('should handle columns with mixed data types', () => {
+        const colDatas = {
+            0: { w: 100, hd: 0, s: 'A' },
+            1: { w: 100, hd: 0, s: 'A' },
+            2: { w: 300, hd: 1, s: 'B' },
+            3: { w: 400, hd: 0, s: 'C' },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 0, e: 1, d: { w: 100, hd: 0, s: 'A' } },
+            { s: 2, e: 2, d: { w: 300, hd: 1, s: 'B' } },
+            { s: 3, e: 3, d: { w: 400, hd: 0, s: 'C' } },
+        ]);
+    });
+
+    it('should merge adjacent columns with the same data test', () => {
+        const colDatas = {
+            1: { w: 100, hd: 0, s: 'A' },
+            3: { w: 100, hd: 0, s: 'A' },
+            4: { w: 300, hd: 0, s: 'C' },
+            5: { w: 300, hd: 0, s: 'C' },
+            7: { w: 300, hd: 0, s: 'C' },
+            8: { w: 300, hd: 0, s: 'C' },
+        };
+
+        const result = transColumnDataToScopeColumnDataInfo(colDatas);
+
+        expect(result).toEqual([
+            { s: 1, e: 1, d: { w: 100, hd: 0, s: 'A' } },
+            { s: 3, e: 3, d: { w: 100, hd: 0, s: 'A' } },
+            { s: 4, e: 5, d: { w: 300, hd: 0, s: 'C' } },
+            { s: 7, e: 8, d: { w: 300, hd: 0, s: 'C' } },
         ]);
     });
 });

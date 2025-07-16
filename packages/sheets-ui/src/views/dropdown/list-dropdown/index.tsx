@@ -20,11 +20,23 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
 import type { IBaseDropdownProps } from '../type';
-import { BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import {
+    BuildTextUtils,
+    ColorKit,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    SheetPermissionCheckController,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+} from '@univerjs/sheets';
 import { RectPopup, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
@@ -106,6 +118,9 @@ const SelectList = (props: ISelectListProps) => {
                     };
 
                     const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
+
+                    const isDark = new ColorKit(item.color).isDark();
+
                     return (
                         <div
                             key={i}
@@ -118,10 +133,14 @@ const SelectList = (props: ISelectListProps) => {
                             onClick={handleClick}
                         >
                             <div
-                                className={`
+                                className={clsx(`
                                   univer-h-4 univer-w-fit univer-flex-[0_1_auto] univer-overflow-hidden univer-truncate
-                                  univer-whitespace-nowrap univer-rounded-lg univer-px-1 univer-py-0 univer-text-xs
-                                `}
+                                  univer-whitespace-nowrap univer-rounded-full univer-px-1.5 univer-py-0.5
+                                  univer-text-xs
+                                `, {
+                                    'univer-text-gray-900': !isDark,
+                                    'univer-text-white': isDark,
+                                })}
                                 style={{ background: item.color }}
                             >
                                 {lowerFilter && item.label.toLowerCase().includes(lowerFilter)

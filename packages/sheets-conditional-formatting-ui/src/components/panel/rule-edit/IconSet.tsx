@@ -79,6 +79,14 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                     <div className="univer-w-full">
                         <FormulaEditor
                             ref={formulaEditorRef}
+                            className={clsx(`
+                              univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
+                              univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
+                              hover:univer-border-primary-600
+                              dark:!univer-bg-gray-700 dark:!univer-text-white
+                              [&>div:first-child]:univer-px-2.5
+                              [&>div]:univer-h-5 [&>div]:univer-ring-transparent
+                            `, borderClassName)}
                             initValue={String(props.value) as any}
                             unitId={unitId}
                             subUnitId={subUnitId}
@@ -283,19 +291,17 @@ const IconSetRuleEdit = (props: {
                                           dark:!univer-text-gray-200
                                         `}
                                     >
-                                        (
                                         {localeService.t('sheet.cf.iconSet.when')}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
-                                        )
                                     </span>
                                 )}
 
                             </>
                         </div>
                     </div>
-                    <div className="univer-mt-3 univer-flex univer-items-center univer-justify-between univer-gap-4">
+                    <div className="univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4">
                         <div className="univer-flex univer-items-center">
                             <Dropdown
                                 overlay={(
@@ -315,11 +321,7 @@ const IconSetRuleEdit = (props: {
                                 >
                                     {icon
                                         ? <img src={icon} className="univer-size-4" draggable={false} />
-                                        : (
-                                            <SlashIcon
-                                                className="univer-size-4"
-                                            />
-                                        )}
+                                        : <SlashIcon className="univer-size-4" />}
                                     <MoreDownIcon />
                                 </div>
                             </Dropdown>
@@ -335,7 +337,7 @@ const IconSetRuleEdit = (props: {
                             : (
                                 <div
                                     className={`
-                                      univer-mt-0 univer-w-[45%] univer-text-sm univer-text-gray-600
+                                      univer-mt-0 univer-text-sm univer-text-gray-600
                                       dark:!univer-text-gray-200
                                     `}
                                 >
@@ -354,42 +356,33 @@ const IconSetRuleEdit = (props: {
                             <>
                                 <div
                                     className={`
-                                      univer-mt-3 univer-flex univer-items-center univer-justify-between univer-gap-4
-                                      univer-text-sm univer-text-gray-600
+                                      univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4 univer-text-sm
+                                      univer-text-gray-600
                                       dark:!univer-text-gray-200
                                     `}
                                 >
-                                    <div>
-                                        {localeService.t('sheet.cf.iconSet.type')}
-                                    </div>
-                                    <div>
-                                        {localeService.t('sheet.cf.iconSet.value')}
-                                    </div>
+                                    <div>{localeService.t('sheet.cf.iconSet.type')}</div>
+                                    <div>{localeService.t('sheet.cf.iconSet.value')}</div>
                                 </div>
                                 <div
-                                    className={`
-                                      univer-mt-3 univer-flex univer-items-center univer-justify-between univer-gap-4
-                                    `}
+                                    className="univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4"
                                 >
                                     <Select
-                                        className="univer-flex-shrink-0"
                                         options={valueTypeOptions}
                                         value={item.value.type}
                                         onChange={(v) => {
                                             handleValueTypeChange(v as CFNumberOperator, index);
                                         }}
                                     />
-                                    <div>
-                                        <TextInput
-                                            id={index}
-                                            type={item.value.type}
-                                            error={error}
-                                            value={item.value.value || ''}
-                                            onChange={(v) => {
-                                                handleValueValueChange(v, index);
-                                            }}
-                                        />
-                                    </div>
+                                    <TextInput
+                                        id={index}
+                                        type={item.value.type}
+                                        error={error}
+                                        value={item.value.value || ''}
+                                        onChange={(v) => {
+                                            handleValueValueChange(v, index);
+                                        }}
+                                    />
                                 </div>
                             </>
                         )

@@ -98,7 +98,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
     injector.get(LocaleService).load({ zhCN, enUS });
 
     univer.registerPlugin(TestPlugin);
-    const doc = univer.createUniverDoc(documentConfig || getTestDocumentDataDemo());
+    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, documentConfig ?? getTestDocumentDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

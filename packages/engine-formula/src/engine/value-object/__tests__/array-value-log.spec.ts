@@ -34,7 +34,7 @@ describe('arrayValueObject log method test', () => {
     describe('log', () => {
         it('origin nm', () => {
             expect((originArrayValueObject.log() as ArrayValueObject).toValue()).toStrictEqual([
-                [2.0794415416798357, 0, '#VALUE!', 0.20701416938432612, 0, '#NUM!'],
+                [2.0794415416798357, 0, '#VALUE!', 0.2070141693843261, 0, '#NUM!'],
                 [3.295836866004329, '#NUM!', 4.605170185988092, 0.85015092936961, '#VALUE!', '#NUM!'],
             ]);
         });

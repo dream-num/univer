@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { Dependency, IDisposable, IWorkbookData } from '@univerjs/core';
+import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import { DisposableCollection, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
@@ -587,7 +587,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA_DEMO);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
@@ -597,7 +597,6 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
     // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
     // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
-    const mockSheetSkService = new SheetSkeletonService(injector);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId: 'test',

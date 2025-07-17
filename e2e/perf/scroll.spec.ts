@@ -143,7 +143,7 @@ const createTest = (title: string, telemetryName: string, sheetData: IJsonObject
         await test.step('create univer', async () => {
             await page.evaluate(({ sheetData, window }: any) => {
                 window.E2EControllerAPI.disposeCurrSheetUnit();
-                window.univer.createUniverSheet(sheetData);
+                window.univerAPI.createWorkbook(sheetData);
             }, { sheetData, window: windowOfPage });
             // wait for canvas has data
             await page.waitForTimeout(2000);

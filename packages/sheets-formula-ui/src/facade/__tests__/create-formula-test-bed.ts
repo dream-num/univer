@@ -122,7 +122,7 @@ export function createFormulaTestBed(workbookData?: IWorkbookData, dependencies?
     injector.get(LocaleService).load({ zhCN, enUS });
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

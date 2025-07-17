@@ -17,7 +17,6 @@
 import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { FilterColumn, generateFilterFn } from '../filter-model';
 import { CustomFilterOperator } from '../types';
 
@@ -224,7 +223,7 @@ function createFilterModelTestBed(workbookData: IWorkbookData) {
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    const sheet = univer.createUniverSheet(workbookData);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

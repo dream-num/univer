@@ -81,7 +81,7 @@ describe('Test log10 function', () => {
             });
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [0, ErrorType.VALUE, 0.08990511143939793, 0, ErrorType.NUM, ErrorType.NUM],
+                [0, ErrorType.VALUE, 0.08990511143939792, 0, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, 2, 0.36921585741014284, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });

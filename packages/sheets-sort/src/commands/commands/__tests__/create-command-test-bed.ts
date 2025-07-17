@@ -155,7 +155,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(Tools.deepClone(workbookData || TEST_WORKBOOK_DATA_DEMO));
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(workbookData || TEST_WORKBOOK_DATA_DEMO));
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

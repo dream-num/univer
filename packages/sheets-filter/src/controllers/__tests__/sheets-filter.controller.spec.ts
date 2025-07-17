@@ -145,7 +145,7 @@ function createFilterControllerTestBed(workbookData?: IWorkbookData) {
 
     univer.registerPlugin(SheetsFilterTestPlugin);
 
-    const sheet = univer.createUniverSheet(workbookData || testWorkbookDataWithFilterFactory());
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData ?? testWorkbookDataWithFilterFactory());
 
     const sheetsFilterService = get(SheetsFilterService);
     const commandService = get(ICommandService);

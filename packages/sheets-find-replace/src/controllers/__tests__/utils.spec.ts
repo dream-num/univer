@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Worksheet } from '@univerjs/core';
-
+import type { Dependency, IWorkbookData, Workbook, Worksheet } from '@univerjs/core';
 import type { IFindQuery } from '@univerjs/find-replace';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { hitCell } from '../sheet-find-replace.controller';
@@ -310,7 +309,7 @@ function createTestBed(dependencies?: Dependency[]) {
 
     dependencies?.forEach((d) => injector.add(d));
 
-    const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, TEST_WORKBOOK_DATA);
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit(TEST_WORKBOOK_DATA.id);
 

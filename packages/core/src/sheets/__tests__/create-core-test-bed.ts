@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Univer } from '../../univer';
+import type { IWorkbookData } from '../typedef';
+import type { Workbook } from '../workbook';
+import { UniverInstanceType } from '../../common/unit';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
-import type { IWorkbookData } from '../typedef';
+import { Univer } from '../../univer';
 
 const testWorkbookDataFactory: () => IWorkbookData = () => ({
     id: 'test',
@@ -50,7 +52,7 @@ export function createCoreTestBed(workbookData?: IWorkbookData) {
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    const sheet = univer.createUniverSheet(workbookData || testWorkbookDataFactory());
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || testWorkbookDataFactory());
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit(workbookData?.id ?? 'test');

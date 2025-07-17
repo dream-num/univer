@@ -33,7 +33,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
-
 import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
@@ -134,7 +133,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
 
     univer.registerPlugin(TestPlugin);
 
-    const doc = univer.createUniverDoc(docData || TEST_DOCUMENT_DATA_EN);
+    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, docData || TEST_DOCUMENT_DATA_EN);
 
     const univerInstanceService = get(IUniverInstanceService);
 

@@ -23,7 +23,7 @@ import { createUniverOnNode } from '../sdk';
 
 async function run(): Promise<void> {
     const API = FUniver.newAPI(createUniverOnNode());
-    const univerSheet = API.createUniverSheet({});
+    const univerSheet = API.createWorkbook({});
 
     const a1 = univerSheet.getActiveSheet().getRange('A1');
     await a1.setValue({ v: 123 });

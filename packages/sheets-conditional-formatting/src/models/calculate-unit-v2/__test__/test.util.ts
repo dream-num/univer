@@ -17,18 +17,14 @@
 import type { Dependency, IWorkbookData } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
-import {
-    SheetInterceptorService,
-} from '@univerjs/sheets';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import { AddConditionalRuleMutation } from '../../../commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from '../../../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingFormulaMarkDirty } from '../../../commands/mutations/formula-mark-dirty.mutation';
 import { MoveConditionalRuleMutation } from '../../../commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from '../../../commands/mutations/set-conditional-rule.mutation';
-
 import { ConditionalFormattingRuleModel } from '../../../models/conditional-formatting-rule-model';
 import { ConditionalFormattingFormulaService } from '../../../services/conditional-formatting-formula.service';
-
 import { ConditionalFormattingService } from '../../../services/conditional-formatting.service';
 import { ConditionalFormattingViewModel } from '../../conditional-formatting-view-model';
 
@@ -89,7 +85,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     univer.registerPlugin(TestPlugin);
 
     const workbookJson = TEST_WORKBOOK_DATA_DEMO();
-    const workbook = univer.createUniverSheet(workbookJson);
+    const workbook = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookJson);
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     const commandService = injector.get(ICommandService);

@@ -15,11 +15,10 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
-import { And } from '../index';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
+import { And } from '../index';
 
 describe('Test and function', () => {
     const testFunction = new And(FUNCTION_NAMES_LOGICAL.AND);

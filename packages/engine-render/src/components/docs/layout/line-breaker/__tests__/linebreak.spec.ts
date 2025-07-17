@@ -18,7 +18,6 @@
 import fs from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-
 import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
 import { LineBreaker } from '../line-breaker';
 

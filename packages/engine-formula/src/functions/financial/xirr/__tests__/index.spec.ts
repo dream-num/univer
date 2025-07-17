@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Xirr } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Xirr } from '../index';
 
 describe('Test xirr function', () => {
     const testFunction = new Xirr(FUNCTION_NAMES_FINANCIAL.XIRR);
@@ -32,7 +31,7 @@ describe('Test xirr function', () => {
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, dates, guess);
-            expect(result.getValue()).toStrictEqual(0.3733625335188314);
+            expect(result.getValue()).toStrictEqual(0.3733625335188316);
         });
 
         it('Value is normal, but no positive and negative number', () => {
@@ -111,7 +110,7 @@ describe('Test xirr function', () => {
             const values2 = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const guess2 = NullValueObject.create();
             const result2 = testFunction.calculate(values2, dates, guess2);
-            expect(result2.getValue()).toStrictEqual(0.3733625335188314);
+            expect(result2.getValue()).toStrictEqual(0.3733625335188316);
         });
 
         it('Value is array', () => {

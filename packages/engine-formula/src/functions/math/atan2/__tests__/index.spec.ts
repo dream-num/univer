@@ -143,7 +143,11 @@ describe('Test atan2 function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(xNum, yNum);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.7853981633974483, ErrorType.VALUE, 0.8881737743776796, 0.7853981633974483, 0, 0], [0, 1.550798992821746, 0.8635794970038352, ErrorType.VALUE, -0.982793723247329, ErrorType.NAME], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [0.7853981633974483, ErrorType.VALUE, 0.8881737743776796, 0.7853981633974483, 0, 0],
+                [0, 1.550798992821746, 0.8635794970038352, ErrorType.VALUE, -0.982793723247329, ErrorType.NAME],
+                [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+            ]);
         });
     });
 });

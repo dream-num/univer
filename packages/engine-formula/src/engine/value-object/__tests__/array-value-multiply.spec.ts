@@ -15,10 +15,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
-import { ErrorType } from '../../../basics/error-type';
 
 describe('ArrayValueObject multiply method test', () => {
     describe('Multiply', () => {

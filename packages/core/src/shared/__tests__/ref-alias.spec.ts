@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { RefAlias } from '../ref-alias';
 
 const createInstance = () =>

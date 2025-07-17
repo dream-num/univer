@@ -86,7 +86,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

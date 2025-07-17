@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Oddfyield } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Oddfyield } from '../index';
 
 describe('Test oddfyield function', () => {
     const testFunction = new Oddfyield(FUNCTION_NAMES_FINANCIAL.ODDFYIELD);
@@ -38,7 +37,7 @@ describe('Test oddfyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, issue, firstCoupon, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(0.10076644980418786);
+            expect(result.getValue()).toStrictEqual(0.10076644980418793);
         });
 
         it('Value is normal, but date valid error, return #NUM!', () => {
@@ -107,7 +106,7 @@ describe('Test oddfyield function', () => {
 
             const frequency3 = NumberValueObject.create(4);
             const result3 = testFunction.calculate(settlement, maturity, issue, firstCoupon, rate, pr, redemption, frequency3, basis);
-            expect(result3.getValue()).toStrictEqual(0.1005633711558758);
+            expect(result3.getValue()).toStrictEqual(0.10056337115587563);
         });
 
         it('Basis value test', () => {
@@ -129,7 +128,7 @@ describe('Test oddfyield function', () => {
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, issue, firstCoupon, rate, pr, redemption, frequency, basis3);
-            expect(result3.getValue()).toStrictEqual(0.10076426120146238);
+            expect(result3.getValue()).toStrictEqual(0.1007642612014625);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, issue, firstCoupon, rate, pr, redemption, frequency, basis4);

@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -61,10 +60,10 @@ describe('Test logest function', () => {
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result)).toStrictEqual([
                 [1.5784365299976528, 0.11391384443661104],
-                [0.06522558747032602, 0.4301922951970874],
-                [0.9607604883077162, 0.1458488474560075],
-                [48.96903385760741, 2],
-                [1.0416637206477855, 0.0425437726084915],
+                [0.06522558747032604, 0.4301922951970876],
+                [0.960760488307716, 0.1458488474560076],
+                [48.96903385760735, 2],
+                [1.0416637206477852, 0.04254377260849154],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
@@ -149,10 +148,10 @@ describe('Test logest function', () => {
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result)).toStrictEqual([
                 [1.0022562631143823, 0.9559927432167645, 1.3220173520215017, 0.9979673263194307, 1251594.7569785423],
-                [0.01111894485530442, 0.4652432570026924, 0.3493511018583655, 0.004803045273340239, 10.832016475252525],
-                [0.12342791182815234, 0.8485606231387034, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [0.21121122864903766, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [0.6083349157737983, 4.320330786849268, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.011118944855304421, 0.46524325700269253, 0.3493511018583656, 0.004803045273340241, 10.832016475252527],
+                [0.12342791182815198, 0.8485606231387036, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.21121122864903694, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.6083349157737965, 4.3203307868492695, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);

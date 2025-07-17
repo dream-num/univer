@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { describe, expect, it } from 'vitest';
-
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Lookup } from '../index';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";

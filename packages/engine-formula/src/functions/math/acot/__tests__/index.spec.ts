@@ -80,21 +80,10 @@ describe('Test acot function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[
-                0.7853981633974483,
-                ErrorType.VALUE,
-                0.682622552417217,
-                0.7853981633974483,
-                1.5707963267948966,
-                1.5707963267948966,
-            ], [
-                1.5707963267948966,
-                0.009999666686665238,
-                0.40385979490737667,
-                ErrorType.VALUE,
-                2.819842099193151,
-                ErrorType.NAME,
-            ]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [0.7853981633974483, ErrorType.VALUE, 0.682622552417217, 0.7853981633974483, 1.5707963267948966, 1.5707963267948966],
+                [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, ErrorType.VALUE, 2.819842099193151, ErrorType.NAME],
+            ]);
         });
     });
 });

@@ -15,10 +15,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../../basics/error-type';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { Na } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test na function', () => {
     const testFunction = new Na(FUNCTION_NAMES_INFORMATION.NA);

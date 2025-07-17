@@ -15,10 +15,40 @@
  */
 
 import type { Dependency, IWorkbookData, LocaleType } from '@univerjs/core';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type {
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    IRemoveRowColCommandParams,
+    IRemoveSheetCommandParams,
+    ISetSelectionsOperationParams,
+} from '@univerjs/sheets';
 import { Direction, ICommandService, Inject, Injector, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
-
-import { InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    InsertColByRangeCommand,
+    InsertColCommand,
+    InsertColMutation,
+    InsertRowByRangeCommand,
+    InsertRowCommand,
+    InsertRowMutation,
+    MoveColsCommand,
+    MoveColsMutation,
+    MoveRowsCommand,
+    MoveRowsMutation,
+    RefRangeService,
+    RemoveColByRangeCommand,
+    RemoveColCommand,
+    RemoveColMutation,
+    RemoveRowByRangeCommand,
+    RemoveRowCommand,
+    RemoveRowMutation,
+    RemoveSheetCommand,
+    RemoveSheetMutation,
+    SetSelectionsOperation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
@@ -294,7 +324,7 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
 
     univer.registerPlugin(TestPlugin);
 
-    univer.createUniverSheet(workbookData || testWorkbookDataFactory());
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || testWorkbookDataFactory());
 
     const sheetsFilterService = injector.get(SheetsFilterService);
 

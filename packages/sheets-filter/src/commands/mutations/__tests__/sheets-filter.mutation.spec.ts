@@ -111,7 +111,7 @@ function createFilterMutationTestBed(workbookData?: IWorkbookData) {
 
     univer.registerPlugin(SheetsFilterTestPlugin);
 
-    const sheet = univer.createUniverSheet(workbookData || testWorkbookDataFactory());
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || testWorkbookDataFactory());
 
     const sheetsFilterService = get(SheetsFilterService);
     const commandService = get(ICommandService);

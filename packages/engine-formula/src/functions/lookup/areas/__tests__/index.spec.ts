@@ -15,12 +15,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Areas } from '../index';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { CellReferenceObject } from '../../../../engine/reference-object/cell-reference-object';
+import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
+import { Areas } from '../index';
 
 describe('Test areas function', () => {
     const testFunction = new Areas(FUNCTION_NAMES_LOOKUP.AREAS);

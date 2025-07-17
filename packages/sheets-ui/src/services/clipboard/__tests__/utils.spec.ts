@@ -16,9 +16,7 @@
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-
 import { describe, expect, it } from 'vitest';
-
 import { getRepeatRange, mergeSetRangeValues } from '../utils';
 
 describe('test getRepeatRange', () => {

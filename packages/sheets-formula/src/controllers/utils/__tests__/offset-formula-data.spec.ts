@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { removeFormulaData } from '../offset-formula-data';
 
 describe('Utils offset formula data test', () => {

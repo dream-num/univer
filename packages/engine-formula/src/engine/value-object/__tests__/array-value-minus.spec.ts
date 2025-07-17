@@ -15,11 +15,10 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { ArrayValueObject, transformToValueObject } from '../array-value-object';
-import { NumberValueObject } from '../primitive-object';
 import { ErrorType } from '../../../basics/error-type';
 import { stripArrayValue } from '../../../functions/__tests__/create-function-test-bed';
+import { ArrayValueObject, transformToValueObject } from '../array-value-object';
+import { NumberValueObject } from '../primitive-object';
 
 describe('ArrayValueObject minus method test', () => {
     describe('Minus', () => {

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import type { Nullable } from '@univerjs/core';
-import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
-import { BooleanValueObject, NumberValueObject } from '../primitive-object';
 import type { BaseValueObject } from '../base-value-object';
-import { ErrorValueObject } from '../base-value-object';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { stripErrorMargin } from '../../utils/math-kit';
+import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
+import { ErrorValueObject } from '../base-value-object';
+import { BooleanValueObject, NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
     const originArrayValueObject = ArrayValueObject.create({

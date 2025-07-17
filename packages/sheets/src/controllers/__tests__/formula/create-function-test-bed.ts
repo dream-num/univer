@@ -242,7 +242,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookData());
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookData());
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

@@ -82,7 +82,7 @@ export const createTestBed = (defaultWorkbook?: IWorkbookData, dependencies?: De
     univer.registerPlugin(TestPlugin);
 
     const workbookJson = defaultWorkbook ?? TEST_WORKBOOK_DATA_DEMO();
-    const sheet = univer.createUniverSheet(workbookJson);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookJson);
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     const commandService = injector.get(ICommandService);

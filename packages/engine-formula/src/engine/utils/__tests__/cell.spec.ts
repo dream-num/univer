@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import type { ICellData } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { getCellValue } from '../cell';
 
 describe('Test cell', () => {

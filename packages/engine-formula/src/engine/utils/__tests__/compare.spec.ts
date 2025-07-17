@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { compareToken } from '../../../basics/token';
 import { compareWithWildcard, isMatchWildcard, isWildcard, replaceWildcard } from '../compare';
 

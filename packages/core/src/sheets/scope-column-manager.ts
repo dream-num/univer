@@ -407,6 +407,55 @@ export class ScopeColumnManger {
         return [leftChangeIndex, rightChangeIndex];
     }
 
+    insertColumns(start: number, end: number, info: IColumnData) {
+        if (this.data.length === 0) {
+            // If there is no existing data, simply add the new range
+            this.data.push({ s: start, e: end, d: info });
+            return;
+        }
+
+        const colLength = end - start + 1;
+
+        for (let i = this.data.length - 1; i >= 0; i--) {
+            const item = this.data[i];
+
+            if (item.s > start) {
+                item.s += colLength;
+                item.e += colLength;
+                continue;
+            }
+            if (item.s < start && item.e >= start) {
+                // If the item starts before the new range and ends after it, adjust the end
+
+                const rightItem = { s: start + colLength, e: item.e + colLength, d: { ...item.d } };
+                // reset the start to end
+                item.e = start - 1;
+                this.data.splice(i + 1, 0, rightItem);
+                continue;
+            }
+        }
+
+        // Add the new range if it doesn't overlap with any existing items
+        const newRange = { s: start, e: end, d: info };
+        this.data.push(newRange);
+
+        // Sort the data by the start index
+        this.data.sort((a, b) => a.s - b.s);
+
+        // Merge adjacent ranges with the same data after adjustments
+        const mergedResult: IScopeColumnDataInfo[] = [];
+        for (const item of this.data) {
+            const lastItem = mergedResult[mergedResult.length - 1];
+            if (lastItem && lastItem.e + 1 === item.s && ScopeColumnManger.isDataEqual(lastItem.d, item.d)) {
+                lastItem.e = item.e; // Merge ranges
+            } else {
+                mergedResult.push(item);
+            }
+        }
+
+        this.data = mergedResult;
+    }
+
     removeColumns(start: number, end: number) {
         if (this.data.length === 0) {
             return;

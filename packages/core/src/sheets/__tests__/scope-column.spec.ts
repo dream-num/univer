@@ -723,3 +723,77 @@ describe('ScopeColumnManger - removeColumns', () => {
         ]);
     });
 });
+
+describe('ScopeColumnManger - insertColumns', () => {
+    it('should adjust indices when range is to the right of items', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 100 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.insertColumns(8, 10, { w: 120 });
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 100 } },
+            { s: 8, e: 10, d: { w: 120 } },
+        ]);
+    });
+
+    it('should merge with overlapping ranges', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 100 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.insertColumns(4, 6, { w: 100 });
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 4, e: 6, d: { w: 100 } },
+            { s: 8, e: 10, d: { w: 100 } },
+        ]);
+    });
+
+    it('should split overlapping ranges', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 5, d: { w: 80 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.insertColumns(3, 4, { w: 100 });
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 2, d: { w: 80 } },
+            { s: 3, e: 4, d: { w: 100 } },
+            { s: 5, e: 7, d: { w: 80 } },
+        ]);
+    });
+
+    it('should handle an empty data set gracefully', () => {
+        const manager = new ScopeColumnManger([]);
+
+        manager.insertColumns(1, 5, { w: 80 });
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 5, d: { w: 80 } },
+        ]);
+    });
+
+    it('should merge adjacent ranges with the same data', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 80 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.insertColumns(4, 4, { w: 80 });
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 4, d: { w: 80 } },
+            { s: 6, e: 8, d: { w: 80 } },
+        ]);
+    });
+});

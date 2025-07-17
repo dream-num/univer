@@ -586,3 +586,140 @@ describe('transColumnDataToScopeColumnDataInfo', () => {
         ]);
     });
 });
+
+describe('ScopeColumnManger - removeColumns', () => {
+    it('should adjust indices when range is to the left of items', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 5, e: 10, d: { w: 80 } },
+            { s: 12, e: 15, d: { w: 100 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(1, 3);
+
+        expect(manager.data).toEqual([
+            { s: 2, e: 7, d: { w: 80 } },
+            { s: 9, e: 12, d: { w: 100 } },
+        ]);
+    });
+
+    it('should remove items completely contained within the range', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 5, e: 10, d: { w: 80 } },
+            { s: 12, e: 15, d: { w: 100 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(5, 10);
+
+        expect(manager.data).toEqual([
+            { s: 6, e: 9, d: { w: 100 } },
+        ]);
+    });
+
+    it('should split items partially overlapping the range', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 5, e: 15, d: { w: 80 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(7, 10);
+
+        expect(manager.data).toEqual([
+            { s: 5, e: 11, d: { w: 80 } },
+        ]);
+    });
+
+    it('should adjust indices when range is to the right of items', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 5, e: 10, d: { w: 80 } },
+            { s: 12, e: 15, d: { w: 100 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(20, 25);
+
+        expect(manager.data).toEqual(initialData);
+    });
+
+    it('should handle an empty data set gracefully', () => {
+        const manager = new ScopeColumnManger([]);
+
+        manager.removeColumns(1, 5);
+
+        expect(manager.data).toEqual([]);
+    });
+
+    it('should handle multiple overlapping ranges', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 100 } },
+            { s: 9, e: 11, d: { w: 120 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(4, 10);
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 4, e: 4, d: { w: 120 } },
+        ]);
+    });
+
+    it('should handle multiple overlapping ranges can merge', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 100 } },
+            { s: 9, e: 11, d: { w: 80 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(4, 10);
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 4, d: { w: 80 } },
+        ]);
+    });
+
+    it('should handle partial overlap at the start of a range', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 5, e: 10, d: { w: 80 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(3, 6);
+
+        expect(manager.data).toEqual([
+            { s: 3, e: 6, d: { w: 80 } },
+        ]);
+    });
+
+    it('should handle partial overlap at the end of a range', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 5, e: 10, d: { w: 80 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(8, 12);
+
+        expect(manager.data).toEqual([
+            { s: 5, e: 7, d: { w: 80 } },
+        ]);
+    });
+
+    it('should handle non-continuous ranges', () => {
+        const initialData: IScopeColumnDataInfo[] = [
+            { s: 1, e: 3, d: { w: 80 } },
+            { s: 5, e: 7, d: { w: 100 } },
+            { s: 9, e: 11, d: { w: 120 } },
+        ];
+        const manager = new ScopeColumnManger(initialData);
+
+        manager.removeColumns(2, 10);
+
+        expect(manager.data).toEqual([
+            { s: 1, e: 1, d: { w: 80 } },
+            { s: 2, e: 2, d: { w: 120 } },
+        ]);
+    });
+});

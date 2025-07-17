@@ -156,7 +156,7 @@ export class ScopeColumnManger {
             // If the data is the same, no need to update
             return;
         }
-          // If the column is already a single column scope, update the data
+        // If the column is already a single column scope, update the data
         if (existingData.s === col && existingData.e === col) {
             existingData.d = colData;
             if (!ignoreMerge) {
@@ -407,6 +407,87 @@ export class ScopeColumnManger {
         return [leftChangeIndex, rightChangeIndex];
     }
 
+    removeColumns(start: number, end: number) {
+        if (this.data.length === 0) {
+            return;
+        }
+
+        const colLength = end - start + 1;
+
+        for (let i = this.data.length - 1; i >= 0; i--) {
+            const item = this.data[i];
+
+            // Case 4: If the range is entirely to the right of the item, no changes are needed
+            // -------------item.s --------item.e--------------------------------
+            // ------------------------------------start-------------------end---
+            if (item.e < start) {
+                continue;
+            }
+
+            // Case 1: If the range is entirely to the left of the item, adjust the item's indices
+            // -------------start----------end-----------------------------------------------
+            // ------------------------------------item.s -------------------------item.e----
+            if (item.s > end) {
+                item.s -= colLength;
+                item.e -= colLength;
+                continue;
+            }
+
+            // Case 3: If the range completely contains the item, remove the item
+            // -------------start-----------------------------end-------------
+            // ---------------------item.s --------item.e---------------------
+            if (item.s >= start && item.e <= end) {
+                this.data.splice(i, 1);
+                continue;
+            }
+
+            // Case 2: If the range partially overlaps the item, adjust the item's indices
+            // -------------item.s ----------------------------------item.e---------------
+            // -----------------------start-------------------end-------------------------
+            if (item.s < start && item.e > end) {
+                const leftPart = { s: item.s, e: start - 1, d: item.d };
+                const rightPart = { s: end + 1 - colLength, e: item.e - colLength, d: item.d };
+                this.data.splice(i, 1, leftPart, rightPart);
+                continue;
+            }
+
+            // Adjust the end of the item if it partially overlaps the start of the range
+            // -------------item.s ----------------------------------item.e---------------
+            // ------------------------------------------start-------------------end------
+            if (item.s < start && item.e >= start) {
+                item.e = start - 1;
+                continue;
+            }
+
+            // Adjust the start of the item if it partially overlaps the end of the range
+            // ----------------item.s ----------------------------------item.e------------
+            //------start-------------------end-------------------------------------------
+            if (item.s < start && item.s <= end && item.e > end) {
+                item.e = end - 1;
+                continue;
+            }
+
+            if (item.s <= end && item.e > end) {
+                item.s = end + 1 - colLength;
+                item.e = item.e - colLength;
+                continue;
+            }
+        }
+
+        // Merge adjacent ranges with the same data after adjustments
+        const mergedResult: IScopeColumnDataInfo[] = [];
+        for (const item of this.data) {
+            const lastItem = mergedResult[mergedResult.length - 1];
+            if (lastItem && lastItem.e + 1 === item.s && ScopeColumnManger.isDataEqual(lastItem.d, item.d)) {
+                lastItem.e = item.e; // Merge ranges
+            } else {
+                mergedResult.push(item);
+            }
+        }
+
+        this.data = mergedResult;
+    }
+
     mergeLeftScopeDataByCol(data: IScopeColumnDataInfo[], col: number): number {
         if (data.length < 2) return -1; // No need to merge if there are less than two elements
 
@@ -444,6 +525,12 @@ export class ScopeColumnManger {
             return this.mergeRightScopeDataByCol(data, col + 1);
         }
         return col;
+    }
+}
+
+export class ColumnManager extends ScopeColumnManger {
+    constructor(data: IScopeColumnDataInfo[]) {
+        super(data);
     }
 }
 

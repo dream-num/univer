@@ -70,7 +70,7 @@
         "@univerjs/sheets": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^5.8.3",
-        "vite": "^6.3.5",
+        "vite": "^7.0.5",
         "vitest": "^3.2.4"
     }
 }

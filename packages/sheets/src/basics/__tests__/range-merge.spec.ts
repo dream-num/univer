@@ -17,7 +17,6 @@
 import type { IRange } from '@univerjs/core';
 import { cellToRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-
 import { rangeMerge, RangeMergeUtil } from '../range-merge';
 
 describe('test rangeMerge', () => {

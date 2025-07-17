@@ -15,10 +15,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumproduct } from '../index';
 
 describe('Test sumproduct function', () => {

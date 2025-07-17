@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Yield } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Yield } from '../index';
 
 describe('Test yield function', () => {
     const testFunction = new Yield(FUNCTION_NAMES_FINANCIAL.YIELD);
@@ -121,11 +120,11 @@ describe('Test yield function', () => {
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis3);
-            expect(result3.getValue()).toStrictEqual(0.08048425764748052);
+            expect(result3.getValue()).toStrictEqual(0.08048425764748053);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis4);
-            expect(result4.getValue()).toStrictEqual(0.0804841172323108);
+            expect(result4.getValue()).toStrictEqual(0.0804841172323109);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis5);

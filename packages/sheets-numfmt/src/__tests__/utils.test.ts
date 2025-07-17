@@ -17,14 +17,9 @@
 import { cellToRange, isPatternEqualWithoutDecimal } from '@univerjs/core';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
-
 import { currencySymbols } from '../base/const/currency-symbols';
 import { getCurrencyType } from '../utils/currency';
-import {
-    getDecimalFromPattern,
-    getDecimalString,
-    setPatternDecimal,
-} from '../utils/decimal';
+import { getDecimalFromPattern, getDecimalString, setPatternDecimal } from '../utils/decimal';
 import { mergeNumfmtMutations } from '../utils/mutation';
 
 describe('test numfmt utils function', () => {

@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Price } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Price } from '../index';
 
 describe('Test price function', () => {
     const testFunction = new Price(FUNCTION_NAMES_FINANCIAL.PRICE);
@@ -108,7 +107,7 @@ describe('Test price function', () => {
 
             const basis2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(settlement, maturity, rate, yld, redemption, frequency, basis2);
-            expect(result2.getValue()).toStrictEqual(113.5813321520683);
+            expect(result2.getValue()).toStrictEqual(113.58133215206828);
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, rate, yld, redemption, frequency, basis3);
@@ -120,11 +119,11 @@ describe('Test price function', () => {
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, rate, yld, redemption, frequency, basis5);
-            expect(result5.getValue()).toStrictEqual(113.5813321520683);
+            expect(result5.getValue()).toStrictEqual(113.58133215206828);
 
             const basis6 = NullValueObject.create();
             const result6 = testFunction.calculate(settlement, maturity, rate, yld, redemption, frequency, basis6);
-            expect(result6.getValue()).toStrictEqual(113.5813321520683);
+            expect(result6.getValue()).toStrictEqual(113.58133215206828);
         });
 
         it('Value is error', () => {

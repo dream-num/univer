@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Transpose } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test transpose function', () => {
     const testFunction = new Transpose(FUNCTION_NAMES_LOOKUP.TRANSPOSE);

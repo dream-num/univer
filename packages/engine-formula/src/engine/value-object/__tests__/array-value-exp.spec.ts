@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject exp method test', () => {

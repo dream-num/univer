@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../move-rows-cols.mutation';
+import { describe, expect, it } from 'vitest';
 import { MoveColsMutationUndoFactory, MoveRowsMutationUndoFactory } from '../move-rows-cols.mutation';
 
 describe('Test moving rows & cols', () => {

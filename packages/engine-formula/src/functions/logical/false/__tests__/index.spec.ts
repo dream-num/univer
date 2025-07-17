@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { False } from '../index';
 

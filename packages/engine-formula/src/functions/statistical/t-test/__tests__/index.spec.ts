@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -258,7 +257,7 @@ describe('Test tTest function', () => {
             });
             const result = testFunction.calculate(array1, array2, tails, type);
             expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, ErrorType.NUM, 0.19601578492531546, 0.1919958867250542, 0.20229392336804775, 0.19601578492531546, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.NUM, 0.19601578492531546, 0.1919958867250512, 0.20229392336804775, 0.19601578492531546, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
 

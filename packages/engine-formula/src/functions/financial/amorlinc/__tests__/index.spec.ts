@@ -15,12 +15,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Amorlinc } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test amorlinc function', () => {
     const testFunction = new Amorlinc(FUNCTION_NAMES_FINANCIAL.AMORLINC);

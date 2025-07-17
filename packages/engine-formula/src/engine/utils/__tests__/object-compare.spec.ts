@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../basics/error-type';
+import { compareToken } from '../../../basics/token';
+import { getObjectValue } from '../../../functions/__tests__/create-function-test-bed';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../value-object/array-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
 import { valueObjectCompare } from '../object-compare';
-import { compareToken } from '../../../basics/token';
-import { ErrorType } from '../../../basics/error-type';
-import { getObjectValue } from '../../../functions/__tests__/create-function-test-bed';
 
 const range = ArrayValueObject.create(/*ts*/ `{
     Ada;

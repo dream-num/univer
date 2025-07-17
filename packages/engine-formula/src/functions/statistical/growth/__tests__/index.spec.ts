@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -93,7 +92,7 @@ describe('Test growth function', () => {
                 [69841.30085621751],
                 [102197.07337883243],
                 [149542.48674004586],
-                [218821.87621459534],
+                [218821.87621459537],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -337,7 +336,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(false);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [1806822.1964432173, 4216666.612455025],
+                [1806822.1964432176, 4216666.612455025],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -466,7 +465,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [3.2237097954706266, 5.583629154612603, 9.671129386411891, 16.750887463837827, 29.013388159235713, 50.252662391513546, 87.04016447770724],
+                [3.2237097954706266, 5.583629154612603, 9.671129386411893, 16.75088746383783, 29.013388159235713, 50.252662391513546, 87.04016447770724],
             ]);
 
             const newXs2 = ArrayValueObject.create({
@@ -559,15 +558,15 @@ describe('Test growth function', () => {
             expect(getObjectValue(result3)).toStrictEqual([
                 [1.1161231740339035],
                 [1.7617295898720453],
-                [2.780778340631825],
-                [4.38928211467954],
-                [6.92820323027555],
+                [2.780778340631826],
+                [4.389282114679541],
+                [6.928203230275551],
                 [10.935729065914696],
                 [17.261354239796905],
                 [27.245952089325364],
                 [43.00600607235713],
                 [67.88225099390954],
-                [107.14782470725653],
+                [107.14782470725655],
             ]);
 
             const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);
@@ -575,14 +574,14 @@ describe('Test growth function', () => {
                 [1.1161231740339097],
                 [1.761729589872056],
                 [2.7807783406318434],
-                [4.38928211467957],
+                [4.389282114679571],
                 [6.928203230275601],
                 [10.935729065914781],
                 [17.261354239797047],
                 [27.2459520893256],
                 [43.00600607235752],
                 [67.88225099391019],
-                [107.14782470725761],
+                [107.1478247072576],
             ]);
 
             const knownYs3 = ArrayValueObject.create({
@@ -622,7 +621,7 @@ describe('Test growth function', () => {
             });
             const result5 = testFunction.calculate(knownYs3, knownXs3, newXs4, constb);
             expect(getObjectValue(result5)).toStrictEqual([
-                [1.1161231740339035, 1.7617295898720453, 2.780778340631825, 4.38928211467954, 6.92820323027555, 10.935729065914696, 17.261354239796905],
+                [1.1161231740339035, 1.7617295898720453, 2.780778340631826, 4.389282114679541, 6.928203230275551, 10.935729065914696, 17.261354239796905],
             ]);
         });
     });

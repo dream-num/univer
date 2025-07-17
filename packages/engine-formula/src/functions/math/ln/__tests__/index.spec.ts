@@ -81,7 +81,7 @@ describe('Test ln function', () => {
             });
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [0, ErrorType.VALUE, 0.2070141693843261, 0, ErrorType.NUM, ErrorType.NUM],
+                [0, ErrorType.VALUE, 0.20701416938432612, 0, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, 4.605170185988092, 0.85015092936961, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });

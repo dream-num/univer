@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Xnpv } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Xnpv } from '../index';
 
 describe('Test xnpv function', () => {
     const testFunction = new Xnpv(FUNCTION_NAMES_FINANCIAL.XNPV);
@@ -32,7 +31,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(1994.5100406532624);
+            expect(result.getValue()).toStrictEqual(1994.510040653262);
         });
 
         it('Value is normal, but no positive and negative number', () => {

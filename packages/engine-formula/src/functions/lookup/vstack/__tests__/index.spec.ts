@@ -15,14 +15,13 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Vstack } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test vstack function', () => {
     const testFunction = new Vstack(FUNCTION_NAMES_LOOKUP.VSTACK);

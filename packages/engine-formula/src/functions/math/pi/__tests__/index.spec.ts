@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Pi } from '../index';
 

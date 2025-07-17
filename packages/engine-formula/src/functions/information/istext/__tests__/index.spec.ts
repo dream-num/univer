@@ -15,12 +15,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Istext } from '../index';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
+import { Istext } from '../index';
 
 describe('Test istext function', () => {
     const testFunction = new Istext(FUNCTION_NAMES_INFORMATION.ISTEXT);

@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { isAllColumnsCovered, isAllRowsCovered } from '../utils/selection-utils';
 
 describe('Test selection utils', () => {

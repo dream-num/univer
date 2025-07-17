@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
@@ -166,7 +165,7 @@ describe('arrayValueObject atan2 method test', () => {
 
             expect((originValueObject.atan2(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
                 [0.7853981633974483, '#VALUE!', 0.682622552417217, 0.7853981633974483, 1.5707963267948966],
-                [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', 2.819842099193151],
+                [1.5707963267948966, 0.009999666686665238, 0.4038597949073766, '#VALUE!', 2.819842099193151],
             ]);
         });
     });

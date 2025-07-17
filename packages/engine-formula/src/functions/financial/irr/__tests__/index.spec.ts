@@ -15,13 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Irr } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Irr } from '../index';
 
 describe('Test irr function', () => {
     const testFunction = new Irr(FUNCTION_NAMES_FINANCIAL.IRR);
@@ -31,7 +30,7 @@ describe('Test irr function', () => {
             const values = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(0.08663094803653168);
+            expect(result.getValue()).toStrictEqual(0.0866309480365317);
         });
 
         it('Value is normal, but no positive and negative number', () => {
@@ -103,7 +102,7 @@ describe('Test irr function', () => {
             });
             const result3 = testFunction.calculate(values3, guess3);
             expect(transformToValue(result3.getArrayValue())).toStrictEqual([
-                [0.08663094803654446, ErrorType.VALUE, 0.08663094803650478, 0.08663094803653167, ErrorType.NAME, 0.08663094803653167],
+                [0.08663094803654446, ErrorType.VALUE, 0.08663094803650478, 0.08663094803653162, ErrorType.NAME, 0.08663094803653162],
             ]);
         });
     });

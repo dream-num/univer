@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
 import { moveMatrixArray, ObjectMatrix, spliceArray } from '../object-matrix';
 
 describe('test ObjectMatrix', () => {

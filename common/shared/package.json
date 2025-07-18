@@ -26,11 +26,11 @@
     },
     "dependencies": {
         "@typescript-eslint/parser": "^8.37.0",
-        "@vitejs/plugin-react": "^4.6.0",
+        "@vitejs/plugin-react": "^4.7.0",
         "@vitejs/plugin-vue": "^6.0.0",
         "@vitest/coverage-istanbul": "^3.2.4",
         "autoprefixer": "^10.4.21",
-        "eslint-plugin-better-tailwindcss": "^3.6.2",
+        "eslint-plugin-better-tailwindcss": "^3.6.3",
         "fs-extra": "^11.3.0",
         "happy-dom": "18.0.1",
         "javascript-obfuscator": "^4.1.1",

@@ -275,15 +275,14 @@ export class SheetSkeleton extends Skeleton {
         for (let c = 0; c < colCount; c++) {
             let columnWidth = defaultColumnWidth;
             const columnDataItem = columnManager.getColumn(c);
-            // if (!columnDataItem) {
-            //     continue;
-            // }
-            if (columnDataItem?.w != null) {
-                columnWidth = columnDataItem.w;
-            }
+            if (columnDataItem) {
+                if (columnDataItem.w != null) {
+                    columnWidth = columnDataItem.w;
+                }
 
-            if (columnDataItem?.hd === BooleanNumber.TRUE) {
-                columnWidth = 0;
+                if (columnDataItem.hd === BooleanNumber.TRUE) {
+                    columnWidth = 0;
+                }
             }
 
             columnTotalWidth += columnWidth;

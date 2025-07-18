@@ -144,6 +144,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                             className={clsx(`
                               univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
                               univer-overflow-hidden univer-bg-white
+                              dark:!univer-bg-gray-800
                             `, borderBottomClassName)}
                         >
                             <header className="univer-w-screen">

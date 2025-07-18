@@ -148,7 +148,12 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 onContextMenu={(e) => e.preventDefault()}
             >
                 {/* user header */}
-                <div className="univer-relative univer-flex univer-min-h-0 univer-flex-col univer-bg-white">
+                <div
+                    className={`
+                      univer-relative univer-flex univer-min-h-0 univer-flex-col univer-bg-white
+                      dark:!univer-bg-gray-800
+                    `}
+                >
                     <ComponentContainer key="custom-header" components={customHeaderComponents} />
                 </div>
 
@@ -186,6 +191,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             className={clsx(`
                               univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
                               univer-overflow-hidden univer-bg-white
+                              dark:!univer-bg-gray-800
                             `, borderBottomClassName)}
                         >
                             <header>

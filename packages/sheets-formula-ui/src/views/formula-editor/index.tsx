@@ -316,16 +316,13 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         <div className={className}>
             <div
                 ref={sheetEmbeddingRef}
-                className={clsx(
-                    `
-                      univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-items-center
-                      univer-justify-around univer-gap-2 univer-rounded-none univer-p-0 univer-ring-1
-                    `,
-                    {
-                        'univer-ring-primary-500': isFocus,
-                        'univer-ring-red-500': isError,
-                    }
-                )}
+                className={clsx(`
+                  univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-items-center
+                  univer-justify-around univer-gap-2 univer-rounded-none univer-p-0 univer-ring-1
+                `, {
+                    'univer-ring-primary-500': isFocus,
+                    'univer-ring-red-500': isError,
+                })}
             >
                 <div
                     ref={formulaEditorContainerRef}
@@ -333,35 +330,28 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     onMouseUp={handleMouseUp}
                 />
             </div>
-            {errorText !== undefined
-                ? (
-                    <div className="univer-my-1 univer-text-xs univer-text-red-500">
-                        {errorText}
-                    </div>
-                )
-                : null}
-            {editor && formulaWithoutEqualSymbol !== ''
-                ? (
-                    <HelpFunction
-                        editor={editor}
-                        isFocus={isFocus}
-                        formulaText={formulaText}
-                        onClose={() => focus()}
-                    />
-                )
-                : null}
-            {editor
-                ? (
-                    <SearchFunction
-                        isFocus={isFocus}
-                        sequenceNodes={sequenceNodes}
-                        onSelect={handleFunctionSelect}
-                        ref={searchFunctionRef}
-                        editor={editor}
-                    />
-                )
-                : null}
+            {(errorText !== undefined) && (
+                <div className="univer-my-1 univer-text-xs univer-text-red-500">
+                    {errorText}
+                </div>
+            )}
+            {(editor && formulaWithoutEqualSymbol !== '') && (
+                <HelpFunction
+                    editor={editor}
+                    isFocus={isFocus}
+                    formulaText={formulaText}
+                    onClose={() => focus()}
+                />
+            )}
+            {!!editor && (
+                <SearchFunction
+                    isFocus={isFocus}
+                    sequenceNodes={sequenceNodes}
+                    onSelect={handleFunctionSelect}
+                    ref={searchFunctionRef}
+                    editor={editor}
+                />
+            )}
         </div>
-    )
-    ;
+    );
 });

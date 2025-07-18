@@ -18,7 +18,7 @@ import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IColumnData, IRange, IScopeColumnDataInfo, IWorksheetData } from './typedef';
-import { getArrayLength } from '../shared/object-matrix';
+import { getArrayLength, insertMatrixArray, moveMatrixArray, spliceArray } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
 import { RANGE_TYPE } from './typedef';
 
@@ -104,6 +104,29 @@ export class ColumnManager {
      */
     getColumnData(): IObjectArrayPrimitiveType<Partial<IColumnData>> {
         return this._columnData;
+    }
+
+    insertColumnData(range: IRange, colInfo: IObjectArrayPrimitiveType<IColumnData> | undefined) {
+        const columnPrimitive = this.getColumnData();
+        const columnWrapper = columnPrimitive;
+
+        const colIndex = range.startColumn;
+        const colCount = range.endColumn - range.startColumn + 1;
+        const defaultColWidth = this._config.defaultColumnWidth;
+        for (let j = colIndex; j < colIndex + colCount; j++) {
+            const defaultColInfo = {
+                w: defaultColWidth,
+                hd: 0,
+            };
+            if (colInfo) {
+                insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
+            }
+        }
+    }
+
+    moveColumnData(fromIndex: number, count: number, toIndex: number) {
+        const o = this.getColumnData();
+        moveMatrixArray(fromIndex, count, toIndex, o);
     }
 
     getColVisible(colPos: number): boolean {
@@ -286,6 +309,11 @@ export class ColumnManager {
     removeColumn(columnPos: number) {
         delete this._columnData[columnPos];
         this._removeScopeColumnData(columnPos);
+    }
+
+    removeColumns(start: number, end: number) {
+        const colCount = end - start + 1;
+        spliceArray(start, colCount, this.getColumnData());
     }
 
     /**

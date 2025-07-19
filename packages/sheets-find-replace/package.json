@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-find-replace",
-    "version": "0.9.2",
+    "version": "0.9.3",
     "private": false,
     "description": "UniverSheet find replace plugin",
     "author": "DreamNum <developer@univer.ai>",

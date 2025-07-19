@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-ui",
-    "version": "0.9.2",
+    "version": "0.9.3",
     "private": false,
     "description": "Univer normal ui-plugin-docs",
     "author": "DreamNum <developer@univer.ai>",

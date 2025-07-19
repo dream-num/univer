@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter",
-    "version": "0.9.2",
+    "version": "0.9.3",
     "private": false,
     "description": "A library for filtering data in Univer Sheet",
     "author": "DreamNum <developer@univer.ai>",

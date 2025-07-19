@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.3](https://github.com/dream-num/univer/compare/v0.9.2...v0.9.3) (2025-07-19)
+
+
+### Bug Fixes
+
+* **sheets-conditional-formatting-ui:** improve layout and styling ([#5539](https://github.com/dream-num/univer/issues/5539)) ([ddea707](https://github.com/dream-num/univer/commit/ddea7077911e9e4890b09c36871385edd1e1cec7))
+* **sheets-data-validation-ui:** reorder `SetCellEditVisibleOperation` command execution ([#5541](https://github.com/dream-num/univer/issues/5541)) ([bbef155](https://github.com/dream-num/univer/commit/bbef1553a0ce996f1e20afea8423fda0eb672bc1))
+* **sheets-filter-ui:** add dark mode text color for filter panel ([#5521](https://github.com/dream-num/univer/issues/5521)) ([6e3ee63](https://github.com/dream-num/univer/commit/6e3ee631a35f38b38223f872513be75258fad2f1))
+* **sheets-ui:** optimize the style of SelectList in dark mode ([#5538](https://github.com/dream-num/univer/issues/5538)) ([95d6394](https://github.com/dream-num/univer/commit/95d63946327caa08041266c3e032ac90b9a68142))
+* **ui:** add dark mode support for custom header ([#5547](https://github.com/dream-num/univer/issues/5547)) ([8bf16aa](https://github.com/dream-num/univer/commit/8bf16aa090022a359c437de7eefaf34de1e53cf2))
+
+
+### Features
+
+* add locales Spanish (es-ES) and Catalan (ca-ES) ([#5536](https://github.com/dream-num/univer/issues/5536)) ([761dfb7](https://github.com/dream-num/univer/commit/761dfb7566c66dc8653b8c8a486177b5ef902769))
+* enhance mobile UI by adding new plugins and improving component registration ([#5535](https://github.com/dream-num/univer/issues/5535)) ([86285a6](https://github.com/dream-num/univer/commit/86285a6fffdf0f8ed050aaa1d7ec1c49969577b4))
+
 ## [0.9.2](https://github.com/dream-num/univer/compare/v0.9.1...v0.9.2) (2025-07-11)
 
 

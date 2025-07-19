@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation-ui",
-    "version": "0.9.2",
+    "version": "0.9.3",
     "private": false,
     "description": "Data validation UI for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/core",
-    "version": "0.9.2",
+    "version": "0.9.3",
     "private": false,
     "description": "Core library for Univer.",
     "author": "DreamNum <developer@univer.ai>",

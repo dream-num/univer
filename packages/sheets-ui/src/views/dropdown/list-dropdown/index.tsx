@@ -28,7 +28,7 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
@@ -62,7 +62,7 @@ interface ISelectListProps {
     showEdit?: boolean;
 }
 
-const SelectList = (props: ISelectListProps) => {
+function SelectList(props: ISelectListProps) {
     const { value, onChange, multiple, options, title, onEdit, filter, style, location, showEdit: showEditOnDropdown } = props;
     const localeService = useDependency(LocaleService);
     const lowerFilter = filter?.toLowerCase();
@@ -84,19 +84,18 @@ const SelectList = (props: ISelectListProps) => {
         <div
             data-u-comp="sheets-dropdown-list"
             className={clsx(`
-              univer-box-border univer-rounded-lg univer-bg-white univer-pb-1 univer-text-gray-900 univer-shadow
+              univer-box-border univer-rounded-lg univer-bg-white univer-py-1 univer-text-gray-900 univer-shadow
               dark:!univer-bg-black dark:!univer-text-white
             `, borderClassName)}
             style={style}
         >
-            <div
-                className="univer-flex-shrink-0 univer-flex-grow-0 univer-px-3.5 univer-py-2 univer-text-xs"
-            >
-                {title}
-            </div>
+            <div className="univer-px-3.5 univer-py-1 univer-pt-2 univer-text-xs">{title}</div>
             <div
                 key={filter}
-                className={clsx('univer-max-h-52 univer-overflow-y-auto univer-px-2', scrollbarClassName)}
+                className={clsx(`
+                  univer-flex univer-max-h-52 univer-flex-col univer-gap-1 univer-overflow-y-auto univer-px-2
+                  univer-py-1
+                `, scrollbarClassName)}
             >
                 {filteredOptions.map((item, i) => {
                     const selected = value.indexOf(item.value) > -1;
@@ -125,7 +124,7 @@ const SelectList = (props: ISelectListProps) => {
                         <div
                             key={i}
                             className={`
-                              univer-mt-1 univer-flex univer-cursor-pointer univer-flex-row univer-items-center
+                              univer-flex univer-cursor-pointer univer-flex-row univer-items-center
                               univer-justify-between univer-rounded-md univer-px-1.5 univer-py-1
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-700
@@ -134,8 +133,8 @@ const SelectList = (props: ISelectListProps) => {
                         >
                             <div
                                 className={clsx(`
-                                  univer-h-4 univer-w-fit univer-flex-[0_1_auto] univer-overflow-hidden univer-truncate
-                                  univer-whitespace-nowrap univer-rounded-full univer-px-1.5 univer-py-0.5
+                                  univer-inline-flex univer-h-4 univer-w-fit univer-items-center univer-overflow-hidden
+                                  univer-truncate univer-whitespace-nowrap univer-rounded-full univer-px-1.5
                                   univer-text-xs
                                 `, {
                                     'univer-text-gray-900': !isDark,
@@ -165,33 +164,20 @@ const SelectList = (props: ISelectListProps) => {
                     );
                 })}
             </div>
-            {showEditOnDropdown && hasPermission
-                ? (
-                    <>
-                        <div
-                            className={`
-                              univer-my-1 univer-h-px univer-flex-shrink-0 univer-flex-grow-0 univer-bg-gray-200
-                              dark:!univer-bg-gray-700
-                            `}
-                        />
-                        <div
-                            className="univer-flex-shrink-0 univer-flex-grow-0 univer-px-1 univer-py-0"
-                        >
-                            <a
-                                className={`
-                                  univer-block univer-cursor-pointer univer-rounded univer-px-1.5 univer-py-1
-                                  univer-text-xs
-                                  hover:univer-bg-gray-200
-                                  dark:hover:!univer-bg-gray-700
-                                `}
-                                onClick={onEdit}
-                            >
-                                {localeService.t('dataValidation.list.edit')}
-                            </a>
-                        </div>
-                    </>
-                )
-                : null}
+            {(showEditOnDropdown && hasPermission) && (
+                <div className={clsx('univer-box-border univer-px-2 univer-pt-1', borderTopClassName)}>
+                    <a
+                        className={`
+                          univer-block univer-cursor-pointer univer-rounded univer-px-1.5 univer-py-1 univer-text-xs
+                          hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-800
+                        `}
+                        onClick={onEdit}
+                    >
+                        {localeService.t('dataValidation.list.edit')}
+                    </a>
+                </div>
+            )}
         </div>
     );
 };
@@ -235,9 +221,7 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
         };
     }, [commandService, editorBridgeService, instanceService]);
 
-    if (!worksheet) {
-        return null;
-    }
+    if (!worksheet) return null;
 
     return (
         <SelectList

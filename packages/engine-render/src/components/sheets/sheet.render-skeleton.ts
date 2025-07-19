@@ -1458,6 +1458,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
+    // eslint-disable-next-line complexity
     private _setMergeBorderProps(type: BORDER_LTRB, cache: IStylesCache, mergeRange: IRange): void {
         if (!this.worksheet || !cache.border) return;
 

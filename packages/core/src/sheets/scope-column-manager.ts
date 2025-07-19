@@ -15,10 +15,9 @@
  */
 
 import type { IObjectArrayPrimitiveType } from '../shared';
-import type { IColumnData, IScopeColumnDataInfo } from './typedef';
-
-//the first index is the index from left which elements is changed, the second index is the index from right which elements is changed
-type IScopeColumnChangeIndex = [number, number];
+import type { CustomData, IColumnData, IRange, IScopeColumnDataInfo, IWorksheetData } from './typedef';
+import { BooleanNumber } from '../types/enum';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * ScopeColumnManger is a class that manages the scope of columns in a spreadsheet.
@@ -369,7 +368,7 @@ export class ScopeColumnManger {
         return null; // No intersection
     }
 
-    deleteScopeDataByCol(col: number): IScopeColumnChangeIndex {
+    deleteScopeDataByCol(col: number) {
         const index = this._getScopeDataIndexByCol(col);
         if (index === -1) return [-1, -1]; // If the column is not found, return [-1, -1]
 
@@ -377,22 +376,13 @@ export class ScopeColumnManger {
         const right = this.data.slice(index + 1);
         const target = this.data[index];
 
-        let leftChangeIndex = -1;
-        let rightChangeIndex = -1;
-
         // if the start equal to end, it means the target is a single column scope,so we can remove it directly
         if (target.s === target.e && target.s === col) {
             this.data = [...left, ...right];
-            leftChangeIndex = left.length;
-            rightChangeIndex = this.data.length - leftChangeIndex - 1;
         } else if (target.s === col) { // If col matches the start of the range, adjust the start
             this.data = [...left, { ...target, s: col + 1 }, ...right];
-            leftChangeIndex = left.length;
-            rightChangeIndex = this.data.length - leftChangeIndex - 1;
         } else if (target.e === col) { // If col matches the end of the range, adjust the end
             this.data = [...left, { ...target, e: col - 1 }, ...right];
-            leftChangeIndex = left.length;
-            rightChangeIndex = this.data.length - leftChangeIndex - 1;
         } else if (target.s < col && col < target.e) {
             // If col is in the middle of the range, split into two parts
             const splitList = [
@@ -400,11 +390,7 @@ export class ScopeColumnManger {
                 { ...target, s: col + 1 },
             ];
             this.data = [...left, ...splitList, ...right];
-            leftChangeIndex = left.length;
-            rightChangeIndex = this.data.length - leftChangeIndex - 1;
         }
-
-        return [leftChangeIndex, rightChangeIndex];
     }
 
     insertColumns(start: number, end: number, info: IColumnData) {
@@ -578,8 +564,143 @@ export class ScopeColumnManger {
 }
 
 export class ColumnManager extends ScopeColumnManger {
-    constructor(data: IScopeColumnDataInfo[]) {
+    constructor(private readonly _config: IWorksheetData, data: IScopeColumnDataInfo[]) {
         super(data);
+    }
+
+    /**
+     * Get the object column data like old version. This func only use for test case.
+     */
+    getColumnData(): IObjectArrayPrimitiveType<Partial<IColumnData>> {
+        const scopeData: IObjectArrayPrimitiveType<Partial<IColumnData>> = {};
+        for (const item of this.data) {
+            for (let i = item.s; i <= item.e; i++) {
+                scopeData[i] = ScopeColumnManger.formatColumnData(item.d);
+            }
+        }
+        return scopeData;
+    }
+
+    getDefaultColumnWidth() {
+        return this._config.defaultColumnWidth;
+    }
+
+    insertColumnData(range: IRange, colInfo: IObjectArrayPrimitiveType<IColumnData> | undefined) {
+        this.insertColumns(range.startColumn, range.endColumn, colInfo ? colInfo[0] : {});
+    }
+
+    moveColumnData(fromIndex: number, count: number, toIndex: number) {
+        // todo: mcc
+    }
+
+    getColVisible(colPos: number): boolean {
+        const data = this.getScopeDataByCol(colPos);
+        if (!data) {
+            return true; // If no data found, consider the column visible
+        }
+        return data.d.hd !== BooleanNumber.TRUE;
+    }
+
+    getColumnStyle(col: number) {
+        const data = this.getScopeDataByCol(col);
+        return data?.s;
+    }
+
+    setColumnStyle(col: number, style: string) {
+        this.setScopeDataRange(col, col, { s: style });
+    }
+
+    getHiddenCols(start: number = 0, end: number = this.getSize() - 1): IRange[] {
+        const hiddenCols: IRange[] = [];
+        for (const item of this.data) {
+            if (item.s > end || item.e < start) {
+                continue;
+            }
+            if (item.d?.hd === BooleanNumber.TRUE) {
+                const intersect = this.getIntersect(item.s, item.e, start, end);
+                if (intersect) {
+                    const [intersectStart, intersectEnd] = intersect;
+                    hiddenCols.push({
+                        rangeType: RANGE_TYPE.COLUMN,
+                        startRow: 0, // Assuming no row information is needed
+                        endRow: 0, // Assuming no row information is needed
+                        startColumn: intersectStart,
+                        endColumn: intersectEnd,
+                    });
+                }
+            }
+        }
+
+        return hiddenCols;
+    }
+
+    getVisibleCols(start: number = 0, end: number = this.getSize() - 1): IRange[] {
+        const visibleCols: IRange[] = [];
+
+        for (const item of this.data) {
+            if (item.s > end || item.e < start) {
+                continue;
+            }
+            if (item.d?.hd !== BooleanNumber.TRUE) {
+                const intersect = this.getIntersect(item.s, item.e, start, end);
+                if (intersect) {
+                    const [intersectStart, intersectEnd] = intersect;
+                    visibleCols.push({
+                        rangeType: RANGE_TYPE.COLUMN,
+                        startRow: 0, // Assuming no row information is needed
+                        endRow: 0, // Assuming no row information is needed
+                        startColumn: intersectStart,
+                        endColumn: intersectEnd,
+                    });
+                }
+            }
+        }
+        return visibleCols;
+    }
+
+    getSize(): number {
+        if (this.data.length === 0) {
+            return 0; // If no data, size is 0
+        }
+        const lastItem = this.data[this.data.length - 1];
+        return lastItem.e + 1; // Size is the end index of the last item + 1
+    }
+
+    getColumnWidth(col: number): number {
+        const data = this.getScopeDataByCol(col);
+        return data?.d.w || this.getDefaultColumnWidth();
+    }
+
+    setColumnWidth(col: number, width: number) {
+        const realWidth = width === this.getDefaultColumnWidth() ? undefined : width;
+        this.setScopeDataRange(col, col, { w: realWidth });
+    }
+
+    getColumn(columnPos: number) {
+        const data = this.getScopeDataByCol(columnPos);
+        return data?.d;
+    }
+
+    override removeColumns(start: number, end: number): void {
+        super.removeColumns(start, end);
+    }
+
+    removeColumn(columnPos: number) {
+        this.removeColumns(columnPos, columnPos);
+    }
+
+    setCustomMetadata(index: number, custom: CustomData | undefined) {
+        const data = this.getScopeDataByCol(index);
+        if (data) {
+            data.d.custom = custom;
+        } else {
+            this.setScopeDataRange(index, index, { custom });
+        }
+    }
+
+    getCustomMetadata(index: number): CustomData | undefined {
+        const data = this.getScopeDataByCol(index);
+        return data?.d.custom;
     }
 }
 

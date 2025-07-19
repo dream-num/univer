@@ -129,11 +129,18 @@ describe('ScopeColumnManger - deleteScopeDataByCol', () => {
             { s: 5, e: 5, d: { w: 80, hd: 1 } },
         ];
         const manager = new ScopeColumnManger(initialData);
+        const manager2 = new ScopeColumnManger(initialData);
 
-        const result = manager.deleteScopeDataByCol(5);
+        manager.deleteScopeDataByCol(5);
+        manager2.setScopeDataRange(5, 5, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual([]);
-        expect(result).toEqual([0, -1]);
+        expect(manager2.data).toEqual([]);
     });
 
     it('should adjust the start of a range when the column matches the start', () => {
@@ -141,13 +148,22 @@ describe('ScopeColumnManger - deleteScopeDataByCol', () => {
             { s: 5, e: 10, d: { w: 80, hd: 1 } },
         ];
         const manager = new ScopeColumnManger(initialData);
+        const manager2 = new ScopeColumnManger(initialData);
 
-        const result = manager.deleteScopeDataByCol(5);
+        manager.deleteScopeDataByCol(5);
+        manager2.setScopeDataRange(5, 5, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual([
             { s: 6, e: 10, d: { w: 80, hd: 1 } },
         ]);
-        expect(result).toEqual([0, 0]);
+        expect(manager2.data).toEqual([
+            { s: 6, e: 10, d: { w: 80, hd: 1 } },
+        ]);
     });
 
     it('should adjust the end of a range when the column matches the end', () => {
@@ -155,13 +171,22 @@ describe('ScopeColumnManger - deleteScopeDataByCol', () => {
             { s: 5, e: 10, d: { w: 80, hd: 1 } },
         ];
         const manager = new ScopeColumnManger(initialData);
+        const manager2 = new ScopeColumnManger(initialData);
 
-        const result = manager.deleteScopeDataByCol(10);
+        manager.deleteScopeDataByCol(10);
+        manager2.setScopeDataRange(10, 10, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual([
             { s: 5, e: 9, d: { w: 80, hd: 1 } },
         ]);
-        expect(result).toEqual([0, 0]);
+        expect(manager2.data).toEqual([
+            { s: 5, e: 9, d: { w: 80, hd: 1 } },
+        ]);
     });
 
     it('should split a range when the column is in the middle', () => {
@@ -169,14 +194,24 @@ describe('ScopeColumnManger - deleteScopeDataByCol', () => {
             { s: 5, e: 10, d: { w: 80, hd: 1 } },
         ];
         const manager = new ScopeColumnManger(initialData);
+        const manager2 = new ScopeColumnManger(initialData);
 
-        const result = manager.deleteScopeDataByCol(7);
+        manager.deleteScopeDataByCol(7);
+        manager2.setScopeDataRange(7, 7, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual([
             { s: 5, e: 6, d: { w: 80, hd: 1 } },
             { s: 8, e: 10, d: { w: 80, hd: 1 } },
         ]);
-        expect(result).toEqual([0, 1]);
+        expect(manager2.data).toEqual([
+            { s: 5, e: 6, d: { w: 80, hd: 1 } },
+            { s: 8, e: 10, d: { w: 80, hd: 1 } },
+        ]);
     });
 
     it('should handle non-existing column gracefully', () => {
@@ -184,11 +219,18 @@ describe('ScopeColumnManger - deleteScopeDataByCol', () => {
             { s: 5, e: 10, d: { w: 80, hd: 1 } },
         ];
         const manager = new ScopeColumnManger(initialData);
+        const manager2 = new ScopeColumnManger(initialData);
 
-        const result = manager.deleteScopeDataByCol(15);
+        manager.deleteScopeDataByCol(15);
+        manager2.setScopeDataRange(15, 15, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual(initialData);
-        expect(result).toEqual([-1, -1]);
+        expect(manager2.data).toEqual(initialData);
     });
 
     it('should handle multiple ranges correctly', () => {
@@ -197,22 +239,40 @@ describe('ScopeColumnManger - deleteScopeDataByCol', () => {
             { s: 12, e: 15, d: { w: 100, hd: 0 } },
         ];
         const manager = new ScopeColumnManger(initialData);
+        const manager2 = new ScopeColumnManger(initialData);
 
-        const result = manager.deleteScopeDataByCol(12);
+        manager.deleteScopeDataByCol(12);
+        manager2.setScopeDataRange(12, 12, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual([
             { s: 5, e: 10, d: { w: 80, hd: 1 } },
             { s: 13, e: 15, d: { w: 100, hd: 0 } },
         ]);
-        expect(result).toEqual([1, 1]);
+        expect(manager2.data).toEqual([
+            { s: 5, e: 10, d: { w: 80, hd: 1 } },
+            { s: 13, e: 15, d: { w: 100, hd: 0 } },
+        ]);
     });
 
     it('should handle an empty data set gracefully', () => {
         const manager = new ScopeColumnManger([]);
+        const manager2 = new ScopeColumnManger([]);
 
         const result = manager.deleteScopeDataByCol(5);
+        manager2.setScopeDataRange(5, 5, {
+            w: undefined,
+            hd: undefined,
+            s: undefined,
+            custom: undefined,
+        });
 
         expect(manager.data).toEqual([]);
+        expect(manager2.data).toEqual([]);
         expect(result).toEqual([-1, -1]);
     });
 });

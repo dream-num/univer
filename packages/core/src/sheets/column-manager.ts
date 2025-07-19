@@ -100,10 +100,20 @@ export class ColumnManager {
 
     /**
      * Get width and hidden status of columns in the sheet
+     * @deprecated The `getColumnData` method is deprecated.We will provide a group methods like add, remove, move, update.
      * @returns {IObjectArrayPrimitiveType<Partial<IColumnData>>} Column data, including width, hidden status, etc.
      */
     getColumnData(): IObjectArrayPrimitiveType<Partial<IColumnData>> {
         return this._columnData;
+    }
+
+    setColumnDataByCol(col: number, dataInfo: Nullable<IColumnData>) {
+        if (dataInfo === null || dataInfo === undefined) {
+            this.removeColumn(col);
+            return;
+        }
+        const currentColInfo = this.getColumnOrCreate(Number(col));
+        Object.assign(currentColInfo, dataInfo);
     }
 
     insertColumnData(range: IRange, colInfo: IObjectArrayPrimitiveType<IColumnData> | undefined) {
@@ -136,6 +146,21 @@ export class ColumnManager {
             return true;
         }
         return col.hd !== BooleanNumber.TRUE;
+    }
+
+    setColVisible(colPos: number, visible: boolean) {
+        const columnData = this.getColumnData();
+        if (visible) {
+            if (columnData[colPos]?.hd === BooleanNumber.FALSE) {
+                delete columnData[colPos].hd;
+            }
+        } else {
+            if (columnData[colPos]) {
+                columnData[colPos].hd = BooleanNumber.TRUE;
+            } else {
+                columnData[colPos] = { hd: BooleanNumber.TRUE };
+            }
+        }
     }
 
     /**

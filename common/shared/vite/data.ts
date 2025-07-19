@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const peerDepsMap = {
+export const commonExternals = {
     react: {
         global: 'React',
         name: 'react',

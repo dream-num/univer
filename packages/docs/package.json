@@ -58,6 +58,8 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

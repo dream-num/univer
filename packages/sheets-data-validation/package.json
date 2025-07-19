@@ -70,6 +70,12 @@
         "lint:types": "tsc --noEmit"
     },
     "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/protocol": "0.1.46",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

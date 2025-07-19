@@ -15,7 +15,7 @@
  */
 
 import type { Plugin } from 'vite';
-import { peerDepsMap } from './data';
+import { commonExternals } from './data';
 import { convertLibNameFromPackageName } from './utils';
 
 export function autoDetectedExternalPlugin(): Plugin {
@@ -33,8 +33,8 @@ export function autoDetectedExternalPlugin(): Plugin {
                 return null;
             }
 
-            if (source in peerDepsMap) {
-                globals[source] = peerDepsMap[source].global;
+            if (source in commonExternals) {
+                globals[source] = commonExternals[source].global;
 
                 return { id: source, external: true };
             } else if (source.startsWith('@univerjs')) {

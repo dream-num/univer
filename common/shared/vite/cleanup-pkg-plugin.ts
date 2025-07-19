@@ -20,7 +20,7 @@ import process from 'node:process';
 import fs from 'fs-extra';
 import sortKeys from 'sort-keys';
 import localPkg from '../package.json';
-import { peerDepsMap } from './data';
+import { commonExternals } from './data';
 
 function filterPackageName(packageName: string): string {
     if (packageName.startsWith('@univerjs/')) {
@@ -38,9 +38,8 @@ export function cleanupPkgPlugin(): Plugin {
     const pkg = fs.readJSONSync(__pkg);
     const isPro = pkg.name.startsWith('@univerjs-pro');
 
-    const peerDeps = {};
+    const externalDeps = {};
     const deps = {};
-    const optionalDeps = {};
 
     return {
         name: 'cleanup-pkg',
@@ -48,14 +47,11 @@ export function cleanupPkgPlugin(): Plugin {
         apply: 'build',
 
         resolveId(source) {
-            if (source in peerDepsMap) {
-                const value = peerDepsMap[source];
-                if (!(value.version in peerDepsMap)) {
-                    if ('optional' in value) {
-                        optionalDeps[value.name] = value.version;
-                    } else {
-                        peerDeps[value.name] = value.version;
-                    }
+            if (source in commonExternals) {
+                const value = commonExternals[source];
+
+                if (!(value.version in commonExternals)) {
+                    externalDeps[value.name] = value.version;
                 }
             } else if (source.startsWith('@univerjs')) {
                 const name = filterPackageName(source);
@@ -113,12 +109,8 @@ export function cleanupPkgPlugin(): Plugin {
             }
             pkg.publishConfig.exports['./lib/*'] = './lib/*';
 
-            if (Object.keys(optionalDeps).length > 0) {
-                pkg.optionalDependencies = sortKeys(optionalDeps);
-            }
-
-            if (Object.keys(peerDeps).length > 0) {
-                pkg.peerDependencies = sortKeys(peerDeps);
+            if (Object.keys(externalDeps).length > 0) {
+                pkg.peerDependencies = sortKeys({ ...externalDeps, ...deps });
             }
 
             // Remove the existing @univerjs dependencies

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
@@ -647,11 +647,14 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const defaultValue = HorizontalAlign.LEFT;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    const defaultStyle = workbook?.getActiveSheet().getDefaultCellStyleInternal();
+    const defaultValue = defaultStyle?.ht ?? HorizontalAlign.LEFT;
 
     return {
         id: SetHorizontalTextAlignCommand.id,
-        icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
+        icon: HORIZONTAL_ALIGN_CHILDREN.find((child) => child.value === defaultValue)?.icon,
         tooltip: 'toolbar.horizontalAlignMode.main',
         type: MenuItemType.SELECTOR,
         selections: HORIZONTAL_ALIGN_CHILDREN,
@@ -663,23 +666,25 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 }
 
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                let ha;
+                let ht;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    ha = range?.getHorizontalAlignment();
+                    const defaultCellStyle = workbook?.getActiveSheet().getComposedCellStyle(primary.startRow, primary.startColumn);
+                    ht = defaultCellStyle?.ht ?? range?.getHorizontalAlignment();
                 }
 
-                subscriber.next(ha ?? defaultValue);
+                subscriber.next(ht ?? defaultValue);
             });
 
             const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-            let ha;
+            let ht;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                ha = range?.getHorizontalAlignment();
+                const defaultCellStyle = workbook?.getActiveSheet().getComposedCellStyle(primary.startRow, primary.startColumn);
+                ht = defaultCellStyle?.ht ?? range?.getHorizontalAlignment();
             }
 
-            subscriber.next(ha ?? defaultValue);
+            subscriber.next(ht ?? defaultValue);
 
             return disposable.dispose;
         })),
@@ -714,11 +719,14 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const defaultValue = VerticalAlign.BOTTOM;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    const defaultStyle = workbook?.getActiveSheet().getDefaultCellStyleInternal();
+    const defaultValue = defaultStyle?.vt ?? VerticalAlign.BOTTOM;
 
     return {
         id: SetVerticalTextAlignCommand.id,
-        icon: VERTICAL_ALIGN_CHILDREN[2].icon,
+        icon: VERTICAL_ALIGN_CHILDREN.find((child) => child.value === defaultValue)?.icon,
         tooltip: 'toolbar.verticalAlignMode.main',
         type: MenuItemType.SELECTOR,
         selections: VERTICAL_ALIGN_CHILDREN,
@@ -730,23 +738,25 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 }
 
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                let va;
+                let vt;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    va = range?.getVerticalAlignment();
+                    const defaultCellStyle = workbook?.getActiveSheet().getComposedCellStyle(primary.startRow, primary.startColumn);
+                    vt = defaultCellStyle?.vt ?? range?.getVerticalAlignment();
                 }
 
-                subscriber.next(va ?? defaultValue);
+                subscriber.next(vt ?? defaultValue);
             });
 
             const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-            let va;
+            let vt;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                va = range?.getVerticalAlignment();
+                const defaultCellStyle = workbook?.getActiveSheet().getComposedCellStyle(primary.startRow, primary.startColumn);
+                vt = defaultCellStyle?.vt ?? range?.getVerticalAlignment();
             }
 
-            subscriber.next(va ?? defaultValue);
+            subscriber.next(vt ?? defaultValue);
 
             return disposable.dispose;
         })),
@@ -781,12 +791,15 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const defaultValue = WrapStrategy.OVERFLOW;
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    const defaultStyle = workbook?.getActiveSheet().getDefaultCellStyleInternal();
+    const defaultValue = defaultStyle?.tb ?? WrapStrategy.OVERFLOW;
 
     return {
         id: SetTextWrapCommand.id,
         tooltip: 'toolbar.textWrapMode.main',
-        icon: TEXT_WRAP_CHILDREN[0].icon,
+        icon: TEXT_WRAP_CHILDREN.find((child) => child.value === defaultValue)?.icon,
         type: MenuItemType.SELECTOR,
         selections: TEXT_WRAP_CHILDREN,
         value$: deriveStateFromActiveSheet$<WrapStrategy>(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
@@ -797,23 +810,25 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 }
 
                 const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                let ws;
+                let tb;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    ws = range?.getWrapStrategy();
+                    const defaultCellStyle = workbook?.getActiveSheet().getComposedCellStyle(primary.startRow, primary.startColumn);
+                    tb = defaultCellStyle?.tb ?? range?.getWrapStrategy();
                 }
 
-                subscriber.next(ws ?? defaultValue);
+                subscriber.next(tb ?? defaultValue);
             });
 
             const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-            let ws;
+            let tb;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                ws = range?.getWrapStrategy();
+                const defaultCellStyle = workbook?.getActiveSheet().getComposedCellStyle(primary.startRow, primary.startColumn);
+                tb = defaultCellStyle?.tb ?? range?.getWrapStrategy();
             }
 
-            subscriber.next(ws ?? defaultValue);
+            subscriber.next(tb ?? defaultValue);
 
             return disposable.dispose;
         })),

@@ -148,18 +148,19 @@ export class ColumnManager {
         return col.hd !== BooleanNumber.TRUE;
     }
 
-    setColVisible(colPos: number, visible: boolean) {
+    setColVisible(colPos: number) {
         const columnData = this.getColumnData();
-        if (visible) {
-            if (columnData[colPos]?.hd === BooleanNumber.FALSE) {
-                delete columnData[colPos].hd;
-            }
+        if (columnData[colPos]) {
+            columnData[colPos].hd = BooleanNumber.TRUE;
         } else {
-            if (columnData[colPos]) {
-                columnData[colPos].hd = BooleanNumber.TRUE;
-            } else {
-                columnData[colPos] = { hd: BooleanNumber.TRUE };
-            }
+            columnData[colPos] = { hd: BooleanNumber.TRUE };
+        }
+    }
+
+    setColHidden(colPos: number) {
+        const columnData = this.getColumnData();
+        if (columnData[colPos].hd === BooleanNumber.TRUE) {
+            delete columnData[colPos].hd;
         }
     }
 

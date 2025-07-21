@@ -53,7 +53,7 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                manager.setColVisible(j, false);
+                manager.setColHidden(j);
             }
         }
 
@@ -97,7 +97,7 @@ export const SetColVisibleMutation: IMutation<ISetColVisibleMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                manager.setColVisible(j, true);
+                manager.setColVisible(j);
             }
         }
 

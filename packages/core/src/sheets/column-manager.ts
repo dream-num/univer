@@ -288,7 +288,7 @@ export class ColumnManager {
      * @returns {number} count of column
      */
     getSize(): number {
-        return getArrayLength(this._columnData) - 1;
+        return getArrayLength(this._columnData);
     }
 
     /**

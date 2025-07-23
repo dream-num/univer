@@ -70,8 +70,8 @@ import '../global.css';
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
-const LOAD_LAZY_PLUGINS_TIMEOUT = 100;
-const LOAD_VERY_LAZY_PLUGINS_TIMEOUT = 1_000;
+const LOAD_LAZY_PLUGINS_TIMEOUT = 50;
+const LOAD_VERY_LAZY_PLUGINS_TIMEOUT = 100;
 
 export const mockUser = {
     userID: 'Owner_qxVnhPbQ',

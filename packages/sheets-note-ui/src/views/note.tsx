@@ -19,42 +19,48 @@ import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
 import type { IUniverSheetsNoteUIConfig } from '../controllers/config.schema';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { of } from 'rxjs';
+import { useEffect, useRef, useState } from 'react';
 import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
+    const { popup } = props;
+
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const config = useConfigValue<IUniverSheetsNoteUIConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
-    const activePopup = props.popup.extraProps?.location;
+    const activePopup = popup.extraProps?.location;
     if (!activePopup) {
         console.error('Popup extraProps or location is undefined.');
         return null; // Or handle this case appropriately
     }
-    const currentRender = renderManagerService.getRenderById(activePopup.unitId)!;
-
-    const cellNoteChange$ = useMemo(() => activePopup ? noteModel.getCellNoteChange$(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col) : of(null), [activePopup]);
-    const note = useMemo(() => {
-        const defaultNote = {
-            width: config?.defaultNoteSize?.width ?? 216,
-            height: config?.defaultNoteSize?.height ?? 92,
-            note: '',
-        }; // Fallback to default size if config is not available
-        const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
-        return existingNote || defaultNote;
-    }, [cellNoteChange$]);
-    const [noteText, setNoteText] = useState<string>(() => {
-        const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
-        return existingNote ? existingNote.note : '';
-    });
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const currentRender = renderManagerService.getRenderById(activePopup.unitId)!;
+
+    const [note, setNote] = useState<ISheetNote | null>(null);
+
+    useEffect(() => {
+        const { unitId, subUnitId, row, col } = activePopup;
+
+        const note = noteModel.getNote(unitId, subUnitId, row, col);
+
+        if (!note) return;
+
+        const { width = 160, height = 92 } = config?.defaultNoteSize ?? {};
+        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+        setNote(note ?? { width, height, note: '' });
+
+        if (textareaRef.current) {
+            textareaRef.current.style.width = `${note.width}px`;
+            textareaRef.current.style.height = `${note.height}px`;
+        }
+    }, [activePopup, textareaRef]);
+
     const commandService = useDependency(ICommandService);
     const updateNote = useDebounceFn((newNote: ISheetNote) => {
         if (!activePopup) return;
@@ -77,60 +83,34 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
         }
     });
 
-    useEffect(() => {
-        if (activePopup) {
-            const existingNote = noteModel.getNote(activePopup.unitId, activePopup.subUnitId!, activePopup.row, activePopup.col);
-            if (!existingNote) {
-                textareaRef.current?.focus();
-            }
-        }
-    }, [activePopup, noteModel]);
+    function handleNoteChange(value: string) {
+        if (!note) return;
 
-    useEffect(() => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const resizeObserver = new ResizeObserver((entries) => {
-            const entry = entries[0];
-            if (!entry) return;
-
-            const { width, height } = entry.target.getBoundingClientRect();
-
-            if (width === 0 || height === 0) return;
-
-            const newNote = { ...note, width, height };
-            updateNote(newNote);
-        });
-
-        resizeObserver.observe(textarea);
-
-        return () => {
-            resizeObserver.unobserve(textarea);
-            resizeObserver.disconnect();
-        };
-    }, [note.note]); // Only re-run when note content changes
-
-    const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const noteString = e.target.value;
-        const newNote = { ...note, note: noteString };
-        setNoteText(noteString);
+        const newNote = { ...note, note: value };
+        setNote(newNote);
         updateNote(newNote);
     };
 
+    function handleResize(width: number, height: number) {
+        if (!note) return;
+
+        const newNote = { ...note, width, height };
+        setNote(newNote);
+        updateNote(newNote);
+    }
+
     return (
-        <textarea
+        <Textarea
             ref={textareaRef}
             data-u-comp="note-textarea"
             className={clsx(`
-              univer-ml-px univer-min-h-1 univer-min-w-1 univer-resize univer-rounded-md univer-bg-white univer-p-2
-              univer-text-gray-900 univer-shadow
-              focus:univer-outline-none
-              dark:!univer-bg-gray-800 dark:!univer-text-white
-            `, borderClassName, scrollbarClassName)}
-            style={{ width: note.width, height: note.height }}
-            value={noteText}
+              univer-ml-px univer-min-h-1 univer-min-w-1 univer-bg-white !univer-text-sm univer-shadow
+              dark:!univer-bg-gray-800
+            `)}
+            value={note?.note}
             placeholder={localeService.t('note.placeholder')}
-            onChange={handleNoteChange}
+            onResize={handleResize}
+            onValueChange={handleNoteChange}
             onWheel={(e) => {
                 if (document.activeElement !== textareaRef.current) {
                     currentRender.engine.getCanvasElement().dispatchEvent(new WheelEvent(e.type, e.nativeEvent));

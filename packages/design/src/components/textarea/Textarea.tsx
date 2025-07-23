@@ -37,7 +37,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
         const textarea = textareaRef.current;
         if (textarea && onResize) {
             const resizeObserver = new ResizeObserver((entries) => {
-                const { width, height } = entries[0].contentRect;
+                const { width, height } = entries[0].target.getBoundingClientRect();
 
                 if (width === 0 || height === 0) return;
 
@@ -70,8 +70,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
             data-slot="textarea"
             className={clsx(
                 `
-                  univer-flex univer-w-full univer-resize univer-rounded-md univer-bg-transparent univer-p-2
-                  univer-text-base univer-text-gray-900 univer-outline-none univer-transition-[color,box-shadow]
+                  univer-box-border univer-flex univer-w-full univer-resize univer-rounded-md univer-bg-transparent
+                  univer-p-2 univer-text-base univer-text-gray-900 univer-outline-none
+                  univer-transition-[color,box-shadow]
                   placeholder:univer-text-gray-200
                   disabled:univer-cursor-not-allowed disabled:univer-opacity-50
                   dark:!univer-text-white

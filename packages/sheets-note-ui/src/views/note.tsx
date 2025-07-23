@@ -23,7 +23,7 @@ import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
@@ -47,15 +47,13 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
     useEffect(() => {
         const { unitId, subUnitId, row, col } = activePopup;
 
-        const note = noteModel.getNote(unitId, subUnitId, row, col);
-
-        if (!note) return;
-
-        const { width = 160, height = 92 } = config?.defaultNoteSize ?? {};
-        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-        setNote(note ?? { width, height, note: '' });
+        const { width = 160, height = 72 } = config?.defaultNoteSize ?? {};
+        const note = noteModel.getNote(unitId, subUnitId, row, col) ?? { width, height, note: '' };
 
         if (textareaRef.current) {
+            // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+            setNote(note);
+
             textareaRef.current.style.width = `${note.width}px`;
             textareaRef.current.style.height = `${note.height}px`;
         }
@@ -83,21 +81,21 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
         }
     });
 
-    function handleNoteChange(value: string) {
+    const handleNoteChange = useCallback((value: string) => {
         if (!note) return;
 
         const newNote = { ...note, note: value };
         setNote(newNote);
         updateNote(newNote);
-    };
+    }, [note]);
 
-    function handleResize(width: number, height: number) {
+    const handleResize = useCallback((width: number, height: number) => {
         if (!note) return;
 
         const newNote = { ...note, width, height };
         setNote(newNote);
         updateNote(newNote);
-    }
+    }, [note]);
 
     return (
         <Textarea

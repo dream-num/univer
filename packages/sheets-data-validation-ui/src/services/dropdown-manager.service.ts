@@ -29,6 +29,7 @@ import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisi
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
+import { DROP_DOWN_DEFAULT_COLOR } from '../const';
 import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 import { DataValidationRejectInputController } from '../controllers/dv-reject-input.controller';
 
@@ -346,7 +347,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                 const options = list.map((item) => ({
                     label: item.label,
                     value: item.label,
-                    color: (showColor || item.color) ? item.color : 'transparent',
+                    color: (showColor || item.color) ? (item.color || DROP_DOWN_DEFAULT_COLOR) : 'transparent',
                 }));
 
                 dropdownParam = {

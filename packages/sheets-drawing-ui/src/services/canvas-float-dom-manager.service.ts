@@ -631,7 +631,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     });
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(data.unitId);
-                    if (renderObject) {
+                    if (renderObject && sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_CHART) {
                         const { scene } = renderObject;
                         const floatDomInfo = this._domLayerInfoMap.get(data.drawingId);
                         if (floatDomInfo?.rect) {

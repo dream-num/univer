@@ -52,6 +52,7 @@ export { type IMultipleSelectProps, MultipleSelect } from './components/select/M
 export { type ISelectProps, Select } from './components/select/Select';
 export { Separator } from './components/separator/Separator';
 export { Switch } from './components/switch/Switch';
+export { Textarea } from './components/textarea/Textarea';
 export { type IToasterProps, toast, Toaster } from './components/toaster/Toaster';
 export { type ITooltipProps, Tooltip } from './components/tooltip/Tooltip';
 export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, type ITreeNodeProps, type ITreeProps, mergeTreeSelected, Tree, TreeSelectionMode } from './components/tree';

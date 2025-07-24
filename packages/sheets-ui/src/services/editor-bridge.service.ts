@@ -304,7 +304,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     getLatestEditCellState() {
         const currentEditCell = this._currentEditCell;
         if (currentEditCell == null) return;

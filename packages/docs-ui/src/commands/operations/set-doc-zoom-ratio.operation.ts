@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { IAccessor, IOperation } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IOperation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface ISetDocZoomRatioOperationParams {
     zoomRatio: number;
@@ -26,12 +26,13 @@ export const SetDocZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetDocZoomRatioOperationParams
 ): ISetDocZoomRatioOperationParams => {
-    const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.unitId);
-    const old = documentModel?.zoomRatio || 1;
-    return {
-        ...Tools.deepClone(params),
-        zoomRatio: old,
-    };
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    const documentModel = univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC);
+
+    documentModel?.setZoomRatio(params.zoomRatio);
+
+    return { ...params };
 };
 
 export const SetDocZoomRatioOperation: IOperation<ISetDocZoomRatioOperationParams> = {
@@ -40,19 +41,14 @@ export const SetDocZoomRatioOperation: IOperation<ISetDocZoomRatioOperationParam
     type: CommandType.OPERATION,
 
     handler: (accessor, params: ISetDocZoomRatioOperationParams) => {
-        const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.unitId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const documentModel = univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC);
         if (!documentModel) {
             return false;
         }
 
-        const documentData = documentModel.getSnapshot();
-        if (documentData.settings == null) {
-            documentData.settings = {
-                zoomRatio: params.zoomRatio,
-            };
-        } else {
-            documentData.settings.zoomRatio = params.zoomRatio;
-        }
+        documentModel.setZoomRatio(params.zoomRatio);
 
         return true;
     },

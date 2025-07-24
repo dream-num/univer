@@ -18,7 +18,7 @@ import type { RangePermissionPointConstructor, WorkbookPermissionPointConstructo
 import type { ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { FRange } from './f-range';
-import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import { cellToRange, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
@@ -443,6 +443,25 @@ export class FPermission extends FBase {
                     ranges: ranges.map((range) => range.getRange()),
                 },
             });
+        }
+    }
+
+    getPermissionInfoWithCell(unitId: string, subUnitId: string, row: number, column: number): {
+        permissionId: string;
+        ruleId: string;
+    } | undefined {
+        const cellRange = cellToRange(row, column);
+        const overlapRule = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).find((rule) => {
+            const ranges = rule.ranges;
+            return ranges.some((range) => {
+                return Rectangle.intersects(cellRange, range);
+            });
+        });
+        if (overlapRule) {
+            return {
+                permissionId: overlapRule.permissionId,
+                ruleId: overlapRule.id,
+            };
         }
     }
 }

@@ -175,6 +175,12 @@ export class SheetClipboardController extends RxDisposable {
 
                 this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent, files });
             });
+
+            docSelectionRenderService?.onKeydown$.subscribe((event) => {
+                if ((event.event as KeyboardEvent).key === 'Escape') {
+                    this._sheetClipboardService.removeMarkSelection();
+                }
+            });
         };
 
         // docSelectionRenderService would init before clipboardService controller when creating a univer.

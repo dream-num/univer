@@ -171,12 +171,9 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         const { documentStyle } = this.snapshot;
 
         if (!documentStyle.pageSize) {
-            width = width ?? Number.POSITIVE_INFINITY;
-            height = height ?? Number.POSITIVE_INFINITY;
-
             documentStyle.pageSize = {
-                width,
-                height,
+                width: width ?? Number.POSITIVE_INFINITY,
+                height: height ?? Number.POSITIVE_INFINITY,
             };
 
             return;
@@ -210,12 +207,12 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
     }
 
     setZoomRatio(zoomRatio: number = 1) {
-        if (this.snapshot.settings == null) {
+        if (!this.snapshot.settings) {
             this.snapshot.settings = {
                 zoomRatio,
             };
         } else {
-            this.snapshot.settings.zoomRatio = 1;
+            this.snapshot.settings.zoomRatio = zoomRatio;
         }
     }
 

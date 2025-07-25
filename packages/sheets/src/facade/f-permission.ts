@@ -446,6 +446,43 @@ export class FPermission extends FBase {
         }
     }
 
+    /**
+     * Get the permission information for a specific cell in a worksheet.
+     * @param {string} unitId - The unique identifier of the workbook.
+     * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
+     * @param {number} row - The row index of the cell.
+     * @param {number} column - The column index of the cell.
+     * @returns {{ permissionId: string, ruleId: string } | undefined} - Returns an object containing the `permissionId` and `ruleId` if the cell is protected by a range protection rule. If no protection is found, it returns `undefined`.
+     *
+     * @example
+     * ```typescript
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const permission = fWorkbook.getPermission();
+     * const unitId = fWorkbook.getId();
+     * const subUnitId = fWorksheet.getSheetId();
+     *
+     * // Get the permission information for cell C3
+     * const cell = fWorksheet.getRange('C3');
+     * const permissionInfo = permission.getPermissionInfoWithCell(
+     *   unitId,
+     *   subUnitId,
+     *   cell.getRow(),
+     *   cell.getColumn()
+     * );
+     * console.log(permissionInfo);
+     *
+     * // If the cell is protected, you can remove the protection like this:
+     * if (permissionInfo) {
+     *   const { ruleId } = permissionInfo;
+     *
+     *   // After 2 seconds, remove the protection for the cell
+     *   setTimeout(() => {
+     *     permission.removeRangeProtection(unitId, subUnitId, [ruleId]);
+     *   }, 2000);
+     * }
+     * ```
+     */
     getPermissionInfoWithCell(unitId: string, subUnitId: string, row: number, column: number): {
         permissionId: string;
         ruleId: string;

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "private": false,
     "description": "Univer thread comment core plugin",
     "author": "DreamNum <developer@univer.ai>",

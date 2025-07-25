@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.9.4](https://github.com/dream-num/univer/compare/v0.9.3...v0.9.4) (2025-07-25)
+
+
+### Bug Fixes
+
+* **drawing:** fix drawing op send cycle ([#5570](https://github.com/dream-num/univer/issues/5570)) ([86d19c5](https://github.com/dream-num/univer/commit/86d19c5a39ff9408adfeb8f046a8d660a20ff180))
+* **sheets-data-validation-ui:** set default color for dropdown options when color is not provided ([#5566](https://github.com/dream-num/univer/issues/5566)) ([095759b](https://github.com/dream-num/univer/commit/095759b3f6b581b12c273e29ba35581382f4319b))
+* **sheets-note-ui:** improve note handling and update textarea value management ([#5563](https://github.com/dream-num/univer/issues/5563)) ([9592d3c](https://github.com/dream-num/univer/commit/9592d3cd6fb8b0f698ac2f8975dc31f9f4e3324b))
+* **sheets-ui:** improve layout and styling of SelectList component ([#5554](https://github.com/dream-num/univer/issues/5554)) ([2bc5246](https://github.com/dream-num/univer/commit/2bc524675c65c63832d732d290172e3de7fe5330))
+* **sheets-ui:** update default style settings based on active sheet styles ([#5556](https://github.com/dream-num/univer/issues/5556)) ([7f32f90](https://github.com/dream-num/univer/commit/7f32f904fca050a253b32a0adb77f9add2a71a12))
+
+
+### Features
+
+* add ru localization in math sheets formula UI ([#5577](https://github.com/dream-num/univer/issues/5577)) ([33574f3](https://github.com/dream-num/univer/commit/33574f3ea9e1e184ec9e1c8cee1e0af39cc0cb68))
+* add ru localization in sheets formula UI ([#5561](https://github.com/dream-num/univer/issues/5561)) ([8aecfe6](https://github.com/dream-num/univer/commit/8aecfe6a35453f534a6788fa1c2877cea9d5496b))
+* **design:** add Textarea component ([#5567](https://github.com/dream-num/univer/issues/5567)) ([8e77b43](https://github.com/dream-num/univer/commit/8e77b4362d2a82e9eac32eba5d3b30b70674b2ba))
+
 ## [0.9.3](https://github.com/dream-num/univer/compare/v0.9.2...v0.9.3) (2025-07-19)
 
 

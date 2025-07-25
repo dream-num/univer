@@ -16,6 +16,7 @@
 
 import type { LocaleService } from '@univerjs/core';
 import type { IInputProps } from '@univerjs/design';
+import type { KeyboardEvent } from 'react';
 import type { IFindReplaceService } from '../../services/find-replace.service';
 import { Input, Pager } from '@univerjs/design';
 import { useState } from 'react';
@@ -30,7 +31,17 @@ export interface ISearchInputProps extends Pick<IInputProps, 'onFocus' | 'onBlur
 }
 
 export function SearchInput(props: ISearchInputProps) {
-    const { findCompleted: findComplete, localeService, matchesCount, matchesPosition, initialFindString, findReplaceService, onChange, ...rest } = props;
+    const {
+        findCompleted: findComplete,
+        localeService,
+        matchesCount,
+        matchesPosition,
+        initialFindString,
+        findReplaceService,
+        onChange,
+        ...rest
+    } = props;
+
     const [value, setValue] = useState(initialFindString);
     const noResult = findComplete && matchesCount === 0;
     const text = noResult
@@ -38,6 +49,24 @@ export function SearchInput(props: ISearchInputProps) {
         : matchesCount === 0
             ? ' '
             : undefined;
+
+    function handleChangePosition(newIndex: number) {
+        if (matchesPosition === matchesCount && newIndex === 1) {
+            findReplaceService.moveToNextMatch();
+        } else if (matchesPosition === 1 && newIndex === matchesCount) {
+            findReplaceService.moveToPreviousMatch();
+        } else if (newIndex < matchesPosition) {
+            findReplaceService.moveToPreviousMatch();
+        } else {
+            findReplaceService.moveToNextMatch();
+        }
+    }
+
+    function handleEnter(event: KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter') {
+            handleChangePosition(matchesPosition + 1);
+        }
+    }
 
     return (
         <div className="univer-relative univer-flex univer-items-center univer-gap-2" onDrag={(e) => e.stopPropagation()}>
@@ -50,23 +79,14 @@ export function SearchInput(props: ISearchInputProps) {
                     setValue(value);
                     onChange?.(value);
                 }}
+                onKeyDown={handleEnter}
                 slot={(
                     <Pager
                         loop
                         text={text}
                         value={matchesPosition}
                         total={matchesCount}
-                        onChange={(newIndex) => {
-                            if (matchesPosition === matchesCount && newIndex === 1) {
-                                findReplaceService.moveToNextMatch();
-                            } else if (matchesPosition === 1 && newIndex === matchesCount) {
-                                findReplaceService.moveToPreviousMatch();
-                            } else if (newIndex < matchesPosition) {
-                                findReplaceService.moveToPreviousMatch();
-                            } else {
-                                findReplaceService.moveToNextMatch();
-                            }
-                        }}
+                        onChange={handleChangePosition}
                     />
                 )}
                 {...rest}

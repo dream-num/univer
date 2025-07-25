@@ -18,7 +18,6 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import {
     ICommandService,
     Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     RxDisposable,
@@ -63,8 +62,7 @@ export class FindReplaceController extends RxDisposable {
         @IDialogService private readonly _dialogService: IDialogService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 

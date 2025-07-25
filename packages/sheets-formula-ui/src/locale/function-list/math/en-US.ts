@@ -1052,7 +1052,7 @@ const locale = {
         ],
         functionParameter: {
             sumRange: { name: 'sum_range', detail: 'The range of cells to sum.' },
-            criteriaRange1: { name: 'criteria_range1 ', detail: 'The range that is tested using criteria1. criteria_range1 and criteria1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in sum_range are added.' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'The range that is tested using criteria1. criteria_range1 and criteria1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in sum_range are added.' },
             criteria1: { name: 'criteria1', detail: 'The criteria that defines which cells in criteria_range1 will be added. For example, criteria can be entered as 32, ">32", B4, "apples", or "32".' },
             criteriaRange2: { name: 'criteriaRange2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
             criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },

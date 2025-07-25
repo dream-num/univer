@@ -21,11 +21,11 @@ import cube from './function-list/cube/ru-RU';
 import database from './function-list/database/ru-RU';
 import date from './function-list/date/ru-RU'; // TODO
 import engineering from './function-list/engineering/ru-RU'; // TODO
-import financial from './function-list/financial/ru-RU'; // TODO
+import financial from './function-list/financial/ru-RU';
 import information from './function-list/information/ru-RU'; // TODO
 import logical from './function-list/logical/ru-RU'; // TODO
 import lookup from './function-list/lookup/ru-RU'; // TODO
-import math from './function-list/math/en-US'; // TODO
+import math from './function-list/math/ru-RU';
 import statistical from './function-list/statistical/en-US'; // TODO
 import text from './function-list/text/ru-RU';
 import univer from './function-list/univer/ru-RU';

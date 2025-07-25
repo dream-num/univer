@@ -89,7 +89,7 @@ export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defin
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export { getCellRealRange } from './common/utils';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
-export { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
+export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
 export { AutoFillController } from './controllers/auto-fill.controller';

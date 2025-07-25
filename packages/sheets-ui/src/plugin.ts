@@ -22,7 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
-import { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
+import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -118,20 +118,15 @@ export class UniverSheetsUIPlugin extends Plugin {
             this._config
         );
 
-        const { customComponents = new Set() } = rest;
-        if (rest.protectedRangeShadow === false) {
-            customComponents.add(UNIVER_SHEET_PERMISSION_BACKGROUND);
-        }
-
         if (rest.protectedRangeUserSelector) {
-            customComponents.add(UNIVER_SHEET_PERMISSION_USER_PART);
+            const { component, framework } = rest.protectedRangeUserSelector;
 
             this.disposeWithMe(
                 this._componentManager.register(
                     UNIVER_SHEET_PERMISSION_USER_PART,
-                    rest.protectedRangeUserSelector.component,
+                    component,
                     {
-                        framework: rest.protectedRangeUserSelector.framework,
+                        framework,
                     }
                 )
             );
@@ -141,7 +136,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest, customComponents });
+        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
     }
 
     override onStarting(): void {

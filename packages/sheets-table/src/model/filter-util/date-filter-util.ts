@@ -421,32 +421,32 @@ export function getDateFilterExecuteFunc(filterInfo: ITableDateFilterInfo) {
     switch (filterInfo.compareType) {
         case TableDateCompareTypeEnum.Equal:
         {
-            const expected = filterInfo.expectedValue as Date;
+            const expected = new Date(filterInfo.expectedValue as string | Date);
             return (date: Date) => date.getTime() === expected.getTime();
         }
         case TableDateCompareTypeEnum.NotEqual:
         {
-            const expected = filterInfo.expectedValue as Date;
+            const expected = new Date(filterInfo.expectedValue as string | Date);
             return (date: Date) => date.getTime() !== expected.getTime();
         }
         case TableDateCompareTypeEnum.After:
         {
-            const expected = filterInfo.expectedValue as Date;
+            const expected = new Date(filterInfo.expectedValue as string | Date);
             return (date: Date) => date.getTime() > expected.getTime();
         }
         case TableDateCompareTypeEnum.Before:
         {
-            const expected = filterInfo.expectedValue as Date;
+            const expected = new Date(filterInfo.expectedValue as string | Date);
             return (date: Date) => date.getTime() < expected.getTime();
         }
         case TableDateCompareTypeEnum.AfterOrEqual:
         {
-            const expected = filterInfo.expectedValue as Date;
+            const expected = new Date(filterInfo.expectedValue as string | Date);
             return (date: Date) => date.getTime() >= expected.getTime();
         }
         case TableDateCompareTypeEnum.BeforeOrEqual:
         {
-            const expected = filterInfo.expectedValue as Date;
+            const expected = new Date(filterInfo.expectedValue as string | Date);
             return (date: Date) => date.getTime() <= expected.getTime();
         }
         case TableDateCompareTypeEnum.Between:

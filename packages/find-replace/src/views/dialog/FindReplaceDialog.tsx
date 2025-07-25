@@ -74,7 +74,6 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
         <>
             <SearchInput
                 findCompleted={findCompleted}
-                className="univer-find-input"
                 matchesCount={matchesCount}
                 matchesPosition={matchesPosition}
                 findReplaceService={findReplaceService}

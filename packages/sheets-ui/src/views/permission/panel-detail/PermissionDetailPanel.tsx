@@ -18,7 +18,7 @@ import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { ComponentContainer, ISidebarService, useComponentsOfPart, useDependency } from '@univerjs/ui';
+import { ComponentManager, ISidebarService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
@@ -34,6 +34,7 @@ interface ISheetPermissionPanelDetailProps {
 export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailProps) => {
     const { fromSheetBar, rule, oldRule } = props;
     const injector = useDependency(Injector);
+    const componentManager = useDependency(ComponentManager);
     const activeRule: IPermissionPanelRule = rule ? generateRuleByUnitType(injector, rule) : generateDefaultRule(injector, fromSheetBar);
 
     const [ranges, setRanges] = useState<IRange[]>(activeRule.ranges);
@@ -43,12 +44,12 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     const [desc, setDesc] = useState<string | undefined>(activeRule.description);
     const [editState, setEditState] = useState<EditStateEnum>(activeRule.editState ?? EditStateEnum.OnlyMe);
     const [viewState, setViewState] = useState<ViewStateEnum>(activeRule.viewState ?? ViewStateEnum.OthersCanView);
-    const PermissionDetailUserPart = useComponentsOfPart(UNIVER_SHEET_PERMISSION_USER_PART);
+    const PermissionDetailUserPart = componentManager.get(UNIVER_SHEET_PERMISSION_USER_PART);
 
     useEffect(() => {
         const univerInstanceService = injector.get(IUniverInstanceService);
         const sidebarService = injector.get(ISidebarService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
         const subUnitId = workbook.getActiveSheet().getSheetId();
         const activeSheetSubscribe = workbook.activeSheet$.subscribe((sheet) => {
@@ -76,10 +77,9 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
                 desc={desc}
                 onDescChange={(v) => setDesc(v)}
             />
-            <ComponentContainer
+            <PermissionDetailUserPart
                 key="user-part"
-                components={PermissionDetailUserPart}
-                sharedProps={{
+                {...{
                     editState,
                     onEditStateChange: (v: EditStateEnum) => setEditState(v),
                     viewState,

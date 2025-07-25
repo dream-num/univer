@@ -22,7 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
-import { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
+import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -76,10 +76,7 @@ import { DragManagerService } from './services/drag-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
-import {
-    FormulaEditorManagerService,
-    IFormulaEditorManagerService,
-} from './services/editor/formula-editor-manager.service';
+import { FormulaEditorManagerService, IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
@@ -119,20 +116,15 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             this._config
         );
 
-        const { customComponents = new Set() } = rest;
-        if (rest.protectedRangeShadow === false) {
-            customComponents.add(UNIVER_SHEET_PERMISSION_BACKGROUND);
-        }
-
         if (rest.protectedRangeUserSelector) {
-            customComponents.add(UNIVER_SHEET_PERMISSION_USER_PART);
+            const { component, framework } = rest.protectedRangeUserSelector;
 
             this.disposeWithMe(
                 this._componentManager.register(
                     UNIVER_SHEET_PERMISSION_USER_PART,
-                    rest.protectedRangeUserSelector.component,
+                    component,
                     {
-                        framework: rest.protectedRangeUserSelector.framework,
+                        framework,
                     }
                 )
             );
@@ -142,7 +134,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest, customComponents });
+        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { ...rest });
     }
 
     override onStarting(): void {

@@ -27,7 +27,7 @@ export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;
     override?: DependencyOverride;
-    customComponents?: Set<string>;
+
     /**
      * The maximum count of rows triggering auto height. This is used to avoid performance issue.
      * @default 1000
@@ -95,7 +95,7 @@ export interface IUniverSheetsUIConfig {
         /**
          * The framework of the component. Must be passed correctly.
          */
-        framework: 'react' | 'vue3';
+        framework: string;
     };
 
     /**
@@ -113,5 +113,6 @@ export interface IUniverSheetsUIConfig {
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
     statusBarStatistic: true,
+    protectedRangeShadow: true,
     maxAutoHeightCount: 1000,
 };

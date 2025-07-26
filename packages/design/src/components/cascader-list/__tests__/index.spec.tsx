@@ -18,6 +18,8 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CascaderList } from '../CascaderList';
 
+afterEach(cleanup);
+
 describe('CascaderList', () => {
     afterEach(cleanup);
 

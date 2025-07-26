@@ -15,11 +15,13 @@
  */
 
 import type { ILocale } from '../../../locale/interface';
-import { render } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { useContext } from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import zhCN from '../../../locale/zh-CN';
 import { ConfigContext, ConfigProvider } from '../ConfigProvider';
+
+afterEach(cleanup);
 
 describe('ConfigProvider', () => {
     it('should render correctly', () => {

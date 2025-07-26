@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Checkbox } from '../Checkbox';
+
+afterEach(cleanup);
 
 describe('Checkbox', () => {
     it('click Checkbox', async () => {

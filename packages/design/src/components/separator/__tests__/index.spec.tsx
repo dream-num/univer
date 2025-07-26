@@ -16,33 +16,22 @@
 
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { Switch } from '../Switch';
+import { Separator } from '../Separator';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-describe('Switch', () => {
-    afterEach(cleanup);
-
-    it('renders correctly', () => {
-        const { container } = render(<Switch />);
-        expect(container);
+describe('Separator', () => {
+    it('should render horizontal separator by default', () => {
+        const { container } = render(<Separator />);
+        const root = container.querySelector('[data-slot="separator-root"]');
+        expect(root).toBeInTheDocument();
+        expect(root).toHaveAttribute('data-orientation', 'horizontal');
     });
 
-    it('renders the checked', () => {
-        const { container } = render(<Switch defaultChecked />);
-
-        const checkboxElement = container.querySelector('[type="checkbox"]')! as HTMLInputElement;
-
-        expect(checkboxElement.checked).toBeTruthy();
-    });
-
-    it('change the checked', () => {
-        const { container } = render(<Switch defaultChecked />);
-
-        const checkboxElement = container.querySelector('[type="checkbox"]')! as HTMLInputElement;
-
-        checkboxElement.click();
-
-        expect(checkboxElement.checked).toBeFalsy();
+    it('should render vertical separator', () => {
+        const { container } = render(<Separator orientation="vertical" />);
+        const root = container.querySelector('[data-slot="separator-root"]');
+        expect(root).toHaveAttribute('data-orientation', 'vertical');
     });
 });

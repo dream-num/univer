@@ -16,33 +16,24 @@
 
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { Switch } from '../Switch';
+import { KBD } from '../Kbd';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-describe('Switch', () => {
-    afterEach(cleanup);
-
-    it('renders correctly', () => {
-        const { container } = render(<Switch />);
-        expect(container);
+describe('KBD', () => {
+    it('should render with default props', () => {
+        const { container } = render(<KBD keyboard="Ctrl" />);
+        expect(container).toMatchSnapshot();
     });
 
-    it('renders the checked', () => {
-        const { container } = render(<Switch defaultChecked />);
-
-        const checkboxElement = container.querySelector('[type="checkbox"]')! as HTMLInputElement;
-
-        expect(checkboxElement.checked).toBeTruthy();
+    it('should render with custom className', () => {
+        const { container } = render(<KBD className="custom-class" keyboard="Ctrl" />);
+        expect(container.querySelector('.custom-class')).toBeTruthy();
     });
 
-    it('change the checked', () => {
-        const { container } = render(<Switch defaultChecked />);
-
-        const checkboxElement = container.querySelector('[type="checkbox"]')! as HTMLInputElement;
-
-        checkboxElement.click();
-
-        expect(checkboxElement.checked).toBeFalsy();
+    it('should render with multiple keys', () => {
+        const { container } = render(<KBD keyboard="Ctrl + Alt + Del" />);
+        expect(container).toMatchSnapshot();
     });
 });

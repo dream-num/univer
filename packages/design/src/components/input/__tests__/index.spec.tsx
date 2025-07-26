@@ -18,6 +18,8 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Input } from '../Input';
 
+afterEach(cleanup);
+
 describe('Input', () => {
     afterEach(cleanup);
 

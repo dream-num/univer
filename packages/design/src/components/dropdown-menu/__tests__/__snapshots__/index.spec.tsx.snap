@@ -1,0 +1,76 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DropdownMenu > should render with checkbox 1`] = `
+<div>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-slot="dropdown-menu-trigger"
+    data-state="closed"
+    id="radix-«r8»"
+    type="button"
+  >
+    Trigger
+  </button>
+</div>
+`;
+
+exports[`DropdownMenu > should render with normal items 1`] = `
+<div>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-slot="dropdown-menu-trigger"
+    data-state="closed"
+    id="radix-«r0»"
+    type="button"
+  >
+    Trigger
+  </button>
+</div>
+`;
+
+exports[`DropdownMenu > should render with radio group 1`] = `
+<div>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-slot="dropdown-menu-trigger"
+    data-state="closed"
+    id="radix-«r6»"
+    type="button"
+  >
+    Trigger
+  </button>
+</div>
+`;
+
+exports[`DropdownMenu > should render with separator 1`] = `
+<div>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-slot="dropdown-menu-trigger"
+    data-state="closed"
+    id="radix-«r2»"
+    type="button"
+  >
+    Trigger
+  </button>
+</div>
+`;
+
+exports[`DropdownMenu > should render with subItem 1`] = `
+<div>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-slot="dropdown-menu-trigger"
+    data-state="closed"
+    id="radix-«r4»"
+    type="button"
+  >
+    Trigger
+  </button>
+</div>
+`;

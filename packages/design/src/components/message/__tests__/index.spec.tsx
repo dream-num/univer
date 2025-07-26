@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Button } from '../../button/Button';
 import { message, Messager, MessageType } from '../Message';
+
+afterEach(cleanup);
 
 describe('Message', () => {
     it('renders correctly', () => {

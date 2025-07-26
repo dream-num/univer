@@ -15,31 +15,24 @@
  */
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
-import { Radio } from '../../radio/Radio';
-import { RadioGroup } from '../RadioGroup';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Badge } from '../Badge';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-describe('RadioGroup', () => {
-    let active = '0';
-    const group = (
-        <RadioGroup
-            value={active}
-            onChange={(value) => {
-                active = value as string;
-            }}
-        >
-            <Radio value="0">0</Radio>
-            <Radio value="1">1</Radio>
-        </RadioGroup>
-    );
+describe('Badge', () => {
+    it('renders children', () => {
+        render(<Badge>Test Badge</Badge>);
+        expect(screen.getByText('Test Badge')).toBeInTheDocument();
+    });
 
-    it('click Radio', async () => {
-        render(group);
-
-        fireEvent.click(screen.getByText('1'));
-
-        expect(active).toBe('1');
+    it('renders closable badge', () => {
+        const onClose = vi.fn();
+        render(<Badge closable onClose={onClose}>Closable Badge</Badge>);
+        const closeButton = screen.getByLabelText('Close badge');
+        expect(closeButton).toBeInTheDocument();
+        fireEvent.click(closeButton);
+        expect(onClose).toHaveBeenCalled();
     });
 });

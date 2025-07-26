@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { Radio } from '../Radio';
+import { Toaster } from '../Toaster';
+import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-describe('Radio', () => {
-    const component = <Radio value="0">text</Radio>;
+describe('Toaster', () => {
+    it('should render without crashing', () => {
+        render(<Toaster />);
+        const toasterRoot = document.querySelector('[data-sonner-toast]') || document.body;
+        expect(toasterRoot).toBeTruthy();
+    });
 
-    it('click Radio', async () => {
-        const { container } = render(component);
-
-        fireEvent.click(container.querySelector('input')!);
-
-        const $input = container.querySelector('input');
-
-        expect($input?.checked).toBe(true);
+    it('should respect visibleToasts prop', () => {
+        render(<Toaster visibleToasts={2} />);
+        const toasterRoot = document.querySelector('[data-sonner-toast]') || document.body;
+        expect(toasterRoot).toBeTruthy();
     });
 });

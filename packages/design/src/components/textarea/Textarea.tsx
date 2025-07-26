@@ -67,6 +67,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
     return (
         <textarea
             ref={textareaRef}
+            data-u-comp="textarea"
             data-slot="textarea"
             className={clsx(
                 `

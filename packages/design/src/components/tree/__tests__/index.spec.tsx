@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, render } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Tree } from '../Tree';
 import { findNodeFromPath, findNodePathFromTree, findSubTreeFromPath, isIntermediated, mergeTreeSelected } from '../util';
+
+afterEach(cleanup);
 
 describe('Tree', () => {
     const data = [

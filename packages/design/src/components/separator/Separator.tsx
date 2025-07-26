@@ -26,6 +26,7 @@ function Separator({
 }: ComponentProps<typeof Root>) {
     return (
         <Root
+            data-u-comp="separator"
             data-slot="separator-root"
             decorative={decorative}
             orientation={orientation}

@@ -18,6 +18,8 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Switch } from '../Switch';
 
+afterEach(cleanup);
+
 describe('Switch', () => {
     afterEach(cleanup);
 

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Button } from '../Button';
+import { ButtonGroup } from '../ButtonGroup';
+import '@testing-library/jest-dom/vitest';
+
+afterEach(cleanup);
 
 describe('Button', () => {
     it('renders correctly', () => {
@@ -59,5 +63,27 @@ describe('Button', () => {
         fireEvent.click(container.querySelector('button')!);
 
         expect(a).toEqual(1);
+    });
+});
+
+describe('ButtonGroup', () => {
+    it('renders correctly', () => {
+        const { container } = render(
+            <ButtonGroup>
+                <Button variant="primary">btn1</Button>
+                <Button variant="link">btn2</Button>
+            </ButtonGroup>
+        );
+        expect(container);
+    });
+
+    it('renders horizontal button group', () => {
+        const { container } = render(
+            <ButtonGroup orientation="horizontal">
+                <Button variant="primary">btn1</Button>
+                <Button variant="link">btn2</Button>
+            </ButtonGroup>
+        );
+        expect(container.querySelector('.univer-grid-flow-row')).toBeNull();
     });
 });

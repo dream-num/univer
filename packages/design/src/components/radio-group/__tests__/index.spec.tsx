@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Radio } from '../../radio/Radio';
 import { RadioGroup } from '../RadioGroup';
+
+afterEach(cleanup);
 
 describe('RadioGroup', () => {
     let active = '0';

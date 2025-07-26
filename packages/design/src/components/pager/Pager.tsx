@@ -20,18 +20,15 @@ import { clsx } from '../../helper/clsx';
 
 export interface IPagerProps {
     className?: string;
-
     text?: string;
-
     value: number;
     total: number;
     loop?: boolean;
-
     onChange?(value: number): void;
 }
 
 export function Pager(props: IPagerProps) {
-    const { className, value: current = 0, total: count = 0, loop, text: propText } = props;
+    const { className, value: current = 0, total: count = 0, loop, text: propText, onChange } = props;
 
     const text = useMemo(() => propText ?? `${current}/${count}`, [current, count, propText]);
     const hasValue = count > 0;
@@ -39,20 +36,20 @@ export function Pager(props: IPagerProps) {
     const onClickLeftArrow = () => {
         if (current === 1) {
             if (loop) {
-                props.onChange?.(count);
+                onChange?.(count);
             }
         } else {
-            props.onChange?.(current - 1);
+            onChange?.(current - 1);
         }
     };
 
     const onClickRightArrow = () => {
         if (current === count) {
             if (loop) {
-                props.onChange?.(1);
+                onChange?.(1);
             }
         } else {
-            props.onChange?.(current + 1);
+            onChange?.(current + 1);
         }
     };
 
@@ -67,31 +64,35 @@ export function Pager(props: IPagerProps) {
             {hasValue
                 ? (
                     <>
-                        <div
+                        <button
                             data-u-comp="pager-left-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
+                              univer-border-none univer-bg-transparent univer-p-0
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-600
                             `}
+                            type="button"
                             role="button"
                             onClick={onClickLeftArrow}
                         >
                             <MoreLeftIcon />
-                        </div>
-                        <div className="univer-mx-1">{text}</div>
-                        <div
+                        </button>
+                        <span className="univer-mx-1">{text}</span>
+                        <button
                             data-u-comp="pager-right-arrow"
                             className={`
                               univer-inline-flex univer-size-4 univer-cursor-pointer univer-items-center univer-rounded
+                              univer-border-none univer-bg-transparent univer-p-0
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-600
                             `}
+                            type="button"
                             role="button"
                             onClick={onClickRightArrow}
                         >
                             <MoreRightIcon />
-                        </div>
+                        </button>
                     </>
                 )
                 : <div className="univer-mx-1">{text}</div>}

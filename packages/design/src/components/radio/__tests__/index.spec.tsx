@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Radio } from '../Radio';
+
+afterEach(cleanup);
 
 describe('Radio', () => {
     const component = <Radio value="0">text</Radio>;

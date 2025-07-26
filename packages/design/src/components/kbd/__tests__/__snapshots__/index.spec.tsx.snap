@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`KBD > should render with default props 1`] = `
+<div>
+  <span
+    class="univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700 dark:!univer-bg-gray-700 dark:!univer-text-white univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid univer-border"
+  >
+    <kbd
+      class="univer-inline-block univer-h-full"
+    >
+      Ctrl
+    </kbd>
+  </span>
+</div>
+`;
+
+exports[`KBD > should render with multiple keys 1`] = `
+<div>
+  <span
+    class="univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700 dark:!univer-bg-gray-700 dark:!univer-text-white univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid univer-border"
+  >
+    <kbd
+      class="univer-inline-block univer-h-full"
+    >
+      Ctrl 
+    </kbd>
+    <span
+      class="univer-inline-block univer-h-full univer-px-1"
+    >
+      +
+    </span>
+    <kbd
+      class="univer-inline-block univer-h-full"
+    >
+       Alt 
+    </kbd>
+    <span
+      class="univer-inline-block univer-h-full univer-px-1"
+    >
+      +
+    </span>
+    <kbd
+      class="univer-inline-block univer-h-full"
+    >
+       Del
+    </kbd>
+  </span>
+</div>
+`;

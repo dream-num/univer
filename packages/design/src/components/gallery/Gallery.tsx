@@ -15,7 +15,7 @@
  */
 
 import { OneToOneIcon, ZoomInIcon, ZoomOutIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
 import { Pager } from '../pager/Pager';
@@ -27,14 +27,40 @@ export interface IGalleryProps {
     onOpenChange?: (open: boolean) => void;
 }
 
+const buttonClassName = `
+    univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none
+    univer-bg-transparent univer-p-0 univer-text-current
+    hover:univer-text-white
+`;
+
 export function Gallery(props: IGalleryProps) {
     const { className, images, open, onOpenChange } = props;
     const [isVisible, setIsVisible] = useState(false);
-
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [zoomLevel, setZoomLevel] = useState(1);
 
+    const dialogRef = useRef<HTMLDivElement>(null);
+
     const activeImage = useMemo(() => images[activeImageIndex], [activeImageIndex, images]);
+
+    // 聚焦管理
+    useEffect(() => {
+        if (open && dialogRef.current) {
+            dialogRef.current.focus();
+        }
+    }, [open]);
+
+    // ESC 关闭支持
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onOpenChange?.(false);
+            }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [open, onOpenChange]);
 
     useEffect(() => {
         if (open) {
@@ -54,7 +80,6 @@ export function Gallery(props: IGalleryProps) {
             setZoomLevel(1);
             return;
         }
-
         const newZoomLevel = zoomLevel + ratio;
         if (newZoomLevel < 0.5) return;
         if (newZoomLevel > 2) return;
@@ -64,6 +89,11 @@ export function Gallery(props: IGalleryProps) {
     return createPortal(
         <div
             data-u-comp="gallery"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Image gallery"
+            tabIndex={-1}
+            ref={dialogRef}
             className={clsx(
                 `
                   univer-absolute univer-inset-0 univer-z-[1080] univer-flex univer-size-full univer-select-none
@@ -78,6 +108,7 @@ export function Gallery(props: IGalleryProps) {
         >
             <div
                 className="univer-absolute univer-inset-0 univer-size-full univer-bg-gray-900 univer-opacity-80"
+                aria-hidden="true"
                 onClick={() => onOpenChange?.(false)}
             />
 
@@ -93,7 +124,7 @@ export function Gallery(props: IGalleryProps) {
                             transform: `scale(${zoomLevel})`,
                         }}
                         src={activeImage}
-                        alt="gallery"
+                        alt={`Image ${activeImageIndex + 1} of ${images.length}`}
                         draggable={false}
                     />
                 )}
@@ -117,33 +148,30 @@ export function Gallery(props: IGalleryProps) {
                     total={images.length}
                     onChange={(value) => setActiveImageIndex(value - 1)}
                 />
-                <a
-                    className={`
-                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center
-                      hover:univer-text-white
-                    `}
+                <button
+                    type="button"
+                    aria-label="Zoom in"
+                    className={buttonClassName}
                     onClick={() => handleToggleZoom(0.25)}
                 >
-                    <ZoomInIcon />
-                </a>
-                <a
-                    className={`
-                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center
-                      hover:univer-text-white
-                    `}
+                    <ZoomInIcon aria-hidden="true" />
+                </button>
+                <button
+                    type="button"
+                    aria-label="Zoom out"
+                    className={buttonClassName}
                     onClick={() => handleToggleZoom(-0.25)}
                 >
-                    <ZoomOutIcon />
-                </a>
-                <a
-                    className={`
-                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center
-                      hover:univer-text-white
-                    `}
+                    <ZoomOutIcon aria-hidden="true" />
+                </button>
+                <button
+                    type="button"
+                    aria-label="Reset zoom"
+                    className={buttonClassName}
                     onClick={() => handleToggleZoom('reset')}
                 >
-                    <OneToOneIcon />
-                </a>
+                    <OneToOneIcon aria-hidden="true" />
+                </button>
             </footer>
         </div>,
         document.body

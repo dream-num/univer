@@ -63,7 +63,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "typescript": "^5.8.3",
-        "vite": "^7.0.5",
+        "vite": "^7.0.6",
         "vitest": "^3.2.4"
     }
 }

@@ -16,8 +16,8 @@
 
 import type {
     BooleanNumber,
+    ColumnManager,
     ICellData,
-    IColumnData,
     IObjectArrayPrimitiveType,
     IObjectMatrixPrimitiveType,
     IRange,
@@ -51,7 +51,7 @@ export interface ISheetItem {
     rowCount: number;
     columnCount: number;
     rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
-    columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
+    columnManager: ColumnManager;
     defaultColumnWidth?: number;
     defaultRowHeight?: number;
 }

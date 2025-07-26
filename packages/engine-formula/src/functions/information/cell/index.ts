@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IColumnData, IObjectArrayPrimitiveType } from '@univerjs/core';
+import type { ColumnManager } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Tools } from '@univerjs/core';
@@ -76,7 +76,7 @@ export class Cell extends BaseFunction {
         }
 
         const currentActiveSheetData = (_reference as BaseReferenceObject).getCurrentActiveSheetData();
-        const { columnData, defaultColumnWidth } = currentActiveSheetData;
+        const { columnManager, defaultColumnWidth } = currentActiveSheetData;
 
         _reference = (_reference as BaseReferenceObject).toArrayValueObject();
 
@@ -129,14 +129,14 @@ export class Cell extends BaseFunction {
 
                 return StringValueObject.create(result);
             case 'width':
-                return this._getWidthResult(columnData, defaultColumnWidth as number, _currentColumn, infoTypeIsArray);
+                return this._getWidthResult(columnManager, defaultColumnWidth as number, _currentColumn, infoTypeIsArray);
             default:
                 return ErrorValueObject.create(ErrorType.VALUE);
         }
     }
 
-    private _getWidthResult(columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>, defaultColumnWidth: number, _currentColumn: number, infoTypeIsArray: boolean): BaseValueObject {
-        let result = columnData[_currentColumn]?.w;
+    private _getWidthResult(columnManager: ColumnManager, defaultColumnWidth: number, _currentColumn: number, infoTypeIsArray: boolean): BaseValueObject {
+        let result = columnManager.getColumnWidth(_currentColumn);
 
         if (!result && result !== 0) {
             result = defaultColumnWidth as number;

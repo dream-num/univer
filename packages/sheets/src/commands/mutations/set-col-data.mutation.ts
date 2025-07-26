@@ -61,18 +61,12 @@ export const SetColDataMutation: IMutation<ISetColDataMutationParams> = {
         const { worksheet } = target;
         const manager = worksheet.getColumnManager();
 
+        // TODO: after the column manager is replace by scope manager, we can use the `setColumnData` method to set the column data.
         // Loop through the custom column properties data and set the properties to the column
         for (const colIndex in columnData) {
-            const col = columnData[colIndex];
+            const colDataInfo = columnData[colIndex];
 
-            // Similar to setting the column width, we assume that null and undefined both have clear deletion meanings.
-            if (col === null || col === undefined) {
-                manager.removeColumn(Number(colIndex));
-                continue;
-            }
-
-            const currentCol = manager.getColumnOrCreate(Number(colIndex));
-            Object.assign(currentCol, col);
+            manager.setColumnDataByCol(Number(colIndex), colDataInfo);
         }
 
         return true;

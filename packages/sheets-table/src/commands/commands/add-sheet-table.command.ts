@@ -30,6 +30,10 @@ export interface IAddSheetTableCommandParams {
     options?: ITableOptions;
 }
 
+function checkSpaceInTableName(name: string): boolean {
+    return name.includes(' ');
+}
+
 export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
     id: 'sheet.command.add-table',
     type: CommandType.COMMAND,
@@ -45,7 +49,12 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
         if (!tableName) {
             const tableManager = accessor.get(TableManager);
             const tableCount = tableManager.getTableList(params.unitId).length;
-            tableName = `${localeService.t('sheets-table.tablePrefix')} ${tableCount + 1}`;
+            tableName = `${localeService.t('sheets-table.tablePrefix')}${tableCount + 1}`;
+        } else {
+            const hasSpace = checkSpaceInTableName(tableName);
+            if (hasSpace) {
+                throw new Error(localeService.t('sheets-table.tableNameError'));
+            }
         }
 
         const redos: IMutationInfo[] = [];

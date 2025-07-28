@@ -40,6 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'Segona línia',
         columnPrefix: 'Columna',
         tablePrefix: 'Taula',
+        tableNameError: 'El nom de la taula no pot contenir espais',
 
         insert: {
             main: 'Insereix una taula',

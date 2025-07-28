@@ -40,6 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'Dòng thứ hai',
         columnPrefix: 'Cột',
         tablePrefix: 'Bảng',
+        tableNameError: 'Tên bảng không được chứa khoảng trắng',
 
         insert: {
             main: 'Chèn bảng',

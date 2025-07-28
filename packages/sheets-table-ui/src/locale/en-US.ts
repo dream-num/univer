@@ -38,6 +38,7 @@ const locale = {
         secondLine: 'Second Line',
         columnPrefix: 'Column',
         tablePrefix: 'Table',
+        tableNameError: 'Table name cannot contain spaces',
 
         insert: {
             main: 'Insert Table',

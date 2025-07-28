@@ -40,6 +40,7 @@ const locale: typeof enUS = {
         secondLine: '두 번째 줄',
         columnPrefix: '열',
         tablePrefix: '표',
+        tableNameError: '표 이름에 공백이 포함될 수 없습니다',
 
         insert: {
             main: '표 삽입',

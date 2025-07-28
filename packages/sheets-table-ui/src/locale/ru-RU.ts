@@ -40,6 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'Вторая строка',
         columnPrefix: 'Столбец',
         tablePrefix: 'Таблица',
+        tableNameError: 'Имя таблицы не должно содержать пробелы',
 
         insert: {
             main: 'Вставить таблицу',

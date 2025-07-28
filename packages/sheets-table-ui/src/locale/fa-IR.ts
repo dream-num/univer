@@ -40,6 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'خط دوم',
         columnPrefix: 'ستون',
         tablePrefix: 'جدول',
+        tableNameError: 'نام جدول نباید شامل فاصله باشد',
 
         insert: {
             main: 'درج جدول',

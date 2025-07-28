@@ -20,7 +20,7 @@ import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { PermissionService } from '../permission/permission.service';
-import { createTestBed } from './index';
+import { createTestBed } from './create-test-bed';
 
 class TestPermissionPoint implements IPermissionPoint {
     type: UnitObject.Workbook;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../../../shared';
+import type { Nullable } from '../../../../shared/types';
 import type {
     ICustomBlock,
     ICustomDecoration,

@@ -16,8 +16,8 @@
 
 import type { Observable } from 'rxjs';
 import { defaultTheme } from '@univerjs/themes';
-import { get } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
+import { get } from '../../common/lodash';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 
 export type Theme = typeof defaultTheme;

@@ -15,9 +15,8 @@
  */
 
 import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
-
-import { merge } from 'lodash-es';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { merge } from '../../common/lodash';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { LocaleType } from '../../types/enum/locale-type';
 

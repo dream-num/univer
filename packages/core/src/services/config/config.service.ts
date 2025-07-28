@@ -16,9 +16,9 @@
 
 import type { IDisposable } from '../../common/di';
 import type { Nullable } from '../../shared/types';
-import { merge } from 'lodash-es';
 import { filter, Observable, Subject } from 'rxjs';
 import { createIdentifier } from '../../common/di';
+import { merge } from '../../common/lodash';
 
 // WARNING!!! Do not set per unit config here! You can definitely find a better place to do that.
 

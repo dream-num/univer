@@ -43,6 +43,7 @@ import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON
 
 const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
 const CUSTOM_SORT_PANEL_WIDTH = 560;
+const CUSTOM_SORT_PANEL_TOP = 128;
 
 export class SheetsSortUIController extends RxDisposable {
     constructor(
@@ -136,8 +137,8 @@ export class SheetsSortUIController extends RxDisposable {
 }
 
 function getCustomSortDialogDefaultPosition(): { x: number; y: number } {
-    const x = 0;
-    const y = 0;
+    const x = (window.innerWidth - CUSTOM_SORT_PANEL_WIDTH) / 2;
+    const y = CUSTOM_SORT_PANEL_TOP;
 
     return { x, y };
 }

@@ -30,6 +30,7 @@ const locale: typeof enUS = {
             insert: {
                 title: '插入图形',
                 rectangle: '插入矩形',
+                ellipse: '插入椭圆',
             },
         },
 

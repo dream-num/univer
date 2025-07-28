@@ -27,7 +27,7 @@ export interface IInsertShapeOperationParams {
 };
 
 export const InsertSlideShapeRectangleCommand: ICommand = {
-    id: 'slide.command.insert-float-shape',
+    id: 'slide.command.insert-float-shape.rectangle',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
@@ -38,7 +38,7 @@ export const InsertSlideShapeRectangleCommand: ICommand = {
 };
 
 export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationParams> = {
-    id: 'slide.operation.insert-float-shape',
+    id: 'slide.operation.insert-float-shape.rectangle',
     type: CommandType.OPERATION,
     handler: async (accessor, params: IInsertShapeOperationParams) => {
         const id = generateRandomId(6);
@@ -126,6 +126,68 @@ export const ToggleSlideEditSidebarOperation: ICommand = {
         } else {
             sidebarService.close();
         }
+        return true;
+    },
+};
+
+export const InsertSlideShapeEllipseCommand: ICommand = {
+    id: 'slide.command.insert-float-shape.ellipse',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const commandService = accessor.get(ICommandService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const unitId = instanceService.getFocusedUnit()?.getUnitId();
+        return commandService.executeCommand(InsertSlideShapeEllipseOperation.id, { unitId });
+    },
+};
+
+export const InsertSlideShapeEllipseOperation: ICommand<IInsertShapeOperationParams> = {
+    id: 'slide.operation.insert-float-shape.ellipse',
+    type: CommandType.OPERATION,
+    handler: async (accessor, params: IInsertShapeOperationParams) => {
+        const id = generateRandomId(6);
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        const unitId = params.unitId;
+        const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
+
+        if (!slideData) return false;
+
+        const activePage = slideData.getActivePage()!;
+        const elements = Object.values(activePage.pageElements);
+        const maxIndex = (elements?.length) ? Math.max(...elements.map((element) => element.zIndex)) : 20;
+        const data = {
+            id,
+            zIndex: maxIndex + 1,
+            left: 378,
+            top: 142,
+            width: 250,
+            height: 250,
+            title: id,
+            description: '',
+            type: PageElementType.SHAPE,
+            shape: {
+                shapeType: BasicShapes.Ellipse,
+                text: '',
+                shapeProperties: {
+                    radius: 100,
+                    shapeBackgroundFill: {
+                        rgb: 'rgb(0,0,255)',
+                    },
+                },
+            },
+        };
+        activePage.pageElements[id] = data;
+        slideData.updatePage(activePage.id, activePage);
+
+        const canvasview = accessor.get(CanvasView);
+        const sceneObject = canvasview.createObjectToPage(data, activePage.id, unitId);
+        if (sceneObject) {
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id, unitId);
+        }
+
         return true;
     },
 };

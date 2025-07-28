@@ -18,7 +18,7 @@ import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
+import { InsertSlideShapeEllipseCommand, InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
 
 export const SHAPE_MENU_ID = 'slide.menu.shape';
 
@@ -33,10 +33,19 @@ export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function UploadSlideFloatShapeMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+export function UploadSlideFloatRectangleShapeMenuFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertSlideShapeRectangleCommand.id,
         title: 'slide.shape.insert.rectangle',
+        type: MenuItemType.BUTTON,
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
+    };
+}
+
+export function UploadSlideFloatEllipseShapeMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: InsertSlideShapeEllipseCommand.id,
+        title: 'slide.shape.insert.ellipse',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };

@@ -28,6 +28,7 @@ const locale = {
             insert: {
                 title: 'Insert Shape',
                 rectangle: 'Insert Rectangle',
+                ellipse: 'Insert Ellipse',
             },
         },
 

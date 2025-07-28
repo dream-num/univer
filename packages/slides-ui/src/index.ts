@@ -20,7 +20,7 @@ export { ActivateSlidePageOperation } from './commands/operations/activate.opera
 export { AppendSlideOperation } from './commands/operations/append-slide.operation';
 export { DeleteSlideElementOperation } from './commands/operations/delete-element.operation';
 export { InsertSlideFloatImageCommand } from './commands/operations/insert-image.operation';
-export { InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation } from './commands/operations/insert-shape.operation';
+export { InsertSlideShapeEllipseCommand, InsertSlideShapeEllipseOperation, InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation } from './commands/operations/insert-shape.operation';
 export { SlideAddTextCommand, SlideAddTextOperation } from './commands/operations/insert-text.operation';
 export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
 export { UpdateSlideElementOperation } from './commands/operations/update-element.operation';

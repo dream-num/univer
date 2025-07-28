@@ -69,13 +69,13 @@ async function generateLocales() {
             statements += `import ${pkgName}Locale from '${pkg}/locale/${locale}';\n`;
         });
 
-        statements += '\nexport default mergeLocales([\n';
+        statements += '\nexport default mergeLocales(\n';
 
         packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');
             statements += `    ${pkgName}Locale,\n`;
         });
-        statements += ']);\n';
+        statements += ');\n';
 
         const outputPath = path.resolve(__dirname, `../src/locales/${locale}.ts`);
         fs.ensureDirSync(path.dirname(outputPath));

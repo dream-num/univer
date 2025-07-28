@@ -62,20 +62,20 @@ async function generateLocales() {
     fs.writeJsonSync(path.resolve(__dirname, '../package.json'), pkgJsonFile, { spaces: 4, EOL: '\n' });
 
     locales.forEach((locale) => {
-        let statements = '/* eslint-disable */\n' + 'import { merge } from \'@univerjs/core\';\n\n';
+        let statements = '/* eslint-disable */\n' + 'import { mergeLocales } from \'@univerjs/core\';\n\n';
 
         packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');
             statements += `import ${pkgName}Locale from '${pkg}/locale/${locale}';\n`;
         });
 
-        statements += '\nexport default merge(\n    {},\n';
+        statements += '\nexport default mergeLocales([\n';
 
         packageNames.forEach((pkg) => {
             const pkgName = pkg.replace(/@|univerjs|\/|-/g, '');
             statements += `    ${pkgName}Locale,\n`;
         });
-        statements += ');\n';
+        statements += ']);\n';
 
         const outputPath = path.resolve(__dirname, `../src/locales/${locale}.ts`);
         fs.ensureDirSync(path.dirname(outputPath));

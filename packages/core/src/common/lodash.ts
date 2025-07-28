@@ -14,18 +14,4 @@
  * limitations under the License.
  */
 
-import { merge } from '../common/lodash';
-
-export type LanguageValue = string | string[] | ILanguagePack | ILanguagePack[] | boolean;
-
-export interface ILanguagePack {
-    [key: string]: LanguageValue;
-}
-
-export interface ILocales {
-    [key: string]: ILanguagePack;
-}
-
-export function mergeLocales(...locales: Record<string, any>[]): Record<string, any> {
-    return merge({}, ...locales);
-}
+export { debounce, get, merge, mergeWith, set } from 'lodash-es';

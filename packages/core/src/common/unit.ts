@@ -16,7 +16,7 @@
 
 import type { UniverType } from '@univerjs/protocol';
 import type { Observable } from 'rxjs';
-import { Disposable } from '../shared';
+import { Disposable } from '../shared/lifecycle';
 
 export { UniverType as UniverInstanceType } from '@univerjs/protocol';
 

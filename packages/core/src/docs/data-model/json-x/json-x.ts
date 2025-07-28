@@ -15,7 +15,7 @@
  */
 
 import type { Doc, JSONOp, Path } from 'ot-json1';
-import type { Nullable } from '../../../shared';
+import type { Nullable } from '../../../shared/types';
 import type { IDocumentBody, IDocumentData } from '../../../types/interfaces';
 import type { TextXAction } from '../text-x/action-types';
 import type { TPriority } from '../text-x/text-x';

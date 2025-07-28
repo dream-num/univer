@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Univer } from '../../univer';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { UniverInstanceType } from '../../common/unit';
 import { IResourceLoaderService } from '../resource-loader/type';
 import { IResourceManagerService } from '../resource-manager/type';
-import type { Univer } from '../../univer';
-import { UniverInstanceType } from '../../common/unit';
-import { createTestBed } from './index';
+import { createTestBed } from './create-test-bed';
 
 describe('Test resources service', () => {
     let univer: Univer;

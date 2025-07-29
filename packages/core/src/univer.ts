@@ -220,6 +220,34 @@ export class Univer implements IDisposable {
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
         this._pluginService.registerPlugin(plugin, config);
     }
+
+    /**
+     * Register multiple plugins into univer.
+     * @param plugins An array of tuples, where each tuple contains a plugin constructor and its optional configuration.
+     */
+    registerPlugins<
+        T extends readonly (
+            | readonly [PluginCtor<Plugin>]
+            | readonly [PluginCtor<Plugin>, unknown]
+        )[]
+    >(
+        plugins: {
+            readonly [K in keyof T]: T[K] extends readonly [infer P]
+                ? P extends PluginCtor<Plugin>
+                    ? readonly [P]
+                    : T[K]
+                : T[K] extends readonly [infer P, unknown]
+                    ? P extends PluginCtor<Plugin>
+                        ? readonly [P, ConstructorParameters<P>[0]?]
+                        : T[K]
+                    : T[K];
+        }
+    ): void {
+        plugins.forEach((item) => {
+            const [plugin, config] = item;
+            this._pluginService.registerPlugin(plugin, config);
+        });
+    }
 }
 
 function createUniverInjector(parentInjector?: Injector, override?: DependencyOverride): Injector {

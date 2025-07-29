@@ -95,39 +95,38 @@ function createNewInstance() {
     });
 
     const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
-    univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
 
-    univer.registerPlugin(UniverDocsPlugin);
-    univer.registerPlugin(UniverRenderEnginePlugin);
-    univer.registerPlugin(UniverUIPlugin, {
-        container: 'app',
-        // ribbonType: 'simple',
-    });
-    univer.registerPlugin(UniverWebComponentAdapterPlugin);
-    univer.registerPlugin(UniverVue3AdapterPlugin);
-    univer.registerPlugin(UniverDocsUIPlugin);
-
-    univer.registerPlugin(UniverSheetsPlugin, {
-        notExecuteFormula: true,
-        autoHeightForMergedCells: true,
-    });
-    univer.registerPlugin(UniverSheetsUIPlugin);
-    univer.registerPlugin(UniverSheetsNumfmtPlugin);
-    univer.registerPlugin(UniverSheetsZenEditorPlugin);
-    univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
-    univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
-    univer.registerPlugin(UniverSheetsDataValidationPlugin);
-    univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
-    univer.registerPlugin(UniverSheetsFilterPlugin);
-    univer.registerPlugin(UniverSheetsSortPlugin);
-    univer.registerPlugin(UniverSheetsHyperLinkPlugin);
-    univer.registerPlugin(UniverSheetsThreadCommentPlugin);
-
-    univer.registerPlugin(UniverSheetsTablePlugin);
-    univer.registerPlugin(UniverNetworkPlugin);
-    univer.registerPlugin(UniverSheetsNotePlugin);
-    univer.registerPlugin(ImportCSVButtonPlugin);
-    univer.registerPlugin(UniverSheetsCustomShortcutPlugin);
+    univer.registerPlugins([
+        [UniverRPCMainThreadPlugin, { workerURL: worker }],
+        [UniverDocsPlugin],
+        [UniverRenderEnginePlugin],
+        [UniverUIPlugin, {
+            container: 'app',
+        }],
+        [UniverWebComponentAdapterPlugin],
+        [UniverVue3AdapterPlugin],
+        [UniverDocsUIPlugin],
+        [UniverSheetsPlugin, {
+            notExecuteFormula: true,
+            autoHeightForMergedCells: true,
+        }],
+        [UniverSheetsUIPlugin],
+        [UniverSheetsNumfmtPlugin],
+        [UniverSheetsZenEditorPlugin],
+        [UniverFormulaEnginePlugin, { notExecuteFormula: true }],
+        [UniverSheetsFormulaPlugin, { notExecuteFormula: true }],
+        [UniverSheetsDataValidationPlugin],
+        [UniverSheetsConditionalFormattingPlugin],
+        [UniverSheetsFilterPlugin],
+        [UniverSheetsSortPlugin],
+        [UniverSheetsHyperLinkPlugin],
+        [UniverSheetsThreadCommentPlugin],
+        [UniverSheetsTablePlugin],
+        [UniverNetworkPlugin],
+        [UniverSheetsNotePlugin],
+        [ImportCSVButtonPlugin],
+        [UniverSheetsCustomShortcutPlugin],
+    ]);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {
@@ -151,14 +150,14 @@ function createNewInstance() {
     setTimeout(() => {
         import('./lazy').then((lazy) => {
             const plugins = lazy.default();
-            plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+            univer.registerPlugins(plugins);
         });
     }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
     setTimeout(() => {
         import('./very-lazy').then((lazy) => {
             const plugins = lazy.default();
-            plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+            univer.registerPlugins(plugins);
         });
     }, LOAD_VERY_LAZY_PLUGINS_TIMEOUT);
 

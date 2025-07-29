@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/themes",
-    "version": "0.9.4",
+    "version": "0.10.0",
     "private": false,
     "description": "Themes package for Univer",
     "author": "DreamNum <developer@univer.ai>",

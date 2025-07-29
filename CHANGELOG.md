@@ -1,5 +1,21 @@
 # Changelog
 
+# [0.10.0](https://github.com/dream-num/univer/compare/v0.9.4...v0.10.0) (2025-07-29)
+
+
+### Bug Fixes
+
+* **sheets-sort-ui:** update default position calculation for custom sort dialog ([#5600](https://github.com/dream-num/univer/issues/5600)) ([6f545c3](https://github.com/dream-num/univer/commit/6f545c33fb3004431b3d1f16043de105455570aa))
+* **tablefilter:** fix table filter fromjson condition error ([#5584](https://github.com/dream-num/univer/issues/5584)) ([6595c02](https://github.com/dream-num/univer/commit/6595c020e5906474b805a876a96a24472198de58))
+
+
+### Features
+
+* **core:** add `mergeLocales` function to combine locale objects ([#5598](https://github.com/dream-num/univer/issues/5598)) ([9538bdf](https://github.com/dream-num/univer/commit/9538bdf84b99a8b939b665673ffd5506f660378a))
+* **core:** add register multi plugins API ([#5604](https://github.com/dream-num/univer/issues/5604)) ([3fd10c0](https://github.com/dream-num/univer/commit/3fd10c060ad31c18255a68a53e92aa8020a18535))
+* **find-replace:** enhance SearchInput component with keyboard navigation ([#5589](https://github.com/dream-num/univer/issues/5589)) ([1d5df3d](https://github.com/dream-num/univer/commit/1d5df3d68b94cc5eb523c3c79cd2ff71a49a945d))
+* **slides:** add insert ellipse in Slides ([#5602](https://github.com/dream-num/univer/issues/5602)) ([6b4f664](https://github.com/dream-num/univer/commit/6b4f6647e6e9537073a1f119d8e12ef728c2bc79))
+
 ## [0.9.4](https://github.com/dream-num/univer/compare/v0.9.3...v0.9.4) (2025-07-25)
 
 

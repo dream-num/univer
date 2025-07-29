@@ -134,7 +134,7 @@ const locale = {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hans&sjid=2155433538747546473-AP',
+                url: 'https://support.google.com/docs/answer/13193461?hl=en',
             },
         ],
         functionParameter: {
@@ -191,7 +191,7 @@ const locale = {
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: 'Required. The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
+            serialNumber: { name: 'serial_number', detail: 'The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     NETWORKDAYS: {
@@ -206,7 +206,7 @@ const locale = {
         functionParameter: {
             startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
             endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
-            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -222,7 +222,7 @@ const locale = {
             startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
             endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
             weekend: { name: 'weekend', detail: 'is a weekend number or string that specifies when weekends occur.' },
-            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays.' },
         },
     },
     NOW: {
@@ -343,7 +343,7 @@ const locale = {
         functionParameter: {
             startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
             days: { name: 'days', detail: 'The number of nonweekend and nonholiday days before or after start_date. A positive value for days yields a future date; a negative value yields a past date.' },
-            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays.' },
         },
     },
     WORKDAY_INTL: {
@@ -359,7 +359,7 @@ const locale = {
             startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
             days: { name: 'days', detail: 'The number of nonweekend and nonholiday days before or after start_date. A positive value for days yields a future date; a negative value yields a past date.' },
             weekend: { name: 'weekend', detail: 'is a weekend number or string that specifies when weekends occur.' },
-            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays.' },
         },
     },
     YEAR: {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
 import type { ITableSetConfig } from '../../types/type';
 import type { ISetSheetTableMutationParams } from '../mutations/set-sheet-table.mutation';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, customNameCharacterCheck, ICommandService, IUndoRedoService, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
@@ -30,6 +30,7 @@ export interface ISetSheetTableCommandParams extends ITableSetConfig {
 export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
     id: 'sheet.command.set-table-config',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -45,7 +46,24 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         const oldTableConfig: ITableSetConfig = {};
         const newTableConfig: ITableSetConfig = {};
 
+        const localeService = accessor.get(LocaleService);
+        const univerInstanceService = accessor.get(UniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+        const sheetNameSet = new Set<string>();
+        if (workbook) {
+            workbook.getSheets().forEach((sheet) => {
+                sheetNameSet.add(sheet.getName());
+            });
+        }
+
         if (name) {
+            const isValidName = customNameCharacterCheck(name, sheetNameSet);
+            if (!isValidName) {
+                console.warn(localeService.t('sheets-table.tableNameError'));
+                return false;
+            }
+
             oldTableConfig.name = table.getDisplayName();
             newTableConfig.name = name;
         }

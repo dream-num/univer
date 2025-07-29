@@ -198,7 +198,7 @@ export interface IFWorkSheetTableMixin {
      * }
      * ```
      */
-    setTableName(tableId: string, tableName: string): Promise<boolean>;
+    setTableName(tableId: string, tableName: string): Promise<boolean> | boolean;
 
     /**
      * Get the list of tables in the worksheet
@@ -391,7 +391,23 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         return this._commandService.executeCommand(SetSheetTableCommand.id, tableSetConfig);
     }
 
-    override setTableName(tableId: string, tableName: string): Promise<boolean> {
+    override setTableName(tableId: string, tableName: string): Promise<boolean> | boolean {
+        const workbook = this.getWorkbook();
+
+        const localeService = this._injector.get(LocaleService);
+
+        const sheetNameSet = new Set<string>();
+        if (workbook) {
+            workbook.getSheets().forEach((sheet) => {
+                sheetNameSet.add(sheet.getName());
+            });
+        }
+        const isValidName = customNameCharacterCheck(tableName, sheetNameSet);
+        if (!isValidName) {
+            console.warn(localeService.t('sheets-table.tableNameError'));
+            return false;
+        }
+
         const tableSetConfig: ISetSheetTableCommandParams = {
             unitId: this.getWorkbook().getUnitId(),
             tableId,

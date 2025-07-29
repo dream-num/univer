@@ -40,7 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'خط دوم',
         columnPrefix: 'ستون',
         tablePrefix: 'جدول',
-        tableNameError: 'نام جدول نباید شامل فاصله باشد',
+        tableNameError: 'لا يمكن أن يحتوي اسم الجدول على مسافات، ولا يمكن أن يبدأ برقم، ولا يمكن أن يتكرر مع أسماء الجداول الموجودة',
 
         insert: {
             main: 'درج جدول',

@@ -40,7 +40,7 @@ const locale: typeof enUS = {
         secondLine: '第二行',
         columnPrefix: '列',
         tablePrefix: '表格',
-        tableNameError: '表格名称不能包含空格',
+        tableNameError: '表格名称不能包含空格， 不能以数字开头，不能和已有表格名称重复',
 
         insert: {
             main: '表格插入',

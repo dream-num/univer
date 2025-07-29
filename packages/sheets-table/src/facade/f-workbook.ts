@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import type { IAddSheetTableCommandParams, IDeleteSheetTableParams, ISetSheetTableParams, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
+import { customNameCharacterCheck, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { AddSheetTableCommand, DeleteSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -197,6 +199,21 @@ export class FWorkbookSheetsTableMixin extends FWorkbook implements IFWorkbookSh
 
     override async addTable(subUnitId: string, tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<string | undefined> {
         const sheetTableService = this._injector.get(SheetTableService);
+        const localeService = this._injector.get(LocaleService);
+
+        const univerInstanceService = this._injector.get(UniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const sheetNameSet = new Set<string>();
+        if (workbook) {
+            workbook.getSheets().forEach((sheet) => {
+                sheetNameSet.add(sheet.getName());
+            });
+        }
+        const isValidName = customNameCharacterCheck(tableName, sheetNameSet);
+        if (!isValidName) {
+            console.warn(localeService.t('sheets-table.tableNameError'));
+            return undefined;
+        }
 
         const addTableParams: IAddSheetTableCommandParams = {
             unitId: this.getId(),

@@ -40,7 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'Deuxième ligne',
         columnPrefix: 'Colonne',
         tablePrefix: 'Tableau',
-        tableNameError: 'Le nom du tableau ne doit pas contenir d\'espaces',
+        tableNameError: 'Le nom du tableau ne peut pas contenir d\'espaces, ne peut pas commencer par un chiffre et ne peut pas être identique à un nom de tableau existant',
 
         insert: {
             main: 'Insérer un tableau',

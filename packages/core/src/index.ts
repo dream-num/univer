@@ -140,7 +140,7 @@ export * from './shared';
 export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
-export { nameCharacterCheck } from './shared/name';
+export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
 export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 export { getIntersectRange } from './shared/range';
 export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, fromCallback, takeAfter } from './shared/rxjs';

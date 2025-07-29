@@ -31,11 +31,13 @@ const univer = new Univer({
     },
 });
 
-univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true });
-univer.registerPlugin(UniverFormulaEnginePlugin);
-univer.registerPlugin(UniverRPCWorkerThreadPlugin);
-univer.registerPlugin(UniverRemoteSheetsFormulaPlugin);
-univer.registerPlugin(UniverSheetsFilterPlugin);
+univer.registerPlugins([
+    [UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true }],
+    [UniverFormulaEnginePlugin],
+    [UniverRPCWorkerThreadPlugin],
+    [UniverRemoteSheetsFormulaPlugin],
+    [UniverSheetsFilterPlugin],
+]);
 
 declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
 self.univer = univer;

@@ -16,7 +16,7 @@
 
 import type { Injector, IPageElement } from '@univerjs/core';
 import { BasicShapes, getColorStyle, PageElementType } from '@univerjs/core';
-import { Rect } from '@univerjs/engine-render';
+import { Circle, Rect } from '@univerjs/engine-render';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
@@ -104,8 +104,28 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 ...strokeStyle,
             });
         }
-        // if (shapeType === ShapeType.ELLIPSE) {
-        // }
+        if (shapeType === BasicShapes.Ellipse) {
+            console.warn(shapeProperties?.radius);
+            const radius = shapeProperties?.radius || 0;
+            return new Circle(id, {
+                fill,
+                top,
+                left,
+                width,
+                height,
+                zIndex,
+                angle,
+                scaleX,
+                scaleY,
+                skewX,
+                skewY,
+                flipX,
+                flipY,
+                forceRender: true,
+                radius,
+                ...strokeStyle,
+            });
+        }
     }
 }
 

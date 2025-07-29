@@ -30,6 +30,7 @@ const locale: typeof enUS = {
             insert: {
                 title: '도형 삽입',
                 rectangle: '사각형 삽입',
+                ellipse: '타원 삽입',
             },
         },
 

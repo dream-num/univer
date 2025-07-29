@@ -30,6 +30,7 @@ const locale: typeof enUS = {
             insert: {
                 title: 'درج شکل',
                 rectangle: 'درج مستطیل',
+                ellipse: 'بیضی را درج کنید',
             },
         },
 

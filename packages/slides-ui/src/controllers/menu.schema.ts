@@ -17,10 +17,10 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
-import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
+import { InsertSlideShapeEllipseCommand, InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
 import { SlideImageMenuFactory, SLIDES_IMAGE_MENU_ID, UploadSlideFloatImageMenuFactory } from './image.menu';
-import { SHAPE_MENU_ID, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
+import { SHAPE_MENU_ID, SlideShapeMenuFactory, UploadSlideFloatEllipseShapeMenuFactory, UploadSlideFloatRectangleShapeMenuFactory } from './shape.menu';
 import { SlideAddTextMenuItemFactory } from './text.menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -42,7 +42,11 @@ export const menuSchema: MenuSchemaType = {
             menuItemFactory: SlideShapeMenuFactory,
             [InsertSlideShapeRectangleCommand.id]: {
                 order: 0,
-                menuItemFactory: UploadSlideFloatShapeMenuFactory,
+                menuItemFactory: UploadSlideFloatRectangleShapeMenuFactory,
+            },
+            [InsertSlideShapeEllipseCommand.id]: {
+                order: 0,
+                menuItemFactory: UploadSlideFloatEllipseShapeMenuFactory,
             },
         },
     },

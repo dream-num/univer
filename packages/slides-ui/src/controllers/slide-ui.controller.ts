@@ -21,7 +21,7 @@ import { ActivateSlidePageOperation } from '../commands/operations/activate.oper
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
-import { InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
+import { InsertSlideShapeEllipseCommand, InsertSlideShapeEllipseOperation, InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextCommand, SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
@@ -75,6 +75,8 @@ export class SlidesUIController extends Disposable {
             InsertSlideFloatImageCommand,
             SlideAddTextOperation,
             SlideAddTextCommand,
+            InsertSlideShapeEllipseCommand,
+            InsertSlideShapeEllipseOperation,
             InsertSlideShapeRectangleOperation,
             InsertSlideShapeRectangleCommand,
             ToggleSlideEditSidebarOperation,

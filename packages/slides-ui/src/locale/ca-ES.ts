@@ -30,6 +30,7 @@ const locale: typeof enUS = {
             insert: {
                 title: 'Insereix forma',
                 rectangle: 'Insereix rectangle',
+                ellipse: 'Insereix el·lipse',
             },
         },
 

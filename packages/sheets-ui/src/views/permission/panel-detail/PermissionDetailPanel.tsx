@@ -24,6 +24,7 @@ import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
 import { PermissionDetailFooterPart } from './PermissionDetailFooterPart';
 import { PermissionDetailMainPart } from './PermissionDetailMainPart';
+import { PermissionDetailUserPart } from './PermissionDetailUserPart';
 
 interface ISheetPermissionPanelDetailProps {
     fromSheetBar: boolean;
@@ -44,7 +45,8 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     const [desc, setDesc] = useState<string | undefined>(activeRule.description);
     const [editState, setEditState] = useState<EditStateEnum>(activeRule.editState ?? EditStateEnum.OnlyMe);
     const [viewState, setViewState] = useState<ViewStateEnum>(activeRule.viewState ?? ViewStateEnum.OthersCanView);
-    const PermissionDetailUserPart = componentManager.get(UNIVER_SHEET_PERMISSION_USER_PART);
+    const CustomPermissionDetailUserPart = componentManager.get(UNIVER_SHEET_PERMISSION_USER_PART);
+    const PermissionDetailUser = CustomPermissionDetailUserPart ?? PermissionDetailUserPart;
 
     useEffect(() => {
         const univerInstanceService = injector.get(IUniverInstanceService);
@@ -77,8 +79,7 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
                 desc={desc}
                 onDescChange={(v) => setDesc(v)}
             />
-            <PermissionDetailUserPart
-                key="user-part"
+            <PermissionDetailUser
                 {...{
                     editState,
                     onEditStateChange: (v: EditStateEnum) => setEditState(v),

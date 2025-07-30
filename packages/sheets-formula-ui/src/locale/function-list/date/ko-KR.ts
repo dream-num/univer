@@ -193,7 +193,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'serial_number', detail: '필수입니다. 찾으려는 월의 날짜입니다. 날짜는 DATE 함수를 사용하여 입력하거나 다른 수식 또는 함수의 결과로 입력해야 합니다. 예를 들어, 2008년 5월 23일에는 DATE(2008,5,23)을 사용합니다.' },
+            serialNumber: { name: 'serial_number', detail: '찾으려는 월의 날짜입니다. 날짜는 DATE 함수를 사용하여 입력하거나 다른 수식 또는 함수의 결과로 입력해야 합니다. 예를 들어, 2008년 5월 23일에는 DATE(2008,5,23)을 사용합니다.' },
         },
     },
     NETWORKDAYS: {

@@ -16,10 +16,10 @@
 
 import type enUS from './en-US';
 import array from './function-list/array/ru-RU'; // TODO
-import compatibility from './function-list/compatibility/ru-RU'; // TODO
+import compatibility from './function-list/compatibility/ru-RU';
 import cube from './function-list/cube/ru-RU';
 import database from './function-list/database/ru-RU';
-import date from './function-list/date/ru-RU'; // TODO
+import date from './function-list/date/ru-RU';
 import engineering from './function-list/engineering/ru-RU'; // TODO
 import financial from './function-list/financial/ru-RU';
 import information from './function-list/information/ru-RU'; // TODO

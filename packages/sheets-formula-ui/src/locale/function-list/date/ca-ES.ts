@@ -193,7 +193,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'número_sèrie', detail: 'Obligatori. La data del mes que intenteu trobar. Les dates han d\'introduir-se utilitzant la funció DATE, o com a resultats d\'altres fórmules o funcions. Per exemple, utilitzeu DATE(2008,5,23) per al dia 23 de maig de 2008.' },
+            serialNumber: { name: 'número_sèrie', detail: 'La data del mes que intenteu trobar. Les dates han d\'introduir-se utilitzant la funció DATE, o com a resultats d\'altres fórmules o funcions. Per exemple, utilitzeu DATE(2008,5,23) per al dia 23 de maig de 2008.' },
         },
     },
     NETWORKDAYS: {

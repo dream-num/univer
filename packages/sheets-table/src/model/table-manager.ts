@@ -378,9 +378,23 @@ export class TableManager extends Disposable {
             unitMap.forEach((table) => {
                 const subUnitId = table.getSubunitId();
                 if (!result[subUnitId]) {
-                    result[subUnitId] = [] as ITableJson[];
+                    const tableFilteredOutRows = new Set<number>();
+                    const tables = this.getTablesBySubunitId(unitId, subUnitId);
+                    tables.forEach((table) => {
+                        const tableFilteredRows = table.getTableFilters().getFilterOutRows();
+                        if (!tableFilteredRows) {
+                            return;
+                        }
+                        for (const row of tableFilteredRows) {
+                            tableFilteredOutRows.add(row);
+                        }
+                    });
+                    result[subUnitId] = {
+                        tables: [] as ITableJson[],
+                        tableFilteredOutRows: Array.from(tableFilteredOutRows),
+                    };
                 }
-                result[subUnitId].push(table.toJSON());
+                result[subUnitId].tables.push(table.toJSON());
             });
         }
         return result;
@@ -395,7 +409,17 @@ export class TableManager extends Disposable {
                 return;
             }
             const sheet = target.worksheet;
-            const tables = data[subUnitId];
+            let tables;
+            // adjust code for older data structures
+            if (data[subUnitId].tables) {
+                tables = data[subUnitId].tables;
+            } else if (Array.isArray(data[subUnitId])) {
+                // for older versions, where tables were not nested under subUnitId
+                tables = data[subUnitId] as any as ITableJson[];
+            }
+            if (!tables) {
+                return;
+            }
             tables.forEach((table) => {
                 const header = this.getColumnHeader(unitId, subUnitId, table.range);
                 const tableInstance = new Table(table.id, table.name, table.range, header, table.options);

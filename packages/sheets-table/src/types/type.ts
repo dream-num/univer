@@ -194,7 +194,13 @@ export interface ITableInfoWithUnitId extends ITableInfo {
 }
 
 export interface ITableResource {
-    [subUnitId: string]: ITableJson[];
+    [subUnitId: string]: {
+        tables: ITableJson[];
+        /**
+         * The rows that are filtered out by the table filter
+         */
+        tableFilteredOutRows: number[];
+    };
 }
 
 export interface ITableRelationItem {

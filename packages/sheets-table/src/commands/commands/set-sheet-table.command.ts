@@ -17,7 +17,7 @@
 import type { ICommand, Workbook } from '@univerjs/core';
 import type { ITableSetConfig } from '../../types/type';
 import type { ISetSheetTableMutationParams } from '../mutations/set-sheet-table.mutation';
-import { CommandType, customNameCharacterCheck, ICommandService, IUndoRedoService, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, customNameCharacterCheck, ICommandService, ILogService, IUndoRedoService, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
@@ -60,7 +60,8 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         if (name) {
             const isValidName = customNameCharacterCheck(name, sheetNameSet);
             if (!isValidName) {
-                console.warn(localeService.t('sheets-table.tableNameError'));
+                const logService = accessor.get(ILogService);
+                logService.warn(localeService.t('sheets-table.tableNameError'));
                 return false;
             }
 

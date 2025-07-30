@@ -25,7 +25,7 @@ import type {
     ITableOptions,
     ITableRange,
 } from '@univerjs/sheets-table';
-import { cellToRange, customNameCharacterCheck, LocaleService, Rectangle } from '@univerjs/core';
+import { cellToRange, customNameCharacterCheck, ILogService, LocaleService, Rectangle } from '@univerjs/core';
 import { RangeThemeStyle } from '@univerjs/sheets';
 import {
     AddSheetTableCommand,
@@ -347,7 +347,8 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         }
         const isValidName = customNameCharacterCheck(tableName, sheetNameSet);
         if (!isValidName) {
-            console.warn(localeService.t('sheets-table.tableNameError'));
+            const logService = this._injector.get(ILogService);
+            logService.warn(localeService.t('sheets-table.tableNameError'));
             return false;
         }
         const addTableParams: IAddSheetTableCommandParams = {
@@ -404,7 +405,8 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
         }
         const isValidName = customNameCharacterCheck(tableName, sheetNameSet);
         if (!isValidName) {
-            console.warn(localeService.t('sheets-table.tableNameError'));
+            const logService = this._injector.get(ILogService);
+            logService.warn(localeService.t('sheets-table.tableNameError'));
             return false;
         }
 

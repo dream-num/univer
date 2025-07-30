@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IAddSheetTableCommandParams, IDeleteSheetTableParams, ISetSheetTableParams, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableOptions, ITableRange } from '@univerjs/sheets-table';
-import { customNameCharacterCheck, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { customNameCharacterCheck, ILogService, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { AddSheetTableCommand, DeleteSheetTableCommand, SetSheetTableFilterCommand, SheetTableService } from '@univerjs/sheets-table';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -211,7 +211,8 @@ export class FWorkbookSheetsTableMixin extends FWorkbook implements IFWorkbookSh
         }
         const isValidName = customNameCharacterCheck(tableName, sheetNameSet);
         if (!isValidName) {
-            console.warn(localeService.t('sheets-table.tableNameError'));
+            const logService = this._injector.get(ILogService);
+            logService.warn(localeService.t('sheets-table.tableNameError'));
             return undefined;
         }
 

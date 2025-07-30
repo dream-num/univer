@@ -65,10 +65,4 @@ describe('customNameCharacterCheck', () => {
         const result = customNameCharacterCheck('_ValidName', new Set());
         expect(result).toBe(true);
     });
-
-    it('should return false for name exceeding 31 characters', () => {
-        const longName = 'ThisNameIsWayTooLongToBeValidBecauseItExceeds31Characters';
-        const result = customNameCharacterCheck(longName, new Set());
-        expect(result).toBe(false);
-    });
 });

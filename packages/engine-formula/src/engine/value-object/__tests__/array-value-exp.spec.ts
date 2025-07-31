@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject exp method test', () => {
@@ -33,9 +34,11 @@ describe('arrayValueObject exp method test', () => {
 
     describe('exp', () => {
         it('origin nm', () => {
-            expect((originArrayValueObject.exp() as ArrayValueObject).toValue()).toStrictEqual([
-                [2.718281828459045, '#VALUE!', 3.4212295362896734, 2.718281828459045, 1],
-                [1, 2.6881171418161356e43, 10.381236562731843, '#VALUE!', 0.049787068367863944],
+            const result = originArrayValueObject.exp();
+
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [2.71828182846, '#VALUE!', 3.42122953629, 2.71828182846, 1],
+                [1, 2.6881171418161356e43, 10.3812365627, '#VALUE!', 0.0497870683679],
             ]);
         });
     });

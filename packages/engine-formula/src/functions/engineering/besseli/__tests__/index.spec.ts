@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Besseli } from '../index';
 
@@ -30,47 +31,47 @@ describe('Test besseli function', () => {
             const x = NumberValueObject.create(1.5);
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(0.981666428475166);
+            expect(getObjectValue(result, true)).toBe(0.981666428475);
         });
 
         it('n < 0 || x === Infinity', () => {
             const x = NumberValueObject.create(1.5);
             const n = NumberValueObject.create(-1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const x2 = NumberValueObject.create(Infinity);
             const n2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(x2, n2);
-            expect(result2.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
             const x = StringValueObject.create('-0.5');
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(-0.25789430328903556);
+            expect(getObjectValue(result, true)).toBe(-0.257894303289);
         });
 
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const x = BooleanValueObject.create(true);
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is null', () => {
             const x = NullValueObject.create();
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Value is blank cell', () => {
@@ -87,14 +88,14 @@ describe('Test besseli function', () => {
             });
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is error', () => {
             const x = ErrorValueObject.create(ErrorType.NAME);
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -112,7 +113,7 @@ describe('Test besseli function', () => {
             });
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

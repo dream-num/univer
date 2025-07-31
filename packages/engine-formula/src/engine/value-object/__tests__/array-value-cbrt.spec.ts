@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject cbrt method test', () => {
@@ -32,10 +33,11 @@ describe('arrayValueObject cbrt method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = cbrtArrayValueObject.cbrt();
 
-            expect((cbrtArrayValueObject.cbrt() as ArrayValueObject).toValue()).toStrictEqual([
-                [2, 1, '#VALUE!', 1.0714412696907731, 1, 0],
-                [3, 0, 4.641588833612779, 1.3276143942617729, '#VALUE!', -1.4422495703074083],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [2, 1, '#VALUE!', 1.07144126969, 1, 0],
+                [3, 0, 4.64158883361, 1.32761439426, '#VALUE!', -1.44224957031],
             ]);
         });
     });

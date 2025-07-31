@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
@@ -47,8 +48,9 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.pow(powArrayValueObject);
 
-            expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, 8, 81, '#N/A', '#N/A'],
                 [6, 2401, 64, '#N/A', '#N/A'],
                 ['#N/A', '#N/A', '#N/A', '#N/A', '#N/A'],
@@ -65,8 +67,9 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.pow(powArrayValueObject);
 
-            expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, 4, 9, 64, 125],
                 [36, 49, 64, 729, 1000],
                 [121, 144, 169, 2744, 3375],
@@ -83,8 +86,9 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.pow(powArrayValueObject);
 
-            expect((originArrayValueObject.pow(powArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, 8, 27, 64, 125],
                 [36, 49, 64, 81, 100],
                 [11, 12, 13, 14, 15],
@@ -101,8 +105,9 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = powArrayValueObject.pow(originArrayValueObject);
 
-            expect((powArrayValueObject.pow(originArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [2, 4, 8, 81, 243],
                 [64, 128, 256, 19683, 59049],
                 [2048, 4096, 8192, 4782969, 14348907],
@@ -119,8 +124,9 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = powArrayValueObject.pow(originArrayValueObject);
 
-            expect((powArrayValueObject.pow(originArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [3, 9, 27, 81, 243],
                 [64, 128, 256, 512, 1024],
                 [1, 1, 1, 1, 1],
@@ -141,8 +147,9 @@ describe('arrayValueObject pow method test', () => {
                 column: 0,
             });
             const roundValueObject = NumberValueObject.create(1);
+            const result = originArrayValueObject.pow(roundValueObject);
 
-            expect((originArrayValueObject.pow(roundValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, '#VALUE!', 1.23, 1, 0],
                 [0, 100, 2.34, '#VALUE!', -3],
             ]);
@@ -162,8 +169,9 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.pow(roundArrayValueObject);
 
-            expect((originValueObject.pow(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, '#VALUE!', 1, 1, 1],
                 [1, 1, 1, '#VALUE!', 1],
             ]);

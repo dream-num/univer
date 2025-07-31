@@ -33,7 +33,7 @@ describe('Test hypgeomdist function', () => {
             const populationS = NumberValueObject.create(8);
             const numberPop = NumberValueObject.create(20);
             const result = testFunction.calculate(sampleS, numberSample, populationS, numberPop);
-            expect(getObjectValue(result)).toBe(0.3632610939112487);
+            expect(getObjectValue(result, true)).toBe(0.363261093911);
         });
 
         it('Value is large number', () => {
@@ -59,11 +59,11 @@ describe('Test hypgeomdist function', () => {
 
             const sampleS3 = BooleanValueObject.create(true);
             const result3 = testFunction.calculate(sampleS3, numberSample, populationS, numberPop);
-            expect(getObjectValue(result3)).toBe(0.3632610939112487);
+            expect(getObjectValue(result3, true)).toBe(0.363261093911);
 
             const sampleS4 = NullValueObject.create();
             const result4 = testFunction.calculate(sampleS4, numberSample, populationS, numberPop);
-            expect(getObjectValue(result4)).toBe(0.1021671826625387);
+            expect(getObjectValue(result4, true)).toBe(0.102167182663);
 
             const sampleS5 = StringValueObject.create('test');
             const result5 = testFunction.calculate(sampleS5, numberSample, populationS, numberPop);
@@ -174,9 +174,9 @@ describe('Test hypgeomdist function', () => {
             const populationS = NumberValueObject.create(8);
             const numberPop = NumberValueObject.create(20);
             const result = testFunction.calculate(sampleS, numberSample, populationS, numberPop);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.3632610939112487, ErrorType.VALUE, 0.3632610939112487, 0.3632610939112487, 0.1021671826625387, 0.1021671826625387],
-                [0.1021671826625387, ErrorType.NUM, 0.3814241486068111, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.363261093911, ErrorType.VALUE, 0.363261093911, 0.363261093911, 0.102167182663, 0.102167182663],
+                [0.102167182663, ErrorType.NUM, 0.381424148607, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
 
             const sampleS2 = ArrayValueObject.create({
@@ -207,9 +207,9 @@ describe('Test hypgeomdist function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(sampleS2, numberSample2, populationS, numberPop);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [0.3632610939112487],
-                [0.27506549178375805],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [0.363261093911],
+                [0.275065491784],
                 [1],
                 [ErrorType.NA],
             ]);

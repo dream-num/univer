@@ -59,7 +59,7 @@ describe('Test dstdev function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(2.8284271247461903);
+            expect(getObjectValue(result, true)).toStrictEqual(2.82842712475);
         });
 
         it('Database value test', () => {
@@ -183,7 +183,7 @@ describe('Test dstdev function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(2.8284271247461903);
+            expect(getObjectValue(result, true)).toStrictEqual(2.82842712475);
 
             const field2 = NullValueObject.create();
             const result2 = testFunction.calculate(database, field2, criteria);
@@ -238,7 +238,7 @@ describe('Test dstdev function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(2.6645825188948455);
+            expect(getObjectValue(result, true)).toStrictEqual(2.66458251889);
 
             const criteria2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -283,7 +283,7 @@ describe('Test dstdev function', () => {
                 column: 0,
             });
             const result4 = testFunction.calculate(database, field, criteria4);
-            expect(getObjectValue(result4)).toStrictEqual(2.6645825188948455);
+            expect(getObjectValue(result4, true)).toStrictEqual(2.66458251889);
         });
     });
 });

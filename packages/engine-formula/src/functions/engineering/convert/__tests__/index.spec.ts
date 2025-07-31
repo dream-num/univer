@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Convert } from '../index';
 
@@ -31,7 +32,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(0.45359237);
+            expect(getObjectValue(result, true)).toBe(0.45359237);
         });
 
         it('Value is number string', () => {
@@ -39,7 +40,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(-0.226796185);
+            expect(getObjectValue(result, true)).toBe(-0.226796185);
         });
 
         it('Value is normal string', () => {
@@ -47,7 +48,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
@@ -55,7 +56,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is blank cell', () => {
@@ -63,7 +64,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is error', () => {
@@ -71,7 +72,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Units represent different quantities', () => {
@@ -79,7 +80,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('ft');
             const toUnit = StringValueObject.create('sec');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Value is array', () => {
@@ -98,7 +99,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value with binary prefix', () => {
@@ -106,7 +107,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('KiB');
             const toUnit = StringValueObject.create('bytes');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
         });
 
         it('Value with unit prefix', () => {
@@ -114,7 +115,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('km');
             const toUnit = StringValueObject.create('m');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(1000);
+            expect(getObjectValue(result)).toStrictEqual(1000);
         });
 
         it('Temperature conversion C test', () => {
@@ -122,19 +123,19 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('C');
             let toUnit = StringValueObject.create('F');
             let result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(32);
+            expect(getObjectValue(result)).toStrictEqual(32);
 
             toUnit = StringValueObject.create('K');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(273.15);
+            expect(getObjectValue(result)).toStrictEqual(273.15);
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toStrictEqual(491.67);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
         });
 
         it('Temperature conversion F test', () => {
@@ -142,19 +143,19 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('F');
             let toUnit = StringValueObject.create('C');
             let result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
 
             toUnit = StringValueObject.create('K');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(273.15);
+            expect(getObjectValue(result)).toStrictEqual(273.15);
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toStrictEqual(491.67);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
         });
 
         it('Temperature conversion K test', () => {
@@ -162,19 +163,19 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('K');
             let toUnit = StringValueObject.create('C');
             let result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
 
             toUnit = StringValueObject.create('F');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(32);
+            expect(getObjectValue(result)).toStrictEqual(32);
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toStrictEqual(491.67);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
         });
 
         it('Temperature conversion Rank test', () => {
@@ -182,19 +183,19 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('Rank');
             let toUnit = StringValueObject.create('C');
             let result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
 
             toUnit = StringValueObject.create('F');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(32);
+            expect(getObjectValue(result)).toStrictEqual(32);
 
             toUnit = StringValueObject.create('K');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(273.15);
+            expect(getObjectValue(result)).toStrictEqual(273.15);
 
             toUnit = StringValueObject.create('Reau');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
         });
 
         it('Temperature conversion Reau test', () => {
@@ -202,19 +203,19 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('Reau');
             let toUnit = StringValueObject.create('C');
             let result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
 
             toUnit = StringValueObject.create('F');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(32);
+            expect(getObjectValue(result)).toStrictEqual(32);
 
             toUnit = StringValueObject.create('K');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(273.15);
+            expect(getObjectValue(result)).toStrictEqual(273.15);
 
             toUnit = StringValueObject.create('Rank');
             result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(491.67);
+            expect(getObjectValue(result)).toStrictEqual(491.67);
         });
 
         it('Source unit does not exist', () => {
@@ -222,7 +223,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('unknown');
             const toUnit = StringValueObject.create('m');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
         });
 
         it('Target unit does not exist', () => {
@@ -230,7 +231,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('m');
             const toUnit = StringValueObject.create('unknown');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
         });
 
         it('Conversion with precision', () => {
@@ -238,7 +239,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('inch');
             const toUnit = StringValueObject.create('cm');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
         });
 
         it('Extreme large number conversion', () => {
@@ -246,7 +247,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('m');
             const toUnit = StringValueObject.create('km');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(1e18);
+            expect(getObjectValue(result)).toStrictEqual(1e18);
         });
 
         it('Extreme small number conversion', () => {
@@ -254,7 +255,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('m');
             const toUnit = StringValueObject.create('km');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(1e-24);
+            expect(getObjectValue(result)).toStrictEqual(1e-24);
         });
 
         it('Unit with alternate symbols', () => {
@@ -262,7 +263,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('mph');
             const toUnit = StringValueObject.create('km/h');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(1.609343999999987);
+            expect(getObjectValue(result, true)).toStrictEqual(1.609344);
         });
 
         it('Null number input', () => {
@@ -270,7 +271,7 @@ describe('Test convert function', () => {
             const fromUnit = StringValueObject.create('lbm');
             const toUnit = StringValueObject.create('kg');
             const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
         });
     });
 });

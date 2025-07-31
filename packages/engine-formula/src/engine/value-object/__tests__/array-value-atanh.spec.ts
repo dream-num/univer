@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject atanh method test', () => {
@@ -32,8 +33,9 @@ describe('arrayValueObject atanh method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = atanhArrayValueObject.atanh();
 
-            expect((atanhArrayValueObject.atanh() as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['#NUM!', '#VALUE!', '#NUM!', '#NUM!', 0],
                 [0, '#NUM!', '#NUM!', '#VALUE!', '#NUM!'],
             ]);

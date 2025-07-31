@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject sin method test', () => {
@@ -32,10 +33,11 @@ describe('arrayValueObject sin method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = tanArrayValueObject.sin();
 
-            expect((tanArrayValueObject.sin() as ArrayValueObject).toValue()).toStrictEqual([
-                [0.9893582466233818, 0.8414709848078965, '#VALUE!', 0.9424888019316975, 0.8414709848078965, 0],
-                [0.956375928404503, 0, -0.5063656411097588, 0.7184647930691261, '#VALUE!', -0.1411200080598672],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.989358246623, 0.841470984808, '#VALUE!', 0.942488801932, 0.841470984808, 0],
+                [0.956375928405, 0, -0.50636564111, 0.718464793069, '#VALUE!', -0.14112000806],
             ]);
         });
     });

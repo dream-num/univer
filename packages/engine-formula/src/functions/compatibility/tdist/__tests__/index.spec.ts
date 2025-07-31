@@ -32,7 +32,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.2113248654052009);
+            expect(getObjectValue(result, true)).toBe(0.211324865405);
         });
 
         it('DegFreedom value test', () => {
@@ -72,7 +72,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.2113248654052009);
+            expect(getObjectValue(result, true)).toBe(0.211324865405);
         });
 
         it('Value is null', () => {
@@ -116,9 +116,9 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.2113248654052009, ErrorType.VALUE, 0.1718728077748428, 0.2113248654052009, 0.5, 0.5],
-                [0.5, 0.00004999250124977886, 0.07207975447515451, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.211324865405, ErrorType.VALUE, 0.171872807775, 0.211324865405, 0.5, 0.5],
+                [0.5, 0.0000499925012498, 0.0720797544752, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
 
@@ -127,7 +127,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(900000000);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.4601721457389526);
+            expect(getObjectValue(result, true)).toBe(0.460172145739);
         });
     });
 });

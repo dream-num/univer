@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject tanh method test', () => {
@@ -32,10 +33,11 @@ describe('arrayValueObject tanh method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = atanArrayValueObject.tanh();
 
-            expect((atanArrayValueObject.tanh() as ArrayValueObject).toValue()).toStrictEqual([
-                [0.9999997749296758, 0.7615941559557649, '#VALUE!', 0.8425793256589296, 0.7615941559557649, 0],
-                [1, 0, 1, 0.9816125892654238, '#VALUE!', -0.9950547536867305],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.99999977493, 0.761594155956, '#VALUE!', 0.842579325659, 0.761594155956, 0],
+                [1, 0, 1, 0.981612589265, '#VALUE!', -0.995054753687],
             ]);
         });
     });

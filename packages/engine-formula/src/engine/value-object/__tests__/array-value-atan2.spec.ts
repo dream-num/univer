@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
@@ -47,10 +48,11 @@ describe('arrayValueObject atan2 method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.atan2(atan2ArrayValueObject);
 
-            expect((originArrayValueObject.atan2(atan2ArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [0.4636476090008061, 0.5880026035475675, 0.6435011087932844, '#N/A', '#N/A'],
-                [1.4056476493802699, 1.0516502125483738, 1.3258176636680326, '#N/A', '#N/A'],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.463647609001, 0.588002603548, 0.643501108793, '#N/A', '#N/A'],
+                [1.40564764938, 1.05165021255, 1.32581766367, '#N/A', '#N/A'],
                 ['#N/A', '#N/A', '#N/A', '#N/A', '#N/A'],
             ]);
         });
@@ -65,11 +67,12 @@ describe('arrayValueObject atan2 method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.atan2(atan2ArrayValueObject);
 
-            expect((originArrayValueObject.atan2(atan2ArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [0.4636476090008061, 0.7853981633974483, 0.982793723247329, 0.9272952180016122, 1.0303768265243125],
-                [1.2490457723982544, 1.2924966677897853, 1.3258176636680326, 1.2490457723982544, 1.2793395323170296],
-                [1.3909428270024184, 1.4056476493802699, 1.4181469983996315, 1.35970299357215, 1.373400766945016],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.463647609001, 0.785398163397, 0.982793723247, 0.927295218002, 1.03037682652],
+                [1.2490457724, 1.29249666779, 1.32581766367, 1.2490457724, 1.27933953232],
+                [1.390942827, 1.40564764938, 1.4181469984, 1.35970299357, 1.37340076695],
             ]);
         });
 
@@ -83,11 +86,12 @@ describe('arrayValueObject atan2 method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.atan2(atan2ArrayValueObject);
 
-            expect((originArrayValueObject.atan2(atan2ArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [0.3217505543966422, 0.5880026035475675, 0.7853981633974483, 0.9272952180016122, 1.0303768265243125],
-                [1.2490457723982544, 1.2924966677897853, 1.3258176636680326, 1.3521273809209546, 1.373400766945016],
-                [1.4801364395941514, 1.4876550949064553, 1.4940244355251187, 1.4994888620096063, 1.5042281630190728],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.321750554397, 0.588002603548, 0.785398163397, 0.927295218002, 1.03037682652],
+                [1.2490457724, 1.29249666779, 1.32581766367, 1.35212738092, 1.37340076695],
+                [1.48013643959, 1.48765509491, 1.49402443553, 1.49948886201, 1.50422816302],
             ]);
         });
 
@@ -101,11 +105,12 @@ describe('arrayValueObject atan2 method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = atan2ArrayValueObject.atan2(originArrayValueObject);
 
-            expect((atan2ArrayValueObject.atan2(originArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1.1071487177940904, 0.7853981633974483, 0.5880026035475675, 0.6435011087932844, 0.5404195002705842],
-                [0.3217505543966422, 0.27829965900511133, 0.24497866312686414, 0.3217505543966422, 0.2914567944778671],
-                [0.17985349979247828, 0.16514867741462683, 0.15264932839526518, 0.21109333322274654, 0.19739555984988078],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.10714871779, 0.785398163397, 0.588002603548, 0.643501108793, 0.540419500271],
+                [0.321750554397, 0.278299659005, 0.244978663127, 0.321750554397, 0.291456794478],
+                [0.179853499792, 0.165148677415, 0.152649328395, 0.211093333223, 0.19739555985],
             ]);
         });
 
@@ -119,11 +124,12 @@ describe('arrayValueObject atan2 method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = atan2ArrayValueObject.atan2(originArrayValueObject);
 
-            expect((atan2ArrayValueObject.atan2(originArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [1.2490457723982544, 0.982793723247329, 0.7853981633974483, 0.6435011087932844, 0.5404195002705842],
-                [0.3217505543966422, 0.27829965900511133, 0.24497866312686414, 0.21866894587394195, 0.19739555984988078],
-                [0.09065988720074511, 0.08314123188844122, 0.07677189126977804, 0.07130746478529032, 0.06656816377582381],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.2490457724, 0.982793723247, 0.785398163397, 0.643501108793, 0.540419500271],
+                [0.321750554397, 0.278299659005, 0.244978663127, 0.218668945874, 0.19739555985],
+                [0.0906598872007, 0.0831412318884, 0.0767718912698, 0.0713074647853, 0.0665681637758],
             ]);
         });
 
@@ -141,10 +147,11 @@ describe('arrayValueObject atan2 method test', () => {
                 column: 0,
             });
             const roundValueObject = NumberValueObject.create(1);
+            const result = originArrayValueObject.atan2(roundValueObject);
 
-            expect((originArrayValueObject.atan2(roundValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [0.7853981633974483, '#VALUE!', 0.8881737743776796, 0.7853981633974483, 0],
-                [0, 1.5607966601082315, 1.16693653188752, '#VALUE!', -1.2490457723982544],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.785398163397, '#VALUE!', 0.888173774378, 0.785398163397, 0],
+                [0, 1.56079666011, 1.16693653189, '#VALUE!', -1.2490457724],
             ]);
         });
 
@@ -162,10 +169,11 @@ describe('arrayValueObject atan2 method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.atan2(roundArrayValueObject);
 
-            expect((originValueObject.atan2(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
-                [0.7853981633974483, '#VALUE!', 0.682622552417217, 0.7853981633974483, 1.5707963267948966],
-                [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', 2.819842099193151],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.785398163397, '#VALUE!', 0.682622552417, 0.785398163397, 1.57079632679],
+                [1.57079632679, 0.00999966668667, 0.403859794907, '#VALUE!', 2.81984209919],
             ]);
         });
     });

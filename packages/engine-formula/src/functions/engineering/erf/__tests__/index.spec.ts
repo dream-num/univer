@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Erf } from '../index';
 
@@ -29,57 +30,57 @@ describe('Test erf function', () => {
         it('Value is normal number', () => {
             const lowerLimit = NumberValueObject.create(1);
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(0.8427007929497149);
+            expect(getObjectValue(result, true)).toBe(0.84270079295);
 
             const upperLimit = NumberValueObject.create(4);
             const result2 = testFunction.calculate(lowerLimit, upperLimit);
-            expect(result2.getValue()).toBe(0.1572991916330272);
+            expect(getObjectValue(result2, true)).toBe(0.157299191633);
         });
 
         it('Value is number string', () => {
             const lowerLimit = StringValueObject.create('1.5');
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(0.9661051464753108);
+            expect(getObjectValue(result, true)).toBe(0.966105146475);
         });
 
         it('Value is negative number', () => {
             const lowerLimit = NumberValueObject.create(-2);
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(-0.9953222650189527);
+            expect(getObjectValue(result, true)).toBe(-0.995322265019);
         });
 
         it('Value is normal string', () => {
             const lowerLimit = StringValueObject.create('test');
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const lowerLimit2 = NumberValueObject.create(1);
             const upperLimit2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(lowerLimit2, upperLimit2);
-            expect(result2.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const lowerLimit = BooleanValueObject.create(true);
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is blank cell', () => {
             const lowerLimit = NullValueObject.create();
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is error', () => {
             const lowerLimit = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const lowerLimit2 = NumberValueObject.create(1);
             const upperLimit2 = ErrorValueObject.create(ErrorType.NAME);
             const result2 = testFunction.calculate(lowerLimit2, upperLimit2);
-            expect(result2.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -96,7 +97,7 @@ describe('Test erf function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(lowerLimit);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

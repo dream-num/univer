@@ -295,7 +295,7 @@ export function SheetPermissionPanelList() {
                                         <Tooltip title={ruleName}>
                                             <div
                                                 className={`
-                                                  univer-max-w-[200px] univer-text-ellipsis univer-font-medium
+                                                  univer-max-w-[200px] univer-truncate univer-text-sm univer-font-medium
                                                 `}
                                             >
                                                 {ruleName}
@@ -382,8 +382,8 @@ export function SheetPermissionPanelList() {
                                             <Tooltip title={rule.description}>
                                                 <div
                                                     className={`
-                                                      univer-text-3 univer-mt-2] univer-max-w-64 univer-overflow-hidden
-                                                      univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-400
+                                                      univer-text-3 univer-mt-2 univer-max-w-64 univer-truncate
+                                                      univer-text-sm univer-text-gray-400
                                                     `}
                                                 >
                                                     {rule.description}

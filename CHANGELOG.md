@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.1](https://github.com/dream-num/univer/compare/v0.10.0...v0.10.1) (2025-07-31)
+
+
+### Bug Fixes
+
+* **core:** fix user part handling in SheetPermissionPanelDetail ([#5611](https://github.com/dream-num/univer/issues/5611)) ([3214050](https://github.com/dream-num/univer/commit/321405006f5dc861a9c1f26ec2bf13297aecdb1e))
+
+
+### Features
+
+* **design:** allow customizing the `Dialog` component's width beyond predefined limits ([#5612](https://github.com/dream-num/univer/issues/5612)) ([1f9c781](https://github.com/dream-num/univer/commit/1f9c781c5c48eb65576fab627020d723cb5617a6))
+* locale compatibility & date formula; fix duplicate `'required'` ([#5608](https://github.com/dream-num/univer/issues/5608)) ([efe1a5e](https://github.com/dream-num/univer/commit/efe1a5ef634047c18e62f32ae1d1746e09e11a68))
+
 # [0.10.0](https://github.com/dream-num/univer/compare/v0.9.4...v0.10.0) (2025-07-29)
 
 

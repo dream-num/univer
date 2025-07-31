@@ -17,7 +17,7 @@
 import type { ICommand, Workbook } from '@univerjs/core';
 import type { ITableSetConfig } from '../../types/type';
 import type { ISetSheetTableMutationParams } from '../mutations/set-sheet-table.mutation';
-import { CommandType, customNameCharacterCheck, ICommandService, ILogService, IUndoRedoService, LocaleService, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, customNameCharacterCheck, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
@@ -47,7 +47,7 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         const newTableConfig: ITableSetConfig = {};
 
         const localeService = accessor.get(LocaleService);
-        const univerInstanceService = accessor.get(UniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
         const sheetNameSet = new Set<string>();

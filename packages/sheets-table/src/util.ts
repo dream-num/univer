@@ -62,7 +62,7 @@ export function convertCellDataToString(cellData: Nullable<ICellData>): string {
 }
 
 export function getTableFilterState(tableFilter: ITableFilterItem | undefined, sortState: SheetsTableSortStateEnum): SheetsTableButtonStateEnum {
-    const hasFilter = tableFilter !== undefined;
+    const hasFilter = tableFilter !== undefined && tableFilter !== null;
     if (hasFilter) {
         switch (sortState) {
             case SheetsTableSortStateEnum.Asc:

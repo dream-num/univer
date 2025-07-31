@@ -17,7 +17,7 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, WorkbookDeleteColumnPermission, WorkbookDeleteRowPermission, WorkbookEditablePermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { MenuItemType } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
@@ -46,7 +46,7 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'DeleteColumnDoubleIcon',
         title: 'rightClick.deleteSelectedColumn',
         hidden$: getDeleteMenuHidden$(accessor, 'col'),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookDeleteColumnPermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission] }),
     };
 }
 
@@ -56,7 +56,7 @@ export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'DeleteRowDoubleIcon',
         title: 'rightClick.deleteSelectedRow',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteRowPermission] }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookDeleteRowPermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteRowPermission] }),
         hidden$: getDeleteMenuHidden$(accessor, 'row'),
     };
 }

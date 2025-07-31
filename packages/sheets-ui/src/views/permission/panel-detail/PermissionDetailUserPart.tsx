@@ -116,7 +116,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                       univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-rounded-lg univer-p-3
                     `, borderClassName)}
                 >
-                    <div className="univer-flex univer-items-center univer-justify-between">
+                    <div className="univer-flex univer-items-center univer-justify-between univer-text-sm">
                         <span>{localeService.t('permission.panel.designedPerson')}</span>
                         <span className="univer-cursor-pointer univer-text-primary-600" onClick={handleAddPerson}>{localeService.t('permission.panel.addPerson')}</span>
                     </div>

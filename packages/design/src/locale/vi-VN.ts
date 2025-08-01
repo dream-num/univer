@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsViVN from 'dayjs/locale/vi';
-import PickerViVN from 'rc-picker/lib/locale/vi_VN';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
-        },
-        Picker: {
-            ...dajsViVN,
-            ...PickerViVN,
         },
         CascaderList: {
             empty: 'Không có',

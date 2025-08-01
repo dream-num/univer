@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsFaIR from 'dayjs/locale/fa';
-import PickerFaIR from 'rc-picker/lib/locale/fa_IR';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: 'لغو',
             confirm: 'باشه',
-        },
-        Picker: {
-            ...dajsFaIR,
-            ...PickerFaIR,
         },
         CascaderList: {
             empty: 'هیچ کدام',

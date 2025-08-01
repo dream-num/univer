@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsRuRU from 'dayjs/locale/ru';
-import PickerRuRU from 'rc-picker/lib/locale/ru_RU';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: 'отмена',
             confirm: 'ок',
-        },
-        Picker: {
-            ...dajsRuRU,
-            ...PickerRuRU,
         },
         CascaderList: {
             empty: 'Нет',

@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsZhCN from 'dayjs/locale/zh';
-import PickerZhCN from 'rc-picker/lib/locale/zh_CN';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: '取消',
             confirm: '确定',
-        },
-        Picker: {
-            ...dajsZhCN,
-            ...PickerZhCN,
         },
         CascaderList: {
             empty: '无',

@@ -45,7 +45,7 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
         if (!tableName) {
             const tableManager = accessor.get(TableManager);
             const tableCount = tableManager.getTableList(params.unitId).length;
-            tableName = `${localeService.t('sheets-table.tablePrefix')} ${tableCount + 1}`;
+            tableName = `${localeService.t('sheets-table.tablePrefix')}${tableCount + 1}`;
         }
 
         const redos: IMutationInfo[] = [];

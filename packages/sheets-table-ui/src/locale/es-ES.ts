@@ -40,6 +40,7 @@ const locale: typeof enUS = {
         secondLine: 'Segunda línea',
         columnPrefix: 'Columna',
         tablePrefix: 'Tabla',
+        tableNameError: 'El nombre de la tabla no puede contener espacios, no puede comenzar con un número y no puede ser idéntico a un nombre de tabla existente',
 
         insert: {
             main: 'Insertar tabla',

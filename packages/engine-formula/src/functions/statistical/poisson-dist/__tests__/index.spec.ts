@@ -32,7 +32,7 @@ describe('Test poissonDist function', () => {
             const mean = NumberValueObject.create(5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, cumulative);
-            expect(getObjectValue(result)).toBe(0.12465201948308113);
+            expect(getObjectValue(result, true)).toBe(0.124652019483);
         });
 
         it('X and mean value test', () => {
@@ -53,7 +53,7 @@ describe('Test poissonDist function', () => {
             const mean = NumberValueObject.create(5);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, mean, cumulative);
-            expect(getObjectValue(result)).toBe(0.08422433748856833);
+            expect(getObjectValue(result, true)).toBe(0.0842243374886);
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test poissonDist function', () => {
             const mean = NumberValueObject.create(5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, cumulative);
-            expect(getObjectValue(result)).toBe(0.040427681994512805);
+            expect(getObjectValue(result, true)).toBe(0.0404276819945);
         });
 
         it('Value is null', () => {
@@ -77,7 +77,7 @@ describe('Test poissonDist function', () => {
             const mean = NumberValueObject.create(5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, cumulative);
-            expect(getObjectValue(result)).toBe(0.006737946999085467);
+            expect(getObjectValue(result, true)).toBe(0.00673794699909);
         });
 
         it('Value is error', () => {
@@ -113,9 +113,9 @@ describe('Test poissonDist function', () => {
             const mean = NumberValueObject.create(5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.040427681994512805, ErrorType.VALUE, 0.040427681994512805, 0.040427681994512805, 0.006737946999085467, 0.006737946999085467],
-                [0.006737946999085467, 1, 0.12465201948308113, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.0404276819945, ErrorType.VALUE, 0.0404276819945, 0.0404276819945, 0.00673794699909, 0.00673794699909],
+                [0.00673794699909, 1, 0.124652019483, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
 
@@ -124,11 +124,11 @@ describe('Test poissonDist function', () => {
             const mean = NumberValueObject.create(0.1);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, mean, cumulative);
-            expect(getObjectValue(result)).toBe(2.543911722940471e-32);
+            expect(getObjectValue(result, true)).toBe(2.54391172294e-32);
 
             const mean2 = NumberValueObject.create(2);
             const result2 = testFunction.calculate(x, mean2, cumulative);
-            expect(getObjectValue(result2)).toBe(4.987150189520231e-11);
+            expect(getObjectValue(result2, true)).toBe(4.98715018952e-11);
 
             const x2 = NumberValueObject.create(0.25);
             const mean3 = NumberValueObject.create(0);
@@ -138,7 +138,7 @@ describe('Test poissonDist function', () => {
             const x3 = NumberValueObject.create(139.7316);
             const mean4 = NumberValueObject.create(161);
             const result4 = testFunction.calculate(x3, mean4, cumulative);
-            expect(getObjectValue(result4)).toBe(0.00698880992304486);
+            expect(getObjectValue(result4, true)).toBe(0.00698880992304);
         });
     });
 });

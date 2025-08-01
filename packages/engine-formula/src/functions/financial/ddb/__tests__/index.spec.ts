@@ -16,8 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Ddb } from '../index';
 
@@ -32,7 +33,7 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(1);
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(result.getValue()).toStrictEqual(7999.999999999998);
+            expect(getObjectValue(result, true)).toBe(8000);
         });
 
         it('Cost is normal string', () => {
@@ -42,7 +43,7 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(1);
             const factor = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Cost <= 0 or salvage < 0 or cost < salvage', () => {
@@ -52,17 +53,17 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(1);
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
 
             const cost2 = NumberValueObject.create(24000);
             const salvage2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(cost2, salvage2, life, period, factor);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const cost3 = NumberValueObject.create(24000);
             const salvage3 = NumberValueObject.create(1000000);
             const result3 = testFunction.calculate(cost3, salvage3, life, period, factor);
-            expect(result3.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result3)).toBe(0);
         });
 
         it('Period <= 0 or period is last or period > life', () => {
@@ -72,15 +73,15 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(0);
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const period2 = NumberValueObject.create(6);
             const result2 = testFunction.calculate(cost, salvage, life, period2, factor);
-            expect(result2.getValue()).toStrictEqual(160.49382716049558);
+            expect(getObjectValue(result2, true)).toBe(160.493827160496);
 
             const period3 = NumberValueObject.create(7);
             const result3 = testFunction.calculate(cost, salvage, life, period3, factor);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
         });
 
         it('value is array', () => {
@@ -100,8 +101,8 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(1);
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [7999.999999999998, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [8000, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
             ]);
         });
     });

@@ -69,7 +69,7 @@ describe('Test binomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(numberS, trials, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.205078125);
+            expect(getObjectValue(result, true)).toBe(0.205078125);
 
             const numberS2 = NumberValueObject.create(0);
             const trials2 = NumberValueObject.create(0);
@@ -98,7 +98,7 @@ describe('Test binomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberS, trials, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.0107421875);
+            expect(getObjectValue(result, true)).toBe(0.0107421875);
         });
 
         it('Value is null', () => {
@@ -107,7 +107,7 @@ describe('Test binomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberS, trials, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.0009765625);
+            expect(getObjectValue(result, true)).toBe(0.0009765625);
         });
 
         it('Value is error', () => {
@@ -149,7 +149,7 @@ describe('Test binomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberS, trials, probabilityS, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
+            expect(getObjectValue(result, true)).toStrictEqual([
                 [0.0107421875, ErrorType.VALUE, 0.0107421875, 0.0107421875, 0.0009765625, 0.0009765625],
                 [0.0009765625, ErrorType.NUM, 0.0546875, ErrorType.VALUE, ErrorType.NUM, 0.0009765625],
             ]);

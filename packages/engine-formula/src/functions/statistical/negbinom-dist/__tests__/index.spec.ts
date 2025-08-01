@@ -33,7 +33,7 @@ describe('Test negbinomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberF, numberS, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.2272491455078125);
+            expect(getObjectValue(result, true)).toBe(0.227249145508);
         });
 
         it('NumberF and numberS value test', () => {
@@ -77,7 +77,7 @@ describe('Test negbinomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(numberF, numberS, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.0763702392578125);
+            expect(getObjectValue(result, true)).toBe(0.0763702392578);
 
             const numberF2 = NumberValueObject.create(0);
             const numberS2 = NumberValueObject.create(0);
@@ -105,7 +105,7 @@ describe('Test negbinomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberF, numberS, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.005859375);
+            expect(getObjectValue(result, true)).toBe(0.005859375);
         });
 
         it('Value is null', () => {
@@ -114,7 +114,7 @@ describe('Test negbinomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberF, numberS, probabilityS, cumulative);
-            expect(getObjectValue(result)).toBe(0.0009765625);
+            expect(getObjectValue(result, true)).toBe(0.0009765625);
         });
 
         it('Value is error', () => {
@@ -156,9 +156,9 @@ describe('Test negbinomDist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberF, numberS, probabilityS, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
+            expect(getObjectValue(result, true)).toStrictEqual([
                 [0.005859375, ErrorType.VALUE, 0.005859375, 0.005859375, 0.0009765625, 0.0009765625],
-                [0.0009765625, 0.9999999999999999, 0.019287109375, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+                [0.0009765625, 1, 0.019287109375, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
     });

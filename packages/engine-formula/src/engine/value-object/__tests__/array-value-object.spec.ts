@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { BaseValueObject } from '../base-value-object';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
-import { stripErrorMargin } from '../../utils/math-kit';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../primitive-object';
@@ -40,7 +40,9 @@ describe('arrayValueObject test', () => {
 
     describe('slice', () => {
         it('row==null;column=2,,', () => {
-            expect(originArrayValueObject.slice(null, [2])?.toValue()).toStrictEqual([
+            const result = originArrayValueObject.slice(null, [2])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
                 [3, 4, 5],
                 [8, 9, 10],
                 [13, 14, 15],
@@ -48,46 +50,68 @@ describe('arrayValueObject test', () => {
         });
 
         it('row==2,,;column=2,,', () => {
-            expect(originArrayValueObject.slice([2], [2])?.toValue()).toStrictEqual([[13, 14, 15]]);
+            const result = originArrayValueObject.slice([2], [2])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
+                [13, 14, 15],
+            ]);
         });
 
         it('row==,,2;column=2,,', () => {
-            expect(originArrayValueObject.slice([undefined, undefined, 2], [2])?.toValue()).toStrictEqual([
+            const result = originArrayValueObject.slice([undefined, undefined, 2], [2])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
                 [3, 4, 5],
                 [13, 14, 15],
             ]);
         });
 
         it('row==1,,;column=null', () => {
-            expect(originArrayValueObject.slice([1])?.toValue()).toStrictEqual([
+            const result = originArrayValueObject.slice([1])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
                 [6, 7, 8, 9, 10],
                 [11, 12, 13, 14, 15],
             ]);
         });
 
         it('row==0,1,;column=,,2', () => {
-            expect(originArrayValueObject.slice([0, 1], [undefined, undefined, 2])?.toValue()).toStrictEqual([
+            const result = originArrayValueObject.slice([0, 1], [undefined, undefined, 2])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, 3, 5],
             ]);
         });
 
         it('row==0,1,;column=,,2,first undefined', () => {
-            expect(originArrayValueObject.slice(undefined, [2, 3])?.toValue()).toStrictEqual([[3], [8], [13]]);
+            const result = originArrayValueObject.slice(undefined, [2, 3])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
+                [3],
+                [8],
+                [13],
+            ]);
         });
 
         it('row==1,3,;column=1,4,', () => {
-            expect(originArrayValueObject.slice([1, 3], [1, 4])?.toValue()).toStrictEqual([
+            const result = originArrayValueObject.slice([1, 3], [1, 4])!;
+
+            expect(getObjectValue(result)).toStrictEqual([
                 [7, 8, 9],
                 [12, 13, 14],
             ]);
         });
 
         it('row==3,,;column=,,', () => {
-            expect(originArrayValueObject.slice([3])?.toValue()).toBeUndefined();
+            const result = originArrayValueObject.slice([3]);
+
+            expect(result).toBeUndefined();
         });
 
         it('row==,,;column=5,,', () => {
-            expect(originArrayValueObject.slice(undefined, [5])?.toValue()).toBeUndefined();
+            const result = originArrayValueObject.slice(undefined, [5]);
+
+            expect(result).toBeUndefined();
         });
     });
 
@@ -105,7 +129,9 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
-            expect(originValueObject.count()?.getValue()).toBe(6);
+            const result = originValueObject.count();
+
+            expect(getObjectValue(result)).toBe(6);
         });
         it('Counta', () => {
             const originValueObject = ArrayValueObject.create({
@@ -120,7 +146,9 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
-            expect(originValueObject.countA()?.getValue()).toBe(10);
+            const result = originValueObject.countA();
+
+            expect(getObjectValue(result)).toBe(10);
         });
         it('CountBlank', () => {
             const originValueObject = ArrayValueObject.create({
@@ -135,7 +163,9 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
-            expect(originValueObject.countBlank()?.getValue()).toBe(3);
+            const result = originValueObject.countBlank();
+
+            expect(getObjectValue(result)).toBe(3);
         });
     });
 
@@ -154,8 +184,11 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.pick(pickArrayValueObject);
 
-            expect(originArrayValueObject.pick(pickArrayValueObject).toValue()).toStrictEqual([[1, 4, 6, 8, 11, 13]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [1, 4, 6, 8, 11, 13],
+            ]);
         });
 
         it('not boolean', () => {
@@ -172,8 +205,11 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.pick(pickArrayValueObject);
 
-            expect(originArrayValueObject.pick(pickArrayValueObject).toValue()).toStrictEqual([[1, 6, 11]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [1, 6, 11],
+            ]);
         });
 
         it('pick and sum', () => {
@@ -190,21 +226,19 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.pick(pickArrayValueObject).sum();
 
-            expect(originArrayValueObject.pick(pickArrayValueObject).sum().getValue()).toStrictEqual(43);
+            expect(getObjectValue(result)).toStrictEqual(43);
         });
     });
 
     describe('sum', () => {
         it('normal', () => {
-            expect(originArrayValueObject.sum().getValue()).toStrictEqual(120);
+            const result = originArrayValueObject.sum();
+
+            expect(getObjectValue(result)).toStrictEqual(120);
         });
 
-        // like numpy array
-        // [
-        //     [1, 0, 1.23, 1, 0],
-        //     [0, 100, 2.34, 0, -3],
-        // ]
         it('nm multiple formats', () => {
             const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -218,21 +252,19 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.sum();
 
-            expect(stripErrorMargin(Number(originValueObject.sum().getValue()))).toStrictEqual(101.57);
+            expect(getObjectValue(result)).toStrictEqual(101.57);
         });
     });
 
     describe('mean', () => {
         it('normal', () => {
-            expect(originArrayValueObject.mean().getValue()).toStrictEqual(8);
+            const result = originArrayValueObject.mean();
+
+            expect(getObjectValue(result)).toStrictEqual(8);
         });
 
-        // like numpy array
-        // [
-        //     [1, 0, 1.23, 1, 0],
-        //     [0, 100, 2.34, 0, -3],
-        // ]
         it('nm multiple formats', () => {
             const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -246,14 +278,17 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.mean();
 
-            expect(originValueObject.mean().getValue()).toStrictEqual(16.928333333333335);
+            expect(getObjectValue(result, true)).toStrictEqual(16.9283333333);
         });
     });
 
     describe('var', () => {
         it('normal', () => {
-            expect(originArrayValueObject.var().getValue()).toStrictEqual(18.666666666666668);
+            const result = originArrayValueObject.var();
+
+            expect(getObjectValue(result, true)).toStrictEqual(18.6666666667);
         });
 
         it('var nm multiple formats', () => {
@@ -269,14 +304,17 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.var();
 
-            expect(originValueObject.var().getValue()).toStrictEqual(1382.9296138888888);
+            expect(getObjectValue(result, true)).toStrictEqual(1382.92961388889);
         });
     });
 
     describe('std', () => {
         it('normal', () => {
-            expect(originArrayValueObject.std().getValue()).toStrictEqual(4.320493798938574);
+            const result = originArrayValueObject.std();
+
+            expect(getObjectValue(result, true)).toStrictEqual(4.32049379894);
         });
 
         it('nm multiple formats', () => {
@@ -292,14 +330,17 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.std();
 
-            expect(originValueObject.std().getValue()).toStrictEqual(37.187761614392564);
+            expect(getObjectValue(result, true)).toStrictEqual(37.1877616144);
         });
     });
 
     describe('getNegative', () => {
         it('normal', () => {
-            expect((originArrayValueObject.getNegative() as ArrayValueObject).toValue()).toStrictEqual([
+            const result = originArrayValueObject.getNegative();
+
+            expect(getObjectValue(result)).toStrictEqual([
                 [-1, -2, -3, -4, -5],
                 [-6, -7, -8, -9, -10],
                 [-11, -12, -13, -14, -15],

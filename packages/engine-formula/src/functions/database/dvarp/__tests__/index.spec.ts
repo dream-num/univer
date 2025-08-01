@@ -238,7 +238,7 @@ describe('Test dvarp function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(5.916666666666667);
+            expect(getObjectValue(result, true)).toStrictEqual(5.91666666667);
 
             const criteria2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -283,7 +283,7 @@ describe('Test dvarp function', () => {
                 column: 0,
             });
             const result4 = testFunction.calculate(database, field, criteria4);
-            expect(getObjectValue(result4)).toStrictEqual(5.916666666666667);
+            expect(getObjectValue(result4, true)).toStrictEqual(5.91666666667);
         });
     });
 });

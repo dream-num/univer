@@ -32,7 +32,7 @@ describe('Test confidenceT function', () => {
             const standardDev = NumberValueObject.create(2.5);
             const size = NumberValueObject.create(50);
             const result = testFunction.calculate(alpha, standardDev, size);
-            expect(getObjectValue(result)).toBe(0.7104921378216537);
+            expect(getObjectValue(result, true)).toBe(0.710492137822);
         });
 
         it('Alpha value test', () => {

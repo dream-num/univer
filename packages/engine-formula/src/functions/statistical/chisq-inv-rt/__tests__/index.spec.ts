@@ -31,7 +31,7 @@ describe('Test chisqInvRt function', () => {
             const probability = NumberValueObject.create(0.5);
             const degFreedom = NumberValueObject.create(1);
             const result = testFunction.calculate(probability, degFreedom);
-            expect(getObjectValue(result)).toBe(0.45493642311961857);
+            expect(getObjectValue(result, true)).toBe(0.45493642312);
         });
 
         it('Probability value test', () => {

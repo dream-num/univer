@@ -32,7 +32,7 @@ describe('Test standardize function', () => {
             const mean = NumberValueObject.create(40);
             const standardDev = NumberValueObject.create(1.5);
             const result = testFunction.calculate(x, mean, standardDev);
-            expect(getObjectValue(result)).toBe(1.3333333333333333);
+            expect(getObjectValue(result, true)).toBe(1.33333333333);
         });
 
         it('StandardDev value test', () => {
@@ -64,7 +64,7 @@ describe('Test standardize function', () => {
             const mean = NumberValueObject.create(40);
             const standardDev = NumberValueObject.create(1.5);
             const result = testFunction.calculate(x, mean, standardDev);
-            expect(getObjectValue(result)).toBe(-26.666666666666668);
+            expect(getObjectValue(result, true)).toBe(-26.6666666667);
         });
 
         it('Value is error', () => {
@@ -100,9 +100,9 @@ describe('Test standardize function', () => {
             const mean = NumberValueObject.create(40);
             const standardDev = NumberValueObject.create(1.5);
             const result = testFunction.calculate(x, mean, standardDev);
-            expect(getObjectValue(result)).toStrictEqual([
-                [-26, ErrorType.VALUE, -25.846666666666668, -26, -26.666666666666668, -26.666666666666668],
-                [-26.666666666666668, 40, -25.106666666666666, ErrorType.VALUE, -28.666666666666668, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [-26, ErrorType.VALUE, -25.8466666667, -26, -26.6666666667, -26.6666666667],
+                [-26.6666666667, 40, -25.1066666667, ErrorType.VALUE, -28.6666666667, ErrorType.NAME],
             ]);
         });
     });

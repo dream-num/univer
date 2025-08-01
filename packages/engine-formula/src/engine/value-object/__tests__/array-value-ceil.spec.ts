@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { stripArrayValue } from '../../../functions/__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
@@ -48,8 +48,9 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.ceil(ceilArrayValueObject);
 
-            expect((originArrayValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [0.13, 0.988, 0.5432, '#N/A', '#N/A'],
                 [0.3, 0.8765, 0.33, '#N/A', '#N/A'],
                 ['#N/A', '#N/A', '#N/A', '#N/A', '#N/A'],
@@ -66,8 +67,9 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.ceil(ceilArrayValueObject);
 
-            expect((originArrayValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [0.13, 0.99, 0.55, 0.679, 0.457],
                 [0.24, 0.88, 0.33, 0.766, 0.544],
                 [0.35, 0.77, 0.22, 0.655, 0.679],
@@ -84,8 +86,9 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.ceil(ceilArrayValueObject);
 
-            expect((originArrayValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [0.124, 0.988, 0.544, 0.679, 0.457],
                 [0.24, 0.88, 0.33, 0.77, 0.55],
                 [0.4, 0.8, 0.3, 0.7, 0.7],
@@ -115,8 +118,9 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.ceil(ceilArrayValueObject);
 
-            expect((originArrayValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [0.13, 0.99, 0.55, 0.679, 0.457],
                 [0.124, 0.988, 0.544, 0.6789, 0.4567],
                 [0.1234, 0.9876, 0.5432, 0.6789, 0.4567],
@@ -146,8 +150,9 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originArrayValueObject.ceil(ceilArrayValueObject);
 
-            expect((originArrayValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [0.13, 0.13, 0.13, 0.124, 0.124],
                 [0.235, 0.235, 0.235, 0.2345, 0.2345],
                 [0.3456, 0.3456, 0.3456, 0.3456, 0.3456],
@@ -167,10 +172,10 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
-
             const ceilValueObject = NumberValueObject.create(1);
+            const result = originArrayValueObject.ceil(ceilValueObject);
 
-            expect((originArrayValueObject.ceil(ceilValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, '#VALUE!', 1.3, 1, -0],
                 [-0, 100, 2.4, '#VALUE!', -3],
             ]);
@@ -190,8 +195,9 @@ describe('arrayValueObject ceil method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = originValueObject.ceil(ceilArrayValueObject);
 
-            expect(stripArrayValue((originValueObject.ceil(ceilArrayValueObject) as ArrayValueObject).toValue())).toStrictEqual([
+            expect(getObjectValue(result, true)).toStrictEqual([
                 [1, '#VALUE!', 1, 1, 1],
                 [1, 1, 1, '#VALUE!', 1000],
             ]);

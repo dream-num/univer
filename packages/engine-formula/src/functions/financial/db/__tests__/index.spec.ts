@@ -16,8 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Db } from '../index';
 
@@ -32,7 +33,7 @@ describe('Test db function', () => {
             const period = NumberValueObject.create(1);
             const month = NumberValueObject.create(7);
             const result = testFunction.calculate(cost, salvage, life, period, month);
-            expect(result.getValue()).toStrictEqual(1860833.3333333333);
+            expect(getObjectValue(result, true)).toBe(1860833.33333333);
         });
 
         it('Cost is normal string', () => {
@@ -42,7 +43,7 @@ describe('Test db function', () => {
             const period = NumberValueObject.create(1);
             const month = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, period, month);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Cost <= 0 or salvage < 0 or cost < salvage', () => {
@@ -52,17 +53,17 @@ describe('Test db function', () => {
             const period = NumberValueObject.create(1);
             const month = NumberValueObject.create(7);
             const result = testFunction.calculate(cost, salvage, life, period, month);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const cost2 = NumberValueObject.create(2400);
             const salvage2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(cost2, salvage2, life, period, month);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const cost3 = NumberValueObject.create(10000);
             const salvage3 = NumberValueObject.create(1000000);
             const result3 = testFunction.calculate(cost3, salvage3, life, period, month);
-            expect(result3.getValue()).toStrictEqual(-6731.666666666667);
+            expect(getObjectValue(result3, true)).toBe(-6731.66666666667);
         });
 
         it('Period <= 0 or period is last or period > life', () => {
@@ -72,23 +73,23 @@ describe('Test db function', () => {
             const period = NumberValueObject.create(0);
             const month = NumberValueObject.create(7);
             const result = testFunction.calculate(cost, salvage, life, period, month);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const period2 = NumberValueObject.create(6);
             const result2 = testFunction.calculate(cost, salvage, life, period2, month);
-            expect(result2.getValue()).toStrictEqual(558417.5673602844);
+            expect(getObjectValue(result2, true)).toBe(558417.567360284);
 
             const period3 = NumberValueObject.create(7);
             const result3 = testFunction.calculate(cost, salvage, life, period3, month);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
 
             const period4 = NumberValueObject.create(0.1);
             const result4 = testFunction.calculate(cost, salvage, life, period4, month);
-            expect(result4.getValue()).toStrictEqual(1860833.3333333333);
+            expect(getObjectValue(result4, true)).toBe(1860833.33333333);
 
             const period5 = NumberValueObject.create(2);
             const result5 = testFunction.calculate(cost, salvage, life, period5, month);
-            expect(result5.getValue()).toStrictEqual(2596394.166666667);
+            expect(getObjectValue(result5, true)).toBe(2596394.16666667);
         });
 
         it('value is array', () => {
@@ -108,8 +109,8 @@ describe('Test db function', () => {
             const period = NumberValueObject.create(1);
             const month = NumberValueObject.create(7);
             const result = testFunction.calculate(cost, salvage, life, period, month);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [312666.6666666667, ErrorType.VALUE, -2.1245, ErrorType.NUM, ErrorType.NAME, ErrorType.NUM],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [312666.666666667, ErrorType.VALUE, -2.1245, ErrorType.NUM, ErrorType.NAME, ErrorType.NUM],
             ]);
         });
     });

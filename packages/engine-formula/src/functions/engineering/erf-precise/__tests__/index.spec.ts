@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { ErfPrecise } from '../index';
 
@@ -29,43 +30,43 @@ describe('Test erf.precise function', () => {
         it('Value is normal number', () => {
             const x = NumberValueObject.create(1);
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(0.8427007929497149);
+            expect(getObjectValue(result, true)).toBe(0.84270079295);
         });
 
         it('Value is number string', () => {
             const x = StringValueObject.create('1.5');
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(0.9661051464753108);
+            expect(getObjectValue(result, true)).toBe(0.966105146475);
         });
 
         it('Value is negative number', () => {
             const x = NumberValueObject.create(-2);
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(-0.9953222650189527);
+            expect(getObjectValue(result, true)).toBe(-0.995322265019);
         });
 
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const x = BooleanValueObject.create(true);
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is blank cell', () => {
             const x = NullValueObject.create();
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is error', () => {
             const x = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -82,7 +83,7 @@ describe('Test erf.precise function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(x);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

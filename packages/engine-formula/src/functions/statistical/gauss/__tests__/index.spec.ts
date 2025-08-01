@@ -30,47 +30,47 @@ describe('Test gauss function', () => {
         it('Value is normal', () => {
             const z = NumberValueObject.create(2.5);
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(0.49379033467422384);
+            expect(getObjectValue(result, true)).toBe(0.493790334674);
         });
 
         it('Value is 0 or negative integers', () => {
             const z = NumberValueObject.create(0);
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
 
             const z2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(z2);
-            expect(getObjectValue(result2)).toStrictEqual(-0.3413447460685429);
+            expect(getObjectValue(result2, true)).toBe(-0.341344746069);
         });
 
         it('Value is number string', () => {
             const z = StringValueObject.create('4');
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(0.4999683287581669);
+            expect(getObjectValue(result, true)).toBe(0.499968328758);
         });
 
         it('Value is normal string', () => {
             const z = StringValueObject.create('test');
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const z = BooleanValueObject.create(true);
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(0.3413447460685429);
+            expect(getObjectValue(result, true)).toBe(0.341344746069);
         });
 
         it('Value is null', () => {
             const z = NullValueObject.create();
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is error', () => {
             const z = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -87,9 +87,9 @@ describe('Test gauss function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.3413447460685429, ErrorType.VALUE, 0.39065144757430814, 0.3413447460685429, 0, 0],
-                [0, 0.5, 0.4903581300546417, ErrorType.VALUE, -0.4986501019683699, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.341344746069, ErrorType.VALUE, 0.390651447574, 0.341344746069, 0, 0],
+                [0, 0.5, 0.490358130055, ErrorType.VALUE, -0.498650101968, ErrorType.NAME],
             ]);
 
             const z2 = ArrayValueObject.create({
@@ -104,7 +104,7 @@ describe('Test gauss function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(z2);
-            expect(getObjectValue(result2)).toStrictEqual(0.04894645101643691);
+            expect(getObjectValue(result2, true)).toBe(0.0489464510164);
         });
     });
 });

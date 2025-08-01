@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Radians } from '../index';
 
@@ -29,41 +30,41 @@ describe('Test radians function', () => {
         it('Value is normal number', () => {
             const angle = NumberValueObject.create(270);
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(4.71238898038469);
+            expect(getObjectValue(result, true)).toBe(4.71238898038);
         });
 
         it('Value is number valid', () => {
             const angle = NumberValueObject.create(-2);
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(-0.03490658503988659);
+            expect(getObjectValue(result, true)).toBe(-0.0349065850399);
         });
 
         it('Value is number string', () => {
             const angle = StringValueObject.create('1.5');
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(0.026179938779914945);
+            expect(getObjectValue(result, true)).toBe(0.0261799387799);
         });
 
         it('Value is normal string', () => {
             const angle = StringValueObject.create('test');
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const angle = BooleanValueObject.create(false);
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
         it('Value is blank cell', () => {
             const angle = NullValueObject.create();
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
         it('Value is error', () => {
             const angle = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(angle);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -80,9 +81,9 @@ describe('Test radians function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(angle);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [0.03752457891787808, ErrorType.VALUE, 0.08726646259971647, -0.02748893571891069, 0.017453292519943295, ErrorType.VALUE],
-                [0.017453292519943295, 0.017453292519943295, 0, 0.03490658503988659, 0, -0.017453292519943295],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.0375245789179, ErrorType.VALUE, 0.0872664625997, -0.0274889357189, 0.0174532925199, ErrorType.VALUE],
+                [0.0174532925199, 0.0174532925199, 0, 0.0349065850399, 0, -0.0174532925199],
             ]);
         });
     });

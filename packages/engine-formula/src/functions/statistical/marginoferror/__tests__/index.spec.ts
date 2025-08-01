@@ -41,7 +41,7 @@ describe('Test marginoferror function', () => {
             });
             const confidence = NumberValueObject.create(0.1);
             const result = testFunction.calculate(range, confidence);
-            expect(getObjectValue(result)).toBe(0.0881737585364693);
+            expect(getObjectValue(result, true)).toBe(0.0881737585365);
         });
 
         it('Range value test', () => {

@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Rri } from '../index';
 
@@ -31,7 +32,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(0.0009933073762913303);
+            expect(getObjectValue(result, true)).toBe(0.000993307376291);
         });
 
         it('Nper <= 0', () => {
@@ -39,7 +40,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Pv === 0 && fv === 0', () => {
@@ -47,7 +48,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(0);
             const fv = NumberValueObject.create(0);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Only pv === 0', () => {
@@ -55,7 +56,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(0);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Fv / pv < 0', () => {
@@ -63,7 +64,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(-10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
@@ -71,7 +72,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -79,7 +80,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(0.10000000000000009);
+            expect(getObjectValue(result, true)).toBe(0.1);
         });
 
         it('Value is blank cell', () => {
@@ -87,7 +88,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is normal string', () => {
@@ -95,7 +96,7 @@ describe('Test rri function', () => {
             const pv = NumberValueObject.create(10000);
             const fv = NumberValueObject.create(11000);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -128,7 +129,7 @@ describe('Test rri function', () => {
             });
             const fv = NumberValueObject.create(0);
             const result = testFunction.calculate(nper, pv, fv);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [ErrorType.VALUE, -1, ErrorType.NUM],
                 [-1, ErrorType.NUM, ErrorType.NAME],
                 [ErrorType.NUM, 0, 0],

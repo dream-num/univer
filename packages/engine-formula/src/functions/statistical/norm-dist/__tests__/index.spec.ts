@@ -33,7 +33,7 @@ describe('Test normDist function', () => {
             const standardDev = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, standardDev, cumulative);
-            expect(getObjectValue(result)).toBe(0.9893246572880974);
+            expect(getObjectValue(result, true)).toBe(0.989324657288);
         });
 
         it('StandardDev value test', () => {
@@ -51,7 +51,7 @@ describe('Test normDist function', () => {
             const standardDev = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, mean, standardDev, cumulative);
-            expect(getObjectValue(result)).toBe(0.007053707723785456);
+            expect(getObjectValue(result, true)).toBe(0.00705370772379);
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test normDist function', () => {
             const standardDev = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, standardDev, cumulative);
-            expect(getObjectValue(result)).toBe(0.10564977366685524);
+            expect(getObjectValue(result, true)).toBe(0.105649773667);
         });
 
         it('Value is null', () => {
@@ -78,7 +78,7 @@ describe('Test normDist function', () => {
             const standardDev = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, standardDev, cumulative);
-            expect(getObjectValue(result)).toBe(0.06680720126885809);
+            expect(getObjectValue(result, true)).toBe(0.0668072012689);
         });
 
         it('Value is error', () => {
@@ -120,9 +120,9 @@ describe('Test normDist function', () => {
             const standardDev = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, standardDev, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.10564977366685524, ErrorType.VALUE, 0.11653262537300785, 0.10564977366685524, 0.06680720126885809, 0.06680720126885809],
-                [0.06680720126885809, 1, 0.18009581506347705, ErrorType.VALUE, 0.012224472655044727, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.105649773667, ErrorType.VALUE, 0.116532625373, 0.105649773667, 0.0668072012689, 0.0668072012689],
+                [0.0668072012689, 1, 0.180095815063, ErrorType.VALUE, 0.012224472655, ErrorType.NAME],
             ]);
         });
     });

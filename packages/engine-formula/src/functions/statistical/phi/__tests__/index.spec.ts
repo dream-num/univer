@@ -30,47 +30,47 @@ describe('Test phi function', () => {
         it('Value is normal', () => {
             const x = NumberValueObject.create(2.5);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0.01752830049356854);
+            expect(getObjectValue(result, true)).toBe(0.0175283004936);
         });
 
         it('Value is 0 or negative integers', () => {
             const x = NumberValueObject.create(0);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0.3989422804014327);
+            expect(getObjectValue(result, true)).toBe(0.398942280401);
 
             const x2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(x2);
-            expect(getObjectValue(result2)).toStrictEqual(0.24197072451914337);
+            expect(getObjectValue(result2, true)).toBe(0.241970724519);
         });
 
         it('Value is number string', () => {
             const x = StringValueObject.create('4');
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0.00013383022576488537);
+            expect(getObjectValue(result, true)).toBe(0.000133830225765);
         });
 
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const x = BooleanValueObject.create(true);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0.24197072451914337);
+            expect(getObjectValue(result, true)).toBe(0.241970724519);
         });
 
         it('Value is null', () => {
             const x = NullValueObject.create();
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0.3989422804014327);
+            expect(getObjectValue(result, true)).toBe(0.398942280401);
         });
 
         it('Value is error', () => {
             const x = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -87,9 +87,9 @@ describe('Test phi function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.24197072451914337, ErrorType.VALUE, 0.18723541817072956, 0.24197072451914337, 0.3989422804014327, 0.3989422804014327],
-                [0.3989422804014327, 0, 0.02581657547158769, ErrorType.VALUE, 0.0044318484119380075, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.241970724519, ErrorType.VALUE, 0.187235418171, 0.241970724519, 0.398942280401, 0.398942280401],
+                [0.398942280401, 0, 0.0258165754716, ErrorType.VALUE, 0.00443184841194, ErrorType.NAME],
             ]);
 
             const x2 = ArrayValueObject.create({
@@ -104,7 +104,7 @@ describe('Test phi function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(x2);
-            expect(getObjectValue(result2)).toStrictEqual(0.3959358668649187);
+            expect(getObjectValue(result2, true)).toBe(0.395935866865);
         });
     });
 });

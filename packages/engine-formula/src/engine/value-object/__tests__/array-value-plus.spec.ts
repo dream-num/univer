@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
@@ -34,10 +35,10 @@ describe('ArrayValueObject plus method test', () => {
                 row: 0,
                 column: 0,
             });
-
             const valueObject = new NumberValueObject(1);
+            const result = arrayValueObject.plus(valueObject);
 
-            expect((arrayValueObject.plus(valueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [2, ErrorType.VALUE, 2.23, 2, 1, 1],
                 [1, 101, 3.34, ErrorType.VALUE, -2, ErrorType.VALUE],
             ]);

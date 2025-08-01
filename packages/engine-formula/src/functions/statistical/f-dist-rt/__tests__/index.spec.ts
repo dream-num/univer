@@ -32,7 +32,7 @@ describe('Test fDistRt function', () => {
             const degFreedom1 = NumberValueObject.create(6);
             const degFreedom2 = NumberValueObject.create(4);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2);
-            expect(getObjectValue(result)).toBe(0.009999956997237325);
+            expect(getObjectValue(result, true)).toBe(0.00999995699724);
         });
 
         it('DegFreedom value test', () => {
@@ -60,7 +60,7 @@ describe('Test fDistRt function', () => {
             const degFreedom1 = NumberValueObject.create(6);
             const degFreedom2 = NumberValueObject.create(4);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2);
-            expect(getObjectValue(result)).toBe(0.5248000000000005);
+            expect(getObjectValue(result, true)).toBe(0.5248);
         });
 
         it('Value is null', () => {
@@ -103,9 +103,9 @@ describe('Test fDistRt function', () => {
             const degFreedom1 = NumberValueObject.create(6);
             const degFreedom2 = NumberValueObject.create(4);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.5248000000000005, ErrorType.VALUE, 0.43966913698600196, 0.5248000000000005, 1, 1],
-                [1, 0.0002608285356223705, 0.2150262771598519, ErrorType.VALUE, ErrorType.NUM, 1],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.5248, ErrorType.VALUE, 0.439669136986, 0.5248, 1, 1],
+                [1, 0.000260828535622, 0.21502627716, ErrorType.VALUE, ErrorType.NUM, 1],
             ]);
         });
     });

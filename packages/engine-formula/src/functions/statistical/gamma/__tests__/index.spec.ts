@@ -30,7 +30,7 @@ describe('Test gamma function', () => {
         it('Value is normal', () => {
             const number = NumberValueObject.create(2.5);
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(1.3293403919101043);
+            expect(getObjectValue(result, true)).toStrictEqual(1.32934039191);
         });
 
         it('Value is 0 or negative integers', () => {
@@ -50,7 +50,7 @@ describe('Test gamma function', () => {
         it('Value is number string', () => {
             const number = StringValueObject.create('-2.5');
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(-0.9453087178298095);
+            expect(getObjectValue(result, true)).toStrictEqual(-0.94530871783);
         });
 
         it('Value is normal string', () => {
@@ -91,9 +91,9 @@ describe('Test gamma function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1, ErrorType.VALUE, 0.9107548563770899, 1, ErrorType.NUM, ErrorType.NUM],
-                [ErrorType.NUM, 9.33262154439441e+155, 1.19556877982239, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1, ErrorType.VALUE, 0.910754856377, 1, ErrorType.NUM, ErrorType.NUM],
+                [ErrorType.NUM, 9.33262154439441e+155, 1.19556877982, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
 
             const number2 = ArrayValueObject.create({
@@ -108,7 +108,7 @@ describe('Test gamma function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(number2);
-            expect(getObjectValue(result2)).toStrictEqual(999.4237724845955);
+            expect(getObjectValue(result2, true)).toBe(999.423772484595);
         });
     });
 });

@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Irr } from '../index';
 
@@ -30,40 +31,40 @@ describe('Test irr function', () => {
             const values = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(0.0866309480365317);
+            expect(getObjectValue(result, true)).toBe(0.0866309480365);
         });
 
         it('Value is normal, but no positive and negative number', () => {
             const values = ArrayValueObject.create('{700000,120000,150000,180000,210000,260000}');
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result, true)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
             const values = ErrorValueObject.create(ErrorType.NAME);
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const values2 = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess2 = ErrorValueObject.create(ErrorType.NAME);
             const result2 = testFunction.calculate(values2, guess2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
             const values = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess = BooleanValueObject.create(true);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(0.08663094803650478);
+            expect(getObjectValue(result, true)).toBe(0.0866309480365);
         });
 
         it('Value is normal string', () => {
             const values = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess = StringValueObject.create('test');
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -81,12 +82,12 @@ describe('Test irr function', () => {
             });
             const guess = NumberValueObject.create(16);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const values2 = NumberValueObject.create(16);
             const guess2 = NullValueObject.create();
             const result2 = testFunction.calculate(values2, guess2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const values3 = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess3 = ArrayValueObject.create({
@@ -101,8 +102,8 @@ describe('Test irr function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(values3, guess3);
-            expect(transformToValue(result3.getArrayValue())).toStrictEqual([
-                [0.08663094803654446, ErrorType.VALUE, 0.08663094803650478, 0.08663094803653162, ErrorType.NAME, 0.08663094803653162],
+            expect(getObjectValue(result3, true)).toStrictEqual([
+                [0.0866309480365, ErrorType.VALUE, 0.0866309480365, 0.0866309480365, ErrorType.NAME, 0.0866309480365],
             ]);
         });
     });

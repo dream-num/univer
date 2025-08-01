@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Atan2 } from '../index';
 
@@ -30,59 +31,63 @@ describe('Test atan2 function', () => {
             const xNum = NumberValueObject.create(1);
             const yNum = NumberValueObject.create(2);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(1.1071487177940904);
+            expect(getObjectValue(result, true)).toBe(1.10714871779);
         });
+
         it('Value is normal number 2', () => {
             const xNum = NumberValueObject.create(8);
             const yNum = NumberValueObject.create(9);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(0.844153986113171);
+            expect(getObjectValue(result, true)).toBe(0.844153986113);
         });
 
         it('Value is number valid', () => {
             const xNum = NumberValueObject.create(-2);
             const yNum = NumberValueObject.create(-3);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(-2.1587989303424644);
+            expect(getObjectValue(result, true)).toBe(-2.15879893034);
         });
 
         it('Value is number string', () => {
             const xNum = StringValueObject.create('0.5');
             const yNum = NumberValueObject.create(2);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(1.3258176636680326);
+            expect(getObjectValue(result, true)).toBe(1.32581766367);
         });
 
         it('Value is normal string', () => {
             const xNum = StringValueObject.create('test');
             const yNum = NumberValueObject.create(1);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const xNum = BooleanValueObject.create(false);
             const yNum = NumberValueObject.create(1);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(1.5707963267948966);
+            expect(getObjectValue(result, true)).toBe(1.57079632679);
         });
+
         it('Value is blank cell', () => {
             const xNum = NullValueObject.create();
             const yNum = NumberValueObject.create(1);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(1.5707963267948966);
+            expect(getObjectValue(result, true)).toBe(1.57079632679);
         });
+
         it('Value is error', () => {
             const xNum = ErrorValueObject.create(ErrorType.NAME);
             const yNum = NumberValueObject.create(1);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
+
         it('Result is error', () => {
             const xNum = NumberValueObject.create(0);
             const yNum = NumberValueObject.create(0);
             const result = testFunction.calculate(xNum, yNum);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value is array and number', () => {
@@ -100,22 +105,12 @@ describe('Test atan2 function', () => {
             });
             const yNum = NumberValueObject.create(1);
             const result = testFunction.calculate(xNum, yNum);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[
-                0.7853981633974483,
-                ErrorType.VALUE,
-                0.682622552417217,
-                0.7853981633974483,
-                1.5707963267948966,
-                1.5707963267948966,
-            ], [
-                1.5707963267948966,
-                0.009999666686665238,
-                0.40385979490737667,
-                ErrorType.VALUE,
-                2.819842099193151,
-                ErrorType.NAME,
-            ]]);
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.785398163397, ErrorType.VALUE, 0.682622552417, 0.785398163397, 1.57079632679, 1.57079632679],
+                [1.57079632679, 0.00999966668667, 0.403859794907, ErrorType.VALUE, 2.81984209919, ErrorType.NAME],
+            ]);
         });
+
         it('Value is array and array', () => {
             const xNum = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -143,9 +138,9 @@ describe('Test atan2 function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(xNum, yNum);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [0.7853981633974483, ErrorType.VALUE, 0.8881737743776796, 0.7853981633974483, 0, 0],
-                [0, 1.550798992821746, 0.8635794970038352, ErrorType.VALUE, -0.982793723247329, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.785398163397, ErrorType.VALUE, 0.888173774378, 0.785398163397, 0, 0],
+                [0, 1.55079899282, 0.863579497004, ErrorType.VALUE, -0.982793723247, ErrorType.NAME],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });

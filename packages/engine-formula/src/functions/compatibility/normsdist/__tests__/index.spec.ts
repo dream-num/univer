@@ -30,7 +30,7 @@ describe('Test normsdist function', () => {
         it('Value is normal', () => {
             const z = NumberValueObject.create(1.2069);
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toBe(0.8862646711511419);
+            expect(getObjectValue(result, true)).toBe(0.886264671151);
         });
 
         it('Value is normal string', () => {
@@ -42,7 +42,7 @@ describe('Test normsdist function', () => {
         it('Value is boolean', () => {
             const z = BooleanValueObject.create(true);
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toBe(0.8413447460685429);
+            expect(getObjectValue(result, true)).toBe(0.841344746069);
         });
 
         it('Value is null', () => {
@@ -71,9 +71,9 @@ describe('Test normsdist function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(z);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.8413447460685429, ErrorType.VALUE, 0.8906514475743081, 0.8413447460685429, 0.5, 0.5],
-                [0.5, 1, 0.9903581300546417, ErrorType.VALUE, 0.0013498980316301035, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.841344746069, ErrorType.VALUE, 0.890651447574, 0.841344746069, 0.5, 0.5],
+                [0.5, 1, 0.990358130055, ErrorType.VALUE, 0.00134989803163, ErrorType.NAME],
             ]);
 
             const z2 = ArrayValueObject.create({
@@ -88,7 +88,7 @@ describe('Test normsdist function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(z2);
-            expect(getObjectValue(result2)).toStrictEqual(0.8413447460685429);
+            expect(getObjectValue(result2, true)).toStrictEqual(0.841344746069);
         });
     });
 });

@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Bessely } from '../index';
 
@@ -30,42 +31,42 @@ describe('Test bessely function', () => {
             const x = NumberValueObject.create(1.5);
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(-0.41230862689590375);
+            expect(getObjectValue(result, true)).toBe(-0.412308626896);
         });
 
         it('n < 0', () => {
             const x = NumberValueObject.create(1.5);
             const n = NumberValueObject.create(-1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
             const x = StringValueObject.create('-0.5');
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const x = BooleanValueObject.create(true);
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is null', () => {
             const x = NullValueObject.create();
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Value is blank cell', () => {
@@ -82,14 +83,14 @@ describe('Test bessely function', () => {
             });
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
             const x = ErrorValueObject.create(ErrorType.NAME);
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -107,7 +108,7 @@ describe('Test bessely function', () => {
             });
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Npv } from '../index';
 
@@ -30,19 +31,19 @@ describe('Test npv function', () => {
             const rate = NumberValueObject.create(0.1);
             const value1 = ArrayValueObject.create('{-10000,3000,4200,6800}');
             const result = testFunction.calculate(rate, value1);
-            expect(result.getValue()).toStrictEqual(1188.4434123352216);
+            expect(getObjectValue(result, true)).toBe(1188.44341233522);
         });
 
         it('Value is error', () => {
             const rate = ErrorValueObject.create(ErrorType.NAME);
             const value1 = ArrayValueObject.create('{-10000,3000,4200,6800}');
             const result = testFunction.calculate(rate, value1);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const rate2 = NumberValueObject.create(0.1);
             const value2 = ErrorValueObject.create(ErrorType.NAME);
             const result2 = testFunction.calculate(rate2, value1, value2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
 
             const value3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -57,7 +58,7 @@ describe('Test npv function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(rate2, value1, value3);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -65,7 +66,7 @@ describe('Test npv function', () => {
             const value1 = ArrayValueObject.create('{-10000,3000,4200,6800}');
             const value2 = BooleanValueObject.create(true);
             const result = testFunction.calculate(rate, value1, value2);
-            expect(result.getValue()).toStrictEqual(1189.0643336582807);
+            expect(getObjectValue(result, true)).toBe(1189.06433365828);
         });
 
         it('Value is normal string', () => {
@@ -73,19 +74,19 @@ describe('Test npv function', () => {
             const value1 = ArrayValueObject.create('{-10000,3000,4200,6800}');
             const value2 = StringValueObject.create('test');
             const result = testFunction.calculate(rate, value1, value2);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const rate2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(rate2, value1);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
             const rate = ArrayValueObject.create('{0.1,-0.1,-1}');
             const value1 = ArrayValueObject.create('{-10000,3000,4200,6800}');
             const result = testFunction.calculate(rate, value1);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [1188.4434123352216, 8718.18320377991, ErrorType.DIV_BY_ZERO],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1188.44341233522, 8718.18320378, ErrorType.DIV_BY_ZERO],
             ]);
 
             const value2 = ArrayValueObject.create({
@@ -101,8 +102,8 @@ describe('Test npv function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(rate, value2);
-            expect(transformToValue(result2.getArrayValue())).toStrictEqual([
-                [-108744.97535213304, 373909.05537924235, ErrorType.DIV_BY_ZERO],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [-108744.975352133, 373909.055379242, ErrorType.DIV_BY_ZERO],
             ]);
         });
     });

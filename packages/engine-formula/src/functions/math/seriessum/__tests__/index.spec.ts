@@ -33,7 +33,7 @@ describe('Test seriessum function', () => {
             const m = NumberValueObject.create(2);
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
-            expect(getObjectValue(result)).toBe(0.7071032152046538);
+            expect(getObjectValue(result, true)).toBe(0.707103215205);
 
             const coefficients2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(x, n, m, coefficients2);
@@ -46,7 +46,7 @@ describe('Test seriessum function', () => {
             const m = NumberValueObject.create(2);
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
-            expect(getObjectValue(result)).toBe(0.9003117762635432);
+            expect(getObjectValue(result, true)).toBe(0.900311776264);
         });
 
         it('Value is number string', () => {
@@ -55,7 +55,7 @@ describe('Test seriessum function', () => {
             const m = NumberValueObject.create(2);
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
-            expect(getObjectValue(result)).toBe(0.49217282836063);
+            expect(getObjectValue(result, true)).toBe(0.492172828361);
         });
 
         it('Value is normal string', () => {
@@ -92,7 +92,7 @@ describe('Test seriessum function', () => {
             const m = NumberValueObject.create(2);
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
-            expect(getObjectValue(result)).toBe(0.7071032152046538);
+            expect(getObjectValue(result, true)).toBe(0.707103215205);
         });
 
         it('Value is null', () => {

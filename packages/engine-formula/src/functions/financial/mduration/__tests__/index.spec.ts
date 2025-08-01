@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Mduration } from '../index';
 
@@ -34,7 +35,7 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(10.448942853198016);
+            expect(getObjectValue(result, true)).toBe(10.4489428532);
         });
 
         it('Value is normal, settlement >= maturity', () => {
@@ -45,7 +46,7 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Coupon < 0', () => {
@@ -56,7 +57,7 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Yld < 0', () => {
@@ -67,7 +68,7 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Frequency value test', () => {
@@ -78,15 +79,15 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(3);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const frequency2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(settlement, maturity, coupon, yld, frequency2, basis);
-            expect(result2.getValue()).toStrictEqual(9.979704155912495);
+            expect(getObjectValue(result2, true)).toBe(9.97970415591);
 
             const frequency3 = NumberValueObject.create(4);
             const result3 = testFunction.calculate(settlement, maturity, coupon, yld, frequency3, basis);
-            expect(result3.getValue()).toStrictEqual(10.473000850230266);
+            expect(getObjectValue(result3, true)).toBe(10.4730008502);
         });
 
         it('Basis value test', () => {
@@ -97,27 +98,27 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(5);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const basis2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis2);
-            expect(result2.getValue()).toStrictEqual(10.448942853198016);
+            expect(getObjectValue(result2, true)).toBe(10.4489428532);
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis3);
-            expect(result3.getValue()).toStrictEqual(10.448942853198016);
+            expect(getObjectValue(result3, true)).toBe(10.4489428532);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis4);
-            expect(result4.getValue()).toStrictEqual(10.448942853198016);
+            expect(getObjectValue(result4, true)).toBe(10.4489428532);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis5);
-            expect(result5.getValue()).toStrictEqual(10.448942853198016);
+            expect(getObjectValue(result5, true)).toBe(10.4489428532);
 
             const basis6 = NullValueObject.create();
             const result6 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis6);
-            expect(result6.getValue()).toStrictEqual(10.448942853198016);
+            expect(getObjectValue(result6, true)).toBe(10.4489428532);
         });
 
         it('Value is error', () => {
@@ -128,7 +129,7 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -139,7 +140,7 @@ describe('Test mduration function', () => {
             const frequency = BooleanValueObject.create(true);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {
@@ -150,16 +151,16 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const settlement2 = StringValueObject.create('2018-7-1');
             const maturity2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(settlement2, maturity2, coupon, yld, frequency, basis);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const coupon2 = StringValueObject.create('test');
             const result3 = testFunction.calculate(settlement2, maturity, coupon2, yld, frequency, basis);
-            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -180,7 +181,7 @@ describe('Test mduration function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
     });
 });

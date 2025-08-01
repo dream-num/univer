@@ -55,9 +55,9 @@ describe('Test power function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number, power);
-            expect(getObjectValue(result)).toStrictEqual([
-                [2, ErrorType.VALUE, 2.3456698984637576, 2, 1, 1],
-                [1, 1.2676506002282294e+30, 5.063026375881119, ErrorType.VALUE, 0.125, ErrorType.VALUE],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [2, ErrorType.VALUE, 2.34566989846, 2, 1, 1],
+                [1, 1.2676506002282294e+30, 5.06302637588, ErrorType.VALUE, 0.125, ErrorType.VALUE],
             ]);
         });
 
@@ -76,9 +76,9 @@ describe('Test power function', () => {
             });
             const power = NumberValueObject.create(2);
             const result = testFunction.calculate(number, power);
-            expect(getObjectValue(result)).toStrictEqual([
+            expect(getObjectValue(result, true)).toStrictEqual([
                 [1, ErrorType.VALUE, 1.5129, 1, 0, 0],
-                [0, 10000, 5.475599999999999, ErrorType.VALUE, 9, ErrorType.VALUE],
+                [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
             ]);
         });
 
@@ -109,9 +109,9 @@ describe('Test power function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number, power);
-            expect(getObjectValue(result)).toStrictEqual([
+            expect(getObjectValue(result, true)).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
-                [0, 10000, 5.475599999999999, ErrorType.VALUE, 9, ErrorType.VALUE],
+                [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });

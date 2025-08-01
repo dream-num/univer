@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Syd } from '../index';
 
@@ -32,7 +33,7 @@ describe('Test syd function', () => {
             const life = NumberValueObject.create(10);
             const per = NumberValueObject.create(10);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(4090.909090909091);
+            expect(getObjectValue(result, true)).toBe(4090.90909090909);
         });
 
         it('Value is normal string', () => {
@@ -41,7 +42,7 @@ describe('Test syd function', () => {
             const life = NumberValueObject.create(10);
             const per = NumberValueObject.create(10);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
@@ -50,7 +51,7 @@ describe('Test syd function', () => {
             const life = BooleanValueObject.create(true);
             const per = NumberValueObject.create(1);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(225000);
+            expect(getObjectValue(result)).toBe(225000);
         });
 
         it('Value is null', () => {
@@ -59,7 +60,7 @@ describe('Test syd function', () => {
             const life = NullValueObject.create();
             const per = NumberValueObject.create(10);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
@@ -68,16 +69,16 @@ describe('Test syd function', () => {
             const life = NumberValueObject.create(10);
             const per = NumberValueObject.create(10);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const salvage2 = NumberValueObject.create(75000);
             const life2 = ErrorValueObject.create(ErrorType.NAME);
             const result2 = testFunction.calculate(cost, salvage2, life2, per);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
 
             const per2 = ErrorValueObject.create(ErrorType.NAME);
             const result3 = testFunction.calculate(cost, salvage2, life, per2);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Salvage < 0', () => {
@@ -86,7 +87,7 @@ describe('Test syd function', () => {
             const life = NumberValueObject.create(10);
             const per = NumberValueObject.create(10);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Per > life', () => {
@@ -95,7 +96,7 @@ describe('Test syd function', () => {
             const life = NumberValueObject.create(10);
             const per = NumberValueObject.create(11);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('value is array', () => {
@@ -139,7 +140,7 @@ describe('Test syd function', () => {
             });
             const per = NumberValueObject.create(1);
             const result = testFunction.calculate(cost, salvage, life, per);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [ErrorType.VALUE, ErrorType.NUM, 0, ErrorType.NA],
                 [0, ErrorType.NUM, ErrorType.NAME, ErrorType.NA],
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NA],

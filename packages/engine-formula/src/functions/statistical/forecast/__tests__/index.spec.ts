@@ -56,7 +56,7 @@ describe('Test forecast function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(x, knownYs, knownXs);
-            expect(getObjectValue(result)).toBe(29.952035314302105);
+            expect(getObjectValue(result, true)).toBe(29.9520353143);
         });
 
         it('X value is array', () => {
@@ -99,9 +99,9 @@ describe('Test forecast function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(x, knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1.4156939427151058, ErrorType.VALUE, 1.6420166501449338, 1.4156939427151058, 0.43168217128107145, 0.43168217128107145],
-                [0.43168217128107145, 98.83285931468451, 2.734269716436712, ErrorType.VALUE, -2.5203531430210315, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.41569394272, ErrorType.VALUE, 1.64201665014, 1.41569394272, 0.431682171281, 0.431682171281],
+                [0.431682171281, 98.8328593147, 2.73426971644, ErrorType.VALUE, -2.52035314302, ErrorType.NAME],
             ]);
         });
 

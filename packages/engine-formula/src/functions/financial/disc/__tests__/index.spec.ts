@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Disc } from '../index';
 
@@ -33,7 +34,7 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(0.0006863841691213469);
+            expect(getObjectValue(result, true)).toBe(0.000686384169121);
         });
 
         it('Value is normal, settlement >= maturity', () => {
@@ -43,7 +44,7 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Basis value test', () => {
@@ -53,23 +54,23 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(5);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const basis2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(settlement, maturity, pr, redemption, basis2);
-            expect(result2.getValue()).toStrictEqual(0.0006864406779661036);
+            expect(getObjectValue(result2, true)).toBe(0.000686440677966);
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, pr, redemption, basis3);
-            expect(result3.getValue()).toStrictEqual(0.0006765033407572402);
+            expect(getObjectValue(result3, true)).toBe(0.000676503340757);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, pr, redemption, basis4);
-            expect(result4.getValue()).toStrictEqual(0.0006858992204899796);
+            expect(getObjectValue(result4, true)).toBe(0.00068589922049);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, pr, redemption, basis5);
-            expect(result5.getValue()).toStrictEqual(0.0006864406779661036);
+            expect(getObjectValue(result5, true)).toBe(0.000686440677966);
         });
 
         it('Value is error', () => {
@@ -79,7 +80,7 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -89,7 +90,7 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {
@@ -99,16 +100,16 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const settlement2 = StringValueObject.create('2018-7-1');
             const maturity2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(settlement2, maturity2, pr, redemption, basis);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const basis2 = StringValueObject.create('test');
             const result3 = testFunction.calculate(settlement2, maturity, pr, redemption, basis2);
-            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -128,7 +129,7 @@ describe('Test disc function', () => {
             const redemption = NumberValueObject.create(100);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
     });
 });

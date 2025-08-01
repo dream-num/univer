@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Xnpv } from '../index';
 
@@ -31,7 +32,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(1994.510040653262);
+            expect(getObjectValue(result, true)).toBe(1994.51004065326);
         });
 
         it('Value is normal, but no positive and negative number', () => {
@@ -39,7 +40,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(21994.510040653262);
+            expect(getObjectValue(result, true)).toBe(21994.5100406533);
         });
 
         it('Value is normal, but values.length !== dates.length', () => {
@@ -47,7 +48,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
@@ -55,16 +56,16 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const rate2 = NumberValueObject.create(0.1);
             const values2 = ErrorValueObject.create(ErrorType.NAME);
             const result2 = testFunction.calculate(rate2, values2, dates);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
 
             const dates2 = ErrorValueObject.create(ErrorType.NAME);
             const result3 = testFunction.calculate(rate2, values, dates2);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -72,28 +73,28 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const rate2 = NumberValueObject.create(0.1);
             const values2 = BooleanValueObject.create(true);
             const result2 = testFunction.calculate(rate2, values2, dates);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const values3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(rate2, values3, dates);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result3)).toBe(ErrorType.NA);
 
             const dates2 = BooleanValueObject.create(true);
             const result4 = testFunction.calculate(rate2, values, dates2);
-            expect(result4.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result4)).toBe(ErrorType.VALUE);
 
             const dates3 = NumberValueObject.create(1);
             const result5 = testFunction.calculate(rate2, values, dates3);
-            expect(result5.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result5)).toBe(ErrorType.NA);
 
             const dates4 = NumberValueObject.create(-1);
             const result6 = testFunction.calculate(rate2, values, dates4);
-            expect(result6.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result6)).toBe(ErrorType.NUM);
         });
 
         it('Value is normal string', () => {
@@ -101,7 +102,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is null', () => {
@@ -109,7 +110,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Value is array', () => {
@@ -127,7 +128,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{-10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const rate2 = NumberValueObject.create(0.1);
             const values2 = ArrayValueObject.create({
@@ -142,7 +143,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(rate2, values2, dates);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const values3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -156,7 +157,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(rate2, values3, dates);
-            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
 
             const values4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -170,7 +171,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result4 = testFunction.calculate(rate2, values4, dates);
-            expect(result4.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
 
             const dates2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -184,7 +185,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result5 = testFunction.calculate(rate2, values, dates2);
-            expect(result5.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result5)).toBe(ErrorType.VALUE);
 
             const dates3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -198,7 +199,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result6 = testFunction.calculate(rate2, values, dates3);
-            expect(result6.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result6)).toBe(ErrorType.VALUE);
 
             const dates4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -212,7 +213,7 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result7 = testFunction.calculate(rate2, values, dates4);
-            expect(result7.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result7)).toBe(ErrorType.NAME);
 
             const dates5 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -226,12 +227,12 @@ describe('Test xnpv function', () => {
                 column: 0,
             });
             const result8 = testFunction.calculate(rate2, values, dates5);
-            expect(result8.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result8)).toBe(ErrorType.NUM);
 
             const values5 = ArrayValueObject.create('{-10000}');
             const dates6 = ArrayValueObject.create('{39448}');
             const result9 = testFunction.calculate(rate2, values5, dates6);
-            expect(result9.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result9)).toBe(ErrorType.NA);
         });
     });
 });

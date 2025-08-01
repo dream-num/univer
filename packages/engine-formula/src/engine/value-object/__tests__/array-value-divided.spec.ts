@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 
@@ -34,10 +35,10 @@ describe('ArrayValueObject divided method test', () => {
                 row: 0,
                 column: 0,
             });
-
             const valueObject = new NumberValueObject(1);
+            const result = arrayValueObject.divided(valueObject);
 
-            expect((arrayValueObject.divided(valueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
                 [0, 100, 2.34, ErrorType.VALUE, -3, ErrorType.VALUE],
             ]);

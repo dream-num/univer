@@ -58,10 +58,10 @@ describe('Test minverse function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(array2);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [0.2222222222222222, -0.4444444444444444, 0.2222222222222222],
-                [-1.7777777777777777, 0.5555555555555556, 0.2222222222222222],
-                [1.4074074074074074, -0.14814814814814814, -0.25925925925925924],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [0.222222222222, -0.444444444444, 0.222222222222],
+                [-1.77777777778, 0.555555555556, 0.222222222222],
+                [1.40740740741, -0.148148148148, -0.259259259259],
             ]);
 
             const array3 = NumberValueObject.create(1);

@@ -16,15 +16,24 @@
 
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import { stripErrorMargin } from '../engine/utils/math-kit';
+import { stripArrayValue } from './__tests__/create-function-test-bed';
 
-export function getObjectValue(result: FunctionVariantType) {
-    if ((result as ErrorValueObject).isError()) {
-        return (result as ErrorValueObject).getValue();
-    } else if ((result as BaseReferenceObject).isReferenceObject()) {
-        return (result as BaseReferenceObject).toArrayValueObject().toValue();
-    } else if ((result as ArrayValueObject).isArray()) {
-        return (result as ArrayValueObject).toValue();
+export function getObjectValue(result: FunctionVariantType, isUseStrip: boolean = false) {
+    if (result.isReferenceObject()) {
+        const arrayValue = (result as BaseReferenceObject).toArrayValueObject().toValue();
+
+        return isUseStrip ? stripArrayValue(arrayValue) : arrayValue;
+    } else if (result.isArray()) {
+        const arrayValue = (result as ArrayValueObject).toValue();
+
+        return isUseStrip ? stripArrayValue(arrayValue) : arrayValue;
+    } else if ((result as BaseValueObject).isNumber()) {
+        const value = (result as BaseValueObject).getValue() as number;
+
+        return isUseStrip ? stripErrorMargin(value) : value;
     }
+
     return (result as BaseValueObject).getValue();
 }

@@ -33,10 +33,10 @@ describe('Test binomDistRange function', () => {
             const numberS = NumberValueObject.create(45);
             const numberS2 = NumberValueObject.create(50);
             const result = testFunction.calculate(trials, probabilityS, numberS, numberS2);
-            expect(getObjectValue(result)).toBe(0.5236297934718872);
+            expect(getObjectValue(result, true)).toBe(0.523629793472);
 
             const result2 = testFunction.calculate(trials, probabilityS, numberS);
-            expect(getObjectValue(result2)).toBe(0.11822800461154298);
+            expect(getObjectValue(result2, true)).toBe(0.118228004612);
         });
 
         it('Trials and numberS and numberS2 value test', () => {
@@ -95,7 +95,7 @@ describe('Test binomDistRange function', () => {
             const numberS = BooleanValueObject.create(true);
             const numberS2 = NumberValueObject.create(50);
             const result = testFunction.calculate(trials, probabilityS, numberS, numberS2);
-            expect(getObjectValue(result)).toBe(0.9548325185075196);
+            expect(getObjectValue(result, true)).toBe(0.954832518508);
         });
 
         it('Value is null', () => {
@@ -104,10 +104,10 @@ describe('Test binomDistRange function', () => {
             const numberS = NullValueObject.create();
             const numberS2 = NumberValueObject.create(50);
             const result = testFunction.calculate(trials, probabilityS, numberS, numberS2);
-            expect(getObjectValue(result)).toBe(0.9548325185075196);
+            expect(getObjectValue(result, true)).toBe(0.954832518508);
 
             const result2 = testFunction.calculate(trials, probabilityS, numberS2, numberS);
-            expect(getObjectValue(result2)).toBe(0.04071929032886058);
+            expect(getObjectValue(result2, true)).toBe(0.0407192903289);
         });
 
         it('Value is error', () => {
@@ -148,9 +148,9 @@ describe('Test binomDistRange function', () => {
             });
             const numberS2 = NumberValueObject.create(50);
             const result = testFunction.calculate(trials, probabilityS, numberS, numberS2);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.9548325185075196, ErrorType.VALUE, 0.9548325185075196, 0.9548325185075196, 0.9548325185075196, 0.9548325185075196],
-                [0.9548325185075196, ErrorType.NUM, 0.9548325185075196, ErrorType.VALUE, ErrorType.NUM, 0.9548325185075196],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.954832518508, ErrorType.VALUE, 0.954832518508, 0.954832518508, 0.954832518508, 0.954832518508],
+                [0.954832518508, ErrorType.NUM, 0.954832518508, ErrorType.VALUE, ErrorType.NUM, 0.954832518508],
             ]);
         });
     });

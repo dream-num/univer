@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Amorlinc } from '../index';
 
@@ -34,7 +35,7 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(360);
+            expect(getObjectValue(result)).toBe(360);
         });
 
         it('Value is normal, life < 0', () => {
@@ -46,7 +47,7 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.6);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Cost is normal string', () => {
@@ -58,16 +59,16 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const cost2 = NumberValueObject.create(2400);
             const datePurchased2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(cost2, datePurchased2, firstPeriod, salvage, period, rate, basis);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const firstPeriod2 = StringValueObject.create('test');
             const result3 = testFunction.calculate(cost2, datePurchased, firstPeriod2, salvage, period, rate, basis);
-            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
         });
 
         it('Cost <= 0 or salvage < 0 or cost < salvage', () => {
@@ -79,17 +80,17 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const cost2 = NumberValueObject.create(2400);
             const salvage2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(cost2, datePurchased, firstPeriod, salvage2, period, rate, basis);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const cost3 = NumberValueObject.create(100);
             const salvage3 = NumberValueObject.create(200);
             const result3 = testFunction.calculate(cost3, datePurchased, firstPeriod, salvage3, period, rate, basis);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
         });
 
         it('DatePurchased > firstPeriod', () => {
@@ -101,7 +102,7 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Period < 0 or period = 0 or period is last or period > maxPeriod', () => {
@@ -113,19 +114,19 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const period2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period2, rate, basis);
-            expect(result2.getValue()).toStrictEqual(132);
+            expect(getObjectValue(result2)).toBe(132);
 
             const period3 = NumberValueObject.create(6);
             const result3 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period3, rate, basis);
-            expect(result3.getValue()).toStrictEqual(168.00000000000023);
+            expect(getObjectValue(result3, true)).toBe(168);
 
             const period4 = NumberValueObject.create(7);
             const result4 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period4, rate, basis);
-            expect(result4.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result4)).toBe(0);
         });
 
         it('Rate <= 0', () => {
@@ -137,7 +138,7 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Basis value is 0|1|3|4', () => {
@@ -149,23 +150,23 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const basis2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis2);
-            expect(result2.getValue()).toStrictEqual(132);
+            expect(getObjectValue(result2)).toBe(132);
 
             const basis3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis3);
-            expect(result3.getValue()).toStrictEqual(131.80327868852459);
+            expect(getObjectValue(result3, true)).toBe(131.803278688525);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis4);
-            expect(result4.getValue()).toStrictEqual(132.16438356164383);
+            expect(getObjectValue(result4, true)).toBe(132.164383561644);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis5);
-            expect(result5.getValue()).toStrictEqual(131);
+            expect(getObjectValue(result5)).toBe(131);
         });
 
         it('value is array', () => {
@@ -187,7 +188,7 @@ describe('Test amorlinc function', () => {
             const rate = NumberValueObject.create(0.15);
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
     });
 });

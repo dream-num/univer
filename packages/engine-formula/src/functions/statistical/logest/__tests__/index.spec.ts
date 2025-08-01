@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../../functions/util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Logest } from '../index';
 
@@ -58,22 +58,22 @@ describe('Test logest function', () => {
             const constb = BooleanValueObject.create(true);
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1.5784365299976528, 0.11391384443661104],
-                [0.06522558747032604, 0.4301922951970876],
-                [0.960760488307716, 0.1458488474560076],
-                [48.96903385760735, 2],
-                [1.0416637206477852, 0.04254377260849154],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.57843653, 0.113913844437],
+                [0.0652255874703, 0.430192295197],
+                [0.960760488308, 0.145848847456],
+                [48.9690338576, 2],
+                [1.04166372065, 0.0425437726085],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [1.1409215862229016, 1],
-                [0.033475302155726666, ErrorType.NA],
-                [0.8379284156943257, 0.4415695626609612],
-                [15.510339198892915, 3],
-                [3.024262994397811, 0.5849510360057776],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [1.14092158622, 1],
+                [0.0334753021557, ErrorType.NA],
+                [0.837928415694, 0.441569562661],
+                [15.5103391989, 3],
+                [3.0242629944, 0.584951036006],
             ]);
         });
 
@@ -95,8 +95,8 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1.463275628116175, 22291.223298465353],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.46327562812, 22291.2232984654],
             ]);
         });
 
@@ -146,28 +146,28 @@ describe('Test logest function', () => {
             const constb = BooleanValueObject.create(true);
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1.0022562631143823, 0.9559927432167645, 1.3220173520215017, 0.9979673263194307, 1251594.7569785423],
-                [0.011118944855304421, 0.46524325700269253, 0.3493511018583656, 0.004803045273340241, 10.832016475252527],
-                [0.12342791182815198, 0.8485606231387036, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [0.21121122864903694, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [0.6083349157737965, 4.3203307868492695, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.00225626311, 0.955992743217, 1.32201735202, 0.997967326319, 1251594.75697854],
+                [0.0111189448553, 0.465243257003, 0.349351101858, 0.00480304527334, 10.8320164753],
+                [0.123427911828, 0.848560623139, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.211211228649, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.608334915774, 4.32033078685, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [0.9976750487463316, 0.6740699096298128, 1.330094504910363, 1.0041640514348724, 1],
-                [0.01104236602940002, 0.3971712658719937, 0.3658934383957033, 0.0005351733146462942, ErrorType.NA],
-                [0.9948092355194054, 0.8888217534708093, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [335.3872379814746, 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [1059.8291850403075, 5.530028766100469, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [0.997675048746, 0.67406990963, 1.33009450491, 1.00416405143, 1],
+                [0.0110423660294, 0.397171265872, 0.365893438396, 0.000535173314646, ErrorType.NA],
+                [0.994809235519, 0.888821753471, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [335.387237981475, 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1059.82918504031, 5.5300287661, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const stats2 = BooleanValueObject.create(false);
             const result3 = testFunction.calculate(knownYs, knownXs, constb, stats2);
-            expect(getObjectValue(result3)).toStrictEqual([
-                [1.0022562631143823, 0.9559927432167645, 1.3220173520215017, 0.9979673263194307, 1251594.7569785423],
+            expect(getObjectValue(result3, true)).toStrictEqual([
+                [1.00225626311, 0.955992743217, 1.32201735202, 0.997967326319, 1251594.75697854],
             ]);
         });
 
@@ -200,22 +200,22 @@ describe('Test logest function', () => {
             const constb = BooleanValueObject.create(true);
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1.0324032624317834, 0.999873102005119, 1.0215735856682533, 0.950065530364825, 1.9506552207912204],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.03240326243, 0.999873102005, 1.02157358567, 0.950065530365, 1.95065522079],
                 [0, 0, 0, 0, 0],
                 [1, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [ErrorType.NUM, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [67.25895433112856, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [67.2589543311, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [1.0578548634220857, 1.000090838078794, 1.0027512055146457, 0.9441658222150167, 1],
-                [0.38279330040800214, 0.005215752470850025, 0.6299241749270339, 0.23786833387662884, ErrorType.NA],
-                [0.9945738822026658, 0.9356346289385562, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [45.82345607624384, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [160.4576424421718, 0.8754121588689897, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [1.05785486342, 1.00009083808, 1.00275120551, 0.944165822215, 1],
+                [0.382793300408, 0.00521575247085, 0.629924174927, 0.237868333877, ErrorType.NA],
+                [0.994573882203, 0.935634628939, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [45.8234560762, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [160.457642442172, 0.875412158869, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });
 
@@ -251,8 +251,8 @@ describe('Test logest function', () => {
             const constb = BooleanValueObject.create(true);
             const stats = BooleanValueObject.create(false);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
-            expect(getObjectValue(result)).toStrictEqual([
-                [1.5784365299976528, 0.11391384443661104],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.57843653, 0.113913844437],
             ]);
 
             const stats2 = StringValueObject.create('test');
@@ -282,7 +282,7 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs, knownXs, constb2, stats3);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('KnownXs length error', () => {
@@ -316,7 +316,7 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toBe(ErrorType.REF);
 
             const knownXs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -333,7 +333,7 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs, knownXs2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result2)).toBe(ErrorType.NA);
 
             const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -362,7 +362,7 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs2, knownXs3);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result3)).toBe(ErrorType.NA);
         });
 
         it('Value is error', () => {
@@ -389,7 +389,7 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -414,7 +414,7 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs2, knownXs2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
         });
     });
 });

@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject cos method test', () => {
@@ -32,10 +33,11 @@ describe('arrayValueObject cos method test', () => {
                 row: 0,
                 column: 0,
             });
+            const result = tanArrayValueObject.cos();
 
-            expect((tanArrayValueObject.cos() as ArrayValueObject).toValue()).toStrictEqual([
-                [-0.14550003380861354, 0.5403023058681398, '#VALUE!', 0.3342377271245026, 0.5403023058681398, 1],
-                [-0.2921388087338362, 1, 0.8623188722876839, -0.695563326462902, '#VALUE!', -0.9899924966004454],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [-0.145500033809, 0.540302305868, '#VALUE!', 0.334237727125, 0.540302305868, 1],
+                [-0.292138808734, 1, 0.862318872288, -0.695563326463, '#VALUE!', -0.9899924966],
             ]);
         });
     });

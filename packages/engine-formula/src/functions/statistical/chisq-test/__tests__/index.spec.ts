@@ -55,7 +55,7 @@ describe('Test chisqTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(actualRange, expectedRange);
-            expect(getObjectValue(result)).toBe(0.0003081920170082686);
+            expect(getObjectValue(result, true)).toBe(0.000308192017008);
         });
 
         it('Value length is equal to 1', () => {
@@ -302,7 +302,7 @@ describe('Test chisqTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(actualRange, expectedRange);
-            expect(getObjectValue(result)).toBe(0.0063762422150260845);
+            expect(getObjectValue(result, true)).toBe(0.00637624221503);
 
             const actualRange2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -321,7 +321,7 @@ describe('Test chisqTest function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(actualRange2, expectedRange);
-            expect(getObjectValue(result2)).toBe(0.0063762422150260845);
+            expect(getObjectValue(result2, true)).toBe(0.00637624221503);
         });
 
         it('ExpectedRange value has 0', () => {

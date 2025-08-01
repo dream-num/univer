@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Cos } from '../index';
 
@@ -29,41 +30,41 @@ describe('Test cos function', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0.5403023058681398);
+            expect(getObjectValue(result, true)).toBe(0.540302305868);
         });
 
         it('Value is number negative', () => {
             const value = NumberValueObject.create(-2);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(-0.4161468365471424);
+            expect(getObjectValue(result, true)).toBe(-0.416146836547);
         });
 
         it('Value is number string', () => {
             const value = StringValueObject.create('0.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0.8775825618903728);
+            expect(getObjectValue(result, true)).toBe(0.87758256189);
         });
 
         it('Value is normal string', () => {
             const value = StringValueObject.create('test');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const value = BooleanValueObject.create(false);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Value is blank cell', () => {
             const value = NullValueObject.create();
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Value is error', () => {
             const value = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -80,7 +81,10 @@ describe('Test cos function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.5403023058681398, ErrorType.VALUE, 0.3342377271245026, 0.5403023058681398, 1, 1], [1, 0.8623188722876839, -0.695563326462902, ErrorType.VALUE, -0.9899924966004454, ErrorType.NAME]]);
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.540302305868, ErrorType.VALUE, 0.334237727125, 0.540302305868, 1, 1],
+                [1, 0.862318872288, -0.695563326463, ErrorType.VALUE, -0.9899924966, ErrorType.NAME],
+            ]);
         });
     });
 });

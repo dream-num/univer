@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Cosh } from '../index';
 
@@ -29,41 +30,41 @@ describe('Test cosh function', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.5430806348152437);
+            expect(getObjectValue(result, true)).toBe(1.54308063482);
         });
 
         it('Value is number negative', () => {
             const value = NumberValueObject.create(-2);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(3.7621956910836314);
+            expect(getObjectValue(result, true)).toBe(3.76219569108);
         });
 
         it('Value is number string', () => {
             const value = StringValueObject.create('1.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(2.352409615243247);
+            expect(getObjectValue(result, true)).toBe(2.35240961524);
         });
 
         it('Value is normal string', () => {
             const value = StringValueObject.create('test');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const value = BooleanValueObject.create(false);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Value is blank cell', () => {
             const value = NullValueObject.create();
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Value is error', () => {
             const value = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -80,9 +81,9 @@ describe('Test cosh function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [1.5430806348152437, ErrorType.VALUE, 1.8567610569852664, 1.5430806348152437, 1, 1],
-                [1, 1.3440585709080678e+43, 5.238782100481168, ErrorType.VALUE, 10.067661995777765, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.54308063482, ErrorType.VALUE, 1.85676105699, 1.54308063482, 1, 1],
+                [1, 1.3440585709080678e+43, 5.23878210048, ErrorType.VALUE, 10.0676619958, ErrorType.NAME],
             ]);
         });
     });

@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { StdevP } from '../index';
 
@@ -30,50 +31,50 @@ describe('Test stdev.p function', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(0.5);
+            expect(getObjectValue(result)).toBe(0.5);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
             let var2 = StringValueObject.create('test');
             let result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             var2 = StringValueObject.create('2');
             result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(0.5);
+            expect(getObjectValue(result)).toBe(0.5);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = NumberValueObject.create(2);
 
             let var2 = BooleanValueObject.create(true);
             let result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(0.5);
+            expect(getObjectValue(result)).toBe(0.5);
 
             var2 = BooleanValueObject.create(false);
             result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Var1 is number, var2 is null', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(0.5);
+            expect(getObjectValue(result)).toBe(0.5);
         });
         it('Var1 is zero', () => {
             const var1 = NumberValueObject.create(0);
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
         it('Var1 is null', () => {
             const var1 = NullValueObject.create();
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = ErrorValueObject.create(ErrorType.NA);
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Var1 is number, var2 is array includes error', () => {
@@ -91,7 +92,7 @@ describe('Test stdev.p function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Var1 is number, var2 is array not includes error', () => {
@@ -109,7 +110,7 @@ describe('Test stdev.p function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(34.82321961694232);
+            expect(getObjectValue(result, true)).toBe(34.8232196169);
         });
     });
 });

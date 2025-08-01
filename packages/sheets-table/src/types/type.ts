@@ -61,7 +61,8 @@ export interface ITableConditionFilterItem {
 export interface ITableDateFilterInfo {
     conditionType: TableConditionTypeEnum.Date;
     compareType: TableDateCompareTypeEnum;
-    expectedValue: Date | [Date, Date] | undefined;
+    // Date-like strings
+    expectedValue?: string | [string, string] | Date | [Date, Date];
     anchorTime?: number;
 }
 

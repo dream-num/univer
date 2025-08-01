@@ -152,15 +152,9 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 {!!(subComponentType === ConditionSubComponentEnum.DatePicker) && (
                     <div id="univer-table-date-picker-wrapper">
                         <DatePicker
-                            value={dayjs(conditionInfo.info.date)}
-                            defaultPickerValue={dayjs()}
-                            onChange={(v) => handleConditionInfo({ date: v.toDate() })}
-                            getPopupContainer={() => {
-                                const wrapper = document.getElementById('univer-table-date-picker-wrapper');
-                                return wrapper || document.body;
-                            }}
                             className="univer-w-full"
-                            allowClear={false}
+                            value={conditionInfo.info.date ?? new Date()}
+                            onValueChange={(v) => handleConditionInfo({ date: v })}
                         />
                     </div>
                 )}

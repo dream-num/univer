@@ -14,49 +14,72 @@
  * limitations under the License.
  */
 
-import type { dayjs } from '@univerjs/core';
-import type { PickerProps } from 'rc-picker';
 import { CalendarIcon } from '@univerjs/icons';
-import RcPicker from 'rc-picker';
-import generateConfig from 'rc-picker/lib/generate/dayjs';
-import { useContext } from 'react';
-import { ConfigContext } from '../config-provider/ConfigProvider';
-import './index.css';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
+import { Calendar } from '../calendar/Calendar';
+import { Dropdown } from '../dropdown/Dropdown';
 
-/** @deprecated */
-export interface IDatePickerProps extends Omit<PickerProps<dayjs.Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
+interface IDatePickerProps {
+    /**
+     * Additional CSS classes for the date picker.
+     */
+    className?: string;
+
     /**
      * The value of the date picker.
      */
-    value: dayjs.Dayjs;
+    value?: Date;
 
     /**
      * Callback when the value of the date picker changes.
      */
-    onChange: (date: dayjs.Dayjs, dateString: string) => void;
+    onValueChange?: (date: Date) => void;
 }
 
-/** @deprecated */
 export function DatePicker(props: IDatePickerProps) {
-    const { value, onChange, ...ext } = props;
+    const { value, onValueChange, className } = props;
 
-    const { locale } = useContext(ConfigContext);
+    const [open, setOpen] = useState(false);
 
-    function handleChange(date: dayjs.Dayjs | dayjs.Dayjs[], dateString: string | string[]) {
-        if (!Array.isArray(date) && !Array.isArray(dateString)) {
-            onChange(date, dateString);
-        }
+    function handleValueChange(date: Date) {
+        onValueChange?.(date);
+        setOpen(false);
     }
 
     return (
-        <RcPicker<dayjs.Dayjs>
-            {...ext}
-            value={value}
-            prefixCls="univer-date-picker"
-            generateConfig={generateConfig}
-            locale={locale?.Picker!}
-            suffixIcon={<CalendarIcon className="univer-date-picker-suffix-icon" />}
-            onChange={handleChange}
-        />
+        <>
+            <Dropdown
+                align="start"
+                overlay={(
+                    <div className="univer-p-2">
+                        <Calendar value={value} onValueChange={handleValueChange} />
+                    </div>
+                )}
+                open={open}
+                onOpenChange={setOpen}
+            >
+                <button
+                    className={clsx(`
+                      univer-flex univer-h-8 univer-items-center univer-justify-between univer-rounded-md
+                      univer-bg-transparent univer-px-2 univer-text-sm univer-text-gray-800 univer-transition-all
+                      hover:univer-border-primary-600
+                      dark:!univer-text-white
+                    `, borderClassName, className)}
+                    type="button"
+                >
+                    {dayjs(value).format('YYYY-MM-DD')}
+
+                    <CalendarIcon
+                        className={`
+                          univer-text-gray-600
+                          dark:!univer-text-gray-400
+                        `}
+                    />
+                </button>
+            </Dropdown>
+        </>
     );
 }

@@ -360,11 +360,23 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
                 info: {},
             };
         } else if (datePickerSet.has(compareType as TableDateCompareTypeEnum)) {
+            let date: Date | [Date, Date] | undefined;
+
+            if (typeof filterInfo.expectedValue === 'string') {
+                date = new Date(filterInfo.expectedValue);
+            } else if (Array.isArray(filterInfo.expectedValue)) {
+                for (let i = 0; i < filterInfo.expectedValue.length; i++) {
+                    if (typeof filterInfo.expectedValue[i] === 'string') {
+                        filterInfo.expectedValue[i] = new Date(filterInfo.expectedValue[i]);
+                    }
+                }
+            }
+
             return {
                 type: conditionType,
                 compare: compareType,
                 info: {
-                    date: filterInfo.expectedValue,
+                    date,
                 },
             };
         } else {

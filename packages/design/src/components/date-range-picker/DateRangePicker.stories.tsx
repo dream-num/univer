@@ -16,8 +16,6 @@
 
 import type { Meta } from '@storybook/react';
 
-import type { NoUndefinedRangeValueType } from 'rc-picker/lib/PickerInput/RangePicker';
-import { dayjs } from '@univerjs/core';
 import { useState } from 'react';
 import { DateRangePicker } from './DateRangePicker';
 
@@ -34,10 +32,10 @@ export default meta;
 
 export const DateRangePickerBasic = {
     render() {
-        const [value, setValue] = useState<NoUndefinedRangeValueType<dayjs.Dayjs>>([dayjs(), dayjs().add(7, 'day')]);
+        const [value, setValue] = useState<[Date, Date]>([new Date(), new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]);
 
         return (
-            <DateRangePicker value={value} onChange={setValue} />
+            <DateRangePicker value={value} onValueChange={setValue} />
         );
     },
 };

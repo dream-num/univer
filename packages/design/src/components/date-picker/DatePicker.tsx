@@ -50,36 +50,34 @@ export function DatePicker(props: IDatePickerProps) {
     }
 
     return (
-        <>
-            <Dropdown
-                align="start"
-                overlay={(
-                    <div className="univer-p-2">
-                        <Calendar value={value} onValueChange={handleValueChange} />
-                    </div>
-                )}
-                open={open}
-                onOpenChange={setOpen}
+        <Dropdown
+            align="start"
+            overlay={(
+                <div className="univer-p-2">
+                    <Calendar value={value} onValueChange={handleValueChange} />
+                </div>
+            )}
+            open={open}
+            onOpenChange={setOpen}
+        >
+            <button
+                className={clsx(`
+                  univer-flex univer-h-8 univer-items-center univer-justify-between univer-gap-2 univer-rounded-md
+                  univer-bg-transparent univer-px-2 univer-text-sm univer-text-gray-800 univer-transition-all
+                  hover:univer-border-primary-600
+                  dark:!univer-text-white
+                `, borderClassName, className)}
+                type="button"
             >
-                <button
-                    className={clsx(`
-                      univer-flex univer-h-8 univer-items-center univer-justify-between univer-rounded-md
-                      univer-bg-transparent univer-px-2 univer-text-sm univer-text-gray-800 univer-transition-all
-                      hover:univer-border-primary-600
-                      dark:!univer-text-white
-                    `, borderClassName, className)}
-                    type="button"
-                >
-                    {dayjs(value).format('YYYY-MM-DD')}
+                {dayjs(value).format('YYYY-MM-DD')}
 
-                    <CalendarIcon
-                        className={`
-                          univer-text-gray-600
-                          dark:!univer-text-gray-400
-                        `}
-                    />
-                </button>
-            </Dropdown>
-        </>
+                <CalendarIcon
+                    className={`
+                      univer-text-gray-600
+                      dark:!univer-text-gray-400
+                    `}
+                />
+            </button>
+        </Dropdown>
     );
 }

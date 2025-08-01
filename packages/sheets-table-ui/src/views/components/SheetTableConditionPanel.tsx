@@ -16,7 +16,7 @@
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
-import { dayjs, Injector, LocaleService } from '@univerjs/core';
+import { Injector, LocaleService } from '@univerjs/core';
 import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
@@ -161,21 +161,15 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 {!!(subComponentType === ConditionSubComponentEnum.DateRange) && (
                     <div id="univer-table-date-range-wrapper">
                         <DateRangePicker
-                            value={[dayjs(conditionInfo.info.dateRange?.[0]) ?? dayjs(), dayjs(conditionInfo.info.dateRange?.[1]) ?? dayjs()]}
-                            defaultPickerValue={[dayjs(), dayjs()]}
-                            onChange={(v) => {
+                            className="univer-w-full"
+                            value={[conditionInfo.info.dateRange?.[0] ?? new Date(), conditionInfo.info.dateRange?.[1] ?? new Date()]}
+                            onValueChange={(v) => {
                                 if (v) {
-                                    handleConditionInfo({ dateRange: v.map((i) => i?.toDate()) as [Date, Date] });
+                                    handleConditionInfo({ dateRange: v });
                                 } else {
                                     handleConditionInfo({});
                                 }
                             }}
-                            getPopupContainer={() => {
-                                const wrapper = document.getElementById('univer-table-date-range-wrapper');
-                                return wrapper || document.body;
-                            }}
-                            classNames={{ popup: 'univer-w-[400px]' }}
-                            allowClear={false}
                         />
                     </div>
                 )}

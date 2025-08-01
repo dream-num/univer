@@ -113,7 +113,8 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             {editState === EditStateEnum.DesignedUserCanEdit && (
                 <div
                     className={clsx(`
-                      univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-rounded-lg univer-p-3
+                      univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-overflow-y-auto univer-rounded-lg
+                      univer-p-3
                     `, borderClassName)}
                 >
                     <div className="univer-flex univer-items-center univer-justify-between univer-text-sm">

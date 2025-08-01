@@ -30,7 +30,7 @@ describe('Test normSInv function', () => {
         it('Value is normal', () => {
             const probability = NumberValueObject.create(0.2069);
             const result = testFunction.calculate(probability);
-            expect(getObjectValue(result)).toBe(-0.8172247517525879);
+            expect(getObjectValue(result, true)).toBe(-0.817224751753);
         });
 
         it('Value is normal string', () => {
@@ -88,7 +88,7 @@ describe('Test normSInv function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(probability2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
     });
 });

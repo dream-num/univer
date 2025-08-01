@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Csc } from '../index';
 
@@ -29,47 +30,47 @@ describe('Test csc function', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.1883951057781212);
+            expect(getObjectValue(result, true)).toBe(1.18839510578);
         });
 
         it('Value is number 2**27', () => {
             const value = NumberValueObject.create(2 ** 27);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is number negative', () => {
             const value = NumberValueObject.create(-2);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(-1.0997501702946164);
+            expect(getObjectValue(result, true)).toBe(-1.09975017029);
         });
 
         it('Value is number string', () => {
             const value = StringValueObject.create('1.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.0025113042467249);
+            expect(getObjectValue(result, true)).toBe(1.00251130425);
         });
 
         it('Value is normal string', () => {
             const value = StringValueObject.create('test');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const value = BooleanValueObject.create(false);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
         it('Value is blank cell', () => {
             const value = NullValueObject.create();
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
         it('Value is error', () => {
             const value = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -86,9 +87,9 @@ describe('Test csc function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [1.1883951057781212, ErrorType.VALUE, 1.0610205637991976, 1.1883951057781212, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO],
-                [ErrorType.DIV_BY_ZERO, -1.9748575314241, 1.3918566499664047, ErrorType.VALUE, -7.086167395737187, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [1.18839510578, ErrorType.VALUE, 1.0610205638, 1.18839510578, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO],
+                [ErrorType.DIV_BY_ZERO, -1.97485753142, 1.39185664997, ErrorType.VALUE, -7.08616739574, ErrorType.NAME],
             ]);
         });
     });

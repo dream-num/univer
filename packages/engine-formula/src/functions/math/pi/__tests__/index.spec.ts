@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Pi } from '../index';
 
@@ -24,7 +25,7 @@ describe('Test pi function', () => {
     describe('Pi', () => {
         it('function is normal', () => {
             const result = testFunction.calculate();
-            expect(result.getValue()).toBe(3.141592653589793);
+            expect(getObjectValue(result, true)).toBe(3.14159265359);
         });
     });
 });

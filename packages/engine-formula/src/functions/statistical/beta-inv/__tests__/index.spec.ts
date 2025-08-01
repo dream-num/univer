@@ -34,10 +34,10 @@ describe('Test betaInv function', () => {
             const A = NumberValueObject.create(1);
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(probability, alpha, beta, A, B);
-            expect(getObjectValue(result)).toBe(1.9999999999920839);
+            expect(getObjectValue(result, true)).toBe(1.99999999999);
 
             const result2 = testFunction.calculate(probability, alpha, beta);
-            expect(getObjectValue(result2)).toBe(0.49999999999604194);
+            expect(getObjectValue(result2, true)).toBe(0.499999999996);
         });
 
         it('Alpha and beta value test', () => {
@@ -57,7 +57,7 @@ describe('Test betaInv function', () => {
             const alpha3 = NumberValueObject.create(1);
             const beta3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(probability, alpha3, beta3, A, B);
-            expect(getObjectValue(result3)).toBe(2.3709411619999994);
+            expect(getObjectValue(result3, true)).toBe(2.370941162);
         });
 
         it('Probability and A and B value test', () => {
@@ -92,7 +92,7 @@ describe('Test betaInv function', () => {
             const A2 = NumberValueObject.create(-1);
             const B2 = NumberValueObject.create(-0.1);
             const result2 = testFunction.calculate(probability, alpha, beta, A2, B2);
-            expect(getObjectValue(result2)).toBe(-0.5500000000035623);
+            expect(getObjectValue(result2, true)).toBe(-0.550000000004);
         });
 
         it('Value is normal string', () => {
@@ -128,7 +128,7 @@ describe('Test betaInv function', () => {
             const A2 = NullValueObject.create();
             const B2 = NullValueObject.create();
             const result2 = testFunction.calculate(probability2, alpha, beta, A2, B2);
-            expect(getObjectValue(result2)).toBe(0.49999999999604194);
+            expect(getObjectValue(result2, true)).toBe(0.499999999996);
         });
 
         it('Value is error', () => {

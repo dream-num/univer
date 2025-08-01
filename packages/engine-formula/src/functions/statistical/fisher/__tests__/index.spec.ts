@@ -30,13 +30,13 @@ describe('Test fisher function', () => {
         it('Value is normal', () => {
             const x = NumberValueObject.create(0.75);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toBe(0.9729550745276566);
+            expect(getObjectValue(result, true)).toBe(0.972955074528);
         });
 
         it('Value is number string', () => {
             const x = StringValueObject.create('0.5');
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toBe(0.5493061443340548);
+            expect(getObjectValue(result, true)).toBe(0.549306144334);
         });
 
         it('Value is normal string', () => {

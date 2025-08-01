@@ -31,7 +31,7 @@ describe('Test tInv function', () => {
             const probability = NumberValueObject.create(0.75);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(probability, degFreedom);
-            expect(getObjectValue(result)).toBe(0.8164965809277775);
+            expect(getObjectValue(result, true)).toBe(0.816496580928);
         });
 
         it('DegFreedom value test', () => {

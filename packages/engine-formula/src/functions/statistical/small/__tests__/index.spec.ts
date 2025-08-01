@@ -41,7 +41,7 @@ describe('Test small function', () => {
             });
             const k = NumberValueObject.create(2.5);
             const result = testFunction.calculate(array, k);
-            expect(getObjectValue(result)).toStrictEqual(2);
+            expect(getObjectValue(result)).toBe(2);
         });
 
         it('Value is number string', () => {
@@ -58,7 +58,7 @@ describe('Test small function', () => {
             });
             const k = NumberValueObject.create(2.5);
             const result = testFunction.calculate(array, k);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Array value test', () => {
@@ -75,7 +75,7 @@ describe('Test small function', () => {
             });
             const k = NumberValueObject.create(2.5);
             const result = testFunction.calculate(array, k);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
             const array2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -89,7 +89,7 @@ describe('Test small function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(array2, k);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('K value test', () => {
@@ -106,27 +106,27 @@ describe('Test small function', () => {
             });
             const k = NumberValueObject.create(0.1);
             const result = testFunction.calculate(array, k);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const k2 = NumberValueObject.create(11);
             const result2 = testFunction.calculate(array, k2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const k3 = BooleanValueObject.create(true);
             const result3 = testFunction.calculate(array, k3);
-            expect(getObjectValue(result3)).toStrictEqual(1);
+            expect(getObjectValue(result3)).toBe(1);
 
             const k4 = NullValueObject.create();
             const result4 = testFunction.calculate(array, k4);
-            expect(getObjectValue(result4)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result4)).toBe(ErrorType.NUM);
 
             const k5 = StringValueObject.create('test');
             const result5 = testFunction.calculate(array, k5);
-            expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result5)).toBe(ErrorType.VALUE);
 
             const k6 = ErrorValueObject.create(ErrorType.NAME);
             const result6 = testFunction.calculate(array, k6);
-            expect(getObjectValue(result6)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result6)).toBe(ErrorType.NAME);
 
             const k7 = ArrayValueObject.create('{1,2,3}');
             const result7 = testFunction.calculate(array, k7);
@@ -136,7 +136,7 @@ describe('Test small function', () => {
 
             const k8 = ArrayValueObject.create('{1}');
             const result8 = testFunction.calculate(array, k8);
-            expect(getObjectValue(result8)).toStrictEqual(1);
+            expect(getObjectValue(result8)).toBe(1);
         });
     });
 });

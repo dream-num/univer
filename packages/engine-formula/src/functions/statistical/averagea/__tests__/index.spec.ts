@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Averagea } from '../index';
 
@@ -30,42 +31,42 @@ describe('Test averagea function', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1.5);
+            expect(getObjectValue(result)).toBe(1.5);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = StringValueObject.create('test');
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
         it('Var1 is number, var2 is string number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = StringValueObject.create('2');
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1.5);
+            expect(getObjectValue(result)).toBe(1.5);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = NumberValueObject.create(2);
 
             let var2 = BooleanValueObject.create(true);
             let result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1.5);
+            expect(getObjectValue(result)).toBe(1.5);
 
             var2 = BooleanValueObject.create(false);
             result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Var1 is number, var2 is null', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(getObjectValue(result)).toBe(1);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = ErrorValueObject.create(ErrorType.NA);
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Var1 is number, var2 is array includes error', () => {
@@ -83,7 +84,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Var1 array, ignore blank cells', () => {
@@ -100,7 +101,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(1.5);
+            expect(getObjectValue(result)).toBe(1.5);
         });
 
         it('Var1 array, string as 0', () => {
@@ -117,7 +118,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0.75);
+            expect(getObjectValue(result)).toBe(0.75);
         });
 
         it('Var1 is number, var2 is array not includes error', () => {
@@ -135,7 +136,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(9.506363636363636);
+            expect(getObjectValue(result, true)).toBe(9.50636363636);
         });
 
         it('Var1 is array includes string only', () => {
@@ -152,7 +153,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Var1 is array includes blank cells only', () => {
@@ -169,7 +170,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Var1 is array includes blank cells and string', () => {
@@ -187,7 +188,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0);
+            expect(getObjectValue(result)).toBe(0);
         });
     });
 });

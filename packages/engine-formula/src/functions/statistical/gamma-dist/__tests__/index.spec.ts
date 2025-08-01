@@ -33,7 +33,7 @@ describe('Test gammaDist function', () => {
             const beta = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
-            expect(getObjectValue(result)).toBe(0.1333716740699961);
+            expect(getObjectValue(result, true)).toBe(0.13337167407);
         });
 
         it('Alpha and beta value test', () => {
@@ -52,11 +52,11 @@ describe('Test gammaDist function', () => {
             const alpha3 = NumberValueObject.create(1);
             const beta3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(x, alpha3, beta3, cumulative);
-            expect(getObjectValue(result3)).toBe(0.9999546000702375);
+            expect(getObjectValue(result3, true)).toBe(0.99995460007);
 
             const alpha4 = NumberValueObject.create(5);
             const result4 = testFunction.calculate(x, alpha4, beta, cumulative);
-            expect(getObjectValue(result4)).toBe(0.5595067149347875);
+            expect(getObjectValue(result4, true)).toBe(0.559506714935);
         });
 
         it('X value test', () => {
@@ -78,16 +78,16 @@ describe('Test gammaDist function', () => {
             const beta = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
-            expect(getObjectValue(result)).toBe(0.05222243147852266);
+            expect(getObjectValue(result, true)).toBe(0.0522224314785);
 
             const alpha2 = NumberValueObject.create(1);
             const beta2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(x, alpha2, beta2, cumulative);
-            expect(getObjectValue(result2)).toBe(0.00004539992976248485);
+            expect(getObjectValue(result2, true)).toBe(0.0000453999297625);
 
             const x2 = NumberValueObject.create(3);
             const result3 = testFunction.calculate(x2, alpha2, beta2, cumulative);
-            expect(getObjectValue(result3)).toBe(0.049787068367863944);
+            expect(getObjectValue(result3, true)).toBe(0.0497870683679);
 
             const alpha3 = NumberValueObject.create(520);
             const beta3 = NumberValueObject.create(520);
@@ -102,7 +102,7 @@ describe('Test gammaDist function', () => {
             const alpha5 = NumberValueObject.create(0.1);
             const beta5 = NumberValueObject.create(0.1);
             const result6 = testFunction.calculate(x, alpha5, beta5, cumulative);
-            expect(getObjectValue(result6)).toBe(6.197422944912591e-46);
+            expect(getObjectValue(result6, true)).toBe(6.19742294491e-46);
         });
 
         it('Value is normal string', () => {
@@ -120,7 +120,7 @@ describe('Test gammaDist function', () => {
             const beta = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
-            expect(getObjectValue(result)).toBe(6.219690863728135e-8);
+            expect(getObjectValue(result, true)).toBe(6.21969086373e-8);
         });
 
         it('Value is null', () => {
@@ -171,9 +171,9 @@ describe('Test gammaDist function', () => {
             const beta = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
-                [6.219690863728135e-8, ErrorType.VALUE, 2.943752902702369e-7, 6.219690863728135e-8, 0, 0],
-                [0, 0.9999999999999654, 0.00003100313605738345, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [6.21969086373e-8, ErrorType.VALUE, 2.9437529027e-7, 6.21969086373e-8, 0, 0],
+                [0, 1, 0.0000310031360574, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
     });

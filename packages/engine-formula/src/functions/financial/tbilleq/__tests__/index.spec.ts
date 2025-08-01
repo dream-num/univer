@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Tbilleq } from '../index';
 
@@ -31,11 +32,11 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(0.09415149356594302);
+            expect(getObjectValue(result, true)).toBe(0.0941514935659);
 
             const maturity2 = StringValueObject.create('2008-11-1');
             const result2 = testFunction.calculate(settlement, maturity2, discount);
-            expect(result2.getValue()).toStrictEqual(0.09730435851979326);
+            expect(getObjectValue(result2, true)).toBe(0.0973043585198);
         });
 
         it('Settlement >= maturity', () => {
@@ -43,7 +44,7 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Maturity is more than one year after settlement', () => {
@@ -51,7 +52,7 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2018-6-1');
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Discount <= 0 || discount to result < 0 or NaN', () => {
@@ -59,15 +60,15 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(-0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const discount2 = NumberValueObject.create(11);
             const result2 = testFunction.calculate(settlement, maturity, discount2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const maturity2 = StringValueObject.create('2008-12-1');
             const result3 = testFunction.calculate(settlement, maturity2, discount2);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
@@ -75,7 +76,7 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -83,7 +84,7 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = BooleanValueObject.create(true);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {
@@ -91,16 +92,16 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const settlement2 = StringValueObject.create('2008-3-31');
             const maturity2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(settlement2, maturity2, discount);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const discount2 = StringValueObject.create('test');
             const result3 = testFunction.calculate(settlement2, maturity, discount2);
-            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -118,7 +119,7 @@ describe('Test tbilleq function', () => {
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
     });
 });

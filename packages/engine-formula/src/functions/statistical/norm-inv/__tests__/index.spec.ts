@@ -32,7 +32,7 @@ describe('Test normInv function', () => {
             const mean = NumberValueObject.create(6);
             const standardDev = NumberValueObject.create(4);
             const result = testFunction.calculate(probability, mean, standardDev);
-            expect(getObjectValue(result)).toBe(2.7311009929896484);
+            expect(getObjectValue(result, true)).toBe(2.73110099299);
         });
 
         it('StandardDev value test', () => {

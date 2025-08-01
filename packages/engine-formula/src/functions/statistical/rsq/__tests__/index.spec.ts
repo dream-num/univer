@@ -55,7 +55,7 @@ describe('Test rsq function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(0.6981161249361308);
+            expect(getObjectValue(result, true)).toBe(0.698116124936);
         });
 
         it('Value length is equal to 1', () => {

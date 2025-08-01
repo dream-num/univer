@@ -63,8 +63,8 @@ describe('Test trend function', () => {
             });
             const constb = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
-            expect(getObjectValue(result)).toStrictEqual([
-                [155404.53583526541, 162554.58675507212],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [155404.535835265, 162554.586755072],
             ]);
         });
 
@@ -86,13 +86,13 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs);
-            expect(getObjectValue(result)).toStrictEqual([
-                [12452.380952380954],
-                [48898.09523809524],
-                [85343.80952380951],
-                [121789.5238095238],
-                [158235.2380952381],
-                [194680.95238095237],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [12452.380952381],
+                [48898.0952380952],
+                [85343.8095238095],
+                [121789.523809524],
+                [158235.238095238],
+                [194680.952380952],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -112,7 +112,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const knownYs3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -131,7 +131,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs3);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
 
             const knownYs4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -150,7 +150,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result4 = testFunction.calculate(knownYs4);
-            expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result4)).toBe(ErrorType.VALUE);
 
             const knownYs5 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -169,7 +169,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result5 = testFunction.calculate(knownYs5);
-            expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result5)).toBe(ErrorType.VALUE);
         });
 
         it('KnownXs length error', () => {
@@ -203,7 +203,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toBe(ErrorType.REF);
 
             const knownXs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -220,7 +220,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs, knownXs2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result2)).toBe(ErrorType.NA);
 
             const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -249,7 +249,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs2, knownXs3);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result3)).toBe(ErrorType.NA);
         });
 
         it('NewXs length error', () => {
@@ -296,7 +296,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs, knownXs, newXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toBe(ErrorType.REF);
         });
 
         it('Constb value test', () => {
@@ -335,8 +335,8 @@ describe('Test trend function', () => {
             });
             const constb = BooleanValueObject.create(false);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
-            expect(getObjectValue(result)).toStrictEqual([
-                [163575.8491131277, 173197.95788448816],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [163575.849113128, 173197.957884488],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -356,13 +356,13 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs2, undefined, undefined, constb);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [30908.79120879121],
-                [61817.58241758242],
-                [92726.37362637362],
-                [123635.16483516483],
-                [154543.95604395604],
-                [185452.74725274724],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [30908.7912087912],
+                [61817.5824175824],
+                [92726.3736263736],
+                [123635.164835165],
+                [154543.956043956],
+                [185452.747252747],
             ]);
 
             const constb2 = ArrayValueObject.create({
@@ -378,16 +378,16 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs2, undefined, undefined, constb2);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
 
             const result4 = testFunction.calculate(knownYs2, undefined, undefined, constb);
-            expect(getObjectValue(result4)).toStrictEqual([
-                [30908.79120879121],
-                [61817.58241758242],
-                [92726.37362637362],
-                [123635.16483516483],
-                [154543.95604395604],
-                [185452.74725274724],
+            expect(getObjectValue(result4, true)).toStrictEqual([
+                [30908.7912087912],
+                [61817.5824175824],
+                [92726.3736263736],
+                [123635.164835165],
+                [154543.956043956],
+                [185452.747252747],
             ]);
         });
 
@@ -406,10 +406,10 @@ describe('Test trend function', () => {
             const knownXs = ErrorValueObject.create(ErrorType.NAME);
             const newXs = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toBe(ErrorType.REF);
 
             const result2 = testFunction.calculate(knownYs, undefined, newXs);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const knownXs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -423,7 +423,7 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs, knownXs2);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
         });
 
         it('More test', () => {
@@ -491,18 +491,18 @@ describe('Test trend function', () => {
             });
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, newXs2, constb2);
-            expect(getObjectValue(result2)).toStrictEqual([
-                [2.5757575757575757],
-                [3.090909090909091],
-                [3.606060606060606],
-                [4.121212121212121],
-                [4.636363636363637],
-                [5.151515151515151],
-                [5.666666666666666],
-                [6.181818181818182],
-                [6.696969696969697],
-                [7.212121212121212],
-                [7.727272727272727],
+            expect(getObjectValue(result2, true)).toStrictEqual([
+                [2.57575757576],
+                [3.09090909091],
+                [3.60606060606],
+                [4.12121212121],
+                [4.63636363636],
+                [5.15151515152],
+                [5.66666666667],
+                [6.18181818182],
+                [6.69696969697],
+                [7.21212121212],
+                [7.72727272727],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -555,18 +555,18 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb);
-            expect(getObjectValue(result3)).toStrictEqual([
-                [0.9999999999999902],
-                [1.9999999999999938],
-                [2.9999999999999973],
-                [4.000000000000001],
-                [5.000000000000004],
-                [6.000000000000008],
-                [7.0000000000000115],
-                [8.000000000000014],
-                [9.000000000000018],
-                [10.000000000000021],
-                [11.000000000000025],
+            expect(getObjectValue(result3, true)).toStrictEqual([
+                [1],
+                [2],
+                [3],
+                [4],
+                [5],
+                [6],
+                [7],
+                [8],
+                [9],
+                [10],
+                [11],
             ]);
 
             const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);
@@ -620,8 +620,8 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result5 = testFunction.calculate(knownYs3, knownXs3, newXs4, constb);
-            expect(getObjectValue(result5)).toStrictEqual([
-                [0.9999999999999902, 1.9999999999999938, 2.9999999999999973, 4.000000000000001, 5.000000000000004, 6.000000000000008, 7.0000000000000115],
+            expect(getObjectValue(result5, true)).toStrictEqual([
+                [1, 2, 3, 4, 5, 6, 7],
             ]);
 
             const knownYs4 = NumberValueObject.create(1);

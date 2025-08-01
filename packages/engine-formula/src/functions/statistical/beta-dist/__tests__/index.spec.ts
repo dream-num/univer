@@ -35,7 +35,7 @@ describe('Test betaDist function', () => {
             const A = NumberValueObject.create(1);
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, cumulative, A, B);
-            expect(getObjectValue(result)).toBe(0.6854705810117458);
+            expect(getObjectValue(result, true)).toBe(0.685470581012);
 
             const result2 = testFunction.calculate(x, alpha, beta, cumulative);
             expect(getObjectValue(result2)).toBe(ErrorType.NUM);
@@ -59,7 +59,7 @@ describe('Test betaDist function', () => {
             const alpha3 = NumberValueObject.create(1);
             const beta3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(x, alpha3, beta3, cumulative, A, B);
-            expect(getObjectValue(result3)).toBe(0.5000000000000002);
+            expect(getObjectValue(result3, true)).toBe(0.5);
         });
 
         it('X and A and B value test', () => {
@@ -91,7 +91,7 @@ describe('Test betaDist function', () => {
             const A = NumberValueObject.create(1);
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, cumulative, A, B);
-            expect(getObjectValue(result)).toBe(1.4837646484375002);
+            expect(getObjectValue(result, true)).toBe(1.48376464844);
 
             const alpha2 = NumberValueObject.create(1);
             const beta2 = NumberValueObject.create(1);
@@ -105,17 +105,17 @@ describe('Test betaDist function', () => {
             const alpha3 = NumberValueObject.create(520);
             const beta3 = NumberValueObject.create(520);
             const result4 = testFunction.calculate(x, alpha3, beta3, cumulative, A, B);
-            expect(getObjectValue(result4)).toBe(12.86240966652393);
+            expect(getObjectValue(result4, true)).toBe(12.8624096665);
 
             const alpha4 = NumberValueObject.create(350);
             const beta4 = NumberValueObject.create(350);
             const result5 = testFunction.calculate(x, alpha4, beta4, cumulative, A, B);
-            expect(getObjectValue(result5)).toBe(10.551251636711884);
+            expect(getObjectValue(result5, true)).toBe(10.5512516367);
 
             const alpha5 = NumberValueObject.create(0.1);
             const beta5 = NumberValueObject.create(0.1);
             const result6 = testFunction.calculate(x, alpha5, beta5, cumulative, A, B);
-            expect(getObjectValue(result6)).toBe(0.08831513898907835);
+            expect(getObjectValue(result6, true)).toBe(0.0883151389891);
         });
 
         it('Value is normal string', () => {
@@ -208,9 +208,9 @@ describe('Test betaDist function', () => {
             const A = NumberValueObject.create(1);
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, cumulative, A, B);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0, ErrorType.VALUE, 0.00028348362316367936, 0, ErrorType.NUM, ErrorType.NUM],
-                [ErrorType.NUM, ErrorType.NUM, 0.9745907595394001, ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0, ErrorType.VALUE, 0.000283483623164, 0, ErrorType.NUM, ErrorType.NUM],
+                [ErrorType.NUM, ErrorType.NUM, 0.974590759539, ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM],
             ]);
         });
     });

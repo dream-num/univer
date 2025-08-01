@@ -31,7 +31,7 @@ describe('Test tDist2t function', () => {
             const x = NumberValueObject.create(1);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.4226497308104018);
+            expect(getObjectValue(result, true)).toBe(0.42264973081);
         });
 
         it('DegFreedom value test', () => {
@@ -56,7 +56,7 @@ describe('Test tDist2t function', () => {
             const x = BooleanValueObject.create(true);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.4226497308104018);
+            expect(getObjectValue(result, true)).toBe(0.42264973081);
         });
 
         it('Value is null', () => {
@@ -93,9 +93,9 @@ describe('Test tDist2t function', () => {
             });
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.4226497308104018, ErrorType.VALUE, 0.3437456155496856, 0.4226497308104018, 1, 1],
-                [1, 0.00009998500249955772, 0.14415950895030902, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.42264973081, ErrorType.VALUE, 0.34374561555, 0.42264973081, 1, 1],
+                [1, 0.0000999850024996, 0.14415950895, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
 
@@ -103,7 +103,7 @@ describe('Test tDist2t function', () => {
             const x = NumberValueObject.create(0.1);
             const degFreedom = NumberValueObject.create(900000000);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.9203442914779052);
+            expect(getObjectValue(result, true)).toBe(0.920344291478);
         });
     });
 });

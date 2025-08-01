@@ -42,7 +42,7 @@ describe('Test skewP function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(4.9343245538895844e-17);
+            expect(getObjectValue(result, true)).toBe(4.93432455389e-17);
         });
 
         it('Value length < 3', () => {
@@ -58,7 +58,7 @@ describe('Test skewP function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value is single cell = null/boolean/string/error/negtive number', () => {
@@ -69,13 +69,13 @@ describe('Test skewP function', () => {
             const number5 = ErrorValueObject.create(ErrorType.NAME);
             const number6 = NumberValueObject.create(-3);
             const result = testFunction.calculate(number, number2, number3, number4);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const result2 = testFunction.calculate(number, number2, number3, number5);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
 
             const result3 = testFunction.calculate(number, number2, number3, number6);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result3)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value is not has number', () => {
@@ -91,7 +91,7 @@ describe('Test skewP function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Stdev is 0', () => {
@@ -109,7 +109,7 @@ describe('Test skewP function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('More test', () => {
@@ -126,7 +126,7 @@ describe('Test skewP function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
     });
 });

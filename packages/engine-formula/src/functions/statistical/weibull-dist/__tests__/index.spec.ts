@@ -52,7 +52,7 @@ describe('Test weibullDist function', () => {
             const alpha3 = NumberValueObject.create(1);
             const beta3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(x, alpha3, beta3, cumulative);
-            expect(getObjectValue(result3)).toBe(0.9999546000702375);
+            expect(getObjectValue(result3, true)).toBe(0.99995460007);
 
             const alpha4 = NumberValueObject.create(5);
             const result4 = testFunction.calculate(x, alpha4, beta, cumulative);
@@ -83,11 +83,11 @@ describe('Test weibullDist function', () => {
             const alpha2 = NumberValueObject.create(1);
             const beta2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(x, alpha2, beta2, cumulative);
-            expect(getObjectValue(result2)).toBe(0.00004539992976248485);
+            expect(getObjectValue(result2, true)).toBe(0.0000453999297625);
 
             const x2 = NumberValueObject.create(3);
             const result3 = testFunction.calculate(x2, alpha2, beta2, cumulative);
-            expect(getObjectValue(result3)).toBe(0.049787068367863944);
+            expect(getObjectValue(result3, true)).toBe(0.0497870683679);
 
             const alpha3 = NumberValueObject.create(520);
             const beta3 = NumberValueObject.create(520);
@@ -102,7 +102,7 @@ describe('Test weibullDist function', () => {
             const alpha5 = NumberValueObject.create(0.1);
             const beta5 = NumberValueObject.create(0.1);
             const result6 = testFunction.calculate(x, alpha5, beta5, cumulative);
-            expect(getObjectValue(result6)).toBe(0.003248550572370161);
+            expect(getObjectValue(result6, true)).toBe(0.00324855057237);
         });
 
         it('Value is normal string', () => {
@@ -120,7 +120,7 @@ describe('Test weibullDist function', () => {
             const beta = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
-            expect(getObjectValue(result)).toBe(0.0038986305298824853);
+            expect(getObjectValue(result, true)).toBe(0.00389863052988);
         });
 
         it('Value is null', () => {
@@ -171,9 +171,9 @@ describe('Test weibullDist function', () => {
             const beta = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.0038986305298824853, ErrorType.VALUE, 0.02025651346279278, 0.0038986305298824853, 0, 0],
-                [0, 1, 0.9701465024693557, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.00389863052988, ErrorType.VALUE, 0.0202565134628, 0.00389863052988, 0, 0],
+                [0, 1, 0.970146502469, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
     });

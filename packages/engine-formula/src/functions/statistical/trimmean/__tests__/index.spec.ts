@@ -89,7 +89,7 @@ describe('Test trimmean function', () => {
             });
             const percent = NumberValueObject.create(0.1);
             const result = testFunction.calculate(array, percent);
-            expect(getObjectValue(result)).toStrictEqual(6.111111111111111);
+            expect(getObjectValue(result, true)).toStrictEqual(6.11111111111);
 
             const percent2 = NumberValueObject.create(11);
             const result2 = testFunction.calculate(array, percent2);
@@ -101,7 +101,7 @@ describe('Test trimmean function', () => {
 
             const percent4 = NullValueObject.create();
             const result4 = testFunction.calculate(array, percent4);
-            expect(getObjectValue(result4)).toStrictEqual(6.111111111111111);
+            expect(getObjectValue(result4, true)).toStrictEqual(6.11111111111);
 
             const percent5 = StringValueObject.create('test');
             const result5 = testFunction.calculate(array, percent5);

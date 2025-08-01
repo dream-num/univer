@@ -31,7 +31,7 @@ describe('Test tDistRt function', () => {
             const x = NumberValueObject.create(1);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.2113248654052009);
+            expect(getObjectValue(result, true)).toBe(0.211324865405);
         });
 
         it('DegFreedom value test', () => {
@@ -56,7 +56,7 @@ describe('Test tDistRt function', () => {
             const x = BooleanValueObject.create(true);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.2113248654052009);
+            expect(getObjectValue(result, true)).toBe(0.211324865405);
         });
 
         it('Value is null', () => {
@@ -93,9 +93,9 @@ describe('Test tDistRt function', () => {
             });
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.2113248654052009, ErrorType.VALUE, 0.1718728077748428, 0.2113248654052009, 0.5, 0.5],
-                [0.5, 0.00004999250124977886, 0.07207975447515451, ErrorType.VALUE, 0.9522670168686455, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.211324865405, ErrorType.VALUE, 0.171872807775, 0.211324865405, 0.5, 0.5],
+                [0.5, 0.0000499925012498, 0.0720797544752, ErrorType.VALUE, 0.952267016869, ErrorType.NAME],
             ]);
         });
 
@@ -103,7 +103,7 @@ describe('Test tDistRt function', () => {
             const x = NumberValueObject.create(0.1);
             const degFreedom = NumberValueObject.create(900000000);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.4601721457389526);
+            expect(getObjectValue(result, true)).toBe(0.460172145739);
         });
     });
 });

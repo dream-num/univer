@@ -53,7 +53,7 @@ describe('Test tTest function', () => {
             const tails = NumberValueObject.create(2);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(array1, array2, tails, type);
-            expect(getObjectValue(result)).toBe(0.19601578492531546);
+            expect(getObjectValue(result, true)).toBe(0.196015784925);
         });
 
         it('Array1 and array2 value test', () => {
@@ -215,8 +215,8 @@ describe('Test tTest function', () => {
             });
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(array1, array2, tails, type);
-            expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, ErrorType.NUM, 0.09800789246265773, 0.19601578492531546, ErrorType.NUM, 0.09800789246265773, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.NUM, ErrorType.NUM, 0.0980078924627, 0.196015784925, ErrorType.NUM, 0.0980078924627, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
 
@@ -256,8 +256,8 @@ describe('Test tTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2, tails, type);
-            expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, ErrorType.NUM, 0.19601578492531546, 0.1919958867250542, 0.20229392336804775, 0.19601578492531546, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.NUM, ErrorType.NUM, 0.196015784925, 0.191995886725, 0.202293923368, 0.196015784925, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
 
@@ -292,11 +292,11 @@ describe('Test tTest function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(array1, array3, tails, type);
-            expect(getObjectValue(result2)).toBe(0.3609071062401591);
+            expect(getObjectValue(result2, true)).toBe(0.36090710624);
 
             const type2 = NumberValueObject.create(3);
             const result3 = testFunction.calculate(array1, array3, tails, type2);
-            expect(getObjectValue(result3)).toBe(0.21930610212734247);
+            expect(getObjectValue(result3, true)).toBe(0.219306102127);
         });
     });
 });

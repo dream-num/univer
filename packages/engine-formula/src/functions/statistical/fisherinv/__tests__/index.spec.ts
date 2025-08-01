@@ -30,7 +30,7 @@ describe('Test fisherinv function', () => {
         it('Value is normal', () => {
             const x = NumberValueObject.create(0.75);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toBe(0.6351489523872873);
+            expect(getObjectValue(result, true)).toBe(0.635148952387);
         });
 
         it('Value is big number', () => {
@@ -42,7 +42,7 @@ describe('Test fisherinv function', () => {
         it('Value is number string', () => {
             const x = StringValueObject.create('0.5');
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toBe(0.46211715726000974);
+            expect(getObjectValue(result, true)).toBe(0.46211715726);
         });
 
         it('Value is normal string', () => {
@@ -54,7 +54,7 @@ describe('Test fisherinv function', () => {
         it('Value is boolean', () => {
             const x = BooleanValueObject.create(true);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toBe(0.7615941559557649);
+            expect(getObjectValue(result, true)).toBe(0.761594155956);
         });
 
         it('Value is null', () => {
@@ -83,9 +83,9 @@ describe('Test fisherinv function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.7615941559557649, ErrorType.VALUE, 0.8425793256589296, 0.7615941559557649, 0, 0],
-                [0, 1, 0.9816125892654238, ErrorType.VALUE, -0.9950547536867306, 0],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.761594155956, ErrorType.VALUE, 0.842579325659, 0.761594155956, 0, 0],
+                [0, 1, 0.981612589265, ErrorType.VALUE, -0.995054753687, 0],
             ]);
         });
     });

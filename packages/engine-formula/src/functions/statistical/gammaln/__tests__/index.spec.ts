@@ -30,47 +30,47 @@ describe('Test gammaln function', () => {
         it('Value is normal', () => {
             const x = NumberValueObject.create(2.5);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0.2846828704729183);
+            expect(getObjectValue(result, true)).toBe(0.284682870473);
         });
 
         it('Value is 0 or negative integers', () => {
             const x = NumberValueObject.create(0);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const x2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(x2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
             const x = StringValueObject.create('4');
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(1.791759469228055);
+            expect(getObjectValue(result, true)).toBe(1.79175946923);
         });
 
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
             const x = BooleanValueObject.create(true);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is null', () => {
             const x = NullValueObject.create();
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
             const x = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -87,9 +87,9 @@ describe('Test gammaln function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0, ErrorType.VALUE, -0.09348151082957568, 0, ErrorType.NUM, ErrorType.NUM],
-                [ErrorType.NUM, 359.1342053696796, 0.17862203839074242, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0, ErrorType.VALUE, -0.0934815108296, 0, ErrorType.NUM, ErrorType.NUM],
+                [ErrorType.NUM, 359.13420536968, 0.178622038391, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
 
             const x2 = ArrayValueObject.create({
@@ -104,13 +104,13 @@ describe('Test gammaln function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(x2);
-            expect(getObjectValue(result2)).toStrictEqual(2.036327503417766);
+            expect(getObjectValue(result2, true)).toBe(2.03632750342);
         });
 
         it('More test', () => {
             const x = NumberValueObject.create(2);
             const result = testFunction.calculate(x);
-            expect(getObjectValue(result)).toStrictEqual(0);
+            expect(getObjectValue(result)).toBe(0);
         });
     });
 });

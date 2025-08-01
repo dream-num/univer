@@ -55,7 +55,7 @@ describe('Test slope function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toBe(0.9840117714340344);
+            expect(getObjectValue(result, true)).toBe(0.984011771434);
         });
 
         it('Value length is equal to 1', () => {

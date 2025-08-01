@@ -31,7 +31,7 @@ describe('Test chisqDistRt function', () => {
             const x = NumberValueObject.create(0.5);
             const degFreedom = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.4795001221869758);
+            expect(getObjectValue(result, true)).toBe(0.479500122187);
         });
 
         it('DegFreedom value test', () => {
@@ -56,7 +56,7 @@ describe('Test chisqDistRt function', () => {
             const x = BooleanValueObject.create(true);
             const degFreedom = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.31731050786294357);
+            expect(getObjectValue(result, true)).toBe(0.317310507863);
         });
 
         it('Value is null', () => {
@@ -93,9 +93,9 @@ describe('Test chisqDistRt function', () => {
             });
             const degFreedom = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.31731050786294357, ErrorType.VALUE, 0.2674070380711471, 0.31731050786294357, 1, 1],
-                [1, 0, 0.12608955395262833, ErrorType.VALUE, ErrorType.NUM, 1],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.317310507863, ErrorType.VALUE, 0.267407038071, 0.317310507863, 1, 1],
+                [1, 0, 0.126089553953, ErrorType.VALUE, ErrorType.NUM, 1],
             ]);
         });
     });

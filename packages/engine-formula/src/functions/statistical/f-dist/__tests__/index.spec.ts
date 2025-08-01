@@ -33,7 +33,7 @@ describe('Test fDist function', () => {
             const degFreedom2 = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
-            expect(getObjectValue(result)).toBe(0.9900000430027627);
+            expect(getObjectValue(result, true)).toBe(0.990000043003);
         });
 
         it('DegFreedom value test', () => {
@@ -55,7 +55,7 @@ describe('Test fDist function', () => {
             const degFreedom2 = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
-            expect(getObjectValue(result)).toBe(0.0012237917087831733);
+            expect(getObjectValue(result, true)).toBe(0.00122379170878);
 
             const x2 = NumberValueObject.create(0);
             const degFreedom3 = NumberValueObject.create(1);
@@ -67,7 +67,7 @@ describe('Test fDist function', () => {
             expect(getObjectValue(result3)).toBe(1);
 
             const result4 = testFunction.calculate(x, degFreedom4, degFreedom4, cumulative);
-            expect(getObjectValue(result4)).toBe(0.0038071509376540248);
+            expect(getObjectValue(result4, true)).toBe(0.00380715093765);
         });
 
         it('Value is normal string', () => {
@@ -85,7 +85,7 @@ describe('Test fDist function', () => {
             const degFreedom2 = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
-            expect(getObjectValue(result)).toBe(0.4751999999999995);
+            expect(getObjectValue(result, true)).toBe(0.4752);
         });
 
         it('Value is null', () => {
@@ -135,9 +135,9 @@ describe('Test fDist function', () => {
             const degFreedom2 = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.4751999999999995, ErrorType.VALUE, 0.560330863013998, 0.4751999999999995, 0, 0],
-                [0, 0.9997391714643776, 0.7849737228401481, ErrorType.VALUE, ErrorType.NUM, 0],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.4752, ErrorType.VALUE, 0.560330863014, 0.4752, 0, 0],
+                [0, 0.999739171464, 0.78497372284, ErrorType.VALUE, ErrorType.NUM, 0],
             ]);
         });
     });

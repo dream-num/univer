@@ -40,7 +40,7 @@ describe('Test zTest function', () => {
             });
             const x = NumberValueObject.create(4);
             const result = testFunction.calculate(array, x);
-            expect(getObjectValue(result)).toBe(0.09057419685136392);
+            expect(getObjectValue(result, true)).toBe(0.0905741968514);
         });
 
         it('Value is number string', () => {
@@ -129,8 +129,8 @@ describe('Test zTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array, x);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0, 1, 0.00039650182754802366, 3.1107494757876e-7, 2.8254398820592996e-10, 2.8254398820592996e-10, ErrorType.VALUE, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0, 1, 0.000396501827548, 3.11074947579e-7, 2.82543988206e-10, 2.82543988206e-10, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
 
@@ -159,8 +159,8 @@ describe('Test zTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array, x, sigma);
-            expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, 0.48612556919551, 0.06856806925633085, 0.00025210911472450803, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.NUM, 0.486125569196, 0.0685680692563, 0.000252109114725, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
     });

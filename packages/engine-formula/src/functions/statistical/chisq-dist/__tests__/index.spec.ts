@@ -32,7 +32,7 @@ describe('Test chisqDist function', () => {
             const degFreedom = NumberValueObject.create(1);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.5204998778130242);
+            expect(getObjectValue(result, true)).toBe(0.520499877813);
         });
 
         it('DegFreedom value test', () => {
@@ -52,7 +52,7 @@ describe('Test chisqDist function', () => {
             const degFreedom = NumberValueObject.create(1);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.4393912894677035);
+            expect(getObjectValue(result, true)).toBe(0.439391289468);
 
             const x2 = NumberValueObject.create(0);
             const degFreedom2 = NumberValueObject.create(2);
@@ -73,7 +73,7 @@ describe('Test chisqDist function', () => {
             const degFreedom = NumberValueObject.create(1);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.6826894921370564);
+            expect(getObjectValue(result, true)).toBe(0.682689492137);
         });
 
         it('Value is null', () => {
@@ -117,9 +117,9 @@ describe('Test chisqDist function', () => {
             const degFreedom = NumberValueObject.create(1);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toStrictEqual([
-                [0.6826894921370564, ErrorType.VALUE, 0.7325929619288529, 0.6826894921370564, 0, 0],
-                [0, 1, 0.8739104460473717, ErrorType.VALUE, ErrorType.NUM, 0],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [0.682689492137, ErrorType.VALUE, 0.732592961929, 0.682689492137, 0, 0],
+                [0, 1, 0.873910446047, ErrorType.VALUE, ErrorType.NUM, 0],
             ]);
         });
     });

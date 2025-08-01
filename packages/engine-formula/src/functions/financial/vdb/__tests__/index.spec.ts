@@ -16,8 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Vdb } from '../index';
 
@@ -34,7 +35,7 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(3840);
+            expect(getObjectValue(result)).toBe(3840);
         });
 
         it('Cost is normal string', () => {
@@ -46,7 +47,7 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Cost < 0 || salvage < 0 || cost < salvage', () => {
@@ -58,20 +59,20 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const salvage2 = NumberValueObject.create(-3000);
             const result2 = testFunction.calculate(cost, salvage2, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const cost3 = NumberValueObject.create(2400);
             const salvage3 = NumberValueObject.create(3000);
             const result3 = testFunction.calculate(cost3, salvage3, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result3.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result3)).toBe(0);
 
             const startPeriod4 = NumberValueObject.create(0.1);
             const result4 = testFunction.calculate(cost3, salvage3, life, startPeriod4, endPeriod, factor, noSwitch);
-            expect(result4.getValue()).toStrictEqual(-600);
+            expect(getObjectValue(result4)).toBe(-600);
         });
 
         it('Life === 0 && startPeriod === 0 && endPeriod === 0', () => {
@@ -83,7 +84,7 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('StartPeriod > endPeriod > life || StartPeriod > life / 2', () => {
@@ -95,12 +96,12 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const startPeriod2 = NumberValueObject.create(6.1);
             const endPeriod2 = NumberValueObject.create(6.2);
             const result2 = testFunction.calculate(cost, salvage, life, startPeriod2, endPeriod2, factor, noSwitch);
-            expect(result2.getValue()).toStrictEqual(123.31253760000065);
+            expect(getObjectValue(result2, true)).toBe(123.3125376);
         });
 
         it('NoSwitch test', () => {
@@ -112,7 +113,7 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(1);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(3839.9999999999964);
+            expect(getObjectValue(result, true)).toBe(3840);
         });
 
         it('Value is null', () => {
@@ -124,7 +125,7 @@ describe('Test vdb function', () => {
             const factor = NullValueObject.create();
             const noSwitch = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(result.getValue()).toStrictEqual(3840);
+            expect(getObjectValue(result)).toBe(3840);
         });
 
         it('value is array', () => {
@@ -146,7 +147,7 @@ describe('Test vdb function', () => {
             const factor = NumberValueObject.create(2);
             const noSwitch = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, salvage, life, startPeriod, endPeriod, factor, noSwitch);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [3840, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
             ]);
         });

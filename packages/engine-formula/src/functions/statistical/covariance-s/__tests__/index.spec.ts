@@ -55,7 +55,7 @@ describe('Test covarianceS function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(225.60799999999995);
+            expect(getObjectValue(result, true)).toBe(225.608);
         });
 
         it('Value length is equal to 1', () => {

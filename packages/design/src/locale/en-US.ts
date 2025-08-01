@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-import dajsEnUS from 'dayjs/locale/en';
-import PickerEnUs from 'rc-picker/lib/locale/en_US';
-
 const locale = {
     design: {
         Confirm: {
             cancel: 'cancel',
             confirm: 'ok',
-        },
-        Picker: {
-            ...dajsEnUS,
-            ...PickerEnUs,
         },
         CascaderList: {
             empty: 'None',

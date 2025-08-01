@@ -47,13 +47,15 @@ function DayButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
 
 interface ICalendarProps {
     className?: string;
+    showTime?: boolean;
+    max?: Date;
+    min?: Date;
     value?: Date;
     onValueChange?: (date: Date) => void;
-    showTime?: boolean;
 }
 
 export function Calendar(props: ICalendarProps) {
-    const { className, value, onValueChange, showTime = false } = props;
+    const { className, max, min, showTime = false, value, onValueChange } = props;
 
     const { locale } = useContext(ConfigContext);
 
@@ -109,7 +111,19 @@ export function Calendar(props: ICalendarProps) {
         return day && currentYear === today.getFullYear() && currentMonth === today.getMonth() && day === today.getDate();
     }
 
+    function isDisabled(day: number) {
+        if (!day) return false;
+        const hours = value?.getHours() ?? today.getHours();
+        const minutes = value?.getMinutes() ?? today.getMinutes();
+        const seconds = value?.getSeconds() ?? today.getSeconds();
+        const d = new Date(currentYear, currentMonth, day, hours, minutes, seconds);
+        if (min && d < min) return true;
+        if (max && d > max) return true;
+        return false;
+    }
+
     function handleChangeDate(day: number) {
+        if (isDisabled(day)) return;
         const hours = value?.getHours() ?? today.getHours();
         const minutes = value?.getMinutes() ?? today.getMinutes();
         const seconds = value?.getSeconds() ?? today.getSeconds();
@@ -187,11 +201,13 @@ export function Calendar(props: ICalendarProps) {
                                 key={idx}
                                 className={clsx({
                                     '!univer-bg-primary-600 univer-font-bold univer-text-white': isSelected(day),
-                                    'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day),
+                                    'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day) && !isDisabled(day),
                                     'dark:!univer-text-white': !isToday(day) && !isSelected(day),
                                     'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day),
+                                    'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
                                 })}
                                 onClick={() => handleChangeDate(day)}
+                                disabled={isDisabled(day)}
                             >
                                 {day}
                             </DayButton>

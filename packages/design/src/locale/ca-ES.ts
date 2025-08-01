@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsEsES from 'dayjs/locale/es';
-import PickerCaES from 'rc-picker/lib/locale/ca_ES';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: 'cancel·la',
             confirm: 'ok',
-        },
-        Picker: {
-            ...dajsEsES,
-            ...PickerCaES,
         },
         CascaderList: {
             empty: 'Cap',

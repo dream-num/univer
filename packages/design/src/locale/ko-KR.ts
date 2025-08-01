@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsKoKR from 'dayjs/locale/ko';
-import PickerKoKR from 'rc-picker/lib/locale/ko_KR';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: '취소',
             confirm: '확인',
-        },
-        Picker: {
-            ...dajsKoKR,
-            ...PickerKoKR,
         },
         CascaderList: {
             empty: '없음',

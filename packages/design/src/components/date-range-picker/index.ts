@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { DateRangePicker, type IDateRangePickerProps } from './DateRangePicker';
+export { DateRangePicker } from './DateRangePicker';

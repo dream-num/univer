@@ -334,11 +334,17 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
     const { conditionType, compareType } = filterInfo;
     if (conditionType === TableConditionTypeEnum.Date) {
         if (compareType === TableDateCompareTypeEnum.Between || compareType === TableDateCompareTypeEnum.NotBetween) {
+            // ensure expectedValue is an array of two dates
+            let dateRange: [Date, Date] | undefined;
+            if (Array.isArray(filterInfo.expectedValue)) {
+                dateRange = filterInfo.expectedValue.map((i) => (typeof i === 'string' ? new Date(i) : i)) as [Date, Date];
+            }
+
             return {
                 type: conditionType,
                 compare: compareType,
                 info: {
-                    dateRange: filterInfo.expectedValue,
+                    dateRange,
                 },
             };
         } else if (compareType === TableDateCompareTypeEnum.Today
@@ -360,11 +366,24 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
                 info: {},
             };
         } else if (datePickerSet.has(compareType as TableDateCompareTypeEnum)) {
+            // ensure expectedValue is a date or an array of two dates
+            let date: Date | [Date, Date] | undefined;
+
+            if (typeof filterInfo.expectedValue === 'string') {
+                date = new Date(filterInfo.expectedValue);
+            } else if (Array.isArray(filterInfo.expectedValue)) {
+                for (let i = 0; i < filterInfo.expectedValue.length; i++) {
+                    if (typeof filterInfo.expectedValue[i] === 'string') {
+                        filterInfo.expectedValue[i] = new Date(filterInfo.expectedValue[i]);
+                    }
+                }
+            }
+
             return {
                 type: conditionType,
                 compare: compareType,
                 info: {
-                    date: filterInfo.expectedValue,
+                    date,
                 },
             };
         } else {

@@ -70,7 +70,7 @@ const DialogContent = forwardRef<
                   data-[state=closed]:univer-slide-out-to-top-[48%]
                   univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1050] univer-box-border univer-grid
                   univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
-                  univer-bg-white univer-px-6 univer-py-4 univer-text-gray-500 univer-shadow-md univer-duration-200
+                  univer-bg-white univer-p-4 univer-text-gray-500 univer-shadow-md univer-duration-200
                   sm:!univer-rounded-lg
                   dark:!univer-bg-gray-700 dark:!univer-text-gray-400
                 `,

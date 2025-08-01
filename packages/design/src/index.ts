@@ -28,7 +28,7 @@ export { Checkbox, type ICheckboxProps } from './components/checkbox/Checkbox';
 export { ColorPicker, type IColorPickerProps } from './components/color-picker/ColorPicker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider/ConfigProvider';
 export { Confirm, type IConfirmProps } from './components/confirm/Confirm';
-export { DatePicker, type IDatePickerProps } from './components/date-picker';
+export { DatePicker } from './components/date-picker/DatePicker';
 export { DateRangePicker } from './components/date-range-picker';
 export { Dialog, type IDialogProps } from './components/dialog/Dialog';
 export { DraggableList, type IDraggableListProps, ReactGridLayout } from './components/draggable-list';

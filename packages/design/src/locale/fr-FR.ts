@@ -15,18 +15,12 @@
  */
 
 import type enUS from './en-US';
-import dajsFrFR from 'dayjs/locale/fr';
-import PickerFrFR from 'rc-picker/lib/locale/fr_FR';
 
 const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: 'annuler',
             confirm: 'ok',
-        },
-        Picker: {
-            ...dajsFrFR,
-            ...PickerFrFR,
         },
         CascaderList: {
             empty: 'Aucun',

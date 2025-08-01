@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     FOCUSING_DOC,
     ICommandService,
@@ -27,8 +28,10 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
@@ -37,6 +40,8 @@ import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
+    private _isSheetEditor = false;
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @IContextService private readonly _contextService: IContextService,
@@ -45,16 +50,19 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService
+        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         this._initSkeletonListener();
         this._initCommandExecutedListener();
         this._initRenderRefresher();
-
+        this._isSheetEditor = this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+        const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
         // TODO: do not use setTimeout.
-        setTimeout(() => this.updateViewZoom(1, true), 20);
+        setTimeout(() => this.updateViewZoom(sheetRenderer && this._isSheetEditor ? sheetRenderer.scene.scaleX : 1, true), 20);
 
         if (!isInternalEditorID(this._context.unitId)) {
             this._initZoomEventListener();
@@ -120,9 +128,13 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
             if (!documentModel) return;
 
-            const zoomRatio = documentModel.zoomRatio || 1;
+            setTimeout(() => {
+                const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
+                const zoomRatio = !this._isSheetEditor ? documentModel.zoomRatio : sheetRenderer?.scene.scaleX || 1;
 
-            this.updateViewZoom(zoomRatio, false);
+                this.updateViewZoom(zoomRatio, false);
+            });
         }));
     }
 

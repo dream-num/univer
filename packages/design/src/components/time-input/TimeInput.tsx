@@ -35,7 +35,7 @@ export function TimeInput(props: ITimeInputProps) {
     };
 
     return (
-        <div className="univer-relative univer-mx-auto univer-mt-1 univer-w-fit">
+        <div data-u-comp="time-input" className="univer-relative univer-mx-auto univer-mt-1 univer-w-fit">
             <ClockIcon
                 className={`
                   univer-absolute univer-left-2 univer-top-1/2 -univer-translate-y-1/2 univer-text-gray-600

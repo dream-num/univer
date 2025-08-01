@@ -30,7 +30,7 @@
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
         "use:react16": "tsx ./scripts/react-version-manager.ts --react=16",
         "use:react19": "tsx ./scripts/react-version-manager.ts --react=19",
-        "lint:types": "turbo lint:types",
+        "typecheck": "turbo typecheck",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
         "build": "turbo build --concurrency=30% --filter=!./common/*",

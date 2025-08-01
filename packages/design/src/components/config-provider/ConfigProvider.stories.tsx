@@ -15,8 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-import type { ILocale } from '../../locale/interface';
-
 import { useState } from 'react';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
@@ -40,7 +38,7 @@ export const Playground = {
         const [visible, setVisible] = useState(false);
         const [locale, setLocale] = useState(enUS);
 
-        function handleChangeLocale(locale: ILocale) {
+        function handleChangeLocale(locale: typeof enUS) {
             setLocale(locale);
             setVisible(true);
         }

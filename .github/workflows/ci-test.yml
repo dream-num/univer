@@ -55,4 +55,4 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: 🧼 Type checking
-              run: pnpm lint:types
+              run: pnpm typecheck

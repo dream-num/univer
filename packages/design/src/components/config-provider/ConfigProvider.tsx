@@ -15,13 +15,12 @@
  */
 
 import type { ReactNode } from 'react';
-import type { ILocale } from '../../locale/interface';
 import { createContext, useMemo } from 'react';
 import { isBrowser } from '../../helper/is-browser';
 
 export interface IConfigProviderProps {
     children: ReactNode;
-    locale?: ILocale['design'];
+    locale?: any;
     mountContainer: HTMLElement | null;
 }
 

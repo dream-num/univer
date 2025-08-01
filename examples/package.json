@@ -13,7 +13,7 @@
         "dev:demo": "tsx ./esbuild.config.ts --watch",
         "dev:e2e": "tsx ./esbuild.config.ts --watch --e2e",
         "build:e2e": "tsx ./esbuild.config.ts --e2e",
-        "lint:types": "tsc --noEmit"
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@lit/react": "^1.0.8",

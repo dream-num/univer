@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { ILocale } from './interface';
 import dajsEnUS from 'dayjs/locale/en';
 import PickerEnUs from 'rc-picker/lib/locale/en_US';
 
-const locale: ILocale = {
+const locale = {
     design: {
         Confirm: {
             cancel: 'cancel',
@@ -30,6 +29,24 @@ const locale: ILocale = {
         },
         CascaderList: {
             empty: 'None',
+        },
+        Calendar: {
+            year: '',
+            weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            months: [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec',
+            ],
         },
         Select: {
             empty: 'None',

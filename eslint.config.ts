@@ -9,6 +9,10 @@ header.rules.header.meta.schema = false;
 
 export default antfu(
     {
+        ignores: [
+            'mockdata/**/*.json',
+            'pnpm-lock.yaml',
+        ],
         stylistic: {
             indent: 4,
             semi: true,
@@ -27,9 +31,6 @@ export default antfu(
             html: true,
         },
         rules: baseRules,
-        ignores: [
-            'mockdata/**/*.json',
-        ],
     },
     {
         files: ['**/*.ts', '**/*.tsx'],

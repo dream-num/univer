@@ -23,6 +23,7 @@ import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import './index.css';
 
+/** @deprecated */
 export interface IDateRangePickerProps extends Omit<RangePickerProps<dayjs.Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
     /**
      * The value of the date picker.
@@ -35,6 +36,7 @@ export interface IDateRangePickerProps extends Omit<RangePickerProps<dayjs.Dayjs
     onChange: (date: NoUndefinedRangeValueType<dayjs.Dayjs>, dateString: [string, string]) => void;
 }
 
+/** @deprecated */
 export function DateRangePicker(props: IDateRangePickerProps) {
     const { value, onChange, ...ext } = props;
 

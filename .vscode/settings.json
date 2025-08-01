@@ -6,11 +6,6 @@
     "javascript.preferences.importModuleSpecifier": "relative",
     "typescript.preferences.importModuleSpecifier": "relative",
 
-    "commentTranslate.multiLineMerge": true,
-    "commentTranslate.targetLanguage": "zh-CN",
-    "commentTranslate.hover.enabled": true,
-    "commentTranslate.source": "Google",
-
     "cSpell.words": [
         "ABJAD",
         "adjustability",
@@ -149,7 +144,6 @@
         "yuhong",
         "yuhongz"
     ],
-    "vsicons.presets.angular": false,
 
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,

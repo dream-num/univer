@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ILocale } from './interface';
+import type enUS from './en-US';
 import dajsFaIR from 'dayjs/locale/fa';
 import PickerFaIR from 'rc-picker/lib/locale/fa_IR';
 
-const locale: ILocale = {
+const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: 'لغو',
@@ -30,6 +30,24 @@ const locale: ILocale = {
         },
         CascaderList: {
             empty: 'هیچ کدام',
+        },
+        Calendar: {
+            year: 'سال',
+            weekDays: ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'],
+            months: [
+                'فروردین',
+                'اردیبهشت',
+                'خرداد',
+                'تیر',
+                'مرداد',
+                'شهریور',
+                'مهر',
+                'آبان',
+                'آذر',
+                'دی',
+                'بهمن',
+                'اسفند',
+            ],
         },
         Select: {
             empty: 'هیچ‌کدام',

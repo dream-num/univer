@@ -21,13 +21,14 @@ export { Avatar, type IAvatarProps } from './components/avatar/Avatar';
 export { Badge, type IBadgeProps } from './components/badge/Badge';
 export { Button, type IButtonProps } from './components/button/Button';
 export { ButtonGroup, type IButtonGroupProps } from './components/button/ButtonGroup';
+export { Calendar } from './components/calendar/Calendar';
 export { CascaderList, type ICascaderListProps, type ICascaderOption } from './components/cascader-list/CascaderList';
 export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-group/CheckboxGroup';
 export { Checkbox, type ICheckboxProps } from './components/checkbox/Checkbox';
 export { ColorPicker, type IColorPickerProps } from './components/color-picker/ColorPicker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider/ConfigProvider';
 export { Confirm, type IConfirmProps } from './components/confirm/Confirm';
-export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
+export { DatePicker, type IDatePickerProps } from './components/date-picker';
 export { DateRangePicker } from './components/date-range-picker';
 export { Dialog, type IDialogProps } from './components/dialog/Dialog';
 export { DraggableList, type IDraggableListProps, ReactGridLayout } from './components/draggable-list';
@@ -53,9 +54,19 @@ export { type ISelectProps, Select } from './components/select/Select';
 export { Separator } from './components/separator/Separator';
 export { Switch } from './components/switch/Switch';
 export { Textarea } from './components/textarea/Textarea';
+export { TimeInput } from './components/time-input/TimeInput';
 export { type IToasterProps, toast, Toaster } from './components/toaster/Toaster';
 export { type ITooltipProps, Tooltip } from './components/tooltip/Tooltip';
-export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, type ITreeNodeProps, type ITreeProps, mergeTreeSelected, Tree, TreeSelectionMode } from './components/tree';
+export {
+    filterLeafNode,
+    findNodePathFromTree,
+    findSubTreeFromPath,
+    type ITreeNodeProps,
+    type ITreeProps,
+    mergeTreeSelected,
+    Tree,
+    TreeSelectionMode,
+} from './components/tree';
 export {
     borderBottomClassName,
     borderClassName,
@@ -71,7 +82,6 @@ export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
 export { resizeObserverCtor } from './helper/resize-observer';
-export { type ILocale } from './locale/interface';
 
 /** @deprecated Only for compatibility with versions before 0.7.0, will be removed in future versions */
 export { defaultTheme, greenTheme } from '@univerjs/themes';

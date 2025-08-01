@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Cumipmt } from '../index';
 
@@ -34,11 +35,11 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(-1874.4879129661426);
+            expect(getObjectValue(result, true)).toBe(-1874.48791296614);
 
             const type2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type2);
-            expect(result2.getValue()).toStrictEqual(-930.0128168398438);
+            expect(getObjectValue(result2, true)).toBe(-930.012816839844);
         });
 
         it('Rate <= 0 or nper <= 0 or pv <= 0', () => {
@@ -49,19 +50,19 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const rate2 = NumberValueObject.create(0.09 / 12);
             const nper2 = NumberValueObject.create(0);
             const pv2 = NumberValueObject.create(125000);
             const result2 = testFunction.calculate(rate2, nper2, pv2, startPeriod, endPeriod, type);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const rate3 = NumberValueObject.create(0.09 / 12);
             const nper3 = NumberValueObject.create(30 * 12);
             const pv3 = NumberValueObject.create(0);
             const result3 = testFunction.calculate(rate3, nper3, pv3, startPeriod, endPeriod, type);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
         });
 
         it('StartPeriod < 1 or endPeriod < 1 or startPeriod > endPeriod', () => {
@@ -72,22 +73,22 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const startPeriod2 = NumberValueObject.create(1);
             const endPeriod2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(rate, nper, pv, startPeriod2, endPeriod2, type);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
 
             const startPeriod3 = NumberValueObject.create(3);
             const endPeriod3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(rate, nper, pv, startPeriod3, endPeriod3, type);
-            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
 
             const startPeriod4 = NumberValueObject.create(1.1);
             const endPeriod4 = NumberValueObject.create(1.1);
             const result4 = testFunction.calculate(rate, nper, pv, startPeriod4, endPeriod4, type);
-            expect(result4.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result4)).toBe(0);
         });
 
         it('Type value is not 0 or 1', () => {
@@ -98,11 +99,11 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0.1);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const type2 = NumberValueObject.create(1.1);
             const result2 = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
@@ -113,7 +114,7 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -124,7 +125,7 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {
@@ -135,7 +136,7 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -156,7 +157,7 @@ describe('Test cumipmt function', () => {
             const endPeriod = NumberValueObject.create(2);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pv, startPeriod, endPeriod, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
     });
 });

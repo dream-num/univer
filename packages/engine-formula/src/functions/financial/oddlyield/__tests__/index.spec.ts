@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Oddlyield } from '../index';
 
@@ -36,7 +37,7 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(0.10707208890680205);
+            expect(getObjectValue(result, true)).toBe(0.107072088907);
         });
 
         it('Value is normal, but correct order is maturity > settlement > lastInterest, otherwise return #NUM!', () => {
@@ -49,7 +50,7 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Rate < 0', () => {
@@ -62,7 +63,7 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Pr < 0', () => {
@@ -75,7 +76,7 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Frequency value test', () => {
@@ -88,15 +89,15 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(3);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const frequency2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency2, basis);
-            expect(result2.getValue()).toStrictEqual(0.10707509323707057);
+            expect(getObjectValue(result2, true)).toBe(0.107075093237);
 
             const frequency3 = NumberValueObject.create(4);
             const result3 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency3, basis);
-            expect(result3.getValue()).toStrictEqual(0.1070807374548397);
+            expect(getObjectValue(result3, true)).toBe(0.107080737455);
         });
 
         it('Basis value test', () => {
@@ -109,27 +110,27 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(5);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
             const basis2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis2);
-            expect(result2.getValue()).toStrictEqual(0.10708735030923248);
+            expect(getObjectValue(result2, true)).toBe(0.107087350309);
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis3);
-            expect(result3.getValue()).toStrictEqual(0.10705322702188155);
+            expect(getObjectValue(result3, true)).toBe(0.107053227022);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis4);
-            expect(result4.getValue()).toStrictEqual(0.10707674261155795);
+            expect(getObjectValue(result4, true)).toBe(0.107076742612);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis5);
-            expect(result5.getValue()).toStrictEqual(0.10708735030923248);
+            expect(getObjectValue(result5, true)).toBe(0.107087350309);
 
             const basis6 = NullValueObject.create();
             const result6 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis6);
-            expect(result6.getValue()).toStrictEqual(0.10708735030923248);
+            expect(getObjectValue(result6, true)).toBe(0.107087350309);
         });
 
         it('Value is error', () => {
@@ -142,7 +143,7 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -155,7 +156,7 @@ describe('Test oddlyield function', () => {
             const frequency = BooleanValueObject.create(true);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {
@@ -168,20 +169,20 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const settlement2 = StringValueObject.create('2008-11-11');
             const maturity2 = StringValueObject.create('test');
             const result2 = testFunction.calculate(settlement2, maturity2, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
 
             const lastInterest2 = StringValueObject.create('test');
             const result3 = testFunction.calculate(settlement2, maturity, lastInterest2, rate, pr, redemption, frequency, basis);
-            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
 
             const rate2 = StringValueObject.create('test');
             const result4 = testFunction.calculate(settlement2, maturity, lastInterest, rate2, pr, redemption, frequency, basis);
-            expect(result4.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result4)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -204,7 +205,7 @@ describe('Test oddlyield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
     });
 });

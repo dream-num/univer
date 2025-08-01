@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Nper } from '../index';
 
@@ -33,11 +34,11 @@ describe('Test nper function', () => {
             const fv = NumberValueObject.create(10000);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, pmt, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(60.08212285376166);
+            expect(getObjectValue(result, true)).toBe(60.0821228538);
 
             const type2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(rate, pmt, pv, fv, type2);
-            expect(result2.getValue()).toStrictEqual(59.67386567429457);
+            expect(getObjectValue(result2, true)).toBe(59.6738656743);
         });
 
         it('Value is error', () => {
@@ -47,7 +48,7 @@ describe('Test nper function', () => {
             const fv = NumberValueObject.create(10000);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, pmt, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -57,7 +58,7 @@ describe('Test nper function', () => {
             const fv = NumberValueObject.create(10000);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, pmt, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(3.1987798641144978);
+            expect(getObjectValue(result, true)).toBe(3.19877986411);
         });
 
         it('Value is blank cell', () => {
@@ -67,7 +68,7 @@ describe('Test nper function', () => {
             const fv = NumberValueObject.create(10000);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, pmt, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(90);
+            expect(getObjectValue(result)).toBe(90);
         });
 
         it('Value is normal string', () => {
@@ -77,7 +78,7 @@ describe('Test nper function', () => {
             const fv = NumberValueObject.create(10000);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, pmt, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -109,10 +110,10 @@ describe('Test nper function', () => {
             const fv = NumberValueObject.create(10000);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(rate, pmt, pv, fv, type);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, 18.769843284838526, ErrorType.DIV_BY_ZERO, ErrorType.NA],
-                [3.324527806346263, 45, ErrorType.NAME, ErrorType.NA],
-                [ErrorType.NUM, 2.5296801547320293, 0.49892198580547814, ErrorType.NA],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.VALUE, 18.7698432848, ErrorType.DIV_BY_ZERO, ErrorType.NA],
+                [3.32452780635, 45, ErrorType.NAME, ErrorType.NA],
+                [ErrorType.NUM, 2.52968015473, 0.498921985805, ErrorType.NA],
             ]);
         });
     });

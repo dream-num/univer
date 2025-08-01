@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Pduration } from '../index';
 
@@ -31,7 +32,7 @@ describe('Test pduration function', () => {
             const pv = NumberValueObject.create(1000);
             const fv = NumberValueObject.create(1200);
             const result = testFunction.calculate(rate, pv, fv);
-            expect(result.getValue()).toStrictEqual(87.6054764193714);
+            expect(getObjectValue(result, true)).toBe(87.6054764194);
         });
 
         it('Value is error', () => {
@@ -39,7 +40,7 @@ describe('Test pduration function', () => {
             const pv = NumberValueObject.create(1000);
             const fv = NumberValueObject.create(1200);
             const result = testFunction.calculate(rate, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -47,7 +48,7 @@ describe('Test pduration function', () => {
             const pv = NumberValueObject.create(1000);
             const fv = NumberValueObject.create(1200);
             const result = testFunction.calculate(rate, pv, fv);
-            expect(result.getValue()).toStrictEqual(0.2630344058337942);
+            expect(getObjectValue(result, true)).toBe(0.263034405834);
         });
 
         it('Value is blank cell', () => {
@@ -55,7 +56,7 @@ describe('Test pduration function', () => {
             const pv = NumberValueObject.create(1000);
             const fv = NumberValueObject.create(1200);
             const result = testFunction.calculate(rate, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is normal string', () => {
@@ -63,7 +64,7 @@ describe('Test pduration function', () => {
             const pv = NumberValueObject.create(1000);
             const fv = NumberValueObject.create(1200);
             const result = testFunction.calculate(rate, pv, fv);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -83,10 +84,10 @@ describe('Test pduration function', () => {
             const pv = NumberValueObject.create(1000);
             const fv = NumberValueObject.create(1200);
             const result = testFunction.calculate(rate, pv, fv);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, 3.1289681352195324, ErrorType.NUM],
-                [0.2630344058337942, ErrorType.NUM, ErrorType.NAME],
-                [ErrorType.NUM, 0.2273331625481107, 0.0395052645166332],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.VALUE, 3.12896813522, ErrorType.NUM],
+                [0.263034405834, ErrorType.NUM, ErrorType.NAME],
+                [ErrorType.NUM, 0.227333162548, 0.0395052645166],
             ]);
         });
     });

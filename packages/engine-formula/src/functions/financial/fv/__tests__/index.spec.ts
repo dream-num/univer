@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Fv } from '../index';
 
@@ -33,11 +34,11 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(result.getValue()).toStrictEqual(2571.175347651979);
+            expect(getObjectValue(result, true)).toBe(2571.17534765198);
 
             const type2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(rate, nper, pmt, pv, type2);
-            expect(result2.getValue()).toStrictEqual(2581.4033740601362);
+            expect(getObjectValue(result2, true)).toBe(2581.40337406014);
         });
 
         it('Result is NaN', () => {
@@ -47,7 +48,7 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {
@@ -57,7 +58,7 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -67,7 +68,7 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(result.getValue()).toStrictEqual(921200);
+            expect(getObjectValue(result)).toBe(921200);
         });
 
         it('Value is blank cell', () => {
@@ -77,7 +78,7 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(result.getValue()).toStrictEqual(2500);
+            expect(getObjectValue(result)).toBe(2500);
         });
 
         it('Value is normal string', () => {
@@ -87,7 +88,7 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -132,10 +133,10 @@ describe('Test fv function', () => {
             const pv = NumberValueObject.create(-500);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(rate, nper, pmt, pv, type);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, 881.4522056325036, 500, ErrorType.NA],
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.VALUE, 881.452205632504, 500, ErrorType.NA],
                 [1400, 2500, ErrorType.NAME, ErrorType.NA],
-                [-10500, 1520612.7751707924, 500, ErrorType.NA],
+                [-10500, 1520612.77517079, 500, ErrorType.NA],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });

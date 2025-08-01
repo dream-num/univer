@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { ILocale } from '../../locale/interface';
+import type enUS from '../../locale/en-US';
 import { useContext } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -62,7 +62,7 @@ export interface IConfirmProps {
 
 }
 
-function Footer(props: { locale: ILocale['design']; cancelText?: string; confirmText?: string; onClose: (() => void) | undefined; onConfirm: (() => void) | undefined }) {
+function Footer(props: { locale: typeof enUS['design']; cancelText?: string; confirmText?: string; onClose: (() => void) | undefined; onConfirm: (() => void) | undefined }) {
     const { locale, cancelText, confirmText, onClose, onConfirm } = props;
 
     return (

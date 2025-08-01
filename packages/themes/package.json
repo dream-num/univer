@@ -52,7 +52,7 @@
         "lib"
     ],
     "scripts": {
-        "lint:types": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
         "build": "univer-cli build"
     },
     "devDependencies": {

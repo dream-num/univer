@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { DatePanel, type IDatePanelProps } from './DatePanel';
+/** @deprecated */
 export { DatePicker, type IDatePickerProps } from './DatePicker';

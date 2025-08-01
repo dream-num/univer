@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ILocale } from '@univerjs/design';
 import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
@@ -105,7 +104,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         }
     }, [onRendered]);
 
-    const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+    const [locale, setLocale] = useState(localeService.getLocales());
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -115,7 +114,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
-                setLocale(localeService.getLocales() as unknown as ILocale);
+                setLocale(localeService.getLocales());
             }),
         ];
 

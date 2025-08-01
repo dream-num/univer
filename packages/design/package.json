@@ -60,7 +60,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "lint:types": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
         "build": "univer-cli build"
     },
     "peerDependencies": {
@@ -88,7 +88,7 @@
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
         "sonner": "^2.0.6",
-        "tailwind-merge": "^3.3.1"
+        "tailwind-merge": "2.6.0"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^6.6.4",

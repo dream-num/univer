@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ILocale } from '../../../locale/interface';
+import type enUS from '../../../locale/en-US';
 import { cleanup, render } from '@testing-library/react';
 import { useContext } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -26,7 +26,7 @@ afterEach(cleanup);
 describe('ConfigProvider', () => {
     it('should render correctly', () => {
         let _mountContainer: HTMLElement | null = null;
-        let _locale: ILocale['design'] | undefined;
+        let _locale: typeof enUS['design'] | undefined;
 
         function Empty() {
             const { locale, mountContainer } = useContext(ConfigContext);

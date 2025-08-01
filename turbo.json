@@ -16,6 +16,6 @@
 
         "build:e2e": {},
 
-        "lint:types": {}
+        "typecheck": {}
     }
 }

@@ -61,6 +61,12 @@ export const buttonVariants = cva(
                   hover:univer-text-primary-500 hover:univer-underline
                   active:univer-text-primary-700
                 `,
+                ghost: `
+                  univer-border-transparent univer-bg-transparent univer-text-gray-900
+                  hover:univer-bg-gray-100
+                  active:univer-bg-gray-200
+                  dark:!univer-text-white dark:hover:!univer-bg-gray-700 dark:active:!univer-bg-gray-600
+                `,
             },
             size: {
                 small: 'univer-h-6 univer-rounded-md univer-px-1.5 univer-text-xs',

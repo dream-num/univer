@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ILocale } from './interface';
+import type enUS from './en-US';
 import dajsKoKR from 'dayjs/locale/ko';
 import PickerKoKR from 'rc-picker/lib/locale/ko_KR';
 
-const locale: ILocale = {
+const locale: typeof enUS = {
     design: {
         Confirm: {
             cancel: '취소',
@@ -30,6 +30,24 @@ const locale: ILocale = {
         },
         CascaderList: {
             empty: '없음',
+        },
+        Calendar: {
+            year: '년',
+            weekDays: ['일', '월', '화', '수', '목', '금', '토'],
+            months: [
+                '1월',
+                '2월',
+                '3월',
+                '4월',
+                '5월',
+                '6월',
+                '7월',
+                '8월',
+                '9월',
+                '10월',
+                '11월',
+                '12월',
+            ],
         },
         Select: {
             empty: '없음',

@@ -16,7 +16,6 @@
 
 // Refer to packages/ui/src/views/App.tsx
 
-import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '@univerjs/ui';
 import type { NodeTypes, ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { IFloatingToolbarRef } from '../uni-toolbar/UniFloatToolbar';
@@ -105,7 +104,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         };
     }, []);
 
-    const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+    const [locale, setLocale] = useState(localeService.getLocales());
     const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
 
     const onControlItemClick = useCallback((key: UniControlItem) => {
@@ -129,7 +128,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
-                setLocale(localeService.getLocales() as unknown as ILocale);
+                setLocale(localeService.getLocales());
             }),
         ];
 

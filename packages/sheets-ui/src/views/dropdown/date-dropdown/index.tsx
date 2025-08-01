@@ -16,8 +16,8 @@
 
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
-import { dayjs, LocaleService, numfmt } from '@univerjs/core';
-import { borderTopClassName, Button, clsx, DatePanel } from '@univerjs/design';
+import { dayjs, LocaleService } from '@univerjs/core';
+import { borderTopClassName, Button, Calendar, clsx, TimeInput } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 
@@ -52,26 +52,32 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
               dark:!univer-bg-black
             `}
         >
-            <DatePanel
-                value={date}
-                pickerValue={date}
-                mode={patternType === 'time' ? 'time' : 'date'}
-                showTime={(showTime ?? (patternType === 'datetime' || patternType === 'time')) || undefined}
-                onSelect={async (newValue) => {
-                    setLocalDate(newValue);
-                }}
-                onPanelChange={(value) => {
-                    setLocalDate(value);
-                }}
-                disabledDate={(current) => !numfmt.parseDate(current.format('YYYY-MM-DD'))}
-            />
-            <div
-                className={clsx('univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
+            {patternType === 'time'
+                ? (
+                    <TimeInput
+                        value={date.toDate()}
+                        onValueChange={(newValue) => {
+                            setLocalDate(dayjs(newValue));
+                        }}
+                    />
+                )
+                : (
+                    <Calendar
+                        value={date.toDate()}
+                        showTime={showTime ?? patternType === 'datetime'}
+                        onValueChange={(newValue) => {
+                            setLocalDate(dayjs(newValue));
+                        }}
+                    />
+                )}
+
+            <footer
+                className={clsx('univer-mt-2 univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
             >
                 <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
                     {localeService.t('dataValidation.alert.ok')}
                 </Button>
-            </div>
+            </footer>
         </div>
 
     );

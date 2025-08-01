@@ -67,7 +67,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "build": "univer-cli build",
-        "lint:types": "tsc --noEmit"
+        "typecheck": "tsc --noEmit"
     },
     "peerDependencies": {
         "rxjs": ">=7.0.0"

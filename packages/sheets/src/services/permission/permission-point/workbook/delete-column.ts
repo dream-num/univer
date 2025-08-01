@@ -25,7 +25,6 @@ export class WorkbookDeleteColumnPermission implements IPermissionPoint {
     id: string;
     subType = UnitAction.DeleteColumn;
     constructor(public unitId: string) {
-        this.unitId = unitId;
         this.id = `${this.type}.${UnitAction.DeleteColumn}_${unitId}`;
     }
 }

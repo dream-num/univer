@@ -25,7 +25,6 @@ export class WorkbookDeleteRowPermission implements IPermissionPoint {
     id: string;
     subType = UnitAction.DeleteRow;
     constructor(public unitId: string) {
-        this.unitId = unitId;
         this.id = `${this.type}.${UnitAction.DeleteRow}_${unitId}`;
     }
 }

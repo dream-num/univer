@@ -25,7 +25,6 @@ export class WorkbookInsertColumnPermission implements IPermissionPoint {
     id: string;
     subType = UnitAction.InsertColumn;
     constructor(public unitId: string) {
-        this.unitId = unitId;
         this.id = `${this.type}.${UnitAction.InsertColumn}_${unitId}`;
     }
 }

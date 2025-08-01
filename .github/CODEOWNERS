@@ -45,8 +45,8 @@ packages/sheets-data-validation @weird94
 packages/sheets @VicKun4937
 packages/sheets-conditional-formatting @VicKun4937
 packages/sheets-conditional-formatting-ui @VicKun4937
-packages/sheets-filter @ybzky @yuhongz
-packages/sheets-filter-ui @ybzky @yuhongz
+packages/sheets-filter @ybzky
+packages/sheets-filter-ui @ybzky
 packages/sheets-find-replace @siam-ese
 packages/sheets-formula @DR-Univer @wpxp123456 @Dushusir
 packages/sheets-formula-ui @DR-Univer @wpxp123456 @Dushusir
@@ -58,9 +58,9 @@ packages/sheets-numfmt-ui @VicKun4937
 packages/sheets-thread-comment @weird94
 packages/sheets-thread-comment-ui @weird94
 packages/sheets-ui @jikkai
-packages/sheets-ui/src/controllers/clipboard @yuhongz
+packages/sheets-ui/src/controllers/clipboard @ybzky
 packages/sheets-ui/src/controllers/editor @Jocs
-packages/sheets-ui/src/services/clipboard @yuhongz
+packages/sheets-ui/src/services/clipboard @ybzky
 packages/sheets-ui/src/services/editor @Jocs
 packages/sheets-ui/src/services/editor-bridge.service.ts @Jocs
 packages/sheets-zen-editor @Jocs
@@ -91,4 +91,4 @@ packages/slides-ui @jikkai
 
 ## Collaboration
 
-**/mutations/** @yuhongz
+**/mutations/** @ybzky

@@ -102,13 +102,13 @@ export class ScrollBar extends Disposable {
         verticalUp: null as Nullable<Subscription>,
     };
 
-    private readonly _colors = {
+    private _colors = {
         thumbDefault: 'rgba(24, 28, 42, 0.20)',
         thumbHover: 'rgba(24, 28, 42, 0.30)',
         thumbActive: 'rgba(24, 28, 42, 0.40)',
         trackBackground: 'rgba(255,255,255,0.5)',
         trackBorder: 'rgba(255,255,255,0.7)',
-    } as const;
+    };
 
     /**
      * The thickness of a scrolling track
@@ -169,7 +169,7 @@ export class ScrollBar extends Disposable {
         });
 
         if (Tools.isDefine(props.thumbBackgroundColor)) {
-            this._thumbDefaultBackgroundColor = props.thumbBackgroundColor;
+            this._colors.thumbDefault = props.thumbBackgroundColor;
         }
 
         if (Tools.isDefine(props.barSize)) {

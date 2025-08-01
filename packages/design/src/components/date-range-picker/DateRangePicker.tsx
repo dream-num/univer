@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { dayjs } from '@univerjs/core';
 import { CalendarIcon } from '@univerjs/icons';
+import dayjs from 'dayjs';
 import { useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';

@@ -20,6 +20,7 @@ import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { CellValueType } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
+import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
@@ -248,8 +249,26 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
 
         if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
             return valueObject;
-        } else if (rangeValueObject?.isNumber()) {
-            if (criteriaObject.isString()) {
+        }
+
+        if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
+            return BooleanValueObject.create(true);
+        }
+
+        /**
+         * If the operator is '=' or '<>', we can compare numbers and strings directly in COUNTIF, COUNTIFS, SUMIF, SUMIFS, etc.
+         * Other operators require both valueObjects to be of the same type.
+         * For example:
+         * | A1    | B1  |
+         * | '123' | 123 |
+         *
+         * =COUNTIF(A1:B1, '=123') will return 2
+         * =COUNTIF(A1:B1, '<>1') will return 2
+         * =COUNTIF(A1:B1, '>1') will return 1
+         * =COUNTIF(A1:B1, '<=123') will return 1
+         */
+        if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
+            if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
                 const criteriaNumber = criteriaObject.convertToNumberObjectValue();
 
                 if (criteriaNumber.isNumber()) {
@@ -257,9 +276,7 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
                 }
             }
 
-            return BooleanValueObject.create(false);
-        } else if (criteriaObject.isNumber()) {
-            if (rangeValueObject?.isString()) {
+            if (criteriaObject.isNumber() && rangeValueObject?.isString()) {
                 const rangeNumber = rangeValueObject.convertToNumberObjectValue();
 
                 if (rangeNumber.isNumber()) {
@@ -267,12 +284,16 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
                 }
             }
 
-            return BooleanValueObject.create(false);
-        } else if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
-            return BooleanValueObject.create(true);
-        } else {
-            return BooleanValueObject.create(false);
+            if (operator === compareToken.EQUALS) {
+                return BooleanValueObject.create(false);
+            }
+
+            if (operator === compareToken.NOT_EQUAL) {
+                return BooleanValueObject.create(true);
+            }
         }
+
+        return BooleanValueObject.create(false);
     });
 }
 

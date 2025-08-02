@@ -266,7 +266,9 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const sheetData: ISheetData = {};
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
-    const sheetId = workbook.getActiveSheet()!.getSheetId();
+    const activeSheet = workbook.getActiveSheet()!;
+    const columnManager = activeSheet.getColumnManager();
+    const sheetId = activeSheet.getSheetId();
     workbook.getSheets().forEach((sheet) => {
         const sheetConfig = sheet.getConfig();
         sheetData[sheet.getSheetId()] = {
@@ -274,7 +276,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             rowCount: sheetConfig.rowCount,
             columnCount: sheetConfig.columnCount,
             rowData: sheetConfig.rowData,
-            columnData: sheetConfig.columnData,
+            columnManager,
         };
     });
 

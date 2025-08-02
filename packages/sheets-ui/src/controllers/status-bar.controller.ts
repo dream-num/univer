@@ -279,7 +279,7 @@ export class StatusBarController extends Disposable {
                     rowCount: sheetConfig.rowCount,
                     columnCount: sheetConfig.columnCount,
                     rowData: sheetConfig.rowData,
-                    columnData: sheetConfig.columnData,
+                    columnManager: sheet.getColumnManager(),
                 };
             });
 

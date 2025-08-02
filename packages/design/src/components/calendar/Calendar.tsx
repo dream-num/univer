@@ -200,11 +200,12 @@ export function Calendar(props: ICalendarProps) {
                             <DayButton
                                 key={idx}
                                 className={clsx({
-                                    '!univer-bg-primary-600 univer-font-bold univer-text-white': isSelected(day),
-                                    'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day) && !isDisabled(day),
+                                    '!univer-bg-primary-600 univer-font-bold univer-text-white': !isToday(day) && isSelected(day),
                                     'dark:!univer-text-white': !isToday(day) && !isSelected(day),
-                                    'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day),
+                                    '!univer-bg-primary-600 univer-text-white': isToday(day) && isSelected(day),
+                                    'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day) && !isSelected(day),
                                     'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
+                                    'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day) && !isDisabled(day),
                                 })}
                                 onClick={() => handleChangeDate(day)}
                                 disabled={isDisabled(day)}

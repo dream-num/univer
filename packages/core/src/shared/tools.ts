@@ -368,19 +368,11 @@ export class Tools {
         return false;
     }
 
-    static isBoolean(value?: any): value is boolean {
-        return this.getValueType(value) === '[object Boolean]';
-    }
-
     static isPlainObject(value: any): value is object {
         if (!this.isDefine(value)) {
             return false;
         }
         return Object.getPrototypeOf(value) === Object.getPrototypeOf({});
-    }
-
-    static isFunction(value?: any): value is boolean {
-        return this.getValueType(value) === '[object Function]';
     }
 
     static isDate(value?: Date): value is Date {
@@ -419,30 +411,8 @@ export class Tools {
         return true;
     }
 
-    static isMobile(): boolean {
-        let clientWidth = 0;
-        let clientHeight = 0;
-        if (document.body.clientWidth) {
-            clientWidth = document.body.clientWidth;
-        }
-        if (document.body.clientHeight) {
-            clientHeight = document.body.clientHeight;
-        }
-        return this.isAndroid() || this.isIPhone() || this.isTablet() || (clientWidth < 350 && clientHeight < 500);
-    }
-
     static isTablet(): boolean {
         return /ipad|android|android 3.0|xoom|sch-i800|playbook|tablet|kindle/i.test(navigator.userAgent.toLowerCase());
-    }
-
-    static isWeChat(): boolean {
-        const userAgent = navigator.userAgent.toLowerCase();
-        return String(userAgent.match(/MicroMessenger/i)) === 'micromessenger' ? !0 : !1;
-    }
-
-    static isAndroid(): boolean {
-        const userAgent = navigator.userAgent;
-        return userAgent.indexOf('Android') > -1 || userAgent.indexOf('Linux') > -1;
     }
 
     static isIPhone(): boolean {
@@ -459,40 +429,6 @@ export class Tools {
 
     static topLevelDomainCombiningString() {
         return [...topLevelDomainSet].join('|');
-    }
-
-    static itCount(count: number): Function {
-        return (callback: Function) => {
-            for (let i = 0; i < count; i++) {
-                callback && callback();
-            }
-        };
-    }
-
-    static hasLength(target: IArguments | any[] | string, length?: number): boolean {
-        if (Tools.isDefine(target)) {
-            if (Tools.isDefine(length)) {
-                return target.length === length;
-            }
-            return target.length > 0;
-        }
-        return false;
-    }
-
-    static capitalize(str: string) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    // Used by camelCase as callback to replace()
-    static fCamelCase(_all: any, letter: string) {
-        return letter.toUpperCase();
-    }
-
-    // Convert dashed to camelCase; used by the css and data modules
-    // Support: IE <=9 - 11, Edge 12 - 15
-    // Microsoft forgot to hump their vendor prefix (#9572)
-    static camelCase(str: string) {
-        return str.replace(rmsPrefix, 'ms-').replace(rDashAlpha, this.fCamelCase);
     }
 
     /**
@@ -554,17 +490,12 @@ export class Tools {
     }
 
     /**
-     *
      * Column subscript letter to number
-     *
-     * @privateRemarks
-     * zh: 列下标  字母转数字
      *
      * @param a - Column subscript letter,e.g.,"A1"
      * @returns Column subscript number,e.g.,0
      *
      */
-
     static ABCatNum(a: string): number {
         if (a == null || a.length === 0) {
             return Number.NaN;
@@ -585,9 +516,7 @@ export class Tools {
     }
 
     /**
-     * en: Column subscript number to letter
-     *
-     * zh: 列下标  数字转字母
+     * Column subscript number to letter
      *
      * @param n Column subscript number,e.g.,0
      * @returns Column subscript letter,e.g.,"A1"
@@ -608,16 +537,6 @@ export class Tools {
         }
 
         return s.toUpperCase();
-    }
-
-    static randSort<T>(arr: T[]) {
-        for (let i = 0, len = arr.length; i < len; i++) {
-            const rand = Number.parseInt((Math.random() * len).toString());
-            const temp = arr[rand];
-            arr[rand] = arr[i];
-            arr[i] = temp;
-        }
-        return arr;
     }
 
     /**
@@ -642,26 +561,6 @@ export class Tools {
         }
 
         return resultJsonObject as unknown as T;
-    }
-
-    static commonExtend1<T>(originJson: IKeyValue, extendJson: IKeyValue): T {
-        for (const attr in originJson) {
-            if (extendJson[attr] == null) {
-                extendJson[attr] = originJson[attr];
-            }
-        }
-        return extendJson as unknown as T;
-    }
-
-    static arrayToObject(array: IKeyValue[][]) {
-        const obj: IKeyValue = {};
-        array.forEach((row, i) => {
-            obj[i] = {};
-            row.forEach((column, j) => {
-                obj[i][j] = column;
-            });
-        });
-        return obj;
     }
 
     static hasIntersectionBetweenTwoRanges(

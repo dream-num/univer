@@ -233,22 +233,23 @@ class FontLibrary {
     }
 
     private async _loadFontsToBook() {
-        if (this.isReady) {
-            return;
-        }
+        if (this.isReady) return;
 
         const permissionStatus = await checkLocalFontsPermission();
-
-        if (!permissionStatus) {
+        if (!permissionStatus || !('queryLocalFonts' in window)) {
             return;
         }
 
-        if (!('queryLocalFonts' in window)) {
+        // If running in Electron, we should not use the Local Font Access API
+        if (typeof navigator === 'object' && navigator.userAgent.includes('Electron')) {
             return;
         }
 
         try {
-            const availableFonts = await (window as any).queryLocalFonts();
+            // @ts-expect-error queryLocalFonts is an experimental API and may not be available in all environments.
+            const availableFonts = await window.queryLocalFonts({
+                postscriptNames: [],
+            });
 
             for (const font of availableFonts) {
                 const { family, style } = font;

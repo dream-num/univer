@@ -510,11 +510,23 @@ export class Font extends SheetExtension {
             cellWidth = endX - startX - paddingLeft - paddingRight;
         }
 
+        // If the horizontal alignment is not specified, we need to determine it based on the cell value type.
+        let hAlign = fontCache.horizontalAlign;
+        if (fontCache.horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+            if (cellData.t === CellValueType.NUMBER) {
+                // If the cell value is a number, default to right alignment.
+                hAlign = HorizontalAlign.RIGHT;
+            } else if (cellData.t === CellValueType.BOOLEAN) {
+                // If the cell value is a boolean, default to center alignment.
+                hAlign = HorizontalAlign.CENTER;
+            }
+        }
+
         Text.drawWith(ctx, {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,
-            hAlign: (cellData.t === CellValueType.NUMBER && fontCache.horizontalAlign === HorizontalAlign.UNSPECIFIED) ? HorizontalAlign.RIGHT : fontCache.horizontalAlign,
+            hAlign,
             vAlign: fontCache.verticalAlign,
             width: cellWidth,
             height: cellHeight,

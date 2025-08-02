@@ -129,7 +129,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         defaultCache={treeMap}
                         itemHeight={28}
                         treeNodeClassName={`
-                          univer-pr-2 univer-border-box univer-max-w-[245px] univer-rounded-md
+                          univer-pr-2 univer-border-box univer-rounded-md
                           [&:hover_a]:univer-inline-block
                           hover:univer-bg-gray-50 univer-h-full
                           univer-text-gray-900 dark:hover:!univer-bg-gray-900

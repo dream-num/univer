@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.10.2](https://github.com/dream-num/univer/compare/v0.10.1...v0.10.2) (2025-08-02)
+
+
+### Bug Fixes
+
+* **design:** fix DayButton styles for Calendar ([#5630](https://github.com/dream-num/univer/issues/5630)) ([f859a58](https://github.com/dream-num/univer/commit/f859a5818e7cae7c6105a56883829f4c75e274d5))
+* **docs-ui:** adjust zoom behavior for sheet editor compatibility ([#5620](https://github.com/dream-num/univer/issues/5620)) ([eed7b23](https://github.com/dream-num/univer/commit/eed7b234adcdeab0bb2227fbc9720022305a9436))
+* **engine-render:** disable queryLocalFonts in Electron to prevent memory overflow ([#5629](https://github.com/dream-num/univer/issues/5629)) ([dd32c66](https://github.com/dream-num/univer/commit/dd32c665e46d3ecc2ca5b6159c949aaf0ed925eb))
+* **formula:** fixed the issue that formulas such as COUNTIFS would calculate incorrectly with <> operator ([#5625](https://github.com/dream-num/univer/issues/5625)) ([abe0e1c](https://github.com/dream-num/univer/commit/abe0e1cc55aed493be725bc6dce2911bcf687dc8))
+* **render:** fix true and false render ([#5626](https://github.com/dream-num/univer/issues/5626)) ([e5b2181](https://github.com/dream-num/univer/commit/e5b2181e7e6a5919848c153bc203007534a2be54))
+* **sheets-formula-ui:** handle undefined unitId in formula selection ([#5627](https://github.com/dream-num/univer/issues/5627)) ([65a87a7](https://github.com/dream-num/univer/commit/65a87a7be651aec8ad95acf877759a258341016d))
+* **sheets-ui:** fix permssion panel styles for better readability ([#5619](https://github.com/dream-num/univer/issues/5619)) ([53de7bf](https://github.com/dream-num/univer/commit/53de7bf7896ce6081f09fe24010295b0a2d3c813))
+* **table:** table name should not include space ([#5601](https://github.com/dream-num/univer/issues/5601)) ([ef87537](https://github.com/dream-num/univer/commit/ef875378f3613106b0e22cfcb23e337c2f75fd11))
+* update default workbook point ([#5624](https://github.com/dream-num/univer/issues/5624)) ([06b4518](https://github.com/dream-num/univer/commit/06b451865e051037a523ef45dd306916316741b7))
+
+
+### Features
+
+* **sheets:** update workbook permission point ([#5615](https://github.com/dream-num/univer/issues/5615)) ([3a59614](https://github.com/dream-num/univer/commit/3a59614ae5d758d31cdbc68f71590a780443e8f8))
+
 ## [0.10.1](https://github.com/dream-num/univer/compare/v0.10.0...v0.10.1) (2025-07-31)
 
 

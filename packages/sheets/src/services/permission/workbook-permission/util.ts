@@ -15,7 +15,7 @@
  */
 
 import { UnitAction } from '@univerjs/protocol';
-import { WorkbookCommentPermission, WorkbookCopyPermission, WorkbookCopySheetPermission, WorkbookCreateSheetPermission, WorkbookDeleteSheetPermission, WorkbookDuplicatePermission, WorkbookEditablePermission, WorkbookExportPermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookPrintPermission, WorkbookRecoverHistoryPermission, WorkbookRenameSheetPermission, WorkbookSharePermission, WorkbookViewHistoryPermission, WorkbookViewPermission } from '../permission-point';
+import { WorkbookCommentPermission, WorkbookCopyPermission, WorkbookCopySheetPermission, WorkbookCreateSheetPermission, WorkbookDeleteColumnPermission, WorkbookDeleteRowPermission, WorkbookDeleteSheetPermission, WorkbookDuplicatePermission, WorkbookEditablePermission, WorkbookExportPermission, WorkbookHideSheetPermission, WorkbookInsertColumnPermission, WorkbookInsertRowPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookPrintPermission, WorkbookRecoverHistoryPermission, WorkbookRenameSheetPermission, WorkbookSharePermission, WorkbookViewHistoryPermission, WorkbookViewPermission } from '../permission-point';
 import { WorkbookCreateProtectPermission } from '../permission-point/workbook/create-permission';
 
 export const getAllWorkbookPermissionPoint = () => [
@@ -37,6 +37,10 @@ export const getAllWorkbookPermissionPoint = () => [
     WorkbookViewHistoryPermission,
     WorkbookRecoverHistoryPermission,
     WorkbookCreateProtectPermission,
+    WorkbookInsertRowPermission,
+    WorkbookInsertColumnPermission,
+    WorkbookDeleteRowPermission,
+    WorkbookDeleteColumnPermission,
 ];
 
 export const defaultWorkbookPermissionPoints = [
@@ -58,4 +62,8 @@ export const defaultWorkbookPermissionPoints = [
     UnitAction.RecoverHistory,
     UnitAction.ViewHistory,
     UnitAction.CreatePermissionObject,
+    UnitAction.InsertRow,
+    UnitAction.InsertColumn,
+    UnitAction.DeleteRow,
+    UnitAction.DeleteColumn,
 ];

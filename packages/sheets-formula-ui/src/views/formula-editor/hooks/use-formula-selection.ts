@@ -114,7 +114,8 @@ export function useFormulaSelecting(opts: { editorId: string; isFocus: boolean; 
                 }
 
                 const { sheetName, unitId } = focusingNode.range;
-                if (unitId !== univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId()) {
+                const currentUnitId = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                if (unitId && unitId !== currentUnitId) {
                     setIsSelecting(FormulaSelectingType.EDIT_OTHER_WORKBOOK_REFERENCE);
                 } else if (
                     (!sheetName && currentSheet.getSheetId() === sourceSheet?.getSheetId()) ||

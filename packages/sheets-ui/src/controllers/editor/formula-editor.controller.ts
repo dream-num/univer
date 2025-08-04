@@ -129,7 +129,6 @@ export class FormulaEditorController extends RxDisposable {
 
             if (isFocusButHidden) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
 
                 const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
                 const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
@@ -143,7 +142,7 @@ export class FormulaEditorController extends RxDisposable {
                         {
                             visible: true,
                             eventType: DeviceInputEventType.PointerDown,
-                            unitId: currentSheet?.getUnitId() ?? '',
+                            unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
                         } as IEditorBridgeServiceVisibleParam
                     );
                 }
@@ -177,7 +176,11 @@ export class FormulaEditorController extends RxDisposable {
                 this._commandService.syncExecuteCommand(CoverContentCommand.id, coverContentParams);
 
                 requestAnimationFrame(() => {
-                    this._textSelectionManagerService.replaceDocRanges(textRanges);
+                    this._textSelectionManagerService.replaceDocRanges(textRanges, {
+                        unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                        subUnitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                    });
+                    this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
                 });
             }
         });

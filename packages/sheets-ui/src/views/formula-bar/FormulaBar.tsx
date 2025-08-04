@@ -18,7 +18,6 @@ import type { Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    EDITOR_ACTIVATED,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
     IContextService,
@@ -87,7 +86,7 @@ export function FormulaBar(props: IProps) {
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);
     useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
-    const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) || contextService.getContextValue(EDITOR_ACTIVATED);
+    const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     const ref = useRef<HTMLDivElement>(null);
     const editorService = useDependency(IEditorService);
 

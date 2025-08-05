@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ActionType, AlignType } from '@rc-component/trigger';
 import type Placements from 'rc-dropdown/lib/placements';
 import type { ReactElement } from 'react';
 import RcDropdown from 'rc-dropdown';
 import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import './index.css';
+
+type ActionType = 'hover' | 'focus' | 'click' | 'contextMenu';
 
 export interface IDropdownLegacyProps {
     /** Semantic DOM class */
@@ -67,7 +68,9 @@ export interface IDropdownLegacyProps {
     /**
      * The align of the dropdown
      */
-    align?: AlignType;
+    align?: {
+        offset?: number[];
+    };
 
     /**
      * Triggered after the dropdown visibility changes

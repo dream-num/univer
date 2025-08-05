@@ -55,7 +55,7 @@ export function fromObjectToString(array: IArrayValueObject) {
     return '';
 }
 
-export function transformToValueObject(array: Array<Array<number | string | boolean | null>> = []) {
+export function transformToValueObject(array: Array<Array<number | string | boolean | null>> = [], isIgnoreNumberPattern: boolean = false) {
     const arrayValueList: BaseValueObject[][] = [];
 
     for (let r = 0; r < array.length; r++) {
@@ -68,7 +68,7 @@ export function transformToValueObject(array: Array<Array<number | string | bool
         for (let c = 0; c < row.length; c++) {
             const cell = row[c];
 
-            arrayValueList[r][c] = ValueObjectFactory.create(cell);
+            arrayValueList[r][c] = ValueObjectFactory.create(cell, isIgnoreNumberPattern);
         }
     }
 

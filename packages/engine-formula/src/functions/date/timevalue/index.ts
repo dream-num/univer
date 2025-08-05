@@ -27,19 +27,23 @@ export class Timevalue extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(timeText: BaseValueObject) {
-        if (timeText.isError()) {
-            return timeText;
-        }
+    override isArgumentsIgnoreNumberPattern(): boolean {
+        return true;
+    }
 
+    override calculate(timeText: BaseValueObject) {
         if (timeText.isArray()) {
-            return timeText.map((timeTextObject) => this._handleSingleObject(timeTextObject));
+            return timeText.mapValue((timeTextObject) => this._handleSingleObject(timeTextObject));
         }
 
         return this._handleSingleObject(timeText);
     }
 
     private _handleSingleObject(timeTextObject: BaseValueObject) {
+        if (timeTextObject.isError()) {
+            return timeTextObject;
+        }
+
         if (timeTextObject.isString()) {
             const value = `${timeTextObject.getValue()}`;
             const parsedTime = parseFormattedValue(value);

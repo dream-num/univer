@@ -16,9 +16,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Timevalue } from '../index';
 
@@ -29,42 +30,45 @@ describe('Test timevalue function', () => {
         it('Time text string', () => {
             const timetText = StringValueObject.create('2020-01-02');
             const result = testFunction.calculate(timetText);
-            expect(result.getValue()).toStrictEqual(0);
+            expect(getObjectValue(result)).toStrictEqual(0);
 
             const timetText2 = StringValueObject.create('2020-01-02 13:14:15');
             const result2 = testFunction.calculate(timetText2);
-            expect(result2.getValue()).toStrictEqual(0.5515624999970896);
+            expect(getObjectValue(result2, true)).toStrictEqual(0.551562499997);
 
             const timetText3 = StringValueObject.create('10:11:12');
             const result3 = testFunction.calculate(timetText3);
-            expect(result3.getValue()).toStrictEqual(0.42444444444444446);
+            expect(getObjectValue(result3, true)).toStrictEqual(0.424444444444);
         });
 
         it('Time text number', () => {
             const timetText = NumberValueObject.create(43832);
             const result = testFunction.calculate(timetText);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
         it('Time text boolean', () => {
             const timetText = BooleanValueObject.create(true);
             const result = testFunction.calculate(timetText);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Time text blank', () => {
             const timetText = NullValueObject.create();
             const result = testFunction.calculate(timetText);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
         it('Time text error', () => {
             const timetText = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(timetText);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
         });
 
         it('Serial number is array', () => {
             const serialNumber = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null], [0, '100', '2.34', 'test', -3, ErrorType.NAME]]),
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '2024-8-8 12:47:55', '2024-8-8', 'test', -3, ErrorType.NAME],
+                ], true),
                 rowCount: 2,
                 columnCount: 6,
                 unitId: '',
@@ -73,7 +77,10 @@ describe('Test timevalue function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(serialNumber);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE], [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]]);
+            expect(getObjectValue(result, true)).toStrictEqual([
+                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
+                [ErrorType.VALUE, 0.533275462964, 0, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
+            ]);
         });
     });
 });

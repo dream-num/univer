@@ -26,19 +26,23 @@ export class Datevalue extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(dateText: BaseValueObject) {
-        if (dateText.isError()) {
-            return dateText;
-        }
+    override isArgumentsIgnoreNumberPattern(): boolean {
+        return true;
+    }
 
+    override calculate(dateText: BaseValueObject) {
         if (dateText.isArray()) {
-            return dateText.map((dateTextObject) => this._handleSingleObject(dateTextObject));
+            return dateText.mapValue((dateTextObject) => this._handleSingleObject(dateTextObject));
         }
 
         return this._handleSingleObject(dateText);
     }
 
     private _handleSingleObject(dateTextObject: BaseValueObject) {
+        if (dateTextObject.isError()) {
+            return dateTextObject;
+        }
+
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
             let parsedDate = parseFormattedDate(value);

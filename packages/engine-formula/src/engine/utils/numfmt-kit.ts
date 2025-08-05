@@ -296,6 +296,11 @@ const countryCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.VI_VN, '₫'],
     [LocaleType.ZH_CN, '¥'],
     [LocaleType.ZH_TW, 'NT$'],
+    [LocaleType.FR_FR, '€'],
+    [LocaleType.FA_IR, '﷼'],
+    [LocaleType.KO_KR, '₩'],
+    [LocaleType.ES_ES, '€'],
+    [LocaleType.CA_ES, '€'],
 ]);
 
 function getCurrencySymbol(locale: LocaleType): string {

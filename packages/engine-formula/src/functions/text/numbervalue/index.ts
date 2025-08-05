@@ -28,6 +28,10 @@ export class Numbervalue extends BaseFunction {
 
     override maxParams = 3;
 
+    override isArgumentsIgnoreNumberPattern(): boolean {
+        return true;
+    }
+
     override calculate(text: BaseValueObject, decimalSeparator?: BaseValueObject, groupSeparator?: BaseValueObject): BaseValueObject {
         const _decimalSeparator = decimalSeparator ?? StringValueObject.create('.');
 

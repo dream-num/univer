@@ -137,7 +137,7 @@ export const FUNCTION_LIST_LOGICAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.IFERROR.functionParameter.valueIfError.name',
                 detail: 'formula.functionList.IFERROR.functionParameter.valueIfError.detail',
-                example: 'Error in calculation',
+                example: '"Error in calculation"',
                 require: 1,
                 repeat: 0,
             },

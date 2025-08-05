@@ -15,14 +15,14 @@
  */
 
 import type enUS from './en-US';
-import array from './function-list/array/ru-RU'; // TODO
+import array from './function-list/array/ru-RU';
 import compatibility from './function-list/compatibility/ru-RU';
 import cube from './function-list/cube/ru-RU';
 import database from './function-list/database/ru-RU';
 import date from './function-list/date/ru-RU';
-import engineering from './function-list/engineering/ru-RU'; // TODO
+import engineering from './function-list/engineering/ru-RU';
 import financial from './function-list/financial/ru-RU';
-import information from './function-list/information/ru-RU'; // TODO
+import information from './function-list/information/ru-RU';
 import logical from './function-list/logical/ru-RU'; // TODO
 import lookup from './function-list/lookup/ru-RU'; // TODO
 import math from './function-list/math/ru-RU';

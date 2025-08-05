@@ -603,8 +603,8 @@ const locale: typeof enUS = {
         },
     },
     IMPRODUCT: {
-        description: 'Retorna el producte de 2 a 255 nombres complexos',
-        abstract: 'Retorna el producte de 2 a 255 nombres complexos',
+        description: 'Retorna el producte de 1 a 255 nombres complexos',
+        abstract: 'Retorna el producte de 1 a 255 nombres complexos',
         links: [
             {
                 title: 'Instruccions',

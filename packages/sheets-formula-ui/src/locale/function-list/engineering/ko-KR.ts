@@ -603,8 +603,8 @@ const locale: typeof enUS = {
         },
     },
     IMPRODUCT: {
-        description: 'Returns the product of from 2 to 255 complex numbers',
-        abstract: 'Returns the product of from 2 to 255 complex numbers',
+        description: 'Returns the product of from 1 to 255 complex numbers',
+        abstract: 'Returns the product of from 1 to 255 complex numbers',
         links: [
             {
                 title: 'Instruction',

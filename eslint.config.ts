@@ -1,11 +1,16 @@
 /* eslint-disable header/header */
 import antfu from '@antfu/eslint-config';
-import { baseRules, facadePreset, specPreset, tailwindcssPreset, typescriptPreset, univerSourcePreset } from '@univerjs-infra/shared/eslint';
-import header from 'eslint-plugin-header';
-import barrel from 'eslint-plugin-no-barrel-import';
-import penetrating from 'eslint-plugin-no-penetrating-import';
-
-header.rules.header.meta.schema = false;
+import {
+    baseRules,
+    facadePreset,
+    headerPreset,
+    noBarrelImportPreset,
+    penetratingPreset,
+    specPreset,
+    tailwindcssPreset,
+    typescriptPreset,
+    univerSourcePreset,
+} from '@univerjs-infra/shared/eslint';
 
 export default antfu(
     {
@@ -32,83 +37,12 @@ export default antfu(
         },
         rules: baseRules,
     },
-    {
-        files: ['**/*.ts', '**/*.tsx'],
-        ignores: [
-            'packages/engine-render/src/components/docs/**/*.ts',
-            '**/*.tsx',
-            '**/*.d.ts',
-            '**/vite.config.ts',
-            'playwright.config.ts',
-            '**/*.spec.ts',
-            '**/*.spec.tsx',
-            '**/*.test.ts',
-            '**/*.test.tsx',
-        ], // do not check test files
-        plugins: {
-            barrel,
-        },
-        rules: {
-            'barrel/no-barrel-import': 2,
-            complexity: ['warn', { max: 20 }],
-            'max-lines-per-function': ['warn', 80],
-        },
-    },
-    {
-        // Not penetrating for source files
-        files: ['**/*.ts', '**/*.tsx'],
-        plugins: {
-            penetrating,
-        },
-        ignores: [
-            '**/__tests__/**/*',
-            '**/__testing__/**/*',
-            'examples/**/*',
-        ],
-        rules: {
-            'penetrating/no-penetrating-import': 2,
-        },
-    },
-    {
-        files: ['**/*.ts', '**/*.tsx'],
-        ignores: [
-            '**/*.d.ts',
-            '**/vite.config.ts',
-            '**/vitest.config.ts',
-            '**/vitest.workspace.ts',
-            'playwright.config.ts',
-        ],
-        plugins: {
-            header,
-        },
-        rules: {
-            'header/header': [
-                2,
-                'block',
-                [
-                    '*',
-                    ' * Copyright 2023-present DreamNum Co., Ltd.',
-                    ' *',
-                    ' * Licensed under the Apache License, Version 2.0 (the "License");',
-                    ' * you may not use this file except in compliance with the License.',
-                    ' * You may obtain a copy of the License at',
-                    ' *',
-                    ' *     http://www.apache.org/licenses/LICENSE-2.0',
-                    ' *',
-                    ' * Unless required by applicable law or agreed to in writing, software',
-                    ' * distributed under the License is distributed on an "AS IS" BASIS,',
-                    ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
-                    ' * See the License for the specific language governing permissions and',
-                    ' * limitations under the License.',
-                    ' ',
-                ],
-                2,
-            ],
-        },
-    },
+    headerPreset(),
+    penetratingPreset(),
     typescriptPreset(),
     univerSourcePreset(),
     facadePreset(),
+    noBarrelImportPreset(),
     tailwindcssPreset(),
     specPreset()
 );

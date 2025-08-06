@@ -480,11 +480,6 @@ export class Scene extends Disposable {
         return this._layers;
     }
 
-    /**
-     * Get layer by zIndex.
-     * This method would create a new Layer if Layer is not exist.
-     * @param zIndex
-     */
     getLayer(zIndex: number = 1): Layer {
         for (const layer of this._layers) {
             if (layer.zIndex === zIndex) {
@@ -521,8 +516,7 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Add objects to Layer( Layer is specified by zIndex)
-     * This method would create a new Layer if Layer is not exist.
+     * Add objects to Layer( Layer is specfied by zIndex)
      * If object is a group, insert all its children and group itself to _objects[].
      * @param objects
      * @param zIndex
@@ -536,8 +530,7 @@ export class Scene extends Disposable {
 
     /**
      * Add object to Layer (Layer is specified by zIndex).
-     * This method would create a new Layer if Layer is not exist.
-     * And if object is a group, insert all its children and group itself to _objects[].
+     * If object is a group, insert all its children and group itself to _objects[].
      * @param o
      * @param zIndex layer index
      * @returns {Scene} scene
@@ -995,9 +988,7 @@ export class Scene extends Disposable {
 
         const scrollBarRect = pickedViewport.pickScrollBar(coord);
         if (scrollBarRect) {
-            if (scrollBarRect.evented) {
-                return scrollBarRect;
-            }
+            return scrollBarRect;
         }
 
         const vecFromSheetContent = pickedViewport.transformVector2SceneCoord(coord);
@@ -1267,9 +1258,8 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Disable scene.event
      * If scene.event is disabled, scene.pick(cursor Pos) return null.
-     * After disableObjectsEvent, only the scene itself can respond to pointer events; objects beneath the scene will not.
+     * Then only scene itself can response to pointer event, all objects under the scene would not.
      * see sceneInputManager@_onPointerMove
      */
     // 禁用对象事件

@@ -429,9 +429,6 @@ export class InputManager extends Disposable {
      * @param offsetY
      */
     private _getObjectAtPos(offsetX: number, offsetY: number) {
-        if (!this._scene.objectsEvented) {
-            return null;
-        }
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
@@ -463,13 +460,6 @@ export class InputManager extends Disposable {
 
     // }
 
-    /**
-     * If return true,  the event will be dispatched to Scene
-     * Even Scene is not a object, but scene could handle event.
-     * currentObject is null, return true
-     * @param currentObject
-     * @returns boolean
-     */
     private _shouldDispatchEventToScene(currentObject: Nullable<Scene | BaseObject>): boolean {
         // 1. Check for empty object
         if (currentObject == null) {

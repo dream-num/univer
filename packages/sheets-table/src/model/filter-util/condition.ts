@@ -117,7 +117,7 @@ function getStringCellValue(sheet: Worksheet, row: number, col: number) {
     if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
 
     if (v === undefined) {
-        return '(空白)';
+        return undefined;
     }
 
     return String(v);

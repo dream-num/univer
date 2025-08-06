@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ISetSheetTableParams, ITableFilterItem } from '@univerjs/sheets-table';
 import type { IFilterByValueWithTreeItem, ITableFilterItemList } from '../types';
-import { cellToRange, Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, Rectangle } from '@univerjs/core';
+import { cellToRange, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { isConditionFilter, isManualFilter, SetSheetTableFilterCommand, SheetTableService, TableManager } from '@univerjs/sheets-table';
 import { FilterByEnum } from '../types';
@@ -38,7 +38,8 @@ export class SheetsTableUiService extends Disposable {
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(SheetTableService) private _sheetTableService: SheetTableService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
         this._registerTableFilterChangeEvent();
@@ -148,7 +149,11 @@ export class SheetsTableUiService extends Disposable {
             if (isFiltered) {
                 continue;
             }
-            const stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
+            let stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
+
+            if (stringItem === undefined) {
+                stringItem = this._localeService.t('sheets-table.condition.empty');
+            }
 
             if (!map.has(stringItem)) {
                 data.push({

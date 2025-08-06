@@ -21,6 +21,7 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverNetworkPlugin } from '@univerjs/network';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
@@ -143,53 +144,7 @@ function createNewInstance() {
 
     // create univer sheet instance
     if (!IS_E2E) {
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
-            id: 'fbpG8l',
-            sheetOrder: [
-                'xeyZKmZIRXwhSzwbec9-c',
-            ],
-            sheets: {
-                'xeyZKmZIRXwhSzwbec9-c': {
-                    id: 'xeyZKmZIRXwhSzwbec9-c',
-                    name: 'Sheet1',
-                    tabColor: '',
-                    hidden: 0,
-                    rowCount: 1000,
-                    columnCount: 20,
-                    zoomRatio: 1,
-                    freeze: {
-                        xSplit: 0,
-                        ySplit: 0,
-                        startRow: -1,
-                        startColumn: -1,
-                    },
-                    scrollTop: 0,
-                    scrollLeft: 0,
-                    defaultColumnWidth: 88,
-                    defaultRowHeight: 24,
-                    mergeData: [],
-                    cellData: {},
-                    rowData: {},
-                    columnData: {},
-                    showGridlines: 1,
-                    rowHeader: {
-                        width: 46,
-                        hidden: 0,
-                    },
-                    columnHeader: {
-                        height: 20,
-                        hidden: 0,
-                    },
-                    rightToLeft: 0,
-                },
-            },
-            resources: [
-                {
-                    name: 'SHEET_DATA_VALIDATION_PLUGIN',
-                    data: '{"xeyZKmZIRXwhSzwbec9-c":[{"uid":"VvFh9x","type":"date","operator":"greaterThan","formula1":"2020-11-11","ranges":[{"startRow":0,"startColumn":0,"endRow":0,"endColumn":0,"rangeType":0}],"formula2":""},{"uid":"K2P_rg","type":"date","operator":"greaterThanOrEqual","formula1":"2025-11-12","ranges":[{"startRow":0,"startColumn":1,"endRow":0,"endColumn":1,"rangeType":0,"unitId":"fbpG8l","sheetId":"xeyZKmZIRXwhSzwbec9-c"}],"formula2":"","bizInfo":{"showTime":true}}]}',
-                },
-            ],
-        });
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
     }
 
     setTimeout(() => {

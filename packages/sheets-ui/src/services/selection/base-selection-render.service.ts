@@ -751,9 +751,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
     }
 
-    /**
-     * Unsubscribe subjects and enable scene event
-     */
     protected _clearUpdatingListeners(): void {
         const scene = this._scene;
         scene.enableObjectsEvent();

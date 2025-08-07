@@ -16,7 +16,6 @@
 
 import type { LocaleService } from '@univerjs/core';
 import type { IInputProps } from '@univerjs/design';
-import type { KeyboardEvent } from 'react';
 import type { IFindReplaceService } from '../../services/find-replace.service';
 import { Input, Pager } from '@univerjs/design';
 import { useState } from 'react';
@@ -62,12 +61,6 @@ export function SearchInput(props: ISearchInputProps) {
         }
     }
 
-    function handleEnter(event: KeyboardEvent<HTMLInputElement>) {
-        if (event.key === 'Enter') {
-            handleChangePosition(matchesPosition + 1);
-        }
-    }
-
     return (
         <div className="univer-relative univer-flex univer-items-center univer-gap-2" onDrag={(e) => e.stopPropagation()}>
             <Input
@@ -79,7 +72,6 @@ export function SearchInput(props: ISearchInputProps) {
                     setValue(value);
                     onChange?.(value);
                 }}
-                onKeyDown={handleEnter}
                 slot={(
                     <Pager
                         loop

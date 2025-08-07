@@ -22,6 +22,7 @@ import type { RenderComponentType } from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FX_BAR_EDITOR,
@@ -31,7 +32,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     RxDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
@@ -129,9 +129,6 @@ export class FormulaEditorController extends RxDisposable {
 
             if (isFocusButHidden) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
-
-                const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
                 const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
                     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                 );
@@ -143,7 +140,7 @@ export class FormulaEditorController extends RxDisposable {
                         {
                             visible: true,
                             eventType: DeviceInputEventType.PointerDown,
-                            unitId: currentSheet?.getUnitId() ?? '',
+                            unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
                         } as IEditorBridgeServiceVisibleParam
                     );
                 }
@@ -177,7 +174,15 @@ export class FormulaEditorController extends RxDisposable {
                 this._commandService.syncExecuteCommand(CoverContentCommand.id, coverContentParams);
 
                 requestAnimationFrame(() => {
-                    this._textSelectionManagerService.replaceDocRanges(textRanges);
+                    this._textSelectionManagerService.replaceDocRanges([], {
+                        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                        subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    });
+                    this._textSelectionManagerService.replaceDocRanges(textRanges, {
+                        unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                        subUnitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                    });
+                    this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
                 });
             }
         });

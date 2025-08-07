@@ -279,9 +279,9 @@ export function FindReplaceDialog() {
             }
 
             if (!focusRef.current || !focusRef.current.selectHasFocus()) {
-                setDialogInputFocus(true);
-            } else {
                 setDialogInputFocus(false);
+            } else {
+                setDialogInputFocus(true);
             }
         });
 

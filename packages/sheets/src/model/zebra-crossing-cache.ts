@@ -48,37 +48,58 @@ export class ZebraCrossingCache {
         const { startRow, endRow } = range;
 
         const toggleRanges: IToggleRange[] = [];
-        let start = -1;
-        let hiddenCount = 0; // Track the number of hidden rows encountered
+        let hiddenCount = 0;
+        let inToggle = false;
+        let toggleStart = -1;
 
         for (let row = startRow; row <= endRow; row++) {
             const isVisible = visibleFunc(row);
 
-            if (isVisible) {
-                if (start === -1) {
-                    start = row; // Start a new visible range
-                }
+            if (!isVisible) {
+                hiddenCount++;
 
-            // If the number of hidden rows before this row is odd, toggle the state
-                if (hiddenCount % 2 !== 0) {
-                    toggleRanges.push([start, row]);
-                    start = -1; // Reset the start for the next range
+                if (hiddenCount % 2 === 1) {
+                    inToggle = true;
+                } else {
+                    inToggle = false;
+                    if (toggleStart !== -1) {
+                        toggleRanges.push([toggleStart, row - 1]);
+                        toggleStart = -1;
+                    }
+                }
+                continue;
+            }
+
+            if (hiddenCount % 2 === 1) {
+                if (!inToggle) {
+                    inToggle = true;
+                    toggleStart = row;
+                } else if (toggleStart === -1) {
+                    toggleStart = row;
                 }
             } else {
-                hiddenCount++; // Increment the hidden row count
-                if (start !== -1) {
-                    toggleRanges.push([start, row - 1]); // Close the current visible range
-                    start = -1;
+                if (inToggle) {
+                    toggleRanges.push([toggleStart, row - 2]);
+                    inToggle = false;
+                    toggleStart = -1;
                 }
+            }
+
+            // If it's the last row and still in the toggle range, finalize the range
+            if (row === endRow && inToggle) {
+                toggleRanges.push([toggleStart, row]);
             }
         }
 
-    // Handle the case where the last range is still open
-        if (start !== -1) {
-            toggleRanges.push([start, endRow]);
-        }
-
         this._toggleRanges = toggleRanges;
+    }
+
+    /**
+     * This function returns the toggle ranges. Only for testing purposes. In production, you should use `getIsToggled` to check if a row is toggled.
+     * @returns [IToggleRange[]] The toggle ranges calculated by the last refresh.
+     */
+    getToggleRanges(): IToggleRange[] {
+        return this._toggleRanges.concat();
     }
 
     /**

@@ -82,7 +82,7 @@ describe('Test xnpv function', () => {
 
             const values3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(rate2, values3, dates);
-            expect(getObjectValue(result3)).toBe(ErrorType.NA);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
 
             const dates2 = BooleanValueObject.create(true);
             const result4 = testFunction.calculate(rate2, values, dates2);
@@ -90,7 +90,7 @@ describe('Test xnpv function', () => {
 
             const dates3 = NumberValueObject.create(1);
             const result5 = testFunction.calculate(rate2, values, dates3);
-            expect(getObjectValue(result5)).toBe(ErrorType.NA);
+            expect(getObjectValue(result5)).toBe(ErrorType.NUM);
 
             const dates4 = NumberValueObject.create(-1);
             const result6 = testFunction.calculate(rate2, values, dates4);
@@ -232,7 +232,7 @@ describe('Test xnpv function', () => {
             const values5 = ArrayValueObject.create('{-10000}');
             const dates6 = ArrayValueObject.create('{39448}');
             const result9 = testFunction.calculate(rate2, values5, dates6);
-            expect(getObjectValue(result9)).toBe(ErrorType.NA);
+            expect(getObjectValue(result9)).toBe(-10000);
         });
     });
 });

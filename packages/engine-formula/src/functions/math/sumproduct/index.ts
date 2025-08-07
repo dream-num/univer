@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -76,12 +75,11 @@ export class Sumproduct extends BaseFunction {
                             return variantValueObject;
                         }
 
-                        const variantValue = variantValueObject.getValue();
-
-                        if (!variantValue || !isRealNum(variantValue)) {
-                            row.push(0);
+                        // Only number values are considered for the sumproduct calculation
+                        if (variantValueObject.isNumber()) {
+                            row.push((variantValueObject.getValue() as number) * resultArray[r][c]);
                         } else {
-                            row.push(+variantValue * resultArray[r][c]);
+                            row.push(0);
                         }
                     }
 
@@ -128,12 +126,11 @@ export class Sumproduct extends BaseFunction {
                     return array1ValueObject;
                 }
 
-                const array1Value = array1ValueObject.getValue();
-
-                if (!array1Value || !isRealNum(array1Value)) {
-                    row.push(0);
+                // Only number values are considered for the sumproduct calculation
+                if (array1ValueObject.isNumber()) {
+                    row.push(array1ValueObject.getValue() as number);
                 } else {
-                    row.push(+array1Value);
+                    row.push(0);
                 }
             }
 

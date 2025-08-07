@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { CellValue, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
-import { Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleService } from '@univerjs/core';
+import { Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleService, Tools } from '@univerjs/core';
 import { INumfmtService } from '@univerjs/sheets';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '@univerjs/sheets-numfmt';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
@@ -76,7 +76,7 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                 }
 
                 // Preventing blank object
-                if (isTextFormat(numfmtValue.pattern) && cellData?.v && isRealNum(cellData.v)) {
+                if (isTextFormat(numfmtValue.pattern) && Tools.isDefine(cellData?.v) && isRealNum(cellData.v as CellValue)) {
                     // If the user has disabled the text format alert, do not show it
                     if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatAlert) {
                         return;

@@ -16,7 +16,7 @@
 
 import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -55,16 +55,24 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                     const [range] = e.textRanges;
                     if (range.collapsed && isShowRef.current) {
                         const { startOffset } = range;
-                        const currentSequenceNode = formulaPromptService.getCurrentSequenceNode(startOffset - 2);
+                        const nodeIndex = formulaPromptService.getCurrentSequenceNodeIndex(startOffset - 2);
+                        const currentSequenceNode = formulaPromptService.getCurrentSequenceNodeByIndex(nodeIndex);
+                        const nextSequenceNode = formulaPromptService.getCurrentSequenceNodeByIndex(nodeIndex + 1);
 
                         if (currentSequenceNode) {
-                            if (typeof currentSequenceNode !== 'string' && currentSequenceNode.nodeType === 3 && !descriptionService.hasDefinedNameDescription(currentSequenceNode.token.trim())) {
+                            if (
+                                typeof currentSequenceNode !== 'string' &&
+                                currentSequenceNode.nodeType === 3 &&
+                                !descriptionService.hasDefinedNameDescription(currentSequenceNode.token.trim()) &&
+                                nextSequenceNode === matchToken.OPEN_BRACKET
+                            ) {
+                                // If the current node is a function name and the next node is an open bracket '(', should show the function description.
                                 const info = descriptionService.getFunctionInfo(currentSequenceNode.token);
                                 setFunctionInfo(info);
                                 setParamIndex(-1);
                                 return;
                             } else {
-                                // 为什么减1,因为nodes是不包含初始 ‘=’ 字符的,但是 selection 会包含 '='
+                                // Why subtract 1? Because the nodes do not include the initial '=' character, but the selection does include '='.
                                 const res = lexerTreeBuilder.getFunctionAndParameter(`${formulaTextRef.current}A`, startOffset - 1);
                                 if (res) {
                                     const { functionName, paramIndex } = res;

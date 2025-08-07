@@ -414,8 +414,7 @@ export class FRange extends FBaseInitialable {
     getRawValue(): Nullable<CellValue> {
         const cell = this._worksheet.getCellMatrix().getValue(this._range.startRow, this._range.startColumn);
         if (cell?.p && cell.p.body?.dataStream) return cell.p.body.dataStream;
-        if (cell?.v) return cell.v;
-        return null;
+        return cell?.v ?? null;
     }
 
     /**
@@ -440,8 +439,7 @@ export class FRange extends FBaseInitialable {
     getDisplayValue(): string {
         const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
         if (cell?.p && cell.p.body?.dataStream) return cell.p.body.dataStream;
-        if (cell?.v) return String(cell.v);
-        return '';
+        return cell?.v?.toString() ?? '';
     }
 
     /**
@@ -545,10 +543,8 @@ export class FRange extends FBaseInitialable {
                 const cell = cellMatrix.getValue(r, c);
                 if (cell?.p && cell.p.body?.dataStream) {
                     row.push(cell.p.body.dataStream);
-                } else if (cell?.v) {
-                    row.push(cell.v);
                 } else {
-                    row.push(null);
+                    row.push(cell?.v ?? null);
                 }
             }
 
@@ -612,10 +608,8 @@ export class FRange extends FBaseInitialable {
 
                 if (cell?.p && cell.p.body?.dataStream) {
                     row.push(cell.p.body.dataStream);
-                } else if (cell?.v) {
-                    row.push(String(cell.v));
                 } else {
-                    row.push('');
+                    row.push(cell?.v?.toString() ?? '');
                 }
             }
 

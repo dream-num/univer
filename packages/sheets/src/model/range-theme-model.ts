@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, Nullable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from './range-theme-util';
-import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, RTree, UniverInstanceType } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, IUniverInstanceService, RTree, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { INTERCEPTOR_POINT, RangeThemeInterceptorId } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
@@ -24,6 +24,7 @@ import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-int
 import { RangeThemeStyle } from './range-theme-util';
 import { buildInThemes } from './range-themes/build-in-theme.factory';
 import { defaultRangeThemeStyle, defaultRangeThemeStyleJSONWithLastRowStyle } from './range-themes/default';
+import { ZebraCrossingCache } from './zebra-crossing-cache';
 
 export interface IRangeThemeRangeInfo {
     range: IRange;
@@ -48,13 +49,20 @@ export class SheetRangeThemeModel extends Disposable {
     private _rangeThemeStyleRuleMap: Map<string, Map<string, IRangeThemeStyleRule>> = new Map();
     private _rTreeCollection: Map<string, RTree> = new Map();
     private _defaultRangeThemeMap: Map<string, RangeThemeStyle> = new Map();
+    /**
+     * This map is used to cache zebra crossing toggle ranges for each unitId and subUnitId, IRangeThemeStyleRule id
+     */
+    private _zebraCrossingCacheMap: Map<string, Map<string, Map<string, ZebraCrossingCache>>> = new Map();
+
+    private _rowVisibleFuncSet: Map<string, Map<string, Set<number>>> = new Map();
 
     private _rangeThemeMapChanged$ = new Subject<{ type: 'add' | 'remove'; styleName: string }>();
     public rangeThemeMapChange$ = this._rangeThemeMapChanged$.asObservable();
 
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
+        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._registerIntercept();
@@ -99,6 +107,59 @@ export class SheetRangeThemeModel extends Disposable {
         return this._ensureRangeThemeStyleMap(unitId).get(name);
     }
 
+    private _getSheetRowVisibleFuncSet(unitId: string, subUnitId: string): Set<number> {
+        if (!this._rowVisibleFuncSet.has(unitId)) {
+            this._rowVisibleFuncSet.set(unitId, new Map());
+        }
+        const subUnitMap = this._rowVisibleFuncSet.get(unitId)!;
+        if (!subUnitMap.has(subUnitId)) {
+            subUnitMap.set(subUnitId, new Set());
+        }
+
+        return subUnitMap.get(subUnitId)!;
+    }
+
+    private _getSheetRowVisibleHasInit(unitId: string, subUnitId: string): boolean {
+        return Boolean(this._rowVisibleFuncSet.has(unitId) && this._rowVisibleFuncSet.get(unitId)?.has(subUnitId));
+    }
+
+    public refreshSheetRowVisibleFuncSet(unitId: string, subUnitId: string) {
+        const set = this._getSheetRowVisibleFuncSet(unitId, subUnitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        if (workbook) {
+            const sheet = workbook.getSheetBySheetId(subUnitId);
+            if (sheet) {
+                const rowCount = sheet.getRowCount();
+                const rowManager = sheet.getRowManager();
+                for (let i = 1; i <= rowCount; i++) {
+                    const visible = sheet.getRowVisible(i);
+                    if (!visible) {
+                        set.add(i);
+                    } else {
+                        if (rowManager.getRowHeight(i) === 0) {
+                            set.add(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private _ensureZebraCrossingCache(unitId: string, subUnitId: string, id: string): ZebraCrossingCache {
+        if (!this._zebraCrossingCacheMap.has(unitId)) {
+            this._zebraCrossingCacheMap.set(unitId, new Map());
+        }
+        const subUnitMap = this._zebraCrossingCacheMap.get(unitId)!;
+        if (!subUnitMap.has(subUnitId)) {
+            subUnitMap.set(subUnitId, new Map());
+        }
+        const cacheMap = subUnitMap.get(subUnitId)!;
+        if (!cacheMap.has(id)) {
+            cacheMap.set(id, new ZebraCrossingCache());
+        }
+        return cacheMap.get(id)!;
+    }
+
     /**
      * Register range theme styles
      * @param {string} themeName
@@ -111,6 +172,18 @@ export class SheetRangeThemeModel extends Disposable {
         const rTreeCollection = this._ensureRTreeCollection(unitId);
         ruleMap.set(id, { rangeInfo, themeName });
         rTreeCollection.insert({ unitId, sheetId: subUnitId, range, id });
+
+        // refresh row visible func set
+        if (!this._getSheetRowVisibleHasInit(unitId, subUnitId)) {
+            this.refreshSheetRowVisibleFuncSet(unitId, subUnitId);
+        }
+
+        // update zebra crossing cache
+        const zebraCache = this._ensureZebraCrossingCache(unitId, subUnitId, id);
+        const sheetRowVisibleFuncSet = this._getSheetRowVisibleFuncSet(unitId, subUnitId);
+        zebraCache.refresh(range, (row: number) => {
+            return !sheetRowVisibleFuncSet.has(row);
+        });
     }
 
     getRegisteredRangeThemeStyle(rangeInfo: IRangeThemeRangeInfo): string | undefined {
@@ -127,6 +200,32 @@ export class SheetRangeThemeModel extends Disposable {
         return undefined;
     }
 
+    refreshZebraCrossingCacheBySheet(unitId: string, subUnitId: string): void {
+        if (!this._zebraCrossingCacheMap.has(unitId)) {
+            this._zebraCrossingCacheMap.set(unitId, new Map());
+        }
+        const subUnitMap = this._zebraCrossingCacheMap.get(unitId)!;
+        if (!subUnitMap.has(subUnitId)) {
+            subUnitMap.set(subUnitId, new Map());
+        }
+        const cacheMap = subUnitMap.get(subUnitId);
+
+        if (cacheMap) {
+            cacheMap.forEach((zebraCache, id) => {
+                const ruleMap = this._ensureRangeThemeStyleRuleMap(unitId);
+                const themeRule = ruleMap.get(id);
+                if (themeRule) {
+                    zebraCache.refresh(themeRule.rangeInfo.range, (row: number) => {
+                        return !this._getSheetRowVisibleFuncSet(unitId, subUnitId).has(row);
+                    });
+                } else {
+                    // If the theme rule is not found, we can remove the cache
+                    cacheMap.delete(id);
+                }
+            });
+        }
+    }
+
     removeRangeThemeRule(themeName: string, rangeInfo: IRangeThemeRangeInfo): void {
         const { unitId, subUnitId, range } = rangeInfo;
         const rTreeCollection = this._ensureRTreeCollection(unitId);
@@ -137,6 +236,15 @@ export class SheetRangeThemeModel extends Disposable {
             if (themeRule && themeRule.themeName === themeName) {
                 themeRuleMap.delete(themes[i] as string);
                 rTreeCollection.remove({ unitId, sheetId: subUnitId, range, id: themes[i] as string });
+
+                // remove zebra crossing cache
+                const zebraCacheMap = this._zebraCrossingCacheMap.get(unitId);
+                if (zebraCacheMap) {
+                    const subUnitCacheMap = zebraCacheMap.get(subUnitId);
+                    if (subUnitCacheMap) {
+                        subUnitCacheMap.delete(themes[i] as string);
+                    }
+                }
                 break;
             }
         }
@@ -204,8 +312,11 @@ export class SheetRangeThemeModel extends Disposable {
                 const offsetRow = row - rangeInfo.range.startRow;
                 const offsetCol = col - rangeInfo.range.startColumn;
                 const theme = this.getRangeThemeStyle(unitId, themeName);
+
+                const zebraCache = this._ensureZebraCrossingCache(unitId, subUnitId, themes[0] as string);
+                const isToggled = zebraCache.getIsToggled(row);
                 if (theme) {
-                    return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn);
+                    return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn, isToggled);
                 }
             }
         }
@@ -324,5 +435,7 @@ export class SheetRangeThemeModel extends Disposable {
         this._rangeThemeStyleRuleMap.clear();
         this._defaultRangeThemeMap.clear();
         this._rTreeCollection.clear();
+        this._zebraCrossingCacheMap.clear();
+        this._rowVisibleFuncSet.clear();
     }
 }

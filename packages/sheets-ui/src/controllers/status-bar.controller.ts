@@ -32,6 +32,7 @@ import {
     RANGE_TYPE,
     splitIntoGrid,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 
@@ -56,7 +57,7 @@ class CalculateValueSet {
     private _max: number = Number.NEGATIVE_INFINITY;
 
     add(value: Nullable<ICellData>, styles: Styles, patternInfoRecord: Record<string, any>) {
-        if (!value?.v) {
+        if (!Tools.isDefine(value?.v)) {
             return;
         }
         const t = value?.t;

@@ -16,7 +16,6 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -171,21 +170,28 @@ export class Xnpv extends BaseFunction {
                 };
             }
 
-            if (_values.length <= 1) {
-                return {
-                    isError: true,
-                    errorObejct: ErrorValueObject.create(ErrorType.NA),
-                };
-            }
-
             return {
                 isError,
                 _values,
             };
         } else {
-            const valuesValue = values.getValue();
+            if (values.isError()) {
+                return {
+                    isError: true,
+                    errorObejct: values as ErrorValueObject,
+                };
+            }
 
-            if (values.isNull() || values.isBoolean() || (values.isString() && !isRealNum(valuesValue))) {
+            if (values.isNull() || values.isBoolean()) {
+                return {
+                    isError: true,
+                    errorObejct: ErrorValueObject.create(ErrorType.VALUE),
+                };
+            }
+
+            const value = +values.getValue();
+
+            if (Number.isNaN(value)) {
                 return {
                     isError: true,
                     errorObejct: ErrorValueObject.create(ErrorType.VALUE),
@@ -193,8 +199,8 @@ export class Xnpv extends BaseFunction {
             }
 
             return {
-                isError: true,
-                errorObejct: ErrorValueObject.create(ErrorType.NA),
+                isError: false,
+                _values: [value],
             };
         }
     }
@@ -245,21 +251,28 @@ export class Xnpv extends BaseFunction {
                 };
             }
 
-            if (_dates.length <= 1) {
-                return {
-                    isError: true,
-                    errorObejct: ErrorValueObject.create(ErrorType.NA),
-                };
-            }
-
             return {
                 isError,
                 _dates,
             };
         } else {
-            const datesValue = dates.getValue();
+            if (dates.isError()) {
+                return {
+                    isError: true,
+                    errorObejct: dates as ErrorValueObject,
+                };
+            }
 
-            if (dates.isNull() || dates.isBoolean() || (dates.isString() && !isRealNum(datesValue))) {
+            if (dates.isNull() || dates.isBoolean()) {
+                return {
+                    isError: true,
+                    errorObejct: ErrorValueObject.create(ErrorType.VALUE),
+                };
+            }
+
+            const datesValue = +dates.getValue();
+
+            if (Number.isNaN(datesValue)) {
                 return {
                     isError: true,
                     errorObejct: ErrorValueObject.create(ErrorType.VALUE),
@@ -274,8 +287,8 @@ export class Xnpv extends BaseFunction {
             }
 
             return {
-                isError: true,
-                errorObejct: ErrorValueObject.create(ErrorType.NA),
+                isError: false,
+                _dates: [Math.floor(datesValue)],
             };
         }
     }

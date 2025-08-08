@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-adapter-web-component",
-    "version": "0.10.2",
+    "version": "0.10.3",
     "private": false,
     "description": "Web component adapter for Univer UI",
     "author": "DreamNum <developer@univer.ai>",

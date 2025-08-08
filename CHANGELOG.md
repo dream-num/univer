@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.10.3](https://github.com/dream-num/univer/compare/v0.10.2...v0.10.3) (2025-08-08)
+
+
+### Bug Fixes
+
+* color picker is partially blocked ([#5654](https://github.com/dream-num/univer/issues/5654)) ([8daabe5](https://github.com/dream-num/univer/commit/8daabe54ef6725ba29d203f6deb5c7a6dd05e238))
+* **find-replace:** fix enter shortcut ([#5657](https://github.com/dream-num/univer/issues/5657)) ([ae1dc2a](https://github.com/dream-num/univer/commit/ae1dc2a93135f638efc51412732f56dd4b2eb12b))
+* fixed some formula and 0 value judgment issues ([#5655](https://github.com/dream-num/univer/issues/5655)) ([6d18c8b](https://github.com/dream-num/univer/commit/6d18c8bbfa8b4e27bcba2dbc697c004c49333915))
+* **formula:** fix numbervalue/datevalue/timevalue calculate ([#5637](https://github.com/dream-num/univer/issues/5637)) ([60c59f9](https://github.com/dream-num/univer/commit/60c59f9661aff8002706d87cd605434c60f0c6b7))
+* **sheets-table:** return undefined for empty cell values & fix i18n ([#5649](https://github.com/dream-num/univer/issues/5649)) ([48aea11](https://github.com/dream-num/univer/commit/48aea112d6210087782a9797e4b130a2022308f7))
+* **sheets-ui:** fix context menu insert control ([#5639](https://github.com/dream-num/univer/issues/5639)) ([e018864](https://github.com/dream-num/univer/commit/e01886440713190138a06e388e51d6a8aaeca9ae))
+
+
+### Features
+
+* add Ru localization engineering&information func; fix: description IMPRODUCT ([#5645](https://github.com/dream-num/univer/issues/5645)) ([2b79e82](https://github.com/dream-num/univer/commit/2b79e828ea009c367d34adf9b6874916aa73d4fe))
+
 ## [0.10.2](https://github.com/dream-num/univer/compare/v0.10.1...v0.10.2) (2025-08-02)
 
 

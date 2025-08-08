@@ -110,6 +110,7 @@ export class ZebraCrossingCacheController extends Disposable {
     private _initTriggerCacheUpdateListener() {
         this.disposeWithMe(
             this._zebraCacheUpdateSubject.subscribe(({ unitId, subUnitId }) => {
+                this._sheetRangeThemeModel.refreshSheetRowVisibleFuncSet(unitId, subUnitId);
                 this._sheetRangeThemeModel.refreshZebraCrossingCacheBySheet(unitId, subUnitId);
             })
         );

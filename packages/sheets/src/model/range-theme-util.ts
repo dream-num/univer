@@ -269,19 +269,11 @@ export class RangeThemeStyle {
         }
 
         if (offsetRow % 2 === 1) {
-            if (isToggled) {
-                mergeNumber = mergeNumber | STYLE_MAP.secondRowStyle;
-            } else {
-                mergeNumber = mergeNumber | STYLE_MAP.firstRowStyle;
-            }
+            mergeNumber = mergeNumber | (isToggled ? STYLE_MAP.secondRowStyle : STYLE_MAP.firstRowStyle);
         }
 
         if (offsetRow % 2 === 0) {
-            if (isToggled) {
-                mergeNumber = mergeNumber | STYLE_MAP.firstRowStyle;
-            } else {
-                mergeNumber = mergeNumber | STYLE_MAP.secondRowStyle;
-            }
+            mergeNumber = mergeNumber | (isToggled ? STYLE_MAP.firstRowStyle : STYLE_MAP.secondRowStyle);
         }
 
         if (offsetRow === 0) {

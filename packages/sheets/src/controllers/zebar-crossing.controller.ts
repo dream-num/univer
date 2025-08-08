@@ -90,7 +90,7 @@ export class ZebraCrossingCacheController extends Disposable {
                     break;
                 case SetWorksheetRowHeightMutation.id:
                     {
-                        // todo : only row height change 0 from non-zero or vice versa will trigger the cache update
+                        // only row height change 0 from non-zero or vice versa will trigger the cache update， we can perform in the future
                         const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
                         unitId = params.unitId;
                         subUnitId = params.subUnitId;

@@ -16,11 +16,13 @@
 
 import type { IInsertRowMutationParams, IRemoveRowsMutationParams } from '../basics';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../commands/mutations/set-row-visible.mutation';
+import type { ISetWorksheetRowHeightMutationParams } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
+import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SheetRangeThemeModel } from '../model/range-theme-model';
 
 export class ZebraCrossingCacheController extends Disposable {
@@ -82,6 +84,14 @@ export class ZebraCrossingCacheController extends Disposable {
                 case RemoveRowMutation.id:
                     {
                         const params = commandInfo.params as IRemoveRowsMutationParams;
+                        unitId = params.unitId;
+                        subUnitId = params.subUnitId;
+                    }
+                    break;
+                case SetWorksheetRowHeightMutation.id:
+                    {
+                        // todo : only row height change 0 from non-zero or vice versa will trigger the cache update
+                        const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
                         unitId = params.unitId;
                         subUnitId = params.subUnitId;
                     }

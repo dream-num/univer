@@ -35,8 +35,10 @@ import { SheetRowFilteredService } from '@univerjs/engine-formula/services/sheet
 import {
     RefRangeService,
     SheetInterceptorService,
+    SheetRangeThemeModel,
     SheetSkeletonService,
     SheetsSelectionsService,
+    ZebraCrossingCacheController,
 } from '@univerjs/sheets';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import enUS from '@univerjs/sheets/locale/en-US';
@@ -121,6 +123,8 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetInterceptorService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([SheetSkeletonService]);
+            injector.add([SheetRangeThemeModel]);
+            injector.add([ZebraCrossingCacheController]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);

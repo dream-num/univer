@@ -47,6 +47,7 @@ import {
     RemoveSheetMutation,
     SetSelectionsOperation,
     SheetInterceptorService,
+    SheetRangeThemeModel,
     SheetsSelectionsService,
     ZebraCrossingCacheController,
 } from '@univerjs/sheets';
@@ -315,6 +316,7 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
             injector.add([SheetsFilterService]);
             injector.add([SheetsSelectionsService]);
             injector.add([RefRangeService]);
+            injector.add([SheetRangeThemeModel]);
             injector.add([ZebraCrossingCacheController]);
             injector.add([SheetsFilterController]);
         }

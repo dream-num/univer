@@ -20,7 +20,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
 import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
@@ -133,6 +133,7 @@ function createFilterControllerTestBed(workbookData?: IWorkbookData) {
         override onStarting(): void {
             this._injector.add([RefRangeService]);
             this._injector.add([SheetsFilterService]);
+            this._injector.add([ZebraCrossingCacheController]);
             this._injector.add([SheetsFilterController]);
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([SheetInterceptorService]);

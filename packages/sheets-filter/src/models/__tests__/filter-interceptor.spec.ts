@@ -48,6 +48,7 @@ import {
     SetSelectionsOperation,
     SheetInterceptorService,
     SheetsSelectionsService,
+    ZebraCrossingCacheController,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
@@ -314,6 +315,7 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
             injector.add([SheetsFilterService]);
             injector.add([SheetsSelectionsService]);
             injector.add([RefRangeService]);
+            injector.add([ZebraCrossingCacheController]);
             injector.add([SheetsFilterController]);
         }
 

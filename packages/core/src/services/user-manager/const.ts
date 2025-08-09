@@ -16,7 +16,7 @@
 
 import type { IUser } from '@univerjs/protocol';
 import { UnitRole } from '@univerjs/protocol';
-import { generateRandomId } from '../../shared/tools';
+import { generateRandomId } from '../../shared';
 
 const nameMap = {
     [UnitRole.Editor]: 'Editor',
@@ -24,7 +24,8 @@ const nameMap = {
     [UnitRole.Reader]: 'Reader',
     [UnitRole.UNRECOGNIZED]: 'UNRECOGNIZED',
 };
-export const createDefaultUser = (type?: UnitRole) => {
+
+export const createDefaultUser = <T extends IUser = IUser>(type?: UnitRole): T => {
     if (!type) {
         return {
             userID: '',
@@ -32,15 +33,15 @@ export const createDefaultUser = (type?: UnitRole) => {
             avatar: '',
             anonymous: true,
             canBindAnonymous: false,
-        } as IUser;
+        } as T;
     }
-    const user = {
+    return {
         userID: `${nameMap[type]}_${generateRandomId(8)}`,
         name: nameMap[type],
         avatar: '',
-    } as IUser;
-    return user;
+    } as T;
 };
+
 export const isDevRole = (userId: string, type: UnitRole) => {
     return userId.startsWith(nameMap[type]);
 };

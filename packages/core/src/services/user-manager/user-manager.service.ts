@@ -14,21 +14,39 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Disposable } from '../../shared/lifecycle';
+import { createIdentifier } from '../../common/di';
+import { Disposable } from '../../shared';
 import { createDefaultUser } from './const';
 
 export interface IUser {
     userID: string;
     name: string;
     avatar?: string;
-};
+}
 
-export class UserManagerService extends Disposable {
-    private _model = new Map<string, IUser>();
-    private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
+export interface IUserManagerService<T extends IUser = IUser> {
+    /** User changed event */
+    userChange$: Observable<{ type: 'add' | 'delete'; user: T } | { type: 'clear' }>;
+    /** When the current user undergoes a switch or change */
+    currentUser$: Observable<T>;
+
+    getCurrentUser(): T | Promise<T>;
+    setCurrentUser(user: T): void | Promise<void>;
+    addUser(user: T): void | Promise<void>;
+    getUser(userId: string, callBack?: () => void): (T | undefined) | Promise<T | undefined>;
+    delete(userId: string): void | Promise<void>;
+    clear(): void | Promise<void>;
+    list(): T[] | Promise<T[]>;
+}
+export const IUserManagerService = createIdentifier<IUserManagerService>('univer.user-manager.service');
+
+export class UserManagerService<T extends IUser = IUser> extends Disposable implements IUserManagerService {
+    private _model = new Map<string, T>();
+    private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: T } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
-    private _currentUser$ = new BehaviorSubject<IUser>(createDefaultUser());
+    private _currentUser$ = new BehaviorSubject<T>(createDefaultUser() as unknown as T);
     /**
      * When the current user undergoes a switch or change
      * @memberof UserManagerService
@@ -43,21 +61,21 @@ export class UserManagerService extends Disposable {
         this._currentUser$.complete();
     }
 
-    getCurrentUser<T extends IUser>() {
+    getCurrentUser(): T {
         return this._currentUser$.getValue() as T;
     }
 
-    setCurrentUser<T extends IUser>(user: T) {
+    setCurrentUser(user: T) {
         this.addUser(user);
         this._currentUser$.next(user);
     }
 
-    addUser<T extends IUser>(user: T) {
+    addUser(user: T) {
         this._model.set(user.userID, user);
         this._userChange$.next({ type: 'add', user });
     }
 
-    getUser<T extends IUser>(userId: string, callBack?: () => void) {
+    getUser(userId: string, callBack?: () => void) {
         const user = this._model.get(userId) as T;
         if (user) {
             return user;

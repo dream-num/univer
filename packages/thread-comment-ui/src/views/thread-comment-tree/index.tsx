@@ -18,7 +18,7 @@ import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
-import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
+import { generateRandomId, ICommandService, IUserManagerService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, ResolvedIcon, SolveIcon } from '@univerjs/icons';
 import {
@@ -81,14 +81,21 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment, type } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const userManagerService = useDependency(UserManagerService);
-    const user = userManagerService.getUser(item.personId);
+    const userManagerService = useDependency(IUserManagerService);
     const currentUser = useObservable(userManagerService.currentUser$);
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
     const [showReply, setShowReply] = useState(false);
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const avatarFallback = uiConfig?.avatarFallback;
+
+    const [threadCommentUser, setThreadCommentUser] = useState<IUser>();
+    useEffect(() => {
+        (async () => {
+            const user = await userManagerService.getUser(item.personId);
+            setThreadCommentUser(user);
+        })();
+    }, []);
 
     const handleDeleteItem = () => {
         if (onDeleteComment?.(item) === false) {
@@ -116,20 +123,20 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                   univer-bg-center univer-bg-no-repeat
                 `}
                 style={{
-                    backgroundImage: `url(${user?.avatar || avatarFallback})`,
+                    backgroundImage: `url(${threadCommentUser?.avatar || avatarFallback})`,
                 }}
             />
-            {user
+            {threadCommentUser
                 ? (
                     <div className="univer-mb-1 univer-flex univer-h-6 univer-items-center univer-justify-between">
                         <div className="univer-text-sm univer-font-medium univer-leading-5">
-                            {user?.name || ' '}
+                            {threadCommentUser?.name || ' '}
                         </div>
                         <div>
                             {(isMock || resolved)
                                 ? null
                                 : (
-                                    showReply && user
+                                    showReply && threadCommentUser
                                         ? (
                                             <div
                                                 className={`
@@ -138,7 +145,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                   univer-rounded-sm univer-text-base
                                                   hover:univer-bg-gray-50
                                                 `}
-                                                onClick={() => onReply(user)}
+                                                onClick={() => onReply(threadCommentUser)}
                                             >
                                                 <ReplyToCommentIcon />
                                             </div>
@@ -290,7 +297,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     useObservable(updte$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
     const commandService = useDependency(ICommandService);
-    const userManagerService = useDependency(UserManagerService);
+    const userManagerService = useDependency(IUserManagerService);
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
     const editorRef = useRef<IThreadCommentEditorInstance>(null);

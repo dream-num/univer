@@ -17,7 +17,7 @@
 import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, IUserManagerService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, merge, of } from 'rxjs';
 import { debounceTime, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
@@ -102,7 +102,7 @@ export function getObservableWithExclusiveRange$(accessor: IAccessor, observable
 export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, supportCellEdit = false) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
     const contextService = accessor.get(IContextService);
     const _editorVisible$ = editorBridgeService?.visible$ ?? of<Nullable<IEditorBridgeServiceVisibleParam>>(null);
@@ -408,7 +408,7 @@ export function getWorkbookPermissionDisable$(accessor: IAccessor, workbookPermi
     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
     const selectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([userManagerService.currentUser$, workbook$]).pipe(
         switchMap(([_user, workbook]) => {

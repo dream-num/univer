@@ -50,7 +50,7 @@ import { ResourceManagerService } from './services/resource-manager/resource-man
 import { IResourceManagerService } from './services/resource-manager/type';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
-import { UserManagerService } from './services/user-manager/user-manager.service';
+import { IUserManagerService, UserManagerService } from './services/user-manager/user-manager.service';
 import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
@@ -257,10 +257,10 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [ThemeService],
         [LifecycleService],
         [PluginService],
-        [UserManagerService],
 
         // abstract services
         [IUniverInstanceService, { useClass: UniverInstanceService }],
+        [IUserManagerService, { useClass: UserManagerService }],
         [IPermissionService, { useClass: PermissionService }],
         [ILogService, { useClass: DesktopLogService, lazy: true }],
         [ICommandService, { useClass: CommandService }],
@@ -275,7 +275,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
 
     const injector = parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     touchDependencies(injector, [
-        [UserManagerService],
+        [IUserManagerService],
         [IResourceLoaderService],
     ]);
 

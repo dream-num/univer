@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, IUserManagerService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetDeleteProtectionPermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, map, merge, of, shareReplay, startWith, switchMap } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -23,7 +23,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 export function getAddPermissionHidden$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -76,7 +76,7 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
     const rangeRuleModel = accessor.get(RangeProtectionRuleModel);
 
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -158,7 +158,7 @@ export function getPermissionDisableBase$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -210,7 +210,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
     const contextService = accessor.get(IContextService);
     const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR).pipe(
@@ -284,7 +284,7 @@ export function getAddPermissionFromSheetBarDisable$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -327,7 +327,7 @@ export function getRemovePermissionFromSheetBarDisable$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -362,7 +362,7 @@ export function getSetPermissionFromSheetBarDisable$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -405,7 +405,7 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
 
     return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
         switchMap(([workbook, _]) => {
@@ -481,7 +481,7 @@ export function getViewPermissionDisable$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    const userManagerService = accessor.get(UserManagerService);
+    const userManagerService = accessor.get(IUserManagerService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
     const contextService = accessor.get(IContextService);
     const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);

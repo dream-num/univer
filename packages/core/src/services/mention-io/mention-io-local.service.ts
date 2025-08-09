@@ -15,26 +15,26 @@
  */
 
 import type { IListMentionParam, IListMentionResponse, IMentionIOService } from './type';
-import { Inject } from '@wendellhu/redi';
 import { MentionType } from '../../types/enum';
-import { UserManagerService } from '../user-manager/user-manager.service';
+import { IUserManagerService } from '../user-manager/user-manager.service';
 
 export class MentionIOLocalService implements IMentionIOService {
     constructor(
-        @Inject(UserManagerService) private _userManagerService: UserManagerService
+        @IUserManagerService private _userManagerService: IUserManagerService
     ) {}
 
     async list(params: IListMentionParam): Promise<IListMentionResponse> {
+        const currentUser = await this._userManagerService.getCurrentUser();
         return {
             list: [{
                 type: MentionType.PERSON,
                 mentions: [
                     {
                         objectType: MentionType.PERSON,
-                        objectId: this._userManagerService.getCurrentUser().userID,
-                        label: this._userManagerService.getCurrentUser().name,
+                        objectId: currentUser.userID,
+                        label: currentUser.name,
                         metadata: {
-                            icon: this._userManagerService.getCurrentUser().avatar,
+                            icon: currentUser.avatar,
                         },
                     },
                 ],

@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
-import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IPermissionService, IUniverInstanceService, IUserManagerService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetViewPermission } from '@univerjs/sheets';
@@ -29,7 +29,7 @@ export class SheetDrawingPermissionController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(UserManagerService) private _userManagerService: UserManagerService
+        @IUserManagerService private _userManagerService: IUserManagerService
     ) {
         super();
         this._initDrawingVisible();

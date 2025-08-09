@@ -16,7 +16,7 @@
 
 import type { IDocumentBody, Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { generateRandomId, ICommandService, Range, Tools, UserManagerService } from '@univerjs/core';
+import { generateRandomId, ICommandService, IUserManagerService, Range, Tools } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
@@ -153,15 +153,15 @@ export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
         return comments;
     }
 
-    override addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
+    override async addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();
         const commentService = injector.get(ICommandService);
-        const userService = injector.get(UserManagerService);
+        const userService = injector.get(IUserManagerService);
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const refStr = `${Tools.chatAtABC(this._range.startColumn)}${this._range.startRow + 1}`;
-        const currentUser = userService.getCurrentUser();
+        const currentUser = await userService.getCurrentUser();
         const commentData: Partial<IThreadComment> = content instanceof FTheadCommentBuilder ? content.build() : { text: content };
 
         return commentService.executeCommand(AddCommentCommand.id, {

@@ -136,7 +136,8 @@ export {
     UndoCommandId,
 } from './services/undoredo/undoredo.service';
 export { createDefaultUser } from './services/user-manager/const';
-export { type IUser, UserManagerService } from './services/user-manager/user-manager.service';
+export type { IUser } from './services/user-manager/user-manager.service';
+export { IUserManagerService, UserManagerService } from './services/user-manager/user-manager.service';
 export * from './shared';
 export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';

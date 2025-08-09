@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, IUserManagerService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -83,13 +83,13 @@ export const ToggleCommentPanelOperation: ICommand = {
 export const StartAddCommentOperation: ICommand = {
     id: 'docs.operation.start-add-comment',
     type: CommandType.OPERATION,
-    handler(accessor) {
+    handler: async (accessor: IAccessor): Promise<boolean> => {
         const panelService = accessor.get(ThreadCommentPanelService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const userManagerService = accessor.get(UserManagerService);
+        const userManagerService = accessor.get(IUserManagerService);
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
         const sidebarService = accessor.get(ISidebarService);
@@ -122,7 +122,7 @@ export const StartAddCommentOperation: ICommand = {
             id: commentId,
             ref: text,
             dT: getDT(),
-            personId: userManagerService.getCurrentUser().userID,
+            personId: (await userManagerService.getCurrentUser()).userID,
             text: {
                 dataStream: '\r\n',
             },

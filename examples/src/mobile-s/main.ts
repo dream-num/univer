@@ -15,7 +15,7 @@
  */
 
 import type { FUniver } from '@univerjs/core/facade';
-import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { IUserManagerService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -83,7 +83,7 @@ const mockUser = {
 };
 
 const injector = univer.__getInjector();
-const userManagerService = injector.get(UserManagerService);
+const userManagerService = injector.get(IUserManagerService);
 userManagerService.setCurrentUser(mockUser);
 
 declare global {

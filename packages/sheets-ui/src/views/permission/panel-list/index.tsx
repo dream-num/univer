@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
+import type { IRange, IUser, Workbook } from '@univerjs/core';
 import type { IPermissionPoint } from '@univerjs/protocol';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, IUserManagerService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
@@ -47,8 +47,7 @@ export function SheetPermissionPanelList() {
     const sidebarService = useDependency(ISidebarService);
     const authzIoService = useDependency(IAuthzIoService);
     const permissionService = useDependency(IPermissionService);
-    const usesManagerService = useDependency(UserManagerService);
-    const currentUser = usesManagerService.getCurrentUser();
+    const usesManagerService = useDependency(IUserManagerService);
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
 
     const sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
@@ -57,6 +56,13 @@ export function SheetPermissionPanelList() {
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     if (!workbook) return null;
+
+    const [currentUser, setCurrentUser] = useState<IUser>();
+    useEffect(() => {
+        (async () => {
+            setCurrentUser(await usesManagerService.getCurrentUser());
+        })();
+    }, []);
 
     const unitId = workbook.getUnitId();
 
@@ -244,8 +250,8 @@ export function SheetPermissionPanelList() {
                             const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
                             const deleteAction = item.actions.find((action) => action.action === UnitAction.Delete);
 
-                            const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
-                            const hasDeletePermission = deleteAction?.allowed || currentUser.userID === item.creator?.userID;
+                            const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser?.userID === item.creator?.userID;
+                            const hasDeletePermission = deleteAction?.allowed || currentUser?.userID === item.creator?.userID;
 
                             let ruleName = '';
 

@@ -19,7 +19,7 @@ import type { UnitAction } from '@univerjs/protocol';
 import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
 import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
 import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
-import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, IUserManagerService, UniverInstanceType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { skip } from 'rxjs';
 import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-protection.mutation';
@@ -39,7 +39,7 @@ export class SheetPermissionInitController extends Disposable {
         @IAuthzIoService private _authzIoService: IAuthzIoService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
-        @Inject(UserManagerService) private _userManagerService: UserManagerService,
+        @IUserManagerService private _userManagerService: IUserManagerService,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(WorkbookPermissionService) private _workbookPermissionService: WorkbookPermissionService,
         @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,

@@ -16,7 +16,7 @@
 
 import type { IDocumentBody, IRange, Workbook } from '@univerjs/core';
 import type { IAddCommentCommandParams, IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import { generateRandomId, ICommandService, Inject, Injector, IUniverInstanceService, RichTextBuilder, RichTextValue, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { generateRandomId, ICommandService, Inject, Injector, IUniverInstanceService, IUserManagerService, RichTextBuilder, RichTextValue, Tools, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
@@ -315,7 +315,7 @@ export class FThreadComment {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetsThreadCommentModel) private readonly _threadCommentModel: SheetsThreadCommentModel,
-        @Inject(UserManagerService) private readonly _userManagerService: UserManagerService
+        @IUserManagerService private readonly _userManagerService: IUserManagerService
     ) {
     }
 
@@ -412,7 +412,6 @@ export class FThreadComment {
         return this._injector.createInstance(FRange, workbook, worksheet, range);
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `getRichText` as instead
      */
@@ -463,7 +462,6 @@ export class FThreadComment {
         );
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `deleteAsync` as instead.
      */
@@ -471,7 +469,6 @@ export class FThreadComment {
         return this.deleteAsync();
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `updateAsync` as instead
      */
@@ -525,7 +522,6 @@ export class FThreadComment {
         return res;
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `resolveAsync` as instead
      */
@@ -595,8 +591,9 @@ export class FThreadComment {
      * console.log(result);
      * ```
      */
-    replyAsync(comment: FTheadCommentBuilder): Promise<boolean> {
+    async replyAsync(comment: FTheadCommentBuilder): Promise<boolean> {
         const commentData = comment.build();
+        const currentUser = await this._userManagerService.getCurrentUser();
         return this._commandService.executeCommand(
             AddCommentCommand.id,
             {
@@ -612,7 +609,7 @@ export class FThreadComment {
                     text: commentData.text,
                     attachments: commentData.attachments,
                     dT: commentData.dT || getDT(),
-                    personId: commentData.personId || this._userManagerService.getCurrentUser().userID,
+                    personId: commentData.personId || currentUser.userID,
                 },
             } as IAddCommentCommandParams
         );

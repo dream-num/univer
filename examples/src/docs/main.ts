@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { IUserManagerService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -89,7 +89,7 @@ declare global {
 
 window.univer = univer;
 const injector = univer.__getInjector();
-const userManagerService = injector.get(UserManagerService);
+const userManagerService = injector.get(IUserManagerService);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

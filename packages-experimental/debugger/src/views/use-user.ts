@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { createDefaultUser, IPermissionService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { createDefaultUser, IPermissionService, IUniverInstanceService, IUserManagerService, UniverInstanceType } from '@univerjs/core';
 import { WorkbookManageCollaboratorPermission } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 
@@ -44,7 +44,7 @@ const menu = [
 
 export function useUser() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const userManagerService = useDependency(UserManagerService);
+    const userManagerService = useDependency(IUserManagerService);
     const permissionService = useDependency(IPermissionService);
 
     const onSelect = (value: UnitRole) => {

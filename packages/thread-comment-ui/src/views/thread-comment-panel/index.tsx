@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { Observable } from 'rxjs';
 import type { IThreadCommentTreeProps } from '../thread-comment-tree';
-import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { ICommandService, IUserManagerService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
@@ -69,7 +69,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
-    const userService = useDependency(UserManagerService);
+    const userService = useDependency(IUserManagerService);
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [unitComments, setUnitComments] = useState(() => threadCommentModel.getUnit(unitId));
     const panelService = useDependency(ThreadCommentPanelService);

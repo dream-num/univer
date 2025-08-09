@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, LocaleType, LogLevel, Univer, UserManagerService } from '@univerjs/core';
+import { CellValueType, IUserManagerService, LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
@@ -104,7 +104,7 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
 
 const injector = univer.__getInjector();
-const userManagerService = injector.get(UserManagerService);
+const userManagerService = injector.get(IUserManagerService);
 userManagerService.setCurrentUser(mockUser);
 
 setTimeout(() => {

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction, UnitObject } from '@univerjs/protocol';
-import { ObjectScope, UnitRole, UniverType } from '@univerjs/protocol';
-import { Inject } from '../../common/di';
-import { generateRandomId } from '../../shared/tools';
+import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitObject } from '@univerjs/protocol';
+import type { IAuthzIoService } from './type';
+import { ObjectScope, UnitAction, UnitRole, UniverType } from '@univerjs/protocol';
+import { generateRandomId } from '../../shared';
 import { IResourceManagerService } from '../resource-manager/type';
-import { UserManagerService } from '../user-manager/user-manager.service';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
 
-import type { IAuthzIoService } from './type';
+import { IUserManagerService } from '../user-manager/user-manager.service';
 
 /**
  * Do not use the mock implementation in a production environment as it is a minimal version.
@@ -34,22 +33,22 @@ export class AuthzIoLocalService implements IAuthzIoService {
 
     constructor(
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @Inject(UserManagerService) private _userManagerService: UserManagerService
+        @IUserManagerService private _userManagerService: IUserManagerService
     ) {
         this._initSnapshot();
         this._initDefaultUser();
     }
 
-    private _initDefaultUser() {
-        const currentUser = this._userManagerService.getCurrentUser();
+    private async _initDefaultUser() {
+        const currentUser = await this._userManagerService.getCurrentUser();
         const currentUserIsValid = currentUser && currentUser.userID;
         if (!currentUserIsValid) {
-            this._userManagerService.setCurrentUser(createDefaultUser(UnitRole.Owner));
+            await this._userManagerService.setCurrentUser(createDefaultUser(UnitRole.Owner));
         }
     }
 
-    private _getRole(type: UnitRole) {
-        const user = this._userManagerService.getCurrentUser();
+    private async _getRole(type: UnitRole) {
+        const user = await this._userManagerService.getCurrentUser();
         if (!user) {
             return false;
         }
@@ -99,83 +98,86 @@ export class AuthzIoLocalService implements IAuthzIoService {
     // eslint-disable-next-line max-lines-per-function
     async list(config: IListPermPointRequest): Promise<IPermissionPoint[]> {
         const result: IPermissionPoint[] = [];
-        config.objectIDs.forEach((objectID) => {
+
+        const allowed = await this._getRole(UnitRole.Owner) || await this._getRole(UnitRole.Editor);
+
+        for (const objectID of config.objectIDs) {
             const rule = this._permissionMap.get(objectID);
-            if (rule) {
-                const item = {
-                    objectID,
-                    unitID: config.unitID,
-                    objectType: rule!.objectType,
-                    name: rule!.name,
-                    shareOn: false,
-                    shareRole: UnitRole.Owner,
-                    shareScope: -1,
-                    scope: {
-                        read: ObjectScope.AllCollaborator,
-                        edit: ObjectScope.AllCollaborator,
-                    },
-                    creator: createDefaultUser(UnitRole.Owner),
-                    strategies: [
-                        {
-                            action: 6,
-                            role: 1,
-                        },
-                        {
-                            action: 16,
-                            role: 1,
-                        },
-                        {
-                            action: 17,
-                            role: 1,
-                        },
-                        {
-                            action: 18,
-                            role: 1,
-                        },
-                        {
-                            action: 19,
-                            role: 1,
-                        },
-                        {
-                            action: 33,
-                            role: 1,
-                        },
-                        {
-                            action: 34,
-                            role: 1,
-                        },
-                        {
-                            action: 35,
-                            role: 1,
-                        },
-                        {
-                            action: 36,
-                            role: 1,
-                        },
-                        {
-                            action: 37,
-                            role: 1,
-                        },
-                        {
-                            action: 38,
-                            role: 1,
-                        },
-                        {
-                            action: 39,
-                            role: 1,
-                        },
-                        {
-                            action: 40,
-                            role: 1,
-                        },
-                    ],
-                    actions: config.actions.map((a) => {
-                        return { action: a, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor) };
-                    }),
-                };
-                result.push(item);
+            if (!rule) {
+                continue;
             }
-        });
+
+            const item = {
+                objectID,
+                unitID: config.unitID,
+                objectType: rule!.objectType,
+                name: rule!.name,
+                shareOn: false,
+                shareRole: UnitRole.Owner,
+                shareScope: -1,
+                scope: {
+                    read: ObjectScope.AllCollaborator,
+                    edit: ObjectScope.AllCollaborator,
+                },
+                creator: createDefaultUser(UnitRole.Owner),
+                strategies: [
+                    {
+                        action: UnitAction.Copy,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.InsertHyperlink,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.Sort,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.Filter,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.PivotTable,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.SetCellStyle,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.SetCellValue,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.SetRowStyle,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.SetColumnStyle,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.InsertRow,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.InsertColumn,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.DeleteRow,
+                        role: UnitRole.Editor,
+                    },
+                    {
+                        action: UnitAction.DeleteColumn,
+                        role: UnitRole.Editor,
+                    },
+                ],
+                actions: config.actions.map((action) => ({ action, allowed })),
+            };
+            result.push(item);
+        }
         return result;
     }
 

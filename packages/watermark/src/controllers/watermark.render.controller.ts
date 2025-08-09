@@ -16,7 +16,7 @@
 
 import type { UnitModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWatermarkConfigWithType } from '@univerjs/engine-render';
-import { ILocalStorageService, Inject, RxDisposable, UserManagerService } from '@univerjs/core';
+import { ILocalStorageService, Inject, IUserManagerService, RxDisposable } from '@univerjs/core';
 import { IWatermarkTypeEnum, UNIVER_WATERMARK_LAYER_INDEX, UNIVER_WATERMARK_STORAGE_KEY, WatermarkLayer } from '@univerjs/engine-render';
 import { WatermarkService } from '../services/watermark.service';
 
@@ -27,7 +27,7 @@ export class WatermarkRenderController extends RxDisposable implements IRenderMo
         private readonly _context: IRenderContext<UnitModel>,
         @Inject(WatermarkService) private _watermarkService: WatermarkService,
         @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService,
-        @Inject(UserManagerService) private _userManagerService: UserManagerService
+        @IUserManagerService private _userManagerService: IUserManagerService
     ) {
         super();
         this._watermarkLayer = new WatermarkLayer(_context.scene, [], UNIVER_WATERMARK_LAYER_INDEX);
@@ -51,14 +51,14 @@ export class WatermarkRenderController extends RxDisposable implements IRenderMo
 
     private _initWatermarkUpdate() {
         this.disposeWithMe(
-            this._watermarkService.updateConfig$.subscribe((_config) => {
+            this._watermarkService.updateConfig$.subscribe(async (_config) => {
                 if (!_config) {
                     this._watermarkLayer.updateConfig();
                     this._context.mainComponent?.makeDirty();
                     return;
                 }
                 if (_config.type === IWatermarkTypeEnum.UserInfo) {
-                    this._watermarkLayer.updateConfig(_config, this._userManagerService.getCurrentUser());
+                    this._watermarkLayer.updateConfig(_config, await this._userManagerService.getCurrentUser());
                 } else {
                     this._watermarkLayer.updateConfig(_config);
                 }

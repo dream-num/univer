@@ -17,7 +17,7 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
-import { HorizontalAlign, VerticalAlign } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, VerticalAlign } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '../basics';
 import { DocSimpleSkeleton } from '../components/docs/layout/doc-simple-skeleton';
 import { Shape } from './shape';
@@ -33,6 +33,7 @@ export interface ITextProps extends IShapeProps {
     color?: Nullable<string>;
     strokeLine?: boolean;
     underline?: boolean;
+    cellValueType?: Nullable<CellValueType>;
 }
 
 export const TEXT_OBJECT_ARRAY = ['text', 'fontStyle', 'warp', 'hAlign', 'vAlign', 'width', 'height', 'color'];
@@ -65,7 +66,7 @@ export class Text extends Shape<ITextProps> {
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: ITextProps, _skeleton?: DocSimpleSkeleton) {
-        const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0 } = props;
+        const { text, fontStyle, warp, hAlign, vAlign, width, height, left = 0, top = 0, cellValueType } = props;
         const skeleton = _skeleton ?? new DocSimpleSkeleton(text, fontStyle, Boolean(warp), width, vAlign === VerticalAlign.TOP ? height : Infinity);
         const lines = skeleton.calculate();
         const totalHeight = skeleton.getTotalHeight();
@@ -82,7 +83,22 @@ export class Text extends Shape<ITextProps> {
         for (const line of lines) {
             const lineHeight = line.height;
             const lineWidth = line.width;
-            const lineX = (hAlign === HorizontalAlign.LEFT || hAlign === HorizontalAlign.UNSPECIFIED) ? 0 : (hAlign === HorizontalAlign.CENTER ? (width - lineWidth) / 2 : (width - lineWidth));
+            /**
+             * Optimized number rendering when cell width is less than text width and does not wrap.
+             * - Excel: The number rendering are automatically rounded as the cell width decreases, so the text width will always be less than the cell width.
+             * - Google Sheets: The number rendering are left-aligned regardless of horizontal alignment when the cell width is less than text width.
+             * - WPS: As the cell width decreases, the excess number will be displayed as "...", so the text width will always be less than the cell width.
+             * We use google sheets behavior here, which is to left-align the text when the cell width is less than the text width and not wrapped.
+             */
+            const lineX = (
+                hAlign === HorizontalAlign.LEFT ||
+                hAlign === HorizontalAlign.UNSPECIFIED ||
+                (!warp && width < lineWidth && cellValueType === CellValueType.NUMBER)
+            )
+                ? 0
+                : (hAlign === HorizontalAlign.CENTER
+                    ? (width - lineWidth) / 2
+                    : (width - lineWidth));
             const baselineY = lineTop + line.baseline;
 
             // Draw the text

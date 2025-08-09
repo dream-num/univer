@@ -576,7 +576,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     Infinity
                 );
                 skeleton.calculate();
-                return skeleton.getTotalHeight();
+                return skeleton.getTotalHeight() + paddingTop + paddingBottom;
             } else {
                 // For same fontStyle, the height of the text is fixed.
                 // So we can use a fixed text to calculate the height to make a speed up.

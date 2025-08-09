@@ -25,7 +25,7 @@ import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { CellValueType, extractPureTextFromCell, HorizontalAlign, Range, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, extractPureTextFromCell, HorizontalAlign, Range, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -513,7 +513,7 @@ export class Font extends SheetExtension {
         // If the horizontal alignment is not specified, we need to determine it based on the cell value type.
         let hAlign = fontCache.horizontalAlign;
         if (fontCache.horizontalAlign === HorizontalAlign.UNSPECIFIED) {
-            if (cellData.t === CellValueType.NUMBER) {
+            if (cellData.t === CellValueType.NUMBER || (!Tools.isDefine(cellData.t) && typeof cellData.v === 'number')) {
                 // If the cell value is a number, default to right alignment.
                 hAlign = HorizontalAlign.RIGHT;
             } else if (cellData.t === CellValueType.BOOLEAN) {

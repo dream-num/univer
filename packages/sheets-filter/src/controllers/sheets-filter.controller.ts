@@ -21,7 +21,7 @@ import type { FilterColumn } from '../models/filter-model';
 
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Optional, Rectangle } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
-import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActiveOperation, SheetInterceptorService } from '@univerjs/sheets';
+import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActiveOperation, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../commands/mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../services/sheet-filter.service';
 import { mergeSetFilterCriteria } from '../utils';
@@ -34,7 +34,8 @@ export class SheetsFilterController extends Disposable {
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
-        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController: DataSyncPrimaryController
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController: DataSyncPrimaryController,
+        @Inject(ZebraCrossingCacheController) private readonly _zebraCrossingCacheController: ZebraCrossingCacheController
     ) {
         super();
 
@@ -43,6 +44,21 @@ export class SheetsFilterController extends Disposable {
         this._initInterceptors();
         this._commandExecutedListener();
         this._initErrorHandling();
+        this._initZebraCrossingCacheListener();
+    }
+
+    private _initZebraCrossingCacheListener() {
+        this.disposeWithMe(
+            this._sheetsFilterService.activeFilterModel$.subscribe((filterModel) => {
+                if (!filterModel) return;
+
+                this.disposeWithMe(
+                    filterModel.filteredOutRows$.subscribe(() => {
+                        this._zebraCrossingCacheController.updateZebraCrossingCache(filterModel.unitId, filterModel.subUnitId);
+                    })
+                );
+            })
+        );
     }
 
     private _initCommands(): void {

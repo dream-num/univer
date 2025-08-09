@@ -21,7 +21,7 @@ import type { IFilterConditionFormParams } from '../../models/conditions';
 import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service';
 import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
-import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { RefRangeService, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { CustomFilterOperator, FilterBy, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
@@ -95,6 +95,8 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
                 [SheetsSelectionsService],
                 [SheetInterceptorService],
                 [SheetsFilterPanelService],
+                [SheetRangeThemeModel],
+                [ZebraCrossingCacheController],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => this._injector.add(d));

@@ -125,7 +125,10 @@ export interface IWorksheetData {
     /** A matrix storing cell contents by row and column index. */
     cellData: IObjectMatrixPrimitiveType<ICellData>;
     rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
+
     columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
+
+    scopeColumnInfo?: IScopeColumnDataInfo[];
 
     /**
      * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Worksheet.
@@ -221,6 +224,21 @@ export interface IColumnData {
      * User stored custom fields
      */
     custom?: CustomData;
+}
+
+export interface IScopeColumnDataInfo {
+    /**
+     * The start column of the scope.
+     */
+    s: number;
+    /**
+     * The end column of the scope.
+     */
+    e: number;
+    /**
+     * The column data of the scope.
+     */
+    d: IColumnData;
 }
 
 export interface IColAutoWidthInfo {

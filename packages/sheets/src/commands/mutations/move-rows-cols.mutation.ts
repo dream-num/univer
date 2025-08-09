@@ -171,8 +171,9 @@ export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
         const toCol = targetRange.startColumn;
 
         // move column properties by directing mutating
-        const columnWrapper = worksheet.getColumnManager().getColumnData();
-        moveMatrixArray(fromCol, count, toCol, columnWrapper);
+        const columnWrapper = worksheet.getColumnManager();
+        // moveMatrixArray(fromCol, count, toCol, columnWrapper);
+        columnWrapper.moveColumnData(fromCol, count, toCol);
 
         // move cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();

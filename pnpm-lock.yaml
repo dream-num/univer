@@ -1226,8 +1226,8 @@ importers:
         specifier: ^3.16.1
         version: 3.18.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-grid-layout:
-        specifier: ^1.5.1
-        version: 1.5.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^1.5.2
+        version: 1.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-transition-group:
         specifier: ^4.4.5
         version: 4.4.5(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -6670,10 +6670,6 @@ packages:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
 
-  clsx@1.2.1:
-    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
-    engines: {node: '>=6'}
-
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
@@ -9956,14 +9952,14 @@ packages:
     peerDependencies:
       react: 19.1.1
 
-  react-draggable@4.4.6:
-    resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
+  react-draggable@4.5.0:
+    resolution: {integrity: sha512-VC+HBLEZ0XJxnOxVAZsdRi8rD04Iz3SiiKOoYzamjylUcju/hP9np/aZdLHf/7WOD268WMoNJMvYfB5yAK45cw==}
     peerDependencies:
       react: 19.1.1
       react-dom: 19.1.1
 
-  react-grid-layout@1.5.1:
-    resolution: {integrity: sha512-4Fr+kKMk0+m1HL/BWfHxi/lRuaOmDNNKQDcu7m12+NEYcen20wIuZFo789u3qWCyvUsNUxCiyf0eKq4WiJSNYw==}
+  react-grid-layout@1.5.2:
+    resolution: {integrity: sha512-vT7xmQqszTT+sQw/LfisrEO4le1EPNnSEMVHy6sBZyzS3yGkMywdOd+5iEFFwQwt0NSaGkxuRmYwa1JsP6OJdw==}
     peerDependencies:
       react: 19.1.1
       react-dom: 19.1.1
@@ -14640,8 +14636,6 @@ snapshots:
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
-  clsx@1.2.1: {}
-
   clsx@2.1.1: {}
 
   collapse-white-space@2.1.0: {}
@@ -18418,21 +18412,21 @@ snapshots:
       react: 19.1.1
       scheduler: 0.26.0
 
-  react-draggable@4.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+  react-draggable@4.5.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
     dependencies:
-      clsx: 1.2.1
+      clsx: 2.1.1
       prop-types: 15.8.1
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
 
-  react-grid-layout@1.5.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+  react-grid-layout@1.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
     dependencies:
       clsx: 2.1.1
       fast-equals: 4.0.3
       prop-types: 15.8.1
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
-      react-draggable: 4.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-draggable: 4.5.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-resizable: 3.0.5(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       resize-observer-polyfill: 1.5.1
 
@@ -18487,7 +18481,7 @@ snapshots:
     dependencies:
       prop-types: 15.8.1
       react: 19.1.1
-      react-draggable: 4.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-draggable: 4.5.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
     transitivePeerDependencies:
       - react-dom
 

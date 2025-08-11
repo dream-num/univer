@@ -64,7 +64,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "5.2.0",
         "eslint-plugin-react-refresh": "^0.4.20",
-        "fs-extra": "^11.3.0",
+        "fs-extra": "^11.3.1",
         "husky": "^9.1.7",
         "lint-staged": "^16.1.4",
         "posthog-node": "^5.6.0",

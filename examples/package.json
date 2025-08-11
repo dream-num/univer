@@ -99,7 +99,7 @@
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
-        "fs-extra": "^11.3.0",
+        "fs-extra": "^11.3.1",
         "minimist": "^1.2.8",
         "postcss": "^8.5.6",
         "tailwindcss": "3.4.17",

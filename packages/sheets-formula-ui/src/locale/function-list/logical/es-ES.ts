@@ -32,8 +32,8 @@ const locale: typeof enUS = {
         },
     },
     BYCOL: {
-        description: 'Aplica una función&nbsp;LAMBDA&nbsp;a cada columna y devuelve una matriz de los resultados',
-        abstract: 'Aplica una función&nbsp;LAMBDA&nbsp;a cada columna y devuelve una matriz de los resultados',
+        description: 'Aplica una función LAMBDA a cada columna y devuelve una matriz de los resultados',
+        abstract: 'Aplica una función LAMBDA a cada columna y devuelve una matriz de los resultados',
         links: [
             {
                 title: 'Instrucción',
@@ -46,8 +46,8 @@ const locale: typeof enUS = {
         },
     },
     BYROW: {
-        description: 'Aplica una función&nbsp;LAMBDA&nbsp;a cada fila y devuelve una matriz de los resultados',
-        abstract: 'Aplica una función&nbsp;LAMBDA&nbsp;a cada fila y devuelve una matriz de los resultados',
+        description: 'Aplica una función LAMBDA a cada fila y devuelve una matriz de los resultados',
+        abstract: 'Aplica una función LAMBDA a cada fila y devuelve una matriz de los resultados',
         links: [
             {
                 title: 'Instrucción',
@@ -173,8 +173,8 @@ const locale: typeof enUS = {
         },
     },
     MAKEARRAY: {
-        description: 'Devuelve una matriz calculada de un tamaño de fila y columna especificado, mediante la aplicación de una&nbsp;LAMBDA',
-        abstract: 'Devuelve una matriz calculada de un tamaño de fila y columna especificado, mediante la aplicación de una&nbsp;LAMBDA',
+        description: 'Devuelve una matriz calculada de un tamaño de fila y columna especificado, mediante la aplicación de una LAMBDA',
+        abstract: 'Devuelve una matriz calculada de un tamaño de fila y columna especificado, mediante la aplicación de una LAMBDA',
         links: [
             {
                 title: 'Instrucción',

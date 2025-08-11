@@ -224,7 +224,7 @@ const locale = {
             },
             rowIndexNum: {
                 name: 'row_index_num',
-                detail: 'The row number in table_array from which the matching value will be returned. A row_index_num of 1 returns the first row value in table_array, a row_index_num of 2 returns the second row value in table_array, and so on. ',
+                detail: 'The row number in table_array from which the matching value will be returned. A row_index_num of 1 returns the first row value in table_array, a row_index_num of 2 returns the second row value in table_array, and so on.',
             },
             rangeLookup: {
                 name: 'range_lookup',
@@ -233,8 +233,8 @@ const locale = {
         },
     },
     HSTACK: {
-        description: 'Appends arrays horizontally and&nbsp;in sequence to return a larger array',
-        abstract: 'Appends arrays horizontally and&nbsp;in sequence to return a larger array',
+        description: 'Appends arrays horizontally and in sequence to return a larger array',
+        abstract: 'Appends arrays horizontally and in sequence to return a larger array',
         links: [
             {
                 title: 'Instruction',
@@ -535,8 +535,8 @@ const locale = {
         },
     },
     VSTACK: {
-        description: 'Appends&nbsp;arrays vertically and in sequence to return a larger array',
-        abstract: 'Appends&nbsp;arrays vertically and in sequence to return a larger array',
+        description: 'Appends arrays vertically and in sequence to return a larger array',
+        abstract: 'Appends arrays vertically and in sequence to return a larger array',
         links: [
             {
                 title: 'Instruction',
@@ -579,8 +579,8 @@ const locale = {
         },
     },
     XLOOKUP: {
-        description: 'Searches a range or an array, and returns&nbsp;an item&nbsp;corresponding&nbsp;to the&nbsp;first match it finds. If a match doesn\'t exist,&nbsp;then XLOOKUP can return the&nbsp;closest (approximate) match.&nbsp;',
-        abstract: 'Searches a range or an array, and returns&nbsp;an item&nbsp;corresponding&nbsp;to the&nbsp;first match it finds. If a match doesn\'t exist,&nbsp;then XLOOKUP can return the&nbsp;closest (approximate) match.&nbsp;',
+        description: 'Searches a range or an array, and returns an item corresponding to the first match it finds. If a match doesn\'t exist, then XLOOKUP can return the closest (approximate) match. ',
+        abstract: 'Searches a range or an array, and returns an item corresponding to the first match it finds. If a match doesn\'t exist, then XLOOKUP can return the closest (approximate) match. ',
         links: [
             {
                 title: 'Instruction',
@@ -610,7 +610,7 @@ const locale = {
     },
     XMATCH: {
         description: 'Searches for a specified item in an array or range of cells, and then returns the item\'s relative position.',
-        abstract: 'Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.',
+        abstract: 'Returns the relative position of an item in an array or range of cells.',
         links: [
             {
                 title: 'Instruction',

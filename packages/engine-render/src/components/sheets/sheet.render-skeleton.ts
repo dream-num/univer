@@ -353,7 +353,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = rowColumnSegment;
 
         // clear cache out of visible range
-        this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
+        // this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
 
         if (visibleEndColumn === -1 || visibleEndRow === -1) return;
 

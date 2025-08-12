@@ -30,8 +30,8 @@ const locale = {
         },
     },
     BYCOL: {
-        description: 'Applies a&nbsp;LAMBDA&nbsp;to each column and returns an array of the results',
-        abstract: 'Applies a&nbsp;LAMBDA&nbsp;to each column and returns an array of the results',
+        description: 'Applies a LAMBDA to each column and returns an array of the results',
+        abstract: 'Applies a LAMBDA to each column and returns an array of the results',
         links: [
             {
                 title: 'Instruction',
@@ -44,8 +44,8 @@ const locale = {
         },
     },
     BYROW: {
-        description: 'Applies a&nbsp;LAMBDA&nbsp;to each row and returns an array of the results',
-        abstract: 'Applies a&nbsp;LAMBDA&nbsp;to each row and returns an array of the results',
+        description: 'Applies a LAMBDA to each row and returns an array of the results',
+        abstract: 'Applies a LAMBDA to each row and returns an array of the results',
         links: [
             {
                 title: 'Instruction',
@@ -171,8 +171,8 @@ const locale = {
         },
     },
     MAKEARRAY: {
-        description: 'Returns a&nbsp;calculated array of a specified row and column size, by applying a&nbsp;LAMBDA',
-        abstract: 'Returns a&nbsp;calculated array of a specified row and column size, by applying a&nbsp;LAMBDA',
+        description: 'Returns a calculated array of a specified row and column size, by applying a LAMBDA',
+        abstract: 'Returns a calculated array of a specified row and column size, by applying a LAMBDA',
         links: [
             {
                 title: 'Instruction',
@@ -184,7 +184,7 @@ const locale = {
             number2: { name: 'cols', detail: 'The number of columns in the array. Must be greater than zero.' },
             value3: {
                 name: 'lambda',
-                detail: ' A LAMBDA that is called to create the array. The LAMBDA takes two parameters: row (The row index of the array), col (The column index of the array).',
+                detail: 'A LAMBDA that is called to create the array. The LAMBDA takes two parameters: row (The row index of the array), col (The column index of the array).',
             },
         },
     },
@@ -231,8 +231,8 @@ const locale = {
         },
     },
     REDUCE: {
-        description: 'Reduces an array to an accumulated value by applying a LAMBDA to each value and returning the total value in the accumulator. ',
-        abstract: 'Reduces an array to an accumulated value by applying a LAMBDA to each value and returning the total value in the accumulator. ',
+        description: 'Reduces an array to an accumulated value by applying a LAMBDA to each value and returning the total value in the accumulator.',
+        abstract: 'Reduces an array to an accumulated value by applying a LAMBDA to each value and returning the total value in the accumulator.',
         links: [
             {
                 title: 'Instruction',

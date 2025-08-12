@@ -32,8 +32,8 @@ const locale: typeof enUS = {
         },
     },
     BYCOL: {
-        description: 'Aplica una funció&nbsp;LAMBDA&nbsp;a cada columna i retorna una matriu dels resultats',
-        abstract: 'Aplica una funció&nbsp;LAMBDA&nbsp;a cada columna i retorna una matriu dels resultats',
+        description: 'Aplica una funció LAMBDA a cada columna i retorna una matriu dels resultats',
+        abstract: 'Aplica una funció LAMBDA a cada columna i retorna una matriu dels resultats',
         links: [
             {
                 title: 'Instrucció',
@@ -46,8 +46,8 @@ const locale: typeof enUS = {
         },
     },
     BYROW: {
-        description: 'Aplica una funció&nbsp;LAMBDA&nbsp;a cada fila i retorna una matriu dels resultats',
-        abstract: 'Aplica una funció&nbsp;LAMBDA&nbsp;a cada fila i retorna una matriu dels resultats',
+        description: 'Aplica una funció LAMBDA a cada fila i retorna una matriu dels resultats',
+        abstract: 'Aplica una funció LAMBDA a cada fila i retorna una matriu dels resultats',
         links: [
             {
                 title: 'Instrucció',
@@ -173,8 +173,8 @@ const locale: typeof enUS = {
         },
     },
     MAKEARRAY: {
-        description: 'Retorna una matriu calculada d\'una mida de fila i columna especificada, aplicant una&nbsp;LAMBDA',
-        abstract: 'Retorna una matriu calculada d\'una mida de fila i columna especificada, aplicant una&nbsp;LAMBDA',
+        description: 'Retorna una matriu calculada d\'una mida de fila i columna especificada, aplicant una LAMBDA',
+        abstract: 'Retorna una matriu calculada d\'una mida de fila i columna especificada, aplicant una LAMBDA',
         links: [
             {
                 title: 'Instrucció',

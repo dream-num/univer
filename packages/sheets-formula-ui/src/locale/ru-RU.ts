@@ -23,8 +23,8 @@ import date from './function-list/date/ru-RU';
 import engineering from './function-list/engineering/ru-RU';
 import financial from './function-list/financial/ru-RU';
 import information from './function-list/information/ru-RU';
-import logical from './function-list/logical/ru-RU'; // TODO
-import lookup from './function-list/lookup/ru-RU'; // TODO
+import logical from './function-list/logical/ru-RU';
+import lookup from './function-list/lookup/ru-RU';
 import math from './function-list/math/ru-RU';
 import statistical from './function-list/statistical/en-US'; // TODO
 import text from './function-list/text/ru-RU';

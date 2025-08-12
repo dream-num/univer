@@ -253,7 +253,7 @@ export class RangeThemeStyle {
         this._resetStyleCache();
     }
 
-    public getStyle(offsetRow: number, offsetCol: number, isLastRow: boolean, isLastCol: boolean) {
+    public getStyle(offsetRow: number, offsetCol: number, isLastRow: boolean, isLastCol: boolean, isToggled: boolean) {
         let mergeNumber = 0;
 
         if (isLastRow) {
@@ -269,11 +269,11 @@ export class RangeThemeStyle {
         }
 
         if (offsetRow % 2 === 1) {
-            mergeNumber = mergeNumber | STYLE_MAP.firstRowStyle;
+            mergeNumber = mergeNumber | (isToggled ? STYLE_MAP.secondRowStyle : STYLE_MAP.firstRowStyle);
         }
 
         if (offsetRow % 2 === 0) {
-            mergeNumber = mergeNumber | STYLE_MAP.secondRowStyle;
+            mergeNumber = mergeNumber | (isToggled ? STYLE_MAP.firstRowStyle : STYLE_MAP.secondRowStyle);
         }
 
         if (offsetRow === 0) {

@@ -19,7 +19,7 @@ import type { ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filte
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { CommandType, ICommandService, IContextService, Inject, Injector, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
-import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { RefRangeService, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
@@ -79,6 +79,8 @@ function createFilterOperationTestBed() {
                 [SheetsFilterPanelService],
                 [RefRangeService],
                 [SheetsSelectionsService],
+                [SheetRangeThemeModel],
+                [ZebraCrossingCacheController],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => this._injector.add(d));

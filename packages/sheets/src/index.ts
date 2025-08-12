@@ -326,6 +326,7 @@ export { getAddMergeMutationRangeByType } from './controllers/merge-cell.control
 export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers/merge-cell.controller';
 export { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+export { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
 export { type ICellPermission, RangeProtectionRenderModel } from './model/range-protection-render.model';
 export { EditStateEnum, type IModel, type IObjectModel, type IRangeProtectionRule, RangeProtectionRuleModel, ViewStateEnum } from './model/range-protection-rule.model';
 export { RangeProtectionCache } from './model/range-protection.cache';

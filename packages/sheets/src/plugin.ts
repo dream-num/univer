@@ -29,10 +29,11 @@ import { SheetPermissionCheckController } from './controllers/permission/sheet-p
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 
+import { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
-import { RangeProtectionCache } from './model/range-protection.cache';
 
+import { RangeProtectionCache } from './model/range-protection.cache';
 import { SheetRangeThemeModel } from './model/range-theme-model';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
@@ -103,6 +104,7 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [NumberCellDisplayController],
             [DefinedNameDataController],
+            [ZebraCrossingCacheController],
 
             // permission
             [WorksheetPermissionService],
@@ -162,6 +164,7 @@ export class UniverSheetsPlugin extends Plugin {
         touchDependencies(this._injector, [
             [CalculateResultApplyController],
             [DefinedNameDataController],
+            [ZebraCrossingCacheController],
             [SheetRangeThemeModel],
             [NumberCellDisplayController],
             [RangeProtectionRenderModel],

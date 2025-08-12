@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ITableRangeWithState } from '@univerjs/sheets-table';
 import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
-import { Inject, Injector, InterceptorEffectEnum, RxDisposable } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
+import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { TableManager } from '@univerjs/sheets-table';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
@@ -34,6 +34,23 @@ interface ISheetsTableFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
+const computeIconTop = (
+    startY: number,
+    endY: number,
+    cellHeight: number,
+    verticalAlign?: VerticalAlign
+) => {
+    switch (verticalAlign) {
+        case VerticalAlign.TOP:
+            return startY + FILTER_ICON_PADDING;
+        case VerticalAlign.MIDDLE:
+            return startY + Math.max(0, (cellHeight - FILTER_ICON_SIZE) / 2);
+        case VerticalAlign.BOTTOM:
+        default:
+            return endY - FILTER_ICON_SIZE - FILTER_ICON_PADDING;
+    }
+};
+
 /**
  * Show selected range in filter.
  */
@@ -46,10 +63,12 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(TableManager) private _tableManager: TableManager
+        @Inject(TableManager) private _tableManager: TableManager,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initRenderer();
+        this._initCommandExecuted();
     }
 
     override dispose(): void {
@@ -96,9 +115,43 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
         });
     }
 
+    private _initCommandExecuted() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetVerticalTextAlignCommand.id) {
+                    return;
+                }
+
+                const { unit: workbook, unitId } = this._context;
+                const worksheetId = workbook.getActiveSheet()?.getSheetId() || '';
+                const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+                if (!skeleton) {
+                    return;
+                }
+                const renderParams: ISheetsTableFilterRenderParams = {
+                    unitId,
+                    worksheetId,
+                    tableFilterRanges: this._tableManager.getSheetFilterRangeWithState(workbook.getUnitId(), worksheetId),
+                    skeleton,
+                };
+
+                this._disposeRendering();
+                if (!renderParams || !renderParams.tableFilterRanges) {
+                    return;
+                }
+
+                this._renderButtons(renderParams as Required<ISheetsTableFilterRenderParams>);
+            })
+        );
+    }
+
     private _renderButtons(params: Required<ISheetsTableFilterRenderParams>): void {
         const { tableFilterRanges, unitId, skeleton, worksheetId } = params;
-        const { scene } = this._context;
+        const { unit: workbook, scene } = this._context;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) {
+            return;
+        }
 
         for (const { range, states, tableId } of tableFilterRanges) {
             const { startRow, startColumn, endColumn } = range;
@@ -106,6 +159,8 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
             for (let col = startColumn; col <= endColumn; col++) {
                 const key = `sheets-table-filter-button-${startRow}-${col}`;
                 const startPosition = getCoordByCell(startRow, col, scene, skeleton);
+                const cellStyle = worksheet.getCellStyle(startRow, col);
+                const verticalAlign = cellStyle?.vt || VerticalAlign.BOTTOM;
                 const { startX, startY, endX, endY } = startPosition;
                 const cellWidth = endX - startX;
                 const cellHeight = endY - startY;
@@ -114,7 +169,7 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
                 }
                 const state = states[col - startColumn];
                 const iconStartX = endX - FILTER_ICON_SIZE - FILTER_ICON_PADDING;
-                const iconStartY = endY - FILTER_ICON_SIZE - FILTER_ICON_PADDING;
+                const iconStartY = computeIconTop(startY, endY, cellHeight, verticalAlign);
                 const props: ISheetsTableFilterButtonShapeProps = {
                     left: iconStartX,
                     top: iconStartY,

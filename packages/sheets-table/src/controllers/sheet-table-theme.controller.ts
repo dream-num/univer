@@ -126,5 +126,7 @@ export class SheetsTableThemeController extends Disposable {
 
     override dispose() {
         super.dispose();
+        this._allThemes = [];
+        this._defaultThemeIndex = 0;
     }
 }

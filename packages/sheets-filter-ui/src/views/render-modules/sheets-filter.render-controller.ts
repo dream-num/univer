@@ -39,12 +39,12 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
-const computeIconTop = (
+function computeIconTop(
     startY: number,
     endY: number,
     cellHeight: number,
     verticalAlign?: VerticalAlign
-) => {
+) {
     switch (verticalAlign) {
         case VerticalAlign.TOP:
             return startY + FILTER_ICON_PADDING;

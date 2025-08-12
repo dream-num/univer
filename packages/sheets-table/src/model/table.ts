@@ -16,7 +16,6 @@
 
 import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange } from '../types/type';
 import { generateRandomId } from '@univerjs/core';
-import { tableThemeConfig } from '../controllers/table-theme.factory';
 import { TableColumn } from './table-column';
 import { TableFilters } from './table-filter';
 
@@ -195,7 +194,7 @@ export class Table {
     }
 
     getTableStyleId() {
-        return this._tableStyleId ?? tableThemeConfig[0].name;
+        return this._tableStyleId;
     }
 
     setTableStyleId(tableStyleId: string) {

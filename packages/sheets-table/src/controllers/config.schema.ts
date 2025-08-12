@@ -14,10 +14,27 @@
  * limitations under the License.
  */
 
+import type { IRangeThemeStyleJSON } from '@univerjs/sheets';
+import { BorderStyleTypes } from '@univerjs/core';
+
+export interface ITableDefaultThemeStyle {
+    name: string;
+    style: Omit<IRangeThemeStyleJSON, 'name'>;
+}
+export const tableDefaultBorderStyle = {
+    s: BorderStyleTypes.THIN,
+    cl: {
+        rgb: 'rgb(95 101 116)',
+    },
+};
+
 export const SHEETS_TABLE_PLUGIN_CONFIG_KEY = 'sheets-table.config';
 
 export const configSymbol = Symbol(SHEETS_TABLE_PLUGIN_CONFIG_KEY);
 
-export interface IUniverSheetsTableConfig {}
+export interface IUniverSheetsTableConfig {
+    userThemes?: ITableDefaultThemeStyle[];
+    defaultThemeIndex?: number;
+}
 
 export const defaultPluginConfig: IUniverSheetsTableConfig = {};

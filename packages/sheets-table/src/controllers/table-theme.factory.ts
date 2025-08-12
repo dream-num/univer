@@ -15,18 +15,8 @@
  */
 
 import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from '@univerjs/sheets';
-import { BorderStyleTypes } from '@univerjs/core';
-
-interface ITableDefaultThemeStyle {
-    name: string;
-    style: Omit<IRangeThemeStyleJSON, 'name'>;
-}
-export const tableDefaultBorderStyle = {
-    s: BorderStyleTypes.THIN,
-    cl: {
-        rgb: 'rgb(95 101 116)',
-    },
-};
+import type { ITableDefaultThemeStyle } from './config.schema';
+import { tableDefaultBorderStyle } from './config.schema';
 
 export const customEmptyThemeWithBorderStyle: Omit<IRangeThemeStyleJSON, 'name'> = {
     headerRowStyle: {

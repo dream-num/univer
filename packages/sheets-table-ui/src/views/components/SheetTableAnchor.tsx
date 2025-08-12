@@ -115,7 +115,7 @@ export const SheetTableAnchor = () => {
             {anchorPosition.map((item) => {
                 const table = tableManager.getTableById(unitId, item.tableId);
                 if (!table) return null;
-                const rangeTheme = rangeThemeModel.getRangeThemeStyle(unitId, table.getTableStyleId());
+                const rangeTheme = rangeThemeModel.getRangeThemeStyle(unitId, table.getTableStyleId() || '');
                 const headerBgColor = rangeTheme?.getHeaderRowStyle()?.bg?.rgb ?? anchorBackgroundColor;
                 const headerCl = rangeTheme?.getHeaderRowStyle()?.cl?.rgb ?? 'rgb(255, 255, 255)';
                 const headerTextColor = headerCl;

@@ -44,11 +44,8 @@ export class SheetsTableThemeController extends Disposable {
             this._tableManager.tableAdd$.subscribe((event) => {
                 const { range, tableId, unitId, subUnitId } = event;
                 const table = this._tableManager.getTable(unitId, tableId)!;
-                let tableStyleId = table.getTableStyleId();
-                if (!tableStyleId) {
-                    tableStyleId = this._allThemes[this._defaultThemeIndex].name;
-                    table.setTableStyleId(tableStyleId);
-                }
+                const tableStyleId = this._allThemes[this._defaultThemeIndex].name;
+                table.setTableStyleId(tableStyleId);
                 this._sheetRangeThemeService.registerRangeThemeStyle(tableStyleId, {
                     unitId,
                     subUnitId,

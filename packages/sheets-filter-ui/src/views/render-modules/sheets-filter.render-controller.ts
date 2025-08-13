@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core';
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
 import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService, VerticalAlign } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SetRangeValuesMutation, SetVerticalTextAlignCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
 
 import { attachSelectionWithCoord, getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -122,39 +122,6 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             this._renderRange(renderParams.range, renderParams.skeleton);
             this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
         });
-    }
-
-    private _initCommandExecuted() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id !== SetVerticalTextAlignCommand.id) {
-                    return;
-                }
-
-                const { unit: workbook, unitId } = this._context;
-                const worksheetId = workbook.getActiveSheet()?.getSheetId() || '';
-                const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-                const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
-                if (!skeleton) {
-                    return;
-                }
-                const renderParams: ISheetsFilterRenderParams = {
-                    unitId,
-                    worksheetId,
-                    filterModel,
-                    range: filterModel?.getRange(),
-                    skeleton,
-                };
-
-                this._disposeRendering();
-                if (!renderParams || !renderParams.range) {
-                    return;
-                }
-
-                this._renderRange(renderParams.range, renderParams.skeleton);
-                this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
-            })
-        );
     }
 
     private _renderRange(range: IRange, skeleton: SpreadsheetSkeleton): void {

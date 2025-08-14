@@ -20,7 +20,6 @@ export const currencySymbols = [
     '$',
     '£',
     '¥',
-    'NT$',
     '¤',
     '֏',
     '؋',

@@ -86,6 +86,18 @@ export class Styles {
         return this.add(data, styleObject);
     }
 
+    addCustomStyle(id: string, data: IStyleData): void {
+        this._styles[id] = data;
+        this._cacheMap.set(JSON.stringify(data), id);
+    }
+
+    remove(id: string): void {
+        if (this._styles[id]) {
+            delete this._styles[id];
+            this._cacheMap.delete(JSON.stringify(this._styles[id]));
+        }
+    }
+
     toJSON(): IKeyType<Nullable<IStyleData>> {
         return this._styles;
     }

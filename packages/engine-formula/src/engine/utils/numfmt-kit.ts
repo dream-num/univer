@@ -283,15 +283,9 @@ export function comparePatternPriority(previousPattern: string, nextPattern: str
 
 /**
  * Get the currency symbol based on the locale
- * Now define it here
- * TODO: import from sheet-numfmt currencySymbolMap later
- *
- * @param locale
- * @returns
  */
-const countryCurrencySymbolMap = new Map<LocaleType, string>([
+const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.EN_US, '$'],
-    // [LocaleType.JA_JP, '¥'],
     [LocaleType.RU_RU, '₽'],
     [LocaleType.VI_VN, '₫'],
     [LocaleType.ZH_CN, '¥'],
@@ -304,7 +298,7 @@ const countryCurrencySymbolMap = new Map<LocaleType, string>([
 ]);
 
 function getCurrencySymbol(locale: LocaleType): string {
-    return countryCurrencySymbolMap.get(locale) || '$';
+    return localeCurrencySymbolMap.get(locale) || '$';
 }
 
 export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {

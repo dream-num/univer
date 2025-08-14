@@ -18,13 +18,13 @@ import type { MenuSchemaType } from '@univerjs/ui';
 import { AddDecimalCommand, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
 import { RibbonDataGroup } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
-import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from './menu';
+import { AddDecimalMenuItem, CurrencySymbolIconMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.FORMULAS]: {
         [SetCurrencyCommand.id]: {
             order: 0,
-            menuItemFactory: CurrencyMenuItem,
+            menuItemFactory: CurrencySymbolIconMenuItem,
         },
         [AddDecimalCommand.id]: {
             order: 1,

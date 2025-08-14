@@ -18,8 +18,9 @@ import type { FormatType } from '@univerjs/sheets';
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { getPatternPreview, getPatternType, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import { getPatternPreview, getPatternType, localeCurrencySymbolMap, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { ILayoutService, useDependency } from '@univerjs/ui';
+import { useMemo } from 'react';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { MENU_OPTIONS } from '../../controllers/menu';
 
@@ -60,15 +61,20 @@ export const Options = () => {
 
         layoutService.focus();
     };
+
+    const menuOptions = useMemo(() => {
+        const currencySymbol = localeCurrencySymbolMap.get(localeService.getCurrentLocale()) as string;
+        return MENU_OPTIONS(currencySymbol);
+    }, [localeService]);
     const handleOnclick = (index: number) => {
         if (index === 0) {
             setNumfmt(null);
-        } else if (index === MENU_OPTIONS.length - 1) {
+        } else if (index === menuOptions.length - 1) {
             // CATUION: This is a command, not a menu item
             commandService.executeCommand(OpenNumfmtPanelOperator.id);
             layoutService.focus();
         } else {
-            const item = MENU_OPTIONS[index] as { pattern: string };
+            const item = menuOptions[index] as { pattern: string };
             item.pattern && setNumfmt(item.pattern);
         }
     };
@@ -77,7 +83,7 @@ export const Options = () => {
 
     return (
         <div className="univer-grid univer-gap-1 univer-p-1.5">
-            {MENU_OPTIONS.map((item, index) => {
+            {menuOptions.map((item, index) => {
                 if (item === '|') {
                     return <Separator key={index} />;
                 }

@@ -26,94 +26,85 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
-import { AddDecimalCommand, countryCurrencyMap, MenuCurrencyService, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
+import { AddDecimalCommand, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { filter, merge, Observable } from 'rxjs';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 
-export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'> = [
-    {
-        label: 'sheet.numfmt.general',
-        pattern: null,
-    },
-    {
-        label: 'sheet.numfmt.text',
-        pattern: DEFAULT_TEXT_FORMAT_EXCEL,
-    },
-    '|',
-    {
-        label: 'sheet.numfmt.number',
-        pattern: '0',
-    },
-    {
-        label: 'sheet.numfmt.percent',
-        pattern: '0.00%',
-    },
-    {
-        label: 'sheet.numfmt.scientific',
-        pattern: '0.00E+00',
-    },
-    '|',
-    {
-        label: 'sheet.numfmt.accounting',
-        pattern: '"¥" #,##0.00_);[Red]("¥"#,##0.00)',
-    },
-    {
-        label: 'sheet.numfmt.financialValue',
-        pattern: '#,##0.00;[Red]#,##0.00',
-    },
-    {
-        label: 'sheet.numfmt.currency',
-        pattern: '"¥"#,##0.00_);[Red]("¥"#,##0.00)',
-    },
-    {
-        label: 'sheet.numfmt.roundingCurrency',
-        pattern: '"¥"#,##0;[Red]"¥"#,##0',
-    },
-    '|',
-    {
-        label: 'sheet.numfmt.date',
-        pattern: 'yyyy-mm-dd;@',
-    },
-    {
-        label: 'sheet.numfmt.time',
-        pattern: 'am/pm h":"mm":"ss',
-    },
-    {
-        label: 'sheet.numfmt.dateTime',
-        pattern: 'yyyy-m-d am/pm h:mm',
-    },
-    {
-        label: 'sheet.numfmt.timeDuration',
-        pattern: 'h:mm:ss',
-    },
-    '|',
-    {
-        label: 'sheet.numfmt.moreFmt',
-        pattern: '',
-    },
-];
+export const MENU_OPTIONS = (currencySymbol: string): Array<{ label: string; pattern: string | null } | '|'> => {
+    return [
+        {
+            label: 'sheet.numfmt.general',
+            pattern: null,
+        },
+        {
+            label: 'sheet.numfmt.text',
+            pattern: DEFAULT_TEXT_FORMAT_EXCEL,
+        },
+        '|',
+        {
+            label: 'sheet.numfmt.number',
+            pattern: '0',
+        },
+        {
+            label: 'sheet.numfmt.percent',
+            pattern: '0.00%',
+        },
+        {
+            label: 'sheet.numfmt.scientific',
+            pattern: '0.00E+00',
+        },
+        '|',
+        {
+            label: 'sheet.numfmt.accounting',
+            pattern: `"${currencySymbol}" #,##0.00_);[Red]("${currencySymbol}"#,##0.00)`,
+        },
+        {
+            label: 'sheet.numfmt.financialValue',
+            pattern: '#,##0.00;[Red]#,##0.00',
+        },
+        {
+            label: 'sheet.numfmt.currency',
+            pattern: `"${currencySymbol}"#,##0.00_);[Red]("${currencySymbol}"#,##0.00)`,
+        },
+        {
+            label: 'sheet.numfmt.roundingCurrency',
+            pattern: `"${currencySymbol}"#,##0;[Red]"${currencySymbol}"#,##0`,
+        },
+        '|',
+        {
+            label: 'sheet.numfmt.date',
+            pattern: 'yyyy-mm-dd;@',
+        },
+        {
+            label: 'sheet.numfmt.time',
+            pattern: 'am/pm h":"mm":"ss',
+        },
+        {
+            label: 'sheet.numfmt.dateTime',
+            pattern: 'yyyy-m-d am/pm h:mm',
+        },
+        {
+            label: 'sheet.numfmt.timeDuration',
+            pattern: 'h:mm:ss',
+        },
+        '|',
+        {
+            label: 'sheet.numfmt.moreFmt',
+            pattern: '',
+        },
+    ] as Array<{ label: string; pattern: string | null } | '|'>;
+};
 
-export const CurrencyMenuItem = (accessor: IAccessor) => {
+export const CurrencySymbolIconMenuItem = (accessor: IAccessor) => {
     return {
         icon: new Observable<string>((subscribe) => {
-            const menuCurrencyService = accessor.get(MenuCurrencyService);
-            function getIconKey(symbol: string) {
-                const iconMap: Record<string, string> = {
-                    [countryCurrencyMap.US]: 'DollarIcon',
-                    [countryCurrencyMap.RU]: 'RoubleIcon',
-                    [countryCurrencyMap.CN]: 'RmbIcon',
-                    [countryCurrencyMap.AT]: 'EuroIcon',
-                };
-                return iconMap[symbol] ?? 'DollarIcon';
-            }
-            const symbol = countryCurrencyMap[menuCurrencyService.getCurrencySymbol()] ?? '$';
-            subscribe.next(getIconKey(symbol));
-            return menuCurrencyService.currencySymbol$.subscribe((code) => {
-                const symbol = countryCurrencyMap[code] ?? '$';
-                subscribe.next(getIconKey(symbol));
+            const localeService = accessor.get(LocaleService);
+            subscribe.next(getCurrencySymbolIconByLocale(localeService.getCurrentLocale()).icon);
+            return localeService.localeChanged$.subscribe(() => {
+                subscribe.next(getCurrencySymbolIconByLocale(localeService.getCurrentLocale()).icon);
             });
         }),
         id: SetCurrencyCommand.id,
@@ -122,7 +113,6 @@ export const CurrencyMenuItem = (accessor: IAccessor) => {
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-
     };
 };
 
@@ -187,6 +177,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                     const col = range.startColumn;
                     const numfmtValue = workbook.getStyles().get(worksheet.getCell(row, col)?.s)?.n;
                     const pattern = numfmtValue?.pattern;
+                    const currencySymbol = getCurrencySymbolByLocale(localeService.getCurrentLocale());
 
                     // Adapts the 'General' obtained during import, or the 'General' set manually
                     let value: string = localeService.t('sheet.numfmt.general');
@@ -197,7 +188,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                     }
 
                     if (pattern) {
-                        const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(
+                        const item = MENU_OPTIONS(currencySymbol).filter((item) => typeof item === 'object' && item.pattern).find(
                             (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
                         );
                         if (item && typeof item === 'object' && item.pattern) {

@@ -16,34 +16,38 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
-import { CommandType, ICommandService, Range } from '@univerjs/core';
+import { CommandType, ICommandService, LocaleService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { countryCurrencyMap } from '../../base/const/currency-symbols';
-import { CURRENCYFORMAT } from '../../base/const/formatdetail';
-import { MenuCurrencyService } from '../../service/menu.currency.service';
+import { getCurrencyFormat, getCurrencySymbolIconByLocale } from '../../base/const/currency-symbols';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
+/**
+ * This command is triggered by clicking the currency symbol icon in the menu.
+ * So the currency format is determined by the currency symbol icon.
+ */
 export const SetCurrencyCommand: ICommand = {
     id: 'sheet.command.numfmt.set.currency',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const menuCurrencyService = accessor.get(MenuCurrencyService);
-        const symbol = countryCurrencyMap[menuCurrencyService.getCurrencySymbol()] || '$';
+        const localeService = accessor.get(LocaleService);
+
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
             return false;
         }
-        const values: ISetNumfmtCommandParams['values'] = [];
 
-        const suffix = CURRENCYFORMAT[4].suffix(symbol);
+        const values: ISetNumfmtCommandParams['values'] = [];
+        const currencySymbolIcon = getCurrencySymbolIconByLocale(localeService.getCurrentLocale());
+        const currencyFormat = getCurrencyFormat(currencySymbolIcon.locale);
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {
-                values.push({ row, col, pattern: suffix, type: 'currency' });
+                values.push({ row, col, pattern: currencyFormat, type: 'currency' });
             });
         });
+
         const result = await commandService.executeCommand(SetNumfmtCommand.id, { values });
         return result;
     },

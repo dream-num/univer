@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-export { countryCurrencyMap } from './base/const/currency-symbols';
-export { currencySymbols } from './base/const/currency-symbols';
+export { currencySymbols, getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale, localeCurrencySymbolMap } from './base/const/currency-symbols';
 export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';
@@ -26,7 +25,6 @@ export { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
 export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
 export { UniverSheetsNumfmtPlugin } from './plugin';
-export { MenuCurrencyService } from './service/menu.currency.service';
 export { getCurrencyType } from './utils/currency';
 export { getDecimalFromPattern, getDecimalString, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
 export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';

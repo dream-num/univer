@@ -71,6 +71,8 @@ const createCollectEffectMutation = () => {
     };
 };
 
+const numfmtIgnorePatterns = new Set(['m/d', 'm d']);
+
 export class NumfmtEditorController extends Disposable {
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
     private _collectEffectMutation = createCollectEffectMutation();
@@ -141,7 +143,7 @@ export class NumfmtEditorController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-                    // eslint-disable-next-line complexity
+                    // eslint-disable-next-line complexity, max-lines-per-function
                     handler: (value, context, next) => {
                         // clear the effect
                         this._collectEffectMutation.clean();
@@ -173,7 +175,12 @@ export class NumfmtEditorController extends Disposable {
 
                         const body = value.p?.body;
                         const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
-                        const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+                        let numfmtInfo = numfmt.parseDate(content);
+                        if (!numfmtInfo) {
+                            numfmtInfo = numfmt.parseTime(content) || numfmt.parseNumber(content);
+                        } else if (numfmtIgnorePatterns.has(numfmtInfo.z!)) {
+                            numfmtInfo = numfmt.parseTime(content) || numfmt.parseNumber(content);
+                        }
 
                         if (body) {
                             if (!canConvertRichTextToNumfmt(body)) {

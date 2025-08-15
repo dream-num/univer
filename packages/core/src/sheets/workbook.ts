@@ -16,6 +16,7 @@
 
 import type { Observable } from 'rxjs';
 import type { Nullable } from '../shared';
+import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
@@ -195,6 +196,18 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
     getStyles(): Styles {
         return this._styles;
+    }
+
+    addStyles(styles: Record<string, IStyleData>): void {
+        Object.entries(styles).forEach(([id, data]) => {
+            this._styles.addCustomStyle(id, data);
+        });
+    }
+
+    removeStyles(ids: string[]) {
+        ids.forEach((id) => {
+            this._styles.remove(id);
+        });
     }
 
     getConfig(): IWorkbookData {

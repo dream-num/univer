@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, IWorksheetData, LocaleType, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IStyleData, IWorkbookData, IWorksheetData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IInsertSheetCommandParams, IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
@@ -1045,6 +1045,84 @@ export class FWorkbook extends FBaseInitialable {
      */
     getCustomMetadata(): CustomData | undefined {
         return this._workbook.getCustomMetadata();
+    }
+
+    /**
+     * Add styles to the workbook styles.
+     * @param {Record<string, IStyleData>} styles Styles to add
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     *
+     * // Add styles to the workbook styles
+     * const styles = {
+     *   'custom-style-1': {
+     *     bg: {
+     *       rgb: 'rgb(255, 0, 0)',
+     *     }
+     *   },
+     *   'custom-style-2': {
+     *     fs: 20,
+     *     n: {
+     *       pattern: '@'
+     *     }
+     *   }
+     * };
+     * fWorkbook.addStyles(styles);
+     *
+     * // Set values with the new styles
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   [{ v: 'Hello', s: 'custom-style-1' }, { v: 'Univer', s: 'custom-style-1' }],
+     *   [{ v: 'To', s: 'custom-style-1' }, { v: '0001', s: 'custom-style-2' }],
+     * ]);
+     * ```
+     */
+    addStyles(styles: Record<string, IStyleData>): void {
+        this._workbook.addStyles(styles);
+    }
+
+    /**
+     * Remove styles from the workbook styles.
+     * @param {string[]} styleKeys Style keys to remove
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     *
+     * // Add styles to the workbook styles
+     * const styles = {
+     *   'custom-style-1': {
+     *     bg: {
+     *       rgb: 'rgb(255, 0, 0)',
+     *     }
+     *   },
+     *   'custom-style-2': {
+     *     fs: 20,
+     *     n: {
+     *       pattern: '@'
+     *     }
+     *   }
+     * };
+     * fWorkbook.addStyles(styles);
+     *
+     * // Set values with the new styles
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.setValues([
+     *   [{ v: 'Hello', s: 'custom-style-1' }, { v: 'Univer', s: 'custom-style-1' }],
+     *   [{ v: 'To', s: 'custom-style-1' }, { v: '0001', s: 'custom-style-2' }],
+     * ]);
+     *
+     * // Remove the style `custom-style-1` after 2 seconds
+     * setTimeout(() => {
+     *   fWorkbook.removeStyles(['custom-style-1']);
+     *   fWorksheet.refreshCanvas();
+     * }, 2000);
+     * ```
+     */
+    removeStyles(styleKeys: string[]): void {
+        this._workbook.removeStyles(styleKeys);
     }
 }
 

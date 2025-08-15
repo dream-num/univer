@@ -166,7 +166,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         for (let col = startColumn; col <= endColumn; col++) {
             const key = `sheets-filter-button-${col}`;
             const startPosition = getCoordByCell(startRow, col, scene, skeleton);
-            const cellStyle = worksheet.getCellStyle(startRow, col);
+            const cellStyle = worksheet.getComposedCellStyle(startRow, col);
             const verticalAlign = cellStyle?.vt || VerticalAlign.BOTTOM;
             const { startX, startY, endX, endY } = startPosition;
 

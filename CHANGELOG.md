@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.10.4](https://github.com/dream-num/univer/compare/v0.10.3...v0.10.4) (2025-08-15)
+
+
+### Bug Fixes
+
+* **editor:** fix after delete cell content using backspace, the cell does not enter edit mode ([#5682](https://github.com/dream-num/univer/issues/5682)) ([f4e3b4e](https://github.com/dream-num/univer/commit/f4e3b4e2f566b50a1bb3abac7449c55d3ab934fb))
+* **engine-render:** disable cache clearing for visible range in sprea… ([#5673](https://github.com/dream-num/univer/issues/5673)) ([ccc5d5b](https://github.com/dream-num/univer/commit/ccc5d5bfeb5e7d045f401b47bd470761c904bf23))
+* **filterAndTable:** filter vertical align and table custom style ([#5677](https://github.com/dream-num/univer/issues/5677)) ([cd10f07](https://github.com/dream-num/univer/commit/cd10f071db287849d7395640d3ac805cae0a76ee))
+* **filter:** fix filter button style not effect range theme ([#5695](https://github.com/dream-num/univer/issues/5695)) ([2336c6d](https://github.com/dream-num/univer/commit/2336c6d326be30ccedb277c9f19e00bb994b5355))
+* fix number render when cell type is undefined or null ([#5666](https://github.com/dream-num/univer/issues/5666)) ([10a09aa](https://github.com/dream-num/univer/commit/10a09aabc2106aab9349ee1fd6830c0d9334eae2))
+* **render:** fix auto height calculate ([#5663](https://github.com/dream-num/univer/issues/5663)) ([4eb3456](https://github.com/dream-num/univer/commit/4eb345676cb8be1ae309519d75eba48d059c59f8))
+
+
+### Features
+
+* localization logical&lookup func; fix: replace &nbsp; in some functions ([#5672](https://github.com/dream-num/univer/issues/5672)) ([6354f0b](https://github.com/dream-num/univer/commit/6354f0b0b3ba0122508ab440a1c9f727951e8aa1))
+* optimize the currency format in the built-in menu to the one corresponding to the language pack. ([#5688](https://github.com/dream-num/univer/issues/5688)) ([0cda1d1](https://github.com/dream-num/univer/commit/0cda1d120394cd056a070ca5a38ee0b126027fba))
+* optimized number rendering when cell width less than text width ([#5665](https://github.com/dream-num/univer/issues/5665)) ([a2465e9](https://github.com/dream-num/univer/commit/a2465e91ff2d784cd26cc6d094088dad3a16e492))
+* **rangetheme:** support a performance cache for consider hide row ([#5651](https://github.com/dream-num/univer/issues/5651)) ([25674c2](https://github.com/dream-num/univer/commit/25674c21d16d4089d03b1092f5d27ed849376237))
+
 ## [0.10.3](https://github.com/dream-num/univer/compare/v0.10.2...v0.10.3) (2025-08-08)
 
 

@@ -967,17 +967,16 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
     async find(query: IFindQuery): Promise<SheetFindModel[]> {
         this._terminate();
 
-        const allWorkbooks = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        const parsedQuery = this._preprocessQuery(query);
-        const findModels = allWorkbooks.map((workbook) => {
-            const skeletonManagerService = this._renderManagerService.getRenderById(workbook.getUnitId())!.with(SheetSkeletonManagerService);
-            const sheetFind = this._injector.createInstance(SheetFindModel, workbook, skeletonManagerService);
-            this._findModelsByUnitId.set(workbook.getUnitId(), sheetFind);
-            sheetFind.start(parsedQuery);
-            return sheetFind;
-        });
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return [];
 
-        return findModels;
+        const parsedQuery = this._preprocessQuery(query);
+        const skeletonManagerService = this._renderManagerService.getRenderById(workbook.getUnitId())!.with(SheetSkeletonManagerService);
+        const sheetFind = this._injector.createInstance(SheetFindModel, workbook, skeletonManagerService);
+        this._findModelsByUnitId.set(workbook.getUnitId(), sheetFind);
+        sheetFind.start(parsedQuery);
+
+        return [sheetFind];
     }
 
     terminate(): void {

@@ -304,9 +304,9 @@ export class SheetRangeThemeModel extends Disposable {
         const range = { startRow: row, startColumn: col, endRow: row, endColumn: col };
         const rTreeCollection = this._ensureRTreeCollection(unitId);
         const themes = Array.from(rTreeCollection.bulkSearch([{ unitId, sheetId: subUnitId, range }]));
-        if (themes[0]) {
+        if (themes.length > 0) {
             const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
-            const themeRule = themeRuleMap.get(themes[0] as string);
+            const themeRule = themeRuleMap.get(themes[themes.length - 1] as string);
             if (themeRule) {
                 const { rangeInfo, themeName } = themeRule;
                 const offsetRow = row - rangeInfo.range.startRow;

@@ -62,6 +62,10 @@ export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatri
     return maxIndex + 1;
 }
 
+/**
+ * This function has bug of undefined value to be inserted.
+ * @deprecated
+ */
 export function insertMatrixArray<T>(
     index: number,
     value: T,
@@ -410,19 +414,40 @@ export class ObjectMatrix<T> {
     }
 
     insertRows(start: number, count: number): void {
-        for (let r = start; r < start + count; r++) {
-            const initial: IObjectArrayPrimitiveType<T> = {};
-            insertMatrixArray(r, initial, this._matrix);
+        const rowKeys = Object.keys(this._matrix);
+
+        // move all items after start in forward order
+        for (let i = rowKeys.length - 1; i >= 0; i--) {
+            const rowIndex = Number(rowKeys[i]);
+
+            if (rowIndex >= start) {
+                const rowObject = this._matrix[rowIndex];
+                // move the row to the next position
+                delete this._matrix[rowIndex];
+                this._matrix[rowIndex + count] = rowObject;
+            }
         }
     }
 
     insertColumns(start: number, count: number): void {
-        for (let c = start; c < start + count; c++) {
-            this.forEach((row, data) => {
-                if (data) {
-                    insertMatrixArray(c, undefined, data);
+        const rowKeys = Object.keys(this._matrix);
+
+        for (let i = 0; i < rowKeys.length; i++) {
+            const rowIndex = Number(rowKeys[i]);
+            const rowObject = this._matrix[rowIndex];
+            const columnKeys = Object.keys(rowObject);
+
+            // move all items after start in backward order
+            for (let j = columnKeys.length - 1; j >= 0; j--) {
+                const columnIndex = Number(columnKeys[j]);
+
+                if (columnIndex >= start) {
+                    const value = rowObject[columnIndex];
+                    // move the column to the next position
+                    delete rowObject[columnIndex];
+                    rowObject[columnIndex + count] = value;
                 }
-            });
+            }
         }
     }
 

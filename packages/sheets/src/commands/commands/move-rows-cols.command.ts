@@ -337,7 +337,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return true;
         }
 
-        return true;
+        return false;
     },
 };
 

@@ -410,19 +410,39 @@ export class ObjectMatrix<T> {
     }
 
     insertRows(start: number, count: number): void {
-        for (let r = start; r < start + count; r++) {
-            const initial: IObjectArrayPrimitiveType<T> = {};
-            insertMatrixArray(r, initial, this._matrix);
+        // move all items after start in forward order
+        const rowKeys = Object.keys(this._matrix).sort((a, b) => Number(b) - Number(a));
+
+        for (const rowKey of rowKeys) {
+            const rowIndex = Number(rowKey);
+
+            if (rowIndex >= start) {
+                const rowObject = this._matrix[rowIndex];
+                // move the row to the next position
+                delete this._matrix[rowIndex];
+                this._matrix[rowIndex + count] = rowObject;
+            }
         }
     }
 
     insertColumns(start: number, count: number): void {
-        for (let c = start; c < start + count; c++) {
-            this.forEach((row, data) => {
-                if (data) {
-                    insertMatrixArray(c, undefined, data);
+        const rowKeys = Object.keys(this._matrix);
+        for (const rowKey of rowKeys) {
+            const rowIndex = Number(rowKey);
+            const rowObject = this._matrix[rowIndex];
+
+            // move all items after start in forward order
+            const columnKeys = Object.keys(rowObject).sort((a, b) => Number(b) - Number(a));
+            for (const columnKey of columnKeys) {
+                const columnIndex = Number(columnKey);
+
+                if (columnIndex >= start) {
+                    const value = rowObject[columnIndex];
+                    // move the column to the next position
+                    delete rowObject[columnIndex];
+                    rowObject[columnIndex + count] = value;
                 }
-            });
+            }
         }
     }
 

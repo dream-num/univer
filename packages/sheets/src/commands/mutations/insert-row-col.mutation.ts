@@ -15,14 +15,13 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
-
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
 
 export const InsertRowMutationUndoFactory = (
     accessor: IAccessor,
@@ -78,7 +77,7 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             }
         }
 
-        worksheet.setRowCount(worksheet.getRowCount() + range.endRow - range.startRow + 1);
+        worksheet.setRowCount(worksheet.getRowCount() + rowCount);
 
         // remove cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();

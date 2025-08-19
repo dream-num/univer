@@ -62,6 +62,10 @@ export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatri
     return maxIndex + 1;
 }
 
+/**
+ * This function has bug of undefined value to be inserted.
+ * @deprecated
+ */
 export function insertMatrixArray<T>(
     index: number,
     value: T,
@@ -410,11 +414,11 @@ export class ObjectMatrix<T> {
     }
 
     insertRows(start: number, count: number): void {
-        // move all items after start in forward order
-        const rowKeys = Object.keys(this._matrix).sort((a, b) => Number(b) - Number(a));
+        const rowKeys = Object.keys(this._matrix);
 
-        for (const rowKey of rowKeys) {
-            const rowIndex = Number(rowKey);
+        // move all items after start in forward order
+        for (let i = rowKeys.length - 1; i >= 0; i--) {
+            const rowIndex = Number(rowKeys[i]);
 
             if (rowIndex >= start) {
                 const rowObject = this._matrix[rowIndex];
@@ -427,14 +431,15 @@ export class ObjectMatrix<T> {
 
     insertColumns(start: number, count: number): void {
         const rowKeys = Object.keys(this._matrix);
-        for (const rowKey of rowKeys) {
-            const rowIndex = Number(rowKey);
-            const rowObject = this._matrix[rowIndex];
 
-            // move all items after start in forward order
-            const columnKeys = Object.keys(rowObject).sort((a, b) => Number(b) - Number(a));
-            for (const columnKey of columnKeys) {
-                const columnIndex = Number(columnKey);
+        for (let i = 0; i < rowKeys.length; i++) {
+            const rowIndex = Number(rowKeys[i]);
+            const rowObject = this._matrix[rowIndex];
+            const columnKeys = Object.keys(rowObject);
+
+            // move all items after start in backward order
+            for (let j = columnKeys.length - 1; j >= 0; j--) {
+                const columnIndex = Number(columnKeys[j]);
 
                 if (columnIndex >= start) {
                     const value = rowObject[columnIndex];

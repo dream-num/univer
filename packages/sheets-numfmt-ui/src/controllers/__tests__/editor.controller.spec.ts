@@ -431,6 +431,80 @@ describe('test editor', () => {
         expect(result?.v).toBe(123);
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
+
+    it('edit content 5A', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '5A' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe('5A');
+    });
+
+    it('edit content 5 A', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '5 A' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(0.20833333333333334);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
+
+    it('edit content 1 23', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '1 23' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe('1 23');
+    });
+
+    it('edit content 2/3', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '2/3' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(45691);
+        expect(result?.t).toBe(CellValueType.NUMBER);
+    });
 });
 
 describe('test get cell text/plain', () => {

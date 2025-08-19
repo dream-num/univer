@@ -28,7 +28,6 @@ import {
     Injector,
     isTextFormat,
     IUniverInstanceService,
-    numfmt,
     Optional,
     toDisposable,
     UniverInstanceType,
@@ -46,7 +45,7 @@ import {
     SheetInterceptorService,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import { getPatternType } from '@univerjs/sheets-numfmt';
+import { getNumfmtParseValueFilter, getPatternType } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 const createCollectEffectMutation = () => {
@@ -70,8 +69,6 @@ const createCollectEffectMutation = () => {
         clean,
     };
 };
-
-const numfmtIgnorePatterns = new Set(['m/d', 'm d']);
 
 export class NumfmtEditorController extends Disposable {
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
@@ -143,7 +140,7 @@ export class NumfmtEditorController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-                    // eslint-disable-next-line complexity, max-lines-per-function
+                    // eslint-disable-next-line complexity
                     handler: (value, context, next) => {
                         // clear the effect
                         this._collectEffectMutation.clean();
@@ -175,12 +172,7 @@ export class NumfmtEditorController extends Disposable {
 
                         const body = value.p?.body;
                         const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
-                        let numfmtInfo = numfmt.parseDate(content);
-                        if (!numfmtInfo) {
-                            numfmtInfo = numfmt.parseTime(content) || numfmt.parseNumber(content);
-                        } else if (numfmtIgnorePatterns.has(numfmtInfo.z!)) {
-                            numfmtInfo = numfmt.parseTime(content) || numfmt.parseNumber(content);
-                        }
+                        const numfmtInfo = getNumfmtParseValueFilter(content);
 
                         if (body) {
                             if (!canConvertRichTextToNumfmt(body)) {

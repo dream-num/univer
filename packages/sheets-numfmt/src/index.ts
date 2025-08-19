@@ -28,4 +28,4 @@ export { UniverSheetsNumfmtPlugin } from './plugin';
 export { getCurrencyType } from './utils/currency';
 export { getDecimalFromPattern, getDecimalString, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
 export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';
-export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';
+export { getNumfmtParseValueFilter, getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';

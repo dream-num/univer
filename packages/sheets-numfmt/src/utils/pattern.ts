@@ -59,7 +59,7 @@ const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
  * Get the numfmt parse value, and filter out the parse error.
  */
 export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | null => {
-    const parseData = numfmt.parseValue(value);
+    const parseData = numfmt.parseDate(value) ?? numfmt.parseTime(value) ?? numfmt.parseNumber(value);
 
     if (!parseData) return null;
 

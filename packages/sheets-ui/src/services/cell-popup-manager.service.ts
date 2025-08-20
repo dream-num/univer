@@ -30,7 +30,7 @@ export interface ICellPopup extends Omit<ICanvasPopup, 'direction' | 'offset' | 
 
 export interface ICellPopupDirectionCache {
     popups: ICellPopup[];
-    disposable: IDisposable;
+    disposable?: IDisposable;
 }
 
 export interface ICellPopupCache {
@@ -89,7 +89,7 @@ export class CellPopupManagerService extends Disposable {
             directionCache?.popups.splice(findIndex, 1);
 
             if (directionCache.popups.length === 0) {
-                directionCache.disposable.dispose();
+                directionCache.disposable?.dispose();
                 root[direction] = undefined;
             }
 

@@ -69,13 +69,13 @@ const locale: typeof enUS = {
         toggleGridlines: 'Переключить сетку',
     },
     align: {
-        left: 'лево',
-        center: 'центр',
-        right: 'право',
+        left: 'Лево',
+        center: 'Центр',
+        right: 'Право',
 
-        top: 'верх',
-        middle: 'середина',
-        bottom: 'низ',
+        top: 'Верх',
+        middle: 'Середина',
+        bottom: 'Низ',
     },
 
     button: {

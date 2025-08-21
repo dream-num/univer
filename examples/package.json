@@ -93,17 +93,17 @@
         "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "detect-port": "^2.1.0",
-        "esbuild": "^0.25.8",
+        "esbuild": "^0.25.9",
         "esbuild-plugin-alias": "^0.2.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
-        "fs-extra": "^11.3.0",
+        "fs-extra": "^11.3.1",
         "minimist": "^1.2.8",
         "postcss": "^8.5.6",
         "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5.8.3"
+        "typescript": "^5.9.2"
     }
 }

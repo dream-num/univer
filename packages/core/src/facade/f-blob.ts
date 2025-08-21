@@ -143,7 +143,7 @@ export class FBlob extends FBase {
      * ```
      */
     setBytes(bytes: Uint8Array): FBlob {
-        this._blob = new Blob([bytes]);
+        this._blob = new Blob([bytes.buffer as ArrayBuffer]);
         return this;
     }
 

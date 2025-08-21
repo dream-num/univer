@@ -193,7 +193,7 @@ function deserialize(request: HTTPRequest, bin: Uint8Array, contentType: string)
         case 'text':
             return new TextDecoder().decode(bin);
         case 'blob':
-            return new Blob([bin], { type: contentType });
+            return new Blob([bin.buffer as ArrayBuffer], { type: contentType });
         case 'arraybuffer':
             return bin.buffer;
         default:

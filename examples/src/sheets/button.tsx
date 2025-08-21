@@ -34,7 +34,7 @@ export const ButtonRangeSelector = () => {
         <>
             <Button onClick={() => selectorRef.current?.showDialog([])}>Start Select</Button>
             <RangeSelector
-                key={workbook?.getUnitId() ?? '' + `_${worksheet?.getSheetId()}` ?? ''}
+                key={`${workbook?.getUnitId() ?? ''}_${worksheet?.getSheetId() ?? ''}`}
                 selectorRef={selectorRef}
                 hideEditor
                 unitId={workbook?.getUnitId() ?? ''}

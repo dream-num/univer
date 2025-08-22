@@ -80,6 +80,30 @@ export class FPermission extends FBase {
     }
 
     /**
+     * Check if a specific permission point is enabled for a workbook.
+     * @param unitId - The unique identifier of the workbook.
+     * @param FPointClass - The constructor for the permission point class.
+     *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook.getPermission();
+     * const unitId = workbook.getId();
+     * // Check if the workbook is editable
+     * const isEditable = permission.checkWorkbookPermissionPoint(unitId, permission.permissionPointsDefinition.WorkbookEditablePermission);
+     * console.log('Workbook is editable:', isEditable);
+     * ```
+     */
+    checkWorkbookPermissionPoint(unitId: string, FPointClass: WorkbookPermissionPointConstructor): boolean | undefined {
+        const instance = new FPointClass(unitId);
+        const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
+        if (permissionPoint) {
+            return permissionPoint.value;
+        }
+        return undefined;
+    }
+
+    /**
      * This function is used to set whether the workbook can be edited
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {boolean} value - A value that controls whether the workbook can be edited
@@ -239,6 +263,34 @@ export class FPermission extends FBase {
         this._permissionService.updatePermissionPoint(instance.id, value);
 
         return permissionId;
+    }
+
+    /**
+     * Check if a specific permission point is enabled for a worksheet.
+     * @param unitId - The unique identifier of the workbook.
+     * @param subUnitId - The unique identifier of the worksheet.
+     * @param FPointClass - The constructor for the permission point class.
+     *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
+     * @returns {boolean | undefined} - Returns true if the permission point is enabled, false if it is disabled, or undefined if the permission point does not exist.
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook.getPermission();
+     * const unitId = workbook.getId();
+     * const worksheet = workbook.getActiveSheet();
+     * const subUnitId = worksheet.getSheetId();
+     * // Check if the worksheet is editable
+     * const isEditable = permission.checkWorksheetPermissionPoint(unitId, subUnitId, permission.permissionPointsDefinition.WorksheetEditPermission);
+     * console.log('Worksheet is editable:', isEditable);
+     * ```
+     */
+    checkWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor): boolean | undefined {
+        const instance = new FPointClass(unitId, subUnitId);
+        const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
+        if (permissionPoint) {
+            return permissionPoint.value;
+        }
+        return undefined;
     }
 
     /**

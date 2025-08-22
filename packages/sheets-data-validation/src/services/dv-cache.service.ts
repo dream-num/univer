@@ -16,7 +16,8 @@
 
 import type { DataValidationStatus, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IRemoveSheetMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import { Disposable, getIntersectRange, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { RemoveSheetMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 
@@ -28,7 +29,8 @@ export class DataValidationCacheService extends Disposable {
 
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DataValidationModel) private readonly _sheetDataValidationModel: DataValidationModel
     ) {
         super();
         this._initDirtyRanges();
@@ -42,7 +44,12 @@ export class DataValidationCacheService extends Disposable {
                 if (cellValue) {
                     const range = new ObjectMatrix(cellValue).getDataRange();
                     if (range.endRow === -1) return;
-                    this.markRangeDirty(unitId, subUnitId, [range], true);
+                    const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
+                    const ranges = rules.map((rule) => rule.ranges).flat();
+                    const intersectsRanges = ranges.map((ruleRange) => getIntersectRange(ruleRange, range)).filter(Boolean) as IRange[];
+                    if (intersectsRanges.length) {
+                        this.markRangeDirty(unitId, subUnitId, intersectsRanges, true);
+                    }
                 }
             }
         }));

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.10.5](https://github.com/dream-num/univer/compare/v0.10.4...v0.10.5) (2025-08-22)
+
+
+### Bug Fixes
+
+* fix issue with inserting rows and columns ([#5711](https://github.com/dream-num/univer/issues/5711)) ([15917b3](https://github.com/dream-num/univer/commit/15917b36cea6b06c1e3c33bd5f41c41d7634000b))
+* **locale:** uppcase for text panel ui ([#5722](https://github.com/dream-num/univer/issues/5722)) ([e3477d7](https://github.com/dream-num/univer/commit/e3477d70c28f24c0ff33f0df782ccc9e2a40547d))
+* **numfmt:** filter some erroneous numfmt pattern conversions ([#5709](https://github.com/dream-num/univer/issues/5709)) ([6c33280](https://github.com/dream-num/univer/commit/6c33280f4d7e50f5a1a1714f819fe3042de39881))
+* **numfmt:** fix numfmt parse error ([#5697](https://github.com/dream-num/univer/issues/5697)) ([d466311](https://github.com/dream-num/univer/commit/d466311478e74e1007aad05f05119e135c255fb1))
+* **sheets-data-validation:** performance issues when edit whole cells on large scale ([#5727](https://github.com/dream-num/univer/issues/5727)) ([128cdc8](https://github.com/dream-num/univer/commit/128cdc8056a9eec1a42c3565ae92b9d1fd28adb1))
+* **sheets-ui:** make disposable property optional and handle undefined case ([#5716](https://github.com/dream-num/univer/issues/5716)) ([e936715](https://github.com/dream-num/univer/commit/e93671588cd308c3020c01518bc5c8fe2faedf1e))
+
+
+### Features
+
+* add facade api addStyles and removeStyles ([#5690](https://github.com/dream-num/univer/issues/5690)) ([0f80221](https://github.com/dream-num/univer/commit/0f802211140da45a56460612695ed39b8d961277))
+
 ## [0.10.4](https://github.com/dream-num/univer/compare/v0.10.3...v0.10.4) (2025-08-15)
 
 

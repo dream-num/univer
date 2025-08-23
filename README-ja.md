@@ -10,10 +10,7 @@ Univer は、開発者に強力で柔軟かつ使いやすいオフィススイ�
 
 Univer MCP を使って自然言語で Univer Sheet を操作し、本物の AI ネイティブなスプレッドシートを構築する。
 
-<video autoplay muted loop playsinline>
-    <source src="https://univer-release.s3.us-east-1.amazonaws.com/template-resource/mcp-univer.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
 
 > 日本語の開発ドキュメントはまだ未完成です。英語のドキュメントをご参照ください。
 

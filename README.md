@@ -10,10 +10,7 @@ An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, 
 
 Use Univer MCP to drive Univer Sheet with natural language and build truly AI-native spreadsheets.
 
-<video autoplay muted loop playsinline>
-    <source src="https://univer-release.s3.us-east-1.amazonaws.com/template-resource/mcp-univer.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
 
 **English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | [Español][readme-es-link] <br />
 [Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]

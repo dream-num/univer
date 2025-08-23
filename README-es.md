@@ -5,8 +5,15 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-Univer es un motor de suite ofimática de código abierto, diseñado para ofrecer a los desarrolladores una solución potente, flexible y fácil de usar. Soporta hojas de cálculo, documentos y presentaciones, y proporciona una amplia gama de funciones y una alta extensibilidad.<br />
+Univer es un motor de suite ofimática de código abierto, diseñado para ofrecer a los desarrolladores una solución potente, flexible y fácil de usar. Soporta hojas de cálculo, documentos y presentaciones, y proporciona una amplia gama de funciones y una alta extensibilidad. <br />
 **Extensible · Integrable · Alto rendimiento**
+
+Usa Univer MCP para controlar Univer Sheet con lenguaje natural y crear hojas de cálculo verdaderamente nativas de IA.
+
+<video autoplay muted loop playsinline>
+    <source src="https://univer-release.s3.us-east-1.amazonaws.com/template-resource/mcp-univer.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
 
 [English][readme-en-link] | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | **Español**<br />
 [Sitio oficial][official-site-link] | [Documentación][documentation-link] | [Demo en línea][playground-link] | [Blog][blog-link]

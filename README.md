@@ -8,10 +8,6 @@
 An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server.<br />
 **Extensible. High-performance. Embedded to your application.**
 
-Use Univer MCP to drive Univer Sheet with natural language and build truly AI-native spreadsheets.
-
-https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
-
 **English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | [Español][readme-es-link] <br />
 [Official Site][official-site-link] | [Documentation][documentation-link] | [Online Playground][playground-link] | [Blog][blog-link]
 
@@ -28,6 +24,10 @@ https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
 [![Trendshift][github-trending-shield]][github-trending-url]
 
 </div>
+
+Use Univer MCP to drive Univer Sheet with natural language and build truly AI-native spreadsheets.
+
+https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
 
 <details open>
 <summary>

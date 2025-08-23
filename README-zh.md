@@ -5,8 +5,15 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-Univer 是一个开源的办公套件引擎，旨在为开发者提供一个强大、灵活且易于使用的办公套件解决方案。它支持电子表格、文档和幻灯片等多种类型的文档，并提供了丰富的功能和高度的可扩展性。通过 Univer MCP，用自然语言驱动 Univer Sheet，构建 AI-Native Spreadsheet。<br />
-**可扩展 · 可嵌入 · 高性能**
+Univer 是一个开源的办公套件引擎，旨在为开发者提供一个强大、灵活且易于使用的办公套件解决方案。它支持电子表格、文档和幻灯片等多种类型的文档，并提供了丰富的功能和高度的可扩展性。<br />
+**可扩展 · 可嵌入 · 高性能**<br />
+
+通过 Univer MCP，用自然语言驱动 Univer Sheet，构建 AI-Native Spreadsheet。
+
+<video autoplay muted loop playsinline>
+    <source src="https://univer-release.s3.us-east-1.amazonaws.com/template-resource/mcp-univer.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
 
 [English][readme-en-link] | **简体中文** | [日本語][readme-ja-link] | [Español][readme-es-link] <br />
 [官网][official-site-link] | [文档][documentation-link] | [在线体验][playground-link] | [博客][blog-link]

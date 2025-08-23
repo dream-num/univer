@@ -5,7 +5,7 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server<br />
+An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server. Use Univer MCP to drive Univer Sheet with natural language and build truly AI-native spreadsheets.<br />
 **Extensible. High-performance. Embedded to your application.**
 
 **English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | [Español][readme-es-link] <br />

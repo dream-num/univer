@@ -8,13 +8,6 @@
 Univer は、開発者に強力で柔軟かつ使いやすいオフィススイートソリューションを提供することを目的としたオープンソースのオフィススイートエンジンです。スプレッドシート、ドキュメント、スライドなど、さまざまなタイプのドキュメントをサポートし、豊富な機能と高い拡張性を提供します。<br />
 **拡張可能・組み込み可能・高性能**
 
-Univer MCP を使って自然言語で Univer Sheet を操作し、本物の AI ネイティブなスプレッドシートを構築する。
-
-<video autoplay muted loop playsinline>
-    <source src="https://univer-release.s3.us-east-1.amazonaws.com/template-resource/mcp-univer.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
-
 > 日本語の開発ドキュメントはまだ未完成です。英語のドキュメントをご参照ください。
 
 [English][readme-en-link] | [简体中文][readme-zh-link] | **日本語** | [Español][readme-es-link] <br />
@@ -33,6 +26,10 @@ Univer MCP を使って自然言語で Univer Sheet を操作し、本物の AI 
 [![Trendshift][github-trending-shield]][github-trending-url]
 
 </div>
+
+Univer MCP を使って自然言語で Univer Sheet を操作し、本物の AI ネイティブなスプレッドシートを構築する。
+
+https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
 
 <details open>
 <summary>

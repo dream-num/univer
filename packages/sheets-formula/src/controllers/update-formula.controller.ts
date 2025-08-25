@@ -362,8 +362,8 @@ export class UpdateFormulaController extends Disposable {
 
             for (const sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
-
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
+                const shouldModifySi: string[] = [];
 
                 // eslint-disable-next-line max-lines-per-function, complexity
                 matrixData.forValue((row, column, formulaDataItem) => {
@@ -379,6 +379,8 @@ export class UpdateFormulaController extends Disposable {
 
                     let shouldModify = false;
                     const refChangeIds: number[] = [];
+                    const { type } = formulaReferenceMoveParam;
+
                     for (let i = 0, len = sequenceNodes.length; i < len; i++) {
                         const node = sequenceNodes[i];
 
@@ -387,7 +389,6 @@ export class UpdateFormulaController extends Disposable {
                         }
 
                         const { token, nodeType } = node;
-                        const { type } = formulaReferenceMoveParam;
 
                         // The impact of defined name changes on formula calculation
                         // 1. ref range only changes formulaOrRefString to trigger recalculation
@@ -514,11 +515,27 @@ export class UpdateFormulaController extends Disposable {
                             shouldModify = true;
                             refChangeIds.push(i);
                             // newRefString = ErrorType.REF;
-                        } else if (type === FormulaReferenceMoveType.MoveRange && si) {
-                            // If the operation is a move range and the formula has si, unpack the si to f.
-                            // This is to ensure that the si formula can be recalculated correctly after the move.
-                            shouldModify = true;
+
+                            // If the formula cell has an si, it means the formula cell is source of other same si cells, so the si cells needs to be updated.
+                            if (formulaString && si) shouldModifySi.push(si);
                         }
+                    }
+
+                    /**
+                     * If the operation is a move type, and the formula has si and is the same as the current shouldModifySi, unpack the si to f.
+                     * This is to ensure that the si formula can be recalculated correctly after the move.
+                     */
+                    if (
+                        si &&
+                        !shouldModify &&
+                        [FormulaReferenceMoveType.MoveRows, FormulaReferenceMoveType.MoveCols, FormulaReferenceMoveType.MoveRange].includes(type) &&
+                        shouldModifySi.includes(si)
+                    ) {
+                        shouldModify = true;
+                    }
+
+                    if (!shouldModify) {
+                        return true;
                     }
 
                     if (!shouldModify) {

@@ -15,11 +15,15 @@
  */
 
 import { describe, it } from 'vitest';
-import { expectMoveFormulaCellResultMatchesSnapshot, expectMoveFormulaRowsResultMatchesSnapshot } from '../__testing__/test-formula-move';
+import { expectMoveFormulaCellResultMatchesSnapshot, expectMoveFormulaRows2ResultMatchesSnapshot, expectMoveFormulaRowsResultMatchesSnapshot } from '../__testing__/test-formula-move';
 
 describe('Test formula move', () => {
     it('move formula rows', () => {
         expectMoveFormulaRowsResultMatchesSnapshot();
+    });
+
+    it('move formula rows2', () => {
+        expectMoveFormulaRows2ResultMatchesSnapshot();
     });
 
     it('move formula cell', () => {

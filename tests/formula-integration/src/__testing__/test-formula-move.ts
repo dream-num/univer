@@ -99,7 +99,7 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
     }
 }
 
-export async function expectMoveFormulaRows2ResultMatchesSnapshot() {
+export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
     const testBed = createTestBed();
     const snapshotRootDir = path.join(import.meta.dirname, '../__snapshots__');
 

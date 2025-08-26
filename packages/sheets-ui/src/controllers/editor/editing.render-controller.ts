@@ -572,7 +572,9 @@ export class EditingRenderController extends Disposable {
         }
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveSelection(keycode, currentUnitId, worksheetId);
+        if (keycode !== undefined) {
+            this._moveSelection(keycode, currentUnitId, worksheetId);
+        }
     }
 
     private _getEditorObject() {

@@ -379,7 +379,7 @@ export class UpdateFormulaController extends Disposable {
 
                     let shouldModify = false;
                     const refChangeIds: number[] = [];
-                    const { type } = formulaReferenceMoveParam;
+                    const { type, from } = formulaReferenceMoveParam;
 
                     for (let i = 0, len = sequenceNodes.length; i < len; i++) {
                         const node = sequenceNodes[i];
@@ -517,29 +517,28 @@ export class UpdateFormulaController extends Disposable {
                             // newRefString = ErrorType.REF;
 
                             // If the formula cell has an si, it means the formula cell is source of other same si cells, so the si cells needs to be updated.
-                            if (formulaString && si) shouldModifySi.push(si);
+                            if (si && (x ?? 0) === 0 && (y ?? 0) === 0) shouldModifySi.push(si);
                         }
                     }
 
-                    /**
-                     * If the operation is a move type, and the formula has si and is the same as the current shouldModifySi, unpack the si to f.
-                     * This is to ensure that the si formula can be recalculated correctly after the move.
-                     */
-                    if (
-                        si &&
-                        !shouldModify &&
-                        [FormulaReferenceMoveType.MoveRows, FormulaReferenceMoveType.MoveCols, FormulaReferenceMoveType.MoveRange].includes(type) &&
-                        shouldModifySi.includes(si)
-                    ) {
-                        shouldModify = true;
-                    }
-
                     if (!shouldModify) {
-                        return true;
-                    }
-
-                    if (!shouldModify) {
-                        return true;
+                        /**
+                         * If the operation is a move type, and the formula cell has si and is the same as the current shouldModifySi, unpack the si to f.
+                         * Or the source formula cell is in the moved range.
+                         * This is to ensure that the si formula can be recalculated correctly after the move.
+                         */
+                        if (
+                            si &&
+                            [FormulaReferenceMoveType.MoveRows, FormulaReferenceMoveType.MoveCols, FormulaReferenceMoveType.MoveRange].includes(type)
+                        ) {
+                            if (from && from.startRow <= row && row <= from.endRow && from.startColumn <= column && column <= from.endColumn) {
+                                if ((x ?? 0) === 0 && (y ?? 0) === 0) shouldModifySi.push(si);
+                            } else if (!shouldModifySi.includes(si)) {
+                                return true;
+                            }
+                        } else {
+                            return true;
+                        }
                     }
 
                     const newSequenceNodes = updateRefOffset(sequenceNodes, refChangeIds, x, y);

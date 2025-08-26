@@ -725,7 +725,7 @@ describe('Test update formula ', () => {
             ]);
         });
 
-        it('Move range with si only', async () => {
+        it('Move range with si only, but the si is not source formula cell', async () => {
             const workbook = get(IUniverInstanceService).getUnit<Workbook>('test');
             const sheetId = 'sheet6';
             const sheet6 = workbook?.getSheetBySheetId(sheetId);
@@ -756,9 +756,9 @@ describe('Test update formula ', () => {
             expect(values1).toStrictEqual([[{ f: '=A3', t: 2, v: 3 }]]);
             const values2 = getValues(1, 1, 3, 1, sheetId);
             expect(values2).toStrictEqual([
-                [{ f: '=A2', t: 2, v: 2 }],
+                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
                 [null],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ si: 'W8Hdfc', t: 2, v: 4 }],
             ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -776,9 +776,9 @@ describe('Test update formula ', () => {
             expect(valuesRedo1).toStrictEqual([[{ f: '=A3', t: 2, v: 3 }]]);
             const valuesRedo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesRedo2).toStrictEqual([
-                [{ f: '=A2', t: 2, v: 2 }],
+                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
                 [null],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ si: 'W8Hdfc', t: 2, v: 4 }],
             ]);
         });
 

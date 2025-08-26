@@ -27,7 +27,7 @@ Univer es un motor de suite ofimática de código abierto, diseñado para ofrece
 
 Usa Univer MCP para controlar Univer Sheet con lenguaje natural y crear hojas de cálculo verdaderamente nativas de IA.
 
-https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
+https://github.com/user-attachments/assets/7429bd5f-d769-4057-9e67-353337531024
 
 <details open>
 <summary>

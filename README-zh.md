@@ -27,7 +27,7 @@ Univer 是一个开源的办公套件引擎，旨在为开发者提供一个强�
 
 通过 Univer MCP，用自然语言驱动 Univer Sheet，构建 AI-Native Spreadsheet。
 
-https://github.com/user-attachments/assets/fb439d4d-ef91-4747-ad43-aa8c731ba60b
+https://github.com/user-attachments/assets/7429bd5f-d769-4057-9e67-353337531024
 
 <details open>
 <summary>

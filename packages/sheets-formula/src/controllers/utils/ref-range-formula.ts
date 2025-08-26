@@ -17,7 +17,7 @@
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, IRangeChange, ISequenceNode } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle } from '@univerjs/core';
+import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle, Tools } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
@@ -239,7 +239,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IF
             if (unitId !== targetUnitId || currentSheetId !== sheetId) {
                 rangeList = processFormulaRange(newFormulaMatrix);
             } else {
-                rangeList = processFormulaChanges(oldFormulaMatrix, formulaReferenceMoveParam);
+                rangeList = processFormulaChanges(oldFormulaMatrix, newFormulaMatrix, formulaReferenceMoveParam);
             }
 
             const sheetRedoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
@@ -269,7 +269,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IF
     };
 }
 
-function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
+function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, newFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
     const { type, from, to, range } = formulaReferenceMoveParam;
     const rangeList: IRangeChange[] = [];
@@ -290,6 +290,11 @@ function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaD
             // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it, newCell can be null
             newCell = result.newCell;
             isReverse = result.isReverse;
+        }
+
+        // If oldCell and newCell are the same and this cell no formula updated, it means that the formula is not offset, skip it directly
+        if (Tools.diffValue(oldCell, newCell) && !newFormulaMatrix.getValue(row, column)) {
+            return true;
         }
 
         // Don't intercept newCell null here

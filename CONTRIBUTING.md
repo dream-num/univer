@@ -231,7 +231,7 @@ npm create @univerjs/cli init <project-name>
 
 ### How to Contribute to Facade API
 
-Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING.md).
+Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING-FACADE.md).
 
 ### Deprecate API
 

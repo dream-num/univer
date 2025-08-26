@@ -33,6 +33,7 @@ import {
     createIdentifier,
     Disposable,
     IConfigService,
+    ILogService,
     Inject,
     ObjectMatrix,
     requestImmediateMacroTask,
@@ -86,7 +87,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         @IFormulaRuntimeService protected readonly _runtimeService: IFormulaRuntimeService,
         @IFormulaDependencyGenerator protected readonly _formulaDependencyGenerator: IFormulaDependencyGenerator,
         @Inject(Interpreter) protected readonly _interpreter: Interpreter,
-        @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder
+        @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
     }
@@ -125,6 +127,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     }
 
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
+        this._logService.debug('[formulaDatasetConfig]', formulaDatasetConfig);
         this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START);
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
@@ -133,8 +136,9 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         this._runtimeService.reset();
 
         const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
-
+        this._logService.debug('[_executeLock]', 1);
         this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
+            this._logService.debug('[_executeLock]', 2);
             for (let i = 0; i < cycleReferenceCount; i++) {
                 this._runtimeService.setFormulaCycleIndex(i);
                 await this._executeStep();

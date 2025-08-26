@@ -58,11 +58,19 @@ export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
         const toCellMatrix = toWorksheet.getCellMatrix();
 
         new ObjectMatrix<Nullable<ICellData>>(from.value).forValue((row, col, newVal) => {
-            fromCellMatrix.setValue(row, col, newVal);
+            if (newVal === null || newVal === undefined) {
+                fromCellMatrix.realDeleteValue(row, col);
+            } else {
+                fromCellMatrix.setValue(row, col, newVal);
+            }
         });
 
         new ObjectMatrix<Nullable<ICellData>>(to.value).forValue((row, col, newVal) => {
-            toCellMatrix.setValue(row, col, newVal);
+            if (newVal === null || newVal === undefined) {
+                toCellMatrix.realDeleteValue(row, col);
+            } else {
+                toCellMatrix.setValue(row, col, newVal);
+            }
         });
 
         return true;

@@ -24,6 +24,7 @@ import {
     IConfigService,
     Inject,
     InterceptorEffectEnum,
+    isDefaultFormat,
     isTextFormat,
     IUniverInstanceService,
     LocaleService,
@@ -110,15 +111,15 @@ export class SheetsNumfmtCellContentController extends Disposable {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
 
-            // eslint-disable-next-line complexity
+            // eslint-disable-next-line max-lines-per-function, complexity
             handler: (cell, location, next) => {
+                if (!cell || cell.v === undefined || cell.v === null) {
+                    return next(cell);
+                }
+
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
                 let numfmtValue;
-                const originCellValue = cell;
-                if (!originCellValue || originCellValue.v === undefined || originCellValue.v === null) {
-                    return next(cell);
-                }
 
                 if (cell?.s) {
                     const style = location.workbook.getStyles().get(cell.s);
@@ -133,25 +134,26 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 // If the cell is not formatted, or the format is 'General', do not process it
                 // e.g. { v: '001', t: 1, s: { n: { pattern: 'General' } } } should display as '001'
-                if (!numfmtValue || numfmtValue.pattern === 'General') {
+                if (isDefaultFormat(numfmtValue?.pattern)) {
                     return next(cell);
                 }
 
                 // If the cell not specified number type, then check the cell value type
-                if (originCellValue.t !== CellValueType.NUMBER) {
-                    const type = checkCellValueType(originCellValue.v);
+                if (cell.t !== CellValueType.NUMBER) {
+                    const type = checkCellValueType(cell.v);
                     // just handle number or number string
                     if (type !== CellValueType.NUMBER) {
                         return next(cell);
                     }
                 }
 
+                const originCellValue = cell;
                 if (!cell || cell === location.rawData) {
                     cell = { ...location.rawData };
                 }
 
                 // Add error marker to text format number
-                if (isTextFormat(numfmtValue.pattern)) {
+                if (isTextFormat(numfmtValue?.pattern)) {
                     // If the user has disabled the text format mark, do not show it
                     if (this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
                         cell.t = CellValueType.STRING;
@@ -165,11 +167,11 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 let numfmtRes: string = '';
                 const cache = renderCache.getValue(location.row, location.col);
-                if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue.pattern}`) {
+                if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue?.pattern}`) {
                     return next({ ...cell, ...cache.result });
                 }
 
-                const info = getPatternPreviewIgnoreGeneral(numfmtValue.pattern, Number(originCellValue.v), this.locale);
+                const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), this.locale);
                 numfmtRes = info.result;
                 if (!numfmtRes) {
                     return next(cell);
@@ -186,7 +188,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 renderCache.setValue(location.row, location.col, {
                     result: res,
-                    parameters: `${originCellValue.v}_${numfmtValue.pattern}`,
+                    parameters: `${originCellValue.v}_${numfmtValue?.pattern}`,
                 });
                 Object.assign(cell, res);
                 return next(cell);

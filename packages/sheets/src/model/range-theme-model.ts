@@ -333,7 +333,7 @@ export class SheetRangeThemeModel extends Disposable {
                 const style = this.getCellStyle(unitId, subUnitId, row, col);
 
                 if (style) {
-                    const newCell: ICellDataForSheetInterceptor = (!cell || cell === context.rawData) ? { ...context.rawData } : cell;
+                    const newCell: ICellDataForSheetInterceptor = (!cell || cell === context.rawData) ? { ...(context.rawData ?? {}) } : cell;
                     newCell.themeStyle = style;
                     return next(newCell);
                 }

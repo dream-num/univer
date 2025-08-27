@@ -40,7 +40,7 @@ export class SheetPermissionViewModelController extends Disposable {
             // permissions are placed at a high level to prioritize whether to filter subsequent renderings.
             priority: 999,
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
-            handler: (cell = {}, context, next) => {
+            handler: (cell, context, next) => {
                 const { unitId, subUnitId, row, col } = context;
 
                 const selectionProtection = this._rangeProtectionCache.getCellInfo(unitId, subUnitId, row, col);
@@ -69,7 +69,7 @@ export class SheetPermissionViewModelController extends Disposable {
             // permissions are placed at a high level to prioritize whether to filter subsequent renderings.
             priority: 999,
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
-            handler: (cell = {}, context, next) => {
+            handler: (cell, context, next) => {
                 const { unitId, subUnitId } = context;
                 const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                 if (worksheetRule?.permissionId) {

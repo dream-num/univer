@@ -26,6 +26,7 @@ import {
     Disposable,
     Inject,
     Injector,
+    isRealNum,
     isTextFormat,
     IUniverInstanceService,
     Optional,
@@ -33,6 +34,7 @@ import {
     UniverInstanceType,
     willLoseNumericPrecision,
 } from '@univerjs/core';
+import { stripErrorMargin } from '@univerjs/engine-formula';
 import {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,
@@ -112,6 +114,9 @@ export class NumfmtEditorController extends Disposable {
                                 case 'grouped':
                                 case 'number': {
                                     const cell = context.worksheet.getCellRaw(row, col);
+                                    if (cell?.t === CellValueType.NUMBER && cell?.v !== undefined && cell.v !== null && isRealNum(cell.v)) {
+                                        cell.v = stripErrorMargin(Number(cell.v));
+                                    }
                                     return next && next(cell);
                                 }
                                 case 'percent':

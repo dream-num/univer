@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isRealNum } from '@univerjs/core';
+import { CellValueType, Disposable, Inject, InterceptorEffectEnum, isDefaultFormat, isRealNum } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
@@ -38,9 +38,13 @@ export class NumberCellDisplayController extends Disposable {
                 priority: 11,
                 effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                 handler: (cell, location, next) => {
+                    if (!cell) {
+                        return next(cell);
+                    }
+
                     // Skip if the cell contains a numfmt pattern
                     const style = location.workbook.getStyles().getStyleByCell(cell);
-                    if (style?.n?.pattern) {
+                    if (!isDefaultFormat(style?.n?.pattern)) {
                         return next(cell);
                     }
 

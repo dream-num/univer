@@ -161,7 +161,8 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>
             const result = conditionalFormattingFormulaService.getFormulaResultWithCoords(unitId, subUnitId, cfId, formulaText);
             return result;
         }
-        case CFValueType.num: {
+        case CFValueType.num:
+        default: {
             const v = Number(value.value);
             return {
                 status: FormulaResultStatus.SUCCESS,

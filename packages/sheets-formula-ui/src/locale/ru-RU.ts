@@ -26,7 +26,7 @@ import information from './function-list/information/ru-RU';
 import logical from './function-list/logical/ru-RU';
 import lookup from './function-list/lookup/ru-RU';
 import math from './function-list/math/ru-RU';
-import statistical from './function-list/statistical/en-US';
+import statistical from './function-list/statistical/ru-RU';
 import text from './function-list/text/ru-RU';
 import univer from './function-list/univer/ru-RU';
 import web from './function-list/web/ru-RU';

@@ -59,10 +59,10 @@ const locale = {
             },
         ],
         functionParameter: {
-            values: { name: 'values', detail: '要计算平均数的值。' },
-            weights: { name: 'weights', detail: '要应用的相应权重列表。' },
-            additionalValues: { name: 'additional_values', detail: '要计算平均数的其他值。' },
-            additionalWeights: { name: 'additional_weights', detail: '要应用的其他权重。' },
+            values: { name: 'values', detail: 'The values to be averaged.' },
+            weights: { name: 'weights', detail: 'The corresponding list of weights to apply.' },
+            additionalValues: { name: 'additional_values', detail: 'Additional values to average.' },
+            additionalWeights: { name: 'additional_weights', detail: 'Additional weights to apply.' },
         },
     },
     AVERAGEA: {
@@ -347,11 +347,11 @@ const locale = {
         functionParameter: {
             number1: {
                 name: 'value1',
-                detail: 'Required. The first argument representing the values that you want to count.',
+                detail: 'The first argument representing the values that you want to count.',
             },
             number2: {
                 name: 'value2',
-                detail: 'Optional. Additional arguments representing the values that you want to count, up to a maximum of 255 arguments.',
+                detail: 'Additional arguments representing the values that you want to count, up to a maximum of 255 arguments.',
             },
         },
     },

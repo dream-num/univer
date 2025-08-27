@@ -349,11 +349,11 @@ const locale: typeof enUS = {
         functionParameter: {
             number1: {
                 name: '數值 1',
-                detail: '必填。 表示要計數的值的第一個參數',
+                detail: '表示要計數的值的第一個參數',
             },
             number2: {
                 name: '數值 2',
-                detail: '可選。 表示要計數的值的其他參數，最多可包含 255 個參數。 ',
+                detail: '表示要計數的值的其他參數，最多可包含 255 個參數。 ',
             },
         },
     },

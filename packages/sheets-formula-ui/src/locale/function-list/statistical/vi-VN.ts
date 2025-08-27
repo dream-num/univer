@@ -337,11 +337,11 @@ const locale: typeof enUS = {
         functionParameter: {
             number1: {
                 name: 'số 1',
-                detail: 'Bắt buộc. Tham số đầu tiên đại diện cho giá trị mà bạn muốn đếm',
+                detail: 'Tham số đầu tiên đại diện cho giá trị mà bạn muốn đếm',
             },
             number2: {
                 name: 'số 2',
-                detail: 'Tùy chọn. Các đối số khác đại diện cho giá trị bạn muốn đếm, có thể chứa tối đa 255 đối số.',
+                detail: 'Các đối số khác đại diện cho giá trị bạn muốn đếm, có thể chứa tối đa 255 đối số.',
             },
         },
     },

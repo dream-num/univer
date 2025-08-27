@@ -349,11 +349,11 @@ const locale: typeof enUS = {
         functionParameter: {
             number1: {
                 name: 'valor1',
-                detail: 'Obligatorio. El primer argumento que representa los valores que desea contar.',
+                detail: 'El primer argumento que representa los valores que desea contar.',
             },
             number2: {
                 name: 'valor2',
-                detail: 'Opcional. Argumentos adicionales que representan los valores que desea contar, hasta un máximo de 255 argumentos.',
+                detail: 'Argumentos adicionales que representan los valores que desea contar, hasta un máximo de 255 argumentos.',
             },
         },
     },

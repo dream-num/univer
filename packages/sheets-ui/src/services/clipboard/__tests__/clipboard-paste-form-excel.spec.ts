@@ -354,7 +354,7 @@ describe('Test clipboard', () => {
             expect(cellValue?.t).toStrictEqual(CellValueType.FORCE_STRING);
         });
 
-        it('copy value is 1234.57, the format "#,##0.00", the origin value 1234.567', async () => {
+        it('copy value is 1,234.57, the format "#,##0.00", the origin value 1234.567', async () => {
             const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
 

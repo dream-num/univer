@@ -62,7 +62,7 @@ export class DefinedNameController extends Disposable {
         toDisposable(
             this._definedNamesService.update$.pipe(
                 catchError((e) => {
-                    this._logService.error('[sheets-formula defined-name.controller] update$ error:', e);
+                    this._logService.debug('[sheets-formula defined-name.controller]', `_descriptionListener error: ${e}`);
                     return of();
                 })
             ).subscribe(() => {
@@ -75,7 +75,7 @@ export class DefinedNameController extends Disposable {
         toDisposable(
             this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
                 catchError((e) => {
-                    this._logService.error('[sheets-formula defined-name.controller] getCurrentTypeOfUnit$ error:', e);
+                    this._logService.debug('[sheets-formula defined-name.controller]', `_changeUnitListener error: ${e}`);
                     return of();
                 })
             ).subscribe(() => {

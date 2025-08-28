@@ -75,7 +75,7 @@ export class GlobalComputingStatusService extends Disposable {
             .pipe(
                 map((values) => values.every((v) => v)),
                 catchError((e) => {
-                    this._logService.error('[engine-formula global-computing-status.service] _computingSubscription error:', e);
+                    this._logService.debug('[engine-formula global-computing-status.service]', `_updateComputingObservable error: ${e}`);
                     return of();
                 }),
             )

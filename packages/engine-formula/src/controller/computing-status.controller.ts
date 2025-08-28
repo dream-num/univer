@@ -47,7 +47,7 @@ export class ComputingStatusReporterController extends Disposable {
         distinctUntilChanged(),
         shareReplay(),
         catchError((e) => {
-            this._logService.error('[engine-formula computing-status.controller] _computingCompleted$ error:', e);
+            this._logService.debug('[engine-formula computing-status.controller]', `_computingCompleted$ error: ${e}`);
             return of(true);
         })
     );
@@ -64,7 +64,7 @@ export class ComputingStatusReporterController extends Disposable {
         disposables.add(this._globalComputingSrv.pushComputingStatusSubject(subject));
         disposables.add(this._computingCompleted$.pipe(
             catchError((e) => {
-                this._logService.error('[engine-formula computing-status.controller] _computingCompleted$ subscription error:', e);
+                this._logService.debug('[engine-formula computing-status.controller]', `_computingCompleted$ error 2: ${e}`);
                 return of(true);
             })
         ).subscribe((completed) => subject.next(completed)));

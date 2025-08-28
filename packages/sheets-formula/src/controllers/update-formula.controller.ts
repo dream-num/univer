@@ -131,7 +131,7 @@ export class UpdateFormulaController extends Disposable {
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(
                 catchError((e) => {
-                    this._logService.error('[sheets-formula update-formula.controller] getTypeOfUnitAdded$ error:', e);
+                    this._logService.debug('[sheets-formula update-formula.controller]', `getTypeOfUnitAdded$ error: ${e}`);
                     return of();
                 })
             )
@@ -140,7 +140,7 @@ export class UpdateFormulaController extends Disposable {
             .pipe(
                 map((unit) => unit.getUnitId()),
                 catchError((e) => {
-                    this._logService.error('[sheets-formula update-formula.controller] getTypeOfUnitDisposed$ error:', e);
+                    this._logService.debug('[sheets-formula update-formula.controller]', `getTypeOfUnitDisposed$ error: ${e}`);
                     return of();
                 })
             )

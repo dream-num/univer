@@ -228,7 +228,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     private _initialize() {
         this._localeService.localeChanged$.pipe(
             catchError((e) => {
-                this._logService.error('[sheets-formula description.service] localeChanged$ error:', e);
+                this._logService.debug('[sheets-formula description.service]', `_localeService.localeChanged$ error: ${e}`);
                 return of();
             })
         ).subscribe(() => {

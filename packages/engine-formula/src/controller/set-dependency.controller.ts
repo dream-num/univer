@@ -58,7 +58,7 @@ export class SetDependencyController extends Disposable {
         this.disposeWithMe(
             this._featureCalculationManagerService.onChanged$.pipe(
                 catchError((e) => {
-                    this._logService.error('[engine-formula set-dependency.controller] _featureCalculationManagerService onChanged error:', e);
+                    this._logService.debug('[engine-formula set-dependency.controller]', `_featureCalculationManagerService onChanged$ error: ${e}`);
                     return of();
                 })
             ).subscribe((params) => {

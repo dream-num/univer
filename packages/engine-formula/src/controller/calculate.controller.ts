@@ -107,7 +107,7 @@ export class CalculateController extends Disposable {
          */
         this._calculateFormulaService.executionCompleteListener$.pipe(
             catchError((e) => {
-                this._logService.error('[engine-formula calculate.controller] executionCompleteListener$ error:', e);
+                this._logService.debug('[engine-formula calculate.controller]', `executionCompleteListener$ error: ${e}`);
                 return of();
             })
         ).subscribe((data) => {
@@ -140,7 +140,7 @@ export class CalculateController extends Disposable {
          */
         this._calculateFormulaService.executionInProgressListener$.pipe(
             catchError((e) => {
-                this._logService.error('[engine-formula calculate.controller] executionInProgressListener$ error:', e);
+                this._logService.debug('[engine-formula calculate.controller]', `executionInProgressListener$ error: ${e}`);
                 return of();
             })
         ).subscribe((data) => {

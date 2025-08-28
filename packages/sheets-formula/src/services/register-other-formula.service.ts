@@ -124,12 +124,12 @@ export class RegisterOtherFormulaService extends Disposable {
                     bufferWhen(() => this.calculateStarted$.pipe(
                         filter((calculateStarted) => calculateStarted),
                         catchError((e) => {
-                            this._logService.error('[sheets-formula register-other-formula.service] calculateStarted$ error:', e);
+                            this._logService.debug('[sheets-formula register-other-formula.service]', `calculateStarted$ error: ${e}`);
                             return of();
                         })
                     )),
                     catchError((e) => {
-                        this._logService.error('[sheets-formula register-other-formula.service] formulaChangeWithRange$ error:', e);
+                        this._logService.debug('[sheets-formula register-other-formula.service]', `formulaChangeWithRange$1 error: ${e}`);
                         return of();
                     })
                 )
@@ -141,7 +141,7 @@ export class RegisterOtherFormulaService extends Disposable {
                 .pipe(
                     filter(() => this.calculateStarted$.getValue()),
                     catchError((e) => {
-                        this._logService.error('[sheets-formula register-other-formula.service] formulaChangeWithRange$2 error:', e);
+                        this._logService.debug('[sheets-formula register-other-formula.service]', `formulaChangeWithRange$2 error: ${e}`);
                         return of();
                     })
                 )

@@ -37,6 +37,7 @@ import {
     Disposable,
     ICommandService,
     IConfigService,
+    ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -55,7 +56,7 @@ import {
     SetStyleCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
@@ -82,7 +83,8 @@ export class UpdateFormulaController extends Disposable {
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @IConfigService private readonly _configService: IConfigService,
-        @Inject(Injector) readonly _injector: Injector
+        @Inject(Injector) readonly _injector: Injector,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -127,9 +129,21 @@ export class UpdateFormulaController extends Disposable {
         );
 
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(
+                catchError((e) => {
+                    this._logService.error('[sheets-formula update-formula.controller] getTypeOfUnitAdded$ error:', e);
+                    return of();
+                })
+            )
             .subscribe((unit) => this._handleWorkbookAdded(unit)));
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-            .pipe(map((unit) => unit.getUnitId()))
+            .pipe(
+                map((unit) => unit.getUnitId()),
+                catchError((e) => {
+                    this._logService.error('[sheets-formula update-formula.controller] getTypeOfUnitDisposed$ error:', e);
+                    return of();
+                })
+            )
             .subscribe((unitId) => this._handleWorkbookDisposed(unitId)));
     }
 

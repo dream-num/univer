@@ -20,7 +20,7 @@ import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/s
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
@@ -33,12 +33,14 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
 import { DEFAULT_CYCLE_REFERENCE_COUNT } from './config.schema';
+import { catchError, of } from 'rxjs';
 
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @ICalculateFormulaService private readonly _calculateFormulaService: ICalculateFormulaService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -103,7 +105,12 @@ export class CalculateController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
+        this._calculateFormulaService.executionCompleteListener$.pipe(
+            catchError((e) => {
+                this._logService.error('[engine-formula calculate.controller] executionCompleteListener$ error:', e);
+                return of();
+            })
+        ).subscribe((data) => {
             const functionsExecutedState = data.functionsExecutedState;
             switch (functionsExecutedState) {
                 case FormulaExecutedStateType.NOT_EXECUTED:
@@ -131,7 +138,12 @@ export class CalculateController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
+        this._calculateFormulaService.executionInProgressListener$.pipe(
+            catchError((e) => {
+                this._logService.error('[engine-formula calculate.controller] executionInProgressListener$ error:', e);
+                return of();
+            })
+        ).subscribe((data) => {
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
                 {

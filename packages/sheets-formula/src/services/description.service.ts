@@ -17,7 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
-import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
+import { createIdentifier, IConfigService, ILogService, Inject, LocaleService, toDisposable } from '@univerjs/core';
 
 import {
     functionArray,
@@ -43,6 +43,7 @@ import {
 import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
+import { catchError, of } from 'rxjs';
 
 export interface ISearchItem {
     name: string;
@@ -123,7 +124,8 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @ILogService private readonly _logService: ILogService
     ) {
         this._initialize();
     }
@@ -224,7 +226,12 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     }
 
     private _initialize() {
-        this._localeService.localeChanged$.subscribe(() => {
+        this._localeService.localeChanged$.pipe(
+            catchError((e) => {
+                this._logService.error('[sheets-formula description.service] localeChanged$ error:', e);
+                return of();
+            })
+        ).subscribe(() => {
             this._registerDescriptions();
         });
 

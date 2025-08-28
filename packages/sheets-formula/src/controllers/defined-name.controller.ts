@@ -19,6 +19,7 @@ import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engi
 import {
     Disposable,
     ICommandService,
+    ILogService,
     IUniverInstanceService,
     toDisposable,
     UniverInstanceType,
@@ -27,6 +28,7 @@ import { FunctionType, IDefinedNamesService, RemoveDefinedNameMutation, SetDefin
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { IDescriptionService } from '../services/description.service';
+import { catchError, of } from 'rxjs';
 
 /**
  * header highlight
@@ -39,7 +41,8 @@ export class DefinedNameController extends Disposable {
         @IDescriptionService private readonly _descriptionService: IDescriptionService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @ILogService private readonly _logService: ILogService
 
     ) {
         super();
@@ -57,7 +60,12 @@ export class DefinedNameController extends Disposable {
 
     private _descriptionListener() {
         toDisposable(
-            this._definedNamesService.update$.subscribe(() => {
+            this._definedNamesService.update$.pipe(
+                catchError((e) => {
+                    this._logService.error('[sheets-formula defined-name.controller] update$ error:', e);
+                    return of();
+                })
+            ).subscribe(() => {
                 this._registerDescriptions();
             })
         );
@@ -65,7 +73,12 @@ export class DefinedNameController extends Disposable {
 
     private _changeUnitListener() {
         toDisposable(
-            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+                catchError((e) => {
+                    this._logService.error('[sheets-formula defined-name.controller] getCurrentTypeOfUnit$ error:', e);
+                    return of();
+                })
+            ).subscribe(() => {
                 this._unRegisterDescriptions();
                 this._registerDescriptions();
             })

@@ -23,7 +23,7 @@ import type {
 } from '../commands/mutations/set-feature-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
-import { Disposable, ICommandService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, ObjectMatrix } from '@univerjs/core';
 import { SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
     RemoveFeatureCalculationMutation,
@@ -33,13 +33,15 @@ import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.m
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { IDependencyManagerService } from '../services/dependency-manager.service';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
+import { catchError, of } from 'rxjs';
 
 export class SetDependencyController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
         @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService,
-        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
+        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -54,7 +56,12 @@ export class SetDependencyController extends Disposable {
 
     private _featureCalculationManagerServiceListener() {
         this.disposeWithMe(
-            this._featureCalculationManagerService.onChanged$.subscribe((params) => {
+            this._featureCalculationManagerService.onChanged$.pipe(
+                catchError((e) => {
+                    this._logService.error('[engine-formula set-dependency.controller] _featureCalculationManagerService onChanged error:', e);
+                    return of();
+                })
+            ).subscribe((params) => {
                 const { unitId, subUnitId, featureIds } = params;
                 this._dependencyManagerService.removeFeatureFormulaDependency(unitId, subUnitId, featureIds);
             })

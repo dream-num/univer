@@ -16,8 +16,8 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import { Disposable, DisposableCollection, ICommandService, Inject } from '@univerjs/core';
-import { BehaviorSubject, distinctUntilChanged, Observable, shareReplay } from 'rxjs';
+import { Disposable, DisposableCollection, ICommandService, ILogService, Inject } from '@univerjs/core';
+import { BehaviorSubject, catchError, distinctUntilChanged, Observable, of, shareReplay } from 'rxjs';
 import { SetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import { GlobalComputingStatusService } from '../services/global-computing-status.service';
 import { FormulaExecuteStageType } from '../services/runtime.service';
@@ -45,19 +45,29 @@ export class ComputingStatusReporterController extends Disposable {
         });
     }).pipe(
         distinctUntilChanged(),
-        shareReplay()
+        shareReplay(),
+        catchError((e) => {
+            this._logService.error('[engine-formula computing-status.controller] _computingCompleted$ error:', e);
+            return of(true);
+        })
     );
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(GlobalComputingStatusService) private readonly _globalComputingSrv: GlobalComputingStatusService
+        @Inject(GlobalComputingStatusService) private readonly _globalComputingSrv: GlobalComputingStatusService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
         const disposables = new DisposableCollection();
         const subject = new BehaviorSubject(true);
         disposables.add(this._globalComputingSrv.pushComputingStatusSubject(subject));
-        disposables.add(this._computingCompleted$.subscribe((completed) => subject.next(completed)));
+        disposables.add(this._computingCompleted$.pipe(
+            catchError((e) => {
+                this._logService.error('[engine-formula computing-status.controller] _computingCompleted$ subscription error:', e);
+                return of(true);
+            })
+        ).subscribe((completed) => subject.next(completed)));
         disposables.add(() => subject.complete());
         this.disposeWithMe(disposables);
     }

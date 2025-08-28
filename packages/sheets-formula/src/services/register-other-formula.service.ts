@@ -18,9 +18,9 @@ import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
-import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, generateRandomId, ICommandService, ILogService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
-import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
+import { BehaviorSubject, bufferWhen, catchError, filter, of, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { FormulaResultStatus } from './formula-common';
 
@@ -39,7 +39,8 @@ export class RegisterOtherFormulaService extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
         this._initFormulaRegister();
@@ -119,13 +120,31 @@ export class RegisterOtherFormulaService extends Disposable {
 
         this.disposeWithMe(
             this._formulaChangeWithRange$
-                .pipe(bufferWhen(() => this.calculateStarted$.pipe(filter((calculateStarted) => calculateStarted))))
+                .pipe(
+                    bufferWhen(() => this.calculateStarted$.pipe(
+                        filter((calculateStarted) => calculateStarted),
+                        catchError((e) => {
+                            this._logService.error('[sheets-formula register-other-formula.service] calculateStarted$ error:', e);
+                            return of();
+                        })
+                    )),
+                    catchError((e) => {
+                        this._logService.error('[sheets-formula register-other-formula.service] formulaChangeWithRange$ error:', e);
+                        return of();
+                    })
+                )
                 .subscribe((options) => options.forEach(handleRegister))
         );
 
         this.disposeWithMe(
             this._formulaChangeWithRange$
-                .pipe(filter(() => this.calculateStarted$.getValue()))
+                .pipe(
+                    filter(() => this.calculateStarted$.getValue()),
+                    catchError((e) => {
+                        this._logService.error('[sheets-formula register-other-formula.service] formulaChangeWithRange$2 error:', e);
+                        return of();
+                    })
+                )
                 .subscribe(handleRegister)
         );
     }

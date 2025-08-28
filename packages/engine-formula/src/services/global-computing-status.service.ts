@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
-import type { Subscription } from 'rxjs';
+import { IDisposable, ILogService, Nullable } from '@univerjs/core';
+import { catchError, of, Subscription } from 'rxjs';
 import { Disposable } from '@univerjs/core';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 
@@ -30,6 +30,10 @@ export class GlobalComputingStatusService extends Disposable {
     get computingStatus(): ComputingStatus { return this._computingStatus$.getValue(); }
 
     private _computingSubscription: Nullable<Subscription>;
+
+    constructor(@ILogService private readonly _logService: ILogService) {
+        super();
+    }
 
     override dispose(): void {
         super.dispose();
@@ -68,7 +72,13 @@ export class GlobalComputingStatusService extends Disposable {
         }
 
         this._computingSubscription = combineLatest(this._allSubjects)
-            .pipe(map((values) => values.every((v) => v)))
+            .pipe(
+                map((values) => values.every((v) => v)),
+                catchError((e) => {
+                    this._logService.error('[engine-formula global-computing-status.service] _computingSubscription error:', e);
+                    return of();
+                }),
+            )
             .subscribe((computing) => this._computingStatus$.next(computing));
     }
 }

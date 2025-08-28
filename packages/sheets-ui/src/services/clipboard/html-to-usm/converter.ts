@@ -473,7 +473,7 @@ export class HtmlToUSMService {
          * e.g. excel cell value is 1234.567, and cell format is "#,##0.00", then the copied html is:
          * "<span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1,234.57 "
          */
-        if (/<span[^>]*mso-spacerun:yes[^>]*>.*?<\/span>/gi.test(cell.innerHTML)) {
+        if (cell.innerHTML.includes('mso-spacerun:yes')) {
             const cellText = cell.innerHTML.replace(/<span[^>]*mso-spacerun:yes[^>]*>.*?<\/span>/gi, '');
             const parseInfo = numfmt.parseNumber(cellText);
 

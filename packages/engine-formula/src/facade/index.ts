@@ -15,6 +15,7 @@
  */
 
 import './f-univer';
+import './f-workbook';
 
 export { FFormula } from './f-formula';
 

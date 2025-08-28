@@ -31,7 +31,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample, excelSample2, excelSample3 } from './constant';
+import { excelSample, excelSample2, excelSample3, excelSample4 } from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -352,6 +352,36 @@ describe('Test clipboard', () => {
             const cellValue = getValues(0, 0, 0, 0)?.[0]?.[0];
             expect(cellValue?.v).toStrictEqual('123456789123456789');
             expect(cellValue?.t).toStrictEqual(CellValueType.FORCE_STRING);
+        });
+
+        it('copy value is 1234.57, the format "#,##0.00", the origin value 1234.567', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+
+            // set selection to K1:L1
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            // paste data, excelSample2 value is 000123456
+            const res = await sheetClipboardService.legacyPaste(excelSample4);
+            expect(res).toBeTruthy();
+
+            // check the values
+            const cellValue = getValues(0, 0, 0, 0)?.[0]?.[0];
+            expect(cellValue?.v).toBe(1234.57);
+            expect(cellValue?.t).toBe(CellValueType.NUMBER);
         });
     });
 });

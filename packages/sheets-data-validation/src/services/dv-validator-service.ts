@@ -15,7 +15,7 @@
  */
 
 import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import { bufferDebounceTime, DataValidationStatus, Disposable, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import { bufferDebounceTime, DataValidationStatus, Disposable, getIntersectRange, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { bufferWhen, filter } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
@@ -121,8 +121,12 @@ export class SheetsDataValidationValidatorService extends Disposable {
         if (!worksheet) {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
         }
+        const allRules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
+        const ruleRanges = allRules.map((i) => i.ranges).flat();
 
-        return Promise.all(ranges.map((range) => {
+        const intersectRanges = ranges.map((range) => ruleRanges.map((ruleRange) => getIntersectRange(range, ruleRange))).flat().filter(Boolean) as IRange[];
+
+        return Promise.all(intersectRanges.map((range) => {
             const promises: Promise<DataValidationStatus>[] = [];
             Range.foreach(range, (row, col) => {
                 promises.push(this._validatorByCell(workbook, worksheet, row, col));

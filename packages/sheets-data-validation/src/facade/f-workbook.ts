@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IDisposable, IExecutionOptions, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IDataValidationRule, IDisposable, IExecutionOptions, IGridRange, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IRuleChange } from '@univerjs/data-validation';
 import type {
     IAddSheetDataValidationCommandParams,
@@ -25,7 +25,7 @@ import type {
     IUpdateSheetDataValidationSettingCommandParams,
     IValidStatusChange,
 } from '@univerjs/sheets-data-validation';
-import { toDisposable } from '@univerjs/core';
+import { DataValidationErrorStyle, DataValidationStatus, toDisposable } from '@univerjs/core';
 
 import {
     AddSheetDataValidationCommand,
@@ -39,6 +39,36 @@ import {
 } from '@univerjs/sheets-data-validation';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { filter } from 'rxjs';
+
+export interface IDataValidationError {
+    /** 工作表名称 */
+    sheetName: string;
+
+    /** 出错的单元格范围 */
+    row: number;
+    column: number;
+
+    /** 对应的规则 ID */
+    ruleId: string;
+
+    /** 触发错误的输入值 */
+    inputValue: string | number | boolean | null;
+
+    /** 规则内容快照（可选，避免规则被修改后追溯不到） */
+    rule?: IDataValidationRule;
+
+    /** 错误样式，例如 STOP / WARNING / INFO */
+    errorStyle?: DataValidationErrorStyle;
+
+    /** 自定义错误标题 */
+    errorTitle?: string;
+
+    /** 自定义错误提示 */
+    errorMessage?: string;
+
+    /** 是否允许继续输入（取决于 errorStyle 和配置） */
+    allowOverride?: boolean;
+}
 
 /**
  * @ignore
@@ -55,6 +85,34 @@ export interface IFWorkbookDataValidationMixin {
      * ```
      */
     getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
+
+    /**
+     * Get all data validation errors for current workbook.
+     * @returns A promise that resolves to an array of validation errors.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const errors = await fWorkbook.getAllDataValidationError();
+     * console.log(errors);
+     * ```
+     */
+    getAllDataValidationError(): Promise<IDataValidationError[]>;
+
+    /**
+     * Get data validation errors for a specific range.
+     * @param range The grid range to check for validation errors.
+     * @returns A promise that resolves to an array of validation errors in the specified range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const errors = await fWorkbook.getDataValidationErrorByRange({
+     *   sheetId: 'sheet1',
+     *   range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 9 }
+     * });
+     * console.log(errors);
+     * ```
+     */
+    getDataValidationErrorByRange(range: IGridRange): Promise<IDataValidationError[]>;
 
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
@@ -136,6 +194,110 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
     override getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(this._workbook.getUnitId());
+    }
+
+    override async getAllDataValidationError(): Promise<IDataValidationError[]> {
+        const unitId = this._workbook.getUnitId();
+        const sheetIds = this._dataValidationModel.getSubUnitIds(unitId);
+
+        const allErrors: IDataValidationError[] = [];
+
+        for (const sheetId of sheetIds) {
+            const sheetErrors = await this._collectValidationErrorsForSheet(unitId, sheetId);
+            allErrors.push(...sheetErrors);
+        }
+
+        return allErrors;
+    }
+
+    override async getDataValidationErrorByRange(range: IGridRange): Promise<IDataValidationError[]> {
+        const unitId = this._workbook.getUnitId();
+        return this._collectValidationErrorsForRange(unitId, range.sheetId, [range.range]);
+    }
+
+    private async _collectValidationErrorsForSheet(unitId: string, sheetId: string): Promise<IDataValidationError[]> {
+        const rules = this._dataValidationModel.getRules(unitId, sheetId);
+        if (!rules.length) {
+            return [];
+        }
+
+        const allRanges = rules.flatMap((rule) => rule.ranges);
+        return this._collectValidationErrorsForRange(unitId, sheetId, allRanges);
+    }
+
+    private async _collectValidationErrorsForRange(unitId: string, sheetId: string, ranges: IRange[]): Promise<IDataValidationError[]> {
+        if (!ranges.length) {
+            return [];
+        }
+
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        const workbook = this._workbook;
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+
+        if (!worksheet) {
+            throw new Error(`Cannot find worksheet with sheetId: ${sheetId}`);
+        }
+
+        const sheetName = worksheet.getName();
+        const errors: IDataValidationError[] = [];
+
+        for (const range of ranges) {
+            const promises: Promise<void>[] = [];
+
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    promises.push((async (): Promise<void> => {
+                        try {
+                            const status = await validatorService.validatorCell(unitId, sheetId, row, col);
+
+                            // Only collect errors (non-VALID status)
+                            if (status !== DataValidationStatus.VALID) {
+                                const rule = this._dataValidationModel.getRuleByLocation(unitId, sheetId, row, col);
+                                if (rule) {
+                                    const cellValue = worksheet.getCell(row, col)?.v || null;
+                                    const error = this._createDataValidationError(
+                                        sheetName,
+                                        row,
+                                        col,
+                                        rule,
+                                        cellValue
+                                    );
+                                    errors.push(error);
+                                }
+                            }
+                        } catch (e) {
+                            // Skip cells that can't be validated
+                            console.warn(`Failed to validate cell [${row}, ${col}]:`, e);
+                        }
+                    })());
+                }
+            }
+
+            await Promise.all(promises);
+        }
+
+        return errors;
+    }
+
+    private _createDataValidationError(
+        sheetName: string,
+        row: number,
+        column: number,
+        rule: IDataValidationRule,
+        inputValue: string | number | boolean | null
+    ): IDataValidationError {
+        return {
+            sheetName,
+            row,
+            column,
+            ruleId: rule.uid,
+            inputValue,
+            rule,
+            errorStyle: rule.errorStyle,
+            errorTitle: rule.errorTitle,
+            errorMessage: rule.error,
+            allowOverride: rule.errorStyle !== DataValidationErrorStyle.STOP,
+        };
     }
 
     // region DataValidationHooks

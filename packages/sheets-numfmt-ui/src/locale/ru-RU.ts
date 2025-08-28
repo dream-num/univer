@@ -50,8 +50,8 @@ const locale: typeof enUS = {
             thousandthPercentileDes: 'Формат процента используется для представления обычных чисел. Монетарные и бухгалтерские форматы предоставляют специальный формат для вычислений монетарных значений.',
             addDecimal: 'Увеличить количество десятичных знаков',
             subtractDecimal: 'Уменьшить количество десятичных знаков',
-            customFormat: 'Custom Format',
-            customFormatDes: 'Generate custom number formats based on existing formats.',
+            customFormat: 'Пользовательский формат',
+            customFormatDes: 'Генерация пользовательских числовых форматов на основе существующих форматов.',
         },
     },
 };

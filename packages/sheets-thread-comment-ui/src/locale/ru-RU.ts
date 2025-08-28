@@ -19,8 +19,8 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     sheetThreadComment: {
         menu: {
-            addComment: 'Add Comment',
-            commentManagement: 'Comment Management',
+            addComment: 'Добавить комментарий',
+            commentManagement: 'Управление комментариями',
         },
     },
 };

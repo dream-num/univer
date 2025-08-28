@@ -175,7 +175,7 @@ export const InsertRowByRangeCommand: ICommand = {
 export const InsertRowBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-before',
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params: IInsertMultiRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
@@ -193,7 +193,10 @@ export const InsertRowBeforeCommand: ICommand = {
         if (!target) return false;
 
         const { worksheet, subUnitId, unitId } = target;
-        const { startRow, endRow } = range;
+        const count = params.value || 0;
+
+        const startRow = range.startRow;
+        const endRow = range.startRow + count - 1;
         const startColumn = 0;
         const endColumn = worksheet.getColumnCount() - 1;
         const insertRowParams: IInsertRowCommandParams = {
@@ -474,7 +477,7 @@ export const InsertColByRangeCommand: ICommand<IInsertColCommandParams> = {
 export const InsertColBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-before',
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params: IInsertMultiRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
@@ -490,8 +493,9 @@ export const InsertColBeforeCommand: ICommand = {
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
-
-        const { startColumn, endColumn } = range;
+        const count = params.value || 0;
+        const startColumn = range.startColumn;
+        const endColumn = range.startColumn + count - 1;
         const startRow = 0;
         const endRow = worksheet.getRowCount() - 1;
 

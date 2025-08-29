@@ -41,20 +41,20 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 import { filter } from 'rxjs';
 
 export interface IDataValidationError {
-    /** 工作表名称 */
+
     sheetName: string;
 
-    /** 出错的单元格范围 */
+    /** The row of the cell that triggered the error */
     row: number;
     column: number;
 
-    /** 对应的规则 ID */
+    /** The ID of the rule that triggered the error */
     ruleId: string;
 
-    /** 触发错误的输入值 */
+    /** The input value that triggered the error */
     inputValue: string | number | boolean | null;
 
-    /** 规则内容快照（可选，避免规则被修改后追溯不到） */
+    /** The rule content snapshot (optional, to avoid tracing back to the rule after modification) */
     rule?: IDataValidationRule;
 }
 

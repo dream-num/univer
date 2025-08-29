@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IDisposable, IExecutionOptions, IGridRange, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IDataValidationRule, IDisposable, IExecutionOptions, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IRuleChange } from '@univerjs/data-validation';
 import type {
     IAddSheetDataValidationCommandParams,
@@ -85,22 +85,6 @@ export interface IFWorkbookDataValidationMixin {
      * ```
      */
     getAllDataValidationError(): Promise<IDataValidationError[]>;
-
-    /**
-     * Get data validation errors for a specific range.
-     * @param range The grid range to check for validation errors.
-     * @returns A promise that resolves to an array of validation errors in the specified range.
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const errors = await fWorkbook.getDataValidationErrorByRange({
-     *   sheetId: 'sheet1',
-     *   range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 9 }
-     * });
-     * console.log(errors);
-     * ```
-     */
-    getDataValidationErrorByRange(range: IGridRange): Promise<IDataValidationError[]>;
 
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
@@ -196,11 +180,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
         }
 
         return allErrors;
-    }
-
-    override async getDataValidationErrorByRange(range: IGridRange): Promise<IDataValidationError[]> {
-        const unitId = this._workbook.getUnitId();
-        return this._collectValidationErrorsForRange(unitId, range.sheetId, [range.range]);
     }
 
     private async _collectValidationErrorsForSheet(unitId: string, sheetId: string): Promise<IDataValidationError[]> {

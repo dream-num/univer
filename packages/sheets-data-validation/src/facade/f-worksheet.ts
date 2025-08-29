@@ -80,22 +80,6 @@ export interface IFWorksheetDataValidationMixin {
      * ```
      */
     getAllDataValidationError(): Promise<IDataValidationError[]>;
-
-    /**
-     * Get data validation errors for a specific range in current worksheet.
-     * @param range The range to check for validation errors.
-     * @returns A promise that resolves to an array of validation errors in the specified range.
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
-     * const errors = await fWorksheet.getDataValidationErrorByRange({
-     *   startRow: 0, endRow: 9, startColumn: 0, endColumn: 9
-     * });
-     * console.log(errors);
-     * ```
-     */
-    getDataValidationErrorByRange(range: IRange): Promise<IDataValidationError[]>;
 }
 
 /**
@@ -133,13 +117,6 @@ export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorks
         const sheetId = this._worksheet.getSheetId();
 
         return this._collectValidationErrorsForSheet(unitId, sheetId);
-    }
-
-    override async getDataValidationErrorByRange(range: IRange): Promise<IDataValidationError[]> {
-        const unitId = this._workbook.getUnitId();
-        const sheetId = this._worksheet.getSheetId();
-
-        return this._collectValidationErrorsForRange(unitId, sheetId, [range]);
     }
 
     private async _collectValidationErrorsForSheet(unitId: string, sheetId: string): Promise<IDataValidationError[]> {

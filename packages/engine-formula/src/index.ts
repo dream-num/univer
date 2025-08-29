@@ -86,6 +86,7 @@ export { BaseReferenceObject, type FunctionVariantType } from './engine/referenc
 export { AsyncArrayObject, AsyncObject } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
+export { extractFormulaError } from './engine/utils/cell';
 export { generateAstNode } from './engine/utils/generate-ast-node';
 export { strip, stripErrorMargin } from './engine/utils/math-kit';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';

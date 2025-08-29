@@ -16,8 +16,7 @@
 
 import type { IGridRange } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
-import { isFormulaId, isFormulaString, Tools } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
+import { extractFormulaError, FormulaDataModel } from '@univerjs/engine-formula';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 /** Interface for sheet formula errors */
@@ -25,8 +24,11 @@ interface ISheetFormulaError {
     /** sheet name */
     sheetName: string;
 
-    /** cell position (e.g., "A1") */
-    cell: string;
+    /** cell row */
+    row: number;
+
+    /** cell column */
+    column: number;
 
     /** formula string (e.g., "=SUM(A1:B10)") */
     formula: string;
@@ -54,7 +56,7 @@ export interface IFWorkbookEngineFormulaMixin {
     /**
      * Get formula errors in a specific range
      * @param {IRange} range The range to check for formula errors
-     * @returns {unknown[]} Array of formula errors in the range
+     * @returns {ISheetFormulaError[]} Array of formula errors in the range
      * @example
      * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -87,23 +89,17 @@ export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbook
             cellMatrix.forValue((row, column, cell) => {
                 if (!cell) return;
 
-                const { f, si, v } = cell;
                 const arrayFormulaCellData = arrayFormulaSheet?.[row]?.[column];
-
-                // Check if cell has a formula
-                const hasFormula = isFormulaString(f) || isFormulaId(si);
-                if (!hasFormula) return;
+                const errorType = extractFormulaError(cell, !!arrayFormulaCellData);
 
                 // Check if the cell value is an error
-                if (v && typeof v === 'object' && v !== null && 'errorType' in v) {
-                    const cellAddress = this._getCellAddress(row, column);
-                    const formulaString = f || '';
-
+                if (errorType) {
                     errors.push({
                         sheetName,
-                        cell: cellAddress,
-                        formula: formulaString,
-                        errorType: (v as { errorType: ErrorType }).errorType,
+                        row,
+                        column,
+                        formula: cell.f || '',
+                        errorType,
                     });
                 }
             });
@@ -115,10 +111,15 @@ export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbook
     override getFormulaErrorByRange(range: IGridRange): ISheetFormulaError[] {
         const errors: ISheetFormulaError[] = [];
         const workbook = this._workbook;
+        const unitId = workbook.getUnitId();
+        const { sheetId } = range;
 
         // Get the specific worksheet
-        const worksheet = workbook.getSheetBySheetId(range.sheetId);
+        const worksheet = workbook.getSheetBySheetId(sheetId);
         if (!worksheet) return errors;
+
+        const arrayFormula = this._injector.get(FormulaDataModel).getArrayFormulaCellData();
+        const arrayFormulaSheet = arrayFormula?.[unitId]?.[sheetId] || {};
 
         const sheetName = worksheet.getName();
         const cellMatrix = worksheet.getCellMatrix();
@@ -130,36 +131,23 @@ export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbook
                 const cell = cellMatrix.getValue(row, column);
                 if (!cell) continue;
 
-                const { f, si, v } = cell;
-
-                // Check if cell has a formula
-                const hasFormula = isFormulaString(f) || isFormulaId(si);
-                if (!hasFormula) continue;
+                const arrayFormulaCellData = arrayFormulaSheet?.[row]?.[column];
+                const errorType = extractFormulaError(cell, !!arrayFormulaCellData);
 
                 // Check if the cell value is an error
-                if (v && typeof v === 'object' && v !== null && 'errorType' in v) {
-                    const cellAddress = this._getCellAddress(row, column);
-                    const formulaString = f || '';
-
+                if (errorType) {
                     errors.push({
                         sheetName,
-                        cell: cellAddress,
-                        formula: formulaString,
-                        errorType: (v as { errorType: ErrorType }).errorType,
+                        row,
+                        column,
+                        formula: cell.f || '',
+                        errorType,
                     });
                 }
             }
         }
 
         return errors;
-    }
-
-    /**
-     * Convert row and column indices to cell address (e.g., A1, B2)
-     * @private
-     */
-    private _getCellAddress(row: number, column: number): string {
-        return `${Tools.chatAtABC(column)}${row + 1}`;
     }
 }
 

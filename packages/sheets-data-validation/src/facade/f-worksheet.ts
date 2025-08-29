@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IDataValidationRule, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IDataValidationRule, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IDataValidationError } from './f-workbook';
-import { DataValidationErrorStyle } from '@univerjs/core';
+import { DataValidationStatus } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
@@ -174,7 +174,7 @@ export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorks
 
                             // Only collect errors (non-VALID status)
                             if (status !== DataValidationStatus.VALID) {
-                                const dataValidationModel = this._injector.get(DataValidationModel);
+                                const dataValidationModel = this._injector.get(SheetDataValidationModel);
                                 const rule = dataValidationModel.getRuleByLocation(unitId, sheetId, row, col);
                                 if (rule) {
                                     const cellValue = worksheet.getCell(row, col)?.v || null;
@@ -216,10 +216,6 @@ export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorks
             ruleId: rule.uid,
             inputValue,
             rule,
-            errorStyle: rule.errorStyle,
-            errorTitle: rule.errorTitle,
-            errorMessage: rule.error,
-            allowOverride: rule.errorStyle !== DataValidationErrorStyle.STOP,
         };
     }
 }

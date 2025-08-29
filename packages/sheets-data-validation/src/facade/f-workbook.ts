@@ -25,7 +25,7 @@ import type {
     IUpdateSheetDataValidationSettingCommandParams,
     IValidStatusChange,
 } from '@univerjs/sheets-data-validation';
-import { DataValidationErrorStyle, DataValidationStatus, toDisposable } from '@univerjs/core';
+import { DataValidationStatus, toDisposable } from '@univerjs/core';
 
 import {
     AddSheetDataValidationCommand,
@@ -56,18 +56,6 @@ export interface IDataValidationError {
 
     /** 规则内容快照（可选，避免规则被修改后追溯不到） */
     rule?: IDataValidationRule;
-
-    /** 错误样式，例如 STOP / WARNING / INFO */
-    errorStyle?: DataValidationErrorStyle;
-
-    /** 自定义错误标题 */
-    errorTitle?: string;
-
-    /** 自定义错误提示 */
-    errorMessage?: string;
-
-    /** 是否允许继续输入（取决于 errorStyle 和配置） */
-    allowOverride?: boolean;
 }
 
 /**
@@ -293,10 +281,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
             ruleId: rule.uid,
             inputValue,
             rule,
-            errorStyle: rule.errorStyle,
-            errorTitle: rule.errorTitle,
-            errorMessage: rule.error,
-            allowOverride: rule.errorStyle !== DataValidationErrorStyle.STOP,
         };
     }
 

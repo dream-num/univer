@@ -79,7 +79,7 @@ export interface IFWorksheetDataValidationMixin {
      * console.log(errors);
      * ```
      */
-    getAllDataValidationError(): Promise<IDataValidationError[]>;
+    getAllDataValidationErrorAsync(): Promise<IDataValidationError[]>;
 }
 
 /**
@@ -112,7 +112,7 @@ export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorks
         return null;
     }
 
-    override async getAllDataValidationError(): Promise<IDataValidationError[]> {
+    override async getAllDataValidationErrorAsync(): Promise<IDataValidationError[]> {
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
 

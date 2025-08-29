@@ -84,7 +84,7 @@ export interface IFWorkbookDataValidationMixin {
      * console.log(errors);
      * ```
      */
-    getAllDataValidationError(): Promise<IDataValidationError[]>;
+    getAllDataValidationErrorAsync(): Promise<IDataValidationError[]>;
 
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
@@ -168,7 +168,7 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
         return validatorService.validatorWorkbook(this._workbook.getUnitId());
     }
 
-    override async getAllDataValidationError(): Promise<IDataValidationError[]> {
+    override async getAllDataValidationErrorAsync(): Promise<IDataValidationError[]> {
         const unitId = this._workbook.getUnitId();
         const sheetIds = this._dataValidationModel.getSubUnitIds(unitId);
 

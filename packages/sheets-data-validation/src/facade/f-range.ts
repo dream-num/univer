@@ -155,12 +155,12 @@ export interface IFRangeDataValidationMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const fRange = fWorksheet.getRange('A1:B10');
-     * const errors = await fRange.getDataValidationError();
+     * const errors = await fRange.getDataValidationErrorAsync();
      *
      * console.log(errors);
      * ```
      */
-    getDataValidationError(): Promise<IDataValidationError[]>;
+    getDataValidationErrorAsync(): Promise<IDataValidationError[]>;
 }
 
 /**
@@ -224,7 +224,7 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
         );
     }
 
-    override async getDataValidationError(): Promise<IDataValidationError[]> {
+    override async getDataValidationErrorAsync(): Promise<IDataValidationError[]> {
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
 

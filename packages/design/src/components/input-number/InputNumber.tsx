@@ -344,7 +344,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                         >
                             <button
                                 className={`
-                                  univer-box-border univer-flex univer-w-5 univer-flex-1 univer-cursor-pointer
+                                  univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
                                   univer-items-center univer-justify-center univer-border-none univer-bg-transparent
                                   univer-p-0 univer-transition-colors
                                   hover:univer-bg-gray-100
@@ -359,7 +359,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                             </button>
                             <button
                                 className={`
-                                  univer-box-border univer-flex univer-w-5 univer-flex-1 univer-cursor-pointer
+                                  univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
                                   univer-items-center univer-justify-center univer-border-none univer-bg-transparent
                                   univer-p-0 univer-transition-colors
                                   hover:univer-bg-gray-100

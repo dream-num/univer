@@ -33,7 +33,6 @@ import {
 import { FUniver } from '@univerjs/core/facade';
 import { DefinedNamesService, FormulaDataModel, FunctionService, IDefinedNamesService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
@@ -135,7 +134,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetInterceptorService]);
 
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);

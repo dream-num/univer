@@ -51,7 +51,7 @@ export const DocCreateTableOperation: ICommand = {
                     },
                 },
             },
-            width: 400,
+            width: 'auto',
             title: { title: localeService.t('toolbar.table.insert') },
             onConfirm: () => {
                 commandService.executeCommand(CreateDocTableCommand.id, tableCreateParams);

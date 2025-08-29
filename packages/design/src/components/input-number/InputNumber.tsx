@@ -16,8 +16,8 @@
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
 import { forwardRef, useEffect, useRef, useState } from 'react';
+import { borderLeftClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { Button } from '../button/Button';
 import { Input } from '../input/Input';
 
 export interface IInputNumberProps
@@ -331,40 +331,48 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                         <div
                             className={clsx(
                                 `
-                                  univer-absolute univer-right-px univer-top-px univer-box-border univer-flex
-                                  univer-h-[calc(100%-2px)] univer-w-6 univer-flex-col univer-border univer-border-y-0
-                                  univer-border-l univer-border-r-0 univer-border-solid univer-border-gray-200
-                                  univer-border-l-gray-200
-                                  dark:!univer-border-gray-600
+                                  univer-absolute univer-right-px univer-top-px univer-flex univer-h-[calc(100%-2px)]
+                                  univer-flex-col univer-overflow-hidden univer-rounded-r-md
+                                  before:univer-absolute before:univer-top-1/2 before:univer-block before:univer-h-px
+                                  before:univer-w-full before:-univer-translate-y-1/2 before:univer-bg-gray-200
+                                  before:univer-content-[""]
+                                  dark:before:!univer-bg-gray-600
                                 `,
+                                borderLeftClassName,
                                 controlsClassName
                             )}
                         >
-                            <Button
+                            <button
                                 className={`
-                                  univer-relative !univer-h-1/2 univer-w-full univer-rounded-none univer-rounded-tr-md
-                                  univer-border-none !univer-bg-transparent univer-text-xs
-                                  after:univer-absolute after:-univer-bottom-px after:univer-block after:univer-h-px
-                                  after:univer-w-full after:univer-bg-gray-200 after:univer-content-['']
-                                  dark:after:!univer-bg-gray-600
+                                  univer-box-border univer-flex univer-w-5 univer-flex-1 univer-cursor-pointer
+                                  univer-items-center univer-justify-center univer-border-none univer-bg-transparent
+                                  univer-p-0 univer-transition-colors
+                                  hover:univer-bg-gray-100
                                 `}
+                                type="button"
+                                aria-label="increment"
                                 tabIndex={-1}
                                 disabled={disabled || (max !== undefined && internalValue !== null && internalValue >= max)}
                                 onClick={() => handleClick(true)}
                             >
                                 +
-                            </Button>
-                            <Button
+                            </button>
+                            <button
                                 className={`
-                                  !univer-h-1/2 univer-w-full univer-rounded-none univer-rounded-br-md
-                                  univer-border-none !univer-bg-transparent univer-text-xs
+                                  univer-box-border univer-flex univer-w-5 univer-flex-1 univer-cursor-pointer
+                                  univer-items-center univer-justify-center univer-border-none univer-bg-transparent
+                                  univer-p-0 univer-transition-colors
+                                  hover:univer-bg-gray-100
+                                  dark:hover:!univer-bg-gray-700
                                 `}
+                                type="button"
+                                aria-label="decrement"
                                 tabIndex={-1}
                                 disabled={disabled || (min !== undefined && internalValue !== null && internalValue <= min)}
                                 onClick={() => handleClick(false)}
                             >
                                 -
-                            </Button>
+                            </button>
                         </div>
                     )}
                 </div>

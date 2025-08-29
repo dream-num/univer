@@ -16,44 +16,51 @@
 
 import type { ISheetFormulaError } from '@univerjs/engine-formula';
 import { extractFormulaError, FormulaDataModel } from '@univerjs/engine-formula';
-import { FWorkbook } from '@univerjs/sheets/facade';
+import { FRange } from '@univerjs/sheets/facade';
 
 /**
  * @ignore
  */
-export interface IFWorkbookEngineFormulaMixin {
+export interface IFRangeEngineFormulaMixin {
     /**
-     * Get all formula errors in the workbook
-     * @returns {ISheetFormulaError[]} Array of formula errors
+     * Get formula errors in the current range
+     * @returns {ISheetFormulaError[]} Array of formula errors in the range
      * @example
      * ```typescript
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const errors = fWorkbook.getAllFormulaError();
-     * console.log('Formula errors:', errors);
+     * const range = univerAPI.getActiveWorkbook()
+     *   .getActiveSheet()
+     *   .getRange('A1:B10');
+     * const errors = range.getFormulaError();
+     * console.log('Formula errors in range:', errors);
      * ```
      */
-    getAllFormulaError(): ISheetFormulaError[];
+    getFormulaError(): ISheetFormulaError[];
 }
 
-export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbookEngineFormulaMixin {
-    override getAllFormulaError(): ISheetFormulaError[] {
+/**
+ * @ignore
+ */
+export class FRangeEngineFormulaMixin extends FRange implements IFRangeEngineFormulaMixin {
+    override getFormulaError(): ISheetFormulaError[] {
         const errors: ISheetFormulaError[] = [];
-        const workbook = this._workbook;
-        const unitId = workbook.getUnitId();
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+        const sheetName = this._worksheet.getName();
+        const worksheet = this._workbook.getSheetBySheetId(sheetId);
 
-        // Get all worksheets in the workbook
-        const worksheets = workbook.getSheets();
+        if (!worksheet) return errors;
+
         const arrayFormula = this._injector.get(FormulaDataModel).getArrayFormulaCellData();
+        const arrayFormulaSheet = arrayFormula?.[unitId]?.[sheetId] || {};
 
-        worksheets.forEach((worksheet) => {
-            const sheetName = worksheet.getName();
-            const sheetId = worksheet.getSheetId();
-            const cellMatrix = worksheet.getCellMatrix();
-            const arrayFormulaSheet = arrayFormula?.[unitId]?.[sheetId] || {};
+        const cellMatrix = worksheet.getCellMatrix();
+        const { startRow, endRow, startColumn, endColumn } = this._range;
 
-            // Traverse all cells in the worksheet
-            cellMatrix.forValue((row, column, cell) => {
-                if (!cell) return;
+        // Traverse cells in the current range
+        for (let row = startRow; row <= endRow; row++) {
+            for (let column = startColumn; column <= endColumn; column++) {
+                const cell = cellMatrix.getValue(row, column);
+                if (!cell) continue;
 
                 const arrayFormulaCellData = arrayFormulaSheet?.[row]?.[column];
                 const errorType = extractFormulaError(cell, !!arrayFormulaCellData);
@@ -68,15 +75,15 @@ export class FWorkbookEngineFormulaMixin extends FWorkbook implements IFWorkbook
                         errorType,
                     });
                 }
-            });
-        });
+            }
+        }
 
         return errors;
     }
 }
 
-FWorkbook.extend(FWorkbookEngineFormulaMixin);
+FRange.extend(FRangeEngineFormulaMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookEngineFormulaMixin { }
+    interface FRange extends IFRangeEngineFormulaMixin {}
 }

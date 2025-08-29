@@ -49,3 +49,21 @@ export enum ErrorType {
 export const ERROR_TYPE_SET = new Set(Object.values(ErrorType));
 
 export const ERROR_TYPE_COUNT_ARRAY = [...new Set(Object.values(ErrorType).map((error) => error.length))];
+
+/** Interface for sheet formula errors */
+export interface ISheetFormulaError {
+    /** sheet name */
+    sheetName: string;
+
+    /** cell row */
+    row: number;
+
+    /** cell column */
+    column: number;
+
+    /** formula string (e.g., "=SUM(A1:B10)") */
+    formula: string;
+
+    /** error type, refer to ErrorType enum */
+    errorType: ErrorType;
+}

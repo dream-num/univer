@@ -50,6 +50,7 @@ import zhCN from '@univerjs/sheets/locale/zh-CN';
 
 import '@univerjs/sheets/facade';
 import '../f-workbook';
+import '../f-range';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {

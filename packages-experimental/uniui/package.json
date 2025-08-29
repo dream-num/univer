@@ -61,7 +61,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@floating-ui/react-dom": "^2.1.4",
+        "@floating-ui/react-dom": "^2.1.6",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
@@ -69,7 +69,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@xyflow/react": "^12.8.2"
+        "@xyflow/react": "^12.8.4"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

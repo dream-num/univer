@@ -15,8 +15,6 @@
  */
 
 import './f-univer';
-import './f-workbook';
-import './f-range';
 
 export { FFormula } from './f-formula';
 

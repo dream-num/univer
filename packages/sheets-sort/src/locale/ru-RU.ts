@@ -20,14 +20,14 @@ const locale: typeof enUS = {
     sheetsSort: {
         title: 'Sort',
         toolbar: {
-            'sort-asc': 'ascending order',
-            'sort-desc': 'descending order',
-            'sort-custom': 'custom order',
+            'sort-asc': 'по возрастанию',
+            'sort-desc': 'по убыванию',
+            'sort-custom': 'пользовательский выбор',
         },
         'context-menu': {
-            'sort-asc': 'ascending order',
-            'sort-desc': 'descending order',
-            'sort-custom': 'custom order',
+            'sort-asc': 'по возрастанию',
+            'sort-desc': 'по убыванию',
+            'sort-custom': 'пользовательский выбор',
         },
     },
 };

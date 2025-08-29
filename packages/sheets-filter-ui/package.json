@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter-ui",
-    "version": "0.10.5",
+    "version": "0.10.6",
     "private": false,
     "description": "Univer Sheets Filter UI",
     "author": "DreamNum <developer@univer.ai>",

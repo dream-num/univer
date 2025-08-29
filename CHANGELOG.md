@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.10.6](https://github.com/dream-num/univer/compare/v0.10.5...v0.10.6) (2025-08-29)
+
+
+### Bug Fixes
+
+* fix data issues after moving range ([#5749](https://github.com/dream-num/univer/issues/5749)) ([a37cfec](https://github.com/dream-num/univer/commit/a37cfeca6dd64b4bb735a796ac98c149a6acd26e))
+* fix number format cell values ​​copied from excel with forced spaces ([#5757](https://github.com/dream-num/univer/issues/5757)) ([5ea935f](https://github.com/dream-num/univer/commit/5ea935f0e34dfd93238bf134ed3688c8e19c669c))
+* fix the issue of digital precision display ([#5755](https://github.com/dream-num/univer/issues/5755)) ([3af6131](https://github.com/dream-num/univer/commit/3af613122d5ea73a00ee93b73fd81680add09c82))
+* fixed the issue that clicking on the switch sheet in the editing state is invalid ([#5750](https://github.com/dream-num/univer/issues/5750)) ([6c1db1c](https://github.com/dream-num/univer/commit/6c1db1c467fba3c9470012b97609c15f873389e5))
+* **formula:** fix the issue with formula movement ([#5740](https://github.com/dream-num/univer/issues/5740)) ([cb76748](https://github.com/dream-num/univer/commit/cb76748640f51d53ff7fe7c78fe9ae27c41bd5d3))
+* **info:** header formatting in README.md ([#5738](https://github.com/dream-num/univer/issues/5738)) ([d5eb5a2](https://github.com/dream-num/univer/commit/d5eb5a2eafac578e787f6a5f6ff44d76aafce6b9))
+* insert cols&rows from rigth mouse btn menu ([#5764](https://github.com/dream-num/univer/issues/5764)) ([57f727b](https://github.com/dream-num/univer/commit/57f727bb6299bfd45642b08453ddf777df9bfc9e))
+
+
+### Features
+
+* ru localize statistical func ([#5752](https://github.com/dream-num/univer/issues/5752)) ([a8b2717](https://github.com/dream-num/univer/commit/a8b2717b0b5860bc8e5fdaac74197a7c6ba3fa44))
+
 ## [0.10.5](https://github.com/dream-num/univer/compare/v0.10.4...v0.10.5) (2025-08-22)
 
 

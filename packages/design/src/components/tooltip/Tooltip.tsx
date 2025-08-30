@@ -223,7 +223,7 @@ export function Tooltip(props: ITooltipProps) {
 
     const triggerElement = asChild
         ? (
-            <span {...commonProps} className="univer-inline-block">
+            <span {...commonProps} className="univer-inline-block univer-truncate">
                 {children}
             </span>
         )

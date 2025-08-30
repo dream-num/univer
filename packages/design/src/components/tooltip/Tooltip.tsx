@@ -223,7 +223,7 @@ export function Tooltip(props: ITooltipProps) {
 
     const triggerElement = asChild
         ? (
-            <span {...commonProps} className="univer-inline-block univer-truncate">
+            <span {...commonProps} className="univer-inline-block univer-max-w-full univer-truncate">
                 {children}
             </span>
         )
@@ -240,21 +240,16 @@ export function Tooltip(props: ITooltipProps) {
             <div
                 ref={tooltipRef}
                 role="tooltip"
-                className={clsx(
-                    'univer-animate-in univer-fade-in-0 univer-zoom-in-95',
-                    'univer-z-[1080] univer-box-border univer-w-fit',
-                    'univer-text-balance univer-rounded-lg',
-                    'univer-bg-gray-700 univer-px-3 univer-py-2.5 univer-text-xs univer-font-medium univer-text-white',
-                    'univer-shadow-lg',
-                    className
-                )}
+                className={clsx(`
+                  univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-pointer-events-auto univer-absolute
+                  univer-z-[1081] univer-box-border univer-w-fit univer-max-w-sm univer-text-balance univer-rounded-lg
+                  univer-bg-gray-700 univer-px-2.5 univer-py-2 univer-text-xs univer-font-medium univer-text-white
+                  univer-shadow-lg univer-drop-shadow-sm
+                  dark:!univer-bg-gray-100 dark:!univer-text-gray-900
+                `, className)}
                 style={{
-                    position: 'absolute',
                     top: coords?.top ?? -9999,
                     left: coords?.left ?? -9999,
-                    // prevent pointer events to underlying content
-                    pointerEvents: 'auto',
-                    zIndex: 1080,
                 }}
                 onMouseEnter={() => showTooltip()}
                 onMouseLeave={() => hideTooltip()}
@@ -262,13 +257,11 @@ export function Tooltip(props: ITooltipProps) {
                 <div>{title}</div>
                 <div
                     ref={arrowRef}
-                    className={clsx(
-                        'univer-absolute univer-size-2.5 univer-rotate-45',
-                        'univer-rounded-[2px] univer-bg-gray-700'
-                    )}
+                    className={`
+                      univer-absolute univer-size-2.5 univer-rotate-45 univer-rounded-sm univer-bg-gray-700
+                      dark:univer-bg-gray-100
+                    `}
                     style={{
-                        width: 10,
-                        height: 10,
                         // position arrow based on placement
                         ...(currentPlacement === 'bottom' && { top: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
                         ...(currentPlacement === 'top' && { bottom: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),

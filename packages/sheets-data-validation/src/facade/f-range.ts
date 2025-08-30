@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, Nullable } from '@univerjs/core';
+import type { IDataValidationRule, IRange, Nullable } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import type { IDataValidationError } from './f-workbook';
+import { DataValidationStatus } from '@univerjs/core';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
@@ -145,6 +147,20 @@ export interface IFRangeDataValidationMixin {
      * ```
      */
     getValidatorStatus(): Promise<DataValidationStatus[][]>;
+    /**
+     * Get data validation errors for a specific range in current worksheet.
+     * @returns A promise that resolves to an array of validation errors in the specified range.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B10');
+     * const errors = await fRange.getDataValidationErrorAsync();
+     *
+     * console.log(errors);
+     * ```
+     */
+    getDataValidationErrorAsync(): Promise<IDataValidationError[]>;
 }
 
 /**
@@ -206,6 +222,79 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
             this._worksheet.getSheetId(),
             [this._range]
         );
+    }
+
+    override async getDataValidationErrorAsync(): Promise<IDataValidationError[]> {
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+
+        return this._collectValidationErrorsForRange(unitId, sheetId, [this._range]);
+    }
+
+    private async _collectValidationErrorsForRange(unitId: string, sheetId: string, ranges: IRange[]): Promise<IDataValidationError[]> {
+        if (!ranges.length) {
+            return [];
+        }
+
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        const worksheet = this._worksheet;
+        const sheetName = worksheet.getName();
+        const errors: IDataValidationError[] = [];
+
+        for (const range of ranges) {
+            const promises: Promise<void>[] = [];
+
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    promises.push((async (): Promise<void> => {
+                        try {
+                            const status = await validatorService.validatorCell(unitId, sheetId, row, col);
+
+                            // Only collect errors (non-VALID status)
+                            if (status !== DataValidationStatus.VALID) {
+                                const dataValidationModel = this._injector.get(SheetDataValidationModel);
+                                const rule = dataValidationModel.getRuleByLocation(unitId, sheetId, row, col);
+                                if (rule) {
+                                    const cellValue = worksheet.getCell(row, col)?.v || null;
+                                    const error = this._createDataValidationError(
+                                        sheetName,
+                                        row,
+                                        col,
+                                        rule,
+                                        cellValue
+                                    );
+                                    errors.push(error);
+                                }
+                            }
+                        } catch (e) {
+                            // Skip cells that can't be validated
+                            console.warn(`Failed to validate cell [${row}, ${col}]:`, e);
+                        }
+                    })());
+                }
+            }
+
+            await Promise.all(promises);
+        }
+
+        return errors;
+    }
+
+    private _createDataValidationError(
+        sheetName: string,
+        row: number,
+        column: number,
+        rule: IDataValidationRule,
+        inputValue: string | number | boolean | null
+    ): IDataValidationError {
+        return {
+            sheetName,
+            row,
+            column,
+            ruleId: rule.uid,
+            inputValue,
+            rule,
+        };
     }
 }
 

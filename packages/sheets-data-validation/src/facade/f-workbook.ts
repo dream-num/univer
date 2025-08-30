@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IDisposable, IExecutionOptions, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IDataValidationRule, IDisposable, IExecutionOptions, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IRuleChange } from '@univerjs/data-validation';
 import type {
     IAddSheetDataValidationCommandParams,
@@ -25,7 +25,7 @@ import type {
     IUpdateSheetDataValidationSettingCommandParams,
     IValidStatusChange,
 } from '@univerjs/sheets-data-validation';
-import { toDisposable } from '@univerjs/core';
+import { DataValidationStatus, toDisposable } from '@univerjs/core';
 
 import {
     AddSheetDataValidationCommand,
@@ -39,6 +39,24 @@ import {
 } from '@univerjs/sheets-data-validation';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { filter } from 'rxjs';
+
+export interface IDataValidationError {
+
+    sheetName: string;
+
+    /** The row of the cell that triggered the error */
+    row: number;
+    column: number;
+
+    /** The ID of the rule that triggered the error */
+    ruleId: string;
+
+    /** The input value that triggered the error */
+    inputValue: string | number | boolean | null;
+
+    /** The rule content snapshot (optional, to avoid tracing back to the rule after modification) */
+    rule?: IDataValidationRule;
+}
 
 /**
  * @ignore
@@ -55,6 +73,18 @@ export interface IFWorkbookDataValidationMixin {
      * ```
      */
     getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
+
+    /**
+     * Get all data validation errors for current workbook.
+     * @returns A promise that resolves to an array of validation errors.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const errors = await fWorkbook.getAllDataValidationError();
+     * console.log(errors);
+     * ```
+     */
+    getAllDataValidationErrorAsync(): Promise<IDataValidationError[]>;
 
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (event) => { ... })` instead
@@ -136,6 +166,101 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
     override getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(this._workbook.getUnitId());
+    }
+
+    override async getAllDataValidationErrorAsync(): Promise<IDataValidationError[]> {
+        const unitId = this._workbook.getUnitId();
+        const sheetIds = this._dataValidationModel.getSubUnitIds(unitId);
+
+        const allErrors: IDataValidationError[] = [];
+
+        for (const sheetId of sheetIds) {
+            const sheetErrors = await this._collectValidationErrorsForSheet(unitId, sheetId);
+            allErrors.push(...sheetErrors);
+        }
+
+        return allErrors;
+    }
+
+    private async _collectValidationErrorsForSheet(unitId: string, sheetId: string): Promise<IDataValidationError[]> {
+        const rules = this._dataValidationModel.getRules(unitId, sheetId);
+        if (!rules.length) {
+            return [];
+        }
+
+        const allRanges = rules.flatMap((rule) => rule.ranges);
+        return this._collectValidationErrorsForRange(unitId, sheetId, allRanges);
+    }
+
+    private async _collectValidationErrorsForRange(unitId: string, sheetId: string, ranges: IRange[]): Promise<IDataValidationError[]> {
+        if (!ranges.length) {
+            return [];
+        }
+
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        const workbook = this._workbook;
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+
+        if (!worksheet) {
+            throw new Error(`Cannot find worksheet with sheetId: ${sheetId}`);
+        }
+
+        const sheetName = worksheet.getName();
+        const errors: IDataValidationError[] = [];
+
+        for (const range of ranges) {
+            const promises: Promise<void>[] = [];
+
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    promises.push((async (): Promise<void> => {
+                        try {
+                            const status = await validatorService.validatorCell(unitId, sheetId, row, col);
+
+                            // Only collect errors (non-VALID status)
+                            if (status !== DataValidationStatus.VALID) {
+                                const rule = this._dataValidationModel.getRuleByLocation(unitId, sheetId, row, col);
+                                if (rule) {
+                                    const cellValue = worksheet.getCell(row, col)?.v || null;
+                                    const error = this._createDataValidationError(
+                                        sheetName,
+                                        row,
+                                        col,
+                                        rule,
+                                        cellValue
+                                    );
+                                    errors.push(error);
+                                }
+                            }
+                        } catch (e) {
+                            // Skip cells that can't be validated
+                            console.warn(`Failed to validate cell [${row}, ${col}]:`, e);
+                        }
+                    })());
+                }
+            }
+
+            await Promise.all(promises);
+        }
+
+        return errors;
+    }
+
+    private _createDataValidationError(
+        sheetName: string,
+        row: number,
+        column: number,
+        rule: IDataValidationRule,
+        inputValue: string | number | boolean | null
+    ): IDataValidationError {
+        return {
+            sheetName,
+            row,
+            column,
+            ruleId: rule.uid,
+            inputValue,
+            rule,
+        };
     }
 
     // region DataValidationHooks

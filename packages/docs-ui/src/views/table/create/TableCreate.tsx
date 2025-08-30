@@ -49,7 +49,7 @@ export const DocCreateTableConfirm = ({
     }, [tableCreateParams]);
 
     return (
-        <div className="univer-flex univer-items-center univer-justify-between">
+        <div className="univer-flex univer-items-center univer-justify-between univer-gap-2">
             <div className="univer-flex univer-items-center univer-gap-2">
                 <span>{localeService.t('toolbar.table.rowCount')}</span>
                 <InputNumber

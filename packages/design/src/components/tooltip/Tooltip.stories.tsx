@@ -15,7 +15,6 @@
  */
 
 import type { Meta } from '@storybook/react';
-
 import { Button } from '../button/Button';
 import { Tooltip } from './Tooltip';
 

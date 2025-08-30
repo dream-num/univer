@@ -21,9 +21,17 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect } from 'react';
 
-export function useRangeSelectorSelectionChange(opts: { supportAcrossSheet?: boolean; unitId: string; subUnitId: string; onChange: (ranges: IUnitRangeName[], isStart: boolean) => void }) {
+interface IRangeSelectorSelectionChangeProps {
+    supportAcrossSheet?: boolean;
+    keepSheetReference?: boolean;
+    unitId: string;
+    subUnitId: string;
+    onChange: (ranges: IUnitRangeName[], isStart: boolean) => void;
+}
+
+export function useRangeSelectorSelectionChange(opts: IRangeSelectorSelectionChangeProps) {
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
-    const { supportAcrossSheet = false, unitId, subUnitId, onChange: _onChange } = opts;
+    const { supportAcrossSheet = false, keepSheetReference = false, unitId, subUnitId, onChange: _onChange } = opts;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const onChange = useEvent(_onChange);
@@ -33,10 +41,11 @@ export function useRangeSelectorSelectionChange(opts: { supportAcrossSheet?: boo
         if (!currentSheet) return;
         if (!supportAcrossSheet && currentSheet.getSheetId() !== subUnitId) return;
         if (!selections?.length) return;
+        const sheetName = keepSheetReference ? currentSheet.getName() : (currentSheet.getSheetId() === subUnitId ? '' : currentSheet.getName());
         const ranges = selections.map((item) => ({
             range: item.range,
             unitId,
-            sheetName: currentSheet.getSheetId() === subUnitId ? '' : currentSheet.getName(),
+            sheetName,
         }));
 
         onChange(ranges, isStart);

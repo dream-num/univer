@@ -46,6 +46,10 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     subUnitId: string;
     maxRangeCount?: number;
     supportAcrossSheet?: boolean;
+    /**
+     * always return range ref with sheet name, default: false
+     */
+    keepSheetReference?: boolean;
     selectorRef?: React.RefObject<IRangeSelectorInstance | null>;
     onVerify?: (res: boolean, rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
@@ -61,6 +65,7 @@ export interface IRangeSelectorDialogProps {
     subUnitId: string;
     maxRangeCount?: number;
     supportAcrossSheet?: boolean;
+    keepSheetReference?: boolean;
     onConfirm: (ranges: IUnitRangeName[]) => void;
     onClose: () => void;
     onShowBySelection?: (ranges: IUnitRangeName[]) => boolean;
@@ -74,6 +79,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         subUnitId,
         maxRangeCount = Infinity,
         supportAcrossSheet,
+        keepSheetReference,
         onConfirm,
         onClose,
         onShowBySelection,
@@ -114,6 +120,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         unitId,
         subUnitId,
         supportAcrossSheet,
+        keepSheetReference,
         onChange: (selections, isStart) => {
             if (!visible) {
                 if (onShowBySelection?.(selections)) {
@@ -236,6 +243,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         subUnitId,
         maxRangeCount,
         supportAcrossSheet,
+        keepSheetReference,
         autoFocus,
         onChange,
         onRangeSelectorDialogVisibleChange,
@@ -365,6 +373,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     setRangeSelectorRanges([]);
                 }}
                 supportAcrossSheet={supportAcrossSheet}
+                keepSheetReference={keepSheetReference}
                 onShowBySelection={(ranges: IUnitRangeName[]) => {
                     if (focusing || forceShowDialogWhenSelectionChanged) {
                         setRangeSelectorRanges(ranges);

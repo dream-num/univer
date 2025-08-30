@@ -16,7 +16,7 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { MutableRefObject } from 'react';
-import { DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
+import { DisposableCollection, LocaleService, ThemeService, toDisposable } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
 import { IMessageService, IShortcutService, useDependency } from '@univerjs/ui';
 import { editor } from 'monaco-editor';
@@ -33,6 +33,7 @@ export function ScriptEditorPanel() {
     const localeService = useDependency(LocaleService);
     const shortcutService = useDependency(IShortcutService);
     const editorService = useDependency(ScriptEditorService);
+    const themeService = useDependency(ThemeService);
 
     useEffect(() => {
         const containerElement = editorContainerRef.current;
@@ -46,6 +47,7 @@ export function ScriptEditorPanel() {
             const monacoEditor = (monacoEditorRef.current = editor.create(containerElement, {
                 value: '',
                 language: 'javascript',
+                theme: themeService.darkMode ? 'vs-dark' : 'vs-light',
             }));
 
             resizeObserver = new ResizeObserver(() => {

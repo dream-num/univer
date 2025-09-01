@@ -30,6 +30,7 @@ import {
     WrapStrategy,
 } from '../types/enum';
 import { ColorBuilder } from './color/color';
+import { ColorKit } from './color/color-kit';
 import { ObjectMatrix } from './object-matrix';
 import { Tools } from './tools';
 
@@ -146,7 +147,7 @@ export function isCellCoverable(cell: Nullable<ICellDataForSheetInterceptor>) {
 export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
     if (color) {
         if (color.rgb) {
-            return color.rgb;
+            return new ColorKit(color.rgb).toRgbString();
         }
 
         if (color.th) {

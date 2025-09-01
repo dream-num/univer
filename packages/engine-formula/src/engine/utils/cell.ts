@@ -15,7 +15,9 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { BuildTextUtils } from '@univerjs/core';
+import type { ErrorType } from '../../basics/error-type';
+import { BuildTextUtils, isFormulaId, isFormulaString } from '@univerjs/core';
+import { ERROR_TYPE_SET } from '../../basics/error-type';
 
 export function getCellValue(cell: Nullable<ICellData>) {
     if (cell === null) {
@@ -36,4 +38,22 @@ export function getCellValue(cell: Nullable<ICellData>) {
     }
 
     return cell?.v ?? 0;
+}
+
+/**
+ * Extract the formula error from the cell
+ * @param cell
+ * @returns
+ */
+export function extractFormulaError(cell: Nullable<ICellData>, isArrayFormulaCell: boolean = false) {
+    // Must contain a formula
+    if (!isArrayFormulaCell && !(isFormulaString(cell?.f) || isFormulaId(cell?.si))) {
+        return null;
+    }
+
+    if (typeof cell?.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
+        return cell.v as ErrorType;
+    }
+
+    return null;
 }

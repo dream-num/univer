@@ -16,7 +16,8 @@
 
 import type { ICellData } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getCellValue } from '../cell';
+import { ErrorType } from '../../../basics/error-type';
+import { extractFormulaError, getCellValue } from '../cell';
 
 describe('Test cell', () => {
     it('Function getCellValue', () => {
@@ -41,5 +42,33 @@ describe('Test cell', () => {
         expect(getCellValue(cell1)).toBe('test');
         expect(getCellValue(cell2)).toBe(2);
         expect(getCellValue(cell3)).toBe(0);
+    });
+
+    it('Function extractFormulaError', () => {
+        expect(extractFormulaError({ v: ErrorType.DIV_BY_ZERO, f: '=1/0' })).toBe(ErrorType.DIV_BY_ZERO);
+        expect(extractFormulaError({ v: ErrorType.NAME, f: '=S' })).toBe(ErrorType.NAME);
+        expect(extractFormulaError({ v: ErrorType.VALUE, f: '=SUM(A1)' })).toBe(ErrorType.VALUE);
+        expect(extractFormulaError({ v: ErrorType.NUM, f: '=SUM(A1)' })).toBe(ErrorType.NUM);
+        expect(extractFormulaError({ v: ErrorType.NA, f: '=SUM(A1)' })).toBe(ErrorType.NA);
+        expect(extractFormulaError({ v: ErrorType.CYCLE, f: '=SUM(A1)' })).toBe(ErrorType.CYCLE);
+        expect(extractFormulaError({ v: ErrorType.REF, f: '=SUM(A1)' })).toBe(ErrorType.REF);
+        expect(extractFormulaError({ v: ErrorType.SPILL, f: '=SUM(A1)' })).toBe(ErrorType.SPILL);
+        expect(extractFormulaError({ v: ErrorType.CALC, f: '=SUM(A1)' })).toBe(ErrorType.CALC);
+        expect(extractFormulaError({ v: ErrorType.ERROR, f: '=SUM(A1)' })).toBe(ErrorType.ERROR);
+        expect(extractFormulaError({ v: ErrorType.CONNECT, f: '=SUM(A1)' })).toBe(ErrorType.CONNECT);
+
+        expect(extractFormulaError({ v: ErrorType.NULL, f: '=SUM(A1)' })).toBe(ErrorType.NULL);
+        expect(extractFormulaError({ v: ErrorType.NULL, f: '=SUM(A1)', si: 'id1' })).toBe(ErrorType.NULL);
+        expect(extractFormulaError({ v: ErrorType.NULL, si: 'id1' })).toBe(ErrorType.NULL);
+        expect(extractFormulaError({ v: ErrorType.NULL })).toBeNull();
+
+        expect(extractFormulaError({ f: '=SUM(1)' })).toBeNull();
+        expect(extractFormulaError({ si: 'id1' })).toBeNull();
+        expect(extractFormulaError({ p: null })).toBeNull();
+        expect(extractFormulaError({ v: 'test' })).toBeNull();
+        expect(extractFormulaError({ v: 1 })).toBeNull();
+        expect(extractFormulaError({})).toBeNull();
+        expect(extractFormulaError(null)).toBeNull();
+        expect(extractFormulaError(undefined)).toBeNull();
     });
 });

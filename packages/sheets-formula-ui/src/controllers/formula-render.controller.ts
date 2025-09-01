@@ -15,9 +15,8 @@
  */
 
 import { Inject, InterceptorEffectEnum, RxDisposable } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
+import { extractFormulaError, FormulaDataModel } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { extractFormulaError } from './utils/utils';
 
 const FORMULA_ERROR_MARK = {
     tl: {

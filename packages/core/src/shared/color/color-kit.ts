@@ -83,6 +83,7 @@ export const COLORS: { [key: string]: number[] } = {
     darkSlateGrey: [47, 79, 79],
     darkTurquoise: [0, 206, 209],
     darkViolet: [148, 0, 211],
+    darkYellow: [139, 128, 0],
     deepPink: [255, 20, 147],
     deepSkyBlue: [0, 191, 255],
     dimGray: [105, 105, 105],

@@ -2421,9 +2421,6 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2437,6 +2434,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2

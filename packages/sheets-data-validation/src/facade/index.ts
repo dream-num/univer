@@ -20,6 +20,7 @@ import './f-workbook';
 import './f-worksheet';
 import './f-event';
 
+export { type IDataValidationError } from './f-workbook';
 export { FDataValidation } from './f-data-validation';
 export { FDataValidationBuilder } from './f-data-validation-builder';
 

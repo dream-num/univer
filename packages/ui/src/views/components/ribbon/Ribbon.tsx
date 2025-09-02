@@ -257,7 +257,7 @@ export function Ribbon(props: IRibbonProps) {
             >
                 {activeGroup.allGroups.map((groupItem, index) => (groupItem.children?.length || groupItem.item) && (
                     <Fragment key={groupItem.key}>
-                        <div className="univer-grid univer-grid-flow-col univer-gap-2 univer-px-2">
+                        <div className="univer-grid univer-shrink-0 univer-grid-flow-col univer-gap-2 univer-px-2">
                             {groupItem.children && groupItem.children?.map((child) => (
                                 child.item && (
                                     <ToolbarItem
@@ -396,7 +396,7 @@ export function Ribbon(props: IRibbonProps) {
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
-                            <div className="univer-grid univer-grid-flow-col univer-gap-2 univer-px-2">
+                            <div className="univer-grid univer-shrink-0 univer-grid-flow-col univer-gap-2 univer-px-2">
                                 {groupItem.children && groupItem.children?.map((child) => (
                                     child.item && <ToolbarItem key={child.key} {...child.item} />
                                 ))}

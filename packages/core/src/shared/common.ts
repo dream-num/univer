@@ -147,7 +147,7 @@ export function isCellCoverable(cell: Nullable<ICellDataForSheetInterceptor>) {
 export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
     if (color) {
         if (color.rgb) {
-            return new ColorKit(color.rgb).toRgbString();
+            return new ColorKit(color.rgb).toHexString();
         }
 
         if (color.th) {

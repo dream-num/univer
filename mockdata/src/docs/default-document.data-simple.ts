@@ -54,10 +54,26 @@ const exampleTables = [
 
 const title = 'Examples of Accessible Data Tables\r';
 const description = 'Basic Data Table with Column Headings\r';
+
+const dotted = 'dotted\r';
+const dotted_heavy = 'dotted_heavy\r';
+const dash = 'dash\r';
+const dashed_heavy = 'dashed_heavy\r';
+const dash_long = 'dash_long\r';
+const dash_long_heavy = 'dash_long_heavy\r';
+const dot_dash = 'dot_dash\r';
+const dash_dot_heavy = 'dash_dot_heavy\r';
+const dot_dot_dash = 'dot_dot_dash\r';
+const dash_dot_dot_heavy = 'dash_dot_dot_heavy\r';
+const thick = 'thick\r';
+const wave = 'wave\r';
+
+const underline = `${dotted}${dotted_heavy}${dash}${dashed_heavy}${dash_long}${dash_long_heavy}${dot_dash}${dash_dot_heavy}${dot_dot_dash}${dash_dot_dot_heavy}${thick}${wave}`;
+
 const summary = 'These example tables contain captions and summaries. When you copy any of these tables into your page you must edit the caption and summary. The caption can be edited in the Design view but the summary text must be edited in Code view. Click inside the table, then select the table tag on the tag selector, then switch to Code view and edit the text in the summary attribute.\r';
 const tableStream = createTableDataStream(exampleTables);
 
-const dataStream = `${title}${description}${tableStream}${summary}\n`;
+const dataStream = `${title}${description}${underline}${tableStream}${summary}\n`;
 
 const startIndex = dataStream.indexOf(TABLE_START);
 const endIndex = tableStream.length + startIndex;
@@ -125,6 +141,234 @@ function createTextRuns() {
     });
 
     offset += description.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dotted.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 8,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dotted.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dotted_heavy.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 9,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dotted_heavy.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dash.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 0,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dash.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dashed_heavy.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 3,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dashed_heavy.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dash_long.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 4,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dash_long.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dash_long_heavy.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 5,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dash_long_heavy.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dot_dash.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 6,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dot_dash.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dash_dot_heavy.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 2,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dash_dot_heavy.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dot_dot_dash.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 7,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dot_dot_dash.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + dash_dot_dot_heavy.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 1,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += dash_dot_dot_heavy.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + thick.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 13,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += thick.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + wave.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            ul: {
+                s: 1,
+                t: 14,
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += wave.length;
 
     textRuns.push({
         st: offset,

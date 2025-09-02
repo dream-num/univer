@@ -535,6 +535,7 @@ export class Font extends SheetExtension {
             color: fontCache.style?.cl?.rgb,
             strokeLine: Boolean(fontCache.style?.st?.s),
             underline: Boolean(fontCache.style?.ul?.s),
+            underlineType: fontCache.style?.ul?.t,
             cellValueType: cellData.t,
         });
     }

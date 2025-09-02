@@ -14508,6 +14508,149 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         s: 'pwABhz',
                     },
                 },
+                28: {
+                    12: {
+                        v: 'DASH DASH DASH',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 0,
+                            },
+                        },
+                    },
+                },
+                30: {
+                    12: {
+                        v: 'DASH DOT DOT HEAVY',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 1,
+                            },
+                        },
+                    },
+                },
+                32: {
+                    12: {
+                        v: 'DASH DOT HEAVY',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 2,
+                            },
+                        },
+                    },
+                },
+                34: {
+                    12: {
+                        v: 'DASHED HEAVY',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 3,
+                            },
+                        },
+                    },
+                },
+                36: {
+                    12: {
+                        v: 'DASH LONG',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 4,
+                            },
+                        },
+                    },
+                },
+                38: {
+                    12: {
+                        v: 'DASH LONG HEAVY',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 5,
+                            },
+                        },
+                    },
+                },
+                40: {
+                    12: {
+                        v: 'DOT DASH',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 6,
+                            },
+                        },
+                    },
+                },
+                42: {
+                    12: {
+                        v: 'DOT DOT DASH',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 7,
+                            },
+                        },
+                    },
+                },
+                44: {
+                    12: {
+                        v: 'DOTTED',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 8,
+                            },
+                        },
+                    },
+                },
+                46: {
+                    12: {
+                        v: 'DOTTED HEAVY',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 9,
+                            },
+                        },
+                    },
+                },
+                48: {
+                    12: {
+                        v: 'WAVE',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 14,
+                            },
+                        },
+                    },
+                },
+                50: {
+                    12: {
+                        v: 'WAVE HEAVY',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 16,
+                            },
+                        },
+                    },
+                },
+                52: {
+                    12: {
+                        v: 'THICK',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 13,
+                            },
+                        },
+                    },
+                },
             },
 
             freeze: {
@@ -14588,7 +14731,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     ah: 19,
                 },
             },
-            columnData: {},
+            columnData: {
+                12: {
+                    w: 180,
+                },
+            },
             showGridlines: 1,
             rowHeader: {
                 width: 46,

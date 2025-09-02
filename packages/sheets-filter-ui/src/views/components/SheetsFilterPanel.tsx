@@ -27,6 +27,7 @@ import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.ser
 import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
+import { FilterSyncSwitch } from './SheetsFilterSyncSwitch';
 
 /**
  * This Filter Panel component is used to filter the data in the sheet.
@@ -105,6 +106,7 @@ export function FilterPanel() {
                 : (
                     <div className="univer-flex-1" />
                 )}
+            <FilterSyncSwitch />
             <div
                 data-u-comp="sheets-filter-panel-footer"
                 className={`

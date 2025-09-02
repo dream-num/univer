@@ -362,7 +362,7 @@ export class CommandService extends Disposable implements ICommandService {
     async executeCommand<P extends object = object, R = boolean>(
         id: string,
         params?: P,
-        options?: IExecutionOptions
+        options: IExecutionOptions = {}
     ): Promise<R> {
         try {
             const item = this._commandRegistry.getCommand(id);
@@ -399,7 +399,7 @@ export class CommandService extends Disposable implements ICommandService {
     syncExecuteCommand<P extends object = object, R = boolean>(
         id: string,
         params?: P | undefined,
-        options?: IExecutionOptions
+        options: IExecutionOptions = {}
     ): R {
         try {
             const item = this._commandRegistry.getCommand(id);

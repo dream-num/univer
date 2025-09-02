@@ -48,3 +48,4 @@ export type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilter
 export { CustomFilterOperator, FilterBy } from './models/types';
 export { UniverSheetsFilterPlugin } from './plugin';
 export { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
+export { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';

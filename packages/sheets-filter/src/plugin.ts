@@ -22,6 +22,7 @@ import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controll
 import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SheetsFilterFormulaService } from './services/sheet-filter-formula.service';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
+import { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 
 export class UniverSheetsFilterPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -48,6 +49,7 @@ export class UniverSheetsFilterPlugin extends Plugin {
             [SheetsFilterFormulaService],
             [SheetsFilterService],
             [SheetsFilterController],
+            [SheetsFilterSyncController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
@@ -55,6 +57,7 @@ export class UniverSheetsFilterPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsFilterFormulaService],
             [SheetsFilterController],
+            [SheetsFilterSyncController],
         ]);
     }
 }

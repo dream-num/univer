@@ -85,6 +85,18 @@ const locale: typeof enUS = {
             11: '11月',
             12: '12月',
         },
+        sync: {
+            title: '筛选对所有人可见',
+            statusTips: {
+                on: '开启后，所有协作者均可查看此次筛选结果',
+                off: '关闭后，仅你可见此次筛选结果',
+            },
+            switchToOnDialog: {
+                title: '筛选提示',
+                content: '开启“筛选对所有人可见”后，筛选结果会同步给其他人，将会影响他人查看数据。',
+            },
+            switchToOffTips: '已关闭“筛选对所有人可见”，仅你可见此次筛选结果',
+        }
     },
 };
 

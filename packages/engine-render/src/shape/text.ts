@@ -17,7 +17,7 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
-import { CellValueType, HorizontalAlign, VerticalAlign } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, TextDecoration, VerticalAlign } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '../basics';
 import { DocSimpleSkeleton } from '../components/docs/layout/doc-simple-skeleton';
 import { Shape } from './shape';
@@ -33,6 +33,7 @@ export interface ITextProps extends IShapeProps {
     color?: Nullable<string>;
     strokeLine?: boolean;
     underline?: boolean;
+    underlineType?: TextDecoration;
     cellValueType?: Nullable<CellValueType>;
 }
 
@@ -112,6 +113,7 @@ export class Text extends Shape<ITextProps> {
                     width: lineWidth,
                     color: props.color || '#000000',
                     lineWidth: 1,
+                    lineType: props.underlineType ?? TextDecoration.SINGLE,
                 });
             }
 
@@ -123,6 +125,7 @@ export class Text extends Shape<ITextProps> {
                     width: lineWidth,
                     color: props.color || '#000000',
                     lineWidth: 1,
+                    lineType: TextDecoration.SINGLE,
                 });
             }
 
@@ -143,18 +146,86 @@ export class Text extends Shape<ITextProps> {
         width: number;
         color: string;
         lineWidth: number;
+        lineType: TextDecoration;
     }) {
-        const { x, y, width, color, lineWidth } = options;
+        const { x, y, width, color, lineWidth, lineType } = options;
 
         ctx.save();
         ctx.strokeStyle = color;
-        ctx.lineWidth = lineWidth;
+        this._setLineType(ctx, lineType, lineWidth);
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + width, y);
+        if (this._isWave(lineType)) {
+            for (let x = 1; x < width + 1; x++) {
+                ctx.lineTo(x, y + 1 * Math.sin(x * 1)); // y + amplitude * frequency
+            }
+        } else {
+            ctx.lineTo(x + width, y);
+        }
         ctx.stroke();
-
         ctx.restore();
+    }
+
+    private static _setLineType(ctx: UniverRenderingContext, style: TextDecoration, lineWidth: number) {
+        switch (style) {
+            case TextDecoration.DOTTED:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2]);
+                return;
+            case TextDecoration.DOTTED_HEAVY:
+                ctx.lineWidth = 2;
+                ctx.setLineDash([2]);
+                return;
+            case TextDecoration.DASH:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3]);
+                return;
+            case TextDecoration.DASHED_HEAVY:
+                ctx.lineWidth = 2;
+                ctx.setLineDash([3]);
+                return;
+            case TextDecoration.DASH_LONG:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([6]);
+                return;
+            case TextDecoration.DASH_LONG_HEAVY:
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6]);
+                return;
+            case TextDecoration.DOT_DASH:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 5, 2]);
+                return;
+            case TextDecoration.DASH_DOT_HEAVY:
+                ctx.lineWidth = 2;
+                ctx.setLineDash([2, 5, 2]);
+                return;
+            case TextDecoration.DOT_DOT_DASH:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 2, 5, 2, 2]);
+                return;
+            case TextDecoration.DASH_DOT_DOT_HEAVY:
+                ctx.lineWidth = 2;
+                ctx.setLineDash([2, 2, 5, 2, 2]);
+                return;
+            case TextDecoration.THICK:
+                ctx.lineWidth = 2;
+                ctx.setLineDash([0]);
+                return;
+            case TextDecoration.WAVE:
+                ctx.lineWidth = 1;
+                return;
+            case TextDecoration.WAVY_HEAVY:
+                ctx.lineWidth = 2;
+                return;
+            default:
+                ctx.setLineDash([0]);
+                ctx.lineWidth = lineWidth;
+        }
+    }
+
+    private static _isWave(lineType: TextDecoration): boolean {
+        return lineType === TextDecoration.WAVE || lineType === TextDecoration.WAVY_HEAVY;
     }
 
     protected override _draw(ctx: UniverRenderingContext) {

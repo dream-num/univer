@@ -86,14 +86,13 @@ const locale = {
         sync: {
             title: 'Filter is visible to everyone',
             statusTips: {
-                on: 'Once on, all collaborators can see the filter results',
-                off: 'Once off, only you can see the filter results',
+                on: 'Once on, all collaborators will see the filter results',
+                off: 'Once off, only you will see the filter results',
             },
-            switchToOnDialog: {
-                title: 'Filter Tips',
-                content: '"Filter is visible to everyone" is turned on, the filter results will be synchronized to others and will affect how others view the data.',
+            switchTips: {
+                on: '"Filter is visible to everyone" is turned on, all collaborators will see the filter results',
+                off: '"Filter is visible to everyone" is turned off, only you will see the filter results',
             },
-            switchToOffTips: '"Filter is visible to everyone" is turned off, only you can see the filter results',
         },
     },
 };

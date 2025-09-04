@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 import { LocaleService } from '@univerjs/core';
-import { Switch, Tooltip } from '@univerjs/design';
+import { MessageType, Switch, Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { SheetsFilterSyncController } from '@univerjs/sheets-filter';
 
 export function FilterSyncSwitch() {
     const sheetsFilterSyncController = useDependency(SheetsFilterSyncController);
-    if (!sheetsFilterSyncController.visible) return null;
+    const visible = useObservable(sheetsFilterSyncController.visible$, undefined, true);
+    if (!visible) return null;
 
     const localeService = useDependency(LocaleService);
+    const messageService = useDependency(IMessageService);
+    const enabled = useObservable(sheetsFilterSyncController.enabled$, undefined, true);
 
     return (
         <div
@@ -34,13 +37,30 @@ export function FilterSyncSwitch() {
         >
             <div className="univer-flex univer-items-center univer-gap-1">
                 <span>{localeService.t('sheets-filter.sync.title')}</span>
-                <Tooltip title={localeService.t('sheets-filter.sync.statusTips.on')} asChild>
+                <Tooltip
+                    title={
+                        enabled
+                            ? localeService.t('sheets-filter.sync.statusTips.off')
+                            : localeService.t('sheets-filter.sync.statusTips.on')
+                    }
+                    asChild
+                >
                     <InfoIcon />
                 </Tooltip>
             </div>
             <Switch
-                defaultChecked={sheetsFilterSyncController.enabled}
-                onChange={(checked) => sheetsFilterSyncController.setEnabled(checked)}
+                defaultChecked={enabled}
+                onChange={(checked) => {
+                    const message = checked
+                        ? localeService.t('sheets-filter.sync.switchTips.on')
+                        : localeService.t('sheets-filter.sync.switchTips.off');
+                    sheetsFilterSyncController.setEnabled(checked)
+                    messageService.show({
+                        content: message,
+                        type: MessageType.Success,
+                        duration: 2000,
+                    });
+                }}
             />
         </div>
     );

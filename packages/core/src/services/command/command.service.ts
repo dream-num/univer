@@ -362,7 +362,7 @@ export class CommandService extends Disposable implements ICommandService {
     async executeCommand<P extends object = object, R = boolean>(
         id: string,
         params?: P,
-        options: IExecutionOptions = {}
+        options?: IExecutionOptions
     ): Promise<R> {
         try {
             const item = this._commandRegistry.getCommand(id);
@@ -375,10 +375,11 @@ export class CommandService extends Disposable implements ICommandService {
                 };
 
                 const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+                const _options = options ?? {};
 
-                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
-                const result = await this._execute<P, R>(command as ICommand<P, R>, params, options);
-                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
+                const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
+                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
 
                 stackItemDisposable.dispose();
 
@@ -399,7 +400,7 @@ export class CommandService extends Disposable implements ICommandService {
     syncExecuteCommand<P extends object = object, R = boolean>(
         id: string,
         params?: P | undefined,
-        options: IExecutionOptions = {}
+        options?: IExecutionOptions
     ): R {
         try {
             const item = this._commandRegistry.getCommand(id);
@@ -425,10 +426,11 @@ export class CommandService extends Disposable implements ICommandService {
                 }
 
                 const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+                const _options = options ?? {};
 
-                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
-                const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, options);
-                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
+                const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
+                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
 
                 stackItemDisposable.dispose();
 

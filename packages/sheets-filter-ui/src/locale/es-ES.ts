@@ -95,7 +95,7 @@ const locale: typeof enUS = {
                 on: '"El filtro es visible para todos" está activado, todos los colaboradores verán los resultados del filtro',
                 off: '"El filtro es visible para todos" está desactivado, solo tú verás los resultados del filtro',
             },
-        }
+        },
     },
 };
 

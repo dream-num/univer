@@ -95,7 +95,7 @@ const locale: typeof enUS = {
                 on: 'Đã bật "Lọc cho tất cả mọi người đều thấy", tất cả cộng tác viên sẽ thấy kết quả lọc',
                 off: 'Đã tắt "Lọc cho tất cả mọi người đều thấy", chỉ bạn mới thấy kết quả lọc',
             },
-        }
+        },
     },
 
 };

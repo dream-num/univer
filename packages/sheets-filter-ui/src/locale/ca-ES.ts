@@ -95,7 +95,7 @@ const locale: typeof enUS = {
                 on: 'S’ha activat "El filtre és visible per a tothom", tots els col·laboradors veuran els resultats del filtre',
                 off: 'S’ha desactivat "El filtre és visible per a tothom", només tu veuràs els resultats del filtre',
             },
-        }
+        },
     },
 };
 

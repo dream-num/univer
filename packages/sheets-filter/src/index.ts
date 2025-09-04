@@ -34,6 +34,7 @@ export {
 } from './commands/mutations/sheets-filter.mutation';
 export { FILTER_MUTATIONS } from './common/const';
 export type { IUniverSheetsFilterConfig } from './controllers/config.schema';
+export { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 export {
     equals,
     getCustomFilterFn,
@@ -48,4 +49,3 @@ export type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilter
 export { CustomFilterOperator, FilterBy } from './models/types';
 export { UniverSheetsFilterPlugin } from './plugin';
 export { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
-export { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';

@@ -142,7 +142,7 @@ export class SheetsFilterController extends Disposable {
                     const params = config.params as IMoveColsCommandParams;
                     return this.handleMoveColsCommand({
                         fromRange: params.fromRange,
-                        toRange: params.toRange
+                        toRange: params.toRange,
                     }, unitId, subUnitId);
                 }
                 case EffectRefRangId.MoveRowsCommandId: {
@@ -432,7 +432,7 @@ export class SheetsFilterController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    handleMoveColsCommand({ fromRange, toRange }: { fromRange: IRange, toRange: IRange }, unitId: string, subUnitId: string) {
+    handleMoveColsCommand({ fromRange, toRange }: { fromRange: IRange; toRange: IRange }, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
         if (!filterModel || !filterRange) {

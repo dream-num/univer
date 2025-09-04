@@ -88,10 +88,11 @@ export function checkCellValueType(v: Nullable<CellValue>, type: Nullable<CellVa
                 return CellValueType.BOOLEAN;
             }
 
+            // If the cell type is string or force string, do not need judge whether it will lose precision.
             // If the numeric string will lose precision when converted to a number, set the cell type to force string
             // e.g. 123456789123456789
             // e.g. 1212121212121212.2345
-            if (willLoseNumericPrecision(v)) {
+            if (type !== CellValueType.STRING && type !== CellValueType.FORCE_STRING && willLoseNumericPrecision(v)) {
                 return CellValueType.FORCE_STRING;
             }
 

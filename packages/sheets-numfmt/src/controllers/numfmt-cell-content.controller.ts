@@ -113,7 +113,9 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
             // eslint-disable-next-line max-lines-per-function, complexity
             handler: (cell, location, next) => {
-                if (!cell || cell.v === undefined || cell.v === null) {
+                // If the cell is empty, or the cell type is boolean or force_string, do not process it.
+                // Cell type is number or number string, it will be applied number format.
+                if (!cell || cell.v === undefined || cell.v === null || cell.t === CellValueType.BOOLEAN || cell.t === CellValueType.FORCE_STRING) {
                     return next(cell);
                 }
 
@@ -140,7 +142,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 // If the cell not specified number type, then check the cell value type
                 if (cell.t !== CellValueType.NUMBER) {
-                    const type = checkCellValueType(cell.v);
+                    const type = checkCellValueType(cell.v, cell.t);
                     // just handle number or number string
                     if (type !== CellValueType.NUMBER) {
                         return next(cell);

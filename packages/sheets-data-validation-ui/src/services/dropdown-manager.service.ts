@@ -51,6 +51,9 @@ const transformDate = (value: Nullable<CellValue>) => {
         return undefined;
     }
 
+    // If the value is an empty string, return the current date
+    if (value === '') return dayjs();
+
     if (typeof value === 'number' || !Number.isNaN(+value)) {
         return dayjs(numfmt.format('yyyy-MM-dd HH:mm:ss', Number(value)));
     }

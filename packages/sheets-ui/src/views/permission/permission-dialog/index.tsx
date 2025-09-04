@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
 import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { Button, Switch } from '@univerjs/design';
+import { borderTopClassName, Button, clsx, Switch } from '@univerjs/design';
 import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { IDialogService, useDependency } from '@univerjs/ui';
@@ -175,8 +175,7 @@ export const SheetPermissionDialog = () => {
 
     return (
         <Spin loading={loading}>
-            <div className="univer-flex univer-flex-col univer-p-2">
-                <div className="univer-h-px univer-bg-gray-200" />
+            <div className={clsx('univer-flex univer-flex-col', borderTopClassName)}>
                 {Object.keys(permissionMap).map((action) => {
                     const actionItem = permissionMap[action];
                     const { text, allowed } = actionItem;
@@ -204,9 +203,12 @@ export const SheetPermissionDialog = () => {
                         </div>
                     );
                 })}
-                <div className="univer-h-px univer-bg-gray-200" />
-                <div className="univer-mt-2 univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2">
 
+                <div
+                    className={clsx(`
+                      univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2 univer-pt-2
+                    `, borderTopClassName)}
+                >
                     <Button
                         onClick={() => {
                             dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);

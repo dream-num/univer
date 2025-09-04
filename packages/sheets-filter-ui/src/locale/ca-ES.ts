@@ -85,6 +85,17 @@ const locale: typeof enUS = {
             11: 'Novembre',
             12: 'Desembre',
         },
+        sync: {
+            title: 'El filtre és visible per a tothom',
+            statusTips: {
+                on: 'Un cop activat, tots els col·laboradors veuran els resultats del filtre',
+                off: 'Un cop desactivat, només tu veuràs els resultats del filtre',
+            },
+            switchTips: {
+                on: 'S’ha activat "El filtre és visible per a tothom", tots els col·laboradors veuran els resultats del filtre',
+                off: 'S’ha desactivat "El filtre és visible per a tothom", només tu veuràs els resultats del filtre',
+            },
+        },
     },
 };
 

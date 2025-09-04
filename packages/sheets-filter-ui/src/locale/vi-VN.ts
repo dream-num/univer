@@ -85,6 +85,17 @@ const locale: typeof enUS = {
             11: 'Tháng 11',
             12: 'Tháng 12',
         },
+        sync: {
+            title: 'Lọc cho tất cả mọi người đều thấy',
+            statusTips: {
+                on: 'Khi bật, tất cả cộng tác viên sẽ thấy kết quả lọc',
+                off: 'Khi tắt, chỉ bạn mới thấy kết quả lọc',
+            },
+            switchTips: {
+                on: 'Đã bật "Lọc cho tất cả mọi người đều thấy", tất cả cộng tác viên sẽ thấy kết quả lọc',
+                off: 'Đã tắt "Lọc cho tất cả mọi người đều thấy", chỉ bạn mới thấy kết quả lọc',
+            },
+        },
     },
 
 };

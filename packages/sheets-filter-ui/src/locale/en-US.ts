@@ -83,6 +83,17 @@ const locale = {
             11: 'November',
             12: 'December',
         },
+        sync: {
+            title: 'Filter is visible to everyone',
+            statusTips: {
+                on: 'Once on, all collaborators will see the filter results',
+                off: 'Once off, only you will see the filter results',
+            },
+            switchTips: {
+                on: '"Filter is visible to everyone" is turned on, all collaborators will see the filter results',
+                off: '"Filter is visible to everyone" is turned off, only you will see the filter results',
+            },
+        },
     },
 };
 

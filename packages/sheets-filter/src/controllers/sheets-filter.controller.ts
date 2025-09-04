@@ -128,11 +128,11 @@ export class SheetsFilterController extends Disposable {
                     const params = config.params as IInsertColCommandParams;
                     const _unitId = params.unitId || unitId;
                     const _subUnitId = params.subUnitId || subUnitId;
-                    return this._handleInsertColCommand(params, _unitId, _subUnitId);
+                    return this.handleInsertColCommand(params.range, _unitId, _subUnitId);
                 }
                 case RemoveColCommand.id: {
                     const params = config.params as IRemoveColMutationParams;
-                    return this._handleRemoveColCommand(params, unitId, subUnitId);
+                    return this.handleRemoveColCommand(params.range, unitId, subUnitId);
                 }
                 case RemoveRowCommand.id: {
                     const params = config.params as IRemoveRowsMutationParams;
@@ -140,7 +140,10 @@ export class SheetsFilterController extends Disposable {
                 }
                 case EffectRefRangId.MoveColsCommandId: {
                     const params = config.params as IMoveColsCommandParams;
-                    return this._handleMoveColsCommand(params, unitId, subUnitId);
+                    return this.handleMoveColsCommand({
+                        fromRange: params.fromRange,
+                        toRange: params.toRange,
+                    }, unitId, subUnitId);
                 }
                 case EffectRefRangId.MoveRowsCommandId: {
                     const params = config.params as IMoveRowsCommandParams;
@@ -183,14 +186,14 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    private _handleInsertColCommand(config: IInsertColCommandParams, unitId: string, subUnitId: string) {
+    handleInsertColCommand(range: IRange, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
         if (!filterModel || !filterRange) {
             return this._handleNull();
         }
         const { startColumn, endColumn } = filterRange;
-        const { startColumn: insertStartColumn, endColumn: insertEndColumn } = config.range;
+        const { startColumn: insertStartColumn, endColumn: insertEndColumn } = range;
         const count = insertEndColumn - insertStartColumn + 1;
 
         if (insertEndColumn > endColumn) {
@@ -224,7 +227,7 @@ export class SheetsFilterController extends Disposable {
         const effected = filterColumn.filter((column) => column[0] >= anchor);
         if (effected.length !== 0) {
             const { newRange, oldRange } = this._moveCriteria(unitId, subUnitId, effected, count);
-            redos.push(...newRange.redos, ...oldRange.redos);
+            redos.push(...oldRange.redos, ...newRange.redos);
             undos.push(...newRange.undos, ...oldRange.undos);
         }
 
@@ -268,14 +271,14 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    private _handleRemoveColCommand(config: IRemoveColMutationParams, unitId: string, subUnitId: string) {
+    handleRemoveColCommand(range: IRange, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
         if (!filterModel || !filterRange) {
             return this._handleNull();
         }
         const { startColumn, endColumn } = filterRange;
-        const { startColumn: removeStartColumn, endColumn: removeEndColumn } = config.range;
+        const { startColumn: removeStartColumn, endColumn: removeEndColumn } = range;
 
         if (removeStartColumn > endColumn) {
             return this._handleNull();
@@ -429,14 +432,13 @@ export class SheetsFilterController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _handleMoveColsCommand(config: IMoveColsCommandParams, unitId: string, subUnitId: string) {
+    handleMoveColsCommand({ fromRange, toRange }: { fromRange: IRange; toRange: IRange }, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
         if (!filterModel || !filterRange) {
             return this._handleNull();
         }
         const { startColumn, endColumn } = filterRange;
-        const { fromRange, toRange } = config;
         if ((fromRange.endColumn < startColumn && toRange.startColumn <= startColumn) || (
             fromRange.startColumn > endColumn && toRange.endColumn > endColumn
         )) {

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Switch, Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
-import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { SheetsFilterSyncController } from '@univerjs/sheets-filter';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 
 export function FilterSyncSwitch() {
     const sheetsFilterSyncController = useDependency(SheetsFilterSyncController);
@@ -38,11 +39,9 @@ export function FilterSyncSwitch() {
             <div className="univer-flex univer-items-center univer-gap-1">
                 <span>{localeService.t('sheets-filter.sync.title')}</span>
                 <Tooltip
-                    title={
-                        enabled
-                            ? localeService.t('sheets-filter.sync.statusTips.off')
-                            : localeService.t('sheets-filter.sync.statusTips.on')
-                    }
+                    title={enabled
+                        ? localeService.t('sheets-filter.sync.statusTips.off')
+                        : localeService.t('sheets-filter.sync.statusTips.on')}
                     asChild
                 >
                     <InfoIcon />
@@ -54,7 +53,7 @@ export function FilterSyncSwitch() {
                     const message = checked
                         ? localeService.t('sheets-filter.sync.switchTips.on')
                         : localeService.t('sheets-filter.sync.switchTips.off');
-                    sheetsFilterSyncController.setEnabled(checked)
+                    sheetsFilterSyncController.setEnabled(checked);
                     messageService.show({
                         content: message,
                         type: MessageType.Success,

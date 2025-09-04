@@ -15,12 +15,13 @@
  */
 
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IRemoveColMutationParams } from '@univerjs/sheets';
+import type { IUniverSheetsFilterConfig } from './config.schema';
 import { Disposable, DisposableCollection, ICommandService, IConfigService, Inject, sequenceExecute } from '@univerjs/core';
 import { InsertColMutation, MoveColsMutation, RemoveColMutation } from '@univerjs/sheets';
-import { ReCalcSheetsFilterMutation, SetSheetsFilterCriteriaMutation } from '../commands/mutations/sheets-filter.mutation';
-import { SheetsFilterController } from './sheets-filter.controller'
 import { BehaviorSubject } from 'rxjs';
-import { IUniverSheetsFilterConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './config.schema';
+import { ReCalcSheetsFilterMutation, SetSheetsFilterCriteriaMutation } from '../commands/mutations/sheets-filter.mutation';
+import { SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './config.schema';
+import { SheetsFilterController } from './sheets-filter.controller';
 
 const sheetsFilterOnlyLocalMutationIds = [
     SetSheetsFilterCriteriaMutation.id,
@@ -51,7 +52,7 @@ export class SheetsFilterSyncController extends Disposable {
     ) {
         super();
 
-        const config = this._configService.getConfig<IUniverSheetsFilterConfig>(SHEETS_FILTER_PLUGIN_CONFIG_KEY)
+        const config = this._configService.getConfig<IUniverSheetsFilterConfig>(SHEETS_FILTER_PLUGIN_CONFIG_KEY);
         if (config?.enableSyncSwitch) {
             this._visible$.next(true);
         }

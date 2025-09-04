@@ -19,7 +19,7 @@ import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
 import { FilterBy, SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentContainer, ComponentManager, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
@@ -27,7 +27,7 @@ import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.ser
 import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
-import { FilterSyncSwitch } from './SheetsFilterSyncSwitch';
+import { SHEETS_FILTER_SYNC_SWITCH_COMPONENT_KEY } from '../../controllers/const';
 
 /**
  * This Filter Panel component is used to filter the data in the sheet.
@@ -38,6 +38,7 @@ export function FilterPanel() {
     const sheetsFilterPanelService = useDependency(SheetsFilterPanelService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
 
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
     const filterByModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
@@ -69,6 +70,8 @@ export function FilterPanel() {
     const range = filterService.activeFilterModel?.getRange();
     const colIndex = sheetsFilterPanelService.col;
     const FilterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
+
+    const SheetsFilterSyncSwitch = componentManager.get(SHEETS_FILTER_SYNC_SWITCH_COMPONENT_KEY);
 
     return (
         <div
@@ -106,7 +109,7 @@ export function FilterPanel() {
                 : (
                     <div className="univer-flex-1" />
                 )}
-            <FilterSyncSwitch />
+            {SheetsFilterSyncSwitch && <SheetsFilterSyncSwitch />}
             <div
                 data-u-comp="sheets-filter-panel-footer"
                 className={`

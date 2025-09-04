@@ -22,4 +22,3 @@ export type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFilterUIPlugin } from './plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
-export { SHEETS_FILTER_SYNC_SWITCH_COMPONENT_KEY } from './controllers/const'

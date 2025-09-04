@@ -46,10 +46,11 @@ const Switch = (props: ISwitchProps) => {
                 />
                 <span
                     className={clsx(`
-                      univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-bg-gray-50
-                      univer-transition-colors univer-duration-200
+                      univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-transition-colors
+                      univer-duration-200
                     `, {
                         'univer-bg-primary-600': checked,
+                        'univer-bg-gray-200 dark:!univer-bg-gray-600': !checked,
                     })}
                 >
                     <span

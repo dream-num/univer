@@ -132,6 +132,15 @@ const locale: typeof enUS = {
                 m12: 'دسامبر',
             },
         },
+        filter: {
+            'by-values': 'بر اساس مقادیر',
+            'by-conditions': 'بر اساس شرایط',
+            'clear-filter': 'پاک کردن فیلتر',
+            cancel: 'انصراف',
+            confirm: 'تایید',
+            'search-placeholder': 'برای جداسازی کلیدواژه‌ها از فاصله استفاده کنید',
+            'select-all': 'انتخاب همه',
+        },
     },
 };
 

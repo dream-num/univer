@@ -269,8 +269,8 @@ export class Table {
         this._range = json.range;
         this.tableMeta = json.meta;
         this._tableStyleId = json.options.tableStyleId || '';
-        this._showHeader = json.options.showHeader || true;
-        this._showFooter = json.options.showFooter || true;
+        this._showHeader = json.options.showHeader ?? true;
+        this._showFooter = json.options.showFooter ?? true;
         const columns = json.columns;
         columns.forEach((column) => {
             const tableColumn = new TableColumn(column.id, column.displayName);

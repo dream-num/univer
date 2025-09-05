@@ -209,11 +209,11 @@ export function SheetTableFilterPanel() {
                     disabled={tableFilter === undefined}
                     onClick={onClearFilter}
                 >
-                    {localeService.t('sheets-filter.panel.clear-filter')}
+                    {localeService.t('sheets-table.filter.clear-filter')}
                 </Button>
                 <div>
-                    <Button className="univer-mr-2" onClick={onCancel}>{localeService.t('sheets-filter.panel.cancel')}</Button>
-                    <Button variant="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>
+                    <Button className="univer-mr-2" onClick={onCancel}>{localeService.t('sheets-table.filter.cancel')}</Button>
+                    <Button variant="primary" onClick={onApply}>{localeService.t('sheets-table.filter.confirm')}</Button>
                 </div>
             </div>
         </div>
@@ -223,7 +223,7 @@ export function SheetTableFilterPanel() {
 function useFilterByOptions(localeService: LocaleService) {
     const locale = localeService.getCurrentLocale();
     return useMemo(() => [
-        { label: localeService.t('sheets-filter.panel.by-values'), value: FilterByEnum.Items },
-        { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterByEnum.Condition },
+        { label: localeService.t('sheets-table.filter.by-values'), value: FilterByEnum.Items },
+        { label: localeService.t('sheets-table.filter.by-conditions'), value: FilterByEnum.Condition },
     ], [locale, localeService]);
 }

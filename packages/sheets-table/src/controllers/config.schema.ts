@@ -24,7 +24,7 @@ export interface ITableDefaultThemeStyle {
 export const tableDefaultBorderStyle = {
     s: BorderStyleTypes.THIN,
     cl: {
-        rgb: 'rgb(95 101 116)',
+        rgb: 'rgb(95, 101, 116)',
     },
 };
 

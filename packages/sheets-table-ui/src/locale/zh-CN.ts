@@ -133,7 +133,15 @@ const locale: typeof enUS = {
                 m12: '十二月',
             },
         },
-
+        filter: {
+            'by-values': '按值',
+            'by-conditions': '按条件',
+            'clear-filter': '清除筛选',
+            cancel: '取消',
+            confirm: '确认',
+            'search-placeholder': '使用空格分隔关键字',
+            'select-all': '全选',
+        },
     },
 };
 

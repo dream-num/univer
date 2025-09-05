@@ -128,6 +128,15 @@ const locale = {
                 m12: 'December',
             },
         },
+        filter: {
+            'by-values': 'By Values',
+            'by-conditions': 'By Conditions',
+            'clear-filter': 'Clear Filter',
+            cancel: 'Cancel',
+            confirm: 'Confirm',
+            'search-placeholder': 'Use space to separate keywords',
+            'select-all': 'Select All',
+        },
     },
 };
 

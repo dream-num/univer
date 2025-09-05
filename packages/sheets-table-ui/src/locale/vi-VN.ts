@@ -132,6 +132,15 @@ const locale: typeof enUS = {
                 m12: 'Tháng 12',
             },
         },
+        filter: {
+            'by-values': 'Theo giá trị',
+            'by-conditions': 'Theo điều kiện',
+            'clear-filter': 'Xóa lọc',
+            cancel: 'Hủy bỏ',
+            confirm: 'Xác nhận',
+            'search-placeholder': 'Sử dụng khoảng trắng để tách các từ khóa',
+            'select-all': 'Chọn tất cả',
+        },
     },
 };
 

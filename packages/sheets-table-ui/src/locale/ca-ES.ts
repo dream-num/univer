@@ -130,6 +130,15 @@ const locale: typeof enUS = {
                 m12: 'Desembre',
             },
         },
+        filter: {
+            'by-values': 'Per valors',
+            'by-conditions': 'Per condicions',
+            'clear-filter': 'Neteja el filtre',
+            cancel: 'Cancel·la',
+            confirm: 'Confirma',
+            'search-placeholder': 'Utilitza espai per separar paraules clau',
+            'select-all': 'Selecciona-ho tot',
+        },
     },
 };
 

@@ -30,14 +30,19 @@ interface IMainRightClickEventParams extends IEventBase {
     column?: number;
 }
 
-interface IRemoveColumnEventParams {
+interface IRemoveColumnEventParams extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     startColumn: number;
     endColumn: number;
 }
 
-interface IBeforeRemoveColumnEventParams extends IRemoveColumnEventParams, IEventBase {}
+interface IBeforeRemoveColumnEventParams extends IEventBase {
+    workbook: FWorkbook;
+    worksheet: FWorksheet;
+    startColumn: number;
+    endColumn: number;
+}
 
 interface ICustomEventParamConfig {
     MainRightClickEvent: IMainRightClickEventParams;

@@ -50,8 +50,9 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
 import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-component';
-import { UniverSheetsCustomShortcutPlugin } from './custom-plugin/custom-shortcut';
-import ImportCSVButtonPlugin from './custom-plugin/import-csv-button';
+import { customRegisterEvent } from './custom/custom-register-event';
+import { UniverSheetsCustomShortcutPlugin } from './custom/custom-shortcut';
+import ImportCSVButtonPlugin from './custom/import-csv-button';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -187,6 +188,8 @@ function createNewInstance() {
 
     window.univer = univer;
     window.univerAPI = FUniver.newAPI(univer);
+
+    customRegisterEvent(univer, window.univerAPI!);
 }
 
 createNewInstance();

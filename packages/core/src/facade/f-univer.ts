@@ -96,7 +96,7 @@ export class FUniver extends Disposable {
 
     protected _eventRegistry = new FEventRegistry();
 
-    protected registerEventHandler = (event: string, handler: () => IDisposable | Subscription): IDisposable => {
+    registerEventHandler = (event: string, handler: () => IDisposable | Subscription): IDisposable => {
         return this._eventRegistry.registerEventHandler(event, handler);
     };
 
@@ -483,7 +483,7 @@ export class FUniver extends Disposable {
      * this.fireEvent(univerAPI.Event.LifeCycleChanged, params);
      * ```
      */
-    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
+    fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
         return this._eventRegistry.fireEvent(event, params);
     }
 

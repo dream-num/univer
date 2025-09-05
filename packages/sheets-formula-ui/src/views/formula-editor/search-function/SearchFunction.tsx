@@ -15,7 +15,7 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import type { ISequenceNode } from '@univerjs/engine-formula';
+import type { FunctionType, ISequenceNode } from '@univerjs/engine-formula';
 import { CommandType, DisposableCollection, ICommandService } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -51,8 +51,8 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const [position$] = useEditorPosition(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
 
-    const handleFunctionSelect = (v: string) => {
-        const res = handlerFormulaReplace(v);
+    const handleFunctionSelect = (v: string, functionType: FunctionType) => {
+        const res = handlerFormulaReplace(v, functionType);
         if (res) {
             resetFormulaSearch();
             onSelect(res);
@@ -104,7 +104,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 case KeyCode.TAB:
                 case KeyCode.ENTER: {
                     const item = searchList[active];
-                    handleFunctionSelect(item.name);
+                    handleFunctionSelect(item.name, item.functionType);
                     break;
                 }
                 case KeyCode.ESC: {
@@ -218,7 +218,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}
                         onClick={() => {
-                            handleFunctionSelect(item.name);
+                            handleFunctionSelect(item.name, item.functionType);
                             if (editor) {
                                 editor.focus();
                             }

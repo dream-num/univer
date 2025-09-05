@@ -135,9 +135,9 @@ export class EditorDataSyncController extends Disposable {
                         const editorDocDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
                         const syncId =
-                        unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-                            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-                            : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+                            unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                                ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+                                : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
 
                         this._checkAndSetRenderStyleConfig(editorDocDataModel!);
                         this._syncActionsAndRender(syncId, params);

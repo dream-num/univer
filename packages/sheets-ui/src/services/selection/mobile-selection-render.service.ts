@@ -539,35 +539,35 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 break;
             case ExpandingControl.BOTTOM_RIGHT:
                 currCellRange =
-                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
+                    skeleton.getCellWithCoordByIndex(startRow, startColumn);
                 break;
             case ExpandingControl.LEFT:
                 currCellRange =
-                        skeleton.getCellWithCoordByIndex(startRow, endColumn);
+                    skeleton.getCellWithCoordByIndex(startRow, endColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             case ExpandingControl.RIGHT:
                 currCellRange =
-                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
+                    skeleton.getCellWithCoordByIndex(startRow, startColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             case ExpandingControl.TOP:
                 currCellRange =
-                        skeleton.getCellWithCoordByIndex(endRow, startColumn);
+                    skeleton.getCellWithCoordByIndex(endRow, startColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             case ExpandingControl.BOTTOM:
                 currCellRange =
-                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
+                    skeleton.getCellWithCoordByIndex(startRow, startColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             default:
                 currCellRange =
-                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
+                    skeleton.getCellWithCoordByIndex(startRow, startColumn);
         }
         activeSelectionControl.updateCurrCell(currCellRange);
         return currCellRange;

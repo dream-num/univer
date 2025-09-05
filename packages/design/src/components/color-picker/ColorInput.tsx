@@ -16,6 +16,8 @@
 
 import type { ChangeEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { borderClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 import { hexToHsv, hsvToHex, hsvToRgb, rgbToHsv } from './color-conversion';
 
 interface IColorInputProps {
@@ -66,10 +68,11 @@ function HexInput({ hsv, onChange }: IInputProps) {
     return (
         <>
             <input
-                className={`
+                className={clsx(`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none
-                `}
+                  dark:!univer-text-white
+                `, borderClassName)}
                 value={inputValue}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -129,7 +132,8 @@ function RgbInput({ hsv, onChange }: IInputProps) {
         <div
             className={`
               univer-flex univer-items-center univer-gap-2
-              [&>input]:univer-w-11
+              [&>input]:univer-w-11 [&>input]:univer-border-gray-200 [&>input]:focus:univer-border-primary-500
+              dark:[&>input]:!univer-border-gray-600 dark:[&>input]:!univer-text-white
             `}
         >
             <input

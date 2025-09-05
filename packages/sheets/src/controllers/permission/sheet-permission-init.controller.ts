@@ -59,6 +59,10 @@ export class SheetPermissionInitController extends Disposable {
         this._refreshPermissionByCollaCreate();
     }
 
+    public refreshRangeProtectPermission() {
+        this._initRangePermissionFromSnapshot();
+    }
+
     private async _initRangePermissionFromSnapshot() {
         const initRangePermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {

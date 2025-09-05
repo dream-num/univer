@@ -14651,6 +14651,28 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         },
                     },
                 },
+                54: {
+                    12: {
+                        v: 'DOUBLE',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 10,
+                            },
+                        },
+                    },
+                },
+                56: {
+                    12: {
+                        v: 'WAVY DOUBLE',
+                        s: {
+                            ul: {
+                                s: 1,
+                                t: 15,
+                            },
+                        },
+                    },
+                },
             },
 
             freeze: {

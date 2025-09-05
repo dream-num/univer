@@ -131,6 +131,8 @@ export class Line extends docExtension {
 
         this._setLineType(ctx, lineType ?? TextDecoration.SINGLE, lineWidth);
 
+        startY += this._isDouble(lineType) ? -0.8 : 0;
+
         const centerAngle = degToRad(centerAngleDeg);
         const vertexAngle = degToRad(vertexAngleDeg);
         const start = calculateRectRotate(
@@ -150,24 +152,34 @@ export class Line extends docExtension {
 
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
-        if (this._isWave(lineType)) {
-            for (let x = start.x; x < end.x; x++) {
-                ctx.lineTo(x, end.y + 1 * Math.sin(x * 1)); // y + amplitude * frequency
-            }
-        } else {
-            ctx.lineTo(end.x, end.y);
+
+        this._drawLineTo(ctx, start.x, end.x, end.y, lineType);
+        if (this._isDouble(lineType)) {
+            ctx.moveTo(start.x, start.y + 2);
+            this._drawLineTo(ctx, start.x, end.x, end.y + 2, lineType);
         }
 
         ctx.stroke();
         ctx.restore();
     }
 
-    private _isWave(lineType: TextDecoration | undefined): boolean {
-        return lineType === TextDecoration.WAVE || lineType === TextDecoration.WAVY_HEAVY;
+    private _drawLineTo(ctx: UniverRenderingContext, startX: number, endX: number, endY: number, lineType?: TextDecoration) {
+        if (this._isWave(lineType)) {
+            for (let x = startX; x < endX; x++) {
+                ctx.lineTo(x, endY + 0.8 * Math.sin(x * 1)); // y + amplitude * frequency
+            }
+        } else {
+            ctx.lineTo(endX, endY);
+        }
     }
 
     private _setLineType(ctx: UniverRenderingContext, style: TextDecoration, lineWidth: number) {
         switch (style) {
+            case TextDecoration.SINGLE:
+            case TextDecoration.DOUBLE:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([0]);
+                return;
             case TextDecoration.DOTTED:
                 ctx.lineWidth = 1;
                 ctx.setLineDash([2]);
@@ -213,6 +225,7 @@ export class Line extends docExtension {
                 ctx.setLineDash([0]);
                 return;
             case TextDecoration.WAVE:
+            case TextDecoration.WAVY_DOUBLE:
                 ctx.lineWidth = 1;
                 return;
             case TextDecoration.WAVY_HEAVY:
@@ -222,6 +235,14 @@ export class Line extends docExtension {
                 ctx.setLineDash([0]);
                 ctx.lineWidth = lineWidth;
         }
+    }
+
+    private _isWave(lineType?: TextDecoration): boolean {
+        return lineType === TextDecoration.WAVE || lineType === TextDecoration.WAVY_HEAVY || lineType === TextDecoration.WAVY_DOUBLE;
+    }
+
+    private _isDouble(lineType?: TextDecoration): boolean {
+        return lineType === TextDecoration.DOUBLE || lineType === TextDecoration.WAVY_DOUBLE;
     }
 }
 

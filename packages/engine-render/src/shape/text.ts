@@ -149,25 +149,41 @@ export class Text extends Shape<ITextProps> {
         lineType: TextDecoration;
     }) {
         const { x, y, width, color, lineWidth, lineType } = options;
+        const offsetY = this._isDouble(lineType) ? y - 0.8 : y;
 
         ctx.save();
         ctx.strokeStyle = color;
         this._setLineType(ctx, lineType, lineWidth);
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        if (this._isWave(lineType)) {
-            for (let x = 1; x < width + 1; x++) {
-                ctx.lineTo(x, y + 1 * Math.sin(x * 1)); // y + amplitude * frequency
-            }
-        } else {
-            ctx.lineTo(x + width, y);
+        ctx.moveTo(x, offsetY);
+        this._drawLine(ctx, x, offsetY, width, lineType);
+
+        if (this._isDouble(lineType)) {
+            ctx.moveTo(x, offsetY + 2);
+            this._drawLine(ctx, x, offsetY + 2, width, lineType);
         }
+
         ctx.stroke();
         ctx.restore();
     }
 
+    private static _drawLine(ctx: UniverRenderingContext, x: number, y: number, width: number, lineType: TextDecoration) {
+        if (this._isWave(lineType)) {
+            for (let i = 1; i < width + 1; i++) {
+                ctx.lineTo(i, y + 0.8 * Math.sin(i * 1)); // y + amplitude * frequency
+            }
+        } else {
+            ctx.lineTo(x + width, y);
+        }
+    }
+
     private static _setLineType(ctx: UniverRenderingContext, style: TextDecoration, lineWidth: number) {
         switch (style) {
+            case TextDecoration.SINGLE:
+            case TextDecoration.DOUBLE:
+                ctx.lineWidth = 1;
+                ctx.setLineDash([0]);
+                return;
             case TextDecoration.DOTTED:
                 ctx.lineWidth = 1;
                 ctx.setLineDash([2]);
@@ -213,6 +229,7 @@ export class Text extends Shape<ITextProps> {
                 ctx.setLineDash([0]);
                 return;
             case TextDecoration.WAVE:
+            case TextDecoration.WAVY_DOUBLE:
                 ctx.lineWidth = 1;
                 return;
             case TextDecoration.WAVY_HEAVY:
@@ -225,7 +242,11 @@ export class Text extends Shape<ITextProps> {
     }
 
     private static _isWave(lineType: TextDecoration): boolean {
-        return lineType === TextDecoration.WAVE || lineType === TextDecoration.WAVY_HEAVY;
+        return lineType === TextDecoration.WAVE || lineType === TextDecoration.WAVY_HEAVY || lineType === TextDecoration.WAVY_DOUBLE;
+    }
+
+    private static _isDouble(lineType: TextDecoration): boolean {
+        return lineType === TextDecoration.DOUBLE || lineType === TextDecoration.WAVY_DOUBLE;
     }
 
     protected override _draw(ctx: UniverRenderingContext) {

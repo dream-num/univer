@@ -16,7 +16,5 @@
 
 import { COMPONENT_PREFIX } from '../const';
 
-export { BulletListTypePicker, OrderListTypePicker } from './picker';
-export const ORDER_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_ORDER_LIST_TYPE_COMPONENT`;
-export const BULLET_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_BULLET_LIST_TYPE_COMPONENT`;
+export { UnderlineTypePicker } from './picker';
 export const UNDERLINE_TYPE_COMPONENT = `${COMPONENT_PREFIX}_UNDERLINE_TYPE_COMPONENT`;

@@ -280,7 +280,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         switch (preCommandId) {
             case SetInlineFormatBoldCommand.id: // fallthrough
             case SetInlineFormatItalicCommand.id: // fallthrough
-            case SetInlineFormatUnderlineCommand.id: // fallthrough
             case SetInlineFormatStrikethroughCommand.id: // fallthrough
             case SetInlineFormatSubscriptCommand.id: // fallthrough
             case SetInlineFormatSuperscriptCommand.id: {
@@ -317,6 +316,10 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 formatValue = {
                     rgb: null,
                 };
+                break;
+            }
+            case SetInlineFormatUnderlineCommand.id: {
+                formatValue = value;
                 break;
             }
 
@@ -431,6 +434,7 @@ function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, 
             }
             : {
                 s: BooleanNumber.TRUE,
+                t: ts?.ul?.t,
             };
     }
 

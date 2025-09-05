@@ -28,8 +28,9 @@ import { CutIcon, DeleteIcon, DocSettingIcon, TodoListDoubleIcon } from '@univer
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
-import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
+import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker, UNDERLINE_TYPE_COMPONENT } from '../components/list-type-picker';
 import { ParagraphMenu } from '../components/paragraph-menu';
+import { UnderlineTypePicker } from '../components/underiline-picker';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
@@ -72,6 +73,7 @@ export class DocUIController extends Disposable {
         ([
             [BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker],
             [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],
+            [UNDERLINE_TYPE_COMPONENT, UnderlineTypePicker],
             ['TodoListDoubleIcon', TodoListDoubleIcon],
             ['doc.paragraph.menu', ParagraphMenu],
             ['CutIcon', CutIcon],

@@ -23,7 +23,8 @@ export { TriggerCalculationController } from './controllers/trigger-calculation.
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 export { UpdateFormulaController } from './controllers/update-formula.controller';
 export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
-export { DescriptionService, IDescriptionService, type ISearchItem } from './services/description.service';
+export { DescriptionService, IDescriptionService } from './services/description.service';
+export type { ISearchItem, ISearchItemWithType } from './services/description.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from './services/register-function.service';

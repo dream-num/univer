@@ -15,9 +15,9 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import type { ISearchItem } from '@univerjs/sheets-formula';
+import type { ISearchItemWithType } from '@univerjs/sheets-formula';
 import type { INode } from './use-formula-token';
-import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { FunctionType, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -29,7 +29,7 @@ import { useStateRef } from '../hooks/use-state-ref';
 export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
 
-    const [searchList, setSearchList] = useState<ISearchItem[]>([]);
+    const [searchList, setSearchList] = useState<ISearchItemWithType[]>([]);
     const [searchText, setSearchText] = useState<string>('');
     const indexRef = useRef(-1);
     const stateRef = useStateRef({ nodes });
@@ -83,14 +83,14 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
         }
     }, [isNeed]);
 
-    const handlerFormulaReplace = (formulaName: string) => {
+    const handlerFormulaReplace = (formulaName: string, functionType: FunctionType) => {
         const cloneNodes = [...stateRef.current.nodes];
         if (indexRef.current !== -1) {
             const lastNodes = cloneNodes.splice(indexRef.current + 1);
             const oldNode = cloneNodes.pop() || '';
             let offset = (typeof oldNode === 'string' ? oldNode.length : oldNode.token.length) - formulaName.length;
             cloneNodes.push(formulaName);
-            if (lastNodes[0] !== matchToken.OPEN_BRACKET) {
+            if (lastNodes[0] !== matchToken.OPEN_BRACKET && functionType !== FunctionType.DefinedName) {
                 cloneNodes.push(matchToken.OPEN_BRACKET);
                 offset--;
             }

@@ -130,6 +130,15 @@ const locale: typeof enUS = {
                 m12: '12월',
             },
         },
+        filter: {
+            'by-values': '값으로 필터',
+            'by-conditions': '조건으로 필터',
+            'clear-filter': '필터 지우기',
+            cancel: '취소',
+            confirm: '확인',
+            'search-placeholder': '검색어는 공백으로 구분',
+            'select-all': '전체 선택',
+        },
     },
 };
 

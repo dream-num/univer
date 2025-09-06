@@ -40,7 +40,7 @@ export interface IFWorkbookSheetsTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -68,7 +68,7 @@ export interface IFWorkbookSheetsTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -113,7 +113,7 @@ export interface IFWorkbookSheetsTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -143,7 +143,7 @@ export interface IFWorkbookSheetsTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *

@@ -42,11 +42,12 @@ export class SheetsTableThemeController extends Disposable {
     registerTableChangeEvent() {
         this.disposeWithMe(
             this._tableManager.tableAdd$.subscribe((event) => {
-                const { range, tableId, unitId, subUnitId } = event;
+                const { range, tableId, unitId, subUnitId, tableStyleId } = event;
                 const table = this._tableManager.getTable(unitId, tableId)!;
-                const tableStyleId = this._allThemes[this._defaultThemeIndex].name;
-                table.setTableStyleId(tableStyleId);
-                this._sheetRangeThemeService.registerRangeThemeStyle(tableStyleId, {
+                // If the tableStyleId is not set or is empty string, use the default theme
+                const _tableStyleId = tableStyleId || this._allThemes[this._defaultThemeIndex].name;
+                table.setTableStyleId(_tableStyleId);
+                this._sheetRangeThemeService.registerRangeThemeStyle(_tableStyleId, {
                     unitId,
                     subUnitId,
                     range: { ...range },

@@ -132,6 +132,15 @@ const locale: typeof enUS = {
                 m12: 'Декабрь',
             },
         },
+        filter: {
+            'by-values': 'По значениям',
+            'by-conditions': 'По условиям',
+            'clear-filter': 'Очистить фильтр',
+            cancel: 'Отмена',
+            confirm: 'Подтвердить',
+            'search-placeholder': 'Используйте пробел для разделения ключевых слов',
+            'select-all': 'Выбрать все',
+        },
     },
 };
 

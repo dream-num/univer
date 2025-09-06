@@ -60,7 +60,20 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
+     *     columns: [
+     *       { id: 'col-1', displayName: 'Column 1' }
+     *     ],
+     *     filters: [
+     *       {
+     *         filterType: univerAPI.Enum.TableColumnFilterTypeEnum.condition,
+     *         filterInfo: {
+     *           conditionType: univerAPI.Enum.TableConditionTypeEnum.Number,
+     *           compareType: univerAPI.Enum.TableNumberCompareTypeEnum.GreaterThan,
+     *           expectedValue: 2,
+     *         }
+     *       }
+     *     ]
      *   }
      * );
      *
@@ -90,7 +103,7 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -148,7 +161,7 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -183,7 +196,7 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -230,7 +243,7 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *
@@ -279,7 +292,7 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      * console.log('debugger tableInfo2', fWorksheet.getTableByCell(row, column));
@@ -304,7 +317,7 @@ export interface IFWorkSheetTableMixin {
      *   fRange.getRange(),
      *   'id-1',
      *   {
-     *     showHeader: true,
+     *     tableStyleId: 'table-default-4',
      *   }
      * );
      *

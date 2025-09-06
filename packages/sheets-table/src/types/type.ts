@@ -25,11 +25,33 @@ export interface ITableRange {
 }
 
 export interface ITableOptions {
+    /**
+     * Whether to show the header row.
+     * @todo not support yet
+     */
     showHeader?: boolean;
+    /**
+     * Whether to show the footer row.
+     * @todo not support yet
+     */
     showFooter?: boolean;
+    /**
+     * The table style id. If the property is empty, the default style will be used.
+     * @default: table-default-0 ~ table-default-5
+     */
     tableStyleId?: string;
+    /**
+     * The total number of rows in the table.
+     * @todo not support yet
+     */
     hasTotalRow?: boolean;
+    /**
+     * The columns of the table. If not provided, default columns will be generated based on the range.
+     */
     columns?: ITableColumnJson[];
+    /**
+     * The column filters of the table.
+     */
     filters?: ITableFilterItem[];
 }
 
@@ -90,6 +112,7 @@ export interface ITableAddedEvent {
     tableId: string;
     tableName: string;
     range: ITableRange;
+    tableStyleId?: string;
 }
 
 export interface ITableRangeUpdate {

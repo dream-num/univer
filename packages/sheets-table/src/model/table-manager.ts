@@ -98,6 +98,7 @@ export class TableManager extends Disposable {
             range,
             tableName: name,
             tableId: id,
+            tableStyleId: options?.tableStyleId,
         });
 
         return id;

@@ -51,25 +51,27 @@ export class Table {
         // Summarization is not supported yet. Footer is not displayed yet.
         this._showFooter = false;
         // init table columns
-        if (options.columns) {
-            options.columns.forEach((column) => {
-                const id = column.id || generateRandomId();
-                const tableColumn = new TableColumn(id, column.displayName);
-                tableColumn.fromJSON(column);
-                this._columns.set(id, tableColumn);
-                this._columnOrder.push(id);
-            });
-        } else {
-            const range = this.getRange();
-            const startColumn = range.startColumn;
-            const endColumn = range.endColumn;
-            for (let i = startColumn; i <= endColumn; i++) {
-                const id = generateRandomId();
+        const range = this.getRange();
+        const startColumn = range.startColumn;
+        const endColumn = range.endColumn;
 
-                const column = new TableColumn(id, header[i - startColumn]);
-                this._columns.set(id, column);
-                this._columnOrder.push(id);
+        for (let i = startColumn; i <= endColumn; i++) {
+            const index = i - startColumn;
+
+            let id;
+            let columnName;
+
+            if (options.columns?.[index]) {
+                id = options.columns[index].id;
+                columnName = options.columns[index].displayName;
+            } else {
+                id = generateRandomId();
+                columnName = header[i - startColumn];
             }
+
+            const column = new TableColumn(id, columnName);
+            this._columns.set(id, column);
+            this._columnOrder.push(id);
         }
 
         // this._tableFilters = new TableFilters();

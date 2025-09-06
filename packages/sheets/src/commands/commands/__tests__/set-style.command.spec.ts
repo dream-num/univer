@@ -97,7 +97,7 @@ describe("Test commands used for updating cells' styles", () => {
                 .getFontColor();
         }
 
-        const defaultColor = '#000';
+        const defaultColor = '#000000';
         const color1 = '#aaa';
         const color2 = '#bbb';
         const color3 = '#ccc';
@@ -485,7 +485,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getFontColor()).toBe('#000');
+                expect(getFontColor()).toBe('#000000');
                 expect(getFontThroughLine()).toStrictEqual({
                     s: BooleanNumber.TRUE,
                 }); // no color

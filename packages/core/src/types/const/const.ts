@@ -127,7 +127,7 @@ export const DEFAULT_STYLES = {
      * color
      */
     cl: {
-        rgb: '#000',
+        rgb: '#000000',
     },
     /**
      * background

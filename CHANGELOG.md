@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.10.7](https://github.com/dream-num/univer/compare/v0.10.6...v0.10.7) (2025-09-06)
+
+
+### Bug Fixes
+
+* **core:** add darkYellow color ([#5782](https://github.com/dream-num/univer/issues/5782)) ([c14cd95](https://github.com/dream-num/univer/commit/c14cd957d2d0961cd9a28f6403fc389998bf8ab1))
+* **design:** update background color for unchecked state in Switch component ([#5796](https://github.com/dream-num/univer/issues/5796)) ([47766b5](https://github.com/dream-num/univer/commit/47766b5a2689350ea95c0fa941a4b45e50549d41))
+* **edit-history:** add refresh permission function ([#5805](https://github.com/dream-num/univer/issues/5805)) ([a4da922](https://github.com/dream-num/univer/commit/a4da922a9118295803b1ec14cf4809667676ad43))
+* fix the issue of applying number format when the cell type is string or force string ([#5798](https://github.com/dream-num/univer/issues/5798)) ([8ebc55d](https://github.com/dream-num/univer/commit/8ebc55de8d750db70f660e37fda8d93fbf29017b))
+* **formular:** fix define name should not add ( ([#5809](https://github.com/dream-num/univer/issues/5809)) ([6b7bef5](https://github.com/dream-num/univer/commit/6b7bef5c968fef344f06f0654d3e1ffd1f0ba854))
+* layering of elements in insert table dialog ([#5771](https://github.com/dream-num/univer/issues/5771)) ([6fab221](https://github.com/dream-num/univer/commit/6fab22135e2719fd8122de0135d41d588da948b3))
+* **rangeselector:** add param to keep rang selector ref always with sheetname ([#5774](https://github.com/dream-num/univer/issues/5774)) ([1b58670](https://github.com/dream-num/univer/commit/1b5867061bd6777359d75d45aea63ee40e1a6fc2))
+* **sheets-data-validation-ui:** return current date for empty string input in `transformDate` ([#5794](https://github.com/dream-num/univer/issues/5794)) ([b58dcca](https://github.com/dream-num/univer/commit/b58dcca4e1fcce3c7770cbb6aa8602fd331e5a6c))
+* **table:** fix sheets-table facade api ([#5812](https://github.com/dream-num/univer/issues/5812)) ([a11d207](https://github.com/dream-num/univer/commit/a11d207423f35955f11642e240ca80f81aa2a55d))
+* **ui:** adjust grid class to prevent shrinking in active group display of Ribbon ([#5785](https://github.com/dream-num/univer/issues/5785)) ([56d27c7](https://github.com/dream-num/univer/commit/56d27c73b48a40e554a310884bbca337fbc29778))
+* **ui:** update Tooltip and span classes for better styling ([#5813](https://github.com/dream-num/univer/issues/5813)) ([8337ba3](https://github.com/dream-num/univer/commit/8337ba38fbffc0ae7fa108b1b19896956b0850f5))
+* **uniscript:** fix dark theme support to ScriptEditorPanel ([#5776](https://github.com/dream-num/univer/issues/5776)) ([8d8acba](https://github.com/dream-num/univer/commit/8d8acbaa4ab509cc0933c3bb4f9c380c179f569a))
+
+
+### Features
+
+* add data validation error handling in workbook and worksheet mixins ([#5759](https://github.com/dream-num/univer/issues/5759)) ([bf6cd65](https://github.com/dream-num/univer/commit/bf6cd652ea2cfd8485c45ce7f90d981ead1abdc0))
+* add display underline depending on type ([#5787](https://github.com/dream-num/univer/issues/5787)) ([034a923](https://github.com/dream-num/univer/commit/034a9236f2fe84abe1668f25ad88ea7b916e55da))
+* add docs ru locale ([#5777](https://github.com/dream-num/univer/issues/5777)) ([a087629](https://github.com/dream-num/univer/commit/a087629475b7c94479a7853104475b09cc0b186b))
+* add formula error handling in f-workbook and f-range mixin ([#5761](https://github.com/dream-num/univer/issues/5761)) ([b2cf32f](https://github.com/dream-num/univer/commit/b2cf32f6c09afe07c11ffcbeebfdddb0a02cd29f))
+* add sheets-filter sync switch ([#5797](https://github.com/dream-num/univer/issues/5797)) ([ea706af](https://github.com/dream-num/univer/commit/ea706af45376c501a8beec26607787965ae8af71))
+* **design:** enhance ColorInput styling ([#5802](https://github.com/dream-num/univer/issues/5802)) ([d4713b4](https://github.com/dream-num/univer/commit/d4713b47e132099a5e8bad29f02055205ebd861f))
+* **design:** optimize the InputNumber component style ([#5766](https://github.com/dream-num/univer/issues/5766)) ([4a79e42](https://github.com/dream-num/univer/commit/4a79e42981b1c55074f88e4602420f3eb7b1178e))
+* double line ([#5793](https://github.com/dream-num/univer/issues/5793)) ([94125c1](https://github.com/dream-num/univer/commit/94125c1b5a21ef84a3bb6a6dc3159aeef57a9e38))
+* **facade:** open register event api ([#5806](https://github.com/dream-num/univer/issues/5806)) ([ef11c97](https://github.com/dream-num/univer/commit/ef11c97a32d63b98c3814ead19817b601f0a395b))
+* **permission:** add checkWorksheetPermissionPoint and checkWorkbook… ([#5730](https://github.com/dream-num/univer/issues/5730)) ([c357d9a](https://github.com/dream-num/univer/commit/c357d9ae2c03cc45643bc9a5fbf169e7b6826e12))
+
 ## [0.10.6](https://github.com/dream-num/univer/compare/v0.10.5...v0.10.6) (2025-08-29)
 
 

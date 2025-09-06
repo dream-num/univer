@@ -27,7 +27,7 @@ Univer は、開発者に強力で柔軟かつ使いやすいオフィススイ�
 
 </div>
 
-Univer MCP を使って自然言語で Univer Sheet を操作し、本物の AI ネイティブなスプレッドシートを構築する。
+[Univer MCP](https://github.com/dream-num/univer-mcp) を使って自然言語で Univer Sheet を操作し、本物の AI ネイティブなスプレッドシートを構築する。
 
 https://github.com/user-attachments/assets/7429bd5f-d769-4057-9e67-353337531024
 

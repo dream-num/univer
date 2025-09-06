@@ -178,8 +178,10 @@ export function Tree(props: ITreeProps) {
                             handleExpendItem(treeItem);
                         }}
                     >
-                        <Tooltip className="univer-w-full univer-truncate" showIfEllipsis placement="top" title={title}>
-                            <span>{title}</span>
+                        <Tooltip className="univer-block" showIfEllipsis placement="top" title={title}>
+                            <span className="univer-block">
+                                {title}
+                            </span>
                         </Tooltip>
                     </div>
 

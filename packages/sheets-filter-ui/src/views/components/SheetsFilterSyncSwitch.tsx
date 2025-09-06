@@ -44,7 +44,7 @@ export function FilterSyncSwitch() {
                         : localeService.t('sheets-filter.sync.statusTips.on')}
                     asChild
                 >
-                    <InfoIcon />
+                    <InfoIcon className="univer-block" />
                 </Tooltip>
             </div>
             <Switch

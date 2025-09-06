@@ -16,7 +16,7 @@
 
 import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
-import { Button, clsx, DropdownMenu, Tooltip } from '@univerjs/design';
+import { Button, clsx, DropdownMenu } from '@univerjs/design';
 import { IncreaseIcon, ReduceIcon } from '@univerjs/icons';
 import React, { useMemo, useRef, useState } from 'react';
 import { useDependency } from '../../utils/di';
@@ -185,18 +185,16 @@ export function Slider(props: ISliderProps) {
                 }}
             >
                 <div ref={sliderInnerRailRef} role="track" className="univer-relative univer-h-0.5">
-                    <Tooltip title={`${localeService.t('zoom-slider.resetTo')} ${resetPoint}%`} placement="top" asChild>
-                        <a
-                            key="reset-button"
-                            className={`
-                              univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-h-0.5
-                              univer-w-0.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
-                              univer-rounded-full univer-bg-white
-                            `}
-                            role="button"
-                            onClick={handleReset}
-                        />
-                    </Tooltip>
+                    <a
+                        key="reset-button"
+                        className={`
+                          univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-h-0.5
+                          univer-w-0.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
+                          univer-rounded-full univer-bg-white
+                        `}
+                        role="button"
+                        onClick={handleReset}
+                    />
 
                     <button
                         className={clsx(`

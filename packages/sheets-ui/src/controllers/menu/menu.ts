@@ -533,7 +533,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
 
@@ -549,6 +549,29 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                     hoverable: false,
                     selectable: false,
                 },
+                value$: new Observable<string>((subscriber) => {
+                    const defaultValue = DEFAULT_STYLES.cl.rgb;
+                    const calc = () => {
+                        const textRun = getFontStyleAtCursor(accessor);
+
+                        if (!textRun) {
+                            subscriber.next(defaultValue);
+                            return;
+                        }
+
+                        const color = textRun.ts?.cl?.rgb;
+                        subscriber.next(color ?? defaultValue);
+                    };
+
+                    const disposable = commandService.onCommandExecuted((c) => {
+                        if (c.id === SetRangeTextColorCommand.id) {
+                            calc();
+                        }
+                    });
+
+                    calc();
+                    return disposable.dispose;
+                }),
             },
         ],
         value$: new Observable<string>((subscriber) => {

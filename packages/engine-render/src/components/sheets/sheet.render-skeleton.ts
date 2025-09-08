@@ -832,9 +832,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         if (horizontalAlign === HorizontalAlign.CENTER) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);
-            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2, horizontalAlign);
+            endColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth);
+            endColumn = this._getOverflowBound(row, column, 0, contentWidth);
         } else {
             endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth);
         }

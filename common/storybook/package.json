@@ -18,7 +18,7 @@
     "dependencies": {
         "@chromatic-com/storybook": "^4.1.1",
         "@storybook/addon-docs": "^9.1.4",
-        "@storybook/addon-links": "^9.1.4",
+        "@storybook/addon-links": "^9.1.5",
         "@storybook/addon-styling-webpack": "^2.0.0",
         "@storybook/addon-webpack5-compiler-swc": "^4.0.1",
         "@storybook/icons": "^1.4.0",

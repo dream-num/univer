@@ -23,7 +23,7 @@
         "@storybook/addon-webpack5-compiler-swc": "^4.0.1",
         "@storybook/icons": "^1.4.0",
         "@storybook/react": "^9.1.4",
-        "@storybook/react-webpack5": "^9.1.4",
+        "@storybook/react-webpack5": "^9.1.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/themes": "workspace:*",

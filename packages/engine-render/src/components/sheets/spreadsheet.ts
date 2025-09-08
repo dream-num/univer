@@ -120,7 +120,7 @@ export class Spreadsheet extends SheetComponent {
             ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRangeByViewBound(bound))
             : [];
 
-        const viewRanges = [spreadsheetSkeleton.getCacheRangeByViewport(viewportInfo)];
+        const viewRanges = [spreadsheetSkeleton.getCacheRangeByViewport(viewportInfo, this.isPrinting)];
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 

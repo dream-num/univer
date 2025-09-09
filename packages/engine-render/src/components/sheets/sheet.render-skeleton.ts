@@ -802,8 +802,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.viewBound);
     }
 
-    getCacheRangeByViewport(vpInfo?: IViewportInfo): IRange {
-        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.cacheBound);
+    getCacheRangeByViewport(vpInfo?: IViewportInfo, isPrinting?: boolean): IRange {
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.cacheBound, isPrinting);
     }
 
     getRangeByViewBound(bound?: IBoundRectNoAngle): IRange {
@@ -1198,7 +1198,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     protected _getRangeByViewBounding(
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        viewBound?: IBoundRectNoAngle
+        viewBound?: IBoundRectNoAngle,
+        isPrinting?: boolean
     ): IRange {
         const lenOfRowData = rowHeightAccumulation.length;
         const lenOfColData = columnWidthAccumulation.length;
@@ -1217,6 +1218,16 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const endRow = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
         const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
         const endColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
+
+        // If the get range is used for printing, the endRow and endColumn do not need to minus 1.
+        if (isPrinting) {
+            return {
+                startRow,
+                endRow: endRow === lenOfRowData - 1 ? endRow : endRow - 1,
+                startColumn,
+                endColumn: endColumn === lenOfColData - 1 ? endColumn : endColumn - 1,
+            };
+        }
 
         return {
             startRow,

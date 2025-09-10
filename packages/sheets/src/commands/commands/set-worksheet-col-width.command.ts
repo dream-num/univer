@@ -218,10 +218,28 @@ export const SetColWidthCommand: ICommand = {
         const result = sequenceExecute([...intercepted.redos, ...autoHeightRedos], commandService);
 
         if (setColWidthResult && result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: SetColWidthCommand.id,
+                params: redoMutationParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...(intercepted.preUndos ?? []), { id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...intercepted.undos, ...autoHeightUndos],
-                redoMutations: [...(intercepted.preRedos ?? []), { id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...intercepted.redos, ...autoHeightRedos],
+                undoMutations: [
+                    ...(intercepted.preUndos ?? []),
+                    { id: SetWorksheetColWidthMutation.id, params: undoMutationParams },
+                    ...intercepted.undos,
+                    ...afterInterceptors.undos,
+                    ...autoHeightUndos,
+                ],
+                redoMutations: [
+                    ...(intercepted.preRedos ?? []),
+                    { id: SetWorksheetColWidthMutation.id, params: redoMutationParams },
+                    ...intercepted.redos,
+                    ...afterInterceptors.redos,
+                    ...autoHeightRedos,
+                ],
             });
 
             return true;

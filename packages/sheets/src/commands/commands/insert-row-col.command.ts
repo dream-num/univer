@@ -159,6 +159,14 @@ export const InsertRowByRangeCommand: ICommand = {
         const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: InsertRowCommand.id,
+                params,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+            redos.push(...afterInterceptors.redos);
+            undos.push(...afterInterceptors.undos);
+
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
                 undoMutations: undos,
@@ -462,11 +470,20 @@ export const InsertColByRangeCommand: ICommand<IInsertColCommandParams> = {
         const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: InsertColCommand.id,
+                params,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+            redos.push(...afterInterceptors.redos);
+            undos.push(...afterInterceptors.undos);
+
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
                 undoMutations: undos.filter(Boolean),
                 redoMutations: redos.filter(Boolean),
             });
+
             return true;
         }
 

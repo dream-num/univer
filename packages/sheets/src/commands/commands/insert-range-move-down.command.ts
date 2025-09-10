@@ -163,6 +163,14 @@ export const InsertRangeMoveDownCommand: ICommand = {
         // execute do mutations and add undo mutations to undo stack if completed
         const result = sequenceExecute(redoMutations, commandService);
         if (result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: InsertRangeMoveDownCommand.id,
+                params: { range } as InsertRangeMoveDownCommandParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+            undoMutations.push(...afterInterceptors.undos);
+            redoMutations.push(...afterInterceptors.redos);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undoMutations.reverse(),

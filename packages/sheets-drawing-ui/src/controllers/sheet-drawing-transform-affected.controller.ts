@@ -90,8 +90,8 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
 
     private _sheetInterceptorListener() {
         this.disposeWithMe(
-            this._sheetInterceptorService.interceptCommand({
-
+            this._sheetInterceptorService.interceptAfterCommand({
+                /* eslint-disable-next-line complexity */
                 getMutations: (commandInfo) => {
                     if (!UPDATE_COMMANDS.includes(commandInfo.id)) {
                         return { redos: [], undos: [] };

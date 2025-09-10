@@ -187,6 +187,14 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: MoveRowsCommand.id,
+                params,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+            redos.push(...afterInterceptors.redos);
+            undos.push(...afterInterceptors.undos);
+
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -328,6 +336,14 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: MoveColsCommand.id,
+                params,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+            redos.push(...afterInterceptors.redos);
+            undos.push(...afterInterceptors.undos);
+
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

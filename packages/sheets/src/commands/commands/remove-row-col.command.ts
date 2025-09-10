@@ -131,6 +131,12 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
         );
 
         if (result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: RemoveRowCommandId,
+                params: { range } as IRemoveRowColCommandParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -138,11 +144,13 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                     ...(intercepted.preUndos ?? []),
                     ...undoMutations,
                     ...intercepted.undos,
+                    ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     ...redoMutations,
                     ...intercepted.redos,
+                    ...afterInterceptors.redos,
                 ],
             });
             return true;
@@ -243,6 +251,12 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
         );
 
         if (result.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: RemoveColCommandId,
+                params: { range } as IRemoveRowColCommandParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -251,11 +265,13 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
                     { id: InsertColMutation.id, params: undoRemoveColParams },
                     { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams },
                     ...intercepted.undos,
+                    ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: RemoveColMutation.id, params: removeColParams },
                     ...intercepted.redos,
+                    ...afterInterceptors.redos,
                 ],
             });
 

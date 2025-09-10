@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
@@ -609,7 +609,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
     };
 }
 
-export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
 
@@ -625,6 +625,30 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                     hoverable: false,
                     selectable: false,
                 },
+                value$: new Observable<string>((subscriber) => {
+                    const defaultValue = DEFAULT_STYLES.bg.rgb;
+                    const calc = () => {
+                        const textRun = getFontStyleAtCursor(accessor);
+
+                        if (!textRun) {
+                            subscriber.next(defaultValue);
+                            return;
+                        }
+
+                        const color = textRun.ts?.bg?.rgb;
+
+                        subscriber.next(color ?? defaultValue);
+                    };
+
+                    const disposable = commandService.onCommandExecuted((c) => {
+                        if (c.id === SetRangeTextColorCommand.id) {
+                            calc();
+                        }
+                    });
+
+                    calc();
+                    return disposable.dispose;
+                }),
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -1400,7 +1424,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
 
-    const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     const activeTextRange = textSelectionService.getActiveTextRange();
 
     if (editorDataModel == null || activeTextRange == null) return null;

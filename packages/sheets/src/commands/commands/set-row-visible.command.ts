@@ -96,6 +96,12 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
         const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
         if (result.result && interceptedResult.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: SetSpecificRowsVisibleCommand.id,
+                params,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
@@ -103,12 +109,14 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
                     { id: SetRowHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                     ...(intercepted.undos ?? []),
+                    ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: SetRowVisibleMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
                     ...intercepted.redos,
+                    ...afterInterceptors.redos,
                 ],
             });
 
@@ -200,6 +208,12 @@ export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
         ], commandService);
 
         if (execution.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: SetRowHiddenCommand.id,
+                params: redoMutationParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
@@ -207,12 +221,14 @@ export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
                     { id: SetRowVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                     ...(intercepted.undos ?? []),
+                    ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: SetRowHiddenMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
                     ...intercepted.redos,
+                    ...afterInterceptors.redos,
                 ],
             });
             return true;

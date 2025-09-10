@@ -153,6 +153,12 @@ export const DeltaRowHeightCommand: ICommand = {
         const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
         if (result.result && interceptedResult.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: DeltaRowHeightCommand.id,
+                params: redoMutationParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
@@ -166,6 +172,7 @@ export const DeltaRowHeightCommand: ICommand = {
                         params: undoSetIsAutoHeightParams,
                     },
                     ...intercepted.undos,
+                    ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
@@ -178,6 +185,7 @@ export const DeltaRowHeightCommand: ICommand = {
                         params: redoSetIsAutoHeightParams,
                     },
                     ...intercepted.redos,
+                    ...afterInterceptors.redos,
                 ],
             });
             return true;
@@ -254,6 +262,12 @@ export const SetRowHeightCommand: ICommand = {
         const sheetInterceptorResult = sequenceExecute([...intercepted.redos], commandService);
 
         if (result.result && sheetInterceptorResult.result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: SetRowHeightCommand.id,
+                params: redoMutationParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
@@ -267,6 +281,7 @@ export const SetRowHeightCommand: ICommand = {
                         params: undoSetIsAutoHeightParams,
                     },
                     ...intercepted.undos,
+                    ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...intercepted.preRedos ?? [],
@@ -279,6 +294,7 @@ export const SetRowHeightCommand: ICommand = {
                         params: redoSetIsAutoHeightParams,
                     },
                     ...intercepted.redos,
+                    ...afterInterceptors.redos,
                 ],
             });
             return true;

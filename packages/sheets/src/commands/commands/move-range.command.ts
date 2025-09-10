@@ -114,18 +114,18 @@ export const MoveRangeCommand: ICommand = {
 
         const result = sequenceExecute(redos, commandService).result;
 
-        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
-            unitId,
-            subUnitId,
-            ranges: [params.fromRange, params.toRange],
-        });
-
-        const afterInterceptors = sheetInterceptorService.afterCommandExecute({
-            id: MoveRangeCommand.id,
-            params,
-        });
-
         if (result) {
+            const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+                unitId,
+                subUnitId,
+                ranges: [params.fromRange, params.toRange],
+            });
+
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: MoveRangeCommand.id,
+                params,
+            });
+
             sequenceExecute([...afterInterceptors.redos, ...autoHeightRedos], commandService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

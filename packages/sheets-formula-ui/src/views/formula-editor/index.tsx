@@ -18,15 +18,17 @@ import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core'
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { CSSProperties, ReactNode, Ref } from 'react';
+import type { IUniverSheetsFormulaUIConfig } from '../../controllers/config.schema';
 import type { FormulaSelectingType } from './hooks/use-formula-selection';
 import type { IRefSelection } from './hooks/use-highlight';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService, useKeyboardEvent, useResize } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { PLUGIN_CONFIG_KEY_BASE } from '../../controllers/config.schema';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFocus } from './hooks/use-focus';
@@ -143,6 +145,10 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const docFocusing = currentDoc?.getUnitId() === editorId;
     const refSelections = useRef([] as IRefSelection[]);
     const selectingMode = isSelecting;
+
+    // whether to hide formula search and help popup
+    const configService = useDependency(IConfigService);
+    const hideSearchAndHelpPopup = configService.getConfig<IUniverSheetsFormulaUIConfig>(PLUGIN_CONFIG_KEY_BASE)?.hideSearchAndHelpPopup ?? false;
 
     useUpdateEffect(() => {
         onChange(formulaText);
@@ -335,7 +341,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     {errorText}
                 </div>
             )}
-            {(editor && formulaWithoutEqualSymbol !== '') && (
+            {(!hideSearchAndHelpPopup && editor && formulaWithoutEqualSymbol !== '') && (
                 <HelpFunction
                     editor={editor}
                     isFocus={isFocus}
@@ -343,7 +349,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     onClose={() => focus()}
                 />
             )}
-            {!!editor && (
+            {(!hideSearchAndHelpPopup && !!editor) && (
                 <SearchFunction
                     isFocus={isFocus}
                     sequenceNodes={sequenceNodes}

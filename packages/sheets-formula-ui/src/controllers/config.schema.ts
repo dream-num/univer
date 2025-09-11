@@ -30,6 +30,11 @@ export interface IUniverSheetsFormulaUIConfig {
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+    /**
+     * Whether to hide the formula search and help popup in the formula editor.
+     * @default false
+     */
+    hideSearchAndHelpPopup?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsFormulaUIConfig = {};

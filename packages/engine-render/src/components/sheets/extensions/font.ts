@@ -489,26 +489,9 @@ export class Font extends SheetExtension {
         const { vertexAngle = 0, wrapStrategy, cellData } = fontCache;
         if (cellData?.v === undefined || cellData?.v === null) return;
         const text = extractPureTextFromCell(cellData);
-        let { startX, startY, endX, endY } = renderFontCtx;
-        let cellWidth = endX - startX - paddingLeft - paddingRight;
+        const { startX, startY, endX, endY } = renderFontCtx;
+        const cellWidth = endX - startX - paddingLeft - paddingRight;
         const cellHeight = endY - startY - paddingTop - paddingBottom;
-
-        const overflowRectangle = overflowCache.getValue(row, col);
-        const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0);
-        if (isOverflow && overflowRectangle) {
-            const endColumn = overflowRectangle.endColumn;
-            const startColumn = overflowRectangle.startColumn;
-            const startRow = overflowRectangle.startRow;
-            const endRow = overflowRectangle.endRow;
-            const endCell = renderFontCtx.spreadsheetSkeleton.getCellWithCoordByIndex(endRow, endColumn);
-            endX = endCell.endX;
-            endY = endCell.endY;
-
-            const startCell = renderFontCtx.spreadsheetSkeleton.getCellWithCoordByIndex(startRow, startColumn);
-            startX = startCell.startX;
-            startY = startCell.startY;
-            cellWidth = endX - startX - paddingLeft - paddingRight;
-        }
 
         // If the horizontal alignment is not specified, we need to determine it based on the cell value type.
         let hAlign = fontCache.horizontalAlign;

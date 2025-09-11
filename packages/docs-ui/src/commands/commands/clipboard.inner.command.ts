@@ -502,7 +502,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         if (docDataModel == null) {
             return false;
         }

@@ -61,7 +61,7 @@ export class FUniverDocsMixin extends FUniver implements IFUniverDocsUIMixin {
     }
 
     override getUniverDoc(id: string): FDocument | null {
-        const document = this._univerInstanceService.getUniverDocInstance(id);
+        const document = this._univerInstanceService.getUnit<DocumentDataModel>(id);
         if (!document) {
             return null;
         }

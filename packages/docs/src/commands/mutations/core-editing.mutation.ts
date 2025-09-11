@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
@@ -73,7 +73,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const renderManagerService = accessor.get(IRenderManagerService);
         const docStateEmitService = accessor.get(DocStateEmitService);
 
-        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const documentViewModel = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getViewModel();
         if (documentDataModel == null || documentViewModel == null) {
             throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);

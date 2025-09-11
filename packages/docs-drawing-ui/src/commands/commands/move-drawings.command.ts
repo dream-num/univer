@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, Direction, ICommandService, IUniverInstanceService, PositionedObjectLayoutType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDrawingDocTransform, IUpdateDrawingDocTransformParams } from './update-doc-drawing.command';
+import { CommandType, Direction, ICommandService, IUniverInstanceService, PositionedObjectLayoutType } from '@univerjs/core';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDrawingDocTransform, IUpdateDrawingDocTransformParams } from './update-doc-drawing.command';
 import { UpdateDrawingDocTransformCommand } from './update-doc-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
@@ -54,7 +54,7 @@ export const MoveDocDrawingsCommand: ICommand = {
         }
         const transformer = scene.getTransformerByCreate();
 
-        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
 
         const newDrawings = drawings.map((drawing) => {
             const { drawingId } = drawing as IDocDrawing;

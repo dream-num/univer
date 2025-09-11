@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentStyle } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentStyle } from '@univerjs/core';
 import type { IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
 import { BooleanNumber, generateRandomId, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
@@ -84,7 +84,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
         }));
 
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const documentStyle = docDataModel?.getSnapshot().documentStyle;
         const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
         const viewModel = docSkeletonManagerService?.getViewModel();
@@ -190,7 +190,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     };
 
     useEffect(() => {
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const documentStyle = docDataModel?.getSnapshot().documentStyle;
 
         if (documentStyle) {

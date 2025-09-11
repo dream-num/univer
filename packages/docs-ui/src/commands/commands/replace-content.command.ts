@@ -233,7 +233,7 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const docDatModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDatModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
 
         const prevBody = docDatModel?.getSnapshot().body;
 

@@ -93,7 +93,7 @@ export class DocViewModelManagerService extends RxDisposable implements IRenderM
     }
 
     private _setCurrent(unitId: string) {
-        const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId);
         if (documentDataModel == null) {
             throw new Error(`Document data model with id ${unitId} not found when build view model.`);
         }

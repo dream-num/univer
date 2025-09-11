@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import {
@@ -127,7 +127,7 @@ export class DocDrawingTransformerController extends Disposable {
                             continue;
                         }
 
-                        const documentDataModel = this._univerInstanceService.getUniverDocInstance(drawing.unitId);
+                        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(drawing.unitId);
                         const drawingData = documentDataModel?.getSnapshot().drawings?.[drawing.drawingId];
 
                         if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {

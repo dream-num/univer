@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import {
@@ -59,7 +59,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     const { unitId } = drawingParam;
 
-    const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
 
     const documentFlavor = documentDataModel?.getSnapshot().documentStyle.documentFlavor;
 
@@ -250,7 +250,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         }
 
         const { drawingId, unitId } = focusDrawings[0];
-        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const skeleton = renderManagerService.getRenderById(unitId)
             ?.with(DocSkeletonManagerService)
             .getSkeleton();

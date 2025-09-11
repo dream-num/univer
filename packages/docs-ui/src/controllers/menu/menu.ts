@@ -127,7 +127,7 @@ function getHeaderFooterMenuHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
             const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
 
             subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
@@ -874,7 +874,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
                 return;
             }
 
-            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
             if (docDataModel == null) {
                 return;
             }

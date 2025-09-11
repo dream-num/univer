@@ -16,7 +16,7 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
@@ -234,7 +234,7 @@ export class DocDrawingAddRemoveController extends Disposable {
     }
 
     private _updateDrawingsOrder(unitId: string) {
-        const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId);
 
         if (documentDataModel == null) {
             return;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import {
     BooleanNumber,
@@ -68,7 +68,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
 
     const { unitId } = drawingParam;
 
-    const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
 
     const renderObject = renderManagerService.getRenderById(unitId);
     const scene = renderObject?.scene;

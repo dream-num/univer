@@ -73,7 +73,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
             return;
         }
 
-        const editorDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const editorDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId);
         if (!editorDataModel) {
             return;
         }

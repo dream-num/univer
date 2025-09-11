@@ -149,7 +149,7 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
         const renderManagerService = accessor.get(IRenderManagerService);
         const { unitId, segmentId, createType, headerFooterProps } = params;
         const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const docViewModel = docSkeletonManagerService?.getViewModel();
 
         if (docDataModel == null || docViewModel == null) {

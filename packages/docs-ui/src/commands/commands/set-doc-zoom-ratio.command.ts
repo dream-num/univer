@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDocZoomRatioOperationParams } from '../operations/set-doc-zoom-ratio.operation';
 
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
@@ -47,7 +47,7 @@ export const SetDocZoomRatioCommand: ICommand = {
             zoomRatio = params.zoomRatio ?? zoomRatio;
         }
 
-        const workbook = univerInstanceService.getUniverDocInstance(documentId);
+        const workbook = univerInstanceService.getUnit<DocumentDataModel>(documentId);
         if (!workbook) return false;
 
         const setZoomRatioMutationParams: ISetDocZoomRatioOperationParams = {

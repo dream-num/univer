@@ -84,6 +84,14 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         const result = sequenceExecute(redos, commandService).result;
 
         if (result) {
+            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+                id: DeleteRangeMoveUpCommand.id,
+                params: { range } as IDeleteRangeMoveUpCommandParams,
+            });
+            sequenceExecute(afterInterceptors.redos, commandService);
+            undos.push(...afterInterceptors.undos);
+            redos.push(...afterInterceptors.redos);
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos.reverse(),

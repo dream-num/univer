@@ -34,7 +34,7 @@ export interface IUniverSheetsFormulaUIConfig {
      * Whether to hide the formula search and help popup in the formula editor.
      * @default false
      */
-    hideSearchAndHelpPopup?: boolean;
+    functionScreenTips?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsFormulaUIConfig = {};

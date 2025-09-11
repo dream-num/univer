@@ -148,7 +148,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
     // whether to hide formula search and help popup
     const configService = useDependency(IConfigService);
-    const hideSearchAndHelpPopup = configService.getConfig<IUniverSheetsFormulaUIConfig>(PLUGIN_CONFIG_KEY_BASE)?.hideSearchAndHelpPopup ?? false;
+    const functionScreenTips = configService.getConfig<IUniverSheetsFormulaUIConfig>(PLUGIN_CONFIG_KEY_BASE)?.functionScreenTips ?? false;
 
     useUpdateEffect(() => {
         onChange(formulaText);
@@ -341,7 +341,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     {errorText}
                 </div>
             )}
-            {(!hideSearchAndHelpPopup && editor && formulaWithoutEqualSymbol !== '') && (
+            {(!functionScreenTips && editor && formulaWithoutEqualSymbol !== '') && (
                 <HelpFunction
                     editor={editor}
                     isFocus={isFocus}
@@ -349,7 +349,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     onClose={() => focus()}
                 />
             )}
-            {(!hideSearchAndHelpPopup && !!editor) && (
+            {(!functionScreenTips && !!editor) && (
                 <SearchFunction
                     isFocus={isFocus}
                     sequenceNodes={sequenceNodes}

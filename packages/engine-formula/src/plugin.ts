@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
+import { CalculationNotificationController } from './controller/calculation-notification.controller';
 import { ComputingStatusReporterController } from './controller/computing-status.controller';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
@@ -96,6 +97,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [SetFeatureCalculationController],
                 [SetDependencyController],
                 [CalculateController],
+                [CalculationNotificationController],
             ]);
         }
     }
@@ -140,6 +142,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
                 //Controller
                 [CalculateController],
+                [CalculationNotificationController],
                 [SetOtherFormulaController],
                 [SetDependencyController],
                 [SetFeatureCalculationController],

@@ -61,6 +61,7 @@ export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 export interface ICalculateFormulaService {
     readonly executionInProgressListener$: Observable<IExecutionInProgressParams>;
     readonly executionCompleteListener$: Observable<IAllRuntimeData>;
+    readonly calculationNeededListener$: Observable<boolean>;
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
@@ -76,6 +77,9 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
     protected readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
+
+    protected readonly _calculationNeededListener$ = new Subject<boolean>();
+    readonly calculationNeededListener$ = this._calculationNeededListener$.asObservable();
 
     private _executeLock = new AsyncLock();
 
@@ -96,6 +100,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
         this._executionInProgressListener$.complete();
         this._executionCompleteListener$.complete();
+        this._calculationNeededListener$.complete();
         FORMULA_REF_TO_ARRAY_CACHE.clear();
         CELL_INVERTED_INDEX_CACHE.clear();
         ErrorValueObjectCache.clear();
@@ -256,14 +261,21 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
         const interpreter = this._interpreter;
 
+        const treeCount = treeList.length;
+
+        // Only emit no calculation needed event for the main calculation phase
+        if (!isArrayFormulaState) {
+            this._calculationNeededListener$.next(treeCount > 0);
+        }
+
         if (isArrayFormulaState) {
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION_ARRAY_FORMULA);
 
-            this._runtimeService.setTotalArrayFormulasToCalculate(treeList.length);
+            this._runtimeService.setTotalArrayFormulasToCalculate(treeCount);
         } else {
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION);
 
-            this._runtimeService.setTotalFormulasToCalculate(treeList.length);
+            this._runtimeService.setTotalFormulasToCalculate(treeCount);
         }
 
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
@@ -273,7 +285,6 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         const config = this._configService.getConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
 
-        const treeCount = treeList.length;
         for (let i = 0; i < treeCount; i++) {
             const tree = treeList[i];
             const nodeData = tree.nodeData;

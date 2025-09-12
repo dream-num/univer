@@ -78,7 +78,7 @@ export class Custom extends SheetExtension {
                     return;
                 }
 
-                primaryWithCoord = skeleton.getCellWithCoordByIndex(mainCell.row, mainCell.col);
+                primaryWithCoord = skeleton.getCellWithCoordByIndex(mainCell.row, mainCell.col, false);
             }
 
             const renderInfo = {

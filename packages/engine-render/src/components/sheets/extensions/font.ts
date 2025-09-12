@@ -244,9 +244,35 @@ export class Font extends SheetExtension {
         }
         //#endregion
 
-        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
-        const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
-        if (!visibleRow || !visibleCol) return true;
+        if (notInMergeRange) {
+            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+            if (!visibleRow || !visibleCol) return true;
+        } else {
+            let isAllRowHidden = true;
+
+            for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
+                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r);
+                if (visibleRow) {
+                    isAllRowHidden = false;
+                    break;
+                }
+            }
+
+            if (isAllRowHidden) return true;
+
+            let isAllColHidden = true;
+
+            for (let c = mergeInfo.startColumn; c <= mergeInfo.endColumn; c++) {
+                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(c);
+                if (visibleCol) {
+                    isAllColHidden = false;
+                    break;
+                }
+            }
+
+            if (isAllColHidden) return true;
+        }
 
         // Since we cannot predict when fontRenderExtension?.isSkip might change,
         // we must check it every time and retrieve cell data directly from the worksheet,

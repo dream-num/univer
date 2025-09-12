@@ -30,6 +30,11 @@ export interface IUniverSheetsFormulaUIConfig {
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+    /**
+     * The switch for the function screen tips display in the formula editor.
+     * @default true
+     */
+    functionScreenTips?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsFormulaUIConfig = {};

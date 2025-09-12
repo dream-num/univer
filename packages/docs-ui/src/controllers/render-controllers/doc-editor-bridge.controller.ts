@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { checkForSubstrings, Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { checkForSubstrings, Disposable, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent } from 'rxjs';
@@ -124,7 +124,14 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
 
                 const focusEditor = this._editorService.getFocusEditor();
 
-                if (editor == null || editor.isSheetEditor() || (focusEditor && focusEditor.getEditorId() === unitId)) {
+                const docSkeleton = this._getEditorSkeleton();
+                if (!docSkeleton) {
+                    return;
+                }
+
+                docSkeleton.resetInitialWidth();
+
+                if (editor == null || !docSkeleton || editor.isSheetEditor() || (focusEditor && focusEditor.getEditorId() === unitId)) {
                     return;
                 }
 
@@ -208,5 +215,9 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                 }
             })
         );
+    }
+
+    private _getEditorSkeleton() {
+        return this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
     }
 }

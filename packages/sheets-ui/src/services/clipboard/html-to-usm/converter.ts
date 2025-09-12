@@ -474,7 +474,7 @@ export class HtmlToUSMService {
          * "<span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1,234.57 "
          */
         if (cell.innerHTML.includes('mso-spacerun:yes')) {
-            const cellText = cell.innerHTML.replace(/<span[^>]*mso-spacerun:yes[^>]*>.*?<\/span>/gi, '');
+            const cellText = cell.innerHTML.replace(/<span[^>]*mso-spacerun:yes[^>]*>[\s\S]*?<\/span>/gi, '');
             const parseInfo = numfmt.parseNumber(cellText);
 
             if (parseInfo && parseInfo.v !== undefined && parseInfo.v !== null) {

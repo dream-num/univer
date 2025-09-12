@@ -80,6 +80,30 @@ export interface IFUniverSheetsUIMixin {
      * @deprecated use `univerAPI.addEvent` as instead.
      */
     getSheetHooks(): FSheetHooks;
+
+    /**
+     * Paste clipboard data or custom data into the active sheet at the current selection position.
+     * @param {string} [htmlContent] - The HTML content from the clipboard or custom data.
+     * @param {string} [textContent] - The plain text content from the clipboard or custom data.
+     * @param {File[]} [files] - The files from the clipboard or custom data.
+     * @return {Promise<boolean>} A promise that resolves to true if the paste operation was successful, otherwise false.
+     * @example
+     * ```typescript
+     * // Listen for the paste event and call the pasteIntoSheet method
+     * document.addEventListener('paste', async (event) => {
+     *   const htmlContent = event.clipboardData.getData('text/html');
+     *   const textContent = event.clipboardData.getData('text/plain');
+     *   const files = Array.from(event.clipboardData.items)
+     *     .map((item) => item.kind === 'file' ? item.getAsFile() : undefined)
+     *     .filter(Boolean);
+     *   await univerAPI.pasteIntoSheet(htmlContent, textContent, files);
+     * });
+     *
+     * // Or paste custom data
+     * univerAPI.pasteIntoSheet('<b>Bold Text</b>', 'Bold Text');
+     * ```
+     */
+    pasteIntoSheet(htmlContent?: string, textContent?: string, files?: File[]): Promise<boolean>;
 }
 
 export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
@@ -953,6 +977,10 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
      */
     override getSheetHooks(): FSheetHooks {
         return this._injector.createInstance(FSheetHooks);
+    }
+
+    override pasteIntoSheet(htmlContent?: string, textContent?: string, files?: File[]): Promise<boolean> {
+        return this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent, files });
     }
 }
 

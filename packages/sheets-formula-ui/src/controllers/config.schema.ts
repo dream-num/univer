@@ -31,8 +31,8 @@ export interface IUniverSheetsFormulaUIConfig {
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
     /**
-     * Whether to hide the formula search and help popup in the formula editor.
-     * @default false
+     * The switch for the function screen tips display in the formula editor.
+     * @default true
      */
     functionScreenTips?: boolean;
 }

@@ -24,6 +24,8 @@ import {
     Injector,
     IUniverInstanceService,
     ObjectMatrix,
+    RANGE_TYPE,
+    Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -34,9 +36,11 @@ import {
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
+    SelectionMoveType,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
+    SetSelectionsOperation,
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -116,6 +120,7 @@ export class FormatPainterController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, originRange: IRange, format: ISelectionFormatInfo) {
         const sheetInterceptorService = this._sheetInterceptorService;
         const univerInstanceService = this._univerInstanceService;
@@ -150,7 +155,16 @@ export class FormatPainterController extends Disposable {
             });
         });
 
+        // whether the primary cell is in a merge range
+        let primaryCellMergeRows = 0;
+        let primaryCellMergeCols = 0;
+
         merges.forEach((merge) => {
+            if (merge.startRow === startRow && merge.startColumn === startColumn) {
+                primaryCellMergeRows = merge.endRow - merge.startRow;
+                primaryCellMergeCols = merge.endColumn - merge.startColumn;
+            }
+
             const relatedRange: IRange = {
                 startRow: merge.startRow - startRow,
                 startColumn: merge.startColumn - startColumn,
@@ -207,47 +221,83 @@ export class FormatPainterController extends Disposable {
             params: { ...setRangeValuesMutationParams, range: currentSelections },
         });
 
-        // handle merge
-        const ranges = getAddMergeMutationRangeByType(mergeRanges);
-
         const mergeRedos: IMutationInfo[] = [];
         const mergeUndos: IMutationInfo[] = [];
-
-        // First we should check if there are values in the going-to-be-merged cells.
         const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
-        const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
 
-        // prepare redo mutations
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
-        };
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
-        };
-        mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-        mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
+        // handle merge
+        if (mergeRanges.length > 0) {
+            const ranges = getAddMergeMutationRangeByType(mergeRanges);
 
-        // prepare undo mutations
-        const undoRemoveMergeMutationParams = this._injector.invoke(
-            RemoveMergeUndoMutationFactory,
-            removeMergeMutationParams
-        );
-        const undoMutationParams = this._injector.invoke(
-            AddMergeUndoMutationFactory,
-            addMergeMutationParams
-        );
-        mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
-        mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+            // First we should check if there are values in the going-to-be-merged cells.
 
-        // add set range values mutations to undo redo mutations
-        if (willRemoveSomeCell) {
-            const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
-            mergeRedos.unshift(...data.redos);
-            mergeUndos.push(...data.undos);
+            const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
+
+            // prepare redo mutations
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges,
+            };
+            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges,
+            };
+            mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+            mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
+
+            // prepare undo mutations
+            const undoRemoveMergeMutationParams = this._injector.invoke(
+                RemoveMergeUndoMutationFactory,
+                removeMergeMutationParams
+            );
+            const undoMutationParams = this._injector.invoke(
+                AddMergeUndoMutationFactory,
+                addMergeMutationParams
+            );
+            mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
+            mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+
+            // add set range values mutations to undo redo mutations
+            if (willRemoveSomeCell) {
+                const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
+                mergeRedos.unshift(...data.redos);
+                mergeUndos.push(...data.undos);
+            }
+        }
+
+        // if the range changed, need to reset selections
+        if (!Rectangle.equals(range, originRange)) {
+            const primary = {
+                actualRow: range.startRow,
+                actualColumn: range.startColumn,
+                rangeType: RANGE_TYPE.NORMAL,
+                isMerged: primaryCellMergeRows > 0 || primaryCellMergeCols > 0,
+                isMergedMainCell: false,
+                startRow: range.startRow,
+                startColumn: range.startColumn,
+                endRow: range.startRow + primaryCellMergeRows,
+                endColumn: range.startColumn + primaryCellMergeCols,
+            };
+            mergeRedos.push({
+                id: SetSelectionsOperation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    type: SelectionMoveType.ONLY_SET,
+                    selections: [{ range, primary, style: null }],
+                },
+            });
+            mergeUndos.unshift({
+                id: SetSelectionsOperation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    type: SelectionMoveType.ONLY_SET,
+                    selections: [{ range: originRange, primary, style: null }],
+                },
+            });
         }
 
         return {

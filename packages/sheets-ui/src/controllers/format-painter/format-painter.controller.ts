@@ -223,14 +223,13 @@ export class FormatPainterController extends Disposable {
 
         const mergeRedos: IMutationInfo[] = [];
         const mergeUndos: IMutationInfo[] = [];
-        const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
 
         // handle merge
         if (mergeRanges.length > 0) {
             const ranges = getAddMergeMutationRangeByType(mergeRanges);
 
             // First we should check if there are values in the going-to-be-merged cells.
-
+            const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
             const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
 
             // prepare redo mutations

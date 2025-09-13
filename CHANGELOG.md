@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.10.8](https://github.com/dream-num/univer/compare/v0.10.7...v0.10.8) (2025-09-13)
+
+
+### Bug Fixes
+
+* **docs-ui:** active bg color ([#5834](https://github.com/dream-num/univer/issues/5834)) ([909a2b8](https://github.com/dream-num/univer/commit/909a2b8e4d6ef61e19f91fe0e28d33fae64c36c9))
+* **docs-ui:** active text color in docs ([#5823](https://github.com/dream-num/univer/issues/5823)) ([bece66c](https://github.com/dream-num/univer/commit/bece66c2d724eebacc2299ccd126ad8f11ed0747))
+* **drawing:** fix sheets drawing transform when insert rows, columns, etc. ([#5833](https://github.com/dream-num/univer/issues/5833)) ([cf35a85](https://github.com/dream-num/univer/commit/cf35a85815ac2af624d903012104465bfead2d6c))
+* **engine-render:** fix sheets print issue ([#5822](https://github.com/dream-num/univer/issues/5822)) ([3bd71cd](https://github.com/dream-num/univer/commit/3bd71cdfc6b4ed471c5d4f57d221f4c477b4285c))
+* fix number format cell values ​​copied from excel with forced spaces and line break ([#5848](https://github.com/dream-num/univer/issues/5848)) ([f9a772b](https://github.com/dream-num/univer/commit/f9a772bb48b2c4f8e2b30a8c096ec779c5f7a626))
+* **render:** fix horizontal alignment error ([#5837](https://github.com/dream-num/univer/issues/5837)) ([bd4661e](https://github.com/dream-num/univer/commit/bd4661edaf5259be9279d4e6a3a6727e7ed46aeb))
+* **render:** fix the issue of value rendering misalignment when hiding the first row of merged cells ([#5844](https://github.com/dream-num/univer/issues/5844)) ([39ea6ce](https://github.com/dream-num/univer/commit/39ea6cebaa6025aa4989c392c05b8859e4a41f6a))
+* **sheets-ui:** set bg active color in colorPicker & change deprecated method ([#5827](https://github.com/dream-num/univer/issues/5827)) ([0d41cc2](https://github.com/dream-num/univer/commit/0d41cc207cfcac2b71607ecb05df3f25bc81e678))
+* **sheets:** active current font color ([#5817](https://github.com/dream-num/univer/issues/5817)) ([c2b427a](https://github.com/dream-num/univer/commit/c2b427a49cfb6c4471a9fe7987df475d0a4c47ef))
+* **sheets:** functionNode not exist ([#5836](https://github.com/dream-num/univer/issues/5836)) ([d44d77c](https://github.com/dream-num/univer/commit/d44d77c33b70d552d0de67a4b9ee8305611232ea))
+
+
+### Features
+
+* add `functionScreenTips` config to switch the function screen tips display in the formula editor ([#5838](https://github.com/dream-num/univer/issues/5838)) ([a85deaa](https://github.com/dream-num/univer/commit/a85deaa901f89ab025ca6be48aff79e3f6332318))
+* add `univerAPI.pasteIntoSheet` api ([#5847](https://github.com/dream-num/univer/issues/5847)) ([3503477](https://github.com/dream-num/univer/commit/3503477ad16df05f292cc199a7093cd8f8bbd27d))
+
 ## [0.10.7](https://github.com/dream-num/univer/compare/v0.10.6...v0.10.7) (2025-09-06)
 
 

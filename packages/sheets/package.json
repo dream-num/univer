@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.10.7",
+    "version": "0.10.8",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",

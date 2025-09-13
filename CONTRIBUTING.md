@@ -12,7 +12,7 @@ If you encounter any issues while using Univer, you can seek help in the followi
 
 - [Discord community](https://discord.gg/z3NKNT6D2f)
 - [GitHub Discussions](https://github.com/dream-num/univer/discussions)
-- Join the Univer Chinese community (please scan the QR code [here](https://univer.ai/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
+- Join the Univer Chinese community (please scan the QR code [here](https://univer.ai/contact))
 
 ## Reporting Issues
 
@@ -52,7 +52,7 @@ pnpm dev
 
 ### Architecture
 
-Please refer to [Architecture](https://univer.ai/guides/sheet/architecture/univer), and also [ISOMORPHIC.md](./docs/ISOMORPHIC.md) for more guidance on how to set up plugins.
+Please refer to [Architecture](https://docs.univer.ai/guides/recipes/architecture/univer), and also [ISOMORPHIC.md](./docs/ISOMORPHIC.md) for more guidance on how to set up plugins.
 
 ### Source code organization
 

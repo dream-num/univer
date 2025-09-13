@@ -122,7 +122,7 @@ Univer 内置多种语言支持，包括：
 
 其中 `zh-CN` 和 `en-US` 由官方支持，其余为社区贡献。
 
-你可以通过[自定义语言包](https://univer.ai/zh-CN/guides/sheet/getting-started/i18n#%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80%E5%8C%85)来添加你想要的语言。也可以参考[贡献指南](/CONTRIBUTING.md)来帮助我们添加新的语言支持。
+你可以通过[自定义语言包](https://docs.univer.ai/guides/sheets/getting-started/i18n#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80%E5%8C%85)来添加你想要的语言。也可以参考[贡献指南](/CONTRIBUTING.md)来帮助我们添加新的语言支持。
 
 ## 👾 在线示例
 
@@ -130,7 +130,7 @@ Univer 内置多种语言支持，包括：
 
 [![][examples-preview-biaoda]][examples-link-biaoda]
 
-你可以在 [Univer Examples](https://univer.ai/examples) 中找到所有的示例。
+你可以在 [Univer Examples](https://docs.univer.ai/showcase) 中找到所有的示例。
 
 | **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
 | :---: | :---: | :---: |

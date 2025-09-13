@@ -122,7 +122,7 @@ Univer supports multiple languages, including:
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 
-You can add the language you want by [Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
+You can add the language you want by [Using Custom Locales](https://docs.univer.ai/guides/sheets/getting-started/i18n#custom-language-packs). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
 
 ## 👾 Showcase
 
@@ -130,7 +130,7 @@ Embed Univer in AI products as a data presentation tool.
 
 [![][examples-preview-capalyze]][examples-link-capalyze]
 
-You can find all the examples in the [Univer Examples](https://univer.ai/examples).
+You can find all the examples in the [Univer Examples](https://docs.univer.ai/showcase).
 
 | **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
 | :---: | :---: | :---: |

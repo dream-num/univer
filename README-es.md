@@ -122,7 +122,7 @@ Univer soporta múltiples idiomas, incluyendo:
 
 `zh-CN` y `en-US` son soportados oficialmente, los demás son contribuciones de la comunidad.
 
-Puedes añadir el idioma que desees siguiendo la [guía de personalización de idiomas](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). También puedes ayudarnos a añadir nuevos idiomas consultando la [guía de contribución](./CONTRIBUTING.md).
+Puedes añadir el idioma que desees siguiendo la [guía de personalización de idiomas](https://docs.univer.ai/guides/sheets/getting-started/i18n#custom-language-packs). También puedes ayudarnos a añadir nuevos idiomas consultando la [guía de contribución](./CONTRIBUTING.md).
 
 ## 👾 Ejemplos
 
@@ -130,7 +130,7 @@ Integra Univer en productos de IA como herramienta de presentación de datos.
 
 [![][examples-preview-capalyze]][examples-link-capalyze]
 
-Puedes encontrar todos los ejemplos en [Univer Examples](https://univer.ai/examples).
+Puedes encontrar todos los ejemplos en [Univer Examples](https://docs.univer.ai/showcase).
 
 | **📊 Hojas de cálculo** | **📊 Multi-instancia** | **📊 Uniscript** |
 | :---: | :---: | :---: |

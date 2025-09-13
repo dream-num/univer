@@ -24,7 +24,7 @@
   * Internationalization
   * Resource management
 
-For more information about `@univerjs/core`'s API, please refer to the [API documentation](https://univer.ai/typedoc/@univerjs/core/README).
+For more information about `@univerjs/core`'s API, please refer to the [API documentation](https://reference.univer.ai/).
 
 ## Usage
 
@@ -55,10 +55,10 @@ new Univer({
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| theme | [Theme](https://univer.ai/guides/sheet/advanced/custom-theme) | - | The theme of the application, which is used to control the appearance of the application. |
-| locale | [LocaleType](https://univer.ai/typedoc/@univerjs/core/enumerations/LocaleType) | `LocaleType.ZH_CN` | The locale of the application. The default value is `LocaleType.ZH_CN`.
-| locales | [ILocales](https://univer.ai/typedoc/@univerjs/core/interfaces/ILocales) | - | The supported locales of the application. By default, the application supports Chinese.
-| logLevel | [LogLevel](https://univer.ai/typedoc/@univerjs/core/enumerations/LogLevel) | `LogLevel.SILENT` | The log level of the application. |
+| theme | [Theme](https://docs.univer.ai/guides/sheets/ui/themes) | - | The theme of the application, which is used to control the appearance of the application. |
+| locale | [LocaleType](https://docs.univer.ai/guides/sheets/getting-started/i18n) | `LocaleType.ZH_CN` | The locale of the application. The default value is `LocaleType.ZH_CN`.
+| locales | [ILocales](https://docs.univer.ai/guides/sheets/getting-started/i18n) | - | The supported locales of the application. By default, the application supports Chinese.
+| logLevel | [LogLevel](https://github.com/dream-num/univer/blob/dev/packages/core/src/services/log/log.service.ts#L22) | `LogLevel.SILENT` | The log level of the application. |
 
 <!-- Links -->
 [npm-version-shield]: https://img.shields.io/npm/v/@univerjs/core?style=flat-square

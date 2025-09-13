@@ -140,7 +140,7 @@ export interface IFUniverUIMixin {
      * @returns the {@link FMenu} object
      * @example
      * ```ts
-     * // Univer Icon can be viewed at https://univer.ai/en-US/icons
+     * // Univer Icon can be viewed at https://docs.univer.ai/icons
      * import { SmileIcon } from '@univerjs/icons'
      *
      * // Create a custom menu with an univer icon

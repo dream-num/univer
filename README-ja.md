@@ -122,7 +122,7 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 
 `zh-CN` と `en-US` は公式サポート言語であり、その他の言語はコミュニティによって提供されています。
 
-[Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales)を使用して、追加の言語を追加することができます。また、新しい言語サポートを追加するために[貢献ガイド](/CONTRIBUTING.md)を参照してください。
+[Using Custom Locales](https://docs.univer.ai/guides/sheets/getting-started/i18n#%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E8%A8%80%E8%AA%9E%E3%83%91%E3%83%83%E3%82%AF)を使用して、追加の言語を追加することができます。また、新しい言語サポートを追加するために[貢献ガイド](/CONTRIBUTING.md)を参照してください。
 
 ## 👾 ショーケース
 
@@ -130,7 +130,7 @@ AI 製品に Univer を組み込み、データ表示ツールとして活用し
 
 [![][examples-preview-capalyze]][examples-link-capalyze]
 
-[Univer Examples](https://univer.ai/examples) ですべての例を見つけることができます。
+[Univer Examples](https://docs.univer.ai/showcase) ですべての例を見つけることができます。
 
 | **📊 Spreadsheets** | **📊 Multi-instance** | **📊 Uniscript** |
 | :---: | :---: | :---: |

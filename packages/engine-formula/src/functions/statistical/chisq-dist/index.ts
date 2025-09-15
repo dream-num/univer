@@ -66,7 +66,7 @@ export class ChisqDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(xObject, degFreedomObject, cumulativeObject);
+            return this._handleSingleObject(xObject, degFreedomObject, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class ChisqDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         degFreedomObject: BaseValueObject,
         cumulativeObject: BaseValueObject

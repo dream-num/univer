@@ -66,7 +66,7 @@ export class Lognormdist extends BaseFunction {
                 return standardDevObject;
             }
 
-            return this._handleSignleObject(xObject, meanObject, standardDevObject);
+            return this._handleSingleObject(xObject, meanObject, standardDevObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class Lognormdist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         meanObject: BaseValueObject,
         standardDevObject: BaseValueObject

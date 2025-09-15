@@ -340,6 +340,15 @@ describe('Test inverted index cache', () => {
 
             // now result should be 1
             expect(getCellValue(30, 3)).toBe(1);
+
+            const result = calculate('=IF((H5:H9=0.03)+(H5:H9=0.01), 0.01, H5:H9)');
+            expect(result).toEqual([
+                [0],
+                [0],
+                [0],
+                [0],
+                [0],
+            ]);
         });
 
         it('Sumif formula test', () => {

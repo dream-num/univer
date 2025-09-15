@@ -97,7 +97,7 @@ export class TTest extends BaseFunction {
                 return array2Values as ErrorValueObject;
             }
 
-            return this._handleSignleObject(
+            return this._handleSingleObject(
                 (typeValue === 1 ? array1Values_sp : array1Values) as number[],
                 (typeValue === 1 ? array2Values_sp : array2Values) as number[],
                 tailsValue,
@@ -112,7 +112,7 @@ export class TTest extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         array1Values: number[],
         array2Values: number[],
         tails: number,

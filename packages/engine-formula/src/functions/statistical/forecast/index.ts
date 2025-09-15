@@ -48,14 +48,14 @@ export class Forecast extends BaseFunction {
 
         if (x.isArray()) {
             return (x as ArrayValueObject).mapValue(
-                (xObject) => this._handleSignleObject(xObject, _knownYs, _knownXs, knownYsRowCount, knownYsColumnCount, knownXsRowCount, knownXsColumnCount)
+                (xObject) => this._handleSingleObject(xObject, _knownYs, _knownXs, knownYsRowCount, knownYsColumnCount, knownXsRowCount, knownXsColumnCount)
             );
         }
 
-        return this._handleSignleObject(x, _knownYs, _knownXs, knownYsRowCount, knownYsColumnCount, knownXsRowCount, knownXsColumnCount);
+        return this._handleSingleObject(x, _knownYs, _knownXs, knownYsRowCount, knownYsColumnCount, knownXsRowCount, knownXsColumnCount);
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         x: BaseValueObject,
         knownYs: BaseValueObject,
         knownXs: BaseValueObject,

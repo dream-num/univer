@@ -75,7 +75,7 @@ export class FDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(xObject, degFreedom1Object, degFreedom2Object, cumulativeObject);
+            return this._handleSingleObject(xObject, degFreedom1Object, degFreedom2Object, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,7 +85,7 @@ export class FDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         degFreedom1Object: BaseValueObject,
         degFreedom2Object: BaseValueObject,

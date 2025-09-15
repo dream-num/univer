@@ -66,7 +66,7 @@ export class GammaInv extends BaseFunction {
                 return betaObject;
             }
 
-            return this._handleSignleObject(probabilityObject, alphaObject, betaObject);
+            return this._handleSingleObject(probabilityObject, alphaObject, betaObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class GammaInv extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         probabilityObject: BaseValueObject,
         alphaObject: BaseValueObject,
         betaObject: BaseValueObject

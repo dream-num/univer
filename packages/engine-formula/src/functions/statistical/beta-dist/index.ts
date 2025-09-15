@@ -80,7 +80,7 @@ export class BetaDist extends BaseFunction {
             const AObject = AArray.get(rowIndex, columnIndex) as BaseValueObject;
             const BObject = BArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            return this._handleSignleObject(xObject, alphaObject, betaObject, cumulativeObject, AObject, BObject);
+            return this._handleSingleObject(xObject, alphaObject, betaObject, cumulativeObject, AObject, BObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -90,7 +90,7 @@ export class BetaDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         alphaObject: BaseValueObject,
         betaObject: BaseValueObject,

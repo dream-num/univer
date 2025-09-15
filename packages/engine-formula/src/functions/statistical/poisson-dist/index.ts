@@ -66,7 +66,7 @@ export class PoissonDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(xObject, meanObject, cumulativeObject);
+            return this._handleSingleObject(xObject, meanObject, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class PoissonDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         meanObject: BaseValueObject,
         cumulativeObject: BaseValueObject

@@ -57,7 +57,7 @@ export class ChisqDistRt extends BaseFunction {
                 return degFreedomObject;
             }
 
-            return this._handleSignleObject(xObject, degFreedomObject);
+            return this._handleSingleObject(xObject, degFreedomObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -67,7 +67,7 @@ export class ChisqDistRt extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         degFreedomObject: BaseValueObject
     ): BaseValueObject {

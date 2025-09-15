@@ -75,7 +75,7 @@ export class BetaInv extends BaseFunction {
             const AObject = AArray.get(rowIndex, columnIndex) as BaseValueObject;
             const BObject = BArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            return this._handleSignleObject(probabilityObject, alphaObject, betaObject, AObject, BObject);
+            return this._handleSingleObject(probabilityObject, alphaObject, betaObject, AObject, BObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,7 +85,7 @@ export class BetaInv extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         probabilityObject: BaseValueObject,
         alphaObject: BaseValueObject,
         betaObject: BaseValueObject,

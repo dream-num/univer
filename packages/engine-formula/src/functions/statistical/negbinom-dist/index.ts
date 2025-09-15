@@ -75,7 +75,7 @@ export class NegbinomDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(numberFObject, numberSObject, probabilitySObject, cumulativeObject);
+            return this._handleSingleObject(numberFObject, numberSObject, probabilitySObject, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,7 +85,7 @@ export class NegbinomDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         numberFObject: BaseValueObject,
         numberSObject: BaseValueObject,
         probabilitySObject: BaseValueObject,

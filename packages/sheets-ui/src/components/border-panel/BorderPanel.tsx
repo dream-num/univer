@@ -69,6 +69,10 @@ const BORDER_SIZE_CHILDREN = [
         label: BorderStyleTypes.THICK,
         value: BorderStyleTypes.THICK,
     },
+    {
+        label: BorderStyleTypes.DOUBLE,
+        value: BorderStyleTypes.DOUBLE,
+    },
 ];
 
 export function BorderPanel(props: IBorderPanelProps) {

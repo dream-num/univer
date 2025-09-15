@@ -163,6 +163,15 @@ export class Border extends SheetExtension {
                 endX,
                 endY,
             });
+
+            if (style === BorderStyleTypes.DOUBLE) {
+                drawLineByBorderType(ctx, type, (lineWidth - 1) / 2 / precisionScale, {
+                    startX: startX + 2,
+                    startY: startY + 2,
+                    endX: endX - 2,
+                    endY: endY - 2,
+                });
+            }
         }
     }
 

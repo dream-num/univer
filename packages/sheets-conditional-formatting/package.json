@@ -83,7 +83,7 @@
         "@univerjs/icons-svg": "^0.4.8",
         "rxjs": "^7.8.2",
         "typescript": "^5.9.2",
-        "vite": "^7.1.4",
+        "vite": "^7.1.5",
         "vitest": "^3.2.4"
     }
 }

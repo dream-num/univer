@@ -57,6 +57,6 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "vite": "^7.1.4"
+        "vite": "^7.1.5"
     }
 }

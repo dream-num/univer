@@ -246,8 +246,10 @@ export class Font extends SheetExtension {
 
         if (notInMergeRange) {
             const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            if (!visibleRow) return true;
+
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
-            if (!visibleRow || !visibleCol) return true;
+            if (!visibleCol) return true;
         } else {
             let isAllRowHidden = true;
 

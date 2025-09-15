@@ -576,6 +576,11 @@ function getFilterValueForConditionalFiltering(worksheet: Worksheet, row: number
         return rawCell.v as number;
     }
 
+    // if the type is number, no matter what the raw value is, we should always return a number.
+    if (interceptedCell.t === CellValueType.NUMBER) {
+        return Number(rawCell.v);
+    }
+
     return extractFilterValueFromCell(rawCell);
 }
 

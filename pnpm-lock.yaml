@@ -1975,8 +1975,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/icons-svg':
-        specifier: ^0.4.7
-        version: 0.4.7
+        specifier: ^0.4.8
+        version: 0.4.8
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -5900,9 +5900,6 @@ packages:
   '@typescript-eslint/visitor-keys@8.42.0':
     resolution: {integrity: sha512-3WbiuzoEowaEn8RSnhJBrxSwX8ULYE9CXaPepS2C2W3NSA5NNIvBaslpBSBElPq0UGr0xVJlXFWOAKIkyylydQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@univerjs/icons-svg@0.4.7':
-    resolution: {integrity: sha512-VPLr/4CyxOBZSlxxFbccpB1MJy2GD0TNnzFAFOwxhCyioQeWERi8eT/JfVnPsaFoDTM/Mf/FE/1zfnhr/d8SdA==}
 
   '@univerjs/icons-svg@0.4.8':
     resolution: {integrity: sha512-fhGeOfwsOAJ5rAh/iyfl6JlAFTdtsUITP/ptzLgSxKMv/z2TLUTh3ujVlG0+FT/51F3V0PGMcnPs/4TlrUeA3Q==}
@@ -13735,8 +13732,6 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.42.0
       eslint-visitor-keys: 4.2.1
-
-  '@univerjs/icons-svg@0.4.7': {}
 
   '@univerjs/icons-svg@0.4.8': {}
 

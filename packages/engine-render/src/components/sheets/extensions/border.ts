@@ -106,8 +106,10 @@ export class Border extends SheetExtension {
 
         if (!isMerged) {
             const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            if (!visibleRow) return true;
+
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
-            if (!visibleRow || !visibleCol) return true;
+            if (!visibleCol) return true;
         }
 
         if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {

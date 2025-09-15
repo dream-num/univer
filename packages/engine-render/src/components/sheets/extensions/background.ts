@@ -187,10 +187,38 @@ export class Background extends SheetExtension {
             return true;
         }
 
-        // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
-        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
-        const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
-        if (!visibleRow || !visibleCol) return true;
+        if (!isMerged && !isMergedMainCell) {
+            // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
+            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            if (!visibleRow) return true;
+
+            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+            if (!visibleCol) return true;
+        } else {
+            let isAllRowHidden = true;
+
+            for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
+                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r);
+                if (visibleRow) {
+                    isAllRowHidden = false;
+                    break;
+                }
+            }
+
+            if (isAllRowHidden) return true;
+
+            let isAllColHidden = true;
+
+            for (let c = mergeInfo.startColumn; c <= mergeInfo.endColumn; c++) {
+                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(c);
+                if (visibleCol) {
+                    isAllColHidden = false;
+                    break;
+                }
+            }
+
+            if (isAllColHidden) return true;
+        }
 
         // precise is a workaround for windows, macOS does not have this issue.
         const startXPrecise = fixLineWidthByScale(startX, scaleX);

@@ -124,6 +124,8 @@ export class DocumentSkeleton extends Skeleton {
 
     private _iteratorCount = 0;
 
+    private _initialWidth = 0;
+
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService
@@ -140,6 +142,7 @@ export class DocumentSkeleton extends Skeleton {
         this._skeletonData = null;
         this._findLiquid = null as unknown as Liquid;
         this._docViewModel.dispose();
+        this._initialWidth = 0;
     }
 
     getViewModel() {
@@ -167,16 +170,19 @@ export class DocumentSkeleton extends Skeleton {
         return this._skeletonData;
     }
 
+    resetInitialWidth() {
+        this._initialWidth = 0;
+    }
+
     getActualSize() {
         const skeletonData = this.getSkeletonData();
-
-        let actualWidth = Number.NEGATIVE_INFINITY;
+        let actualWidth = 0;
         let actualHeight = 0;
 
         skeletonData?.pages.forEach((page) => {
             const { width, height } = page;
-            actualWidth = Math.max(actualWidth, width);
-
+            actualWidth = Math.max(this._initialWidth, width);
+            this._initialWidth = actualWidth;
             actualHeight += height;
         });
 
@@ -1165,7 +1171,6 @@ export class DocumentSkeleton extends Skeleton {
         // TODO: 10 is too small?
         if (ctx.isDirty && this._iteratorCount < 10) {
             this._iteratorCount++;
-
             resetContext(ctx);
             return this._createSkeleton(ctx, _bounds);
         } else {

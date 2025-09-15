@@ -74,7 +74,7 @@ export class Prob extends BaseFunction {
                 return errorObject as ErrorValueObject;
             }
 
-            return this._handleSignleObject(xRangeValues as number[], probRangeValues as number[], lowerLimitObject, upperLimitObject);
+            return this._handleSingleObject(xRangeValues as number[], probRangeValues as number[], lowerLimitObject, upperLimitObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -84,7 +84,7 @@ export class Prob extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xRangeValues: number[],
         probRangeValues: number[],
         lowerLimit: BaseValueObject,

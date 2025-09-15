@@ -81,7 +81,7 @@ export class BinomDistRange extends BaseFunction {
                 return numberS2Object;
             }
 
-            return this._handleSignleObject(trialsObject, probabilitySObject, numberSObject, numberS2Object);
+            return this._handleSingleObject(trialsObject, probabilitySObject, numberSObject, numberS2Object);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -91,7 +91,7 @@ export class BinomDistRange extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         trialsObject: BaseValueObject,
         probabilitySObject: BaseValueObject,
         numberSObject: BaseValueObject,

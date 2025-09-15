@@ -66,7 +66,7 @@ export class FDistRt extends BaseFunction {
                 return degFreedom2Object;
             }
 
-            return this._handleSignleObject(xObject, degFreedom1Object, degFreedom2Object);
+            return this._handleSingleObject(xObject, degFreedom1Object, degFreedom2Object);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class FDistRt extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         degFreedom1Object: BaseValueObject,
         degFreedom2Object: BaseValueObject

@@ -75,7 +75,7 @@ export class Hypgeomdist extends BaseFunction {
                 return numberPopObject;
             }
 
-            return this._handleSignleObject(sampleSObject, numberSampleObject, populationSObject, numberPopObject);
+            return this._handleSingleObject(sampleSObject, numberSampleObject, populationSObject, numberPopObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,7 +85,7 @@ export class Hypgeomdist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         sampleSObject: BaseValueObject,
         numberSampleObject: BaseValueObject,
         populationSObject: BaseValueObject,

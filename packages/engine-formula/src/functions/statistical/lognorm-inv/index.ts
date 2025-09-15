@@ -66,7 +66,7 @@ export class LognormInv extends BaseFunction {
                 return standardDevObject;
             }
 
-            return this._handleSignleObject(probabilityObject, meanObject, standardDevObject);
+            return this._handleSingleObject(probabilityObject, meanObject, standardDevObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class LognormInv extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         probabilityObject: BaseValueObject,
         meanObject: BaseValueObject,
         standardDevObject: BaseValueObject

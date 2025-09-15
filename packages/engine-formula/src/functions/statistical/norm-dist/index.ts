@@ -75,7 +75,7 @@ export class NormDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(xObject, meanObject, standardDevObject, cumulativeObject);
+            return this._handleSingleObject(xObject, meanObject, standardDevObject, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,7 +85,7 @@ export class NormDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         meanObject: BaseValueObject,
         standardDevObject: BaseValueObject,

@@ -75,7 +75,7 @@ export class BinomDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(numberSObject, trialsObject, probabilitySObject, cumulativeObject);
+            return this._handleSingleObject(numberSObject, trialsObject, probabilitySObject, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -85,7 +85,7 @@ export class BinomDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         numberSObject: BaseValueObject,
         trialsObject: BaseValueObject,
         probabilitySObject: BaseValueObject,

@@ -66,7 +66,7 @@ export class Tdist extends BaseFunction {
                 return tailsObject;
             }
 
-            return this._handleSignleObject(xObject, degFreedomObject, tailsObject);
+            return this._handleSingleObject(xObject, degFreedomObject, tailsObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class Tdist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         degFreedomObject: BaseValueObject,
         tailsObject: BaseValueObject

@@ -30,7 +30,7 @@ export class NormSInv extends BaseFunction {
 
     override calculate(probability: BaseValueObject): BaseValueObject {
         if (probability.isArray()) {
-            const resultArray = (probability as ArrayValueObject).mapValue((probabilityObject) => this._handleSignleObject(probabilityObject));
+            const resultArray = (probability as ArrayValueObject).mapValue((probabilityObject) => this._handleSingleObject(probabilityObject));
 
             if ((probability as ArrayValueObject).getRowCount() === 1 && (probability as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -39,10 +39,10 @@ export class NormSInv extends BaseFunction {
             return resultArray;
         }
 
-        return this._handleSignleObject(probability);
+        return this._handleSingleObject(probability);
     }
 
-    private _handleSignleObject(probabilityObject: BaseValueObject): BaseValueObject {
+    private _handleSingleObject(probabilityObject: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(probabilityObject);
 
         if (isError) {

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { normalCDF } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Normsdist extends BaseFunction {
     override minParams = 1;
@@ -28,7 +28,7 @@ export class Normsdist extends BaseFunction {
 
     override calculate(z: BaseValueObject): BaseValueObject {
         if (z.isArray()) {
-            const resultArray = (z as ArrayValueObject).mapValue((zObject) => this._handleSignleObject(zObject));
+            const resultArray = (z as ArrayValueObject).mapValue((zObject) => this._handleSingleObject(zObject));
 
             if ((z as ArrayValueObject).getRowCount() === 1 && (z as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -37,10 +37,10 @@ export class Normsdist extends BaseFunction {
             return resultArray;
         }
 
-        return this._handleSignleObject(z);
+        return this._handleSingleObject(z);
     }
 
-    private _handleSignleObject(zObject: BaseValueObject): BaseValueObject {
+    private _handleSingleObject(zObject: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(zObject);
 
         if (isError) {

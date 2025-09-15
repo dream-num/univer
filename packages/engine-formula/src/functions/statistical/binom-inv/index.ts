@@ -66,7 +66,7 @@ export class BinomInv extends BaseFunction {
                 return alphaObject;
             }
 
-            return this._handleSignleObject(trialsObject, probabilitySObject, alphaObject);
+            return this._handleSingleObject(trialsObject, probabilitySObject, alphaObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class BinomInv extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         trialsObject: BaseValueObject,
         probabilitySObject: BaseValueObject,
         alphaObject: BaseValueObject

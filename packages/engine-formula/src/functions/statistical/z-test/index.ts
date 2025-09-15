@@ -69,7 +69,7 @@ export class ZTest extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
-            return this._handleSignleObject(arrayValues as number[], xObject, sigmaObject);
+            return this._handleSingleObject(arrayValues as number[], xObject, sigmaObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -79,7 +79,7 @@ export class ZTest extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         arrayValues: number[],
         x: BaseValueObject,
         sigma: BaseValueObject | undefined

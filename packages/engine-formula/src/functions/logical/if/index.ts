@@ -19,7 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NullValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
@@ -28,15 +28,19 @@ export class If extends BaseFunction {
     override maxParams = 3;
 
     override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
-        // get single value object
-        const _logicalTest = this._getSingleValueObject(logicalTest);
+        let _logicalTest = logicalTest;
 
-        if (_logicalTest.isError()) {
-            return _logicalTest;
+        if (logicalTest.isArray()) {
+            const rowCount = (logicalTest as ArrayValueObject).getRowCount();
+            const columnCount = (logicalTest as ArrayValueObject).getColumnCount();
+
+            if (rowCount === 1 && columnCount === 1) {
+                _logicalTest = (logicalTest as ArrayValueObject).get(0, 0) as BaseValueObject;
+            }
         }
 
         if (!_logicalTest.isArray()) {
-            return _logicalTest.getValue() ? valueIfTrue : valueIfFalse;
+            return this._handleSingleObject(_logicalTest, valueIfTrue, valueIfFalse);
         }
 
         // get max row length
@@ -53,49 +57,32 @@ export class If extends BaseFunction {
             valueIfFalse.isArray() ? (valueIfFalse as ArrayValueObject).getColumnCount() : 1
         );
 
-        const logicalTestArray = expandArrayValueObject(maxRowLength, maxColumnLength, _logicalTest);
+        const logicalTestArray = expandArrayValueObject(maxRowLength, maxColumnLength, _logicalTest, ErrorValueObject.create(ErrorType.NA));
         const valueIfTrueArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfTrue, ErrorValueObject.create(ErrorType.NA));
         const valueIfFalseArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfFalse, ErrorValueObject.create(ErrorType.NA));
 
-        return logicalTestArray.map((logicalTestValue, rowIndex, columnIndex) => {
-            if (logicalTestValue.isNull()) {
-                return ErrorValueObject.create(ErrorType.NA);
-            } else {
-                const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex) || NullValueObject.create();
-                const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex) || NullValueObject.create();
+        return logicalTestArray.mapValue((logicalTestValue, rowIndex, columnIndex) => {
+            const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-                return this._calculateSingleCell(logicalTestValue, valueIfTrueValue, valueIfFalseValue);
-            }
+            return this._handleSingleObject(logicalTestValue, valueIfTrueValue, valueIfFalseValue);
         });
     }
 
-    private _getSingleValueObject(valueObject: BaseValueObject) {
-        if (valueObject.isArray() && (valueObject as ArrayValueObject).getRowCount() === 1 && (valueObject as ArrayValueObject).getColumnCount() === 1) {
-            return (valueObject as ArrayValueObject).getFirstCell();
-        }
-        return valueObject;
-    }
-
-    private _calculateSingleCell(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject) {
-        if (logicalTest.isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
+    private _handleSingleObject(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject) {
+        if (logicalTest.isError()) {
+            return logicalTest;
         }
 
         const logicalTestValue = logicalTest.getValue();
 
         // true or non-zero
-        if (logicalTestValue) {
-            if (valueIfTrue.isNull()) {
-                return ErrorValueObject.create(ErrorType.NA);
-            }
-
-            return valueIfTrue;
-        }
-
-        if (valueIfFalse.isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        return valueIfFalse;
+        return logicalTestValue
+            ? valueIfTrue.isNull()
+                ? NumberValueObject.create(0)
+                : valueIfTrue
+            : valueIfFalse.isNull()
+                ? NumberValueObject.create(0)
+                : valueIfFalse;
     }
 }

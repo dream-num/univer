@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { If } from '../index';
@@ -499,6 +499,26 @@ describe('Test if function', () => {
                 ['yes1', 'yes2', 'yes3', 'yes4'],
                 ['no1', 'no2', 'no3', '#N/A'],
             ]);
+        });
+
+        it('More test', () => {
+            const logicTest = NullValueObject.create();
+            const valueIfTrue = NumberValueObject.create(1);
+            const valueIfFalse = NumberValueObject.create(2);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            expect(getObjectValue(result)).toBe(2);
+
+            const logicTest2 = BooleanValueObject.create(true);
+            const valueIfTrue2 = NullValueObject.create();
+            const valueIfFalse2 = NumberValueObject.create(2);
+            const result2 = testFunction.calculate(logicTest2, valueIfTrue2, valueIfFalse2);
+            expect(getObjectValue(result2)).toBe(0);
+
+            const logicTest3 = BooleanValueObject.create(false);
+            const valueIfTrue3 = NumberValueObject.create(1);
+            const valueIfFalse3 = NullValueObject.create();
+            const result3 = testFunction.calculate(logicTest3, valueIfTrue3, valueIfFalse3);
+            expect(getObjectValue(result3)).toBe(0);
         });
     });
 });

@@ -66,7 +66,7 @@ export class FInv extends BaseFunction {
                 return degFreedom2Object;
             }
 
-            return this._handleSignleObject(probabilityObject, degFreedom1Object, degFreedom2Object);
+            return this._handleSingleObject(probabilityObject, degFreedom1Object, degFreedom2Object);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -76,7 +76,7 @@ export class FInv extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         probabilityObject: BaseValueObject,
         degFreedom1Object: BaseValueObject,
         degFreedom2Object: BaseValueObject

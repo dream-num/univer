@@ -57,7 +57,7 @@ export class ChisqInvRt extends BaseFunction {
                 return degFreedomObject;
             }
 
-            return this._handleSignleObject(probabilityObject, degFreedomObject);
+            return this._handleSingleObject(probabilityObject, degFreedomObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -67,7 +67,7 @@ export class ChisqInvRt extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         probabilityObject: BaseValueObject,
         degFreedomObject: BaseValueObject
     ): BaseValueObject {

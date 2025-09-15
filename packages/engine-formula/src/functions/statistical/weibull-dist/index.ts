@@ -74,7 +74,7 @@ export class WeibullDist extends BaseFunction {
                 return cumulativeObject;
             }
 
-            return this._handleSignleObject(xObject, alphaObject, betaObject, cumulativeObject);
+            return this._handleSingleObject(xObject, alphaObject, betaObject, cumulativeObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -84,7 +84,7 @@ export class WeibullDist extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSignleObject(
+    private _handleSingleObject(
         xObject: BaseValueObject,
         alphaObject: BaseValueObject,
         betaObject: BaseValueObject,

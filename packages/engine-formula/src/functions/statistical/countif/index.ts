@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -28,29 +29,41 @@ export class Countif extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(range: BaseValueObject, criteria: BaseValueObject) {
-        if (range.isError() || criteria.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override needsReferenceObject = true;
 
-        if (!range.isArray()) {
+    override calculate(range: FunctionVariantType, criteria: FunctionVariantType): BaseValueObject {
+        if (!range.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (criteria.isArray()) {
-            return criteria.mapValue((criteriaItem) => this._handleSingleObject(range, criteriaItem));
+        let _criteria = criteria;
+
+        if (criteria.isReferenceObject()) {
+            _criteria = (criteria as BaseReferenceObject).toArrayValueObject();
         }
 
-        return this._handleSingleObject(range, criteria);
+        if (_criteria.isArray()) {
+            const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(range, criteriaObject));
+
+            if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+                return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+            }
+
+            return resultArray;
+        }
+
+        return this._handleSingleObject(range, _criteria as BaseValueObject);
     }
 
-    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject) {
-        let resultArrayObject = valueObjectCompare(range, criteria);
+    private _handleSingleObject(range: FunctionVariantType, criteria: BaseValueObject): BaseValueObject {
+        const _range = (range as BaseReferenceObject).toArrayValueObject();
+
+        let resultArrayObject = valueObjectCompare(_range, criteria);
 
         // If the condition is a numeric comparison, only numbers are counted, otherwise text is counted.
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteria);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteria);
 
-        const picked = (range as ArrayValueObject).pick(resultArrayObject as ArrayValueObject);
+        const picked = (_range as ArrayValueObject).pick(resultArrayObject as ArrayValueObject);
         return this._countA(picked);
     }
 

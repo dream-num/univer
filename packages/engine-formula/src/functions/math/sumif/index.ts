@@ -31,6 +31,10 @@ export class Sumif extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType, sumRange?: FunctionVariantType): BaseValueObject {
+        if (!range.isReferenceObject() || (sumRange && !sumRange.isReferenceObject())) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         let _criteria = criteria;
 
         if (criteria.isReferenceObject()) {
@@ -51,22 +55,6 @@ export class Sumif extends BaseFunction {
     }
 
     private _handleSingleObject(range: FunctionVariantType, criteria: BaseValueObject, sumRange?: FunctionVariantType): BaseValueObject {
-        if (range.isError()) {
-            return range as ErrorValueObject;
-        }
-
-        if (criteria.isError()) {
-            return criteria;
-        }
-
-        if (sumRange?.isError()) {
-            return sumRange as ErrorValueObject;
-        }
-
-        if (!range.isReferenceObject() || (sumRange && !sumRange.isReferenceObject())) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
         const _range = (range as BaseReferenceObject).toArrayValueObject();
 
         let resultArrayObject = valueObjectCompare(_range, criteria);

@@ -20,6 +20,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
+import { baseValueObjectToArrayValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -32,12 +33,12 @@ export class Xlookup extends BaseFunction {
     // eslint-disable-next-line
     override calculate(
         lookupValue: BaseValueObject,
-        lookupArray: ArrayValueObject,
-        returnArray: ArrayValueObject,
+        lookupArray: BaseValueObject,
+        returnArray: BaseValueObject,
         ifNotFound?: BaseValueObject,
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         let _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
         if (ifNotFound?.isNull()) {
             _ifNotFound = ErrorValueObject.create(ErrorType.NA);
@@ -57,18 +58,10 @@ export class Xlookup extends BaseFunction {
             return lookupValue;
         }
 
-        if (lookupArray.isError() || returnArray.isError()) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
-
-        if (!lookupArray.isArray() || !returnArray.isArray()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const rowCountLookup = lookupArray.getRowCount();
-        const columnCountLookup = lookupArray.getColumnCount();
-        const rowCountReturn = returnArray.getRowCount();
-        const columnCountReturn = returnArray.getColumnCount();
+        const rowCountLookup = lookupArray.isArray() ? (lookupArray as ArrayValueObject).getRowCount() : 1;
+        const columnCountLookup = lookupArray.isArray() ? (lookupArray as ArrayValueObject).getColumnCount() : 1;
+        const rowCountReturn = returnArray.isArray() ? (returnArray as ArrayValueObject).getRowCount() : 1;
+        const columnCountReturn = returnArray.isArray() ? (returnArray as ArrayValueObject).getColumnCount() : 1;
 
         if (
             (rowCountLookup !== 1 && columnCountLookup !== 1) ||
@@ -100,8 +93,8 @@ export class Xlookup extends BaseFunction {
 
         return this._getResult(
             lookupValue,
-            lookupArray,
-            returnArray,
+            baseValueObjectToArrayValueObject(lookupArray),
+            baseValueObjectToArrayValueObject(returnArray),
             _ifNotFound,
             matchModeValue,
             searchModeValue,

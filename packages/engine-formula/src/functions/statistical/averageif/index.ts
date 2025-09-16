@@ -18,7 +18,6 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { createNewArray } from '../../../engine/utils/array-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
 import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -31,105 +30,66 @@ export class Averageif extends BaseFunction {
 
     override needsReferenceObject = true;
 
-    override calculate(range: FunctionVariantType, criteria: FunctionVariantType, averageRange?: FunctionVariantType) {
-        if (range.isError()) {
-            return range;
-        }
-
-        if (criteria.isError()) {
-            return criteria;
-        }
-
-        if (averageRange?.isError()) {
-            return averageRange;
-        }
-
-        let _range = range;
-
-        if (_range.isReferenceObject()) {
-            _range = (_range as BaseReferenceObject).toArrayValueObject();
-        }
-
-        if (!_range.isArray()) {
-            _range = createNewArray([[_range as BaseValueObject]], 1, 1);
+    override calculate(range: FunctionVariantType, criteria: FunctionVariantType, averageRange?: FunctionVariantType): BaseValueObject {
+        if (!range.isReferenceObject() || (averageRange && !averageRange.isReferenceObject())) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         let _criteria = criteria;
 
-        if (_criteria.isReferenceObject()) {
-            _criteria = (_criteria as BaseReferenceObject).toArrayValueObject();
+        if (criteria.isReferenceObject()) {
+            _criteria = (criteria as BaseReferenceObject).toArrayValueObject();
         }
-
-        if (averageRange && !averageRange?.isReferenceObject()) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        _criteria = _criteria as BaseValueObject;
 
         if (_criteria.isArray()) {
-            return (_criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(_range as BaseValueObject, criteriaItem, averageRange as BaseReferenceObject));
+            const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(range, criteriaObject, averageRange));
+
+            if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+                return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+            }
+
+            return resultArray;
         }
 
-        return this._handleSingleObject(_range as BaseValueObject, _criteria, averageRange as BaseReferenceObject);
+        return this._handleSingleObject(range, _criteria as BaseValueObject, averageRange);
     }
 
-    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseReferenceObject) {
-        let resultArrayObject = valueObjectCompare(range, criteria);
+    private _handleSingleObject(range: FunctionVariantType, criteria: BaseValueObject, averageRange?: FunctionVariantType): BaseValueObject {
+        const _range = (range as BaseReferenceObject).toArrayValueObject();
+
+        let resultArrayObject = valueObjectCompare(_range, criteria);
 
         // When comparing non-numbers and numbers, it does not take the result
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteria);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteria);
 
-        // averageRange has the same dimensions as range
-        let averageRangeArray = averageRange
-            ? this._createRangeReferenceObject(averageRange, range)
-            : (range as ArrayValueObject);
+        const rangeRowCount = _range.getRowCount();
+        const rangeColumnCount = _range.getColumnCount();
 
-        if (!averageRangeArray) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        let _averageRange = _range;
+
+        if (averageRange) {
+            _averageRange = (averageRange as BaseReferenceObject).toArrayValueObject();
+
+            const averageRangeRowCount = _averageRange.getRowCount();
+            const averageRangeColumnCount = _averageRange.getColumnCount();
+
+            // averageRange has different dimensions than range, then adjust averageRange dimensions to match range dimensions
+            // TODO: @DR-Univer The current situation is that the cell value in the extended range changes,
+            // but it is not within the formula parameter range, so it will not trigger the formula to recalculate.
+            if (rangeRowCount !== averageRangeRowCount || rangeColumnCount !== averageRangeColumnCount) {
+                const rangeData = (averageRange as BaseReferenceObject).getRangeData();
+                rangeData.endRow = rangeData.startRow + rangeRowCount - 1;
+                rangeData.endColumn = rangeData.startColumn + rangeColumnCount - 1;
+
+                (averageRange as BaseReferenceObject).setRangeData(rangeData);
+
+                _averageRange = (averageRange as BaseReferenceObject).toArrayValueObject();
+            }
         }
 
-        if (averageRangeArray.isError()) {
-            return averageRangeArray as ErrorValueObject;
-        }
-
-        if (averageRangeArray.isReferenceObject()) {
-            averageRangeArray = (averageRangeArray as BaseReferenceObject).toArrayValueObject();
-        }
-
-        averageRangeArray = averageRangeArray as ArrayValueObject;
-
-        const picked = averageRangeArray.pick(resultArrayObject as ArrayValueObject);
+        const picked = _averageRange.pick(resultArrayObject as ArrayValueObject);
         const sum = picked.sum();
         const count = picked.count();
         return sum.divided(count);
-    }
-
-    /**
-     * Create reference object, starting from the first cell in the upper left corner, the height is rowCount and the width is columnCount
-     * @param averageRange
-     * @param rowCount
-     * @param columnCount
-     * @returns
-     */
-    private _createRangeReferenceObject(averageRange: BaseReferenceObject, range: BaseValueObject) {
-        const averageRangeRow = averageRange.getRowCount();
-        const averageRangeColumn = averageRange.getColumnCount();
-
-        const rowCount = range.isArray() ? (range as ArrayValueObject).getRowCount() : 1;
-        const columnCount = range.isArray() ? (range as ArrayValueObject).getColumnCount() : 1;
-
-        if (averageRangeRow === rowCount && averageRangeColumn === columnCount) {
-            return averageRange;
-        }
-
-        const { startRow, startColumn } = averageRange.getRangePosition();
-        const rangeData = {
-            startRow,
-            startColumn,
-            endRow: startRow + rowCount - 1,
-            endColumn: startColumn + columnCount - 1,
-        };
-
-        return this.createReferenceObject(averageRange, rangeData);
     }
 }

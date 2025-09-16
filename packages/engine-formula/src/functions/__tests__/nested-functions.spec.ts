@@ -600,24 +600,16 @@ describe('Test nested functions', () => {
 
         it('Sumifs test, range is number, criteria is number string', () => {
             let result = calculate('=SUMIFS(A11:C11,A11:C11,"2")');
-            expect(result).toStrictEqual([
-                [2],
-            ]);
+            expect(result).toBe(2);
 
             result = calculate('=SUMIFS(A11:C11,A11:C11,A12)');
-            expect(result).toStrictEqual([
-                [2],
-            ]);
+            expect(result).toBe(2);
 
             result = calculate('=SUMIFS(A11:C11,A11:C11,"2",A11:C11,3)');
-            expect(result).toStrictEqual([
-                [0],
-            ]);
+            expect(result).toBe(0);
 
             result = calculate('=SUMIFS(A11:C11,A11:C11,"2",A11:C11,2)');
-            expect(result).toStrictEqual([
-                [2],
-            ]);
+            expect(result).toBe(2);
 
             result = calculate('=SUMIF(A11:C11,"1",A11:C11)');
             expect(result).toBe(1);

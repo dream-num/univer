@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateMaxDimensions, getBooleanResults, getErrorArray } from '../../../engine/utils/value-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { getBooleanResults, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -26,40 +28,38 @@ export class Averageifs extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(averageRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (averageRange.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+    override needsReferenceObject = true;
+
+    override calculate(averageRange: FunctionVariantType, ...variants: FunctionVariantType[]): BaseValueObject {
+        const {
+            isError,
+            errorObject,
+            rangeIsDifferentSize,
+            criteriaMaxRowLength,
+            criteriaMaxColumnLength,
+            targetRange: _averageRange,
+            variants: _variants,
+        } = parsePairedRangeAndCriteria(variants, averageRange);
+
+        if (isError) {
+            return errorObject as ErrorValueObject;
         }
 
-        if (!averageRange.isArray()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (rangeIsDifferentSize) {
+            if (criteriaMaxRowLength === 1 && criteriaMaxColumnLength === 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            return expandArrayValueObject(criteriaMaxRowLength, criteriaMaxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        // Range and criteria must be paired
-        if (variants.length % 2 !== 0) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+        const booleanResults = getBooleanResults(_variants, criteriaMaxRowLength, criteriaMaxColumnLength, true);
 
-        // Every range must be array
-        if (variants.some((variant, i) => i % 2 === 0 && !variant.isArray())) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
-
-        const errorArray = getErrorArray(variants, averageRange, maxRowLength, maxColumnLength);
-
-        if (errorArray) {
-            return errorArray;
-        }
-
-        const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength, true);
-
-        return this._aggregateResults(averageRange, booleanResults);
+        return this._aggregateResults(_averageRange as BaseValueObject, booleanResults);
     }
 
-    private _aggregateResults(averageRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
-        const maxResults = booleanResults.map((row) => {
+    private _aggregateResults(averageRange: BaseValueObject, booleanResults: BaseValueObject[][]): BaseValueObject {
+        const results = booleanResults.map((row) => {
             return row.map((booleanResult) => {
                 const picked = (averageRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
                 const sum = picked.sum();
@@ -68,16 +68,18 @@ export class Averageifs extends BaseFunction {
             });
         });
 
-        const arrayValueObjectData: IArrayValueObject = {
-            calculateValueList: maxResults,
-            rowCount: maxResults.length,
-            columnCount: maxResults[0].length,
+        if (results.length === 1 && results[0].length === 1) {
+            return results[0][0];
+        }
+
+        return ArrayValueObject.create({
+            calculateValueList: results,
+            rowCount: results.length,
+            columnCount: results[0].length,
             unitId: this.unitId || '',
             sheetId: this.subUnitId || '',
             row: this.row,
             column: this.column,
-        };
-
-        return ArrayValueObject.create(arrayValueObjectData);
+        });
     }
 }

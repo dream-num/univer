@@ -16,10 +16,7 @@
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
@@ -27,10 +24,11 @@ import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Averageif } from '../index';
 
@@ -48,98 +46,86 @@ const getTestWorkbookData = (): IWorkbookData => {
                             t: CellValueType.NUMBER,
                         },
                         1: {
-                            v: 2,
+                            v: true,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        2: {
+                            v: 'Ada',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        4: {
+                            v: 5,
                             t: CellValueType.NUMBER,
                         },
                     },
                     1: {
                         0: {
-                            v: 3,
-                            t: CellValueType.NUMBER,
-                        },
-                        1: {
                             v: 4,
                             t: CellValueType.NUMBER,
                         },
+                        1: {
+                            v: false,
+                            t: CellValueType.BOOLEAN,
+                        },
                         2: {
-                            v: 'B2',
+                            v: 'test1',
                             t: CellValueType.STRING,
                         },
                         3: {
-                            v: 'R2C2',
-                            t: CellValueType.STRING,
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        4: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
                         },
                     },
                     2: {
                         0: {
-                            v: 1,
+                            v: 44,
                             t: CellValueType.NUMBER,
                         },
                         1: {
-                            v: ' ',
-                            t: CellValueType.STRING,
-                        },
-                        2: {
-                            v: 1.23,
+                            v: null,
                             t: CellValueType.NUMBER,
                         },
+                        2: {
+                            v: 'test12',
+                            t: CellValueType.STRING,
+                        },
                         3: {
-                            v: true,
-                            t: CellValueType.BOOLEAN,
+                            v: 44,
+                            t: CellValueType.NUMBER,
                         },
                         4: {
-                            v: false,
-                            t: CellValueType.BOOLEAN,
+                            v: 44,
+                            t: CellValueType.NUMBER,
                         },
                     },
                     3: {
                         0: {
-                            v: 0,
+                            v: 444,
                             t: CellValueType.NUMBER,
                         },
                         1: {
-                            v: '100',
+                            v: null,
+                            t: CellValueType.NUMBER,
                         },
                         2: {
-                            v: '2.34',
-                        },
-                        3: {
-                            v: 'test',
-                            t: CellValueType.STRING,
-                        },
-                        4: {
-                            v: -3,
-                            t: CellValueType.NUMBER,
-                        },
-                    },
-                    4: {
-                        3: {
-                            v: 'test1',
-                            t: CellValueType.STRING,
-                        },
-                    },
-                    5: {
-                        0: {
-                            v: 'Tom',
-                            t: CellValueType.STRING,
-                        },
-                        1: {
-                            v: 'Sarah',
-                            t: CellValueType.STRING,
-                        },
-                        3: {
                             v: 'Univer',
                             t: CellValueType.STRING,
                         },
-                    },
-                    6: {
-                        0: {
-                            v: 'Alex',
-                            t: CellValueType.STRING,
+                        3: {
+                            v: 444,
+                            t: CellValueType.NUMBER,
                         },
-                        1: {
-                            v: 'Mickey',
-                            t: CellValueType.STRING,
+                        4: {
+                            v: 444,
+                            t: CellValueType.NUMBER,
                         },
                     },
                 },
@@ -151,7 +137,8 @@ const getTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
-describe('Test isref function', () => {
+
+describe('Test averageif function', () => {
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -182,11 +169,11 @@ describe('Test isref function', () => {
             dirtyNameMap: {},
             dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
             excludedCell: {},
             allUnitData: {
                 [testBed.unitId]: testBed.sheetData,
             },
-            dirtyUnitOtherFormulaMap: {},
         });
 
         const sheetItem = testBed.sheetData[testBed.sheetId];
@@ -211,68 +198,68 @@ describe('Test isref function', () => {
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            if ((result as ErrorValueObject).isError()) {
-                return (result as ErrorValueObject).getValue();
-            } else if ((result as ArrayValueObject).isArray()) {
-                return (result as ArrayValueObject).toValue();
-            }
-            return (result as BaseValueObject).getValue();
+            return getObjectValue(result);
         };
     });
 
     describe('Averageif', () => {
         it('Range and criteria', async () => {
-            const result = await calculate('=AVERAGEIF(A1:A4,">0")');
-
-            expect(result).toBe(1.6666666666666667);
+            const result = await calculate('=AVERAGEIF(A1:A4,">40")');
+            expect(result).toBe(244);
         });
-        it('Range and criteria, compare number', async () => {
-            const result = await calculate('=AVERAGEIF(A6:A7,">1")');
 
+        it('Range and criteria, different type', async () => {
+            const result = await calculate('=AVERAGEIF(B1,">4",A1)');
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
         });
 
-        it('Range number', async () => {
-            const result = await calculate('=AVERAGEIF(1,1)');
-
-            expect(result).toBe(1);
-        });
-
-        it('Range string', async () => {
-            const result = await calculate('=AVERAGEIF("test",">1")');
-
-            expect(result).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Range string, average range number', async () => {
-            const result = await calculate('=AVERAGEIF("test",1,1)');
-
-            expect(result).toBe(ErrorType.NA);
-        });
-
-        it('Range blank cell', async () => {
-            const result = await calculate('=AVERAGEIF(A5,">1")');
-
-            expect(result).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Average range with wildcard asterisk', async () => {
-            const result = await calculate('=AVERAGEIF(D4:D6,"test*",A1)');
-
-            expect(result).toBe(2);
+        it('averageRange with wildcard asterisk', async () => {
+            const result = await calculate('=AVERAGEIF(C1:C4,"test*",A1:A4)');
+            expect(result).toBe(24);
         });
 
         it('ArrayValueObject range and ArrayValueObject criteria', async () => {
-            const result = await calculate('=AVERAGEIF(A3:F4,A3:F4)');
+            const result = await calculate('=AVERAGEIF(A1:A4,D1:D4)');
+            expect(result).toStrictEqual([
+                [4],
+                [4],
+                [44],
+                [444],
+            ]);
 
-            // [0][1] ErrorType.DIV_BY_ZERO refer to Google Sheets
-            expect(result).toStrictEqual([[1, ErrorType.DIV_BY_ZERO, 1.23, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO, 0], [0, 100, 2.34, ErrorType.DIV_BY_ZERO, -3, 0]]);
+            const result2 = await calculate('=AVERAGEIF(A1:A4,E1:E4)');
+            expect(result2).toStrictEqual([
+                [ErrorType.DIV_BY_ZERO],
+                [4],
+                [44],
+                [444],
+            ]);
+
+            const result3 = await calculate('=AVERAGEIF(A1:A4,A2)');
+            expect(result3).toBe(4);
         });
 
-        it('ArrayValueObject range and string criteria', async () => {
-            const result = await calculate('=AVERAGEIF(A3:F4," ")');
+        it('Includes error', async () => {
+            const error = ErrorValueObject.create(ErrorType.NAME);
 
-            expect(result).toBe(ErrorType.DIV_BY_ZERO);
+            const result = await calculate(`=AVERAGEIF(${error},A1:A4)`);
+            expect(result).toBe(ErrorType.VALUE);
+
+            const result2 = await calculate(`=AVERAGEIF(A1:A4,${error})`);
+            expect(result2).toBe(ErrorType.DIV_BY_ZERO);
+
+            const result3 = await calculate(`=AVERAGEIF(A1:A4,">40",${error})`);
+            expect(result3).toBe(ErrorType.VALUE);
+        });
+
+        it('Range or averageRange is not referenceObject', async () => {
+            const result = await calculate('=AVERAGEIF(1,"test*",A1:A4)');
+            expect(result).toBe(ErrorType.VALUE);
+        });
+
+        it('Range length is not equal to averageRange length', async () => {
+            const result = await calculate('=AVERAGEIF(A1:A4,">40",E1:E2)');
+            expect(result).toBe(244);
         });
     });
 });

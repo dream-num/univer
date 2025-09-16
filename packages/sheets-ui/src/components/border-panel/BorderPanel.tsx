@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IBorderData, Nullable,
+} from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
-import { BorderStyleTypes } from '@univerjs/core';
+import {
+    BorderStyleTypes,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
 import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { BorderStyleManagerService } from '@univerjs/sheets';
@@ -71,9 +77,21 @@ const BORDER_SIZE_CHILDREN = [
     },
 ];
 
+function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {
+    if (!borderData) return;
+    for (const key in borderData) {
+        const border = borderData[key as keyof IBorderData];
+        if (border?.cl?.rgb) return border.cl.rgb;
+    }
+}
+
 export function BorderPanel(props: IBorderPanelProps) {
     const componentManager = useDependency(ComponentManager);
     const borderStyleManagerService = useDependency(BorderStyleManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    const textRuns = editorDataModel?.getBody()?.textRuns;
+    const color = getBorderColor(textRuns?.[0]?.ts?.bd);
 
     const { onChange, value } = props;
 
@@ -126,7 +144,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                     <Dropdown
                         overlay={(
                             <div className="univer-rounded-lg univer-p-4">
-                                <ColorPicker onChange={(value) => handleClick(value, 'color')} />
+                                <ColorPicker value={color} onChange={(value) => handleClick(value, 'color')} />
                             </div>
                         )}
                     >

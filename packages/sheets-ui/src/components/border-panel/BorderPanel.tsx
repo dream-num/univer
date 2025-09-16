@@ -24,7 +24,7 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
-import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
+import { CheckMarkIcon, MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { BorderStyleManagerService } from '@univerjs/sheets';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { BorderLine } from './border-line/BorderLine';
@@ -85,6 +85,14 @@ function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {
     }
 }
 
+function getBorderStyle(borderData: Nullable<IBorderData>): BorderStyleTypes | undefined {
+    if (!borderData) return;
+    for (const key in borderData) {
+        const border = borderData[key as keyof IBorderData];
+        if (border?.cl?.rgb) return border.s;
+    }
+}
+
 export function BorderPanel(props: IBorderPanelProps) {
     const componentManager = useDependency(ComponentManager);
     const borderStyleManagerService = useDependency(BorderStyleManagerService);
@@ -92,6 +100,7 @@ export function BorderPanel(props: IBorderPanelProps) {
     const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     const textRuns = editorDataModel?.getBody()?.textRuns;
     const color = getBorderColor(textRuns?.[0]?.ts?.bd);
+    const type = getBorderStyle(textRuns?.[0]?.ts?.bd);
 
     const { onChange, value } = props;
 
@@ -179,15 +188,20 @@ export function BorderPanel(props: IBorderPanelProps) {
                                             key={item.value}
                                             className={`
                                               univer-flex univer-cursor-pointer univer-items-center
-                                              univer-justify-center univer-rounded univer-px-1 univer-py-2
+                                              univer-justify-center univer-rounded univer-px-1 univer-py-3
                                               hover:univer-bg-gray-100
                                               dark:hover:!univer-bg-gray-700
                                             `}
                                             onClick={() => handleClick(item.value, 'style')}
                                         >
+                                            {item.value === type && (
+                                                <CheckMarkIcon
+                                                    className="univer-absolute univer-left-3 univer-text-primary-600"
+                                                />
+                                            )}
                                             <BorderLine
                                                 className={`
-                                                  univer-fill-gray-900
+                                                  univer-ml-6 univer-fill-gray-900
                                                   dark:!univer-fill-white
                                                 `}
                                                 type={item.value}

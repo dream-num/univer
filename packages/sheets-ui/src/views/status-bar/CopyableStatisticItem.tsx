@@ -69,7 +69,7 @@ export const CopyableStatisticItem: FC<IStatisticItem> = (item: IStatisticItem) 
             <div
                 key={item.name}
                 className={`
-                  univer-flex univer-max-w-24 univer-cursor-default univer-truncate univer-text-center univer-text-xs
+                  univer-flex univer-cursor-pointer univer-truncate univer-text-center univer-text-xs
                   univer-text-gray-400
                 `}
                 onClick={copyToClipboard}

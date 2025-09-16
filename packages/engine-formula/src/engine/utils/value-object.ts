@@ -16,7 +16,6 @@
 
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { CellValueType } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
@@ -24,6 +23,7 @@ import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
+import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
@@ -176,23 +176,138 @@ export function calculateMaxDimensions(variants: BaseValueObject[]) {
     return { maxRowLength, maxColumnLength };
 }
 
-export function getErrorArray(variants: BaseValueObject[], sumRange: BaseValueObject, maxRowLength: number, maxColumnLength: number) {
-    const sumRowLength = (sumRange as ArrayValueObject).getRowCount();
-    const sumColumnLength = (sumRange as ArrayValueObject).getColumnCount();
+/**
+ * Parse the paired range and criteria in functions like COUNTIFS, SUMIFS, etc.
+ * @param variants - The range and criteria pairs
+ * @param targetRange - The target range for calculation (e.g., sumRange in SUMIFS)
+ * @returns An object containing parsed information
+ */
+// eslint-disable-next-line max-lines-per-function
+export function parsePairedRangeAndCriteria(
+    variants: FunctionVariantType[],
+    targetRange?: FunctionVariantType
+): {
+    isError: boolean;
+    errorObject: Nullable<ErrorValueObject>;
+    rangeIsDifferentSize: boolean;
+    criteriaMaxRowLength: number;
+    criteriaMaxColumnLength: number;
+    targetRange: Nullable<BaseValueObject>;
+    variants: BaseValueObject[];
+} {
+    /**
+     * The range and criteria must be in pairs.
+     * If not, Excel will prevent the operation. But we can't do it like that, so we just return a #VALUE! error.
+     */
+    if (variants.length === 0 || variants.length % 2 !== 0) {
+        return {
+            isError: true,
+            errorObject: ErrorValueObject.create(ErrorType.VALUE),
+            rangeIsDifferentSize: false,
+            criteriaMaxRowLength: 0,
+            criteriaMaxColumnLength: 0,
+            targetRange: null,
+            variants: [],
+        };
+    }
+
+    let _targetRange: Nullable<BaseValueObject> = null;
+    let targetRangeRowCount = -1;
+    let targetRangeColumnCount = -1;
+
+    if (targetRange) {
+        /**
+         * If the target range is provided, it must be a reference object.
+         * If not, Excel will prevent the operation. But we can't do it like that, so we just return a #VALUE! error.
+         */
+        if (!targetRange.isReferenceObject()) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.VALUE),
+                rangeIsDifferentSize: false,
+                criteriaMaxRowLength: 0,
+                criteriaMaxColumnLength: 0,
+                targetRange: null,
+                variants: [],
+            };
+        }
+
+        _targetRange = (targetRange as BaseReferenceObject).toArrayValueObject();
+        targetRangeRowCount = (_targetRange as ArrayValueObject).getRowCount();
+        targetRangeColumnCount = (_targetRange as ArrayValueObject).getColumnCount();
+    }
+
+    let criteriaMaxRowLength = 0;
+    let criteriaMaxColumnLength = 0;
+    let rangeIsDifferentSize = false;
+
+    const _variants: BaseValueObject[] = [];
 
     for (let i = 0; i < variants.length; i++) {
-        if (i % 2 === 1) continue;
+        if (i % 2 === 1) {
+            const range = variants[i - 1];
+            const criteria = variants[i];
 
-        const range = variants[i];
+            /**
+             * The range must be a reference object.
+             * If not, Excel will prevent the operation. But we can't do it like that, so we just return a #VALUE! error.
+             */
+            if (!range.isReferenceObject()) {
+                return {
+                    isError: true,
+                    errorObject: ErrorValueObject.create(ErrorType.VALUE),
+                    rangeIsDifferentSize: false,
+                    criteriaMaxRowLength: 0,
+                    criteriaMaxColumnLength: 0,
+                    targetRange: null,
+                    variants: [],
+                };
+            }
 
-        const rangeRowLength = (range as ArrayValueObject).getRowCount();
-        const rangeColumnLength = (range as ArrayValueObject).getColumnCount();
-        if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
-            return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
+            const _range = (range as BaseReferenceObject).toArrayValueObject();
+            const rangeRowCount = _range.getRowCount();
+            const rangeColumnCount = _range.getColumnCount();
+
+            if (i === 1 && targetRangeRowCount === -1 && targetRangeColumnCount === -1) {
+                // If the target range is not specified, use the first range as the target range. e.g. COUNTIFS(A1:A3, ">1", B1:B3, "<5").
+                targetRangeRowCount = rangeRowCount;
+                targetRangeColumnCount = rangeColumnCount;
+            } else if (!rangeIsDifferentSize && (targetRangeRowCount !== rangeRowCount || targetRangeColumnCount !== rangeColumnCount)) {
+                // The size of each range must be the same as the target range
+                rangeIsDifferentSize = true;
+            }
+
+            let _criteria = criteria;
+
+            if (criteria.isReferenceObject()) {
+                _criteria = (criteria as BaseReferenceObject).toArrayValueObject();
+            }
+
+            criteriaMaxRowLength = Math.max(criteriaMaxRowLength, _criteria.isArray() ? (_criteria as ArrayValueObject).getRowCount() : 1);
+            criteriaMaxColumnLength = Math.max(criteriaMaxColumnLength, _criteria.isArray() ? (_criteria as ArrayValueObject).getColumnCount() : 1);
+
+            _variants.push(_range);
+            _variants.push(_criteria as BaseValueObject);
         }
     }
 
-    return null;
+    return {
+        isError: false,
+        errorObject: null,
+        rangeIsDifferentSize,
+        criteriaMaxRowLength,
+        criteriaMaxColumnLength,
+        targetRange: _targetRange,
+        variants: _variants,
+    };
+}
+
+export function baseValueObjectToArrayValueObject(valueObject: BaseValueObject): ArrayValueObject {
+    if (valueObject.isArray()) {
+        return valueObject as ArrayValueObject;
+    }
+
+    return ArrayValueObject.createByArray([[valueObject.getValue()]]);
 }
 
 export function getBooleanResults(variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number, isNumberSensitive: boolean = false) {

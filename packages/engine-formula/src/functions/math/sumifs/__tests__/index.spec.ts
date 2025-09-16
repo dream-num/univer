@@ -14,181 +14,219 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { LexerNode } from '../../../../engine/analysis/lexer-node';
+import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import { CellValueType, LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { Lexer } from '../../../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../../../engine/analysis/parser';
+import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
+import { IFunctionService } from '../../../../services/function.service';
+import { IFormulaRuntimeService } from '../../../../services/runtime.service';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumifs } from '../index';
 
+const getTestWorkbookData = (): IWorkbookData => {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    1: {
+                        0: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: 5,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    2: {
+                        0: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 5,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: 6,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    3: {
+                        0: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 5,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 6,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: 7,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                },
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
+};
+
 describe('Test sumifs function', () => {
-    const testFunction = new Sumifs(FUNCTION_NAMES_MATH.SUMIF);
+    let get: Injector['get'];
+    let lexer: Lexer;
+    let astTreeBuilder: AstTreeBuilder;
+    let interpreter: Interpreter;
+    let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
 
-    describe('Sumifs', () => {
-        it('Range and criteria', async () => {
-            const sumRange = ArrayValueObject.create(/*ts*/ `{
-                1;
-                1;
-                1
-            }`);
-            const range = ArrayValueObject.create(/*ts*/ `{
-                2;
-                3;
-                4
-            }`);
+    beforeEach(() => {
+        const testBed = createFunctionTestBed(getTestWorkbookData());
 
-            const criteria = StringValueObject.create('>2');
+        get = testBed.get;
 
-            const resultObject = testFunction.calculate(sumRange, range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
+        lexer = get(Lexer);
+        astTreeBuilder = get(AstTreeBuilder);
+        interpreter = get(Interpreter);
+
+        const functionService = get(IFunctionService);
+
+        const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
+
+        const formulaRuntimeService = get(IFormulaRuntimeService);
+
+        formulaCurrentConfigService.load({
+            formulaData: {},
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: false,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+            excludedCell: {},
+            allUnitData: {
+                [testBed.unitId]: testBed.sheetData,
+            },
         });
 
-        it('Range and criteria, compare string', async () => {
-            const sumRange = ArrayValueObject.create(`{
-                1;
-                2;
-                3
-            }`);
-            const range = ArrayValueObject.create(`{
-                a;
-                b;
-                c
-            }`);
+        const sheetItem = testBed.sheetData[testBed.sheetId];
 
-            const criteria = StringValueObject.create('>2');
-            const resultObject = testFunction.calculate(sumRange, range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
+        formulaRuntimeService.setCurrent(
+            0,
+            0,
+            sheetItem.rowCount,
+            sheetItem.columnCount,
+            testBed.sheetId,
+            testBed.unitId
+        );
+
+        functionService.registerExecutors(
+            new Sumifs(FUNCTION_NAMES_MATH.SUMIFS)
+        );
+
+        calculate = (formula: string) => {
+            const lexerNode = lexer.treeBuilder(formula);
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            return getObjectValue(result);
+        };
+    });
+
+    describe('Sumifs', () => {
+        it('Value is normal', async () => {
+            const result = await calculate('=SUMIFS(A1:A4,B1:B4,">3")');
+            expect(result).toBe(7);
+        });
+
+        it('Value is array', async () => {
+            const result = await calculate('=SUMIFS({1;2;3;4},B1:B4,">3")');
+            expect(result).toBe(ErrorType.VALUE);
+        });
+
+        it('Range and criteria is not paired', async () => {
+            const result = await calculate('=SUMIFS(A1:A4,B1:B4,">3",C1:C4)');
+            expect(result).toBe(ErrorType.VALUE);
+        });
+
+        it('Range is different size', async () => {
+            const result = await calculate('=SUMIFS(A1:A4,B1:B4,">3",C1:C3,{"=5","=6"})');
+            expect(result).toStrictEqual([
+                [ErrorType.VALUE, ErrorType.VALUE],
+            ]);
         });
 
         it('Range and array criteria', async () => {
-            const sumRange = ArrayValueObject.create(/*ts*/ `{
-                1;
-                1;
-                1
-            }`);
-            const range = ArrayValueObject.create(/*ts*/ `{
-                2;
-                3;
-                4
-            }`);
-
-            const criteria = ArrayValueObject.create(/*ts*/ `{
-                >2;
-                >3;
-                >4
-            }`);
-
-            const resultObject = testFunction.calculate(sumRange, range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [1], [0]]);
+            const result = await calculate('=SUMIFS(A1:A4,B1:B4,{">1";">2"})');
+            expect(result).toStrictEqual([
+                [10],
+                [9],
+            ]);
         });
 
-        it('2 ranges and criteria', async () => {
-            const sumRange = ArrayValueObject.create(/*ts*/ `{
-                1;
-                1;
-                1
-            }`);
-
-            const range1 = ArrayValueObject.create(/*ts*/ `{
-                2;
-                3;
-                4
-            }`);
-
-            const criteria1 = StringValueObject.create('>2');
-
-            const range2 = ArrayValueObject.create(/*ts*/ `{
-                3;
-                4;
-                5
-            }`);
-
-            const criteria2 = StringValueObject.create('<5');
-
-            const resultObject = testFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1]]);
+        it('Two ranges and criteria', async () => {
+            const result = await calculate('=SUMIFS(A1:A4,B1:B4,">2",C1:C4,"=5")');
+            expect(result).toBe(3);
         });
 
-        it('2 ranges and criteria, 1 array criteria', async () => {
-            const sumRange = ArrayValueObject.create(/*ts*/ `{
-                1;
-                1;
-                1
-            }`);
-
-            const range1 = ArrayValueObject.create(/*ts*/ `{
-                2;
-                3;
-                4
-            }`);
-
-            const criteria1 = ArrayValueObject.create(/*ts*/ `{
-                >2;
-                >3;
-                >4
-            }`);
-
-            const range2 = ArrayValueObject.create(/*ts*/ `{
-                3;
-                4;
-                5
-            }`);
-
-            const criteria2 = NumberValueObject.create(5);
-
-            const resultObject = testFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [1], [0]]);
-        });
-
-        it('2 ranges and criteria, 2 array criteria', async () => {
-            const sumRange = ArrayValueObject.create(/*ts*/ `{
-                1;
-                1;
-                1
-            }`);
-
-            const range1 = ArrayValueObject.create(/*ts*/ `{
-                2;
-                3;
-                4
-            }`);
-
-            const criteria1 = ArrayValueObject.create(/*ts*/ `{
-                >2;
-                >3;
-                >4
-            }`);
-
-            const range2 = ArrayValueObject.create(/*ts*/ `{
-                3;
-                4;
-                5
-            }`);
-
-            const criteria2 = ArrayValueObject.create(/*ts*/ `{
-                4;
-                4;
-                4;
-                4
-            }`);
-
-            const resultObject = testFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [0], [0], [0]]);
-        });
-
-        it('Includes REF error', async () => {
-            const range = ErrorValueObject.create(ErrorType.REF);
-
-            const criteria = ArrayValueObject.create(/*ts*/ `{
-                4;
-                4;
-                44;
-                444
-            }`);
-
-            const resultObject = testFunction.calculate(range, criteria);
-            expect(resultObject.getValue()).toStrictEqual(ErrorType.REF);
+        it('Two ranges and criteria, criteria is array', async () => {
+            const result = await calculate('=SUMIFS(A1:A4,B1:B4,">2",C1:C4,{">4";">5"})');
+            expect(result).toStrictEqual([
+                [7],
+                [4],
+            ]);
         });
     });
 });

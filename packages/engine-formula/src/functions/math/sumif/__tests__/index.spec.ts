@@ -16,7 +16,6 @@
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -244,18 +243,13 @@ describe('Test sumif function', () => {
             const error = ErrorValueObject.create(ErrorType.NAME);
 
             const result = await calculate(`=SUMIF(${error},A1:A4)`);
-            expect(result).toStrictEqual([
-                [ErrorType.NAME],
-                [ErrorType.NAME],
-                [ErrorType.NAME],
-                [ErrorType.NAME],
-            ]);
+            expect(result).toBe(ErrorType.VALUE);
 
             const result2 = await calculate(`=SUMIF(A1:A4,${error})`);
-            expect(result2).toBe(ErrorType.NAME);
+            expect(result2).toBe(0);
 
             const result3 = await calculate(`=SUMIF(A1:A4,">40",${error})`);
-            expect(result3).toBe(ErrorType.NAME);
+            expect(result3).toBe(ErrorType.VALUE);
         });
 
         it('Range or sumRange is not referenceObject', async () => {

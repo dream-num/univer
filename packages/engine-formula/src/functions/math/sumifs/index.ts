@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateMaxDimensions, getBooleanResults, getErrorArray } from '../../../engine/utils/value-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { getBooleanResults, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -26,55 +28,55 @@ export class Sumifs extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(sumRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (sumRange.isError()) {
-            return sumRange;
+    override needsReferenceObject = true;
+
+    override calculate(sumRange: FunctionVariantType, ...variants: FunctionVariantType[]) {
+        const {
+            isError,
+            errorObject,
+            rangeIsDifferentSize,
+            criteriaMaxRowLength,
+            criteriaMaxColumnLength,
+            targetRange: _sumRange,
+            variants: _variants,
+        } = parsePairedRangeAndCriteria(variants, sumRange);
+
+        if (isError) {
+            return errorObject as ErrorValueObject;
         }
 
-        if (!sumRange.isArray()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (rangeIsDifferentSize) {
+            if (criteriaMaxRowLength === 1 && criteriaMaxColumnLength === 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            return expandArrayValueObject(criteriaMaxRowLength, criteriaMaxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        // Range and criteria must be paired
-        if (variants.length < 2 || variants.length % 2 !== 0) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+        const booleanResults = getBooleanResults(_variants, criteriaMaxRowLength, criteriaMaxColumnLength, true);
 
-        // Every range must be array
-        if (variants.some((variant, i) => i % 2 === 0 && !variant.isArray())) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
-
-        const errorArray = getErrorArray(variants, sumRange, maxRowLength, maxColumnLength);
-
-        if (errorArray) {
-            return errorArray;
-        }
-
-        const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength, true);
-
-        return this._aggregateResults(sumRange, booleanResults);
+        return this._aggregateResults(_sumRange as BaseValueObject, booleanResults);
     }
 
-    private _aggregateResults(sumRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
-        const sumResults = booleanResults.map((row) => {
+    private _aggregateResults(sumRange: BaseValueObject, booleanResults: BaseValueObject[][]): BaseValueObject {
+        const results = booleanResults.map((row) => {
             return row.map((booleanResult) => {
                 return (sumRange as ArrayValueObject).pick(booleanResult as ArrayValueObject).sum();
             });
         });
 
-        const arrayValueObjectData: IArrayValueObject = {
-            calculateValueList: sumResults,
-            rowCount: sumResults.length,
-            columnCount: sumResults[0].length,
+        if (results.length === 1 && results[0].length === 1) {
+            return results[0][0];
+        }
+
+        return ArrayValueObject.create({
+            calculateValueList: results,
+            rowCount: results.length,
+            columnCount: results[0].length,
             unitId: this.unitId || '',
             sheetId: this.subUnitId || '',
             row: this.row,
             column: this.column,
-        };
-
-        return ArrayValueObject.create(arrayValueObjectData);
+        });
     }
 }

@@ -53,31 +53,60 @@ export function nameCharacterCheck(name: string) {
  * Checks if the custom table name or custom name is valid based on the following criteria:
  * - The name cannot conflict with existing sheet names.
  * - The name cannot be empty.
- * - The name must start with a letter or underscore.
+ * - The name must start with a letter or underscore or a unicode letter (e.g., Chinese).
+ * - The name cannot be a simple A1-style reference (e.g., A1, $A$1, AB123).
+ * - The name cannot be an R1C1-style reference (e.g., R1C1).
+ * - The name cannot be purely numeric.
+ * - The name cannot exceed 255 characters in length.
  * The name cannot contain spaces or invalid characters (e.g., :, \, /, ?, *, [, ]).
  * @param name The name need to check
  * @param sheetNameSet The set of existing sheet names to check against
  * @returns {boolean} Returns true if the name is valid, false otherwise.
  */
 export function customNameCharacterCheck(name: string, sheetNameSet: Set<string>): boolean {
-     // Custom table name cannot conflict with existing sheet names
+    // not empty
+    if (!name || name.length === 0) {
+        return false;
+    }
+
+    // Excel Define Name maximum length (use 255 to be safe)
+    if (name.length > 255) {
+        return false;
+    }
+
+    // cannot conflict with existing sheet names
     if (sheetNameSet.has(name)) {
         return false;
     }
 
-    // Custom table name cannot be empty
-    if (name.length === 0) {
+    // cannot contain spaces or invalid chars : \ / ? * [ ]
+    const invalidChars = /[ :\\\/\?\*\[\]]/;
+    if (invalidChars.test(name)) {
         return false;
     }
 
-    // Custom table name must start with a letter or underscore
-    const validStart = /^[A-Za-z_]/;
+    // must start with a letter (including unicode letters, e.g. Chinese) or underscore
+    // use Unicode property escape \p{L} with 'u' flag to allow non-latin letters
+    const validStart = /^[\p{L}_]/u;
     if (!validStart.test(name)) {
         return false;
     }
-    // Custom table name cannot contain spaces or invalid characters
-    const invalidChars = /[ :\\\/\?\*\[\]]/;
-    if (invalidChars.test(name)) {
+
+    // cannot be a simple A1-style reference (e.g. A1, $A$1, AB123)
+    // column letters limited to reasonable length (1-3) and then numbers
+    const a1Ref = /^\$?[A-Za-z]{1,3}\$?[0-9]+$/;
+    if (a1Ref.test(name)) {
+        return false;
+    }
+
+    // cannot be R1C1 style reference like R1C1
+    const r1c1Ref = /^[rR]\d+[cC]\d+$/;
+    if (r1c1Ref.test(name)) {
+        return false;
+    }
+
+    // cannot be purely numeric
+    if (/^\d+$/.test(name)) {
         return false;
     }
 

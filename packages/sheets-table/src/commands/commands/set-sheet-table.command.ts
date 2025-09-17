@@ -55,6 +55,12 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
             workbook.getSheets().forEach((sheet) => {
                 sheetNameSet.add(sheet.getName());
             });
+
+            // Add existing table names to the set to ensure uniqueness
+            const tableList = tableManager.getTableList(unitId);
+            tableList.forEach((tableItem) => {
+                sheetNameSet.add(tableItem.name);
+            });
         }
 
         if (name) {

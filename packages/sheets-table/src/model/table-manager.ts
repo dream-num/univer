@@ -81,6 +81,8 @@ export class TableManager extends Disposable {
      * @param {string} subUnitId The subunit id of the table.
      * @param {string} name The table name, it should be unique in the unit or it will be appended with a number.
      * @param {ITableRange} range The range of the table, it contains the unit id and subunit id.
+     * @param {string[]} [header] The header of the table, if not provided, it will be generated based on the range.
+     * @param {string} [initId] The initial id of the table, if not provided, a random id will be generated.
      * @param {ITableOptions} [options] Other options of the table.
      * @returns {string} The table id.
      */

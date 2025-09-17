@@ -230,7 +230,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                   univer-fill-gray-900
                                   dark:!univer-fill-white
                                 `}
-                                type={BorderStyleTypes.THIN}
+                                type={type ?? BorderStyleTypes.THIN}
                             />
                             <MoreDownIcon className="dark:!univer-text-white" />
                         </button>

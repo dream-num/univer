@@ -75,6 +75,10 @@ const BORDER_SIZE_CHILDREN = [
         label: BorderStyleTypes.THICK,
         value: BorderStyleTypes.THICK,
     },
+    {
+        label: BorderStyleTypes.DOUBLE,
+        value: BorderStyleTypes.DOUBLE,
+    },
 ];
 
 function getBorderColor(borderData: Nullable<IBorderData>): string | undefined {

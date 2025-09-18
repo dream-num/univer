@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
+import { getNumfmtParseValueFilter, isRealNum } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -478,7 +478,12 @@ export class NumberValueObject extends BaseValueObject {
             return valueObject.plus(this);
         }
 
-        let object = this.plusBy(valueObject.getValue());
+        let _valueObject = valueObject;
+        if (!valueObject.isNumber()) {
+            _valueObject = valueObject.convertToNumberObjectValue();
+        }
+
+        let object = this.plusBy(_valueObject.getValue());
 
         // = 1 + #NAME? gets #NAME?, = 1 + #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -486,7 +491,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.PLUS);
+        const pattern = comparePatternPriority(this.getPattern(), _valueObject.getPattern(), operatorToken.PLUS);
         object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
@@ -504,7 +509,13 @@ export class NumberValueObject extends BaseValueObject {
             }
             return (o as BaseValueObject).plus(this);
         }
-        let object = this.minusBy(valueObject.getValue());
+
+        let _valueObject = valueObject;
+        if (!valueObject.isNumber()) {
+            _valueObject = valueObject.convertToNumberObjectValue();
+        }
+
+        let object = this.minusBy(_valueObject.getValue());
 
         // = 1 - #NAME? gets #NAME?, = 1 - #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -512,7 +523,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MINUS);
+        const pattern = comparePatternPriority(this.getPattern(), _valueObject.getPattern(), operatorToken.MINUS);
         object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
@@ -522,7 +533,13 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.multiply(this);
         }
-        let object = this.multiplyBy(valueObject.getValue());
+
+        let _valueObject = valueObject;
+        if (!valueObject.isNumber()) {
+            _valueObject = valueObject.convertToNumberObjectValue();
+        }
+
+        let object = this.multiplyBy(_valueObject.getValue());
 
         // = 1 * #NAME? gets #NAME?, = 1 * #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -530,7 +547,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MULTIPLY);
+        const pattern = comparePatternPriority(this.getPattern(), _valueObject.getPattern(), operatorToken.MULTIPLY);
         object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
@@ -544,7 +561,13 @@ export class NumberValueObject extends BaseValueObject {
             }
             return (o as BaseValueObject).multiply(this);
         }
-        let object = this.dividedBy(valueObject.getValue());
+
+        let _valueObject = valueObject;
+        if (!valueObject.isNumber()) {
+            _valueObject = valueObject.convertToNumberObjectValue();
+        }
+
+        let object = this.dividedBy(_valueObject.getValue());
 
         // = 1 / #NAME? gets #NAME?, = 1 / #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -552,7 +575,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.DIVIDED);
+        const pattern = comparePatternPriority(this.getPattern(), _valueObject.getPattern(), operatorToken.DIVIDED);
         object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
@@ -1487,7 +1510,14 @@ export class StringValueObject extends BaseValueObject {
     }
 
     override convertToNumberObjectValue() {
-        return createNumberValueObjectByRawValue(this.getValue());
+        const rawValue = this.getValue();
+        const parseData = getNumfmtParseValueFilter(rawValue);
+
+        if (parseData && parseData.z) {
+            return createNumberValueObjectByRawValue(parseData.v, parseData.z);
+        }
+
+        return createNumberValueObjectByRawValue(rawValue);
     }
 
     override convertToBooleanObjectValue() {

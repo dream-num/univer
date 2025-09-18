@@ -58,11 +58,11 @@ export type INumfmtLocaleTag =
     | 'tr'
     | 'vi';
 
-    /**
-     * Determines whether two patterns are equal, excluding differences in decimal places.
-     * This function ignores the decimal part of the patterns and the positive color will be ignored but negative color will be considered.
-     * more info can check the test case.
-     */
+/**
+ * Determines whether two patterns are equal, excluding differences in decimal places.
+ * This function ignores the decimal part of the patterns and the positive color will be ignored but negative color will be considered.
+ * more info can check the test case.
+ */
 export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string): boolean => {
     if ((patternA && !patternB) || (!patternA && patternB)) {
         return false;
@@ -118,4 +118,36 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
     const normalizedB = getStringWithoutDecimal(patternB);
 
     return normalizedA === normalizedB;
+};
+
+const ignoreCommonPatterns = new Set(['m d']);
+const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
+
+/**
+ * Get the numfmt parse value, and filter out the parse error.
+ */
+export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | null => {
+    const parseData = numfmt.parseDate(value) ?? numfmt.parseTime(value) ?? numfmt.parseNumber(value);
+
+    if (!parseData) return null;
+
+    const { z } = parseData;
+
+    if (z) {
+        /**
+         * '1 23' => 'm d' ----- error
+         * '2/3' => 'm/d' ----- This is supported by Excel
+         */
+        if (ignoreCommonPatterns.has(z)) return null;
+
+        /**
+         * If the pattern is 'h:mm AM/PM' or 'hh:mm AM/PM', we need to check if the value ends with ' A', ' P', ' AM', or ' PM'.
+         * '5A' => 'h:mm AM/PM' ----- error
+         * '5 A' => 'h:mm AM/PM' ----- This is supported by Excel
+         * '5:00 AM' => 'h:mm AM/PM' ----- correct
+         */
+        if (ignoreAMPMPatterns.has(z) && !/\s(A|AM|P|PM)$/i.test(value)) return null;
+    }
+
+    return parseData;
 };

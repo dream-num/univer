@@ -97,7 +97,7 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_L
     ctx.closePathByEnv();
 }
 
-export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
+function drawDiagonalSingleLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
@@ -148,6 +148,61 @@ export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: 
     ctx.lineToByPrecision(drawEndX, drawEndY);
     ctx.closePathByEnv();
     ctx.stroke();
+}
+
+function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
+    let drawFirstStartX = 0;
+    let drawFirstStartY = 0;
+    let drawFirstEndX = 0;
+    let drawFirstEndY = 0;
+    let drawSecondStartX = 0;
+    let drawSecondStartY = 0;
+    let drawSecondEndX = 0;
+    let drawSecondEndY = 0;
+    const { startX, startY, endX, endY } = position;
+    switch (type) {
+        case BORDER_LTRB.TL_BR:
+            drawFirstStartX = startX;
+            drawFirstStartY = startY + 1.5;
+            drawFirstEndX = endX - 1.5;
+            drawFirstEndY = endY;
+            drawSecondStartX = startX + 1.5;
+            drawSecondStartY = startY;
+            drawSecondEndX = endX;
+            drawSecondEndY = endY - 1.5;
+            break;
+        case BORDER_LTRB.BL_TR:
+            drawFirstStartX = startX;
+            drawFirstStartY = endY - 1.5;
+            drawFirstEndX = endX - 1.5;
+            drawFirstEndY = startY;
+            drawSecondStartX = startX + 1.5;
+            drawSecondStartY = endY;
+            drawSecondEndX = endX;
+            drawSecondEndY = startY + 1.5;
+            break;
+    }
+
+    // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);
+    ctx.beginPath();
+    ctx.moveToByPrecision(drawFirstStartX, drawFirstStartY);
+    ctx.lineToByPrecision(drawFirstEndX, drawFirstEndY);
+    ctx.closePathByEnv();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveToByPrecision(drawSecondStartX, drawSecondStartY);
+    ctx.lineToByPrecision(drawSecondEndX, drawSecondEndY);
+    ctx.closePathByEnv();
+    ctx.stroke();
+}
+
+export function drawDiagonalineByBorderType(ctx: UniverRenderingContext, style: BorderStyleTypes, type: BORDER_LTRB, position: IPosition) {
+    if (style === BorderStyleTypes.DOUBLE && (type === BORDER_LTRB.TL_BR || type === BORDER_LTRB.BL_TR)) {
+        drawDiagonalDoubleLineByBorderType(ctx, type, position);
+    } else {
+        drawDiagonalSingleLineByBorderType(ctx, type, position);
+    }
 }
 
 export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {

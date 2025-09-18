@@ -15,8 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { INumfmtItemWithCache } from '@univerjs/sheets';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
-import { CellValueType, CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
+import { CellValueType, CommandType, ICommandService, isDefaultFormat, IUniverInstanceService, Range } from '@univerjs/core';
 import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 import { SetNumfmtCommand } from './set-numfmt.command';
@@ -68,16 +69,16 @@ export const AddDecimalCommand: ICommand = {
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {
                 const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
-                if (!numfmtValue) {
+                if (isDefaultFormat(numfmtValue?.pattern)) {
                     values.push({
                         row,
                         col,
                         pattern: defaultPattern,
                     });
                 } else {
-                    const decimals = getDecimalFromPattern(numfmtValue.pattern);
-                    const pattern = setPatternDecimal(numfmtValue.pattern, decimals + 1);
-                    pattern !== numfmtValue.pattern &&
+                    const decimals = getDecimalFromPattern((numfmtValue as INumfmtItemWithCache).pattern);
+                    const pattern = setPatternDecimal((numfmtValue as INumfmtItemWithCache).pattern, decimals + 1);
+                    pattern !== (numfmtValue as INumfmtItemWithCache).pattern &&
                         values.push({
                             row,
                             col,

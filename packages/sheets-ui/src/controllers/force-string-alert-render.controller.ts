@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { CellValueType, Disposable, IConfigService, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import { CellValueType, Disposable, IConfigService, Inject, isRealNum, LocaleService, numfmt } from '@univerjs/core';
 import { IZenZoneService } from '@univerjs/ui';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -53,7 +53,20 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
 
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
-                if (cellData?.t === CellValueType.FORCE_STRING && cellData.v && isRealNum(cellData.v)) {
+                if (!cellData || cellData.v === null || cellData.v === undefined) return;
+
+                /**
+                 * If the cell type is string or force string, and the value is a pure number or a string that can be converted to a number, show the force string alert.
+                 * '123 -> yes
+                 * '20% -> yes
+                 * '1,234.56 -> yes
+                 * 'abc -> no
+                 * '2025-09-17 -> no
+                 */
+                if (
+                    (cellData.t === CellValueType.FORCE_STRING || cellData.t === CellValueType.STRING) &&
+                    (isRealNum(cellData.v) || (typeof cellData.v === 'string' && numfmt.parseNumber(cellData.v)))
+                ) {
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (

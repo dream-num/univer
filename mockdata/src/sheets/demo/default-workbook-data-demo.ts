@@ -14507,6 +14507,40 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         t: 1,
                         s: 'pwABhz',
                     },
+                    1: {
+                        v: '20%',
+                        t: 4,
+                    },
+                    2: {
+                        v: '1,234.56',
+                        t: 4,
+                    },
+                    3: {
+                        v: 'abc',
+                        t: 4,
+                    },
+                    4: {
+                        v: '2025-09-17',
+                        t: 4,
+                    },
+                },
+                27: {
+                    0: {
+                        f: '=A27/A27',
+                    },
+                    1: {
+                        f: '=B27/B27',
+                        si: 'SKEmZc',
+                    },
+                    2: {
+                        si: 'SKEmZc',
+                    },
+                    3: {
+                        si: 'SKEmZc',
+                    },
+                    4: {
+                        si: 'SKEmZc',
+                    },
                 },
                 28: {
                     12: {

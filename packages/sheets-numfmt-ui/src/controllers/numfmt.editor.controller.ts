@@ -24,6 +24,7 @@ import type {
 import {
     CellValueType,
     Disposable,
+    getNumfmtParseValueFilter,
     Inject,
     Injector,
     isRealNum,
@@ -47,7 +48,7 @@ import {
     SheetInterceptorService,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import { getNumfmtParseValueFilter, getPatternType } from '@univerjs/sheets-numfmt';
+import { getPatternType } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 const createCollectEffectMutation = () => {

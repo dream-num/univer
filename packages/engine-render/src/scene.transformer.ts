@@ -393,6 +393,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this.hoverLeaveFunc && applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc);
         }
 
+        // First check if there is an old subscription to avoid duplicate subscriptions
+        this.detachFrom(applyObject);
+
         // eslint-disable-next-line max-lines-per-function
         const observer = applyObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;

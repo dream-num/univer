@@ -394,26 +394,14 @@ export class ScrollBar extends Disposable {
         // content is smaller than viewport size
         if (this.horizontalThumbSize >= viewportW - (this._trackThickness + 2)) {
             // hide horizontal scroll track
-            this.horizonScrollTrack?.setProps({
-                visible: false,
-            });
+            this.horizonScrollTrack?.hide();
             // hide horizontal scroll thumb
-            this.horizonThumbRect?.setProps({
-                visible: false,
-            });
+            this.horizonThumbRect?.hide();
         } else {
             // show horizontal scroll track
-            if (!this.horizonScrollTrack?.visible) {
-                this.horizonScrollTrack?.setProps({
-                    visible: true,
-                });
-            }
+            if (!this.horizonScrollTrack?.visible) this.horizonScrollTrack?.show();
             // show horizontal scroll thumb
-            if (!this.horizonThumbRect?.visible) {
-                this.horizonThumbRect?.setProps({
-                    visible: true,
-                });
-            }
+            if (!this.horizonThumbRect?.visible) this.horizonThumbRect?.show();
 
             this.horizonThumbRect?.transformByState({
                 left: this._viewport.scrollX,
@@ -453,26 +441,15 @@ export class ScrollBar extends Disposable {
         // content is smaller than viewport size
         if (this.verticalThumbSize >= viewportH - this._trackThickness) {
             // hide vertical scroll track
-            this.verticalScrollTrack?.setProps({
-                visible: false,
-            });
+            this.verticalScrollTrack?.hide();
             // hide vertical scroll thumb
-            this.verticalThumbRect?.setProps({
-                visible: false,
-            });
+            this.verticalThumbRect?.hide();
         } else {
             // show vertical scroll track
-            if (!this.verticalScrollTrack?.visible) {
-                this.verticalScrollTrack?.setProps({
-                    visible: true,
-                });
-            }
+            if (!this.verticalScrollTrack?.visible) this.verticalScrollTrack?.show();
             // show vertical scroll thumb
-            if (!this.verticalThumbRect?.visible) {
-                this.verticalThumbRect?.setProps({
-                    visible: true,
-                });
-            }
+            if (!this.verticalThumbRect?.visible) this.verticalThumbRect?.show();
+
             this.verticalThumbRect?.transformByState({
                 left: viewportW - this._trackThickness + this._vThumbMargin,
                 top: this._viewport.scrollY,

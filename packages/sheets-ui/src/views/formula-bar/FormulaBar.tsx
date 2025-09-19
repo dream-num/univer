@@ -236,7 +236,7 @@ export function FormulaBar(props: IProps) {
             // When clicking on the formula bar, the cell editor also needs to enter the edit state
             const visibleState = editorBridgeService.isVisible();
             if (visibleState.visible === false) {
-                commandService.syncExecuteCommand(
+                const result = commandService.syncExecuteCommand(
                     SetCellEditVisibleOperation.id,
                     {
                         visible: true,
@@ -244,6 +244,11 @@ export function FormulaBar(props: IProps) {
                         unitId: editState!.unitId,
                     } as IEditorBridgeServiceVisibleParam
                 );
+                // cancel by event
+                if (!result) {
+                    shouldSkipFocus.current = true;
+                    return;
+                }
                 // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
 

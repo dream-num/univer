@@ -91,15 +91,20 @@ export class Text extends Shape<ITextProps> {
              * - WPS: As the cell width decreases, the excess number will be displayed as "...", so the text width will always be less than the cell width.
              * We use google sheets behavior here, which is to left-align the text when the cell width is less than the text width and not wrapped.
              */
-            const lineX = (
-                hAlign === HorizontalAlign.LEFT ||
-                hAlign === HorizontalAlign.UNSPECIFIED ||
-                (!warp && width < lineWidth && cellValueType === CellValueType.NUMBER)
-            )
-                ? 0
-                : (hAlign === HorizontalAlign.CENTER
-                    ? (width - lineWidth) / 2
-                    : (width - lineWidth));
+            let lineX: number = 0;
+            if (!(!warp && width < lineWidth && cellValueType === CellValueType.NUMBER)) {
+                switch (hAlign) {
+                    case HorizontalAlign.CENTER:
+                        lineX = (width - lineWidth) / 2;
+                        break;
+                    case HorizontalAlign.RIGHT:
+                        lineX = width - lineWidth;
+                        break;
+                    default:
+                        lineX = 0;
+                }
+            }
+
             const baselineY = lineTop + line.baseline;
 
             // Draw the text

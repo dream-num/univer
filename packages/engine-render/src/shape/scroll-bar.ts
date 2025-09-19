@@ -393,10 +393,22 @@ export class ScrollBar extends Disposable {
 
         // content is smaller than viewport size
         if (this.horizontalThumbSize >= viewportW - (this._trackThickness + 2)) {
+            // hide horizontal scroll track
+            this.horizonScrollTrack?.setProps({
+                visible: false,
+            });
+            // hide horizontal scroll thumb
             this.horizonThumbRect?.setProps({
                 visible: false,
             });
         } else {
+            // show horizontal scroll track
+            if (!this.horizonScrollTrack?.visible) {
+                this.horizonScrollTrack?.setProps({
+                    visible: true,
+                });
+            }
+            // show horizontal scroll thumb
             if (!this.horizonThumbRect?.visible) {
                 this.horizonThumbRect?.setProps({
                     visible: true,
@@ -440,10 +452,22 @@ export class ScrollBar extends Disposable {
 
         // content is smaller than viewport size
         if (this.verticalThumbSize >= viewportH - this._trackThickness) {
+            // hide vertical scroll track
+            this.verticalScrollTrack?.setProps({
+                visible: false,
+            });
+            // hide vertical scroll thumb
             this.verticalThumbRect?.setProps({
                 visible: false,
             });
         } else {
+            // show vertical scroll track
+            if (!this.verticalScrollTrack?.visible) {
+                this.verticalScrollTrack?.setProps({
+                    visible: true,
+                });
+            }
+            // show vertical scroll thumb
             if (!this.verticalThumbRect?.visible) {
                 this.verticalThumbRect?.setProps({
                     visible: true,

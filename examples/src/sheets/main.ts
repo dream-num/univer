@@ -129,11 +129,7 @@ function createNewInstance() {
             notExecuteFormula: true,
             autoHeightForMergedCells: true,
         }],
-        [UniverSheetsUIPlugin, {
-            scrollConfig: {
-                trackBackgroundColor: 'rgba(255,0,0,0.5)',
-            },
-        }],
+        [UniverSheetsUIPlugin],
         [UniverSheetsNumfmtPlugin],
         [UniverSheetsZenEditorPlugin],
         [UniverFormulaEnginePlugin, { notExecuteFormula: true }],

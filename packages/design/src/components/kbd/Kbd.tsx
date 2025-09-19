@@ -31,8 +31,8 @@ export function KBD(props: IKBDProps) {
     return (
         <span
             className={clsx(`
-              univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2
-              univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700
+              univer-inline-block univer-h-6 univer-select-none univer-whitespace-nowrap univer-rounded-md
+              univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700
               dark:!univer-bg-gray-700 dark:!univer-text-white
             `, borderClassName, className)}
         >

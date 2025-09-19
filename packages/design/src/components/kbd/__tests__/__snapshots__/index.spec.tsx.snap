@@ -3,7 +3,7 @@
 exports[`KBD > should render with default props 1`] = `
 <div>
   <span
-    class="univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700 dark:!univer-bg-gray-700 dark:!univer-text-white univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid univer-border"
+    class="univer-inline-block univer-h-6 univer-select-none univer-whitespace-nowrap univer-rounded-md univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700 dark:!univer-bg-gray-700 dark:!univer-text-white univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid univer-border"
   >
     <kbd
       class="univer-inline-block univer-h-full"
@@ -17,7 +17,7 @@ exports[`KBD > should render with default props 1`] = `
 exports[`KBD > should render with multiple keys 1`] = `
 <div>
   <span
-    class="univer-inline-block univer-h-6 univer-select-none univer-rounded-md univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700 dark:!univer-bg-gray-700 dark:!univer-text-white univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid univer-border"
+    class="univer-inline-block univer-h-6 univer-select-none univer-whitespace-nowrap univer-rounded-md univer-bg-gray-50 univer-px-2 univer-font-mono univer-text-xs/6 univer-font-medium univer-text-gray-700 dark:!univer-bg-gray-700 dark:!univer-text-white univer-border-gray-200 dark:!univer-border-gray-600 univer-border-solid univer-border"
   >
     <kbd
       class="univer-inline-block univer-h-full"

@@ -215,8 +215,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
             ctx.translateWithPrecision(0, paddingTop);
             ctx.save();
-            ctx.translateWithPrecision(PADDING_H, 0);
+            ctx.translateWithPrecision(paddingLeft, 0);
             ctx.beginPath();
+            // Ensure clipping area matches the actual text rendering area
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
             Text.drawWith(ctx, {
@@ -230,13 +231,12 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 warp: tb === WrapStrategy.WRAP,
                 hAlign: HorizontalAlign.LEFT,
             }, textSkeleton);
-            ctx.translateWithPrecision(paddingLeft, 0);
             ctx.restore();
 
             ctx.restore();
 
             map.set(key, {
-                left: cellBounding.endX + l + skeleton.rowHeaderWidth - ICON_PLACE,
+                left: cellBounding.endX - ICON_PLACE + skeleton.rowHeaderWidth,
                 top: cellBounding.startY + t + skeleton.columnHeaderHeight,
                 width: ICON_PLACE,
                 height: cellHeight - t - b,
@@ -262,7 +262,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             const fontHeight = textSkeleton.getTotalHeight();
             const rectHeight = fontHeight + (PADDING_V * 2);
             const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
-            const { paddingTop, paddingLeft } = calcPadding(rectWidth, cellHeight, fontWidth, rectHeight, vt, ht);
+            const { paddingTop } = calcPadding(rectWidth, cellHeight, fontWidth, rectHeight, vt, ht);
 
             ctx.translateWithPrecision(MARGIN_H, paddingTop);
 
@@ -275,9 +275,12 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.save();
             ctx.translateWithPrecision(PADDING_H, PADDING_V);
             ctx.beginPath();
+            // Use actual font height for clipping, ensuring wrapped text is not cut off
+            // The clipping height should match the available text area height
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
-            ctx.translateWithPrecision(paddingLeft, 0);
+            // Remove redundant paddingLeft translation as it's already handled by text alignment
+            // ctx.translateWithPrecision(paddingLeft, 0);
 
             Text.drawWith(ctx, {
                 text: valueStr,
@@ -337,7 +340,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         tb = tb ?? WrapStrategy.WRAP;
 
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
-            const realWidth = cellWidth - ICON_PLACE;
+            const { l = DEFAULT_STYLES.pd.l, r = DEFAULT_STYLES.pd.r } = (pd ?? {});
+            const realWidth = cellWidth - l - r - ICON_PLACE - 4;
             const skeleton = new DocSimpleSkeleton(
                 valueStr,
                 getFontStyleString(style).fontCache,
@@ -348,7 +352,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             skeleton.calculate();
             return skeleton.getTotalHeight() + t + b + (MARGIN_V * 2);
         } else {
-            const realWidth = Math.max(cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE, 10);
+            const realWidth = Math.max(cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE - 4, 10);
             const skeleton = new DocSimpleSkeleton(
                 valueStr,
                 getFontStyleString(style).fontCache,
@@ -357,7 +361,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 Infinity
             );
             skeleton.calculate();
-            return skeleton.getTotalHeight() + (MARGIN_V * 2) + +(PADDING_V * 2);
+            return skeleton.getTotalHeight() + (MARGIN_V * 2) + (PADDING_V * 2);
         }
     }
 
@@ -394,7 +398,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         let paddingAll = MARGIN_H * 2 + ICON_PLACE;
         switch (rule.renderMode) {
             case DataValidationRenderMode.ARROW:
-                paddingAll = ICON_PLACE + MARGIN_H * 2 + r + l;
+                paddingAll = ICON_PLACE + 4 + r + l;
                 break;
             case DataValidationRenderMode.CUSTOM:
                 // + 1 is must, or last character will be cut
@@ -459,13 +463,13 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         this._commandService.executeCommand(ShowDataValidationDropdown.id, params);
     };
 
-    onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+    onPointerEnter(_info: ICellRenderContext, _evt: IPointerEvent | IMouseEvent) {
         getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
             ?.mainComponent
             ?.setCursor(CURSOR_TYPE.POINTER);
     }
 
-    onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+    onPointerLeave(_info: ICellRenderContext, _evt: IPointerEvent | IMouseEvent) {
         getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService)
             ?.mainComponent
             ?.setCursor(CURSOR_TYPE.DEFAULT);

@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         Pacifico: 'Pacifico',
     },
     'shortcut-panel': {
-        title: 'Ярлыки',
+        title: 'Сочетания клавиш',
     },
     shortcut: {
         undo: 'Отменить',
@@ -73,10 +73,10 @@ const locale: typeof enUS = {
         cut: 'Вырезать',
         copy: 'Копировать',
         paste: 'Вставить',
-        'shortcut-panel': 'Переключить панель ярлыков',
+        'shortcut-panel': 'Переключить панель сочетания клавиш',
     },
     'common-edit': 'Общие команды редактирования',
-    'toggle-shortcut-panel': 'Переключить панель ярлыков',
+    'toggle-shortcut-panel': 'Переключить панель сочетания клавиш',
     clipboard: {
         authentication: {
             title: 'Доступ запрещен',
@@ -95,7 +95,7 @@ const locale: typeof enUS = {
         confirm: 'Подтвердить',
         cancel: 'Отменить',
     },
-    'global-shortcut': 'Глобальные ярлыки',
+    'global-shortcut': 'Сочетания клавиш',
     'zoom-slider': {
         resetTo: 'Сбросить до',
     },

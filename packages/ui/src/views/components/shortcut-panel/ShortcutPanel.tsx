@@ -108,11 +108,12 @@ export function ShortcutPanel() {
                             <li
                                 key={`${item.title}-${item.shortcut}`}
                                 className={`
-                                  univer-flex univer-h-10 univer-items-center univer-justify-between univer-text-sm
+                                  univer-flex univer-h-10 univer-items-center univer-justify-between univer-py-0.5
+                                  univer-text-sm
                                   last:univer-border-b-0
                                 `}
                             >
-                                <span className="univer-line-clamp-1">{item.title}</span>
+                                <span className="univer-line-clamp-2">{item.title}</span>
                                 {item.shortcut && <KBD keyboard={item.shortcut} />}
                             </li>
                         ))}

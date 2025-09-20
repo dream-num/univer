@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.10.9](https://github.com/dream-num/univer/compare/v0.10.8...v0.10.9) (2025-09-20)
+
+
+### Bug Fixes
+
+* active cell border color ([#5855](https://github.com/dream-num/univer/issues/5855)) ([be5c8c0](https://github.com/dream-num/univer/commit/be5c8c01bc0c8909f8ed50a8a237cf642aa10fec))
+* **drawing:** fix duplicate event subscriptions ([#5890](https://github.com/dream-num/univer/issues/5890)) ([e780d48](https://github.com/dream-num/univer/commit/e780d487a094f5ef605404c09d1c887302cea4d3))
+* **dropdown-widget:** adjust padding calculations and clipping areas for better text rendering ([#5888](https://github.com/dream-num/univer/issues/5888)) ([a581a8b](https://github.com/dream-num/univer/commit/a581a8b7d0346167e07865e4fc3408254fc6933d))
+* **engine-render:** fix the issue of background rendering misalignment when hiding the first row of merged cells ([#5858](https://github.com/dream-num/univer/issues/5858)) ([7d70db0](https://github.com/dream-num/univer/commit/7d70db085feb946579cb3a7bd413d46dfbd944bc))
+* **event:** fix BeforeSheetEditEnd cancel ([#5889](https://github.com/dream-num/univer/issues/5889)) ([56368fa](https://github.com/dream-num/univer/commit/56368fa2476e12e0781d4e1ea92cc11477041094))
+* fix format painter selection issue ([#5853](https://github.com/dream-num/univer/issues/5853)) ([94da109](https://github.com/dream-num/univer/commit/94da1098523a8c8ce22ad2d14bfdbc38ca0519ab))
+* **formula:** fix the issue in some formulas where the range parameter is not a reference object ([#5872](https://github.com/dream-num/univer/issues/5872)) ([03d0ee5](https://github.com/dream-num/univer/commit/03d0ee5b87ea15f9c939fd04148ebe3a8086e77d))
+* **formula:** fix the issue where +-*/ formula could not calculate text that can be converted to numbers ([#5882](https://github.com/dream-num/univer/issues/5882)) ([6f256f2](https://github.com/dream-num/univer/commit/6f256f2695d4719015d070fd7d733cbcedc71969))
+* **formula:** fixed the issue where null values ​​in IF formulas would return #N/A errors ([#5861](https://github.com/dream-num/univer/issues/5861)) ([9026ac7](https://github.com/dream-num/univer/commit/9026ac7cb2637bea2edaca8c573f6c39c16032b3))
+* **numfmt:** fix the issue where increasing/decreasing decimal places could not be applied when the cell number format was General ([#5881](https://github.com/dream-num/univer/issues/5881)) ([794983f](https://github.com/dream-num/univer/commit/794983f9a87486f3b33024a6e48592ae7d0ef2fe))
+* **render:** fix horizontal alignment ([#5887](https://github.com/dream-num/univer/issues/5887)) ([f3d3b20](https://github.com/dream-num/univer/commit/f3d3b2096a59a11a1f1fb185730e98ee419d2494))
+* **sheets-filter:** fix filter treat number as string expect value ([#5862](https://github.com/dream-num/univer/issues/5862)) ([d9401ec](https://github.com/dream-num/univer/commit/d9401ec74b90c97cc2fee7ea47220f1b4444a65d))
+* statistic not fully displayed ([#5864](https://github.com/dream-num/univer/issues/5864)) ([b7d3f83](https://github.com/dream-num/univer/commit/b7d3f83ebf2f45ca69cfc15e72edbb3f6e02af1e))
+* **table:** fix table name error ([#5874](https://github.com/dream-num/univer/issues/5874)) ([7926607](https://github.com/dream-num/univer/commit/79266070fc35ce544acbc67b6d5692a49c953240))
+* text under active input ([#5849](https://github.com/dream-num/univer/issues/5849)) ([ad3f67b](https://github.com/dream-num/univer/commit/ad3f67b68269e11cf421b9ad8d279c19fb7d24b6))
+
+
+### Features
+
+* diagonal double border ([#5879](https://github.com/dream-num/univer/issues/5879)) ([c89800b](https://github.com/dream-num/univer/commit/c89800b7a047327a3cc4741e242e35ae6e502d6e))
+* **sheets-ui:** active border type ([#5875](https://github.com/dream-num/univer/issues/5875)) ([72cbe91](https://github.com/dream-num/univer/commit/72cbe91c1c29ad0ccacbfcdfbcbea7df01c53be2))
+* **sheets-ui:** active border type in dropdown value ([#5880](https://github.com/dream-num/univer/issues/5880)) ([cb63a01](https://github.com/dream-num/univer/commit/cb63a01fff42daa36c01fe8710e4f7fb881fa9dd))
+* **sheets-ui:** add double border ([#5865](https://github.com/dream-num/univer/issues/5865)) ([ad8b8f4](https://github.com/dream-num/univer/commit/ad8b8f44b7338f84cbccd4386f90371341efb8e8))
+
 ## [0.10.8](https://github.com/dream-num/univer/compare/v0.10.7...v0.10.8) (2025-09-13)
 
 

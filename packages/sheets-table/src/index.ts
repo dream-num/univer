@@ -42,4 +42,4 @@ export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './
 export { UniverSheetsTablePlugin } from './plugin';
 export { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnDataTypeEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from './types/enum';
 export type { ITableColumnJson, ITableConditionFilterItem, ITableData, ITableFilterItem, ITableInfo, ITableInfoWithUnitId, ITableManualFilterItem, ITableOptions, ITableRange, ITableRangeWithState, TableMetaType, TableRelationTupleType } from './types/type';
-export type { ITableSetConfig } from './types/type';
+export type { ITableJson, ITableSetConfig } from './types/type';

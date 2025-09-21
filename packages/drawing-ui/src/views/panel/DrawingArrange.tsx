@@ -68,7 +68,7 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
                 <div>{localeService.t('image-panel.arrange.title')}</div>
             </header>
 
-            <div className="univer-grid univer-grid-cols-2 univer-gap-2 univer-px-8">
+            <div className="univer-grid univer-grid-cols-2 univer-gap-2">
                 <Button onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                     <MoveUpIcon />
                     {localeService.t('image-panel.arrange.forward')}

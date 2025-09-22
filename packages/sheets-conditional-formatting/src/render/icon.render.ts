@@ -27,6 +27,11 @@ const EXTENSION_Z_INDEX = 35;
 export const DEFAULT_WIDTH = 15;
 export const DEFAULT_PADDING = 2;
 
+const stringifyRange = (range: IRange) => {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    return `${startRow}-${endRow}-${startColumn}-${endColumn}`;
+};
+
 export class ConditionalFormattingIcon extends SheetExtension {
     private _paddingRightAndLeft = DEFAULT_PADDING;
 
@@ -52,45 +57,59 @@ export class ConditionalFormattingIcon extends SheetExtension {
         if (!worksheet) {
             return false;
         }
+        const mergeCellRendered = new Set<string>();
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
             if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
                 return;
             }
-            const cellData = worksheet.getCell(row, col) as IIconSetCellData;
-            if (cellData?.iconSet) {
-                const { iconType, iconId } = cellData.iconSet;
-                if (iconType === EMPTY_ICON_TYPE) {
-                    return;
-                }
-                const icon = this._imageMap.get(this._createKey(iconType, iconId));
-                if (!icon) {
-                    return;
-                }
-                const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
-                let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
-                if (isMerged) {
-                    return;
-                }
-                if (isMergedMainCell) {
-                    startY = mergeInfo.startY;
-                    endY = mergeInfo.endY;
-                    startX = mergeInfo.startX;
-                    endX = mergeInfo.endX;
-                }
-                if (!this.isRenderDiffRangesByCell(mergeInfo, diffRanges)) {
-                    return;
-                }
-                const borderWidth = endX - startX;
-                const borderHeight = endY - startY;
-                if (this._width > borderHeight || this._width > borderWidth + this._paddingRightAndLeft * 2) {
-                    return;
-                }
-                // Highly centered processing
-                const y = (borderHeight - this._width) / 2 + startY;
-                ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, this._width, this._width);
+
+            const primaryWithCoord = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
+            const { isMerged, isMergedMainCell, mergeInfo } = primaryWithCoord;
+
+            let cellData = worksheet.getCell(row, col) as IIconSetCellData;
+            if (isMerged) {
+                cellData = worksheet.getCell(mergeInfo.startRow, mergeInfo.startColumn) as IIconSetCellData;
             }
+
+            if (!cellData?.iconSet) {
+                return;
+            }
+
+            const { iconType, iconId } = cellData.iconSet;
+            if (iconType === EMPTY_ICON_TYPE) {
+                return;
+            }
+
+            const icon = this._imageMap.get(this._createKey(iconType, iconId));
+            if (!icon) {
+                return;
+            }
+
+            if (!this.isRenderDiffRangesByCell(mergeInfo, diffRanges)) {
+                return;
+            }
+
+            if (isMerged || isMergedMainCell) {
+                const rangeStr = stringifyRange(mergeInfo);
+                if (mergeCellRendered.has(rangeStr)) {
+                    return;
+                }
+
+                mergeCellRendered.add(rangeStr);
+            }
+
+            const { startX, endX, startY, endY } = (isMerged || isMergedMainCell) ? mergeInfo : primaryWithCoord;
+            const borderWidth = endX - startX;
+            const borderHeight = endY - startY;
+            if (this._width > borderHeight || this._width > borderWidth + this._paddingRightAndLeft * 2) {
+                return;
+            }
+
+            // Highly centered processing
+            const y = (borderHeight - this._width) / 2 + startY;
+            ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, this._width, this._width);
         });
         ctx.restore();
     }

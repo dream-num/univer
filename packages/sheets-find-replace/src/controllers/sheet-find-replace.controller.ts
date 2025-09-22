@@ -535,12 +535,27 @@ export class SheetFindModel extends FindModel {
             const { startX, startY } = startPosition;
             const { endX, endY } = endPosition;
 
-            const rowHidden = !worksheet.getRowRawVisible(startRow);
-            const columnHidden = !worksheet.getColVisible(startColumn);
+            let isAllRowHidden = true;
 
-            const inHiddenRange = rowHidden || columnHidden;
-            const width = columnHidden ? 2 : endX - startX;
-            const height = rowHidden ? 2 : endY - startY;
+            for (let row = startRow; row <= endRow; row++) {
+                if (worksheet.getRowRawVisible(row)) {
+                    isAllRowHidden = false;
+                    break;
+                }
+            }
+
+            let isAllColHidden = true;
+
+            for (let col = startColumn; col <= endColumn; col++) {
+                if (worksheet.getColVisible(col)) {
+                    isAllColHidden = false;
+                    break;
+                }
+            }
+
+            const inHiddenRange = isAllRowHidden || isAllColHidden;
+            const width = isAllColHidden ? 2 : endX - startX;
+            const height = isAllRowHidden ? 2 : endY - startY;
 
             const props: ISheetFindReplaceHighlightShapeProps = {
                 left: startX,

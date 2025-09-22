@@ -339,12 +339,16 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         const [min, max] = RANGE_DRAWING_ROTATION_LIMIT;
 
+        if (val === min || val === max) {
+            val = 0;
+        }
+
         if (val < min) {
-            val = min;
+            val = ((val % 360) - 360) % 360;
         }
 
         if (val > max) {
-            val = max;
+            val = ((val % 360) + 360) % 360;
         }
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { angle: val } };

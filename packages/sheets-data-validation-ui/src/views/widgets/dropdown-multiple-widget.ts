@@ -87,7 +87,9 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
-        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, row, col);
+        const _row = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startRow : row;
+        const _col = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startColumn : col;
+        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, _row, _col);
         if (!rule) {
             return;
         }

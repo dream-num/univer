@@ -47,14 +47,19 @@ export class Custom extends SheetExtension {
             if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
                 return;
             }
+
+            let primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col, false);
+            const { mergeInfo } = primaryWithCoord;
+
             let cellData = worksheet.getCell(row, col);
+            if (primaryWithCoord.isMerged) {
+                cellData = worksheet.getCell(mergeInfo.startRow, mergeInfo.startColumn);
+            }
+
             if (!cellData?.customRender) {
                 return;
             }
 
-            let primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col, false);
-
-            const { mergeInfo } = primaryWithCoord;
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                 return true;
             }
@@ -69,16 +74,7 @@ export class Custom extends SheetExtension {
             }
 
             if (primaryWithCoord.isMerged) {
-                const mainCell = {
-                    row: mergeInfo.startRow,
-                    col: mergeInfo.startColumn,
-                };
-                cellData = worksheet.getCell(mainCell.row, mainCell.col);
-                if (!cellData?.customRender) {
-                    return;
-                }
-
-                primaryWithCoord = skeleton.getCellWithCoordByIndex(mainCell.row, mainCell.col, false);
+                primaryWithCoord = skeleton.getCellWithCoordByIndex(mergeInfo.startRow, mergeInfo.startColumn, false);
             }
 
             const renderInfo = {

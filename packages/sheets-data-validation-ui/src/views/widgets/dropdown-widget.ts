@@ -149,7 +149,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, row, col);
+        const _row = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startRow : row;
+        const _col = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startColumn : col;
+        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, _row, _col);
         if (!rule) {
             return;
         }

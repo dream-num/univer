@@ -46,7 +46,7 @@ export interface ISideMenuInstance {
     scrollTo: (id: string) => void;
 }
 
-const commonClass = 'univer-overflow-hidden univer-font-[500] univer-truncate univer-h-[24px] univer-mb-2 univer-leading-[24px] univer-ellipsis univer-cursor-pointer';
+const commonClass = 'univer-overflow-hidden univer-font-[500] univer-truncate univer-h-[24px] univer-mb-2 univer-leading-[24px] univer-ellipsis univer-cursor-pointer univer-pr-1 ';
 const titleClass = 'univer-text-base univer-font-semibold';
 const h1Class = 'univer-text-sm univer-font-semibold';
 const textClass = 'univer-text-sm';

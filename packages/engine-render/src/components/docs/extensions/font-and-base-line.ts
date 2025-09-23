@@ -65,14 +65,15 @@ export class FontAndBaseLine extends docExtension {
 
         const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
 
-        if (more) {
-            if (more.viewBound) {
-                // ctx.fillText('', x, y), the 'y' is the baseline of a character, not the left top of the character
-                if (spanPointWithFont.x > more.viewBound.right || spanPointWithFont.y - glyph.bBox.aba > more.viewBound.bottom) {
-                    return;
-                }
-            }
-        }
+        // I don't know what this code does. It affects the rendering of Rotate up. After commenting it out, it works normally.
+        // if (more) {
+        //     if (more.viewBound) {
+        //         // ctx.fillText('', x, y), the 'y' is the baseline of a character, not the left top of the character
+        //         if (spanPointWithFont.x > more.viewBound.right || spanPointWithFont.y - glyph.bBox.aba > more.viewBound.bottom) {
+        //             return;
+        //         }
+        //     }
+        // }
 
         if (content == null) {
             return;

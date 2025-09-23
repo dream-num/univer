@@ -69,13 +69,13 @@ const locale: typeof enUS = {
         },
         null: 'Нет выбранных объектов',
     },
-    'drawing-view': 'Drawing',
+    'drawing-view': 'Изображение',
     shortcut: {
-        'drawing-move-down': 'Move Drawing down',
-        'drawing-move-up': 'Move Drawing up',
-        'drawing-move-left': 'Move Drawing left',
-        'drawing-move-right': 'Move Drawing right',
-        'drawing-delete': 'Delete Drawing',
+        'drawing-move-down': 'Переместить изображение вниз',
+        'drawing-move-up': 'Переместить изображение вверх',
+        'drawing-move-left': 'Переместить изображение влево',
+        'drawing-move-right': 'Переместить изображение вправо',
+        'drawing-delete': 'Удалить изображение',
     },
 };
 

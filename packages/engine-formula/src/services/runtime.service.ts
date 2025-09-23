@@ -38,6 +38,7 @@ import { objectValueToCellValue } from '../engine/utils/value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { IHyperlinkEngineFormulaService } from './hyperlink-engine-formula.service';
+import { IImageEngineFormulaService } from './image-engine-formula.service';
 
 /**
  * The formula engine has a lot of stages. IDLE and CALCULATION_COMPLETED can be considered as
@@ -226,7 +227,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
-        @IHyperlinkEngineFormulaService private readonly _hyperlinkEngineFormulaService: IHyperlinkEngineFormulaService
+        @IHyperlinkEngineFormulaService private readonly _hyperlinkEngineFormulaService: IHyperlinkEngineFormulaService,
+        @IImageEngineFormulaService private readonly _imageEngineFormulaService: IImageEngineFormulaService
     ) {
         super();
     }
@@ -643,11 +645,19 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     private _getValueObjectOfRuntimeData(variant: Nullable<BaseValueObject>): Nullable<ICellData> {
-        if (variant?.isString() && variant.isHyperlink()) {
-            return this._hyperlinkEngineFormulaService.generateCellValue(
-                (variant as StringValueObject).getHyperlinkUrl(),
-                variant.getValue() as string
-            );
+        if (variant?.isString()) {
+            if (variant.isHyperlink()) {
+                return this._hyperlinkEngineFormulaService.generateCellValue(
+                    (variant as StringValueObject).getHyperlinkUrl(),
+                    variant.getValue() as string
+                );
+            } else if (variant.isImage()) {
+                return this._imageEngineFormulaService.generateCellValue(
+                    (variant as StringValueObject).getImageInfo(),
+                    this._currentUnitId,
+                    this._currentSubUnitId
+                );
+            }
         }
 
         return objectValueToCellValue(variant);

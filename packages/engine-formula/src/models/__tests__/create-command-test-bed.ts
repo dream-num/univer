@@ -23,6 +23,7 @@ import { CalculateFormulaService, ICalculateFormulaService } from '../../service
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
+import { IImageEngineFormulaService, ImageEngineFormulaService } from '../../services/image-engine-formula.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../../services/sheet-row-filtered.service';
 import { FormulaDataModel } from '../formula-data.model';
@@ -77,6 +78,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([Lexer]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
+            injector.add([IImageEngineFormulaService, { useClass: ImageEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);

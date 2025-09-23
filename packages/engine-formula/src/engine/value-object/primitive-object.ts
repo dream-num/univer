@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getNumfmtParseValueFilter, isRealNum } from '@univerjs/core';
+import { getNumfmtParseValueFilter, isRealNum, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -1337,9 +1337,23 @@ export class NumberValueObject extends BaseValueObject {
     }
 }
 
-interface IStringValueObjectOptions {
+export interface IStringValueObjectOptions {
+    /**
+     * Whether it is a hyperlink value from HYPERLINK function
+     */
     isHyperlink?: boolean;
     hyperlinkUrl?: string;
+    /**
+     * Whether it is an image value from IMAGE function
+     */
+    isImage?: boolean;
+    imageInfo?: {
+        source: string;
+        altText: string;
+        sizing: number;
+        height: number;
+        width: number;
+    };
 }
 
 const STRING_CACHE_LRU_COUNT = 100000;
@@ -1349,6 +1363,8 @@ export class StringValueObject extends BaseValueObject {
     private _value: string;
     private _isHyperlink: boolean = false;
     private _hyperlinkUrl: string = '';
+    private _isImage: boolean = false;
+    private _imageInfo: IStringValueObjectOptions['imageInfo'];
 
     static create(value: string, options?: IStringValueObjectOptions) {
         const cached = StringValueObjectCache.get(value);
@@ -1360,6 +1376,10 @@ export class StringValueObject extends BaseValueObject {
             instance._isHyperlink = options.isHyperlink;
             instance._hyperlinkUrl = options.hyperlinkUrl ?? '';
         }
+        if (options?.isImage) {
+            instance._isImage = options.isImage;
+            instance._imageInfo = options.imageInfo;
+        }
         StringValueObjectCache.set(value, instance);
         return instance;
     }
@@ -1370,6 +1390,14 @@ export class StringValueObject extends BaseValueObject {
         }
 
         if (cached.getHyperlinkUrl() !== options.hyperlinkUrl) {
+            return false;
+        }
+
+        if (cached.isImage() !== options.isImage) {
+            return false;
+        }
+
+        if (!Tools.diffValue(cached.getImageInfo(), options.imageInfo)) {
             return false;
         }
 
@@ -1395,6 +1423,14 @@ export class StringValueObject extends BaseValueObject {
 
     getHyperlinkUrl(): string {
         return this._hyperlinkUrl;
+    }
+
+    override isImage(): boolean {
+        return this._isImage;
+    }
+
+    getImageInfo(): IStringValueObjectOptions['imageInfo'] {
+        return this._imageInfo;
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {

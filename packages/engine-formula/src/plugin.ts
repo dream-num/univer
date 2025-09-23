@@ -53,6 +53,7 @@ import {
 import { FunctionService, IFunctionService } from './services/function.service';
 import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
+import { IImageEngineFormulaService, ImageEngineFormulaService } from './services/image-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
@@ -118,6 +119,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }],
+            [IImageEngineFormulaService, { useClass: ImageEngineFormulaService }],
             [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             [ISuperTableService, { useClass: SuperTableService }],
             [GlobalComputingStatusService],

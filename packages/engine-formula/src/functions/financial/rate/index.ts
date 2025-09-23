@@ -82,9 +82,16 @@ export class Rate extends BaseFunction {
 
             typeValue = typeValue ? 1 : 0;
 
-            if (nperValue <= 0 || pmtValue >= 0) {
+            if (nperValue <= 0) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
+
+            // ? return error whenever the cash flows doesn’t make economic sense
+            if ((pmtValue >= 0 && pvValue >= 0 && fvValue >= 0) ||
+                 (pmtValue <= 0 && pvValue <= 0 && fvValue <= 0)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
 
             return this._getResult(nperValue, pmtValue, pvValue, fvValue, typeValue, guessValue, rowIndex, columnIndex);
         });

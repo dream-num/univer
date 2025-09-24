@@ -89,7 +89,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
 
         // Update internal value when value prop changes
         useEffect(() => {
-            if (value !== undefined) {
+            if (value !== undefined && value !== internalValue) {
                 setInternalValue(value);
                 lastValidValueRef.current = value;
                 setInputValue(formatValue(value));

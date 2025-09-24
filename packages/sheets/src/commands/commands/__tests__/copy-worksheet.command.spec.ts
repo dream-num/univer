@@ -97,11 +97,11 @@ describe('Test copy worksheet commands', () => {
                 localeService.setLocale(LocaleType.EN_US);
                 const name = 'Sheet1';
 
-                expect(getCopyUniqueSheetName(workbook, localeService, name)).toBe('Sheet1(Copy)');
+                expect(getCopyUniqueSheetName(workbook, localeService, name)).toBe('Sheet1 (Copy)');
 
-                workbook.addWorksheet('sheet1-copy', 0, { name: 'Sheet1(Copy)' });
+                workbook.addWorksheet('sheet1-copy', 0, { name: 'Sheet1 (Copy)' });
 
-                expect(getCopyUniqueSheetName(workbook, localeService, name)).toBe('Sheet1(Copy2)');
+                expect(getCopyUniqueSheetName(workbook, localeService, name)).toBe('Sheet1 (Copy2)');
             });
         });
     });

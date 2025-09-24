@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 
 export class Rate extends BaseFunction {
     override minParams = 3;
@@ -82,7 +82,13 @@ export class Rate extends BaseFunction {
 
             typeValue = typeValue ? 1 : 0;
 
-            if (nperValue <= 0 || pmtValue >= 0) {
+            if (nperValue <= 0) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            // ? return error whenever the cash flows doesn’t make economic sense
+            if ((pmtValue >= 0 && pvValue >= 0 && fvValue >= 0) ||
+                 (pmtValue <= 0 && pvValue <= 0 && fvValue <= 0)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 

@@ -136,5 +136,36 @@ describe('Test rate function', () => {
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });
+
+        // New tests for all-positive or all-negative cash flows
+        it('Returns #NUM! when all cash flows have the same positive sign', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(12),
+                NumberValueObject.create(100),
+                NumberValueObject.create(1000),
+                NumberValueObject.create(100)
+            );
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
+
+        it('Returns #NUM! when all cash flows have the same negative sign', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(12),
+                NumberValueObject.create(-100),
+                NumberValueObject.create(-1000),
+                NumberValueObject.create(-100)
+            );
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
+
+        it('Calculates rate correctly with mixed signs', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(48),
+                NumberValueObject.create(0),
+                NumberValueObject.create(-8000),
+                NumberValueObject.create(9000)
+            );
+            expect(typeof getObjectValue(result)).toBe('number');
+        });
     });
 });

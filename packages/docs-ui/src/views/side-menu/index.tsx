@@ -229,7 +229,7 @@ function DocSideMenuContent() {
                 open={open}
                 onOpenChange={setOpen}
                 mode={mode}
-                maxWidth={mode === 'float' ? undefined : Math.floor(left)}
+                maxWidth={mode === 'float' ? undefined : Math.floor(left) - 10}
                 wrapperClass="univer-mt-12"
                 activeId={activeId}
                 onClick={handleClick}

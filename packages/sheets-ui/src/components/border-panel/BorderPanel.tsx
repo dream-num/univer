@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IBorderData, Nullable,
-} from '@univerjs/core';
+import type { IBorderData, Nullable } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
-import {
-    BorderStyleTypes,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    IUniverInstanceService,
-} from '@univerjs/core';
+import { BorderStyleTypes } from '@univerjs/core';
 import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
 import { CheckMarkIcon, MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
-import { BorderStyleManagerService } from '@univerjs/sheets';
+import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { BorderLine } from './border-line/BorderLine';
 import { BORDER_LINE_CHILDREN } from './interface';
@@ -100,11 +95,11 @@ function getBorderStyle(borderData: Nullable<IBorderData>): BorderStyleTypes | u
 export function BorderPanel(props: IBorderPanelProps) {
     const componentManager = useDependency(ComponentManager);
     const borderStyleManagerService = useDependency(BorderStyleManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-    const textRuns = editorDataModel?.getBody()?.textRuns;
-    const color = getBorderColor(textRuns?.[0]?.ts?.bd);
-    const type = getBorderStyle(textRuns?.[0]?.ts?.bd);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
+
+    const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('bd');
+    const color = isAllValuesSame ? getBorderColor(currentValue as Nullable<IBorderData>) : undefined;
+    const type = isAllValuesSame ? getBorderStyle(currentValue as Nullable<IBorderData>) : undefined;
 
     const { onChange, value } = props;
 

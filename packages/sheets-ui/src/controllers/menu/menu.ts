@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IColorStyle, Nullable, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
@@ -536,6 +536,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     return {
         id: SetRangeTextColorCommand.id,
@@ -551,26 +552,13 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                 },
                 value$: new Observable<string>((subscriber) => {
                     const defaultValue = DEFAULT_STYLES.cl.rgb;
-                    const calc = () => {
-                        const textRun = getFontStyleAtCursor(accessor);
+                    const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('cl');
 
-                        if (!textRun) {
-                            subscriber.next(defaultValue);
-                            return;
-                        }
-
-                        const color = textRun.ts?.cl?.rgb;
-                        subscriber.next(color ?? defaultValue);
-                    };
-
-                    const disposable = commandService.onCommandExecuted((c) => {
-                        if (c.id === SetRangeTextColorCommand.id) {
-                            calc();
-                        }
-                    });
-
-                    calc();
-                    return disposable.dispose;
+                    if (isAllValuesSame) {
+                        subscriber.next((currentValue as Nullable<IColorStyle>)?.rgb ?? defaultValue);
+                    } else {
+                        subscriber.next(defaultValue);
+                    }
                 }),
             },
         ],
@@ -612,6 +600,7 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     return {
         id: SetBackgroundColorCommand.id,
@@ -627,27 +616,13 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 },
                 value$: new Observable<string>((subscriber) => {
                     const defaultValue = DEFAULT_STYLES.bg.rgb;
-                    const calc = () => {
-                        const textRun = getFontStyleAtCursor(accessor);
+                    const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('bg');
 
-                        if (!textRun) {
-                            subscriber.next(defaultValue);
-                            return;
-                        }
-
-                        const color = textRun.ts?.bg?.rgb;
-
-                        subscriber.next(color ?? defaultValue);
-                    };
-
-                    const disposable = commandService.onCommandExecuted((c) => {
-                        if (c.id === SetRangeTextColorCommand.id) {
-                            calc();
-                        }
-                    });
-
-                    calc();
-                    return disposable.dispose;
+                    if (isAllValuesSame) {
+                        subscriber.next((currentValue as Nullable<IColorStyle>)?.rgb ?? defaultValue);
+                    } else {
+                        subscriber.next(defaultValue);
+                    }
                 }),
             },
         ],

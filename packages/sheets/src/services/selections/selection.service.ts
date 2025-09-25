@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { DeepReadonly, ISelectionCell, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { ISelectionWithStyle } from '../../basics/selection';
 import type { ISelectionManagerSearchParam } from './type';
-
-import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, RxDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { distinctUntilChanged, of, shareReplay, skip, switchMap, takeUntil } from 'rxjs';
 import { WorkbookSelectionModel } from './selection-data-model';
 import { SelectionMoveType } from './type';
@@ -40,6 +39,11 @@ export class SheetsSelectionsService extends RxDisposable {
     get currentSelectionParam() {
         return this._currentSelectionPos;
     }
+
+    /**
+     * Cache cell styles for current selections, key is `${row}_${column}`.
+     */
+    private _cellStylesCache = new Map<string, IStyleData>();
 
     /**
      * Selection Events, usually triggered when pointerdown in spreadsheet by selection render service after selectionModel has updated.
@@ -93,6 +97,11 @@ export class SheetsSelectionsService extends RxDisposable {
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._removeWorkbookSelection(workbook.getUnitId());
+        });
+
+        // Clear cell styles cache when current selections changed.
+        this.selectionChanged$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+            this._cellStylesCache.clear();
         });
     }
 
@@ -231,6 +240,62 @@ export class SheetsSelectionsService extends RxDisposable {
 
     protected _removeWorkbookSelection(unitId: string): void {
         this._workbookSelections.delete(unitId);
+    }
+
+    /**
+     * This method is used to get the common value of a specific cell style property in the current selections.
+     * Used to determine the state related to color panels in the toolbar.
+     * Because in Excel, only the color panels need to show the common color of the current selections, other properties based on the current selection primary cell.
+     * Now only handles text color, fill color, border style, border color.
+     */
+    getCellStylesProperty(property: keyof IStyleData): {
+        isAllValuesSame: boolean;
+        value: Nullable<IStyleData[keyof IStyleData]>;
+    } {
+        const worksheet = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const selections = this.getCurrentSelections();
+        if (!worksheet || selections.length === 0) {
+            return {
+                isAllValuesSame: false,
+                value: null,
+            };
+        }
+
+        let value: Nullable<IStyleData[keyof IStyleData]> = null;
+
+        for (let i = 0; i < selections.length; i++) {
+            const selection = selections[i];
+            const { startRow, endRow, startColumn, endColumn } = selection.range;
+
+            for (let row = startRow; row <= endRow; row++) {
+                for (let column = startColumn; column <= endColumn; column++) {
+                    const key = `${row}_${column}`;
+                    let style: IStyleData;
+                    if (this._cellStylesCache.has(key)) {
+                        style = this._cellStylesCache.get(key)!;
+                    } else {
+                        style = worksheet.getComposedCellStyle(row, column);
+                        this._cellStylesCache.set(key, style);
+                    }
+
+                    const _value = style[property];
+
+                    if (value !== undefined && value !== null && !Tools.diffValue(value, _value)) {
+                        return {
+                            isAllValuesSame: false,
+                            value: null,
+                        };
+                    }
+
+                    value = _value;
+                }
+            }
+        }
+
+        return {
+            isAllValuesSame: true,
+            value,
+        };
     }
 }
 

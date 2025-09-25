@@ -168,7 +168,7 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     if (!format) {
         return {};
     }
-    const { ff, fs, it, bl, ul, st, ol, cl, bg, bd } = format;
+    const { ff, fs, it, bl, ul, st, ol, cl, bg } = format;
     const style: IStyleBase = {};
     ff && (style.ff = ff);
     fs && (style.fs = fs);
@@ -179,7 +179,6 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     ol && (style.ol = ol);
     cl && (style.cl = cl);
     bg && (style.bg = bg);
-    bd && (style.bd = bd);
 
     return style;
 }

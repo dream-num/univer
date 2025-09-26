@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.10.10](https://github.com/dream-num/univer/compare/v0.10.9...v0.10.10) (2025-09-26)
+
+
+### Bug Fixes
+
+* (RATE func) Validate cash flow signs and support zero PMT scenarios for Excel compatibility ([#5910](https://github.com/dream-num/univer/issues/5910)) ([6484c60](https://github.com/dream-num/univer/commit/6484c6020704cc23d94f8f54104bf4f3e39ca2af))
+* content in the image edit button ([#5896](https://github.com/dream-num/univer/issues/5896)) ([17cecf1](https://github.com/dream-num/univer/commit/17cecf14d716285da6b0fb87a319cf864453ba74))
+* **editor:** fix the issue where the SheetValueChanged event would be triggered if the cell value remained unchanged when exiting the editing state ([#5913](https://github.com/dream-num/univer/issues/5913)) ([04660fd](https://github.com/dream-num/univer/commit/04660fd7015d01b66a254f578685f6a715129329))
+* **engine-render:** fix some issues when hiding the first row of merged cells ([#5904](https://github.com/dream-num/univer/issues/5904)) ([39b4f87](https://github.com/dream-num/univer/commit/39b4f8708de604c21f8df8bfa8545ff02c90eb64))
+* fix text border issue in editor and optimized the active color in panels related to cell color properties ([#5917](https://github.com/dream-num/univer/issues/5917)) ([79ca94c](https://github.com/dream-num/univer/commit/79ca94cb3e3486bb0bdebe0651ecded5d0b4131a))
+* **render:** fix text rotate ([#5909](https://github.com/dream-num/univer/issues/5909)) ([d509c3e](https://github.com/dream-num/univer/commit/d509c3e67508aa5debfdd603067d81e47e02b12a))
+* **type:** add table type ([#5895](https://github.com/dream-num/univer/issues/5895)) ([0cb8b5f](https://github.com/dream-num/univer/commit/0cb8b5f7bbceed0e4b5f10ee0f3b2f9af21d583b))
+* **ui:** shortcut cropped content in kbd component ([#5891](https://github.com/dream-num/univer/issues/5891)) ([1433275](https://github.com/dream-num/univer/commit/143327521560dbbc9e1d3e6248c1622a214d12b1))
+
+
+### Features
+
+* **docs-ui:** side menu stylization ([#5911](https://github.com/dream-num/univer/issues/5911)) ([ff80c9c](https://github.com/dream-num/univer/commit/ff80c9c029a97143a6eee97c8996e4e722664708))
+* optimize the range of image rotation angle settings ([#5914](https://github.com/dream-num/univer/issues/5914)) ([99a331e](https://github.com/dream-num/univer/commit/99a331e9ab186c88d5e639b2c03d892a8a4fdb32))
+* **sheets:** add space on create sheet copy ([#5915](https://github.com/dream-num/univer/issues/5915)) ([5f171a3](https://github.com/dream-num/univer/commit/5f171a34a0e02adde70a1802b7d8be696bcb07d9))
+* shortcut panel ru localization drawing ([#5905](https://github.com/dream-num/univer/issues/5905)) ([9a3c1b5](https://github.com/dream-num/univer/commit/9a3c1b55db22d39b6e859e8df8d17f0f66bccef3))
+
 ## [0.10.9](https://github.com/dream-num/univer/compare/v0.10.8...v0.10.9) (2025-09-20)
 
 

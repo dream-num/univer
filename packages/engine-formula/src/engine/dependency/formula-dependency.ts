@@ -58,6 +58,8 @@ export interface IFormulaDependencyGenerator {
     generate(): Promise<IFormulaDependencyTree[]>;
 }
 
+export type { IFormulaDependencyTree };
+
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
 export class FormulaDependencyGenerator extends Disposable {

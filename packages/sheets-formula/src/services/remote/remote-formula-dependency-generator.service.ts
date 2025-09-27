@@ -15,9 +15,8 @@
  */
 
 import type { IUnitRange } from '@univerjs/core';
-import type { FormulaCurrentConfigService } from '@univerjs/engine-formula';
-import { createIdentifier, isFormulaId, isFormulaString } from '@univerjs/core';
-import { IFormulaCurrentConfigService, IFormulaDependencyGenerator } from '@univerjs/engine-formula';
+import { createIdentifier, Inject, isFormulaId, isFormulaString } from '@univerjs/core';
+import { FormulaDataModel, ICalculateFormulaService, IFormulaCurrentConfigService } from '@univerjs/engine-formula';
 
 export interface IFormulaCellAndFeatureItem {
     unitId: string;
@@ -41,43 +40,46 @@ export const IRemoteFormulaDependencyGenerator = createIdentifier<IRemoteFormula
  */
 export class RemoteFormulaDependencyGeneratorService implements IRemoteFormulaDependencyGenerator {
     constructor(
-        @IFormulaDependencyGenerator private readonly _dependencyGenerator: IFormulaDependencyGenerator,
+        @ICalculateFormulaService private readonly _calculateFormulaService: ICalculateFormulaService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
     ) {}
 
     async generate(range?: IUnitRange): Promise<Array<IFormulaCellAndFeatureItem>> {
-        const configService = this._currentConfigService as FormulaCurrentConfigService;
-        const originalForceCalculate = configService.isForceCalculate();
-        configService.setForceCalculate(true);
-        const trees = await this._dependencyGenerator.generate();
-        configService.setForceCalculate(originalForceCalculate);
+        const formulaData = this._formulaDataModel.getFormulaData();
+        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+
+        const formulaDatasetConfig = {
+            formulaData,
+            arrayFormulaCellData,
+            arrayFormulaRange,
+            forceCalculate: false,
+            dirtyRanges: range ? [range] : [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+            clearDependencyTreeCache: {},
+            maxIteration: 1,
+            rowData: undefined,
+        };
+
+        const trees = await this._calculateFormulaService.generateDependencyTrees(formulaDatasetConfig);
+
         const result: Array<IFormulaCellAndFeatureItem> = [];
         for (let i = 0; i < trees.length; i++) {
             const tree = trees[i];
             if ((isFormulaString(tree.formula) || isFormulaId(tree.formulaId)) || tree.featureId != null) {
-                let include = true;
-                if (range) {
-                    if (tree.unitId !== range.unitId || tree.subUnitId !== range.sheetId) {
-                        include = false;
-                    } else if (tree.row != null && tree.column != null) {
-                        const r = range.range;
-                        if (tree.row < r.startRow || tree.row > r.endRow || tree.column < r.startColumn || tree.column > r.endColumn) {
-                            include = false;
-                        }
-                    }
-                    // For features without row/column, include if unitId and subUnitId match
-                }
-                if (include) {
-                    result.push({
-                        unitId: tree.unitId,
-                        subUnitId: tree.subUnitId,
-                        row: tree.row,
-                        column: tree.column,
-                        featureId: tree.featureId || undefined,
-                        formula: tree.formula || undefined,
-                        formulaId: tree.formulaId || undefined,
-                    });
-                }
+                result.push({
+                    unitId: tree.unitId,
+                    subUnitId: tree.subUnitId,
+                    row: tree.row,
+                    column: tree.column,
+                    featureId: tree.featureId || undefined,
+                    formula: tree.formula || undefined,
+                    formulaId: tree.formulaId || undefined,
+                });
             }
         }
         return result;

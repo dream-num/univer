@@ -23,9 +23,10 @@ import type {
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../basics/common';
-
 import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
+
 import type { LexerNode } from '../engine/analysis/lexer-node';
+import type { IFormulaDependencyTree } from '../engine/dependency/formula-dependency';
 import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
@@ -64,6 +65,7 @@ export interface ICalculateFormulaService {
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
+    generateDependencyTrees(formulaDatasetConfig: IFormulaDatasetConfig): Promise<IFormulaDependencyTree[]>;
     stopFormulaExecution(): void;
     calculate(formulaString: string, transformSuffix?: boolean): void;
 }
@@ -361,6 +363,37 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         // treeList.length = 0;
 
         return this._runtimeService.getAllRuntimeData();
+    }
+
+    async generateDependencyTrees(formulaDatasetConfig: IFormulaDatasetConfig): Promise<IFormulaDependencyTree[]> {
+        this._currentConfigService.load(formulaDatasetConfig);
+
+        this._runtimeService.reset();
+
+        const normalTrees = await this._generateTrees(false);
+
+        const executeState = this._runtimeService.getAllRuntimeData();
+
+        const { dirtyRanges, excludedCell } = this._getArrayFormulaDirtyRangeAndExcludedRange(
+            executeState.arrayFormulaRange,
+            executeState.runtimeFeatureRange
+        );
+
+        let arrayTrees: IFormulaDependencyTree[] = [];
+
+        if (dirtyRanges && dirtyRanges.length > 0) {
+            this._currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
+
+            arrayTrees = await this._generateTrees(true);
+        }
+
+        return [...normalTrees, ...arrayTrees];
+    }
+
+    private async _generateTrees(isArrayFormulaState: boolean): Promise<IFormulaDependencyTree[]> {
+        const treeList = (await this._formulaDependencyGenerator.generate()).reverse();
+
+        return treeList;
     }
 
     calculate(formulaString: string, transformSuffix: boolean = true) {

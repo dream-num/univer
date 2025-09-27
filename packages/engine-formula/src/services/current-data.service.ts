@@ -65,8 +65,6 @@ export interface IFormulaCurrentConfigService {
 
     isForceCalculate(): boolean;
 
-    setForceCalculate(forceCalculate: boolean): void;
-
     getDirtyRanges(): IUnitRange[];
 
     getDirtyNameMap(): IDirtyUnitSheetNameMap;
@@ -222,10 +220,6 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     isForceCalculate() {
         return this._forceCalculate;
-    }
-
-    setForceCalculate(forceCalculate: boolean) {
-        this._forceCalculate = forceCalculate;
     }
 
     getDirtyRanges() {

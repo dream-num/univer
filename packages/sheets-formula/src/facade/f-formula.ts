@@ -41,7 +41,7 @@ export interface IFFormulaSheetsMixin {
 
     /**
      * Get the list of formula cells and feature IDs from the dependency tree.
-     * @returns {Promise<Array<{ unitId: string; subUnitId: string; row?: number; column?: number; featureId?: string; formula?: string; formulaId?: string }>>} An array of objects containing unitId, subUnitId, and either cell coordinates or featureId.
+     * @returns {Promise<Array<IFormulaCellAndFeatureItem>>} An array of objects containing unitId, subUnitId, and either cell coordinates or featureId.
      *
      * @example
      * ```ts

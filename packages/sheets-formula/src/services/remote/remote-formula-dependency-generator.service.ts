@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUnitRange } from '@univerjs/core';
 import type { FormulaCurrentConfigService } from '@univerjs/engine-formula';
 import { createIdentifier, isFormulaId, isFormulaString } from '@univerjs/core';
 import { IFormulaCurrentConfigService, IFormulaDependencyGenerator } from '@univerjs/engine-formula';
@@ -29,7 +30,7 @@ export interface IFormulaCellAndFeatureItem {
 }
 
 export interface IRemoteFormulaDependencyGenerator {
-    generate(): Promise<Array<IFormulaCellAndFeatureItem>>;
+    generate(range?: IUnitRange): Promise<Array<IFormulaCellAndFeatureItem>>;
 }
 
 export const RemoteFormulaDependencyGeneratorServiceName = 'sheets-formula.remote-formula-dependency-generator.service';
@@ -44,7 +45,7 @@ export class RemoteFormulaDependencyGeneratorService implements IRemoteFormulaDe
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
     ) {}
 
-    async generate(): Promise<Array<IFormulaCellAndFeatureItem>> {
+    async generate(range?: IUnitRange): Promise<Array<IFormulaCellAndFeatureItem>> {
         const configService = this._currentConfigService as FormulaCurrentConfigService;
         const originalForceCalculate = configService.isForceCalculate();
         configService.setForceCalculate(true);
@@ -54,15 +55,29 @@ export class RemoteFormulaDependencyGeneratorService implements IRemoteFormulaDe
         for (let i = 0; i < trees.length; i++) {
             const tree = trees[i];
             if ((isFormulaString(tree.formula) || isFormulaId(tree.formulaId)) || tree.featureId != null) {
-                result.push({
-                    unitId: tree.unitId,
-                    subUnitId: tree.subUnitId,
-                    row: tree.row,
-                    column: tree.column,
-                    featureId: tree.featureId || undefined,
-                    formula: tree.formula || undefined,
-                    formulaId: tree.formulaId || undefined,
-                });
+                let include = true;
+                if (range) {
+                    if (tree.unitId !== range.unitId || tree.subUnitId !== range.sheetId) {
+                        include = false;
+                    } else if (tree.row != null && tree.column != null) {
+                        const r = range.range;
+                        if (tree.row < r.startRow || tree.row > r.endRow || tree.column < r.startColumn || tree.column > r.endColumn) {
+                            include = false;
+                        }
+                    }
+                    // For features without row/column, include if unitId and subUnitId match
+                }
+                if (include) {
+                    result.push({
+                        unitId: tree.unitId,
+                        subUnitId: tree.subUnitId,
+                        row: tree.row,
+                        column: tree.column,
+                        featureId: tree.featureId || undefined,
+                        formula: tree.formula || undefined,
+                        formulaId: tree.formulaId || undefined,
+                    });
+                }
             }
         }
         return result;

@@ -50,16 +50,21 @@ export class RemoteFormulaDependencyGeneratorService implements IRemoteFormulaDe
         configService.setForceCalculate(true);
         const trees = await this._dependencyGenerator.generate();
         configService.setForceCalculate(originalForceCalculate);
-        return trees
-            .filter((tree) => (isFormulaString(tree.formula) || isFormulaId(tree.formulaId)) || tree.featureId != null)
-            .map((tree) => ({
-                unitId: tree.unitId,
-                subUnitId: tree.subUnitId,
-                row: tree.row,
-                column: tree.column,
-                featureId: tree.featureId || undefined,
-                formula: tree.formula || undefined,
-                formulaId: tree.formulaId || undefined,
-            }));
+        const result: Array<IFormulaCellAndFeatureItem> = [];
+        for (let i = 0; i < trees.length; i++) {
+            const tree = trees[i];
+            if ((isFormulaString(tree.formula) || isFormulaId(tree.formulaId)) || tree.featureId != null) {
+                result.push({
+                    unitId: tree.unitId,
+                    subUnitId: tree.subUnitId,
+                    row: tree.row,
+                    column: tree.column,
+                    featureId: tree.featureId || undefined,
+                    formula: tree.formula || undefined,
+                    formulaId: tree.formulaId || undefined,
+                });
+            }
+        }
+        return result;
     }
 }

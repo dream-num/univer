@@ -55,8 +55,8 @@ export class RemoteFormulaDependencyGeneratorService implements IRemoteFormulaDe
             .map((tree) => ({
                 unitId: tree.unitId,
                 subUnitId: tree.subUnitId,
-                row: tree.row >= 0 ? tree.row : undefined,
-                column: tree.column >= 0 ? tree.column : undefined,
+                row: tree.row,
+                column: tree.column,
                 featureId: tree.featureId || undefined,
                 formula: tree.formula || undefined,
                 formulaId: tree.formulaId || undefined,

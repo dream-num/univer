@@ -38,6 +38,7 @@ import { DescriptionService, IDescriptionService } from './services/description.
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
+import { IRemoteFormulaDependencyGenerator, RemoteFormulaDependencyGeneratorService, RemoteFormulaDependencyGeneratorServiceName } from './services/remote/remote-formula-dependency-generator.service';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
 
 @DependentOn(UniverFormulaEnginePlugin)
@@ -66,6 +67,12 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
         this._injector.get(IRPCChannelService).registerChannel(
             RemoteRegisterFunctionServiceName,
             fromModule(this._injector.get(RemoteRegisterFunctionService))
+        );
+
+        this._injector.add([RemoteFormulaDependencyGeneratorService]);
+        this._injector.get(IRPCChannelService).registerChannel(
+            RemoteFormulaDependencyGeneratorServiceName,
+            fromModule(this._injector.get(RemoteFormulaDependencyGeneratorService))
         );
     }
 }
@@ -113,6 +120,10 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             const rpcChannelService = j.get(IRPCChannelService);
             dependencies.push([IRemoteRegisterFunctionService, {
                 useFactory: () => toModule<IRemoteRegisterFunctionService>(rpcChannelService.requestChannel(RemoteRegisterFunctionServiceName)),
+            }]);
+
+            dependencies.push([IRemoteFormulaDependencyGenerator, {
+                useFactory: () => toModule<IRemoteFormulaDependencyGenerator>(rpcChannelService.requestChannel(RemoteFormulaDependencyGeneratorServiceName)),
             }]);
         }
 

@@ -69,7 +69,7 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "@wendellhu/redi": "1.0.0",
+        "@wendellhu/redi": "1.0.1",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

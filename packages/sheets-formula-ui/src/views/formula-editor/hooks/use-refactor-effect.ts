@@ -40,7 +40,7 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
 
             return () => {
                 const currentDoc = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)!;
-                if (currentDoc.getUnitId() === editorId) {
+                if (currentDoc?.getUnitId() === editorId) {
                     contextService.setContextValue(EDITOR_ACTIVATED, false);
                 }
 

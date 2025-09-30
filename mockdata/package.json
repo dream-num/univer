@@ -74,7 +74,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "fs-extra": "^11.3.1",
+        "fs-extra": "^11.3.2",
         "typescript": "^5.9.2"
     }
 }

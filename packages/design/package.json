@@ -74,11 +74,11 @@
         "@radix-ui/react-popover": "^1.1.15",
         "@radix-ui/react-separator": "^1.1.7",
         "@radix-ui/react-slot": "^1.2.3",
-        "@univerjs/icons": "^0.4.8",
+        "@univerjs/icons": "^0.4.9",
         "@univerjs/themes": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "dayjs": "^1.11.15",
+        "dayjs": "^1.11.18",
         "rc-dropdown": "^4.2.1",
         "rc-menu": "^9.16.0",
         "rc-virtual-list": "^3.16.1",
@@ -100,7 +100,7 @@
         "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.2",
-        "vite": "^7.1.4",
+        "vite": "^7.1.7",
         "vitest": "^3.2.4"
     }
 }

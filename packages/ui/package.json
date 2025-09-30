@@ -83,8 +83,8 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.4.8",
-        "@wendellhu/redi": "1.0.0",
+        "@univerjs/icons": "^0.4.9",
+        "@wendellhu/redi": "1.0.1",
         "localforage": "^1.10.0"
     },
     "devDependencies": {
@@ -98,7 +98,7 @@
         "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.2",
-        "vite": "^7.1.4",
+        "vite": "^7.1.7",
         "vitest": "^3.2.4"
     }
 }

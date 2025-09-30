@@ -57,10 +57,5 @@
 
     "editor.quickSuggestions": {
         "strings": "on"
-    },
-    "cSpell.words": [
-        "mockdata",
-        "Univer",
-        "univerjs"
-    ]
+    }
 }

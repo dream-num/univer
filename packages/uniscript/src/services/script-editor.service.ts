@@ -49,8 +49,10 @@ export class ScriptEditorService extends Disposable {
     }
 
     requireVscodeEditor(): void {
+        // @ts-expect-error monaco editor global
         if (!window.MonacoEnvironment) {
             const config = this._configService.getConfig<IUniverUniscriptConfig>(UNISCRIPT_PLUGIN_CONFIG_KEY);
+            // @ts-expect-error monaco editor global
             window.MonacoEnvironment = { getWorkerUrl: config?.getWorkerUrl };
         }
     }

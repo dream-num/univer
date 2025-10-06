@@ -59,7 +59,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^5.0.4",
-        "eslint": "9.36.0",
+        "eslint": "9.37.0",
         "eslint-plugin-format": "^1.0.2",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "5.2.0",

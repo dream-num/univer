@@ -378,8 +378,8 @@ const locale: typeof enUS = {
         },
     },
     YEARFRAC: {
-        description: 'Returns the year fraction representing the number of whole days between start_date and end_date',
-        abstract: 'Returns the year fraction representing the number of whole days between start_date and end_date',
+        description: 'Возвращает долю года, которую составляет количество дней между двумя датами (начальной и конечной)',
+        abstract: 'Возвращает долю года, которую составляет количество дней между двумя датами (начальной и конечной)',
         links: [
             {
                 title: 'Инструкция',

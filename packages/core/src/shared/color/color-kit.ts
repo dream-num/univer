@@ -64,7 +64,7 @@ export const COLORS: { [key: string]: number[] } = {
     cornSilk: [255, 248, 220],
     crimson: [220, 20, 60],
     cyan: [0, 255, 255],
-    darkblue: [0, 0, 139],
+    darkBlue: [0, 0, 139],
     darkCyan: [0, 139, 139],
     darkGoldenrod: [184, 132, 11],
     darkGray: [169, 169, 169],

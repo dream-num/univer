@@ -1739,8 +1739,8 @@ importers:
   packages/engine-formula:
     dependencies:
       '@flatten-js/interval-tree':
-        specifier: ^1.1.3
-        version: 1.1.3
+        specifier: ^1.1.4
+        version: 1.1.4
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -2137,8 +2137,8 @@ importers:
   packages/sheets-data-validation-ui:
     dependencies:
       '@flatten-js/interval-tree':
-        specifier: ^1.1.3
-        version: 1.1.3
+        specifier: ^1.1.4
+        version: 1.1.4
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -4483,8 +4483,8 @@ packages:
     resolution: {integrity: sha512-sB5uyeq+dwCWyPi31B2gQlVlo+j5brPlWx4yZBrEaRo/nhdDE8Xke1gsGgtiBdaBTxuTkceLVuVt/pclrasb0A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@flatten-js/interval-tree@1.1.3':
-    resolution: {integrity: sha512-xhFWUBoHJFF77cJO1D6REjdgJEMRf2Y2Z+eKEPav8evGKcLSnj1ud5pLXQSbGuxF3VSvT1rWhMfVpXEKJLTL+A==}
+  '@flatten-js/interval-tree@1.1.4':
+    resolution: {integrity: sha512-o4emRDDvGdkwX18BSVSXH8q27qAL7Z2WDHSN75C8xyRSE4A8UOkig0mWSGoT5M5KaTHZxoLmalFwOTQmbRusUg==}
 
   '@floating-ui/core@1.7.3':
     resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
@@ -12451,7 +12451,7 @@ snapshots:
       '@eslint/core': 0.16.0
       levn: 0.4.1
 
-  '@flatten-js/interval-tree@1.1.3': {}
+  '@flatten-js/interval-tree@1.1.4': {}
 
   '@floating-ui/core@1.7.3':
     dependencies:

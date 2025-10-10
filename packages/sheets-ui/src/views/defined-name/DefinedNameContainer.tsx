@@ -246,44 +246,45 @@ export const DefinedNameContainer = () => {
                                         {definedName.formulaOrRefString}
                                     </div>
                                 </div>
-                                <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
-                                    <a
-                                        className={`
-                                          univer-absolute univer-right-[60px] univer-top-1/2 univer-hidden
-                                          -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
-                                          univer-justify-center univer-rounded univer-p-1 univer-text-xs
-                                          univer-text-primary-600
-                                          hover:univer-bg-gray-100
-                                          group-hover:univer-flex
-                                          dark:hover:!univer-bg-gray-600
-                                        `}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            closeInsertOpenKeyEditor(definedName.id);
-                                        }}
-                                    >
-                                        <PenIcon />
-                                    </a>
-                                </Tooltip>
-                                <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
-                                    <a
-                                        className={`
-                                          univer-text-error univer-absolute univer-right-5 univer-top-1/2 univer-hidden
-                                          -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
-                                          univer-justify-center univer-rounded univer-p-1 univer-text-xs
-                                          univer-text-red-600
-                                          hover:univer-bg-gray-100
-                                          group-hover:univer-flex
-                                          dark:hover:!univer-bg-gray-600
-                                        `}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteDefinedName(definedName.id);
-                                        }}
-                                    >
-                                        <DeleteIcon />
-                                    </a>
-                                </Tooltip>
+                                <div
+                                    className={`
+                                      univer-absolute univer-right-5 univer-top-1/2 univer-hidden
+                                      -univer-translate-y-1/2 univer-cursor-pointer univer-items-center
+                                      univer-justify-end univer-gap-7 univer-text-xs univer-text-primary-600
+                                      group-hover:univer-flex
+                                      dark:hover:!univer-bg-gray-600
+                                    `}
+                                >
+                                    <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
+                                        <a
+                                            className={`
+                                              univer-rounded univer-p-1
+                                              hover:univer-bg-gray-100
+                                            `}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                closeInsertOpenKeyEditor(definedName.id);
+                                            }}
+                                        >
+                                            <PenIcon />
+                                        </a>
+                                    </Tooltip>
+                                    <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
+                                        <a
+                                            className={`
+                                              univer-rounded univer-p-1 univer-text-red-600
+                                              hover:univer-bg-gray-100
+                                            `}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteDefinedName(definedName.id);
+                                            }}
+                                        >
+                                            <DeleteIcon />
+                                        </a>
+                                    </Tooltip>
+                                </div>
+
                             </div>
 
                             <Confirm

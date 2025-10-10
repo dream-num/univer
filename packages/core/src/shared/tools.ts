@@ -573,7 +573,7 @@ export class Tools {
     }
 
     static isStartValidPosition(name: string): boolean {
-        const startsWithLetterOrUnderscore = /^[A-Za-z_]/.test(name);
+        const startsWithLetterOrUnderscore = /^[A-Za-zА-Яа-яЁё_]/.test(name);
 
         return startsWithLetterOrUnderscore;
     }

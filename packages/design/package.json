@@ -81,7 +81,7 @@
         "dayjs": "^1.11.18",
         "rc-dropdown": "^4.2.1",
         "rc-menu": "^9.16.0",
-        "rc-virtual-list": "^3.16.1",
+        "rc-virtual-list": "^3.19.2",
         "react-grid-layout": "^1.5.1",
         "react-transition-group": "^4.4.5",
         "sonner": "^2.0.7",

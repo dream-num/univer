@@ -84,9 +84,9 @@
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
         "lit": "^3.3.1",
-        "monaco-editor": "0.53.0",
-        "react": "19.1.1",
-        "react-dom": "19.1.1",
+        "monaco-editor": "0.54.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
         "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
@@ -104,6 +104,6 @@
         "postcss": "^8.5.6",
         "tailwindcss": "3.4.17",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.3"
     }
 }

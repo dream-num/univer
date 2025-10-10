@@ -42,7 +42,7 @@ import {
     ThemeService,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
+import { convertPrimaryWithCoordToPrimary, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -902,7 +902,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
         const selectionWithStyle = {
             range,
-            primary: null,
+            primary: convertPrimaryWithCoordToPrimary(currentCell),
             style: null,
         };
         const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);

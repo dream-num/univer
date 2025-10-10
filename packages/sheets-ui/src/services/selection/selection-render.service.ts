@@ -409,7 +409,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             !this._singleSelectionEnabled;
 
         //#region update selection control
-        if (expandByShiftKey && currentCell) {
+        if (expandByShiftKey) {
             // Perform pointer down selection.
             this._makeSelectionByTwoCells(
                 currentCell,

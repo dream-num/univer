@@ -18,7 +18,7 @@ import type { IOperation } from '@univerjs/core';
 import type { FilterBy } from '@univerjs/sheets-filter';
 import { CommandType, ICommandService, IContextService, Quantity } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { ILayoutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 
@@ -44,7 +44,10 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
         const commandService = accessor.get(ICommandService);
 
         // Close the cell edit if it is opened.
-        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, { visible: false });
+        const editorBridgeService = accessor.get(IEditorBridgeService);
+        if (editorBridgeService.isVisible().visible) {
+            commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, { visible: false });
+        }
 
         const { unitId, subUnitId, col } = params;
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);

@@ -44,8 +44,8 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
         const commandService = accessor.get(ICommandService);
 
         // Close the cell edit if it is opened.
-        const editorBridgeService = accessor.get(IEditorBridgeService);
-        if (editorBridgeService.isVisible().visible) {
+        const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
+        if (editorBridgeService?.isVisible().visible) {
             commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, { visible: false });
         }
 

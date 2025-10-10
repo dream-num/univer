@@ -74,7 +74,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "monaco-editor": "0.53.0"
+        "monaco-editor": "0.54.0"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
@@ -82,8 +82,8 @@
         "react": "18.3.1",
         "rxjs": "^7.8.2",
         "tailwindcss": "3.4.17",
-        "typescript": "^5.9.2",
-        "vite": "^7.1.7",
+        "typescript": "^5.9.3",
+        "vite": "^7.1.9",
         "vitest": "^3.2.4"
     }
 }

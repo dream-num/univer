@@ -25,7 +25,7 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.45.0",
+        "@typescript-eslint/parser": "^8.46.0",
         "@vitejs/plugin-react": "^5.0.4",
         "@vitejs/plugin-vue": "^6.0.1",
         "@vitest/coverage-istanbul": "^3.2.4",
@@ -35,14 +35,14 @@
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "fs-extra": "^11.3.2",
-        "happy-dom": "18.0.1",
+        "happy-dom": "20.0.0",
         "javascript-obfuscator": "^4.1.1",
         "postcss-preset-env": "^10.4.0",
         "postcss-replace": "^2.0.1",
         "sort-keys": "^6.0.0",
         "tailwind-scrollbar": "^4.0.2",
         "tailwindcss": "3.4.17",
-        "vite": "^7.1.7",
+        "vite": "^7.1.9",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
         "vitest": "^3.2.4"

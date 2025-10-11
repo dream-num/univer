@@ -37,6 +37,12 @@ export interface IUniverSheetsConfig {
      * default false, auto height works for merged cells
      */
     autoHeightForMergedCells?: boolean;
+
+    /**
+     * Whether synchronize the frozen state to other users in real-time collaboration.
+     * @default true
+     */
+    freezeSync?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

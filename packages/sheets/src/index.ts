@@ -322,6 +322,7 @@ export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
+export { SheetsFreezeSyncController } from './controllers/freeze-sync.controller';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers/merge-cell.controller';
 export { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';

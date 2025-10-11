@@ -21,7 +21,7 @@ import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
 import { CanceledError, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameCommand, SetWorksheetOrderMutation, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameCommand, SetWorksheetOrderMutation, SheetsFreezeSyncController, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -161,6 +161,17 @@ export interface IFUniverSheetsMixin {
      * ```
      */
     getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+
+    /**
+     * Set whether to enable synchronize the frozen state to other users in real-time collaboration.
+     * @param {boolean} enabled - Whether to enable freeze sync. Default is true.
+     * @example
+     * ```ts
+     * // Disable freeze sync
+     * univerAPI.setFreezeSync(false);
+     * ```
+     */
+    setFreezeSync(enabled: boolean): void;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
@@ -630,6 +641,11 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
             return null;
         }
         return { workbook, worksheet };
+    }
+
+    override setFreezeSync(enabled: boolean): void {
+        const controller = this._injector.get(SheetsFreezeSyncController);
+        controller.setEnabled(enabled);
     }
 
     private _fireActiveSheetChanged(workbook: FWorkbook, newActiveSheet: FWorksheet): void {

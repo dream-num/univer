@@ -23,16 +23,15 @@ import { CalculateResultApplyController } from './controllers/calculate-result-a
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
 import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
+import { SheetsFreezeSyncController } from './controllers/freeze-sync.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
 import { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
-
 import { ZebraCrossingCacheController } from './controllers/zebar-crossing.controller';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
-
 import { RangeProtectionCache } from './model/range-protection.cache';
 import { SheetRangeThemeModel } from './model/range-theme-model';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
@@ -105,6 +104,7 @@ export class UniverSheetsPlugin extends Plugin {
             [NumberCellDisplayController],
             [DefinedNameDataController],
             [ZebraCrossingCacheController],
+            [SheetsFreezeSyncController],
 
             // permission
             [WorksheetPermissionService],
@@ -140,6 +140,7 @@ export class UniverSheetsPlugin extends Plugin {
             [RangeProtectionService],
             [IExclusiveRangeService],
             [SheetPermissionInitController],
+            [SheetsFreezeSyncController],
         ]);
     }
 

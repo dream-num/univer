@@ -1261,7 +1261,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                         const params = command.params as IInsertRowCommandParams;
                         const { range, direction } = params;
                         const insertCount = range.endRow - range.startRow + 1;
-                        if (range.startRow + 1 < freeze.startRow || (range.startRow + 1 === freeze.startRow && direction === Direction.UP)) {
+                        if (range.startRow < freeze.startRow || (range.startRow + 1 === freeze.startRow && direction === Direction.UP)) {
                             const newFreeze: IFreeze = {
                                 ...freeze,
                                 startRow: Math.max(1, freeze.startRow + insertCount),
@@ -1276,7 +1276,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                         const params = command.params as IInsertColCommandParams;
                         const { range, direction } = params;
                         const insertCount = range.endColumn - range.startColumn + 1;
-                        if (range.startColumn + 1 < freeze.startColumn || (range.startColumn + 1 === freeze.startColumn && direction === Direction.LEFT)) {
+                        if (range.startColumn < freeze.startColumn || (range.startColumn + 1 === freeze.startColumn && direction === Direction.LEFT)) {
                             const newFreeze: IFreeze = {
                                 ...freeze,
                                 startColumn: Math.max(1, freeze.startColumn + insertCount),

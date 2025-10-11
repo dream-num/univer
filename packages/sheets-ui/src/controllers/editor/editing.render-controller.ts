@@ -677,6 +677,10 @@ export class EditingRenderController extends Disposable {
         if (editorUnitId == null || !this._editorService.isSheetEditor(editorUnitId)) {
             return;
         }
+        // Reset the width of the editor to the initial state after exiting the input.
+        if (editorUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.resetInitialWidth();
+        }
         this._undoRedoService.clearUndoRedo(editorUnitId);
         this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }

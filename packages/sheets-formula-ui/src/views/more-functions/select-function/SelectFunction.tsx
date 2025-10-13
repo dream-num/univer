@@ -165,7 +165,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
             {selectList.length > 0 && (
                 <ul
                     className={clsx(`
-                      univer-m-0 univer-mt-2 univer-box-border univer-max-h-72 univer-w-full univer-select-none
+                      univer-mb-0 univer-mt-2 univer-box-border univer-max-h-72 univer-w-full univer-select-none
                       univer-list-none univer-overflow-y-auto univer-rounded univer-p-3 univer-outline-none
                     `, borderClassName, scrollbarClassName)}
                     onKeyDown={handleSelectListKeyDown}

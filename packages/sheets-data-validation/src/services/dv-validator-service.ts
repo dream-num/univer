@@ -146,15 +146,19 @@ export class SheetsDataValidationValidatorService extends Disposable {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
         }
         const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
-        await Promise.all(rules.map((rule) => {
-            return Promise.all(rule.ranges.map((range) => {
-                const promises: Promise<DataValidationStatus>[] = [];
-                Range.foreach(range, (row, col) => {
-                    promises.push(this._validatorByCell(workbook, worksheet, row, col));
-                });
-                return promises;
-            }));
-        }));
+        await Promise.all(
+            rules.map((rule) => {
+                return Promise.all(
+                    rule.ranges.map((range) => {
+                        const promises: Promise<DataValidationStatus>[] = [];
+                        Range.foreach(range, (row, col) => {
+                            promises.push(this._validatorByCell(workbook, worksheet, row, col));
+                        });
+                        return Promise.all(promises);
+                    })
+                );
+            })
+        );
 
         return this._dataValidationCacheService.ensureCache(unitId, subUnitId);
     }

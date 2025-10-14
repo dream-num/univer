@@ -32,6 +32,17 @@ export class FEventRegistry {
         return this._eventRegistry.get(event)!;
     }
 
+    dispose(): void {
+        this._eventRegistry.clear();
+        this._eventHandlerMap.clear();
+        this._eventHandlerRegisted.forEach((map) => {
+            map.forEach((disposable) => disposable.dispose());
+            map.clear();
+        }
+        );
+        this._eventHandlerRegisted.clear();
+    }
+
     registerEventHandler(event: string, handler: () => IDisposable | Subscription): IDisposable {
         const current = this._eventHandlerMap.get(event);
         if (current) {

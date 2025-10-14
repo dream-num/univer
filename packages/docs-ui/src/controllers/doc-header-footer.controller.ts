@@ -157,6 +157,11 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         this._listenSwitchMode();
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._loadedMap = new WeakSet<RenderComponentType>();
+    }
+
     // Close header footer panel when switch mode.
     private _listenSwitchMode() {
         // this.disposeWithMe(

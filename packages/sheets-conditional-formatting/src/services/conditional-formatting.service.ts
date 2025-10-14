@@ -138,6 +138,7 @@ export class ConditionalFormattingService extends Disposable {
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
                     this._conditionalFormattingRuleModel.deleteUnitId(unitID);
+                    this._conditionalFormattingViewModelV2.dispose();
                 },
                 onLoad: (unitID, value) => {
                     Object.keys(value).forEach((subunitId) => {

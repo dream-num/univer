@@ -61,6 +61,12 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._editAreaChangeListener();
     }
 
+    override dispose(): void {
+        super.dispose();
+        // @ts-ignore
+        delete this._context;
+    }
+
     async insertDocImage(): Promise<boolean> {
         const files = await this._fileOpenerService.openFile({
             multiple: true,

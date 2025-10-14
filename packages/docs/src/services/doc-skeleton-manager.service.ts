@@ -61,6 +61,12 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
+        this._currentViewModel$.complete();
+
+        this._docViewModel?.dispose();
+
+        //@ts-ignore
+        delete this._docViewModel;
     }
 
     getSkeleton(): DocumentSkeleton {

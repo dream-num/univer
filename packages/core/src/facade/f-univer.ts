@@ -274,7 +274,9 @@ export class FUniver extends Disposable {
      * ```
      */
     disposeUnit(unitId: string): boolean {
-        return this._univerInstanceService.disposeUnit(unitId);
+        const rs = this._univerInstanceService.disposeUnit(unitId);
+        this._eventRegistry.dispose();
+        return rs;
     }
 
     /**

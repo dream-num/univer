@@ -430,8 +430,8 @@ export const RuleList = (props: IRuleListProps) => {
                                               univer-absolute univer-right-1 univer-hidden univer-size-6
                                               univer-cursor-pointer univer-items-center univer-justify-center
                                               univer-rounded
-                                              hover:univer-bg-gray-200
                                               group-hover:univer-flex
+                                              hover:univer-bg-gray-200
                                             `, {
                                                 'univer-flex univer-items-center univer-justify-center': draggingId === index,
                                             })}

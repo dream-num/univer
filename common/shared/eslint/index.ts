@@ -92,6 +92,14 @@ export const baseRules: Partial<Rules> = {
     'react/no-unstable-default-props': 'warn',
     'react/no-direct-mutation-state': 'warn',
     'react/no-create-ref': 'warn',
+    'react-hooks/static-components': 'off',
+    'react-hooks/preserve-manual-memoization': 'off',
+    'react-hooks/set-state-in-effect': 'off',
+    'react-hooks/refs': 'off',
+    'react-hooks/immutability': 'warn',
+    'react-hooks/use-memo': 'warn',
+    'react-hooks/purity': 'warn',
+    'react-hooks/globals': 'warn',
 
     // Import and export rules
     'sort-imports': [

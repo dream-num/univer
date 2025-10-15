@@ -132,38 +132,29 @@ export const StatusBar = () => {
                     return acc;
                 }, []);
 
-                return (
-                    <>
-                        {doubleLineList.map((item, index) => (
-                            <div key={`stat-col-${index}`}>
-                                {item[0] && (
-                                    <CopyableStatisticItem
-                                        key={item[0].name}
-                                        {...item[0]}
-                                    />
-                                )}
-                                {item[1] && (
-                                    <CopyableStatisticItem
-                                        key={item[1].name}
-                                        {...item[1]}
-                                    />
-                                )}
-                            </div>
-                        ))}
-                    </>
-                );
+                return doubleLineList.map((item, index) => (
+                    <div key={`stat-col-${index}`} className="univer-grid univer-h-full univer-items-center">
+                        {item[0] && (
+                            <CopyableStatisticItem
+                                key={item[0].name}
+                                {...item[0]}
+                            />
+                        )}
+                        {item[1] && (
+                            <CopyableStatisticItem
+                                key={item[1].name}
+                                {...item[1]}
+                            />
+                        )}
+                    </div>
+                ));
             }
 
-            return (
-                <>
-                    {showList.map((item) => (
-                        <CopyableStatisticItem
-                            key={item.name}
-                            {...item}
-                        />
-                    ))}
-                </>
-            );
+            return showList.map((item) => (
+                <div key={item.name} className="univer-grid univer-h-full univer-items-center">
+                    <CopyableStatisticItem {...item} />
+                </div>
+            ));
         }, [showList, rowCountThreshold, CopyableStatisticItem]);
 
         return renderContent;
@@ -175,15 +166,16 @@ export const StatusBar = () => {
         show && (
             <div
                 className={clsx(`
-                  univer-relative univer-box-border univer-flex univer-items-center univer-px-2
+                  univer-relative univer-box-border univer-flex univer-h-full univer-items-center univer-overflow-hidden
+                  univer-px-2
                   after:univer-absolute after:univer-right-0 after:univer-top-1/2 after:univer-block after:univer-h-4
                   after:univer-w-px after:-univer-translate-y-1/2 after:univer-bg-gray-200 after:univer-content-[""]
                 `, {
                     'univer-max-w-32': isSingle,
-                    'univer-max-w-80': !isSingle,
+                    'univer-max-w-fit': !isSingle,
                 })}
             >
-                <div className="univer-flex univer-gap-x-2">{renderContent}</div>
+                <div className="univer-flex univer-h-full univer-gap-x-2">{renderContent}</div>
             </div>
         )
     );

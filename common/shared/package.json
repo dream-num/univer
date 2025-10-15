@@ -35,7 +35,7 @@
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "fs-extra": "^11.3.2",
-        "happy-dom": "20.0.1",
+        "happy-dom": "20.0.2",
         "javascript-obfuscator": "^4.1.1",
         "postcss-preset-env": "^10.4.0",
         "postcss-replace": "^2.0.1",

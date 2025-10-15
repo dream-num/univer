@@ -74,6 +74,12 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this._initUserActionSyncListener();
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._renderDisposable?.dispose();
+        this._renderDisposable = null;
+    }
+
     private _initEventListeners(sheetObject: ISheetObjectParam): void {
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;

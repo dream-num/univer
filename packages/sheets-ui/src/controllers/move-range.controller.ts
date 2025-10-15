@@ -29,6 +29,7 @@ import { MoveRangeCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 
 export class MoveRangeRenderController extends Disposable implements IRenderModule {
+    private _disposableCollection: DisposableCollection = new DisposableCollection();
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
@@ -39,8 +40,13 @@ export class MoveRangeRenderController extends Disposable implements IRenderModu
         this._initialize();
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._disposableCollection?.dispose();
+    }
+
     private _initialize = () => {
-        const disposableCollection = new DisposableCollection();
+        const disposableCollection = this._disposableCollection;
 
         this.disposeWithMe(
             this._selectionManagerService.selectionMoveEnd$.subscribe(() => {

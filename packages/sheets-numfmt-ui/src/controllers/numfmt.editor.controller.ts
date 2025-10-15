@@ -305,6 +305,11 @@ export class NumfmtEditorController extends Disposable {
             })
         );
     }
+
+    override dispose(): void {
+        super.dispose();
+        this._collectEffectMutation.clean();
+    }
 }
 
 function isNumeric(str: string) {

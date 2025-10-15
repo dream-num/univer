@@ -237,6 +237,10 @@ export class DocumentViewModel implements IDisposable {
         this._customBlockCache.clear();
         this._tableCache.clear();
         this._tableNodeCache.clear();
+        // this._headerTreeMap.clear();
+        // this._footerTreeMap.clear();
+        this._segmentViewModels$.complete();
+        this._editAreaChange$.complete();
     }
 
     getHeaderFooterTreeMap() {

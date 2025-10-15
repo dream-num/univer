@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
@@ -27,6 +27,7 @@ import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing
 
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
+    private _disposePopups: IDisposable[] = [];
 
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
@@ -42,13 +43,23 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._create(documentDataModel));
-        this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._dispose(documentDataModel));
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._create(documentDataModel))
+        );
+
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._dispose(documentDataModel))
+        );
+
         this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentDataModel) => this._create(documentDataModel));
     }
 
     private _dispose(documentDataModel: DocumentDataModel) {
         const unitId = documentDataModel.getUnitId();
+        if (this._disposePopups.length) {
+            this._disposePopups.forEach((dispose) => dispose.dispose());
+            this._disposePopups.length = 0;
+        }
         this._renderManagerService.removeRender(unitId);
     }
 
@@ -87,92 +98,87 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             return;
         }
 
-        const disposePopups: IDisposable[] = [];
+        const disposePopups: IDisposable[] = this._disposePopups;
 
         this.disposeWithMe(
-            toDisposable(
-                transformer.createControl$.subscribe(() => {
-                    if (this._hasCropObject(scene)) {
-                        return;
-                    }
+            transformer.createControl$.subscribe(() => {
+                if (this._hasCropObject(scene)) {
+                    return;
+                }
 
-                    const selectedObjects = transformer.getSelectedObjectMap();
-                    disposePopups.forEach((dispose) => dispose.dispose());
-                    disposePopups.length = 0;
-                    if (selectedObjects.size > 1) {
-                        return;
-                    }
+                const selectedObjects = transformer.getSelectedObjectMap();
+                disposePopups.forEach((dispose) => dispose.dispose());
+                disposePopups.length = 0;
+                if (selectedObjects.size > 1) {
+                    return;
+                }
 
-                    const object = selectedObjects.values().next().value as Nullable<BaseObject>;
-                    if (!object) {
-                        return;
-                    }
+                const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+                if (!object) {
+                    return;
+                }
 
-                    const oKey = object.oKey;
-                    const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
-                    if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                        return;
-                    }
+                const oKey = object.oKey;
+                const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
+                if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                    return;
+                }
 
-                    const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
-                    const popup = this._canvasPopManagerService.attachPopupToObject(
-                        object,
-                        {
-                            componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                            direction: 'horizontal',
-                            offset: [2, 0],
-                            extraProps: {
-                                menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
-                            },
+                const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                const popup = this._canvasPopManagerService.attachPopupToObject(
+                    object,
+                    {
+                        componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                        direction: 'horizontal',
+                        offset: [2, 0],
+                        extraProps: {
+                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
                         },
-                        unitId
-                    );
+                    },
+                    unitId
+                );
 
-                    disposePopups.push(this.disposeWithMe(popup));
+                disposePopups.push(this.disposeWithMe(popup));
 
-                    const focusDrawings = this._drawingManagerService.getFocusDrawings();
+                const focusDrawings = this._drawingManagerService.getFocusDrawings();
 
-                    const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
+                const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
 
-                    if (alreadyFocused) {
-                        return;
-                    }
+                if (alreadyFocused) {
+                    return;
+                }
 
-                    this._drawingManagerService.focusDrawing([{
-                        unitId,
-                        subUnitId,
-                        drawingId,
-                    }]);
-                })
+                this._drawingManagerService.focusDrawing([{
+                    unitId,
+                    subUnitId,
+                    drawingId,
+                }]);
+            }
             )
         );
 
         this.disposeWithMe(
-            toDisposable(
-                transformer.clearControl$.subscribe(() => {
-                    disposePopups.forEach((dispose) => dispose.dispose());
-                    disposePopups.length = 0;
-                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                    this._drawingManagerService.focusDrawing(null);
-                })
+            transformer.clearControl$.subscribe(() => {
+                disposePopups.forEach((dispose) => dispose.dispose());
+                disposePopups.length = 0;
+                this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                this._drawingManagerService.focusDrawing(null);
+            }
             )
         );
         this.disposeWithMe(
-            toDisposable(
-                transformer.changing$.subscribe(() => {
-                    disposePopups.forEach((dispose) => dispose.dispose());
-                    disposePopups.length = 0;
-                })
+            transformer.changing$.subscribe(() => {
+                disposePopups.forEach((dispose) => dispose.dispose());
+                disposePopups.length = 0;
+            }
             )
         );
 
         this.disposeWithMe(
-            toDisposable(
-                transformer.changeStart$.subscribe(() => {
-                    disposePopups.forEach((dispose) => dispose.dispose());
-                    disposePopups.length = 0;
-                })
-            )
+            transformer.changeStart$.subscribe(() => {
+                disposePopups.forEach((dispose) => dispose.dispose());
+                disposePopups.length = 0;
+            })
         );
     }
 

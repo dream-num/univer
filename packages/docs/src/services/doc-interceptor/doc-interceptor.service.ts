@@ -52,6 +52,7 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
             segmentViewModels.forEach((segmentViewModel) => {
                 disposableCollection.add(this.interceptDocumentViewModel(segmentViewModel));
             });
+            // this._docSkeletonManagerService.dispose();
         });
 
         this.disposeWithMe(disposableCollection);

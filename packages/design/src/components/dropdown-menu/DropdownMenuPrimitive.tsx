@@ -102,9 +102,9 @@ function DropdownMenuSubTrigger({
                 `
                   univer-flex univer-cursor-default univer-select-none univer-items-center univer-justify-between
                   univer-gap-2 univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none
-                  focus:univer-bg-gray-100
                   data-[state=open]:univer-bg-gray-100
-                  dark:focus:!univer-bg-gray-600 dark:data-[state=open]:!univer-bg-gray-600
+                  focus:univer-bg-gray-100
+                  dark:data-[state=open]:!univer-bg-gray-600 dark:focus:!univer-bg-gray-600
                   [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
                 `,
                 className
@@ -201,8 +201,8 @@ function DropdownMenuItem({
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center univer-gap-2
                   univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none univer-transition-colors
-                  focus:univer-bg-gray-100
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
+                  focus:univer-bg-gray-100
                   dark:focus:!univer-bg-gray-600
                   [&>svg]:univer-size-4 [&>svg]:univer-shrink-0
                 `,
@@ -227,8 +227,8 @@ function DropdownMenuCheckboxItem({
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
                   univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
-                  focus:univer-bg-gray-100
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
+                  focus:univer-bg-gray-100
                   dark:focus:!univer-bg-gray-600
                 `,
                 {
@@ -272,8 +272,8 @@ function DropdownMenuRadioItem({
                 `
                   univer-relative univer-flex univer-cursor-default univer-select-none univer-items-center
                   univer-rounded univer-py-1.5 univer-pr-2 univer-text-sm univer-outline-none univer-transition-colors
-                  focus:univer-bg-gray-100
                   data-[disabled]:univer-pointer-events-none data-[disabled]:univer-opacity-50
+                  focus:univer-bg-gray-100
                   dark:focus:!univer-bg-gray-600
                 `,
                 {

@@ -86,7 +86,8 @@ export class Styles {
         return this.add(data, styleObject);
     }
 
-    addCustomStyle(id: string, data: IStyleData): void {
+    addCustomStyle(id: string, data: Nullable<IStyleData>): void {
+        if (data == null) return;
         this._styles[id] = data;
         this._cacheMap.set(JSON.stringify(data), id);
     }

@@ -22,6 +22,7 @@ import type {
     IObjectMatrixPrimitiveType,
     IRange,
     IRowData,
+    IStyleData,
     IWorksheetData,
     Nullable,
 } from '@univerjs/core';
@@ -38,6 +39,7 @@ export interface IInsertSheetMutationParams {
     index: number;
     sheet: IWorksheetData;
     unitId: string;
+    styles?: Record<string, Nullable<IStyleData>>;
 }
 
 /** Params of InsertRowMutation */

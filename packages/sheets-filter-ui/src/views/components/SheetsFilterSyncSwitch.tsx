@@ -33,7 +33,7 @@ export function FilterSyncSwitch() {
         <div
             className={`
               univer-mt-2 univer-flex univer-items-center univer-justify-between univer-text-sm univer-text-gray-900
-              dark:univer-text-gray-200
+              dark:!univer-text-gray-200
             `}
         >
             <div className="univer-flex univer-items-center univer-gap-1">

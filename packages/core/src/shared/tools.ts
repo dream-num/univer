@@ -641,3 +641,14 @@ export const isNodeEnv = () => {
     // eslint-disable-next-line node/prefer-global/process
     return typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 };
+
+/**
+ * Converts a wildcard pattern with ? and * to a regular expression.
+ * @param {string} wildChar - The wildcard string containing ? and *
+ * @returns {RegExp} The generated regular expression
+ */
+export function createREGEXFromWildChar(wildChar: string): RegExp {
+    const escaped = wildChar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regexpStr = escaped.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
+    return new RegExp(`^${regexpStr}$`, 'i');
+}

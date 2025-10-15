@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { getSheetCommandTarget, INTERCEPTOR_POINT, SheetInterceptorService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { BehaviorSubject, filter, switchMap } from 'rxjs';
 import { TableManager } from '../model/table-manager';
 
@@ -30,7 +30,8 @@ export class TableFilterController extends Disposable {
     constructor(
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ZebraCrossingCacheController) private readonly _zebraCrossingCacheController: ZebraCrossingCacheController
     ) {
         super();
         this.registerFilterChangeEvent();
@@ -112,6 +113,8 @@ export class TableFilterController extends Disposable {
                         this.tableFilteredOutRows.add(row);
                     }
                 });
+
+                this._zebraCrossingCacheController.updateZebraCrossingCache(unitId, subUnitId);
             })
         );
     }

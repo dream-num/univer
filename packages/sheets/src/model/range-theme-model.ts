@@ -125,6 +125,7 @@ export class SheetRangeThemeModel extends Disposable {
 
     public refreshSheetRowVisibleFuncSet(unitId: string, subUnitId: string) {
         const set = this._getSheetRowVisibleFuncSet(unitId, subUnitId);
+        set.clear();
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         if (workbook) {
             const sheet = workbook.getSheetBySheetId(subUnitId);

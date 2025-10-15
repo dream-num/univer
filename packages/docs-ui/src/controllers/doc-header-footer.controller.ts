@@ -308,7 +308,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         const localeService = this._localeService;
 
         // eslint-disable-next-line max-lines-per-function
-        this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
+        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
             if (unit == null) {
                 return;
             }
@@ -424,7 +424,8 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                     })
                 )
             );
-        });
+        })
+        );
     }
 
     private _isEditorReadOnly(unitId: string) {

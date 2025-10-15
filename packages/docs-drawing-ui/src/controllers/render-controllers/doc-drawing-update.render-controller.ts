@@ -223,26 +223,32 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _updateOrderListener() {
-        this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
-            const { unitId, subUnitId, drawingIds, arrangeType } = params;
+        this.disposeWithMe(
+            this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
+                const { unitId, subUnitId, drawingIds, arrangeType } = params;
 
-            this._commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
-                unitId,
-                subUnitId,
-                drawingIds,
-                arrangeType,
-            } as ISetDrawingArrangeCommandParams);
-        });
+                this._commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+                    unitId,
+                    subUnitId,
+                    drawingIds,
+                    arrangeType,
+                } as ISetDrawingArrangeCommandParams);
+            })
+        );
     }
 
     private _groupDrawingListener() {
-        this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(GroupDocDrawingCommand.id, params);
-        });
+        this.disposeWithMe(
+            this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
+                this._commandService.executeCommand(GroupDocDrawingCommand.id, params);
+            })
+        );
 
-        this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(UngroupDocDrawingCommand.id, params);
-        });
+        this.disposeWithMe(
+            this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
+                this._commandService.executeCommand(UngroupDocDrawingCommand.id, params);
+            })
+        );
     }
 
     private _getCurrentSceneAndTransformer() {
@@ -398,16 +404,18 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             })
         );
 
-        this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
-            if (skeleton == null) {
-                return;
-            }
+        this.disposeWithMe(
+            this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
+                if (skeleton == null) {
+                    return;
+                }
 
             // To wait the image is rendered.
-            queueMicrotask(() => {
-                this._updateDrawingsEditStatus();
-            });
-        });
+                queueMicrotask(() => {
+                    this._updateDrawingsEditStatus();
+                });
+            })
+        );
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted(async (command: ICommandInfo) => {

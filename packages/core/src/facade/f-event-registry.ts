@@ -38,8 +38,8 @@ export class FEventRegistry {
         this._eventHandlerRegisted.forEach((map) => {
             map.forEach((disposable) => disposable.dispose());
             map.clear();
-        }
-        );
+        });
+
         this._eventHandlerRegisted.clear();
     }
 

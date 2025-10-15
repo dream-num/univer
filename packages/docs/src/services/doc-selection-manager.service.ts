@@ -265,6 +265,7 @@ export class DocSelectionManagerService extends RxDisposable {
 
     override dispose(): void {
         this._textSelection$.complete();
+        this._refreshSelection$.complete();
     }
 
     private _setCurrentSelectionNotRefresh(param: IDocSelectionManagerSearchParam) {

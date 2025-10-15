@@ -75,21 +75,25 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     }
 
     private _initialRenderRefresh() {
-        this._docSkeletonManagerService.currentSkeleton$.subscribe((documentSkeleton) => {
-            if (documentSkeleton == null) {
-                return;
-            }
+        this.disposeWithMe(
+            this._docSkeletonManagerService.currentSkeleton$.subscribe((documentSkeleton) => {
+                if (documentSkeleton == null) {
+                    return;
+                }
 
-            this._refreshDrawing(documentSkeleton);
-        });
+                this._refreshDrawing(documentSkeleton);
+            })
+        );
 
-        this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
-            if (skeleton == null) {
-                return;
-            }
+        this.disposeWithMe(
+            this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
+                if (skeleton == null) {
+                    return;
+                }
 
-            this._refreshDrawing(skeleton);
-        });
+                this._refreshDrawing(skeleton);
+            })
+        );
     }
 
     private _commandExecutedListener() {
@@ -314,7 +318,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 setTimeout(init, 500);
             }
         } else {
-            this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)).subscribe(init);
+            this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)).subscribe(init));
         }
     }
 }

@@ -198,7 +198,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return this._styles;
     }
 
-    addStyles(styles: Record<string, IStyleData>): void {
+    addStyles(styles: Record<string, Nullable<IStyleData>>): void {
         Object.entries(styles).forEach(([id, data]) => {
             this._styles.addCustomStyle(id, data);
         });

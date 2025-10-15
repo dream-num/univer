@@ -15,12 +15,11 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
-
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 /**
  * Generate undo mutation of a `InsertSheetMutation`
@@ -43,10 +42,15 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { sheet, index, unitId } = params;
+        const { sheet, index, unitId, styles } = params;
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return false;
+        }
+
+        // If the mutation contains styles, it means that the mutation is from collaboration and its styles need to be added to the workbook.
+        if (styles) {
+            workbook.addStyles(styles);
         }
 
         return workbook.addWorksheet(sheet.id, index, sheet);

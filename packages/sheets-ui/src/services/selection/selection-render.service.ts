@@ -76,7 +76,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     override dispose(): void {
         super.dispose();
-        // this._renderDisposable?.dispose();
+        this._renderDisposable?.dispose();
         // this._renderDisposable = null;
     }
 

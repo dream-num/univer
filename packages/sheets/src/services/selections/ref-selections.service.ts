@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { WorkbookSelectionModel } from './selection-data-model';
 import { createIdentifier, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, map, merge, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, map, merge, of, switchMap, takeUntil } from 'rxjs';
 import { SheetsSelectionsService } from './selection.service';
 
 /**
@@ -46,6 +46,22 @@ export class RefSelectionsService extends SheetsSelectionsService {
         this.selectionMoving$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoving$))));
         this.selectionMoveEnd$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoveEnd$))));
         this.selectionSet$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionSet$))));
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        // @ts-ignore
+        this.selectionMoveStart$ = of(null);
+        // @ts-ignore
+        this.selectionMoving$ = of(null);
+        // @ts-ignore
+        this.selectionMoveEnd$ = of(null);
+        // @ts-ignore
+        this.selectionSet$ = of(null);
+        //@ts-ignore
+        delete this._instanceSrv;
+        this._workbookSelections.clear();
     }
 
     private _getAliveWorkbooks$(): Observable<WorkbookSelectionModel[]> {

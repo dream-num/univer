@@ -173,6 +173,19 @@ export class SheetsFilterService extends Disposable {
         });
     }
 
+    override dispose(): void {
+        super.dispose();
+
+        this._loadedUnitId$.complete();
+        this._errorMsg$.complete();
+        this._activeFilterModel$.complete();
+        this._filterModels.forEach((allFilterModels) => {
+            allFilterModels.forEach((model) => model.dispose());
+            allFilterModels.clear();
+        });
+        this._filterModels.clear();
+    }
+
     private _initModel(): void {
         this._resourcesManagerService.registerPluginResource<ISheetsFilterResource>({
             pluginName: SHEET_FILTER_SNAPSHOT_ID,

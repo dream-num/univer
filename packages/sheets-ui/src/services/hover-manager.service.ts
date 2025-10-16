@@ -20,7 +20,7 @@ import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from './sheet-skeleton-manager.service';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, of, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -219,6 +219,22 @@ export class HoverManagerService extends Disposable {
         this._currentPointerDownCell$.complete();
         this._currentPointerUpCell$.complete();
         this._currentCellWithEvent$.complete();
+
+        this._currentRichText$.complete();
+        this._currentDbClickedCell$.complete();
+        this._currentHoveredRowHeader$.complete();
+        this._currentHoveredColHeader$.complete();
+        this._currentRowHeaderClick$.complete();
+        this._currentColHeaderClick$.complete();
+        this._currentRowHeaderDbClick$.complete();
+        this._currentColHeaderDbClick$.complete();
+        this._currentRowHeaderPointerDown$.complete();
+        this._currentColHeaderPointerDown$.complete();
+        this._currentRowHeaderPointerUp$.complete();
+        this._currentColHeaderPointerUp$.complete();
+
+        this.currentCellPosWithEvent$ = of(null);
+        this.currentRichText$ = of(null);
     }
 
     private _initCellDisposableListener(): void {

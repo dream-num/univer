@@ -80,10 +80,10 @@ export class SheetsSelectionsService extends RxDisposable {
     protected _init(): void {
         const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay(1), takeUntil(this.dispose$));
         // When workbook changed, unsubscribe the previous workbook selection$ and subscribe the new workbook selection$.
-        this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
-        this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
-        this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
-        this.selectionSet$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionSet$));
+        this.selectionMoveStart$ = c$.pipe().pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$)).pipe(takeUntil(this.dispose$));
+        this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$)).pipe(takeUntil(this.dispose$));
+        this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$)).pipe(takeUntil(this.dispose$));
+        this.selectionSet$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionSet$)).pipe(takeUntil(this.dispose$));
         this.selectionChanged$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionChanged$)).pipe(
             distinctUntilChanged((prev, curr) => {
                 if (prev.length !== curr.length) return false;
@@ -93,16 +93,34 @@ export class SheetsSelectionsService extends RxDisposable {
                 });
             }),
             skip(1)
+        ).pipe(takeUntil(this.dispose$));
+
+        this.disposeWithMe(
+            this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+                this._removeWorkbookSelection(workbook.getUnitId());
+            })
         );
 
-        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
-            this._removeWorkbookSelection(workbook.getUnitId());
-        });
-
         // Clear cell styles cache when current selections changed.
-        this.selectionChanged$.pipe(takeUntil(this.dispose$)).subscribe(() => {
-            this._cellStylesCache.clear();
-        });
+        this.disposeWithMe(
+            this.selectionChanged$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+                this._cellStylesCache.clear();
+            })
+        );
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this._cellStylesCache.clear();
+        this._workbookSelections.forEach((wbSelection) => wbSelection.dispose());
+        this._workbookSelections.clear();
+        // Observables do not have unsubscribe(); active subscriptions are handled via takeUntil(this.dispose$) and disposeWithMe.
+        // Replace exposed observables with simple completed values to avoid holding references.
+        this.selectionMoveStart$ = of(null);
+        this.selectionMoving$ = of(null);
+        this.selectionMoveEnd$ = of([]);
+        this.selectionSet$ = of(null);
+        this.selectionChanged$ = of(null);
     }
 
     /**

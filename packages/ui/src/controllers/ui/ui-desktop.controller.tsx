@@ -77,6 +77,11 @@ export class DesktopUIController extends SingleUnitUIController {
         });
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._componentManager.dispose();
+    }
+
     override bootstrap(callback: (contentElement: HTMLElement, containerElement: HTMLElement) => void): IDisposable {
         return bootstrap(this._injector, this._config, callback);
     }

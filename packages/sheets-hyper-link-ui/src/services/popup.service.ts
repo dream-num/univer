@@ -210,6 +210,14 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
     }
 
+    override dispose(): void {
+        super.dispose();
+        this.hideCurrentPopup();
+        this.endEditing();
+        this._currentPopup$.complete();
+        this._currentEditing$.complete();
+    }
+
     private _getEditingRange(): Nullable<ITextRange & { label: string }> {
         const visible = this._editorBridgeService.isVisible().visible;
         const state = this._editorBridgeService.getEditCellState();

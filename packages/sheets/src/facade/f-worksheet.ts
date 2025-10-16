@@ -59,6 +59,16 @@ export class FWorksheet extends FBaseInitialable {
         super(_injector);
     }
 
+    override dispose(): void {
+        super.dispose();
+        //@ts-ignore
+        delete this._fWorkbook;
+        //@ts-ignore
+        delete this._workbook;
+        //@ts-ignore
+        delete this._worksheet;
+    }
+
     /**
      * Get the worksheet instance.
      * @returns {Worksheet} The worksheet instance.
@@ -1989,7 +1999,6 @@ export class FWorksheet extends FBaseInitialable {
         return this._worksheet.getTabColor() as string | undefined;
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (params) => {})` instead
      */
@@ -2009,7 +2018,6 @@ export class FWorksheet extends FBaseInitialable {
         });
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {})` instead
      */

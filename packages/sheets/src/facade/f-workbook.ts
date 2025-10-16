@@ -66,6 +66,12 @@ export class FWorkbook extends FBaseInitialable {
         return this._workbook;
     }
 
+    override dispose(): void {
+        super.dispose();
+        //@ts-ignore
+        this._workbook = null;
+    }
+
     /**
      * Get the id of the workbook.
      * @returns {string} The id of the workbook.

@@ -128,6 +128,10 @@ export class RenderUnit extends Disposable implements IRender {
 
         this._activated$.next(false);
         this._activated$.complete();
+
+        //@ts-ignore
+        this._renderContext.unit = null;
+        this._renderContext.components.clear();
     }
 
     /**

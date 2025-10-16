@@ -184,22 +184,24 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
     }
 
     private _initWorkbookUnload() {
-        this._univerInstanceService.unitDisposed$.subscribe((unit) => {
-            if (unit.type === UniverInstanceType.UNIVER_SHEET) {
-                const workbook = unit as Workbook;
-                const unitId = workbook.getUnitId();
-                workbook.getSheets().forEach((sheet) => {
-                    const subUnitId = sheet.getSheetId();
-                    const map = this._enusreMap(unitId, subUnitId);
-                    map.forValue((row, col, dispose) => {
-                        if (dispose) {
-                            dispose.dispose();
-                        }
+        this.disposeWithMe(
+            this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    const workbook = unit as Workbook;
+                    const unitId = workbook.getUnitId();
+                    workbook.getSheets().forEach((sheet) => {
+                        const subUnitId = sheet.getSheetId();
+                        const map = this._enusreMap(unitId, subUnitId);
+                        map.forValue((row, col, dispose) => {
+                            if (dispose) {
+                                dispose.dispose();
+                            }
+                        });
                     });
-                });
-                this._refRangeMap.delete(unitId);
-            }
-        });
+                    this._refRangeMap.delete(unitId);
+                }
+            })
+        );
     }
 
     private _initSetRangesListener() {

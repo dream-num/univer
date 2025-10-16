@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, Nullable } from '@univerjs/core';
-import { isNumeric } from '@univerjs/core';
+import { createREGEXFromWildChar, isNumeric } from '@univerjs/core';
 import { CustomFilterOperator } from './types';
 
 export interface IFilterFn<P extends unknown[]> {
@@ -189,10 +189,4 @@ function isWildCardString(str: string | number): boolean {
     }
 
     return str.indexOf('*') !== -1 || str.indexOf('?') !== -1;
-}
-
-function createREGEXFromWildChar(wildChar: string): RegExp {
-    // only '*' and '?' is supported
-    const regexpStr = wildChar.replace(/[.+^${}()|[\]\\]/g, '\\$&').replaceAll('?', '.').replace(/[*]/g, '.$&');
-    return new RegExp(`^${regexpStr}$`);
 }

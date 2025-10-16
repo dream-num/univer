@@ -15,46 +15,36 @@
  */
 
 import type { ITableStringFilterInfo } from '../../types/type';
+import { createREGEXFromWildChar } from '@univerjs/core';
 import { TableStringCompareTypeEnum } from '../../types/enum';
 
-/**
- * Converts a pattern with ? and * to a regular expression.
- * @param {string} pattern - The pattern to convert.
- * @returns {RegExp} The regular expression.
- */
-const patternToRegExp = (pattern: string): RegExp => {
-    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regexPattern = escapedPattern.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
-    return new RegExp(`^${regexPattern}$`);
-};
-
 export const textEqual = (compareValue: string, expectedValue: string) => {
-    const regex = patternToRegExp(expectedValue);
+    const regex = createREGEXFromWildChar(expectedValue);
     return regex.test(compareValue);
 };
 
 export const textNotEqual = (compareValue: string, expectedValue: string) => {
-    const regex = patternToRegExp(expectedValue);
+    const regex = createREGEXFromWildChar(expectedValue);
     return !regex.test(compareValue);
 };
 
 export const textContain = (compareValue: string, expectedValue: string) => {
-    const regex = patternToRegExp(`*${expectedValue}*`);
+    const regex = createREGEXFromWildChar(`*${expectedValue}*`);
     return regex.test(compareValue);
 };
 
 export const textNotContain = (compareValue: string, expectedValue: string) => {
-    const regex = patternToRegExp(`*${expectedValue}*`);
+    const regex = createREGEXFromWildChar(`*${expectedValue}*`);
     return !regex.test(compareValue);
 };
 
 export const textStartWith = (compareValue: string, expectedValue: string) => {
-    const regex = patternToRegExp(`${expectedValue}*`);
+    const regex = createREGEXFromWildChar(`${expectedValue}*`);
     return regex.test(compareValue);
 };
 
 export const textEndWith = (compareValue: string, expectedValue: string) => {
-    const regex = patternToRegExp(`*${expectedValue}`);
+    const regex = createREGEXFromWildChar(`*${expectedValue}`);
     return regex.test(compareValue);
 };
 

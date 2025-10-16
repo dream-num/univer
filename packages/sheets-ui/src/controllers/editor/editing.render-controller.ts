@@ -626,6 +626,9 @@ export class EditingRenderController extends Disposable {
             return true;
         }
 
+        // Remove the same style attributes that have been set by composed style in the cell data.
+        this._removeComposedCellStyleInCellData(cellData, worksheet.getComposedCellStyle(row, column));
+
         const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
         if (Tools.diffValue(cleanCellDataObject(finalCell), cleanCellDataObject(worksheet.getCellRaw(row, column)))) {
             return true;
@@ -658,6 +661,20 @@ export class EditingRenderController extends Disposable {
         }
 
         return true;
+    }
+
+    private _removeComposedCellStyleInCellData(cellData: ICellData, composedStyle: IStyleData) {
+        if (!cellData.s || typeof cellData.s === 'string') {
+            return;
+        }
+
+        const keys = Object.keys(cellData.s);
+
+        for (const key of keys) {
+            if (composedStyle[key as keyof IStyleData] !== undefined && Tools.diffValue(cellData.s[key as keyof IStyleData], composedStyle[key as keyof IStyleData])) {
+                delete cellData.s[key as keyof IStyleData];
+            }
+        }
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {

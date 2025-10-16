@@ -303,7 +303,7 @@ export function FormulaBar(props: IProps) {
                               univer-text-base
                               dark:!univer-text-white
                             `, {
-                                'univer-cursor-pointer univer-text-green-600 hover:univer-bg-gray-100 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700': iconActivated,
+                                'univer-cursor-pointer univer-text-red-600 hover:univer-bg-gray-100 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700': iconActivated,
                             })}
                             onClick={handleCloseBtnClick}
                         >
@@ -315,7 +315,7 @@ export function FormulaBar(props: IProps) {
                               univer-text-base
                               dark:!univer-text-white
                             `, {
-                                'univer-cursor-pointer univer-text-red-600 hover:univer-bg-gray-100 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700': iconActivated,
+                                'univer-cursor-pointer univer-text-green-600 hover:univer-bg-gray-100 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700': iconActivated,
                             })}
                             onClick={handleConfirmBtnClick}
                         >

@@ -59,6 +59,11 @@ export class SheetsNotePopupService extends Disposable {
         }));
     }
 
+    override dispose(): void {
+        super.dispose();
+        this.hidePopup();
+    }
+
     showPopup(location: INotePopup, onHide?: () => void) {
         const { row, col, unitId, subUnitId } = location;
         if (

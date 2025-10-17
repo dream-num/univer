@@ -118,6 +118,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         return this._isKeepVisible;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     showPopup(location: IHyperLinkPopupOptions) {
         if (this._currentPopup && isEqualLink(location, this._currentPopup)) {
             return;
@@ -182,6 +183,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
 
         if (disposable) {
+            if (this._currentPopup) {
+                this._currentPopup.disposable?.dispose();
+            }
             this._currentPopup = {
                 unitId,
                 subUnitId,

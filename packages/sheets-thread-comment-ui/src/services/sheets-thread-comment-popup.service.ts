@@ -61,6 +61,11 @@ export class SheetsThreadCommentPopupService extends Disposable {
         }));
     }
 
+    override dispose(): void {
+        super.dispose();
+        this.hidePopup();
+    }
+
     showPopup(location: IThreadCommentPopup, onHide?: () => void) {
         const { row, col, unitId, subUnitId } = location;
         if (

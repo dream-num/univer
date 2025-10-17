@@ -103,6 +103,9 @@ export class CellAlertManagerService extends Disposable {
             }
         );
         if (disposable) {
+            if (lastPopup) {
+                lastPopup.dispose?.dispose();
+            }
             lastPopup.dispose = disposable;
         }
 

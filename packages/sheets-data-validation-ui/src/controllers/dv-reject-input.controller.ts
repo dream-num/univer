@@ -36,7 +36,7 @@ export class DataValidationRejectInputController extends Disposable {
     }
 
     private _initEditorBridgeInterceptor() {
-        this._sheetInterceptorService.writeCellInterceptor.intercept(
+        this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(
             VALIDATE_CELL,
             {
                 handler: async (lastResult, context, next) => {
@@ -88,7 +88,7 @@ export class DataValidationRejectInputController extends Disposable {
                     return next(Promise.resolve(false))!; // Add explicit return for invalid data
                 },
             }
-        );
+        ));
     }
 
     showReject(title: string) {

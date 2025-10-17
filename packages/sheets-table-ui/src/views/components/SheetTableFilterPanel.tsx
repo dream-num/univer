@@ -146,7 +146,7 @@ export function SheetTableFilterPanel() {
     return (
         <div
             className={`
-              univer-box-border univer-flex univer-w-[312px] univer-flex-col univer-rounded-[10px] univer-bg-white
+              univer-box-border univer-flex univer-min-w-[312px] univer-flex-col univer-rounded-[10px] univer-bg-white
               univer-p-4 univer-shadow-lg
               dark:!univer-border-gray-600 dark:!univer-bg-gray-700
             `}
@@ -172,7 +172,7 @@ export function SheetTableFilterPanel() {
                     onChange={(value) => setFilterBy(value as FilterByEnum)}
                 />
             </div>
-            <div className="univer-z-10 univer-h-60 univer-w-[280px]">
+            <div className="univer-z-10 univer-h-60">
                 <div className="univer-mt-3 univer-h-full univer-w-full">
                     {filterBy === FilterByEnum.Items
                         ? (
@@ -202,7 +202,7 @@ export function SheetTableFilterPanel() {
             <div
                 className={`
                   univer-flex-wrap-nowrap univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0
-                  univer-justify-between univer-overflow-hidden
+                  univer-justify-between univer-gap-6 univer-overflow-hidden
                 `}
             >
                 <Button

@@ -52,6 +52,12 @@ export class DataValidationCustomFormulaService extends Disposable {
         this._initDirtyRanges();
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._ruleFormulaMap.clear();
+        this._ruleFormulaMap2.clear();
+    }
+
     private _initFormulaResultHandler() {
         this.disposeWithMe(this._registerOtherFormulaService.formulaResult$.subscribe((resultMap) => {
             for (const unitId in resultMap) {
@@ -120,11 +126,11 @@ export class DataValidationCustomFormulaService extends Disposable {
     }
 
     private _initDirtyRanges() {
-        this._dataValidationCacheService.dirtyRanges$.subscribe((data) => {
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.subscribe((data) => {
             if (data.isSetRange) {
                 this._handleDirtyRanges(data.unitId, data.subUnitId, data.ranges);
             }
-        });
+        }));
     }
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {

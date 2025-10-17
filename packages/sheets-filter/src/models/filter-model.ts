@@ -61,6 +61,8 @@ export class FilterModel extends Disposable {
 
         this._filteredOutRows$.complete();
         this._hasCriteria$.complete();
+        //@ts-ignore
+        this._worksheet = null;
     }
 
     /**

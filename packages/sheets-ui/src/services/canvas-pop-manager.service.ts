@@ -304,8 +304,8 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     // #region attach to position
     attachPopupByPosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, location: ISheetLocationBase): Nullable<INeedCheckDisposable> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return null;
         }
@@ -353,6 +353,10 @@ export class SheetCanvasPopManagerService extends Disposable {
                 position$.complete();
                 disposable.dispose();
                 rectsObserverDisposable.dispose();
+                //@ts-ignore
+                workbook = null;
+                //@ts-ignore
+                worksheet = null;
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
@@ -418,8 +422,8 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        let worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return null;
         }
@@ -484,6 +488,10 @@ export class SheetCanvasPopManagerService extends Disposable {
         return {
             dispose() {
                 disposableCollection.dispose();
+                //@ts-ignore
+                worksheet = null;
+                //@ts-ignore
+                workbook = null;
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
@@ -641,6 +649,15 @@ export class SheetCanvasPopManagerService extends Disposable {
         activeViewport: Viewport
     ): IBoundRectNoAngle {
         const { scene, engine } = currentRender;
+        //@ts-ignore this line for check disposed
+        if (skeleton._disposed || scene._disposed) {
+            return {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+            };
+        }
 
         const primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;

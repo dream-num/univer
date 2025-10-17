@@ -118,6 +118,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         return this._isKeepVisible;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     showPopup(location: IHyperLinkPopupOptions) {
         if (this._currentPopup && isEqualLink(location, this._currentPopup)) {
             return;
@@ -182,6 +183,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
 
         if (disposable) {
+            if (this._currentPopup) {
+                this._currentPopup.disposable?.dispose();
+            }
             this._currentPopup = {
                 unitId,
                 subUnitId,
@@ -208,6 +212,14 @@ export class SheetsHyperLinkPopupService extends Disposable {
             this._currentPopup = null;
             this._currentPopup$.next(null);
         }
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this.hideCurrentPopup();
+        this.endEditing();
+        this._currentPopup$.complete();
+        this._currentEditing$.complete();
     }
 
     private _getEditingRange(): Nullable<ITextRange & { label: string }> {

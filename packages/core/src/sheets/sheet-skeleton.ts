@@ -1037,6 +1037,8 @@ export class SheetSkeleton extends Skeleton {
         this._worksheetData = null as unknown as IWorksheetData;
         this._cellData = null as unknown as ObjectMatrix<Nullable<ICellData>>;
         this._styles = null as unknown as Styles;
+        //@ts-ignore
+        this.worksheet = null as unknown as Worksheet;
     }
 }
 

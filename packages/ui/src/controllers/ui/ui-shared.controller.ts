@@ -43,6 +43,14 @@ export abstract class SingleUnitUIController extends Disposable {
 
         clearTimeout(this._steadyTimeout);
         clearTimeout(this._renderTimeout);
+        //@ts-ignore
+        delete this._instanceService;
+        //@ts-ignore
+        delete this._layoutService;
+        //@ts-ignore
+        delete this._lifecycleService;
+        //@ts-ignore
+        delete this._renderManagerService;
     }
 
     protected _bootstrapWorkbench() {

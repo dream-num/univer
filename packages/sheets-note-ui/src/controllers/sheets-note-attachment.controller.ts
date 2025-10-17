@@ -64,6 +64,13 @@ export class SheetsNoteAttachmentController extends Disposable {
         );
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._noteMatrix.forValue((_, __, disposable) => {
+            disposable.dispose();
+        });
+    }
+
     private _initSheet(targetUnitId: string, targetSheetId: string) {
         const oldMatrix = this._noteMatrix;
         oldMatrix.forValue((_, __, disposable) => {

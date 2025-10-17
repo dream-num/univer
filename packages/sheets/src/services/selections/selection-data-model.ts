@@ -64,6 +64,9 @@ export class WorkbookSelectionModel extends Disposable {
         this._selectionMoving$.complete();
         this._selectionMoveStart$.complete();
         this._selectionSet$.complete();
+
+        //@ts-ignore
+        this._workbook = null!;
     }
 
     addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {

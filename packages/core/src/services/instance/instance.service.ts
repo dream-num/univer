@@ -116,6 +116,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         super.dispose();
 
         this._focused$.complete();
+        this._currentUnits$.complete();
+        this._unitAdded$.complete();
+        this._currentUnits.clear();
+        this._unitsByType.clear();
     }
 
     private _createHandler!: (

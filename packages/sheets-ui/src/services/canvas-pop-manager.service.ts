@@ -179,13 +179,13 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const disposable = new DisposableCollection();
 
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetFrozenMutation.id) {
                 rects$.next(calc());
             }
         }));
 
-        this.disposeWithMe(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(() => {
+        disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(() => {
             rects$.next(calc());
         }));
 
@@ -227,7 +227,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const position$ = new BehaviorSubject(position);
         const disposable = new DisposableCollection();
 
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
                 position$.next(calc());
             }

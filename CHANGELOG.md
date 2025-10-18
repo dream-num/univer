@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.10.11](https://github.com/dream-num/univer/compare/v0.10.10...v0.10.11) (2025-10-18)
+
+
+### Bug Fixes
+
+* darkBlue key ([#5954](https://github.com/dream-num/univer/issues/5954)) ([89495e1](https://github.com/dream-num/univer/commit/89495e11f02803c60dd2a0d20b6d1873fadac067))
+* defined name Ru support ([#5946](https://github.com/dream-num/univer/issues/5946)) ([46d2f71](https://github.com/dream-num/univer/commit/46d2f71c280b5cf04034e1ab6f15e459353567bb))
+* fix getValidatorStatusAsync api result ([#5963](https://github.com/dream-num/univer/issues/5963)) ([9ea416e](https://github.com/dream-num/univer/commit/9ea416e368ecccfcd37363d359140b60dd5c51ae))
+* fix open filter panel will trigger SheetEditEnded event ([#5955](https://github.com/dream-num/univer/issues/5955)) ([a50385e](https://github.com/dream-num/univer/commit/a50385e2ac64318ce217bec330ccc833972e0ed1))
+* fix some issues with sheets-table ([#5987](https://github.com/dream-num/univer/issues/5987)) ([580efc8](https://github.com/dream-num/univer/commit/580efc87fcfc94532313e39cd22e735922bf7c99))
+* fix the issue of holding down the shift key to select a selection ([#5958](https://github.com/dream-num/univer/issues/5958)) ([e05e89f](https://github.com/dream-num/univer/commit/e05e89f1f1e0c6ebb5833b51da1e71a9f62325d8))
+* fix the issue that the style ID of the copied worksheet could not be found in collaboration ([#5977](https://github.com/dream-num/univer/issues/5977)) ([1ad3872](https://github.com/dream-num/univer/commit/1ad38720bc8ccec46cecfac1eb7b97674ef9cc69))
+* **mem:** dispose some obj ([#5978](https://github.com/dream-num/univer/issues/5978)) ([e838616](https://github.com/dream-num/univer/commit/e838616d3dd5e1c70796753f78cb6bb8eb0580a2))
+* **memo:** fix memo leak ([#5988](https://github.com/dream-num/univer/issues/5988)) ([2c08a0c](https://github.com/dream-num/univer/commit/2c08a0c809aa0fc6190ad11bc174329bf5de0270))
+* optimize editor input ([#5950](https://github.com/dream-num/univer/issues/5950)) ([3565968](https://github.com/dream-num/univer/commit/35659680cc1ee834d24c396635b40d7ca5554b67))
+* **sheet:** fix some memory leak error ([#5973](https://github.com/dream-num/univer/issues/5973)) ([f5f2ea8](https://github.com/dream-num/univer/commit/f5f2ea8cd9d1a3f09866141faf6297027a9db8b6))
+* **sheets-formula-ui:** handle potential null reference for currentDoc in useRefactorEffect ([#5932](https://github.com/dream-num/univer/issues/5932)) ([dbfe4e6](https://github.com/dream-num/univer/commit/dbfe4e6a8bd75f886fc3b13495cc4fd8844c6a32))
+* **sheets-ui:** defined name bar - actions tooltip position ([#5944](https://github.com/dream-num/univer/issues/5944)) ([9214b92](https://github.com/dream-num/univer/commit/9214b922cc9dcf500f1951298bd51d838e7aee48))
+* **sheets-ui:** improve layout and styling of status bar items ([#5975](https://github.com/dream-num/univer/issues/5975)) ([6121b21](https://github.com/dream-num/univer/commit/6121b2113df2abac16e4bdca3ab4a9e75fb0a0b1))
+* some typos in the ru translation ([#5945](https://github.com/dream-num/univer/issues/5945)) ([0848c55](https://github.com/dream-num/univer/commit/0848c551c7d81381c047e6a84572b8a0a678c039))
+* table filter panel  buttons overlap each other in some lang ([#5990](https://github.com/dream-num/univer/issues/5990)) ([1f9ed06](https://github.com/dream-num/univer/commit/1f9ed06d27ae0b4d5ae028e7eb743c3819eb04f5))
+* **ui:** fix tooltip for dark mode styling ([#5974](https://github.com/dream-num/univer/issues/5974)) ([252e8d3](https://github.com/dream-num/univer/commit/252e8d3f0a27775fc094b75dd5dd7ca1bc31f450))
+* ul margin in funtions list ([#5970](https://github.com/dream-num/univer/issues/5970)) ([fa5bbb9](https://github.com/dream-num/univer/commit/fa5bbb9d840e3e161b876d173782834c80a8a563))
+
+
+### Features
+
+* add freezeSync config and api to controll whether synchronize the frozen state to other users in real-time collaboration ([#5960](https://github.com/dream-num/univer/issues/5960)) ([dc3f9d3](https://github.com/dream-num/univer/commit/dc3f9d3c7b2e180be19ef2fde739c8122ce6ed73))
+* **sheets-ui:** increase UX in formulaBar ([#5980](https://github.com/dream-num/univer/issues/5980)) ([4906d98](https://github.com/dream-num/univer/commit/4906d98956b3eb7d83dea28c794031ac60d5797f))
+
 ## [0.10.10](https://github.com/dream-num/univer/compare/v0.10.9...v0.10.10) (2025-09-26)
 
 

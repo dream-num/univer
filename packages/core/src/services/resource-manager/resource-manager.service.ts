@@ -94,8 +94,8 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         });
     }
 
-    public unloadResources(unitId: string) {
-        this.getAllResourceHooks().forEach((hook) => {
+    public unloadResources(unitId: string, type: UniverInstanceType) {
+        this.getAllResourceHooks().filter((hook) => hook.businesses.includes(type)).forEach((hook) => {
             hook.onUnLoad(unitId);
         });
     }

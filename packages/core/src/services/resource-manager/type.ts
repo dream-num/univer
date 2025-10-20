@@ -46,7 +46,7 @@ export interface IResourceManagerService {
     getResources(unitId: string, type: UniverInstanceType): IResources;
     getResourcesByType: (unitId: string, type: UniverInstanceType) => IResources;
     loadResources: (unitId: string, resources?: IResources) => void;
-    unloadResources(unitId: string): void;
+    unloadResources(unitId: string, type: UniverInstanceType): void;
 }
 
 export const IResourceManagerService = createIdentifier<IResourceManagerService>('core.resource-manager.service');

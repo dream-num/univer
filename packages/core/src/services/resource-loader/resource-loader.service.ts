@@ -98,13 +98,13 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-                this._resourceManagerService.unloadResources(workbook.getUnitId());
+                this._resourceManagerService.unloadResources(workbook.getUnitId(), UniverInstanceType.UNIVER_SHEET);
             })
         );
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
-                this._resourceManagerService.unloadResources(doc.getUnitId());
+                this._resourceManagerService.unloadResources(doc.getUnitId(), UniverInstanceType.UNIVER_DOC);
             })
         );
     }

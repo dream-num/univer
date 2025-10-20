@@ -28,7 +28,7 @@ import type {
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, IUniverInstanceService, merge, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, isInternalEditorID, IUniverInstanceService, merge, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -138,6 +138,7 @@ export class ConditionalFormattingService extends Disposable {
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
                     this._conditionalFormattingRuleModel.deleteUnitId(unitID);
+                    if (isInternalEditorID(unitID)) return;
                     this._conditionalFormattingViewModelV2.dispose();
                 },
                 onLoad: (unitID, value) => {

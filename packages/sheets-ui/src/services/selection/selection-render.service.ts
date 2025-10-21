@@ -292,7 +292,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
-            if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+            if (skeleton.worksheet && prevSheetId !== skeleton.worksheet.getSheetId()) {
                 // If there is no initial selection, add one by default in the top left corner.
                 const selections = this._workbookSelections.getCurrentSelections();
                 // WARNING: SetSelectionsOperation with type=null would clear all exists selections

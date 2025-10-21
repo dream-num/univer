@@ -78,7 +78,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                     this._changeRuntime(skeleton);
 
                     // change to another sheet
-                    if (skeleton.worksheet && prevSheetId !== skeleton.worksheet.getSheetId()) {
+                    if (prevSheetId !== skeleton.worksheet.getSheetId()) {
                         this._removeArrayFormulaRangeShape();
                     } else {
                         const { unitId, sheetId } = param;

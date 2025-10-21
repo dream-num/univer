@@ -45,6 +45,11 @@ export interface IScrollState {
      * e.g. If column A ~ C is frozen, the first column of viewMain is D, but sheetViewStartColumn still 0.
      */
     sheetViewStartColumn: number;
+
+    /**
+     * The duration of the scroll animation in milliseconds.
+     */
+    duration?: number;
 }
 
 export interface IViewportScrollState extends IScrollState {

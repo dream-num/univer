@@ -45,6 +45,11 @@ export interface IScrollCommandParams {
      * e.g. if scrolled about 2 columns, now left is E, then sheetViewStartColumn is 2.
      */
     sheetViewStartColumn?: number;
+
+    /**
+     * The duration of the scroll animation in milliseconds.
+     */
+    duration?: number;
 }
 
 /**
@@ -120,7 +125,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             return false;
         }
 
-        const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = params;
+        const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY, duration } = params;
         const {
             sheetViewStartColumn: currentColumn,
             sheetViewStartRow: currentRow,
@@ -140,6 +145,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0 + xSplit),
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
+            duration,
         });
     },
 };

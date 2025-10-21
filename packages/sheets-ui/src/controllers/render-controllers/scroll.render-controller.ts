@@ -15,7 +15,7 @@
  */
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
@@ -141,7 +141,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     }
 
                     // prev scrolling state from rawScrollInfo$
-                    const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = rawScrollInfo;
+                    const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY, duration } = rawScrollInfo;
 
                     const { startX, startY } = skeleton.getCellWithCoordByIndex(
                         sheetViewStartRow,
@@ -152,7 +152,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     const viewportScrollX = startX + offsetX;
                     const viewportScrollY = startY + offsetY;
 
-                    viewportMain.scrollToViewportPos({ viewportScrollX, viewportScrollY });
+                    if (!duration) {
+                        viewportMain.scrollToViewportPos({ viewportScrollX, viewportScrollY });
+                    } else {
+                        this._smoothScrollToViewportPos({ viewportMain, viewportScrollX, viewportScrollY, duration });
+                    }
                 })
             )
         );
@@ -262,6 +266,35 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         ));
     }
 
+    _smoothScrollToViewportPos(params: { viewportMain: Viewport; viewportScrollX: number; viewportScrollY: number; duration: number }) {
+        const { viewportMain, viewportScrollX, viewportScrollY, duration } = params;
+        const startTime = performance.now();
+        const startX = viewportMain.viewportScrollX;
+        const startY = viewportMain.viewportScrollY;
+        const offsetX = viewportScrollX - startX;
+        const offsetY = viewportScrollY - startY;
+
+        function animate(now: number) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1); // 0 → 1
+            const ease = 1 - (1 - progress) ** 3; // cubic easing
+
+            const currentX = startX + offsetX * ease;
+            const currentY = startY + offsetY * ease;
+
+            viewportMain.scrollToViewportPos({
+                viewportScrollX: currentX,
+                viewportScrollY: currentY,
+            });
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
     _updateViewportScroll(viewportScrollX: number = 0, viewportScrollY: number = 0) {
         const sheetObject = this._getSheetObject();
         if (!sheetObject) return;
@@ -318,7 +351,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
      * @param {number} column - Cell column
      * @returns {boolean} - true if scroll is successful
      */
-    scrollToCell(row: number, column: number) {
+    scrollToCell(row: number, column: number, duration?: number): boolean {
         const worksheet = this._context.unit.getActiveSheet();
         const {
             ySplit: freezeYSplit,
@@ -329,6 +362,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             sheetViewStartColumn: column - freezeXSplit,
             offsetX: 0,
             offsetY: 0,
+            duration,
         });
     }
 

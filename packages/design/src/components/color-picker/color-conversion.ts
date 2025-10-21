@@ -105,6 +105,7 @@ export const rgbToHsv = (r: number, g: number, b: number): [number, number, numb
 };
 
 export const hexToHsv = (hex: string): [number, number, number] => {
+    if (hex.length === 4) hex = `#${hex.slice(1).split('').map((i) => i + i).join('')}`;
     const [r, g, b] = hex.match(/\w\w/g)!.map((x) => Number.parseInt(x, 16));
     return rgbToHsv(r, g, b);
 };

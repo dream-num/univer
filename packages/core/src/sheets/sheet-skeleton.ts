@@ -1038,7 +1038,8 @@ export class SheetSkeleton extends Skeleton {
         this._cellData = null as unknown as ObjectMatrix<Nullable<ICellData>>;
         this._styles = null as unknown as Styles;
         //@ts-ignore
-        this.worksheet = null as unknown as Worksheet;
+        // this breaks the getLocation method when deleting a sheet.
+        // this.worksheet = null as unknown as Worksheet;
     }
 }
 

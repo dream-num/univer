@@ -344,13 +344,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
-        const [unitId, sheetId] = this._skeleton.getLocation();
-        return selectionControls.map((control) => {
-            const v = control.getValue();
-            v.rangeWithCoord.sheetId = sheetId;
-            v.rangeWithCoord.unitId = unitId;
-            return v;
-        });
+        if (this._skeleton.worksheet) {
+            const [unitId, sheetId] = this._skeleton.getLocation();
+            return selectionControls.map((control) => {
+                const v = control.getValue();
+                v.rangeWithCoord.sheetId = sheetId;
+                v.rangeWithCoord.unitId = unitId;
+                return v;
+            });
+        }
+        return [];
     }
 
     /**

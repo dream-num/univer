@@ -243,7 +243,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
             // changing sheet
-            if (this._skeleton && this._skeleton.worksheet.getSheetId() !== skeleton.worksheet.getSheetId()) {
+            if (this._skeleton && this._skeleton.worksheet?.getSheetId() !== skeleton.worksheet.getSheetId()) {
                 this._reset();
             }
             this._changeRuntime(skeleton, scene, viewportMain);

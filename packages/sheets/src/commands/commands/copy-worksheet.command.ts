@@ -56,11 +56,13 @@ export const CopySheetCommand: ICommand = {
         config.name = getCopyUniqueSheetName(workbook, localeService, config.name);
         config.id = generateRandomId();
         const sheetIndex = workbook.getSheetIndex(worksheet);
+        const styles = workbook.getStyles().toJSON();
 
         const insertSheetMutationParams: IInsertSheetMutationParams = {
             index: sheetIndex + 1,
             sheet: config,
             unitId,
+            styles,
         };
 
         const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(

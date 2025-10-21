@@ -18,6 +18,7 @@ import type { IRange, RichTextValue } from '@univerjs/core';
 import type { IEventBase } from '@univerjs/core/facade';
 import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
+import type { IDragCellPosition } from '@univerjs/sheets-ui';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName } from '@univerjs/core/facade';
@@ -499,12 +500,12 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when the drag element passes over the spreadsheet cells
-     * @see {@link ICellEventParam}
+     * @see {@link IDragEventParam}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.DragOver, (params) => {
-     *   const { worksheet, workbook, row, column } = params;
-     *   console.log(params);
+     *   const { row, column, dataTransfer } = params;
+     *   console.log(params, dataTransfer.files.length);
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -514,12 +515,12 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when the drag element is dropped on the spreadsheet cells
-     * @see {@link ICellEventParam}
+     * @see {@link IDragEventParam}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.Drop, (params) => {
-     *   const { worksheet, workbook, row, column } = params;
-     *   console.log(params);
+     *   const { row, column, dataTransfer } = params;
+     *   console.log(params, dataTransfer.files.length);
      * });
      *
      * // Remove the event listener, use `disposable.dispose()`
@@ -864,6 +865,9 @@ export interface ICellEventParam extends ISheetUIEventBase {
     column: number;
 }
 
+export interface IDragEventParam extends IDragCellPosition, ICellEventParam {
+}
+
 export interface IScrollEventParam extends ISheetUIEventBase {
     scrollX: number;
     scrollY: number;
@@ -905,8 +909,8 @@ export interface IFSheetsUIEventParamConfig {
     CellPointerDown: ICellEventParam;
     CellPointerUp: ICellEventParam;
     CellPointerMove: ICellEventParam;
-    Drop: ICellEventParam;
-    DragOver: ICellEventParam;
+    Drop: IDragEventParam;
+    DragOver: IDragEventParam;
     RowHeaderClick: ISheetRowHeaderEvent;
     // RowHeaderDbClick: ISheetRowHeaderEvent;
     RowHeaderHover: ISheetRowHeaderEvent;

@@ -89,6 +89,7 @@ export interface IFWorksheetSkeletonMixin {
      * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
      * @param {number} row - Cell row index
      * @param {number} column - Cell column index
+     * @param {number} [duration] - The duration of the scroll animation in milliseconds.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
@@ -102,7 +103,7 @@ export interface IFWorksheetSkeletonMixin {
      * fWorksheet.scrollToCell(row, column);
      * ```
      */
-    scrollToCell(row: number, column: number): FWorksheet;
+    scrollToCell(row: number, column: number, duration?: number): FWorksheet;
 
     /**
      * Get scroll state of current sheet.
@@ -352,13 +353,13 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return range;
     }
 
-    override scrollToCell(row: number, column: number): FWorksheet {
+    override scrollToCell(row: number, column: number, duration?: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             const scrollRenderController = render?.with(SheetsScrollRenderController);
-            scrollRenderController.scrollToCell(row, column);
+            scrollRenderController.scrollToCell(row, column, duration);
         }
         return this;
     }

@@ -31,7 +31,7 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         }
 
         // freeze is handled by set-scroll.command.ts
-        const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = params;
+        const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow, duration } = params;
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollManagerService = renderManagerService.getRenderById(unitId)!.with(SheetScrollManagerService);
         // const currentService = accessor.get(IUniverInstanceService);
@@ -46,6 +46,7 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
             offsetY,
             sheetViewStartRow,
             sheetViewStartColumn,
+            duration,
         });
 
         return true;

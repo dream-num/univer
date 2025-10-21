@@ -149,13 +149,13 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                         false
                     );
 
-                    if (!duration) {
-                        const viewportScrollX = startX + offsetX;
-                        const viewportScrollY = startY + offsetY;
+                    const viewportScrollX = startX + offsetX;
+                    const viewportScrollY = startY + offsetY;
 
+                    if (!duration) {
                         viewportMain.scrollToViewportPos({ viewportScrollX, viewportScrollY });
                     } else {
-                        this._smoothScrollToViewportPos(viewportMain, startX + offsetX, startY + offsetY, duration);
+                        this._smoothScrollToViewportPos({ viewportMain, viewportScrollX, viewportScrollY, duration });
                     }
                 })
             )
@@ -266,17 +266,18 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         ));
     }
 
-    _smoothScrollToViewportPos(viewportMain: Viewport, targetX: number, targetY: number, duration: number) {
+    _smoothScrollToViewportPos(params: { viewportMain: Viewport; viewportScrollX: number; viewportScrollY: number; duration: number }) {
+        const { viewportMain, viewportScrollX, viewportScrollY, duration } = params;
         const startTime = performance.now();
         const startX = viewportMain.viewportScrollX;
         const startY = viewportMain.viewportScrollY;
-        const offsetX = targetX - startX;
-        const offsetY = targetY - startY;
+        const offsetX = viewportScrollX - startX;
+        const offsetY = viewportScrollY - startY;
 
         function animate(now: number) {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1); // 0 → 1
-            const ease = 1 - (1 - progress) ** 3; // ✨ cubic easing
+            const ease = 1 - (1 - progress) ** 3; // cubic easing
 
             const currentX = startX + offsetX * ease;
             const currentY = startY + offsetY * ease;

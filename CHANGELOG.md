@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.12](https://github.com/dream-num/univer/compare/v0.10.11...v0.10.12) (2025-10-22)
+
+
+### Bug Fixes
+
+* **design:** colorPickerDialog normalize short hex ([#5968](https://github.com/dream-num/univer/issues/5968)) ([76545d2](https://github.com/dream-num/univer/commit/76545d236398cc7774216f44c1923e1f3298d67c))
+* fix resource unload ([#6000](https://github.com/dream-num/univer/issues/6000)) ([3608424](https://github.com/dream-num/univer/commit/3608424e82b0e4f575cfc964732fd4866b02406c))
+* **sheet:** fix remove sheet error ([#6005](https://github.com/dream-num/univer/issues/6005)) ([05294c8](https://github.com/dream-num/univer/commit/05294c8a2330a62c48f226e4fecccfff924b1be9))
+
+
+### Features
+
+* **sheets-ui:** scrolling supports setting animation duration ([#6012](https://github.com/dream-num/univer/issues/6012)) ([9e09cce](https://github.com/dream-num/univer/commit/9e09ccec67384fb43ea6f85f1af20f5f74f29158))
+
 ## [0.10.11](https://github.com/dream-num/univer/compare/v0.10.10...v0.10.11) (2025-10-18)
 
 

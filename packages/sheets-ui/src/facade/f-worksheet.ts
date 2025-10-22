@@ -53,7 +53,7 @@ export interface IFWorksheetSkeletonMixin {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const ranges = [fWorksheet.getRange('A1:B2'), fWorksheet.getRange('D4:E5')];
-     * const disposable = fWorksheet.highlightRanges(ranges, { backgroundColor: 'yellow' });
+     * const disposable = fWorksheet.highlightRanges(ranges, { fill: 'yellow' });
      *
      * // To remove the highlights later
      * disposable.dispose();

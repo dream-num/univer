@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import type { IDisposable, IRange, ISelectionCell, Nullable } from '@univerjs/core';
 import type { IColumnsHeaderCfgParam, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
+import type { ISelectionStyle } from '@univerjs/sheets';
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { FRange } from '@univerjs/sheets/facade';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
 import { SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
-import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { IMarkSelectionService, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 /**
@@ -39,6 +41,25 @@ export interface IFWorksheetSkeletonMixin {
      * ```
      */
     refreshCanvas(): FWorksheet;
+
+    /**
+     * Highlight multiple ranges on the worksheet.
+     * @param {FRange[]} ranges  The ranges to highlight.
+     * @param {Nullable<Partial<ISelectionStyle>>} style - style for highlight ranges.
+     * @param {Nullable<ISelectionCell>} primary - primary cell for highlight ranges.
+     * @return {IDisposable} An IDisposable to remove the highlights.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const ranges = [fWorksheet.getRange('A1:B2'), fWorksheet.getRange('D4:E5')];
+     * const disposable = fWorksheet.highlightRanges(ranges, { backgroundColor: 'yellow' });
+     *
+     * // To remove the highlights later
+     * disposable.dispose();
+     * ```
+     */
+    highlightRanges(ranges: FRange[], style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;
 
     /**
      * Set zoom ratio of the worksheet.
@@ -307,6 +328,28 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         mainComponent.makeDirty();
 
         return this;
+    }
+
+    override highlightRanges(ranges: FRange[], style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable {
+        const markSelectionService = this._injector.get(IMarkSelectionService);
+        const ids: string[] = [];
+        for (const range of ranges) {
+            const iRange = range.getRange();
+            const id = markSelectionService.addShapeWithNoFresh({ range: iRange, style, primary });
+            if (id) {
+                ids.push(id);
+            }
+        }
+        markSelectionService.refreshShapes();
+
+        if (ids.length === 0) {
+            throw new Error('Failed to highlight current range');
+        }
+        return toDisposable(() => {
+            ids.forEach((id) => {
+                markSelectionService.removeShape(id);
+            });
+        });
     }
 
     override zoom(zoomRatio: number): FWorksheet {

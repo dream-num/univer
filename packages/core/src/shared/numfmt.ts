@@ -131,7 +131,7 @@ export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | nul
 
     if (!parseData) return null;
 
-    const { z } = parseData;
+    const { v, z } = parseData;
 
     if (z) {
         /**
@@ -147,6 +147,13 @@ export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | nul
          * '5:00 AM' => 'h:mm AM/PM' ----- correct
          */
         if (ignoreAMPMPatterns.has(z) && !/\s(A|AM|P|PM)$/i.test(value)) return null;
+
+        /**
+         * Verify by formatting back to string
+         * '1000,' => '#,##0,' ----- error
+         * '1000,1.00' => '#,##0.00' ----- error
+         */
+        if (z.includes('#,##0') && numfmt.format(z, v) !== value) return null;
     }
 
     return parseData;

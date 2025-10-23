@@ -67,9 +67,8 @@ export class FBaseInitialable extends Disposable {
         super();
 
         const Ctor = this.constructor as any;
-        const manual = Boolean(Ctor[ManualInitSymbol]); // <— 仅该类（及其子类）开启时才手动
+        const manual = Boolean(Ctor[ManualInitSymbol]); // <— Enable manual control only when this class (and its subclasses) is active.
 
-        // eslint-disable-next-line ts/no-this-alias
         const self = this;
 
         const initializers = Object.getPrototypeOf(this)[InitializerSymbol];

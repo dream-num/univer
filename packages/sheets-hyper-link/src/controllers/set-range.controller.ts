@@ -148,6 +148,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 if (typeof cell.v === 'string' && Tools.isLegalUrl(cell.v) && cell.v[cell.v.length - 1] !== ' ') {
                     const { unitId, subUnitId, row, col } = context;
 
+                    const link = Tools.normalizeUrl(cell.v);
                     const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                     const worksheet = workbook?.getSheetBySheetId(subUnitId);
                     if (!worksheet) {
@@ -176,7 +177,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 rangeId: generateRandomId(),
                                 rangeType: CustomRangeType.HYPERLINK,
                                 properties: {
-                                    url: cell.v,
+                                    url: link,
                                 },
                             }],
                         },

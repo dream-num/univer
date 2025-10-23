@@ -152,6 +152,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     const viewportScrollX = startX + offsetX;
                     const viewportScrollY = startY + offsetY;
 
+                    // If there is an ongoing scroll animation, cancel it before starting a new one.
+                    if (viewportMain.scrollAnimationFrameId !== null) {
+                        cancelAnimationFrame(viewportMain.scrollAnimationFrameId);
+                    }
+
                     if (!duration) {
                         viewportMain.scrollToViewportPos({ viewportScrollX, viewportScrollY });
                     } else {
@@ -268,11 +273,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     _smoothScrollToViewportPos(params: { viewportMain: Viewport; viewportScrollX: number; viewportScrollY: number; duration: number }) {
         const { viewportMain, viewportScrollX, viewportScrollY, duration } = params;
-
-        if (viewportMain.scrollAnimationFrameId !== null) {
-            cancelAnimationFrame(viewportMain.scrollAnimationFrameId);
-        }
-
         const startTime = performance.now();
         const startX = viewportMain.viewportScrollX;
         const startY = viewportMain.viewportScrollY;

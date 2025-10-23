@@ -228,7 +228,7 @@ export const DefinedNameContainer = () => {
                                     <div
                                         className={`
                                           univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-overflow-hidden
-                                          univer-text-sm univer-font-medium univer-text-gray-900
+                                          univer-text-ellipsis univer-text-sm univer-font-medium univer-text-gray-900
                                           dark:!univer-text-white
                                         `}
                                     >

@@ -268,6 +268,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     _smoothScrollToViewportPos(params: { viewportMain: Viewport; viewportScrollX: number; viewportScrollY: number; duration: number }) {
         const { viewportMain, viewportScrollX, viewportScrollY, duration } = params;
+
+        if (viewportMain.scrollAnimationFrameId !== null) {
+            cancelAnimationFrame(viewportMain.scrollAnimationFrameId);
+        }
+
         const startTime = performance.now();
         const startX = viewportMain.viewportScrollX;
         const startY = viewportMain.viewportScrollY;
@@ -288,11 +293,13 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             });
 
             if (progress < 1) {
-                requestAnimationFrame(animate);
+                viewportMain.scrollAnimationFrameId = requestAnimationFrame(animate);
+            } else {
+                viewportMain.scrollAnimationFrameId = null;
             }
         }
 
-        requestAnimationFrame(animate);
+        viewportMain.scrollAnimationFrameId = requestAnimationFrame(animate);
     }
 
     _updateViewportScroll(viewportScrollX: number = 0, viewportScrollY: number = 0) {

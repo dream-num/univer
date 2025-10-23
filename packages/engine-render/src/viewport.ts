@@ -232,6 +232,11 @@ export class Viewport {
     bufferEdgeX: number = 0;
     bufferEdgeY: number = 0;
 
+    /**
+     * Used to store the requestAnimationFrame ID for scroll animation.
+     */
+    scrollAnimationFrameId: number | null = null;
+
     constructor(viewportKey: string, scene: Scene, props?: IViewProps) {
         this._viewportKey = viewportKey;
         this._scene = scene;

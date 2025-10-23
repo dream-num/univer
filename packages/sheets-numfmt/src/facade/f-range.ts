@@ -101,7 +101,13 @@ export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
         const values: ISetNumfmtCommandParams['values'] = [];
 
         // Add number format info to the `values` array.
-        this.forEach((row, col) => values.push({ row, col, pattern }));
+        const { startColumn, startRow, endColumn, endRow } = this._range;
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startColumn; col <= endColumn; col++) {
+                values.push({ row, col, pattern });
+            }
+        }
+
         this._commandService.syncExecuteCommand(SetNumfmtCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -115,10 +121,14 @@ export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
         const values: ISetNumfmtCommandParams['values'] = [];
 
         // Add number format info to the `values` array.
-        this.forEach((row, col) => {
-            const pattern = patterns[row]?.[col];
-            values.push({ row, col, pattern });
-        });
+        const { startColumn, startRow, endColumn, endRow } = this._range;
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startColumn; col <= endColumn; col++) {
+                const pattern = patterns[row - startRow]?.[col - startColumn];
+                values.push({ row, col, pattern });
+            }
+        }
+
         this._commandService.syncExecuteCommand(SetNumfmtCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),

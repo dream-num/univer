@@ -48,6 +48,10 @@ export abstract class FBase extends Disposable {
  * @ignore
  */
 const InitializerSymbol = Symbol('initializers');
+/**
+ * @ignore
+ */
+const ManualInitSymbol = Symbol('manualInit');
 
 /**
  * @ignore
@@ -66,6 +70,10 @@ export class FBaseInitialable extends Disposable {
     ) {
         super();
 
+        const Ctor = this.constructor as any;
+        const manual = Boolean(Ctor[ManualInitSymbol]); // <— Enable manual control only when this class (and its subclasses) is active.
+        if (manual) return;
+
         // eslint-disable-next-line ts/no-this-alias
         const self = this;
 
@@ -80,7 +88,18 @@ export class FBaseInitialable extends Disposable {
     /**
      * @ignore
      */
-    _initialize(injector: Injector): void { }
+    _initialize(injector: Injector, ..._rest: any[]): void { }
+
+    protected _runInitializers(...args: any[]): void {
+        const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
+        if (initializers?.length) {
+            initializers.forEach((fn: any) => fn.apply(this, args));
+        }
+    }
+
+    protected static _enableManualInit(): void {
+        (this as any)[ManualInitSymbol] = true;
+    }
 
     /**
      * @ignore

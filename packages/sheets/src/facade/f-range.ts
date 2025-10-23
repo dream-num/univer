@@ -45,6 +45,8 @@ export type GetStyleType = 'row' | 'col' | 'cell';
  * @hideconstructor
  */
 export class FRange extends FBaseInitialable {
+    static { this._enableManualInit(); }
+
     constructor(
         protected readonly _workbook: Workbook,
         protected readonly _worksheet: Worksheet,
@@ -54,6 +56,15 @@ export class FRange extends FBaseInitialable {
         @Inject(FormulaDataModel) protected readonly _formulaDataModel: FormulaDataModel
     ) {
         super(_injector);
+
+        this._runInitializers(
+            this._injector,
+            this._workbook,
+            this._worksheet,
+            this._range,
+            this._commandService,
+            this._formulaDataModel
+        );
     }
 
     /**

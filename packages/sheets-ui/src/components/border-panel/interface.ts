@@ -76,27 +76,27 @@ export const BORDER_LINE_CHILDREN = [
 
     {
         label: 'borderLine.borderTlbr',
-        icon: 'BackSlashIcon',
+        icon: 'BackSlashDoubleIcon',
         value: 'tlbr',
     },
     {
         label: 'borderLine.borderTlbcTlmr',
-        icon: 'LeftDoubleDiagonalIcon',
+        icon: 'LeftDoubleDiagonalDoubleIcon',
         value: 'tlbc_tlmr',
     },
     {
         label: 'borderLine.borderTlbrTlbcTlmr',
-        icon: 'LeftTridiagonalIcon',
+        icon: 'LeftTridiagonalDoubleIcon',
         value: 'tlbr_tlbc_tlmr',
     },
     {
         label: 'borderLine.borderBlTr',
-        icon: 'SlashIcon',
+        icon: 'SlashDoubleIcon',
         value: 'bltr',
     },
     {
         label: 'borderLine.borderMltrBctr',
-        icon: 'RightDoubleDiagonalIcon',
+        icon: 'RightDoubleDiagonalDoubleIcon',
         value: 'mltr_bctr',
     },
 ];

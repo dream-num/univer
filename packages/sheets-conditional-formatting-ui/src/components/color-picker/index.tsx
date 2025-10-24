@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IconProps } from '@univerjs/icons';
+import type { FC } from 'react';
 import { ColorKit } from '@univerjs/core';
 import { clsx, Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
 import { PaintBucketDoubleIcon } from '@univerjs/icons';
@@ -24,7 +24,7 @@ interface IColorPickerProps {
     color: string;
     onChange: (color: string) => void;
     disable?: boolean;
-    Icon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGElement>>;
+    Icon?: FC;
     className?: string;
 };
 

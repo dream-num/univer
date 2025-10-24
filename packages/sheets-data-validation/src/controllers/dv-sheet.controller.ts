@@ -16,10 +16,10 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '@univerjs/data-validation';
-import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { AddDataValidationMutation, RemoveDataValidationMutation } from '@univerjs/data-validation';
-import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 export class SheetDataValidationSheetController extends Disposable {
@@ -32,9 +32,11 @@ export class SheetDataValidationSheetController extends Disposable {
         this._initSheetChange();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initSheetChange() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
+                // eslint-disable-next-line max-lines-per-function
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
@@ -78,6 +80,49 @@ export class SheetDataValidationSheetController extends Disposable {
                                 id: AddDataValidationMutation.id,
                                 params: undoParams,
                             }],
+                        };
+                    } else if (commandInfo.id === CopySheetCommand.id) {
+                        const params = commandInfo.params as ICopySheetCommandParams & { targetSubUnitId: string };
+                        const { unitId, subUnitId, targetSubUnitId } = params;
+
+                        if (!unitId || !subUnitId || !targetSubUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
+
+                        if (rules.length === 0) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const newRules = rules.map((rule) => {
+                            const newRule = { ...rule, uid: generateRandomId(6) }; // Clear uid to let the system generate a new one
+                            return newRule;
+                        });
+
+                        return {
+                            redos: [
+                                {
+                                    id: AddDataValidationMutation.id,
+                                    params: {
+                                        unitId,
+                                        subUnitId: targetSubUnitId,
+                                        rule: newRules,
+                                        source: 'patched',
+                                    },
+                                },
+                            ],
+                            undos: [
+                                {
+                                    id: RemoveDataValidationMutation.id,
+                                    params: {
+                                        unitId,
+                                        subUnitId: targetSubUnitId,
+                                        ruleId: newRules.map((r) => r.uid),
+                                        source: 'patched',
+                                    },
+                                },
+                            ],
                         };
                     }
                     return { redos: [], undos: [] };

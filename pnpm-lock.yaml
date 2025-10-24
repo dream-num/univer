@@ -2209,13 +2209,13 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

@@ -16,10 +16,11 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
-import { DependentOn, ICommandService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { defaultPluginConfig } from './controllers/config.schema';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
+import { SheetsThreadCommentResourceController } from './controllers/sheets-thread-comment-resource.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SHEET_THREAD_COMMENT_BASE } from './types/const';
 
@@ -40,10 +41,14 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
         ([
             [SheetsThreadCommentModel],
             [SheetsThreadCommentRefRangeController],
+            [SheetsThreadCommentResourceController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
 
-        this._injector.get(SheetsThreadCommentRefRangeController);
+        touchDependencies(this._injector, [
+            [SheetsThreadCommentRefRangeController],
+            [SheetsThreadCommentResourceController],
+        ]);
     }
 }

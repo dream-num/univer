@@ -16,6 +16,7 @@
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type {
+    ICopySheetCommandParams,
     IInsertColMutationParams,
     IMoveColumnsMutationParams,
     IMoveRangeMutationParams,
@@ -25,11 +26,13 @@ import type {
     IReorderRangeMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
+import type { IAddConditionalRuleMutationParams } from '../commands/mutations/add-conditional-rule.mutation';
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
 import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, isInternalEditorID, IUniverInstanceService, merge, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
 import {
+    CopySheetCommand,
     InsertColMutation,
     InsertRowMutation,
     MoveColsMutation,
@@ -43,6 +46,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
@@ -191,6 +195,36 @@ export class ConditionalFormattingService extends Disposable {
                             redos,
                             undos,
                         };
+                    } else if (commandInfo.id === CopySheetCommand.id) {
+                        const params = commandInfo.params as ICopySheetCommandParams & { targetSubUnitId: string };
+                        const { unitId, subUnitId, targetSubUnitId } = params;
+
+                        if (!unitId || !subUnitId || !targetSubUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const ruleList = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                        if (!ruleList) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const redos: IMutationInfo[] = [];
+                        const undos: IMutationInfo[] = [];
+
+                        ruleList.forEach((item) => {
+                            const params: IAddConditionalRuleMutationParams = {
+                                unitId,
+                                subUnitId: targetSubUnitId,
+                                rule: {
+                                    ...item,
+                                    cfId: this._conditionalFormattingRuleModel.createCfId(unitId, targetSubUnitId),
+                                },
+                            };
+                            redos.push({ id: AddConditionalRuleMutation.id, params });
+                            undos.push(AddConditionalRuleMutationUndoFactory(this._injector, params));
+                        });
+
+                        return { redos, undos };
                     }
                     return { redos: [], undos: [] };
                 },

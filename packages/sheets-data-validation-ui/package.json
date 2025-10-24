@@ -69,7 +69,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@flatten-js/interval-tree": "^1.1.3",
+        "@flatten-js/interval-tree": "^2.0.0",
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",

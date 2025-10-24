@@ -31,7 +31,7 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         }
 
         // freeze is handled by set-scroll.command.ts
-        const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow, duration } = params;
+        const { unitId, sheetId, offsetX = 0, offsetY = 0, sheetViewStartColumn, sheetViewStartRow, duration, screenRatioX, screenRatioY } = params;
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollManagerService = renderManagerService.getRenderById(unitId)!.with(SheetScrollManagerService);
         // const currentService = accessor.get(IUniverInstanceService);
@@ -39,11 +39,24 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         // const worksheet = workbook!.getSheetBySheetId(sheetId);
         // const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
+        const renderUnit = renderManagerService.getRenderById(unitId);
+
+        if (!renderUnit) {
+            return false;
+        }
+
+        const engine = renderUnit.engine;
+        const canvasWidth = engine.width;
+        const canvasHeight = engine.height;
+
+        const finalOffsetX = screenRatioX !== undefined ? (canvasWidth * screenRatioX) + offsetX : offsetX;
+        const finalOffsetY = screenRatioY !== undefined ? (canvasHeight * screenRatioY) + offsetY : offsetY;
+
         scrollManagerService.emitRawScrollParam({
             unitId,
             sheetId,
-            offsetX,
-            offsetY,
+            offsetX: finalOffsetX,
+            offsetY: finalOffsetY,
             sheetViewStartRow,
             sheetViewStartColumn,
             duration,

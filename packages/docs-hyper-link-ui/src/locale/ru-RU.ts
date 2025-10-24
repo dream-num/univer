@@ -25,14 +25,14 @@ const locale: typeof enUS = {
             address: 'Cсылки',
             label: 'Текст',
             labelError: 'Введите текст ссылки',
-            placeholder: 'Пожалуйста, введите URL ссылки',
-            addressError: 'URL некорректен!',
+            placeholder: 'Пожалуйста, введите ссылку',
+            addressError: 'Пожалуйста, введите корректную ссылку',
         },
         info: {
             copy: 'Копировать',
             edit: 'Редактировать',
             cancel: 'Отменить ссылку',
-            coped: 'Link copied to clipboard',
+            coped: 'Ссылка скопирована в буфер обмена',
         },
         menu: {
             tooltip: 'Добавить ссылку',

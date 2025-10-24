@@ -55,6 +55,10 @@ export class SheetsFilterSyncController extends Disposable {
         const config = this._configService.getConfig<IUniverSheetsFilterConfig>(SHEETS_FILTER_PLUGIN_CONFIG_KEY);
         if (config?.enableSyncSwitch) {
             this._visible$.next(true);
+
+            if (typeof config.enableSyncSwitch === 'object') {
+                this.setEnabled(config.enableSyncSwitch.defaultValue ?? true);
+            }
         }
     }
 

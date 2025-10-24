@@ -22,9 +22,10 @@ export interface IUniverSheetsFilterConfig {
     /**
      * Whether to display the filter sync switch in the filter panel.
      * This configuration can be used in a collaboration scenario to allow users to choose whether to enable filter synchronization.
+     * If set to a defaultValue object, the filter sync switch will be displayed and its initial state will be determined by the defaultValue property.
      * @default false
      */
-    enableSyncSwitch?: boolean;
+    enableSyncSwitch?: boolean | { defaultValue: boolean };
 }
 
 export const defaultPluginConfig: IUniverSheetsFilterConfig = {};

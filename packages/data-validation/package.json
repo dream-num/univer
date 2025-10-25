@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/data-validation",
-    "version": "0.10.12",
+    "version": "0.10.13",
     "private": false,
     "description": "Data validation library for Univer",
     "author": "DreamNum <developer@univer.ai>",

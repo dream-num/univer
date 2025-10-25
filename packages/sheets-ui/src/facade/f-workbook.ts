@@ -22,7 +22,7 @@ import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/
 import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { IDialogService, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -215,10 +215,22 @@ export interface IFWorkbookSheetsUIMixin {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * await fWorkbook.endEditingAsync(false);
+     * await fWorkbook.abortEditingAsync();
      * ```
      */
     abortEditingAsync(): Promise<boolean>;
+
+    /**
+     * Check if the current active cell is in editing state
+     * @returns {boolean} True if the current active cell is in editing state, false otherwise
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const isEditing = fWorkbook.isCellEditing();
+     * console.log(isEditing);
+     * ```
+     */
+    isCellEditing(): boolean;
 
     /**
      * Get scroll state of specified sheet.
@@ -427,6 +439,12 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     override startEditing(): boolean {
         const commandService = this._injector.get(ICommandService);
+        const editorBridgeService = this._injector.get(IEditorBridgeService);
+
+        if (editorBridgeService.isVisible().visible) {
+            return true;
+        }
+
         return commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             eventType: DeviceInputEventType.Dblclick,
             unitId: this._workbook.getUnitId(),
@@ -436,12 +454,16 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     override async endEditing(save?: boolean): Promise<boolean> {
         const commandService = this._injector.get(ICommandService);
-        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
-            eventType: DeviceInputEventType.Keyboard,
-            keycode: save ? KeyCode.ENTER : KeyCode.ESC,
-            visible: false,
-            unitId: this._workbook.getUnitId(),
-        } as IEditorBridgeServiceVisibleParam);
+        const editorBridgeService = this._injector.get(IEditorBridgeService);
+
+        if (editorBridgeService.isVisible().visible) {
+            commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                eventType: DeviceInputEventType.Keyboard,
+                keycode: save ? KeyCode.ENTER : KeyCode.ESC,
+                visible: false,
+                unitId: this._workbook.getUnitId(),
+            } as IEditorBridgeServiceVisibleParam);
+        }
 
         // wait for the async cell edit operation to complete
         await awaitTime(0);
@@ -454,6 +476,11 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     override abortEditingAsync(): Promise<boolean> {
         return this.endEditingAsync(false);
+    }
+
+    override isCellEditing(): boolean {
+        const editorBridgeService = this._injector.get(IEditorBridgeService);
+        return editorBridgeService.isVisible().visible;
     }
 
     /**

@@ -54,7 +54,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     const [editing, setEditing] = useState(false);
     const editorService = useDependency(IEditorService);
     const editor = useRef<Editor>(null);
-    const rootEditorId = type === UniverInstanceType.UNIVER_SHEET ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : unitId;
+    const rootEditorId = type === UniverInstanceType.UNIVER_DOC ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : unitId;
     const [canSubmit, setCanSubmit] = useState(() => BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));
     useEffect(() => {
         setCanSubmit(BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));

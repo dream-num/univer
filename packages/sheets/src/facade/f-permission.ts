@@ -20,7 +20,7 @@ import type { Observable } from 'rxjs';
 import type { FRange } from './f-range';
 import { cellToRange, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorkbookPermissionService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
 /**
  * @description Used to generate permission instances to control permissions for the entire workbook
@@ -40,6 +40,11 @@ export class FPermission extends FBase {
      */
     public sheetRuleChangedAfterAuth$: Observable<string>;
 
+    /**
+     * An observable object used to monitor the initialization state changes of unit permissions.
+     */
+    public unitPermissionInitStateChange$: Observable<boolean>;
+
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -47,11 +52,13 @@ export class FPermission extends FBase {
         @Inject(WorksheetProtectionRuleModel) protected readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(RangeProtectionRuleModel) protected readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) protected readonly _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
+        @Inject(WorkbookPermissionService) protected readonly _workbookPermissionService: WorkbookPermissionService,
         @Inject(IAuthzIoService) protected readonly _authzIoService: IAuthzIoService
     ) {
         super();
         this.rangeRuleChangedAfterAuth$ = this._rangeProtectionRuleModel.ruleRefresh$;
         this.sheetRuleChangedAfterAuth$ = this._worksheetProtectionRuleModel.ruleRefresh$;
+        this.unitPermissionInitStateChange$ = this._workbookPermissionService.unitPermissionInitStateChange$;
     }
 
     /**

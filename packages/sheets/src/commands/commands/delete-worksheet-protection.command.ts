@@ -37,6 +37,8 @@ export const DeleteWorksheetProtectionCommand: ICommand<IDeleteWorksheetProtecti
         const undoRedoService = accessor.get(IUndoRedoService);
         const { rule, unitId, subUnitId } = params;
 
+         console.warn("command.delete-worksheet-protection", unitId, subUnitId,rule);
+
         commandService.executeCommand(DeleteWorksheetProtectionMutation.id, {
             unitId,
             subUnitId,

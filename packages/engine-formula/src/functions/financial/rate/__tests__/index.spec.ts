@@ -167,5 +167,28 @@ describe('Test rate function', () => {
             );
             expect(typeof getObjectValue(result)).toBe('number');
         });
+
+        // Edge cases for growth-only / zero-guess-
+        it('Correctly calculates long-term growth-only rate even with zero guess', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(90),
+                NumberValueObject.create(0),
+                NumberValueObject.create(-1000),
+                NumberValueObject.create(7_500_000),
+                NumberValueObject.create(0),
+                NumberValueObject.create(0) // zero guess
+            );
+            expect(getObjectValue(result, true)).toBeCloseTo(0.10422, 5);
+        });
+
+        it('Rejects invalid sign convention with PMT=0', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(90),
+                NumberValueObject.create(0),
+                NumberValueObject.create(1000),
+                NumberValueObject.create(7_500_000)
+            );
+            expect(getObjectValue(result)).toBe(ErrorType.NUM); // PV and FV same sign
+        });
     });
 });

@@ -82,16 +82,20 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                         return;
                     }
 
-                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
-                    const currentLoc = currentAlert?.alert?.location;
-                    if (
-                        currentLoc &&
-                        currentLoc.row === location.row &&
-                        currentLoc.col === location.col &&
-                        currentLoc.subUnitId === location.subUnitId &&
-                        currentLoc.unitId === location.unitId
-                    ) {
-                        return;
+                    const currentAlerts = this._cellAlertManagerService.currentAlert;
+
+                    for (const [_, value] of currentAlerts.entries()) {
+                        const currentLoc = value?.alert?.location;
+
+                        if (
+                            currentLoc &&
+                            currentLoc.row === location.row &&
+                            currentLoc.col === location.col &&
+                            currentLoc.subUnitId === location.subUnitId &&
+                            currentLoc.unitId === location.unitId
+                        ) {
+                            return;
+                        }
                     }
 
                     this._cellAlertManagerService.showAlert({

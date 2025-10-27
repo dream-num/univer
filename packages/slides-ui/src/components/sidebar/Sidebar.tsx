@@ -33,9 +33,14 @@ export default function RectSidebar() {
     const currentSlide = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
     const pageId = currentSlide?.getActivePage()?.id;
 
-    if (!pageId) return null;
+    // see packages/sheets-ui/src/views/permission/permission-dialog/index.tsx@SheetPermissionDialog
+    // see packages/sheets-conditional-formatting-ui/src/components/panel/rule-edit/index.tsx@getUnitId
+    // const unitId = univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)!.getUnitId();
+    const unitId = univerInstanceService.getFocusedUnit()?.getUnitId() || '';
 
-    const page = canvasView.getRenderUnitByPageId(pageId, pageId);
+    if (!pageId || !unitId) return null;
+
+    const page = canvasView.getRenderUnitByPageId(pageId, unitId);
     const transformer = page.scene?.getTransformer();
 
     if (!transformer) return null;
@@ -46,11 +51,6 @@ export default function RectSidebar() {
     if (!object) {
         return null;
     }
-
-    // see packages/sheets-ui/src/views/permission/permission-dialog/index.tsx@SheetPermissionDialog
-    // see packages/sheets-conditional-formatting-ui/src/components/panel/rule-edit/index.tsx@getUnitId
-    // const unitId = univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)!.getUnitId();
-    const unitId = univerInstanceService.getFocusedUnit()?.getUnitId() || '';
 
     return (
         <section className="univer-p-2 univer-text-center univer-text-sm">

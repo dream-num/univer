@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-numfmt",
-    "version": "0.10.13",
+    "version": "0.10.14",
     "private": false,
     "description": "UniverSheet numfmt plugin",
     "author": "DreamNum <developer@univer.ai>",

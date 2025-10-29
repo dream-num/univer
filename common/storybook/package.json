@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/storybook",
-    "version": "0.10.13",
+    "version": "0.10.14",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",

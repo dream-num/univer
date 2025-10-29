@@ -16,9 +16,11 @@
 
 import type { Observable } from 'rxjs';
 import type { IPermissionPoint, IPermissionService } from './type';
+import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Disposable } from '../../shared';
+import { ILogService } from '../log/log.service';
 import { PermissionStatus } from './type';
 
 export class PermissionService extends Disposable implements IPermissionService {
@@ -28,6 +30,12 @@ export class PermissionService extends Disposable implements IPermissionService 
     public permissionPointUpdate$ = this._permissionPointUpdate$.asObservable();
 
     private _showComponents = true;
+
+    constructor(
+        @Inject(ILogService) private readonly _loggerService: ILogService
+    ) {
+        super();
+    }
 
     setShowComponents(showComponents: boolean) {
         this._showComponents = showComponents;
@@ -54,7 +62,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         const permissionPoint = this._permissionPointMap.get(item.id);
         if (permissionPoint) {
             // throw new Error(`${item.id} PermissionPoint already exists`);
-            console.warn(`${item.id} PermissionPoint already exists`);
+            this._loggerService.warn(`${item.id} PermissionPoint already exists`);
             return false;
         }
         this._permissionPointMap.set(item.id, isSubject ? _item : new BehaviorSubject<IPermissionPoint<unknown>>(item));

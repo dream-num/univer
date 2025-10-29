@@ -104,7 +104,13 @@ export class FilterModel extends Disposable {
 
     private _dump(autoFilter: IAutoFilter) {
         this.setRange(autoFilter.ref);
-        autoFilter.filterColumns?.forEach((filterColumn) => this._setCriteriaWithoutReCalc(filterColumn.colId, filterColumn));
+        autoFilter.filterColumns?.filter((filterColumn) => {
+            // we only support 3 types of filters now.Other types of filters are not supported yet.
+            if (!filterColumn.filters && !filterColumn.colorFilters && !filterColumn.customFilters) {
+                return false;
+            }
+            return true;
+        }).forEach((filterColumn) => this._setCriteriaWithoutReCalc(filterColumn.colId, filterColumn));
 
         if (autoFilter.cachedFilteredOut) {
             this._alreadyFilteredOutRows = new Set(autoFilter.cachedFilteredOut);
@@ -433,11 +439,6 @@ export class FilterColumn extends Disposable {
 
     private _generateFilterFn(): void {
         if (!this._criteria) {
-            return;
-        }
-
-        // we only support 3 types of filters now.Other types of filters are not supported yet.
-        if (!this._criteria.filters && !this._criteria.colorFilters && !this._criteria.customFilters) {
             return;
         }
 

@@ -184,7 +184,10 @@ export class FilterModel extends Disposable {
 
         this._setCriteriaWithoutReCalc(col, criteria);
         if (reCalc) {
+            // save some performance if we can reuse the cached filtered out rows.
             this._rebuildAlreadyFilteredOutRowsWithCache();
+            // but we still need to recalc the all columns.
+            this._getAllFilterColumns().forEach((filterColumn) => filterColumn.__clearCache());
             this._reCalcWithNoCacheColumns();
             this._emit();
             this._emitHasCriteria();

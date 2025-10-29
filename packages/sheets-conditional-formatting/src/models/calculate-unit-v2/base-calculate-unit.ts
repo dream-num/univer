@@ -21,7 +21,6 @@ import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 export enum CalculateEmitStatus {
-
     preComputingStart = 'preComputingStart',
     preComputing = 'preComputing',
     preComputingEnd = 'preComputingEnd',
@@ -35,7 +34,7 @@ export interface IContext {
     worksheet: Worksheet;
     accessor: IAccessor;
     rule: IConditionFormattingRule;
-    getCellValue: (row: number, col: number,) => ICellData;
+    getCellValue: (row: number, col: number) => ICellData;
     limit: number;
 }
 /**

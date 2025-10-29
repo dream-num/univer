@@ -436,6 +436,11 @@ export class FilterColumn extends Disposable {
             return;
         }
 
+        // we only support 3 types of filters now.Other types of filters are not supported yet.
+        if (!this._criteria.filters && !this._criteria.colorFilters && !this._criteria.customFilters) {
+            return;
+        }
+
         this._filterFn = generateFilterFn(this._criteria);
         this._filterBy = this._criteria.filters
             ? FilterBy.VALUES

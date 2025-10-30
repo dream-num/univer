@@ -5,7 +5,7 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-Univer es un motor de suite ofimática de código abierto, diseñado para ofrecer a los desarrolladores una solución potente, flexible y fácil de usar. Soporta hojas de cálculo, documentos y presentaciones, y proporciona una amplia gama de funciones y una alta extensibilidad. <br />
+Univer es un motor de suite ofimática de código abierto, diseñado para ofrecer a los desarrolladores una solución potente, flexible y fácil de usar. Se centra en la creación y edición de hojas de cálculo, ofreciendo una amplia gama de funciones y alta extensibilidad.<br />
 **Extensible · Integrable · Alto rendimiento**
 
 [English][readme-en-link] | [简体中文][readme-zh-link] | [日本語][readme-ja-link] | **Español**<br />
@@ -25,7 +25,7 @@ Univer es un motor de suite ofimática de código abierto, diseñado para ofrece
 
 </div>
 
-Usa [Univer MCP](https://github.com/dream-num/univer-mcp) para controlar Univer Sheet con lenguaje natural y crear hojas de cálculo verdaderamente nativas de IA.
+Usa [Univer Platform](https://github.com/dream-num/univer-mcp) para controlar Univer Spreadsheets con lenguaje natural y crear hojas de cálculo verdaderamente nativas de IA.
 
 https://github.com/user-attachments/assets/7429bd5f-d769-4057-9e67-353337531024
 

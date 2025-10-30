@@ -314,8 +314,6 @@ export class SheetPermissionCheckController extends Disposable {
             }
         }
         if (worksheetTypes) {
-            const worksheetProtectionRuleModel = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-            console.warn('worksheetProtectionRuleModel:', worksheetProtectionRuleModel)
             const worksheetDisable = worksheetTypes.some((F) => {
                 const instance = new F(unitId, subUnitId);
                 const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;

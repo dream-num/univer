@@ -18,8 +18,9 @@ import type { Workbook } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
 import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
 import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
+import type { IDeleteWorksheetProtectionParams } from '../../commands/mutations/delete-worksheet-protection.mutation';
 import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
-import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, set, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { skip } from 'rxjs';
 import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-protection.mutation';
@@ -31,9 +32,6 @@ import { baseProtectionActions, getAllRangePermissionPoint } from '../../service
 import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '../../services/permission/workbook-permission';
 import { WorkbookPermissionService } from '../../services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
-import { IDeleteWorksheetProtectionParams } from '../../commands/mutations/delete-worksheet-protection.mutation';
-import { start } from 'repl';
-
 
 interface ISheetPermissionCmdBufferListItemType {
     id: string;
@@ -41,7 +39,6 @@ interface ISheetPermissionCmdBufferListItemType {
 }
 
 export class SheetPermissionInitController extends Disposable {
-
     private _cmdBufferList: ISheetPermissionCmdBufferListItemType[] = [];
     private _isRangePermissionInitFinish: boolean = false;
     private _isWorksheetPermissionInitFinish: boolean = false;
@@ -80,6 +77,7 @@ export class SheetPermissionInitController extends Disposable {
     public getIsPermissionInitFinish() {
         return this._isWorksheetPermissionInitFinish && this._isRangePermissionInitFinish && this._isWorkbookPermissionInitFinish;
     }
+
     public addCmdToBufferList(item: ISheetPermissionCmdBufferListItemType) {
         this._cmdBufferList.push(item);
     }
@@ -93,6 +91,7 @@ export class SheetPermissionInitController extends Disposable {
             this._commandService.executeCommand(item.id, item.params, { onlyLocal: true });
         }
     }
+
     private async _initRangePermissionFromSnapshot() {
         const initRangePermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {
@@ -319,8 +318,6 @@ export class SheetPermissionInitController extends Disposable {
                 return;
             }
 
-
-
             this._authzIoService.batchAllowed(allAllowedParams).then((permissionMap) => {
                 permissionMap.forEach((item) => {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
@@ -345,7 +342,7 @@ export class SheetPermissionInitController extends Disposable {
 
         await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => initSheetPermissionFunc(workbook)));
         this._worksheetProtectionRuleModel.changeRuleInitState(true);
-        if(this.getIsPermissionInitFinish()) {
+        if (this.getIsPermissionInitFinish()) {
             this._processCmdBufferList();
         }
     }
@@ -399,15 +396,12 @@ export class SheetPermissionInitController extends Disposable {
                     this._initWorkbookPermissionFromSnapshot();
                     this._initWorksheetPermissionFromSnapshot();
                     this._initRangePermissionFromSnapshot();
-
-                    console.warn('permission.user-change', unitId);
                 });
             })
         );
     }
 
     public refreshPermission(unitId: string, permissionId: string) {
-        console.warn('permission.refresh-permission', unitId, permissionId);
         const sheetRuleItem = this._worksheetProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
         let needClearUndoRedo = false;
         if (sheetRuleItem) {

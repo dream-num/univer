@@ -16,6 +16,7 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import { SheetPermissionInitController } from '../../controllers/permission/sheet-permission-init.controller';
 import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export interface IDeleteWorksheetProtectionParams {
@@ -27,8 +28,17 @@ export const DeleteWorksheetProtectionMutation: IMutation<IDeleteWorksheetProtec
     id: 'sheet.mutation.delete-worksheet-protection',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId } = params;
         const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
+        const sheetPermissionInitController = accessor.get(SheetPermissionInitController);
+        if (!sheetPermissionInitController.getIsPermissionInitFinish()) {
+            sheetPermissionInitController.addCmdToBufferList({
+                id: DeleteWorksheetProtectionMutation.id,
+                params,
+            });
+            return true;
+        }
+        const { unitId, subUnitId } = params;
+
         worksheetProtectionRuleModel.deleteRule(unitId, subUnitId);
         return true;
     },

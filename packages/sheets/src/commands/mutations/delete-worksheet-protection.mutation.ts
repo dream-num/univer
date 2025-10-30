@@ -16,8 +16,8 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 import { SheetPermissionInitController } from '../../controllers/permission/sheet-permission-init.controller';
+import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export interface IDeleteWorksheetProtectionParams {
     unitId: string;
@@ -38,7 +38,7 @@ export const DeleteWorksheetProtectionMutation: IMutation<IDeleteWorksheetProtec
             return true;
         }
         const { unitId, subUnitId } = params;
-       
+
         worksheetProtectionRuleModel.deleteRule(unitId, subUnitId);
         return true;
     },

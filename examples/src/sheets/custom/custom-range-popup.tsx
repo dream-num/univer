@@ -70,7 +70,7 @@ function createPopupComponent(direction: RectPopupDirection) {
 }
 
 function generateComponentKey(direction: RectPopupDirection) {
-    return `PopupComponent${direction.split('-').map((segment) => `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`)}`;
+    return `PopupComponent${direction.split('-').map((segment) => `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`).join('')}`;
 }
 
 export function customRangePopups(univer: Univer, univerAPI: FUniver) {

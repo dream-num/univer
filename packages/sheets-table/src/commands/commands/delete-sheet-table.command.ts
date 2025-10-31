@@ -16,7 +16,7 @@
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 
 import { TableManager } from '../../model/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
@@ -32,6 +32,7 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const sheetTableManager = accessor.get(TableManager);
+        const logService = accessor.get(ILogService);
 
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
@@ -40,7 +41,8 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
         const tableConfig = tableInstance?.toJSON();
 
         if (!tableConfig) {
-            throw new Error('[TableManager]: Table not found');
+            logService.error('[TableManager]: Table not found');
+            return false;
         }
 
         redos.push({ id: DeleteSheetTableMutation.id, params: { ...params } });

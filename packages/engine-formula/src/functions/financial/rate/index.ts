@@ -156,15 +156,10 @@ export class Rate extends BaseFunction {
 
             result -= dampedStep;
             lastResidual = residual;
-
-            // Keep within reasonable economic bounds during iteration
-            if (result > 100.0) {
-                result = 100.0;
-            }
         }
 
-        // Economic bounds - reject unreasonable rates
-        if (!isFinite(result) || result > 50.0 || result < -0.9999) {
+        // Only reject rates that are mathematically invalid or non-finite
+        if (!Number.isFinite(result) || result <= -1) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

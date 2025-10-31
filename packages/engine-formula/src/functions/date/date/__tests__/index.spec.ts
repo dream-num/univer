@@ -16,8 +16,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { DateFunction } from '../index';
 
@@ -30,28 +31,31 @@ describe('Test date function', () => {
             const month = NumberValueObject.create(1);
             const day = NumberValueObject.create(1);
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292]]);
+            expect(getObjectValue(result)).toBe(45292);
         });
+
         it('Edge case, 1900.1.1', () => {
             const year = NumberValueObject.create(1900);
             const month = NumberValueObject.create(1);
             const day = NumberValueObject.create(1);
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1]]);
+            expect(getObjectValue(result)).toBe(1);
         });
+
         it('Edge case, 1900.1.0', () => {
             const year = NumberValueObject.create(1900);
             const month = NumberValueObject.create(1);
             const day = NumberValueObject.create(0);
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0]]);
+            expect(getObjectValue(result)).toBe(0);
         });
+
         it('Edge case, 1900.1.-1', () => {
             const year = NumberValueObject.create(1900);
             const month = NumberValueObject.create(1);
             const day = NumberValueObject.create(-1);
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[ErrorType.NUM]]);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Year is single cell, month is one column, day is one row', () => {
@@ -75,7 +79,10 @@ describe('Test date function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45294, 45295, 45296], [45325, 45326, 45327]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [45294, 45295, 45296],
+                [45325, 45326, 45327],
+            ]);
         });
 
         it('Year is array with multiple format values', () => {
@@ -94,7 +101,10 @@ describe('Test date function', () => {
             const month = NumberValueObject.create(1);
             const day = NumberValueObject.create(1);
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[367, '#VALUE!', 367, 367, 1, 1, 6576], [1, 36526, 732, '#VALUE!', '#NUM!', 1, 39448]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [367, ErrorType.VALUE, 367, 367, 1, 1, 6576],
+                [1, 36526, 732, ErrorType.VALUE, ErrorType.NUM, 1, 39448],
+            ]);
         });
 
         it('Month is array with multiple format values', () => {
@@ -113,7 +123,10 @@ describe('Test date function', () => {
             });
             const day = NumberValueObject.create(1);
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292, '#VALUE!', 45292, 45292, 45261, 45261], [45261, 48305, 45323, '#VALUE!', 45170, 45689]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [45292, ErrorType.VALUE, 45292, 45292, 45261, 45261],
+                [45261, 48305, 45323, ErrorType.VALUE, 45170, 45689],
+            ]);
         });
 
         it('Day is array with multiple format values', () => {
@@ -132,7 +145,10 @@ describe('Test date function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(year, month, day);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[45292, '#VALUE!', 45292, 45292, 45291, 45291], [45291, 45391, 45293, '#VALUE!', 45288, 45323]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [45292, ErrorType.VALUE, 45292, 45292, 45291, 45291],
+                [45291, 45391, 45293, ErrorType.VALUE, 45288, 45323],
+            ]);
         });
     });
 });

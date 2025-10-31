@@ -28,11 +28,12 @@ export function createTableSkeleton(
     viewModel: DocumentViewModel,
     tableNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig
-): IDocumentSkeletonTable {
+): Nullable<IDocumentSkeletonTable> {
     const { startIndex, endIndex, children: rowNodes } = tableNode;
     const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
     if (table == null) {
-        throw new Error('Table not found');
+        console.warn('Table not found when creating table skeleton');
+        return null;
     }
 
     const tableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
@@ -173,7 +174,11 @@ export function createTableSkeletons(
 
     const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
     if (table == null) {
-        throw new Error('Table not found when creating table skeletons');
+        console.warn('Table not found when creating table skeletons');
+        return {
+            skeTables,
+            fromCurrentPage: false,
+        };
     }
 
     const needRepeatHeader = table.tableRows[0].repeatHeaderRow === BooleanNumber.TRUE;

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.10.14](https://github.com/dream-num/univer/compare/v0.10.13...v0.10.14) (2025-10-29)
+
+
+### Bug Fixes
+
+* **filter:** fix the error of filtering multiple conditions ([#6059](https://github.com/dream-num/univer/issues/6059)) ([e95e64e](https://github.com/dream-num/univer/commit/e95e64efdc4bee287c87d451796652a36999fb80))
+* **permission:** remove throw error ([#6049](https://github.com/dream-num/univer/issues/6049)) ([5e0a9db](https://github.com/dream-num/univer/commit/5e0a9db1ea5080ae5e416c6ce0067d1aced62daa))
+* **slides:** params in getRenderUnitByPageId ([#6053](https://github.com/dream-num/univer/issues/6053)) ([38b7063](https://github.com/dream-num/univer/commit/38b7063c6cdabc840559c6ec89e814f76048c56c))
+
 ## [0.10.13](https://github.com/dream-num/univer/compare/v0.10.12...v0.10.13) (2025-10-25)
 
 

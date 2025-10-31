@@ -282,6 +282,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     placeholder={localeService.t('definedName.inputCommentPlaceholder')}
                     value={commentValue}
                     onChange={setCommentValue}
+                    allowClear
                 />
             </div>
             <div

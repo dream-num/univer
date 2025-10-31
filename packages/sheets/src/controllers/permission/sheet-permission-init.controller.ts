@@ -18,6 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
 import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
 import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
+import type { IDeleteWorksheetProtectionParams } from '../../commands/mutations/delete-worksheet-protection.mutation';
 import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
@@ -32,7 +33,17 @@ import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '
 import { WorkbookPermissionService } from '../../services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
 
+interface ISheetPermissionCmdBufferListItemType {
+    id: string;
+    params: IDeleteWorksheetProtectionParams;
+}
+
 export class SheetPermissionInitController extends Disposable {
+    private _cmdBufferList: ISheetPermissionCmdBufferListItemType[] = [];
+    private _isRangePermissionInitFinish: boolean = false;
+    private _isWorksheetPermissionInitFinish: boolean = false;
+    private _isWorkbookPermissionInitFinish: boolean = false;
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private _permissionService: IPermissionService,
@@ -63,6 +74,25 @@ export class SheetPermissionInitController extends Disposable {
         this._initRangePermissionFromSnapshot();
     }
 
+    public getIsPermissionInitFinish() {
+        // console.warn(this._isWorksheetPermissionInitFinish, this._isRangePermissionInitFinish, this._isWorkbookPermissionInitFinish);
+        return this._isWorksheetPermissionInitFinish && this._isRangePermissionInitFinish && this._isWorkbookPermissionInitFinish;
+    }
+
+    public addCmdToBufferList(item: ISheetPermissionCmdBufferListItemType) {
+        this._cmdBufferList.push(item);
+    }
+
+    private _processCmdBufferList() {
+        if (!this.getIsPermissionInitFinish() || this._cmdBufferList.length === 0) {
+            return;
+        }
+
+        for (const item of this._cmdBufferList) {
+            this._commandService.executeCommand(item.id, item.params, { onlyLocal: true });
+        }
+    }
+
     private async _initRangePermissionFromSnapshot() {
         const initRangePermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {
@@ -89,6 +119,10 @@ export class SheetPermissionInitController extends Disposable {
 
             if (!allAllowedParams.length) {
                 this._rangeProtectionRuleModel.changeRuleInitState(true);
+                this._isRangePermissionInitFinish = true;
+                if (this.getIsPermissionInitFinish()) {
+                    this._processCmdBufferList();
+                }
                 return;
             }
 
@@ -107,6 +141,10 @@ export class SheetPermissionInitController extends Disposable {
                     }
                 });
                 this._rangeProtectionRuleModel.changeRuleInitState(true);
+                this._isRangePermissionInitFinish = true;
+                if (this.getIsPermissionInitFinish()) {
+                    this._processCmdBufferList();
+                }
             });
         };
 
@@ -175,6 +213,10 @@ export class SheetPermissionInitController extends Disposable {
                     this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                 }
             });
+            this._isWorkbookPermissionInitFinish = true;
+            if (this.getIsPermissionInitFinish()) {
+                this._processCmdBufferList();
+            }
         });
     }
 
@@ -274,6 +316,10 @@ export class SheetPermissionInitController extends Disposable {
 
             if (!allAllowedParams.length) {
                 this._worksheetProtectionRuleModel.changeRuleInitState(true);
+                this._isWorksheetPermissionInitFinish = true;
+                if (this.getIsPermissionInitFinish()) {
+                    this._processCmdBufferList();
+                }
                 return;
             }
 
@@ -292,11 +338,18 @@ export class SheetPermissionInitController extends Disposable {
                     }
                 });
                 this._worksheetProtectionRuleModel.changeRuleInitState(true);
+                this._isWorksheetPermissionInitFinish = true;
+                if (this.getIsPermissionInitFinish()) {
+                    this._processCmdBufferList();
+                }
             });
         };
 
         await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => initSheetPermissionFunc(workbook)));
         this._worksheetProtectionRuleModel.changeRuleInitState(true);
+        if (this.getIsPermissionInitFinish()) {
+            this._processCmdBufferList();
+        }
     }
 
     private _initUserChange() {

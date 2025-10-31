@@ -46,12 +46,13 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
+                const location = cellPos.location;
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
 
                 if (!worksheet) return;
 
-                const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
+                const cellData = worksheet.getCell(location.row, location.col);
 
                 if (!cellData || cellData.v === null || cellData.v === undefined) return;
 
@@ -67,16 +68,20 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                     (cellData.t === CellValueType.FORCE_STRING || cellData.t === CellValueType.STRING) &&
                     (isRealNum(cellData.v) || (typeof cellData.v === 'string' && numfmt.parseNumber(cellData.v)))
                 ) {
-                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
-                    const currentLoc = currentAlert?.alert?.location;
-                    if (
-                        currentLoc &&
-                        currentLoc.row === cellPos.location.row &&
-                        currentLoc.col === cellPos.location.col &&
-                        currentLoc.subUnitId === cellPos.location.subUnitId &&
-                        currentLoc.unitId === cellPos.location.unitId
-                    ) {
-                        return;
+                    const currentAlerts = this._cellAlertManagerService.currentAlert;
+
+                    for (const [_, value] of currentAlerts.entries()) {
+                        const currentLoc = value?.alert?.location;
+
+                        if (
+                            currentLoc &&
+                            currentLoc.row === location.row &&
+                            currentLoc.col === location.col &&
+                            currentLoc.subUnitId === location.subUnitId &&
+                            currentLoc.unitId === location.unitId
+                        ) {
+                            return;
+                        }
                     }
 
                     // If the user has disabled the force string alert, do not show it
@@ -88,7 +93,7 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                         type: CellAlertType.ERROR,
                         title: this._localeService.t('info.error'),
                         message: this._localeService.t('info.forceStringInfo'),
-                        location: cellPos.location,
+                        location,
                         width: 200,
                         height: 74,
                         key: ALERT_KEY,

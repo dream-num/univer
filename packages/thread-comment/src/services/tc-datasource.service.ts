@@ -39,7 +39,7 @@ export interface IThreadCommentDataSource {
     /**
      * handler for delete-comment, throw error means fail and stop the process.
      */
-    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string,) => Promise<Success>;
+    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
     /**
      * handler for batch-fetch-comment, throw error means fail and stop the process.
      */

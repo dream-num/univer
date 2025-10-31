@@ -15,9 +15,10 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 import type { IWorksheetProtectionRule } from '../../services/permission/type';
+import { CommandType } from '@univerjs/core';
+import { SheetPermissionInitController } from '../../controllers/permission/sheet-permission-init.controller';
+import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export interface IAddWorksheetProtectionParams {
     unitId: string;
@@ -29,8 +30,16 @@ export const AddWorksheetProtectionMutation: IMutation<IAddWorksheetProtectionPa
     id: 'sheet.mutation.add-worksheet-protection',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, rule } = params;
+        const sheetPermissionInitController = accessor.get(SheetPermissionInitController);
         const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
+        if (!sheetPermissionInitController.getIsPermissionInitFinish()) {
+            sheetPermissionInitController.addCmdToBufferList({
+                id: AddWorksheetProtectionMutation.id,
+                params,
+            });
+            return true;
+        }
+        const { unitId, rule } = params;
         worksheetProtectionRuleModel.addRule(unitId, rule);
         return true;
     },

@@ -69,7 +69,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@xyflow/react": "^12.8.6"
+        "@xyflow/react": "^12.9.1"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
@@ -78,9 +78,9 @@
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.2",
-        "tailwindcss": "3.4.17",
+        "tailwindcss": "3.4.18",
         "typescript": "^5.9.3",
-        "vite": "^7.1.10",
+        "vite": "^7.1.12",
         "vitest": "^3.2.4"
     }
 }

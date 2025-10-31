@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class DateFunction extends BaseFunction {
@@ -29,59 +30,48 @@ export class DateFunction extends BaseFunction {
     override maxParams = 3;
 
     override calculate(year: BaseValueObject, month: BaseValueObject, day: BaseValueObject) {
-        if (year.isError()) {
-            return year;
-        }
-
-        if (month.isError()) {
-            return month;
-        }
-
-        if (day.isError()) {
-            return day;
-        }
-
-        // get max row length
         const maxRowLength = Math.max(
             year.isArray() ? (year as ArrayValueObject).getRowCount() : 1,
             month.isArray() ? (month as ArrayValueObject).getRowCount() : 1,
             day.isArray() ? (day as ArrayValueObject).getRowCount() : 1
         );
-
-        // get max column length
         const maxColumnLength = Math.max(
             year.isArray() ? (year as ArrayValueObject).getColumnCount() : 1,
             month.isArray() ? (month as ArrayValueObject).getColumnCount() : 1,
             day.isArray() ? (day as ArrayValueObject).getColumnCount() : 1
         );
 
-        const yearArray = expandArrayValueObject(maxRowLength, maxColumnLength, year);
-        const monthArray = expandArrayValueObject(maxRowLength, maxColumnLength, month);
-        const dayArray = expandArrayValueObject(maxRowLength, maxColumnLength, day);
+        const yearArray = expandArrayValueObject(maxRowLength, maxColumnLength, year, ErrorValueObject.create(ErrorType.NA));
+        const monthArray = expandArrayValueObject(maxRowLength, maxColumnLength, month, ErrorValueObject.create(ErrorType.NA));
+        const dayArray = expandArrayValueObject(maxRowLength, maxColumnLength, day, ErrorValueObject.create(ErrorType.NA));
 
-        return yearArray.map((yearValueObject, rowIndex, columnIndex) => {
-            const monthValueObject = monthArray.get(rowIndex, columnIndex) || NullValueObject.create();
-            const dayValueObject = dayArray.get(rowIndex, columnIndex) || NullValueObject.create();
+        const resultArray = yearArray.map((yearObject, rowIndex, columnIndex) => {
+            const monthObject = monthArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const dayObject = dayArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (yearValueObject.isError()) {
-                return yearValueObject;
+            if (yearObject.isError()) {
+                return yearObject;
             }
 
-            if (monthValueObject.isError()) {
-                return monthValueObject;
+            if (monthObject.isError()) {
+                return monthObject;
             }
 
-            if (dayValueObject.isError()) {
-                return dayValueObject;
+            if (dayObject.isError()) {
+                return dayObject;
             }
 
-            if (yearValueObject.isString() || monthValueObject.isString() || dayValueObject.isString()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+            const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(yearObject, monthObject, dayObject);
+
+            if (isError) {
+                return errorObject as ErrorValueObject;
             }
 
-            let yearValue = +yearValueObject.getValue();
-            const monthValue = Math.floor(+monthValueObject.getValue());
-            const dayValue = +dayValueObject.getValue();
+            const [_yearObject, _monthObject, _dayObject] = variants as BaseValueObject[];
+
+            let yearValue = Math.floor(+_yearObject.getValue());
+            const monthValue = Math.floor(+_monthObject.getValue());
+            const dayValue = Math.floor(+_dayObject.getValue());
 
             if (yearValue < 0 || yearValue > 9999) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -103,5 +93,11 @@ export class DateFunction extends BaseFunction {
 
             return valueObject;
         });
+
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        return resultArray;
     }
 }

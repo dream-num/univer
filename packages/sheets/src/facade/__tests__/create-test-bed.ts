@@ -38,6 +38,7 @@ import {
     RangeProtectionRuleModel,
     RefRangeService,
     SheetInterceptorService,
+    SheetPermissionInitController,
     SheetSkeletonService,
     SheetsSelectionsService,
     WorkbookPermissionService,
@@ -145,6 +146,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
+            injector.add([SheetPermissionInitController]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
 
             dependencies?.forEach((d) => injector.add(d));

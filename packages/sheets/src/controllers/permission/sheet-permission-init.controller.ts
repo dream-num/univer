@@ -316,7 +316,7 @@ export class SheetPermissionInitController extends Disposable {
 
             if (!allAllowedParams.length) {
                 this._worksheetProtectionRuleModel.changeRuleInitState(true);
-                 this._isWorksheetPermissionInitFinish = true;
+                this._isWorksheetPermissionInitFinish = true;
                 if (this.getIsPermissionInitFinish()) {
                     this._processCmdBufferList();
                 }

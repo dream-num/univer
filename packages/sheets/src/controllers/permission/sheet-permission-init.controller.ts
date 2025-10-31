@@ -75,6 +75,7 @@ export class SheetPermissionInitController extends Disposable {
     }
 
     public getIsPermissionInitFinish() {
+        // console.warn(this._isWorksheetPermissionInitFinish, this._isRangePermissionInitFinish, this._isWorkbookPermissionInitFinish);
         return this._isWorksheetPermissionInitFinish && this._isRangePermissionInitFinish && this._isWorkbookPermissionInitFinish;
     }
 
@@ -315,6 +316,10 @@ export class SheetPermissionInitController extends Disposable {
 
             if (!allAllowedParams.length) {
                 this._worksheetProtectionRuleModel.changeRuleInitState(true);
+                 this._isWorksheetPermissionInitFinish = true;
+                if (this.getIsPermissionInitFinish()) {
+                    this._processCmdBufferList();
+                }
                 return;
             }
 

@@ -22,7 +22,7 @@ const locale: typeof enUS = {
             confirm: 'Подтвердить',
             cancel: 'Отменить',
             title: 'Ссылка',
-            address: 'Cсылки',
+            address: 'Ссылка',
             label: 'Текст',
             labelError: 'Введите текст ссылки',
             placeholder: 'Пожалуйста, введите ссылку',

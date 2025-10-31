@@ -126,7 +126,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         type: UnitType,
         data: unknown,
         ctor: UnitCtor,
-        options?: ICreateUnitOptions,
+        options?: ICreateUnitOptions
     ) => UnitModel;
 
     __setCreateHandler(handler: (type: UnitType, data: unknown, ctor: UnitCtor, options?: ICreateUnitOptions) => UnitModel): void {

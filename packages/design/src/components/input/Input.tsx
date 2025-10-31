@@ -118,6 +118,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             return () => observer?.disconnect();
         }, [slotRef.current]);
 
+        useEffect(() => {
+            if (allowClear && !(slot && slotRef.current)) setPaddingRight(26);
+        }, []); // only enough for init, otherwise it works again when you click it
+
         return (
             <div
                 data-u-comp="input"

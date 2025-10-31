@@ -5,7 +5,7 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-Univer は、開発者に強力で柔軟かつ使いやすいオフィススイートソリューションを提供することを目的としたオープンソースのオフィススイートエンジンです。スプレッドシート、ドキュメント、スライドなど、さまざまなタイプのドキュメントをサポートし、豊富な機能と高い拡張性を提供します。<br />
+Univer は、開発者に強力で柔軟かつ使いやすいオフィススイートソリューションを提供することを目的としたオープンソースのオフィススイートエンジンです。スプレッドシートの作成と編集に特化しており、豊富な機能と高い拡張性を提供します。<br />
 **拡張可能・組み込み可能・高性能**
 
 > 日本語の開発ドキュメントはまだ未完成です。英語のドキュメントをご参照ください。
@@ -27,7 +27,7 @@ Univer は、開発者に強力で柔軟かつ使いやすいオフィススイ�
 
 </div>
 
-[Univer MCP](https://github.com/dream-num/univer-mcp) を使って自然言語で Univer Sheet を操作し、本物の AI ネイティブなスプレッドシートを構築する。
+[Univer Platform](https://github.com/dream-num/univer-mcp) を使って自然言語で Univer Spreadsheets を操作し、本物の AI ネイティブなスプレッドシートを構築する。
 
 https://github.com/user-attachments/assets/7429bd5f-d769-4057-9e67-353337531024
 

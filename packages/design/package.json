@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.10.12",
+    "version": "0.10.14",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -97,10 +97,10 @@
         "postcss": "^8.5.6",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "tailwindcss": "3.4.17",
+        "tailwindcss": "3.4.18",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.3",
-        "vite": "^7.1.10",
+        "vite": "^7.1.12",
         "vitest": "^3.2.4"
     }
 }

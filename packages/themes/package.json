@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/themes",
-    "version": "0.10.12",
+    "version": "0.10.14",
     "private": false,
     "description": "Themes package for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -57,6 +57,6 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "vite": "^7.1.10"
+        "vite": "^7.1.12"
     }
 }

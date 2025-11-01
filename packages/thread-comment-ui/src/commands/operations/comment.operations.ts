@@ -34,7 +34,7 @@ export const ToggleSheetCommentPanelOperation: ICommand = {
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
                 children: { label: THREAD_COMMENT_PANEL },
-                width: 330,
+                width: 360,
             });
             panelService.setPanelVisible(true);
         }

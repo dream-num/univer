@@ -37,7 +37,6 @@ export interface ISheetsGenerateFilterValuesService {
 }
 export const SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME = 'sheets-filter.generate-filter-values.service';
 export const ISheetsGenerateFilterValuesService = createIdentifier<ISheetsGenerateFilterValuesService>(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME);
-const CAN_PARSE_DATE_FORMAT = ['yyyy-mm-dd', 'yyyy-mm-dd;@', 'yyyy/mm/dd;@', 'yyyy/mm/dd hh:mm', 'yyyy-m-d am/pm h:mm', 'yyyy-MM-dd', 'yyyy/MM/dd', 'yyyy/mm/dd', 'yyyy"年"MM"月"dd"日"', 'MM-dd', 'M"月"d"日"', 'MM-dd A/P hh:mm'];
 
 export class SheetsGenerateFilterValuesService extends Disposable {
     constructor(
@@ -168,7 +167,6 @@ export function getFilterTreeByValueItems(
     const treeMap: Map<string, string[]> = new Map();
 
     const DefaultPattern = 'yyyy-mm-dd';
-    const canSplitPatternSet = new Set(CAN_PARSE_DATE_FORMAT);
     const EmptyKey = 'empty';
     // filter column is the column that is currently being filtered.
     // If the filter column is filter by colors or conditions, it means that the tab is switched from filter by colors or conditions to filter by values,
@@ -199,14 +197,14 @@ export function getFilterTreeByValueItems(
 
             const fmtStr = (cell.value?.v && !cell.value.p) ? styles.get(cell.value?.s)?.n?.pattern : '';
             const isDateValue = fmtStr && numfmt.getFormatInfo(fmtStr).isDate;
-            if (fmtStr && isDateValue && canSplitPatternSet.has(fmtStr)) {
-                // const originValue = numfmt.parseDate(value).v as number;
-                const originValue = worksheet.getCellRaw(cell.row, cell.col)?.v as number;
+            if (fmtStr && isDateValue && /[ymd]/.test(fmtStr.toLowerCase())) {
+                // The date and time format must include the date portion.
+                const originValue = worksheet.getCellRaw(cell.row, cell.col)?.v;
                 if (!originValue) {
                     rowIndex++;
                     continue;
                 }
-                const valueParsedByDefaultPattern = numfmt.format(DefaultPattern, originValue);
+                const valueParsedByDefaultPattern = numfmt.format(DefaultPattern, Number(originValue));
                 const [year, month, day] = valueParsedByDefaultPattern.split('-').map(Number);
                 let yearItem = items.get(`${year}`);
                 if (!yearItem) {

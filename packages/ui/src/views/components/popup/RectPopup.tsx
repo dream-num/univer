@@ -129,9 +129,9 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             horizontalStyle = (Math.max(startX + offsetX, minLeft) + width) > containerWidth
                 ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
                 : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
-        } else if (direction.includes('left')) {
-            horizontalStyle = { left: Math.max(endX - width, minLeft) };
         } else if (direction.includes('right')) {
+            horizontalStyle = { left: Math.max(endX - width, minLeft) };
+        } else if (direction.includes('left')) {
             horizontalStyle = { left: Math.min(startX, maxLeft) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.

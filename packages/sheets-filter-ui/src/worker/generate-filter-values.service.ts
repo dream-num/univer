@@ -197,8 +197,15 @@ export function getFilterTreeByValueItems(
 
             const fmtStr = (cell.value?.v && !cell.value.p) ? styles.get(cell.value?.s)?.n?.pattern : '';
             const isDateValue = fmtStr && numfmt.getFormatInfo(fmtStr).isDate;
-            if (fmtStr && isDateValue && /[ymd]/.test(fmtStr.toLowerCase())) {
-                // The date and time format must include the date portion.
+
+            // The date formatted value must include date part (year/month/day) to be treated as date grouping tree item.
+            let isIncludeDatePart = false;
+            if (isDateValue) {
+                const { year, month, day } = numfmt.getFormatDateInfo(fmtStr);
+                isIncludeDatePart = year || month || day;
+            }
+
+            if (fmtStr && isDateValue && isIncludeDatePart) {
                 const originValue = worksheet.getCellRaw(cell.row, cell.col)?.v;
                 if (!originValue) {
                     rowIndex++;

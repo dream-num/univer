@@ -115,6 +115,10 @@ export class FilterModel extends Disposable {
         if (autoFilter.cachedFilteredOut) {
             this._alreadyFilteredOutRows = new Set(autoFilter.cachedFilteredOut);
             this._emit();
+        } else if (autoFilter.filterColumns && autoFilter.filterColumns.length > 0) {
+            // If there is no cached filtered out rows, we need to re-calc all columns.
+            this._reCalcAllColumns();
+            this._emit();
         }
 
         this._emitHasCriteria();

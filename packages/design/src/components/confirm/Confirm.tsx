@@ -60,14 +60,20 @@ export interface IConfirmProps {
      */
     width?: number | string;
 
+    /**
+     * Whether to show the close button.
+     * @default true
+     */
+    closable?: boolean;
+
 }
 
-function Footer(props: { locale: typeof enUS['design']; cancelText?: string; confirmText?: string; onClose: (() => void) | undefined; onConfirm: (() => void) | undefined }) {
-    const { locale, cancelText, confirmText, onClose, onConfirm } = props;
+function Footer(props: { locale: typeof enUS['design']; cancelText?: string; confirmText?: string; onClose: (() => void) | undefined; onConfirm: (() => void) | undefined; closable?: boolean }) {
+    const { locale, cancelText, confirmText, onClose, onConfirm, closable = true } = props;
 
     return (
         <footer className="univer-flex univer-items-center univer-justify-end univer-gap-2">
-            <Button onClick={onClose}>{cancelText ?? locale?.Confirm.cancel}</Button>
+            {closable && (<Button onClick={onClose}>{cancelText ?? locale?.Confirm.cancel}</Button>)}
             <Button variant="primary" onClick={onConfirm}>
                 {confirmText ?? locale?.Confirm.confirm}
             </Button>
@@ -76,7 +82,7 @@ function Footer(props: { locale: typeof enUS['design']; cancelText?: string; con
 }
 
 export function Confirm(props: IConfirmProps) {
-    const { children, visible = false, title, cancelText, confirmText, width, onClose, onConfirm } = props;
+    const { children, visible = false, title, cancelText, confirmText, width, onClose, onConfirm, closable = true } = props;
     const { locale } = useContext(ConfigContext);
 
     return (
@@ -91,10 +97,12 @@ export function Confirm(props: IConfirmProps) {
                     confirmText={confirmText}
                     onClose={onClose}
                     onConfirm={onConfirm}
+                    closable={closable}
                 />
             )}
             onClose={onClose}
             width={width}
+            closable={closable}
         >
             {children}
         </Dialog>

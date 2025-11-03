@@ -67,7 +67,7 @@ export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 export { AstTreeBuilder } from './engine/analysis/parser';
 export { AstRootNodeFactory } from './engine/ast-node/ast-root-node';
-export type { BaseAstNode } from './engine/ast-node/base-ast-node.js';
+export type { BaseAstNode, IAstNodeNodeJson } from './engine/ast-node/base-ast-node';
 export { FunctionNodeFactory } from './engine/ast-node/function-node';
 export { LambdaNodeFactory } from './engine/ast-node/lambda-node';
 export { LambdaParameterNodeFactory } from './engine/ast-node/lambda-parameter-node';
@@ -100,11 +100,14 @@ export {
     type IAbsoluteRefTypeForRange,
     isReferenceStrings,
     isReferenceStringWithEffectiveColumn,
+    needsQuoting,
+    quoteSheetName,
     serializeRange,
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
     singleReferenceToGrid,
+    unquoteSheetName,
 } from './engine/utils/reference';
 export { handleRefStringInfo } from './engine/utils/reference';
 export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';

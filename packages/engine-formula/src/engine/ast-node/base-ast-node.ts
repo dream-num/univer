@@ -23,7 +23,7 @@ import { AstNodePromiseType } from '../../basics/common';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
 
-interface IAstNodeNodeJson {
+export interface IAstNodeNodeJson {
     token: string;
     children?: IAstNodeNodeJson[];
     nodeType: number;

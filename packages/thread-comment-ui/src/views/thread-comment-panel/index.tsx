@@ -160,7 +160,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     const renderComment = (comment: IThreadComment) => (
         <ThreadCommentTree
-            full
             prefix={prefix}
             getSubUnitName={getSubUnitName}
             key={comment.id}

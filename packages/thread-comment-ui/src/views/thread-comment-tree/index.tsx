@@ -405,11 +405,11 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         `}
                     />
                     <Tooltip showIfEllipsis title={title}>
-                        <div
+                        <span
                             className="univer-flex-1 univer-truncate"
                         >
                             {title}
-                        </div>
+                        </span>
                     </Tooltip>
                 </div>
                 {!!comments && (

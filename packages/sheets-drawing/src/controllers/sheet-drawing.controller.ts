@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
-import { Disposable, generateRandomId, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
@@ -99,7 +99,13 @@ export class SheetsDrawingLoadController extends Disposable {
                         }
 
                         const drawingData = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
-                        const drawings = Object.values(drawingData);
+                        const drawings = Object.values(drawingData).filter((drawing) => {
+                            // filter out chart types and let the chart handle it itself, because chart id must match the drawing id.
+                            if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                                return false;
+                            }
+                            return true;
+                        });
 
                         if (drawings.length === 0) {
                             return { redos: [], undos: [] };
@@ -143,7 +149,13 @@ export class SheetsDrawingLoadController extends Disposable {
                         }
 
                         const drawingData = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
-                        const drawings = Object.values(drawingData).map((drawing) => {
+                        const drawings = Object.values(drawingData).filter((drawing) => {
+                            // filter out chart types and let the chart handle it itself, because chart id must match the drawing id.
+                            if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                                return false;
+                            }
+                            return true;
+                        }).map((drawing) => {
                             return {
                                 ...drawing,
                                 subUnitId: targetSubUnitId,

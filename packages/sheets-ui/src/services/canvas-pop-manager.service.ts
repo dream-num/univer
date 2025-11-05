@@ -537,7 +537,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
-        const { position, position$, disposable: positionObserverDisposable, updateRowCol, topLeftPos$, rightBottomPos$ } = this._createRangePositionObserver(range, currentRender, skeleton, activeViewport);
+        const { position, position$, disposable: positionObserverDisposable, updateRange, topLeftPos$, rightBottomPos$ } = this._createRangePositionObserver(range, currentRender, skeleton, activeViewport);
 
         const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
             row: range.startRow,
@@ -570,7 +570,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             if (!after) {
                 disposableCollection.dispose();
             } else {
-                updateRowCol(after.startRow, after.startColumn);
+                updateRange(after);
             }
         }));
 
@@ -707,15 +707,15 @@ export class SheetCanvasPopManagerService extends Disposable {
         skeleton: SpreadsheetSkeleton,
         activeViewport: Viewport
     ) {
-        let { startRow, startColumn } = range;
+        let { startRow, startColumn, endRow, endColumn } = range;
         const topLeftCoord = this._calcCellPositionByCell(startRow, startColumn, currentRender, skeleton, activeViewport);
         const topLeftPos$ = new BehaviorSubject(topLeftCoord);
-        const rightBottomCoord = this._calcCellPositionByCell(range.endRow, range.endColumn, currentRender, skeleton, activeViewport);
+        const rightBottomCoord = this._calcCellPositionByCell(endRow, endColumn, currentRender, skeleton, activeViewport);
         const rightBottomPos$ = new BehaviorSubject(rightBottomCoord);
 
         const updatePosition = () => {
             const topLeftCoord = this._calcCellPositionByCell(startRow, startColumn, currentRender, skeleton, activeViewport);
-            const rightBottomCoord = this._calcCellPositionByCell(range.endRow, range.endColumn, currentRender, skeleton, activeViewport);
+            const rightBottomCoord = this._calcCellPositionByCell(endRow, endColumn, currentRender, skeleton, activeViewport);
 
             topLeftPos$.next(topLeftCoord);
             rightBottomPos$.next(rightBottomCoord);
@@ -742,16 +742,18 @@ export class SheetCanvasPopManagerService extends Disposable {
             }
         }));
 
-        const updateRowCol = (newRow: number, newCol: number) => {
-            startRow = newRow;
-            startColumn = newCol;
+        const updateRange = (newRange: IRange) => {
+            startRow = newRange.startRow;
+            startColumn = newRange.startColumn;
+            endRow = newRange.endRow;
+            endColumn = newRange.endColumn;
 
             updatePosition();
         };
         // const position$ = combineLatest(topLeftPos$, rightBottomPos$);
         const position$ = topLeftPos$.pipe(
             map((topLeft) => {
-                const rightBottomCoord = this._calcCellPositionByCell(range.endRow, range.endColumn, currentRender, skeleton, activeViewport);
+                const rightBottomCoord = this._calcCellPositionByCell(endRow, endColumn, currentRender, skeleton, activeViewport);
                 return {
                     top: topLeft.top,
                     left: topLeft.left,
@@ -769,7 +771,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         return {
             position$,
             position,
-            updateRowCol,
+            updateRange,
             topLeftPos$,
             rightBottomPos$,
             disposable,

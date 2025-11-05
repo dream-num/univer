@@ -133,9 +133,8 @@ function SelectList(props: ISelectListProps) {
                         >
                             <div
                                 className={clsx(`
-                                  univer-inline-flex univer-h-4 univer-w-fit univer-items-center univer-overflow-hidden
-                                  univer-truncate univer-whitespace-nowrap univer-rounded-full univer-px-1.5
-                                  univer-text-xs
+                                  univer-inline-flex univer-h-4 univer-w-fit univer-items-center univer-truncate
+                                  univer-rounded-full univer-px-1.5 univer-text-xs
                                 `, {
                                     'univer-text-gray-900': !isDark,
                                     'univer-text-white': isDark,

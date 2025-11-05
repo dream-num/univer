@@ -121,9 +121,8 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         className={clsx(
                             `
                               univer-box-border univer-h-full univer-min-w-12 univer-max-w-[120px] univer-shrink-0
-                              univer-flex-nowrap univer-items-center univer-overflow-hidden univer-truncate
-                              univer-whitespace-nowrap univer-px-1 univer-py-0.5 univer-text-center univer-text-xs
-                              univer-leading-7
+                              univer-flex-nowrap univer-items-center univer-truncate univer-px-1 univer-py-0.5
+                              univer-text-center univer-text-xs univer-leading-7
                             `,
                             borderRightClassName,
                             {

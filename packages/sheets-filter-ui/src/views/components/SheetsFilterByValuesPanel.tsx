@@ -99,8 +99,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         <span
                             data-u-comp="sheets-filter-panel-values-item-text"
                             className={`
-                              univer-mx-1 univer-inline-block univer-flex-shrink univer-overflow-hidden
-                              univer-text-ellipsis univer-whitespace-nowrap univer-text-gray-900
+                              univer-mx-1 univer-inline-block univer-flex-shrink univer-truncate univer-text-gray-900
                               dark:!univer-text-white
                             `}
                         >

@@ -78,7 +78,7 @@
         "@univerjs/themes": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "dayjs": "^1.11.18",
+        "dayjs": "^1.11.19",
         "rc-dropdown": "^4.2.1",
         "rc-menu": "^9.16.0",
         "rc-virtual-list": "^3.16.1",

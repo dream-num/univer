@@ -1518,6 +1518,8 @@ export class ArrayValueObject extends BaseValueObject {
             );
 
             if (rowsInCache.length > 0) {
+                let valueInCache = false;
+
                 if (operator === compareToken.EQUALS) {
                     // TODO@DR-Univer: When comparing equal with two parameters, one of them is error, and the logic here is wrong
                     const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
@@ -1540,6 +1542,8 @@ export class ArrayValueObject extends BaseValueObject {
                             }
                             result[r][column] = BooleanValueObject.create(true);
                         });
+
+                        valueInCache = true;
                     }
                 } else {
                     const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(
@@ -1584,38 +1588,59 @@ export class ArrayValueObject extends BaseValueObject {
                     }
                 }
 
-                // handle the not in cache rows
-                if (rowsNotInCache.length > 0) {
-                    for (const interval of rowsNotInCache) {
-                        const [start, end] = interval;
+                /**
+                 * The calculation should skip the cache logic and continue only if the operator is EQUALS, value is not in cache, and the text is case insensitive.
+                 * Otherwise, the calculation should follow the cache logic.
+                 * For example:
+                 * -----------------
+                 * |   A1   |   B1  |
+                 * | Potato | TRUE  |
+                 * | Potato | TRUE  |
+                 * | Tomato | none  |
+                 * | Pickle | FALSE |
+                 * -----------------
+                 * `=IF(COUNTIFS(A$2:A5,"tomato",B$2:B5,FALSE)>0,"Ignore",IF(COUNTIFS(A$2:A5,"pickle",B$2:B5,FALSE)>0,"Bad","Good"))`
+                 */
+                if (
+                    !(
+                        operator === compareToken.EQUALS &&
+                        !valueInCache &&
+                        !isCaseSensitive
+                    )
+                ) {
+                    // handle the not in cache rows
+                    if (rowsNotInCache.length > 0) {
+                        for (const interval of rowsNotInCache) {
+                            const [start, end] = interval;
 
-                        for (let r = start; r <= end; r++) {
-                            this.__batchOperatorRowValue(
-                                valueObject,
-                                column,
-                                result,
-                                batchOperatorType,
-                                r - startRow,
+                            for (let r = start; r <= end; r++) {
+                                this.__batchOperatorRowValue(
+                                    valueObject,
+                                    column,
+                                    result,
+                                    batchOperatorType,
+                                    r - startRow,
+                                    unitId,
+                                    sheetId,
+                                    startRow,
+                                    startColumn,
+                                    operator,
+                                    isCaseSensitive
+                                );
+                            }
+
+                            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
                                 unitId,
                                 sheetId,
-                                startRow,
-                                startColumn,
-                                operator,
-                                isCaseSensitive
+                                column + startColumn,
+                                start,
+                                end
                             );
                         }
-
-                        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
-                            unitId,
-                            sheetId,
-                            column + startColumn,
-                            start,
-                            end
-                        );
                     }
-                }
 
-                return;
+                    return;
+                }
             }
         }
 

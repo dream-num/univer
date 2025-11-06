@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-crosshair-highlight",
-    "version": "0.10.12",
+    "version": "0.10.14",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -80,7 +80,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.4.9",
+        "@univerjs/icons": "^1.0.2",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"
@@ -90,9 +90,9 @@
         "postcss": "^8.5.6",
         "react": "18.3.1",
         "rxjs": "^7.8.2",
-        "tailwindcss": "3.4.17",
+        "tailwindcss": "3.4.18",
         "typescript": "^5.9.3",
-        "vite": "^7.1.10",
+        "vite": "^7.1.12",
         "vitest": "^3.2.4"
     }
 }

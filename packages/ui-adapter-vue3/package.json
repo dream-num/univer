@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-adapter-vue3",
-    "version": "0.10.12",
+    "version": "0.10.14",
     "private": false,
     "description": "Vue adapter for Univer UI",
     "author": "DreamNum <developer@univer.ai>",
@@ -67,7 +67,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^5.9.3",
-        "vite": "^7.1.10",
+        "vite": "^7.1.12",
         "vitest": "^3.2.4",
         "vue": "^3.5.22"
     }

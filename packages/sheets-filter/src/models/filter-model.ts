@@ -104,10 +104,20 @@ export class FilterModel extends Disposable {
 
     private _dump(autoFilter: IAutoFilter) {
         this.setRange(autoFilter.ref);
-        autoFilter.filterColumns?.forEach((filterColumn) => this._setCriteriaWithoutReCalc(filterColumn.colId, filterColumn));
+        autoFilter.filterColumns?.filter((filterColumn) => {
+            // we only support 3 types of filters now.Other types of filters are not supported yet.
+            if (!filterColumn.filters && !filterColumn.colorFilters && !filterColumn.customFilters) {
+                return false;
+            }
+            return true;
+        }).forEach((filterColumn) => this._setCriteriaWithoutReCalc(filterColumn.colId, filterColumn));
 
         if (autoFilter.cachedFilteredOut) {
             this._alreadyFilteredOutRows = new Set(autoFilter.cachedFilteredOut);
+            this._emit();
+        } else if (autoFilter.filterColumns && autoFilter.filterColumns.length > 0) {
+            // If there is no cached filtered out rows, we need to re-calc all columns.
+            this._reCalcAllColumns();
             this._emit();
         }
 
@@ -184,7 +194,10 @@ export class FilterModel extends Disposable {
 
         this._setCriteriaWithoutReCalc(col, criteria);
         if (reCalc) {
+            // save some performance if we can reuse the cached filtered out rows.
             this._rebuildAlreadyFilteredOutRowsWithCache();
+            // but we still need to recalc the all columns.
+            this._getAllFilterColumns().forEach((filterColumn) => filterColumn.__clearCache());
             this._reCalcWithNoCacheColumns();
             this._emit();
             this._emitHasCriteria();

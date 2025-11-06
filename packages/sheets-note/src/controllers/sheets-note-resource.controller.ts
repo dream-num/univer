@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+import type { IMutationInfo, Workbook } from '@univerjs/core';
+import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import type { ISheetNote } from '../models/sheets-note.model';
 import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { RemoveNoteMutation, UpdateNoteMutation } from '../commands/mutations/note.mutation';
 import { PLUGIN_NAME } from '../const';
 import { SheetsNoteModel } from '../models/sheets-note.model';
 
@@ -31,10 +35,12 @@ export class SheetsNoteResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsNoteModel) private readonly _sheetsNoteModel: SheetsNoteModel
     ) {
         super();
         this._initSnapshot();
+        this._initSheetChange();
     }
 
     private _initSnapshot() {
@@ -97,6 +103,100 @@ export class SheetsNoteResourceController extends Disposable {
                             });
                         });
                     });
+                },
+            })
+        );
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _initSheetChange() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                // eslint-disable-next-line max-lines-per-function
+                getMutations: (commandInfo) => {
+                    if (commandInfo.id === RemoveSheetCommand.id) {
+                        const params = commandInfo.params as IRemoveSheetCommandParams;
+                        const unitId = params.unitId || this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+                        const subUnitId = params.subUnitId || this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+
+                        if (!unitId || !subUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const noteMatrix = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
+
+                        if (!noteMatrix) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const redos: IMutationInfo[] = [];
+                        const undos: IMutationInfo[] = [];
+
+                        noteMatrix.forValue((row, col, note) => {
+                            redos.push({
+                                id: RemoveNoteMutation.id,
+                                params: {
+                                    unitId,
+                                    sheetId: subUnitId,
+                                    row,
+                                    col,
+                                },
+                            });
+                            undos.push({
+                                id: UpdateNoteMutation.id,
+                                params: {
+                                    unitId,
+                                    sheetId: subUnitId,
+                                    row,
+                                    col,
+                                    note,
+                                },
+                            });
+                        });
+
+                        return { redos, undos };
+                    } else if (commandInfo.id === CopySheetCommand.id) {
+                        const params = commandInfo.params as ICopySheetCommandParams & { targetSubUnitId: string };
+                        const { unitId, subUnitId, targetSubUnitId } = params;
+
+                        if (!unitId || !subUnitId || !targetSubUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const noteMatrix = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
+
+                        if (!noteMatrix) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const redos: IMutationInfo[] = [];
+                        const undos: IMutationInfo[] = [];
+
+                        noteMatrix.forValue((row, col, note) => {
+                            redos.push({
+                                id: UpdateNoteMutation.id,
+                                params: {
+                                    unitId,
+                                    sheetId: targetSubUnitId,
+                                    row,
+                                    col,
+                                    note,
+                                },
+                            });
+                            undos.push({
+                                id: RemoveNoteMutation.id,
+                                params: {
+                                    unitId,
+                                    sheetId: targetSubUnitId,
+                                    row,
+                                    col,
+                                },
+                            });
+                        });
+
+                        return { redos, undos };
+                    }
+                    return { redos: [], undos: [] };
                 },
             })
         );

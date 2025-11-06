@@ -103,6 +103,16 @@ export class TableManager extends Disposable {
             tableStyleId: options?.tableStyleId,
         });
 
+        if (options?.filters) {
+            const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+            table.getTableFilters().doFilter(worksheet!, range);
+            this._tableFilterChanged$.next({
+                unitId,
+                subUnitId,
+                tableId: id,
+            });
+        }
+
         return id;
     }
 

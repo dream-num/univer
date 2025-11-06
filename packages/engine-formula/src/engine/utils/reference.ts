@@ -437,7 +437,7 @@ export function addQuotesBothSides(name: string) {
  * @param name
  * @returns Quoted name
  */
-function quoteSheetName(name: string) {
+export function quoteSheetName(name: string) {
     return name.replace(/'/g, "''");
 }
 
@@ -446,7 +446,7 @@ function quoteSheetName(name: string) {
  * @param name
  * @returns Unquoted name
  */
-function unquoteSheetName(name: string) {
+export function unquoteSheetName(name: string) {
     return name.replace(/''/g, "'");
 }
 

@@ -130,7 +130,7 @@ export class SheetCellEditorResizeService extends Disposable {
 
         let offsetLeft = 0;
         if (horizontalAlign === HorizontalAlign.CENTER) {
-            offsetLeft = (editorWidth - actualWidth) / 2 / scaleX;
+            // offsetLeft = ((editorWidth - actualWidth) / 2 / scaleX);
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             offsetLeft = (editorWidth - actualWidth) / scaleX;
         } else {

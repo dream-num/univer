@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.10.12",
+    "version": "0.10.14",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -80,7 +80,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.46",
+        "@univerjs/protocol": "0.1.47",
         "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {
@@ -89,7 +89,7 @@
         "@univerjs/network": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^5.9.3",
-        "vite": "^7.1.10",
+        "vite": "^7.1.12",
         "vitest": "^3.2.4"
     }
 }

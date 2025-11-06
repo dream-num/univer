@@ -159,6 +159,7 @@ export class SheetInterceptorService extends Disposable {
 
         this._workbookDisposables.forEach((disposable) => disposable.dispose());
         this._workbookDisposables.clear();
+        this._worksheetDisposables.forEach((disposable) => disposable.dispose());
         this._worksheetDisposables.clear();
 
         this._interceptorsByName.clear();

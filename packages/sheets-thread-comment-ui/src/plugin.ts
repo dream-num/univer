@@ -25,7 +25,6 @@ import { SheetsThreadCommentRenderController } from './controllers/render-contro
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 import { SheetsThreadCommentPopupController } from './controllers/sheets-thread-comment-popup.controller';
-import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { SHEETS_THREAD_COMMENT } from './types/const';
@@ -61,7 +60,6 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
             [SheetsThreadCommentRenderController],
             [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentHoverController],
-            [ThreadCommentRemoveSheetsController],
             [SheetsThreadCommentPopupController],
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
@@ -77,7 +75,6 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
 
     override onReady(): void {
         this._injector.get(SheetsThreadCommentRenderController);
-        this._injector.get(ThreadCommentRemoveSheetsController);
     }
 
     override onRendered(): void {

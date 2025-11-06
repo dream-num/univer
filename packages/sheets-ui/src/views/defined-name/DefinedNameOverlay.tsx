@@ -115,8 +115,8 @@ export function DefinedNameOverlay() {
                             >
                                 <div
                                     className={`
-                                      univer-w-[50%] univer-flex-shrink-0 univer-overflow-hidden univer-text-ellipsis
-                                      univer-whitespace-nowrap univer-text-sm univer-text-gray-600
+                                      univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-sm
+                                      univer-text-gray-600
                                       dark:!univer-text-gray-200
                                     `}
                                     title={definedName.name}
@@ -125,8 +125,8 @@ export function DefinedNameOverlay() {
                                 </div>
                                 <div
                                     className={`
-                                      univer-w-[50%] univer-flex-shrink-0 univer-overflow-hidden univer-text-ellipsis
-                                      univer-whitespace-nowrap univer-text-xs univer-text-gray-400
+                                      univer-w-[50%] univer-flex-shrink-0 univer-truncate univer-text-xs
+                                      univer-text-gray-400
                                     `}
                                     title={definedName.formulaOrRefString}
                                 >

@@ -35,7 +35,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "0.4.9",
+        "@univerjs/icons": "1.0.2",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/rpc": "workspace:*",
@@ -102,7 +102,7 @@
         "fs-extra": "^11.3.2",
         "minimist": "^1.2.8",
         "postcss": "^8.5.6",
-        "tailwindcss": "3.4.17",
+        "tailwindcss": "3.4.18",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.3"
     }

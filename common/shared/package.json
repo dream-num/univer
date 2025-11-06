@@ -1,6 +1,6 @@
 {
     "name": "@univerjs-infra/shared",
-    "version": "0.10.12",
+    "version": "0.10.14",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -25,8 +25,8 @@
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.46.1",
-        "@vitejs/plugin-react": "^5.0.4",
+        "@typescript-eslint/parser": "^8.46.2",
+        "@vitejs/plugin-react": "^5.1.0",
         "@vitejs/plugin-vue": "^6.0.1",
         "@vitest/coverage-istanbul": "^3.2.4",
         "autoprefixer": "^10.4.21",
@@ -35,22 +35,22 @@
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "fs-extra": "^11.3.2",
-        "happy-dom": "20.0.1",
+        "happy-dom": "20.0.10",
         "javascript-obfuscator": "^4.1.1",
         "postcss-preset-env": "^10.4.0",
         "postcss-replace": "^2.0.1",
         "sort-keys": "^6.0.0",
         "tailwind-scrollbar": "^3",
-        "tailwindcss": "3.4.17",
-        "vite": "^7.1.10",
+        "tailwindcss": "3.4.18",
+        "vite": "^7.1.12",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
         "vitest": "^3.2.4"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
-        "@univerjs/icons": "^0.4.9",
-        "@univerjs/icons-svg": "^0.4.9",
-        "@univerjs/protocol": "0.1.46"
+        "@univerjs/icons": "^1.0.2",
+        "@univerjs/icons-svg": "^1.0.2",
+        "@univerjs/protocol": "0.1.47"
     }
 }

@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { MoreDownIcon, SlashIcon } from '@univerjs/icons';
+import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
 import {
     CFNumberOperator,
     CFRuleType,
@@ -191,7 +191,7 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
                 className="univer-mb-2.5 univer-flex univer-cursor-pointer univer-items-center univer-pl-1"
                 onClick={() => handleClick({ iconType: EMPTY_ICON_TYPE as any, iconId: '', base64: '' })}
             >
-                <SlashIcon className="univer-size-5" />
+                <SlashDoubleIcon className="univer-size-5" />
                 <span className="univer-ml-2">无单元格图标</span>
             </div>
             <div className="univer-flex univer-w-64 univer-flex-wrap">
@@ -321,7 +321,7 @@ const IconSetRuleEdit = (props: {
                                 >
                                     {icon
                                         ? <img src={icon} className="univer-size-4" draggable={false} />
-                                        : <SlashIcon className="univer-size-4" />}
+                                        : <SlashDoubleIcon className="univer-size-4" />}
                                     <MoreDownIcon />
                                 </div>
                             </Dropdown>
@@ -451,7 +451,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                             src={icon}
                         />
                     )
-                    : <SlashIcon className="univer-size-5" key={index} />))}
+                    : <SlashDoubleIcon className="univer-size-5" key={index} />))}
             </div>
         );
     }, [configList]);

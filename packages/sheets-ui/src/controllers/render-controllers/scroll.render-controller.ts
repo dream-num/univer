@@ -152,6 +152,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     const viewportScrollX = startX + offsetX;
                     const viewportScrollY = startY + offsetY;
 
+                    // If there is an ongoing scroll animation, cancel it before starting a new one.
+                    if (viewportMain.scrollAnimationFrameId !== null) {
+                        cancelAnimationFrame(viewportMain.scrollAnimationFrameId);
+                    }
+
                     if (!duration) {
                         viewportMain.scrollToViewportPos({ viewportScrollX, viewportScrollY });
                     } else {
@@ -288,11 +293,13 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             });
 
             if (progress < 1) {
-                requestAnimationFrame(animate);
+                viewportMain.scrollAnimationFrameId = requestAnimationFrame(animate);
+            } else {
+                viewportMain.scrollAnimationFrameId = null;
             }
         }
 
-        requestAnimationFrame(animate);
+        viewportMain.scrollAnimationFrameId = requestAnimationFrame(animate);
     }
 
     _updateViewportScroll(viewportScrollX: number = 0, viewportScrollY: number = 0) {

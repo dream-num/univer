@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import type { ITableResource } from '../types/type';
-import { Disposable, Inject, InterceptorEffectEnum, IResourceManagerService, Rectangle, RTree, UniverInstanceType } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, IUniverInstanceService, Rectangle, RTree, UniverInstanceType } from '@univerjs/core';
+import { CopySheetCommand, INTERCEPTOR_POINT, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
+import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { PLUGIN_NAME } from '../const';
 import { TableManager } from '../model/table-manager';
 
 export class SheetsTableController extends Disposable {
     private _tableRangeRTree = new Map<string, RTree>();
     constructor(
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
     ) {
         super();
         this._initSnapshot();
+        this._initSheetChange();
         this.registerTableChangeEvent();
         this.registerTableHeaderInterceptor();
     }
@@ -176,6 +180,116 @@ export class SheetsTableController extends Disposable {
                 this._deleteUnitId(unitId);
             },
         }));
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _initSheetChange() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                // eslint-disable-next-line max-lines-per-function
+                getMutations: (commandInfo) => {
+                    if (commandInfo.id === RemoveSheetCommand.id) {
+                        const params = commandInfo.params as IRemoveSheetCommandParams;
+                        const unitId = params.unitId || this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+                        const subUnitId = params.subUnitId || this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+
+                        if (!unitId || !subUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const tables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
+
+                        if (tables.length === 0) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const redos: IMutationInfo[] = [];
+                        const undos: IMutationInfo[] = [];
+
+                        tables.forEach((table) => {
+                            const tableJson = table.toJSON();
+
+                            redos.push({
+                                id: DeleteSheetTableMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId,
+                                    tableId: tableJson.id,
+                                },
+                            });
+                            undos.push({
+                                id: AddSheetTableMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId,
+                                    name: tableJson.name,
+                                    range: tableJson.range,
+                                    tableId: tableJson.id,
+                                    options: {
+                                        ...tableJson.options,
+                                        columns: tableJson.columns,
+                                        filters: tableJson.filters.tableColumnFilterList,
+                                    },
+                                },
+                            });
+                        });
+
+                        return { redos, undos };
+                    } else if (commandInfo.id === CopySheetCommand.id) {
+                        const params = commandInfo.params as ICopySheetCommandParams & { targetSubUnitId: string };
+                        const { unitId, subUnitId, targetSubUnitId } = params;
+
+                        if (!unitId || !subUnitId || !targetSubUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const tables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
+
+                        if (tables.length === 0) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const redos: IMutationInfo[] = [];
+                        const undos: IMutationInfo[] = [];
+
+                        tables.forEach((table) => {
+                            const tableJson = table.toJSON();
+                            const tableId = generateRandomId();
+
+                            redos.push({
+                                id: AddSheetTableMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId: targetSubUnitId,
+                                    name: tableJson.name,
+                                    range: {
+                                        ...tableJson.range,
+                                        sheetId: targetSubUnitId,
+                                    },
+                                    tableId,
+                                    options: {
+                                        ...tableJson.options,
+                                        columns: tableJson.columns,
+                                        filters: tableJson.filters.tableColumnFilterList,
+                                    },
+                                },
+                            });
+                            undos.push({
+                                id: DeleteSheetTableMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId: targetSubUnitId,
+                                    tableId,
+                                },
+                            });
+                        });
+
+                        return { redos, undos };
+                    }
+                    return { redos: [], undos: [] };
+                },
+            })
+        );
     }
 
     override dispose() {

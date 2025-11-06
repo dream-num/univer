@@ -28,6 +28,7 @@ export interface IUniverDocsUIConfig {
     container?: HTMLElement | string;
     layout?: ILayout;
     override?: DependencyOverride;
+    disableAutoFocus?: boolean;
 }
 
 export const defaultPluginConfig: IUniverDocsUIConfig = {

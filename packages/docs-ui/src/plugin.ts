@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
+    DocumentDataModel,
     ICommandService,
     IConfigService,
     ILogService,
@@ -33,6 +34,7 @@ import {
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
+import { filter } from 'rxjs';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
@@ -152,7 +154,8 @@ export class UniverDocsUIPlugin extends Plugin {
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ICommandService private _commandService: ICommandService,
         @ILogService private _logService: ILogService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -175,6 +178,11 @@ export class UniverDocsUIPlugin extends Plugin {
     override onReady(): void {
         this._initRenderBasics();
         this._markDocAsFocused();
+        
+        // Add auto-focus feature similar to sheets-ui
+        if (!this._config.disableAutoFocus) {
+            this._initAutoFocus();
+        }
 
         touchDependencies(this._injector, [
             [DocStateChangeManagerService],
@@ -352,6 +360,14 @@ export class UniverDocsUIPlugin extends Plugin {
         } catch (err) {
             this._logService.warn(err);
         }
+    }
+
+    private _initAutoFocus(): void {
+        const univerInstanceService = this._univerInstanceService;
+        const editorService = this._injector.get(IEditorService);
+        this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(filter((v) => !!v && !editorService.isEditor(v.getUnitId())))
+            .subscribe((doc) => univerInstanceService.focusUnit(doc!.getUnitId())));
     }
 
     private _initUI(): void {

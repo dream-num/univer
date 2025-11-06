@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, DocumentDataModel } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
-    DocumentDataModel,
     ICommandService,
     IConfigService,
     ILogService,
@@ -178,7 +177,7 @@ export class UniverDocsUIPlugin extends Plugin {
     override onReady(): void {
         this._initRenderBasics();
         this._markDocAsFocused();
-        
+
         // Add auto-focus feature similar to sheets-ui
         if (!this._config.disableAutoFocus) {
             this._initAutoFocus();

@@ -36,7 +36,7 @@ export const CommonLabel = (props: ICommonLabelProps) => {
 
     return (
         <div
-            className="univer-overflow-hidden univer-truncate univer-text-sm"
+            className="univer-truncate univer-text-sm"
         >
             {viewValue}
         </div>

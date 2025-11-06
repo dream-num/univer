@@ -79,7 +79,7 @@ export class Textjoin extends BaseFunction {
         let _textValues = textValues;
 
         if (ignoreEmptyValue) {
-            _textValues = textValues.filter((value) => value !== null);
+            _textValues = textValues.filter((value) => value !== null && value !== '');
         }
 
         let result = '';

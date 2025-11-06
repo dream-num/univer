@@ -1728,6 +1728,14 @@ export class ArrayValueObject extends BaseValueObject {
             return;
         }
 
+        /**
+         * The blank cell are not stored in the inverted index, so skip it.
+         * If needed store it in the future. ask @DR-Univer
+         */
+        if (currentValue.isNull()) {
+            return;
+        }
+
         if (currentValue.isError()) {
             CELL_INVERTED_INDEX_CACHE.set(
                 unitId,

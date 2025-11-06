@@ -16,7 +16,6 @@
 
 import type { ITextStyle } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
-import { DEFAULT_BACKGROUND_COLOR_RGB, DEFAULT_BACKGROUND_COLOR_RGBA } from '@univerjs/ui';
 
 export function extractNodeStyle(node: HTMLElement, predefinedStyles?: Record<string, string>): ITextStyle {
     const styles = predefinedStyles ?? node.style;
@@ -76,7 +75,6 @@ function parseStyleByProperty(styles: CSSStyleDeclaration | Record<string, strin
     }
 }
 
-// eslint-disable-next-line complexity
 function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
     switch (cssRule) {
         case 'font-family':
@@ -132,9 +130,11 @@ function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
         }
         case 'background-color': {
             const color = new ColorKit(cssValue);
-            const bgColor = color.isValid ? color.toRgbString() : '';
-            if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB && bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
-                docStyles.bg = { rgb: bgColor };
+
+            if (color.isValid) {
+                docStyles.bg = {
+                    rgb: color.toRgbString(),
+                };
             }
             break;
         }

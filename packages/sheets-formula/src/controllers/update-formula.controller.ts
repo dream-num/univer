@@ -141,6 +141,11 @@ export class UpdateFormulaController extends Disposable {
         }
 
         const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+
+        if (Object.keys(newSheetFormulaData).length === 0) {
+            return;
+        }
+
         const newFormulaData = {
             [unitId]: {
                 [sheetId]: newSheetFormulaData,

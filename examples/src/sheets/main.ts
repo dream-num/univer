@@ -54,6 +54,7 @@ import { customRangePopups } from './custom/custom-range-popup';
 import { customRegisterEvent } from './custom/custom-register-event';
 import { UniverSheetsCustomShortcutPlugin } from './custom/custom-shortcut';
 import ImportCSVButtonPlugin from './custom/import-csv-button';
+import { initProtectedRangeShadowDemo } from './custom/protected-range-shadow-plugin';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -192,6 +193,7 @@ function createNewInstance() {
 
     customRegisterEvent(univer, window.univerAPI!);
     customRangePopups(univer, window.univerAPI!);
+    initProtectedRangeShadowDemo(univer, window.univerAPI!);
 }
 
 createNewInstance();

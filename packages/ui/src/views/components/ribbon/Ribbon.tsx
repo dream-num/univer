@@ -305,7 +305,7 @@ export function Ribbon(props: IRibbonProps) {
                 className={clsx(`
                   univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
                 `, {
-                    'univer-justify-center': ribbonType === 'classic',
+                    'univer-grid-cols-[1fr] univer-justify-center': ribbonType === 'classic',
                     'univer-grid-cols-[auto,1fr]': ribbon.length > 1 && ribbonType !== 'classic',
                     'univer-grid-cols-none': ribbon.length === 1,
                 }, borderBottomClassName)}
@@ -321,7 +321,9 @@ export function Ribbon(props: IRibbonProps) {
                 <div
                     data-u-comp="ribbon-toolbar"
                     ref={containerRef}
-                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName)}
+                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
+                        'univer-justify-center': ribbonType === 'classic',
+                    })}
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>

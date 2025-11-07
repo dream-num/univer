@@ -34,7 +34,7 @@ export function ClassicMenu({
             className={`
               univer-flex univer-w-full univer-items-center univer-justify-center univer-gap-1 univer-overflow-x-auto
               univer-rounded-md univer-bg-gray-50 univer-px-3 univer-py-1.5
-              dark:univer-bg-gray-900
+              dark:!univer-bg-gray-900
             `}
             role="tablist"
             aria-label={localeService.t('ribbon.menu')}
@@ -51,20 +51,20 @@ export function ClassicMenu({
                         onClick={() => onSelectTab(group)}
                         className={clsx(`
                           univer-focus:outline-none univer-focus:ring-2 univer-focus:ring-primary-500
-                          dark:univer-focus:ring-primary-300
+                          dark:!univer-focus:ring-primary-300
                           univer-flex univer-cursor-pointer univer-appearance-none univer-items-center univer-gap-1
                           univer-rounded-sm univer-border-none univer-px-2 univer-py-1 univer-text-sm
                           univer-transition-colors
                         `, isActive
                             ? `
                               univer-bg-primary-50 univer-font-semibold univer-text-primary-600 univer-shadow-sm
-                              dark:univer-bg-primary-900 dark:univer-text-primary-300
+                              dark:!univer-bg-primary-900 dark:!univer-text-primary-300
                             `
                             : `
                               univer-hover:bg-gray-100
-                              dark:univer-hover:bg-gray-700
+                              dark:!univer-hover:bg-gray-700
                               univer-bg-transparent univer-text-gray-700
-                              dark:univer-text-gray-200
+                              dark:!univer-text-gray-200
                             `)}
                     >
                         {localeService.t(group.key)}

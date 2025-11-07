@@ -40,6 +40,20 @@ describe('Test text function', () => {
             expect(getObjectValue(result)).toBe('0001年23月45日');
         });
 
+        it('Text is empty string', () => {
+            const text1 = StringValueObject.create('');
+            const formatText = StringValueObject.create('0;;;\\0');
+            const result = testFunction.calculate(text1, formatText);
+            expect(getObjectValue(result)).toBe('0');
+        });
+
+        it('Text is string a', () => {
+            const text1 = StringValueObject.create('a');
+            const formatText = StringValueObject.create('0;;;\\0');
+            const result = testFunction.calculate(text1, formatText);
+            expect(getObjectValue(result)).toBe('0');
+        });
+
         it('Text is array, format text is array', () => {
             const text1 = new ArrayValueObject({
                 calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null, 0, '100', '2.34', 'test', -3, ErrorType.NAME]]),
@@ -77,7 +91,7 @@ describe('Test text function', () => {
                 ['1900-01-01', ' ', '1900-01-01', true, false, '1900-01-00', '1900-01-00', '1900-04-09', '1900-01-02', 'test', '1899-12-27', ErrorType.NAME],
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
-                ['', ' ', '', true, false, '', '', '', '', 'test', '-', ErrorType.NAME],
+                ['', '', '', true, false, '', '', '', '', 'test', '-', ErrorType.NAME],
                 ['1', ' ', '1', true, false, '0', '0', '100', '2', 'test', '-3', ErrorType.NAME],
                 ['101', ' ', '101', true, false, '100', '100', '1100', '102', 'test', '-103', ErrorType.NAME],
                 ['t19000t', ' ', 't190012t', true, false, 't19000t', 't19000t', 't19000t', 't190036t', 'test', 't18990t', ErrorType.NAME],

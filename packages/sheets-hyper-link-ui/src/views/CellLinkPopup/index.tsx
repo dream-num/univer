@@ -100,7 +100,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     {iconsMap[linkObj.type]}
                 </div>
                 <Tooltip showIfEllipsis title={linkObj.name} asChild>
-                    <span className="univer-flex-1 univer-overflow-hidden univer-text-ellipsis">{linkObj.name}</span>
+                    <span className="univer-flex-1 univer-truncate">{linkObj.name}</span>
                 </Tooltip>
             </div>
             <div

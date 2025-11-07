@@ -224,7 +224,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                             }
                         }}
                     >
-                        <span className="univer-block univer-overflow-x-hidden univer-text-ellipsis univer-text-xs">
+                        <span className="univer-block univer-truncate univer-text-xs">
                             <span className="univer-text-red-500">{item.name.substring(0, searchText.length)}</span>
                             <span>{item.name.slice(searchText.length)}</span>
                         </span>

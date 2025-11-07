@@ -50,6 +50,22 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
         this.renderCache.clear();
     }
 
+    /**
+     * Set the shadow strategy for this extension
+     * @param strategy The shadow strategy
+     */
+    setShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): void {
+        this._shadowStrategy = strategy;
+        this.clearCache();
+    }
+
+    /**
+     * Get the current shadow strategy
+     */
+    getShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none' {
+        return this._shadowStrategy;
+    }
+
     protected abstract shouldRender(config: ICellPermission): boolean;
 
     override draw(

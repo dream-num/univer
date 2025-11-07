@@ -104,6 +104,21 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         ctx.restore();
     }
 
+    /**
+     * Set the shadow strategy for this extension
+     * @param strategy The shadow strategy
+     */
+    setShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): void {
+        this._shadowStrategy = strategy;
+    }
+
+    /**
+     * Get the current shadow strategy
+     */
+    getShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none' {
+        return this._shadowStrategy;
+    }
+
     setZIndex(zIndex: number) {
         this.Z_INDEX = zIndex;
     }

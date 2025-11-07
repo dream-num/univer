@@ -15,14 +15,14 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { IColumnsHeaderCfgParam, IMouseEvent, IPointerEvent, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import type { IColumnsHeaderCfgParam, IMouseEvent, IPointerEvent, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 
 import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPermissionRenderManagerService, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { IDialogService, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -322,6 +322,18 @@ export interface IFWorkbookSheetsUIMixin {
      * ```
      */
     setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): FWorkbook;
+
+    /**
+     * Get the current strategy for showing the protected range shadow.
+     * @returns {('always' | 'non-editable' | 'non-viewable' | 'none')} The current shadow strategy
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const currentStrategy = fWorkbook.getProtectedRangeShadowStrategy();
+     * console.log(currentStrategy); // 'none', 'always', 'non-editable', or 'non-viewable'
+     * ```
+     */
+    getProtectedRangeShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none';
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -570,35 +582,22 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     override setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): FWorkbook {
         const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const render = renderManagerService.getRenderById(unitId);
+        const renderManagerService = this._injector.get(SheetPermissionRenderManagerService);
 
-        if (render) {
-            const spreadsheet = render.mainComponent as Spreadsheet;
-            if (spreadsheet) {
-                // Update range protection extensions
-                const canViewExtension = spreadsheet.getExtensionByKey('RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY');
-                if (canViewExtension && 'setShadowStrategy' in canViewExtension) {
-                    (canViewExtension as any).setShadowStrategy(strategy);
-                }
+        const success = renderManagerService.setProtectedRangeShadowStrategy(unitId, strategy);
 
-                const canNotViewExtension = spreadsheet.getExtensionByKey('RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY');
-                if (canNotViewExtension && 'setShadowStrategy' in canNotViewExtension) {
-                    (canNotViewExtension as any).setShadowStrategy(strategy);
-                }
-
-                // Update worksheet protection extension
-                const worksheetExtension = spreadsheet.getExtensionByKey('worksheetProtectionRenderExtension');
-                if (worksheetExtension && 'setShadowStrategy' in worksheetExtension) {
-                    (worksheetExtension as any).setShadowStrategy(strategy);
-                }
-
-                // Mark canvas as dirty to trigger re-render
-                spreadsheet.makeDirty(true);
-            }
+        if (!success) {
+            console.warn(`Failed to set protected range shadow strategy for unit ${unitId}`);
         }
 
         return this;
+    }
+
+    override getProtectedRangeShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none' {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(SheetPermissionRenderManagerService);
+
+        return renderManagerService.getProtectedRangeShadowStrategy(unitId);
     }
 }
 

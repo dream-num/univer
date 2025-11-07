@@ -145,6 +145,7 @@ export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './
 export { HoverManagerService } from './services/hover-manager.service';
 export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
+export { type ProtectedRangeShadowStrategy, SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { SheetScrollManagerService } from './services/scroll-manager.service';

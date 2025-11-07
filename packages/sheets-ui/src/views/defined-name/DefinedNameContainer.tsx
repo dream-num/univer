@@ -209,14 +209,16 @@ export const DefinedNameContainer = () => {
                         <div
                             key={index}
                             className={`
-                              univer-divide-x-0 univer-divide-y univer-divide-solid univer-divide-gray-200
+                              univer-relative univer-w-full univer-divide-x-0 univer-divide-y univer-divide-solid
+                              univer-divide-gray-200
                               dark:!univer-divide-gray-600
                             `}
                         >
                             <div
                                 className={clsx(`
-                                  univer-group univer-relative univer-flex univer-cursor-default univer-select-none
-                                  univer-items-center univer-justify-between univer-rounded-md univer-p-2
+                                  univer-group univer-relative univer-flex univer-w-full univer-cursor-default
+                                  univer-select-none univer-items-center univer-justify-between univer-rounded-md
+                                  univer-p-2
                                   hover:univer-bg-gray-50
                                   dark:hover:!univer-bg-gray-700
                                 `, {
@@ -239,9 +241,11 @@ export const DefinedNameContainer = () => {
                                     </div>
                                     <div
                                         className={`
-                                          univer-my-1 univer-max-h-[100px] univer-overflow-hidden univer-text-ellipsis
-                                          univer-text-xs univer-text-gray-500
+                                          univer-my-1 univer-max-h-[100px] univer-w-full univer-max-w-[190px]
+                                          univer-overflow-hidden univer-text-ellipsis univer-text-xs
+                                          univer-text-gray-500
                                         `}
+                                        title={definedName.formulaOrRefString}
                                     >
                                         {definedName.formulaOrRefString}
                                     </div>

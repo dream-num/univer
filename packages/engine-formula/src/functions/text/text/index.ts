@@ -82,11 +82,7 @@ export class Text extends BaseFunction {
                 textValueNumber = 0;
             }
 
-            if (textValue.isString()) {
-                if (!isRealNum(textValueNumber)) {
-                    return textValue;
-                }
-
+            if (textValue.isString() && isRealNum(textValueNumber)) {
                 textValueNumber = Number(textValueNumber);
             }
 

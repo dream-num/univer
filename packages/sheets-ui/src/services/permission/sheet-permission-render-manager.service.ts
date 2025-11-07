@@ -20,11 +20,25 @@ import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import { Disposable, IConfigService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey } from '../../views/permission/extensions/worksheet-permission.render';
 
 export type ProtectedRangeShadowStrategy = 'always' | 'non-editable' | 'non-viewable' | 'none';
+
+/**
+ * Interface for extensions that support shadow strategy
+ */
+interface IExtensionWithShadowStrategy {
+    setShadowStrategy: (strategy: ProtectedRangeShadowStrategy) => void;
+}
+
+/**
+ * Type guard to check if an extension supports shadow strategy
+ */
+function hasSetShadowStrategy(extension: unknown): extension is IExtensionWithShadowStrategy {
+    return typeof (extension as IExtensionWithShadowStrategy).setShadowStrategy === 'function';
+}
 
 export interface ISheetPermissionRenderManagerService {
     /**
@@ -60,7 +74,7 @@ export class SheetPermissionRenderManagerService extends Disposable implements I
         super();
 
         const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-        this._currentStrategy = config?.protectedRangeShadowStrategy || 'always';
+        this._currentStrategy = convertToShadowStrategy(config?.protectedRangeShadow);
         this._strategySubject = new BehaviorSubject<ProtectedRangeShadowStrategy>(this._currentStrategy);
 
         this.disposeWithMe({
@@ -90,8 +104,8 @@ export class SheetPermissionRenderManagerService extends Disposable implements I
             let updated = false;
             for (const { key } of extensions) {
                 const extension = spreadsheet.getExtensionByKey(key);
-                if (extension && typeof (extension as any).setShadowStrategy === 'function') {
-                    (extension as any).setShadowStrategy(strategy);
+                if (extension && hasSetShadowStrategy(extension)) {
+                    extension.setShadowStrategy(strategy);
                     updated = true;
                 }
             }

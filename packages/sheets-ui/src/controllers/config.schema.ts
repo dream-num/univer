@@ -81,6 +81,7 @@ export interface IUniverSheetsUIConfig {
     /**
      * Whether to show the protected range shadow.
      * @default true
+     * @deprecated Use `protectedRangeShadowStrategy` instead.
      */
     protectedRangeShadow?: boolean;
 
@@ -89,9 +90,10 @@ export interface IUniverSheetsUIConfig {
      * - 'always': Show shadow for all protected ranges (default behavior)
      * - 'non-editable': Only show shadow for ranges that cannot be edited (Edit permission is false)
      * - 'non-viewable': Only show shadow for ranges that cannot be viewed (View permission is false)
+     * - 'none': Never show shadow for protected ranges
      * @default 'always'
      */
-    protectedRangeShadowStrategy?: 'always' | 'non-editable' | 'non-viewable';
+    protectedRangeShadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none';
 
     /**
      * The custom component of the protected range user selector.

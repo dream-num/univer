@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { IColumnsHeaderCfgParam, IMouseEvent, IPointerEvent, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import type { IColumnsHeaderCfgParam, IMouseEvent, IPointerEvent, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 
@@ -295,6 +295,33 @@ export interface IFWorkbookSheetsUIMixin {
      * ```
      */
     showSelection(): FWorkbook;
+
+    /**
+     * Set the strategy for showing the protected range shadow.
+     * @param {('always' | 'non-editable' | 'non-viewable' | 'none')} strategy - The shadow strategy to apply
+     * - 'always': Show shadow for all protected ranges
+     * - 'non-editable': Only show shadow for ranges that cannot be edited
+     * - 'non-viewable': Only show shadow for ranges that cannot be viewed
+     * - 'none': Never show shadow for protected ranges
+     * @returns {FWorkbook} FWorkbook instance for chaining
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     *
+     * // Always show shadows (default)
+     * fWorkbook.setProtectedRangeShadowStrategy('always');
+     *
+     * // Only show shadows for non-editable ranges
+     * fWorkbook.setProtectedRangeShadowStrategy('non-editable');
+     *
+     * // Only show shadows for non-viewable ranges
+     * fWorkbook.setProtectedRangeShadowStrategy('non-viewable');
+     *
+     * // Never show shadows
+     * fWorkbook.setProtectedRangeShadowStrategy('none');
+     * ```
+     */
+    setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): FWorkbook;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -538,6 +565,39 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
         }
+        return this;
+    }
+
+    override setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): FWorkbook {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+
+        if (render) {
+            const spreadsheet = render.mainComponent as Spreadsheet;
+            if (spreadsheet) {
+                // Update range protection extensions
+                const canViewExtension = spreadsheet.getExtensionByKey('RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY');
+                if (canViewExtension && 'setShadowStrategy' in canViewExtension) {
+                    (canViewExtension as any).setShadowStrategy(strategy);
+                }
+
+                const canNotViewExtension = spreadsheet.getExtensionByKey('RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY');
+                if (canNotViewExtension && 'setShadowStrategy' in canNotViewExtension) {
+                    (canNotViewExtension as any).setShadowStrategy(strategy);
+                }
+
+                // Update worksheet protection extension
+                const worksheetExtension = spreadsheet.getExtensionByKey('worksheetProtectionRenderExtension');
+                if (worksheetExtension && 'setShadowStrategy' in worksheetExtension) {
+                    (worksheetExtension as any).setShadowStrategy(strategy);
+                }
+
+                // Mark canvas as dirty to trigger re-render
+                spreadsheet.makeDirty(true);
+            }
+        }
+
         return this;
     }
 }

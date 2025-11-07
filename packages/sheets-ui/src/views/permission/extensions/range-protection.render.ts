@@ -36,9 +36,9 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
     protected _pattern: CanvasPattern | null = null;
     protected _img = new Image();
     public renderCache = new Set<string>();
-    protected _shadowStrategy: 'always' | 'non-editable' | 'non-viewable' = 'always';
+    protected _shadowStrategy: 'always' | 'non-editable' | 'non-viewable' | 'none' = 'always';
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable') {
+    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
         super();
         this._img.src = base64;
         if (shadowStrategy) {
@@ -104,11 +104,15 @@ export class RangeProtectionCanViewRenderExtension extends RangeProtectionRender
     override uKey = RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY;
     override Z_INDEX = EXTENSION_CAN_VIEW_Z_INDEX;
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable') {
+    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
         super(shadowStrategy);
     }
 
     protected override shouldRender(config: ICellPermission): boolean {
+        // If strategy is 'none', never show shadow
+        if (this._shadowStrategy === 'none') {
+            return false;
+        }
         // If strategy is 'non-editable', only show shadow when edit permission is false
         if (this._shadowStrategy === 'non-editable') {
             return config?.[UnitAction.View] !== false && config?.[UnitAction.Edit] === false;
@@ -126,13 +130,17 @@ export class RangeProtectionCanNotViewRenderExtension extends RangeProtectionRen
     override uKey = RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY;
     override Z_INDEX = EXTENSION_CAN_NOT_VIEW_Z_INDEX;
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable') {
+    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
         super(shadowStrategy);
     }
 
     protected override shouldRender(config: ICellPermission): boolean {
+        // If strategy is 'none', never show shadow
+        if (this._shadowStrategy === 'none') {
+            return false;
+        }
         // This extension always handles the non-viewable case (View permission is false)
-        // regardless of the strategy
+        // regardless of the strategy (except 'none')
         return config?.[UnitAction.View] === false;
     }
 }

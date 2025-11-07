@@ -15,9 +15,11 @@
  */
 
 import type { Spreadsheet } from '@univerjs/engine-render';
+import type { Observable } from 'rxjs';
 import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import { Disposable, IConfigService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey } from '../../views/permission/extensions/worksheet-permission.render';
@@ -26,25 +28,30 @@ export type ProtectedRangeShadowStrategy = 'always' | 'non-editable' | 'non-view
 
 export interface ISheetPermissionRenderManagerService {
     /**
-     * Set the shadow strategy for protected ranges
-     * @param unitId The unit id
+     * Set the global shadow strategy for protected ranges
+     * This will apply to all workbooks
      * @param strategy The shadow strategy
      */
-    setProtectedRangeShadowStrategy(unitId: string, strategy: ProtectedRangeShadowStrategy): boolean;
+    setProtectedRangeShadowStrategy(strategy: ProtectedRangeShadowStrategy): void;
 
     /**
-     * Get the current shadow strategy for a unit
-     * @param unitId The unit id
+     * Get the current global shadow strategy
      */
-    getProtectedRangeShadowStrategy(unitId: string): ProtectedRangeShadowStrategy;
+    getProtectedRangeShadowStrategy(): ProtectedRangeShadowStrategy;
+
+    /**
+     * Get an observable of the global shadow strategy
+     */
+    getProtectedRangeShadowStrategy$(): Observable<ProtectedRangeShadowStrategy>;
 }
 
 /**
  * Service to manage the rendering of sheet permissions (range protection shadows)
+ * This is a global service that applies the strategy to all workbooks
  */
 export class SheetPermissionRenderManagerService extends Disposable implements ISheetPermissionRenderManagerService {
-    private _strategyMap: Map<string, ProtectedRangeShadowStrategy> = new Map();
-    private _defaultStrategy: ProtectedRangeShadowStrategy;
+    private _currentStrategy: ProtectedRangeShadowStrategy;
+    private _strategySubject: BehaviorSubject<ProtectedRangeShadowStrategy>;
 
     constructor(
         @IConfigService private readonly _configService: IConfigService,
@@ -53,53 +60,70 @@ export class SheetPermissionRenderManagerService extends Disposable implements I
         super();
 
         const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-        this._defaultStrategy = config?.protectedRangeShadowStrategy || 'always';
+        this._currentStrategy = config?.protectedRangeShadowStrategy || 'always';
+        this._strategySubject = new BehaviorSubject<ProtectedRangeShadowStrategy>(this._currentStrategy);
+
+        this.disposeWithMe({
+            dispose: () => {
+                this._strategySubject.complete();
+            },
+        });
     }
 
-    setProtectedRangeShadowStrategy(unitId: string, strategy: ProtectedRangeShadowStrategy): boolean {
-        const render = this._renderManagerService.getRenderById(unitId);
-        if (!render) {
-            return false;
-        }
+    private _updateAllWorkbooks(strategy: ProtectedRangeShadowStrategy): void {
+        // Get all renders (workbooks)
+        const renders = this._renderManagerService.getRenderAll();
 
-        const spreadsheet = render.mainComponent as Spreadsheet;
-        if (!spreadsheet) {
-            return false;
-        }
-
-        // Update the strategy in the map
-        this._strategyMap.set(unitId, strategy);
-
-        // Update all protection render extensions
-        const extensions = [
-            { key: RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY },
-            { key: RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY },
-            { key: worksheetProtectionKey },
-        ];
-
-        let updated = false;
-        for (const { key } of extensions) {
-            const extension = spreadsheet.getExtensionByKey(key);
-            if (extension && typeof (extension as any).setShadowStrategy === 'function') {
-                (extension as any).setShadowStrategy(strategy);
-                updated = true;
+        renders.forEach((render) => {
+            const spreadsheet = render.mainComponent as Spreadsheet;
+            if (!spreadsheet) {
+                return;
             }
-        }
 
-        if (updated) {
-            // Mark canvas as dirty to trigger re-render
-            spreadsheet.makeDirty(true);
-        }
+            // Update all protection render extensions
+            const extensions = [
+                { key: RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY },
+                { key: RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY },
+                { key: worksheetProtectionKey },
+            ];
 
-        return updated;
+            let updated = false;
+            for (const { key } of extensions) {
+                const extension = spreadsheet.getExtensionByKey(key);
+                if (extension && typeof (extension as any).setShadowStrategy === 'function') {
+                    (extension as any).setShadowStrategy(strategy);
+                    updated = true;
+                }
+            }
+
+            if (updated) {
+                // Mark canvas as dirty to trigger re-render
+                spreadsheet.makeDirty(true);
+            }
+        });
     }
 
-    getProtectedRangeShadowStrategy(unitId: string): ProtectedRangeShadowStrategy {
-        return this._strategyMap.get(unitId) || this._defaultStrategy;
+    setProtectedRangeShadowStrategy(strategy: ProtectedRangeShadowStrategy): void {
+        // Update the current strategy
+        this._currentStrategy = strategy;
+
+        // Emit the new strategy to observers
+        this._strategySubject.next(strategy);
+
+        // Update all workbooks
+        this._updateAllWorkbooks(strategy);
+    }
+
+    getProtectedRangeShadowStrategy(): ProtectedRangeShadowStrategy {
+        return this._currentStrategy;
+    }
+
+    getProtectedRangeShadowStrategy$(): Observable<ProtectedRangeShadowStrategy> {
+        return this._strategySubject.asObservable();
     }
 
     override dispose(): void {
         super.dispose();
-        this._strategyMap.clear();
+        this._strategySubject.complete();
     }
 }

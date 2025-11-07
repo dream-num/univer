@@ -22,7 +22,7 @@ import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/
 import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPermissionRenderManagerService, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { IDialogService, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -296,44 +296,6 @@ export interface IFWorkbookSheetsUIMixin {
      */
     showSelection(): FWorkbook;
 
-    /**
-     * Set the strategy for showing the protected range shadow.
-     * @param {('always' | 'non-editable' | 'non-viewable' | 'none')} strategy - The shadow strategy to apply
-     * - 'always': Show shadow for all protected ranges
-     * - 'non-editable': Only show shadow for ranges that cannot be edited
-     * - 'non-viewable': Only show shadow for ranges that cannot be viewed
-     * - 'none': Never show shadow for protected ranges
-     * @returns {FWorkbook} FWorkbook instance for chaining
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     *
-     * // Always show shadows (default)
-     * fWorkbook.setProtectedRangeShadowStrategy('always');
-     *
-     * // Only show shadows for non-editable ranges
-     * fWorkbook.setProtectedRangeShadowStrategy('non-editable');
-     *
-     * // Only show shadows for non-viewable ranges
-     * fWorkbook.setProtectedRangeShadowStrategy('non-viewable');
-     *
-     * // Never show shadows
-     * fWorkbook.setProtectedRangeShadowStrategy('none');
-     * ```
-     */
-    setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): FWorkbook;
-
-    /**
-     * Get the current strategy for showing the protected range shadow.
-     * @returns {('always' | 'non-editable' | 'non-viewable' | 'none')} The current shadow strategy
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const currentStrategy = fWorkbook.getProtectedRangeShadowStrategy();
-     * console.log(currentStrategy); // 'none', 'always', 'non-editable', or 'non-viewable'
-     * ```
-     */
-    getProtectedRangeShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none';
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -578,26 +540,6 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
         }
         return this;
-    }
-
-    override setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): FWorkbook {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(SheetPermissionRenderManagerService);
-
-        const success = renderManagerService.setProtectedRangeShadowStrategy(unitId, strategy);
-
-        if (!success) {
-            console.warn(`Failed to set protected range shadow strategy for unit ${unitId}`);
-        }
-
-        return this;
-    }
-
-    override getProtectedRangeShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none' {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(SheetPermissionRenderManagerService);
-
-        return renderManagerService.getProtectedRangeShadowStrategy(unitId);
     }
 }
 

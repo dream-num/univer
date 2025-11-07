@@ -95,8 +95,8 @@ export class SheetPermissionRenderManagerController extends Disposable {
 }
 
 export class SheetPermissionRenderController extends Disposable implements IRenderModule {
-    private _rangeProtectionCanViewRenderExtension = new RangeProtectionCanViewRenderExtension();
-    private _rangeProtectionCanNotViewRenderExtension = new RangeProtectionCanNotViewRenderExtension();
+    private _rangeProtectionCanViewRenderExtension: RangeProtectionCanViewRenderExtension;
+    private _rangeProtectionCanNotViewRenderExtension: RangeProtectionCanNotViewRenderExtension;
 
     constructor(
         private readonly _context: IRenderContext,
@@ -108,6 +108,14 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         super();
 
         const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        
+        // Get shadow strategy from config, default to 'always'
+        const shadowStrategy = config?.protectedRangeShadowStrategy || 'always';
+        
+        // Create render extensions with the shadow strategy
+        this._rangeProtectionCanViewRenderExtension = new RangeProtectionCanViewRenderExtension(shadowStrategy);
+        this._rangeProtectionCanNotViewRenderExtension = new RangeProtectionCanNotViewRenderExtension(shadowStrategy);
+        
         this._initSkeleton();
         if (config?.protectedRangeShadow === false) {
             return;
@@ -151,7 +159,8 @@ export class SheetPermissionRenderController extends Disposable implements IRend
 }
 
 export class WorksheetProtectionRenderController extends Disposable implements IRenderModule {
-    private _worksheetProtectionRenderExtension = new WorksheetProtectionRenderExtension();
+    private _worksheetProtectionRenderExtension: WorksheetProtectionRenderExtension;
+    
     constructor(
         private readonly _context: IRenderContext,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
@@ -162,6 +171,13 @@ export class WorksheetProtectionRenderController extends Disposable implements I
         super();
 
         const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        
+        // Get shadow strategy from config, default to 'always'
+        const shadowStrategy = config?.protectedRangeShadowStrategy || 'always';
+        
+        // Create render extension with the shadow strategy
+        this._worksheetProtectionRenderExtension = new WorksheetProtectionRenderExtension(shadowStrategy);
+        
         this._initSkeleton();
         if (config?.protectedRangeShadow === false) {
             return;

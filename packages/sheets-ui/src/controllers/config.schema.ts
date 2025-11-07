@@ -85,6 +85,15 @@ export interface IUniverSheetsUIConfig {
     protectedRangeShadow?: boolean;
 
     /**
+     * Strategy for showing the protected range shadow.
+     * - 'always': Show shadow for all protected ranges (default behavior)
+     * - 'non-editable': Only show shadow for ranges that cannot be edited (Edit permission is false)
+     * - 'non-viewable': Only show shadow for ranges that cannot be viewed (View permission is false)
+     * @default 'always'
+     */
+    protectedRangeShadowStrategy?: 'always' | 'non-editable' | 'non-viewable';
+
+    /**
      * The custom component of the protected range user selector.
      */
     protectedRangeUserSelector?: {
@@ -114,5 +123,6 @@ export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
     statusBarStatistic: true,
     protectedRangeShadow: true,
+    protectedRangeShadowStrategy: 'always',
     maxAutoHeightCount: 1000,
 };

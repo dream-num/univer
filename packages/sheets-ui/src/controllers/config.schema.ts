@@ -79,10 +79,14 @@ export interface IUniverSheetsUIConfig {
     scrollConfig?: IScrollBarProps;
 
     /**
-     * Whether to show the protected range shadow.
+     * Strategy for showing the protected range shadow.
+     * - true or 'always': Show shadow for all protected ranges (default behavior)
+     * - 'non-editable': Only show shadow for ranges that cannot be edited (Edit permission is false)
+     * - 'non-viewable': Only show shadow for ranges that cannot be viewed (View permission is false)
+     * - false or 'none': Never show shadow for protected ranges
      * @default true
      */
-    protectedRangeShadow?: boolean;
+    protectedRangeShadow?: boolean | 'always' | 'non-editable' | 'non-viewable' | 'none';
 
     /**
      * The custom component of the protected range user selector.
@@ -116,3 +120,19 @@ export const defaultPluginConfig: IUniverSheetsUIConfig = {
     protectedRangeShadow: true,
     maxAutoHeightCount: 1000,
 };
+
+/**
+ * Convert the protectedRangeShadow config to shadow strategy
+ * - true -> 'always'
+ * - false -> 'none'
+ * - string values remain unchanged
+ * @param config The protectedRangeShadow config value
+ * @returns The shadow strategy
+ */
+export function convertToShadowStrategy(
+    config?: boolean | 'always' | 'non-editable' | 'non-viewable' | 'none'
+): 'always' | 'non-editable' | 'non-viewable' | 'none' {
+    if (config === true) return 'always';
+    if (config === false) return 'none';
+    return config || 'always';
+}

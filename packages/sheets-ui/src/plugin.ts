@@ -83,6 +83,7 @@ import { FormatPainterService, IFormatPainterService } from './services/format-p
 import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
+import { SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetScrollManagerService } from './services/scroll-manager.service';
@@ -181,6 +182,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionPanelModel],
             [SheetPermissionInitUIController],
             [SheetPermissionUserManagerService],
+            [SheetPermissionRenderManagerService],
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionCheckUIController],
             [SheetPermissionRenderManagerController],

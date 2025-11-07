@@ -29,13 +29,14 @@ import type {
 import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
+import type { Observable } from 'rxjs';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams, ISheetZoomEvent } from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, getSkeletonChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetPermissionRenderManagerService, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
@@ -104,6 +105,59 @@ export interface IFUniverSheetsUIMixin {
      * ```
      */
     pasteIntoSheet(htmlContent?: string, textContent?: string, files?: File[]): Promise<boolean>;
+
+    /**
+     * Set the global strategy for showing the protected range shadow.
+     * This will apply to all workbooks in the current Univer instance.
+     * @param {('always' | 'non-editable' | 'non-viewable' | 'none')} strategy - The shadow strategy to apply
+     * - 'always': Show shadow for all protected ranges
+     * - 'non-editable': Only show shadow for ranges that cannot be edited
+     * - 'non-viewable': Only show shadow for ranges that cannot be viewed
+     * - 'none': Never show shadow for protected ranges
+     * @example
+     * ```typescript
+     * // Always show shadows (default)
+     * univerAPI.setProtectedRangeShadowStrategy('always');
+     *
+     * // Only show shadows for non-editable ranges
+     * univerAPI.setProtectedRangeShadowStrategy('non-editable');
+     *
+     * // Only show shadows for non-viewable ranges
+     * univerAPI.setProtectedRangeShadowStrategy('non-viewable');
+     *
+     * // Never show shadows
+     * univerAPI.setProtectedRangeShadowStrategy('none');
+     * ```
+     */
+    setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): void;
+
+    /**
+     * Get the current global strategy for showing the protected range shadow.
+     * @returns {('always' | 'non-editable' | 'non-viewable' | 'none')} The current shadow strategy
+     * @example
+     * ```typescript
+     * const currentStrategy = univerAPI.getProtectedRangeShadowStrategy();
+     * console.log(currentStrategy); // 'none', 'always', 'non-editable', or 'non-viewable'
+     * ```
+     */
+    getProtectedRangeShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none';
+
+    /**
+     * Get an observable of the global strategy for showing the protected range shadow.
+     * This allows you to listen for strategy changes across all workbooks.
+     * @returns {Observable<('always' | 'non-editable' | 'non-viewable' | 'none')>} An observable that emits the current shadow strategy
+     * @example
+     * ```typescript
+     * const subscription = univerAPI.getProtectedRangeShadowStrategy$().subscribe((strategy) => {
+     *     console.log('Global strategy changed to:', strategy);
+     *     // Update UI or perform other actions
+     * });
+     *
+     * // Later, unsubscribe to clean up
+     * subscription.unsubscribe();
+     * ```
+     */
+    getProtectedRangeShadowStrategy$(): Observable<'always' | 'non-editable' | 'non-viewable' | 'none'>;
 }
 
 export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
@@ -981,6 +1035,21 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
     override pasteIntoSheet(htmlContent?: string, textContent?: string, files?: File[]): Promise<boolean> {
         return this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent, files });
+    }
+
+    override setProtectedRangeShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): void {
+        const service = this._injector.get(SheetPermissionRenderManagerService);
+        service.setProtectedRangeShadowStrategy(strategy);
+    }
+
+    override getProtectedRangeShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none' {
+        const service = this._injector.get(SheetPermissionRenderManagerService);
+        return service.getProtectedRangeShadowStrategy();
+    }
+
+    override getProtectedRangeShadowStrategy$(): Observable<'always' | 'non-editable' | 'non-viewable' | 'none'> {
+        const service = this._injector.get(SheetPermissionRenderManagerService);
+        return service.getProtectedRangeShadowStrategy$();
     }
 }
 

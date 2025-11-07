@@ -333,7 +333,7 @@ export class Worksheet {
                         || style.bd.tl_br
                         || style.bd.tl_mr
                     );
-                if ((cellValue && ((cellValue.v !== null && cellValue.v !== undefined) || cellValue.p)) || style?.bg || isLegalBorder) {
+                if ((cellValue && ((cellValue.v !== null && cellValue.v !== undefined && cellValue.v !== '') || cellValue.p)) || style?.bg || isLegalBorder) {
                     if (rowInitd) {
                         startRow = Math.min(startRow, rowIndex);
                     } else {

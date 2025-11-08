@@ -158,9 +158,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     /**
-     *
-     * @param result
-     * @returns
+     * If it contains an array formula, set the current cell to the cache and send itself as a ref outward
      */
     private _setEmbeddedArrayFormulaToResult(result: FunctionVariantType) {
         if (!result.isArray()) {

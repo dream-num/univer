@@ -15,6 +15,7 @@
  */
 
 export type {
+    IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
     IDirtyUnitFeatureMap,
@@ -142,6 +143,7 @@ export { FUNCTION_NAMES_LOOKUP } from './functions/lookup/function-names';
 export { functionMath } from './functions/math/function-map';
 export { FUNCTION_NAMES_MATH } from './functions/math/function-names';
 export { functionMeta } from './functions/meta/function-map';
+export { NEW_EXCEL_FUNCTIONS, NEW_EXCEL_FUNCTIONS_LAMBDA } from './functions/new-excel-functions';
 export { functionStatistical } from './functions/statistical/function-map';
 export { FUNCTION_NAMES_STATISTICAL } from './functions/statistical/function-names';
 export { functionText } from './functions/text/function-map';

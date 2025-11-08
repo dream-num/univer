@@ -16,6 +16,7 @@
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type {
+    IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
     IRuntimeOtherUnitDataType,
@@ -65,6 +66,7 @@ export enum FormulaExecutedStateType {
 export interface IAllRuntimeData {
     unitData: IRuntimeUnitDataType;
     arrayFormulaRange: IArrayFormulaRangeType;
+    arrayFormulaEmbedded: IArrayFormulaEmbeddedMap;
     unitOtherData: IRuntimeOtherUnitDataType;
     functionsExecutedState: FormulaExecutedStateType;
     arrayFormulaCellData: IRuntimeUnitDataType;
@@ -177,6 +179,10 @@ export interface IFormulaRuntimeService {
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
 
     clearReferenceAndNumberformatCache(): void;
+
+    getUnitArrayFormulaEmbeddedMap(): IArrayFormulaEmbeddedMap;
+
+    setUnitArrayFormulaEmbeddedMap(): void;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -198,6 +204,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _runtimeOtherData: IRuntimeOtherUnitDataType = {}; // Data returned by other businesses through formula calculation, excluding the sheet.
 
     private _unitArrayFormulaRange: IArrayFormulaRangeType = {};
+
+    private _unitArrayFormulaEmbeddedMap: IArrayFormulaEmbeddedMap = {};
 
     private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
 
@@ -355,6 +363,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._runtimeData = {};
         this._runtimeOtherData = {};
         this._unitArrayFormulaRange = {};
+        this._unitArrayFormulaEmbeddedMap = {};
         this._runtimeArrayFormulaCellData = {};
         this._runtimeClearArrayFormulaCellData = {};
 
@@ -661,6 +670,32 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._unitArrayFormulaRange;
     }
 
+    getUnitArrayFormulaEmbeddedMap() {
+        return this._unitArrayFormulaEmbeddedMap;
+    }
+
+    setUnitArrayFormulaEmbeddedMap() {
+        const unitId = this._currentUnitId;
+        const sheetId = this._currentSubUnitId;
+        const rowIndex = this._currentRow;
+        const columnIndex = this._currentColumn;
+
+        const arrayFormulaEmbeddedMap = this._unitArrayFormulaEmbeddedMap;
+        if (arrayFormulaEmbeddedMap[unitId] == null) {
+            arrayFormulaEmbeddedMap[unitId] = {};
+        }
+
+        if (arrayFormulaEmbeddedMap[unitId][sheetId] == null) {
+            arrayFormulaEmbeddedMap[unitId][sheetId] = {};
+        }
+
+        if (arrayFormulaEmbeddedMap[unitId][sheetId][rowIndex] == null) {
+            arrayFormulaEmbeddedMap[unitId][sheetId][rowIndex] = {};
+        }
+
+        arrayFormulaEmbeddedMap[unitId][sheetId][rowIndex][columnIndex] = true;
+    }
+
     getRuntimeOtherData() {
         return this._runtimeOtherData;
     }
@@ -693,6 +728,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return {
             unitData: this.getUnitData(),
             arrayFormulaRange: this.getUnitArrayFormula(),
+            arrayFormulaEmbedded: this.getUnitArrayFormulaEmbeddedMap(),
             unitOtherData: this.getRuntimeOtherData(),
             functionsExecutedState: this._functionsExecutedState,
             arrayFormulaCellData: this.getRuntimeArrayFormulaCellData(),

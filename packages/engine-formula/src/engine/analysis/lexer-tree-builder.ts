@@ -17,11 +17,12 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitSheetDefinedNameMap } from '../../basics/common';
 
+import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
 import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
 import { regexTestSingeRange } from '../../basics/regex';
@@ -37,10 +38,12 @@ import {
 import {
     DEFAULT_TOKEN_CUBE_FUNCTION_NAME,
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
+    DEFAULT_TOKEN_LET_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
+import { NEW_EXCEL_FUNCTIONS } from '../../functions/new-excel-functions';
 import { isReferenceStringWithEffectiveColumn, replaceRefPrefixString, serializeRangeToRefString } from '../utils/reference';
 import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
@@ -50,6 +53,17 @@ enum bracketType {
     NORMAL,
     FUNCTION,
     LAMBDA,
+}
+
+enum NewExcelFunctionNodeType {
+    NORMAL,
+    LET,
+    LAMBDA,
+    ROOT,
+    PARAMETER,
+    LAMBDA_PARAMETER,
+    FUNCTION,
+    OTHER,
 }
 
 const FORMULA_CACHE_LRU_COUNT = 2000;
@@ -1877,5 +1891,111 @@ export class LexerTreeBuilder extends Disposable {
             cur,
             currentLexerNode: this._currentLexerNode,
         });
+    }
+
+    private _hasNewExcelFunction = false;
+
+    private _lambdaFunctionParameterSet = new Set<string>();
+
+    // 请看单测
+    getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean) {
+        const lexerNode = this.treeBuilder(formulaString, false);
+        if (!lexerNode || lexerNode === ErrorType.VALUE || (Array.isArray(lexerNode))) {
+            return null;
+        }
+
+        const formulaStrings: (string | number | boolean)[] = [];
+        this._hasNewExcelFunction = false;
+        this._generateNewFunctionString(lexerNode as LexerNode, formulaStrings, hasFunction);
+
+        if (this._hasNewExcelFunction) {
+            return `=${formulaStrings.join('')}`;
+        }
+    }
+
+    // eslint-disable-next-line complexity, max-lines-per-function
+    private _generateNewFunctionString(lexerNode: LexerNode, formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean, parentNodeType = NewExcelFunctionNodeType.NORMAL, parentChildrenIndex?: number, parentChildrenCount?: number) {
+        const token = lexerNode.getToken();
+
+        const tokenTrim = token.trim();
+        const tokenTrimUpper = tokenTrim.toUpperCase();
+        const isFunctionNode = hasFunction(tokenTrimUpper);
+        let curNodeType = NewExcelFunctionNodeType.NORMAL;
+
+        if (token === DEFAULT_TOKEN_TYPE_ROOT) {
+            curNodeType = NewExcelFunctionNodeType.ROOT;
+        } else if (token === DEFAULT_TOKEN_TYPE_PARAMETER) {
+            curNodeType = NewExcelFunctionNodeType.PARAMETER;
+        } else if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+            curNodeType = NewExcelFunctionNodeType.LAMBDA_PARAMETER;
+        } else if (NEW_EXCEL_FUNCTIONS.has(tokenTrimUpper)) {
+            formulaStrings.push(`_xlfn.${tokenTrim}`);
+        } else if (tokenTrimUpper === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
+            formulaStrings.push(`_xlfn.${tokenTrim}`);
+            curNodeType = NewExcelFunctionNodeType.LAMBDA;
+        } else if (tokenTrimUpper === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
+            formulaStrings.push(`_xlfn.${tokenTrim}`);
+            curNodeType = NewExcelFunctionNodeType.LET;
+        } else {
+            formulaStrings.push(token);
+            curNodeType = NewExcelFunctionNodeType.OTHER;
+        }
+
+        if (parentChildrenIndex != null && parentChildrenCount != null) {
+            if (parentNodeType === NewExcelFunctionNodeType.LAMBDA && parentChildrenIndex !== 0 && parentChildrenIndex !== parentChildrenCount - 1) {
+                /**
+                 * 处理lambda表达式，根据lexerNode的结构，lambda表达式的参数位于出了开头和结尾的节点，并且以P_1的子节点存储
+                 */
+                const varName = lexerNode.getChildren()[0];
+                if (typeof varName === 'string') {
+                    if (this._lambdaFunctionParameterSet.has(varName)) {
+                        console.error(`Lambda parameter name "${varName}" is duplicated.`);
+                    }
+                    this._lambdaFunctionParameterSet.add(varName);
+
+                    formulaStrings.push(`_xlpm.${varName}`);
+
+                    return;
+                }
+            } else if (parentNodeType === NewExcelFunctionNodeType.LET && parentChildrenIndex % 2 === 0 && parentChildrenIndex !== parentChildrenCount - 1) {
+                /**
+                 * 处理let表达式，根据lexerNode的结构，let表达式的变量位于除了最后一个节点的偶数节点，并且以P_1的子节点存储
+                 */
+                const varName = lexerNode.getChildren()[0];
+                if (typeof varName === 'string') {
+                    if (this._lambdaFunctionParameterSet.has(varName)) {
+                        console.error(`Let variable name "${varName}" is duplicated.`);
+                    }
+                    this._lambdaFunctionParameterSet.add(varName);
+                    formulaStrings.push(`_xlpm.${varName}`);
+
+                    return;
+                }
+            }
+        }
+
+        if (isFunctionNode) {
+            curNodeType = NewExcelFunctionNodeType.FUNCTION;
+            formulaStrings.push('(');
+        }
+
+        const children = lexerNode.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            if (item instanceof LexerNode) {
+                this._generateNewFunctionString(item, formulaStrings, hasFunction, curNodeType, i, childrenCount);
+            } else {
+                if (this._lambdaFunctionParameterSet.has(item)) {
+                    formulaStrings.push(`_xlpm.${item}`);
+                } else {
+                    formulaStrings.push(item);
+                }
+            }
+        }
+
+        if (isFunctionNode) {
+            formulaStrings.push(')');
+        }
     }
 }

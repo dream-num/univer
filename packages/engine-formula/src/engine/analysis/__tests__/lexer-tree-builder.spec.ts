@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { LexerNode } from '../lexer-node';
+import type { IFunctionNames } from '../../../basics/function';
 
+import type { LexerNode } from '../lexer-node';
 import { AbsoluteRefType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
+import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
+import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/function-names';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 
 describe('lexer nodeMaker test', () => {
@@ -741,6 +745,27 @@ describe('lexer nodeMaker test', () => {
 
             result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
             expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
+        });
+    });
+
+    describe('getNewFormulaWithPrefix', () => {
+        it('lambda prefix simple1', () => {
+            // The space before [workbook4] will lead to error.
+            const hasFunction = (functionToken: IFunctionNames) => {
+                const functionList = [
+                    FUNCTION_NAMES_STATISTICAL.MAX,
+                    FUNCTION_NAMES_LOGICAL.LAMBDA,
+                    FUNCTION_NAMES_MATH.SUM,
+                ] as IFunctionNames[];
+
+                if (functionList.includes(functionToken)) {
+                    return true;
+                }
+
+                return false;
+            };
+            const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)', hasFunction);
+            expect(newFunctionString).toStrictEqual('');
         });
     });
 

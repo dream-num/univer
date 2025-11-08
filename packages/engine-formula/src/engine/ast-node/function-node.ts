@@ -100,11 +100,14 @@ export class FunctionNode extends BaseAstNode {
 
         const resultVariant = await this._calculateAsync(variants);
         let result: FunctionVariantType;
+
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
             result = await (resultVariant as AsyncObject | AsyncArrayObject).getValue();
         } else {
             result = resultVariant as FunctionVariantType;
         }
+
+        this._setEmbeddedArrayFormulaToResult(result);
 
         this._setRefData(result);
 
@@ -143,6 +146,8 @@ export class FunctionNode extends BaseAstNode {
 
         const resultVariant = this._calculate(variants) as FunctionVariantType;
 
+        this._setEmbeddedArrayFormulaToResult(resultVariant);
+
         this._setRefData(resultVariant);
 
         this.setValue(resultVariant as FunctionVariantType);
@@ -150,6 +155,19 @@ export class FunctionNode extends BaseAstNode {
 
     isFunctionExecutorArgumentsIgnoreNumberPattern() {
         return this._functionExecutor.isArgumentsIgnoreNumberPattern();
+    }
+
+    /**
+     *
+     * @param result
+     * @returns
+     */
+    private _setEmbeddedArrayFormulaToResult(result: FunctionVariantType) {
+        if (!result.isArray()) {
+            return;
+        }
+
+        this._runtimeService.setUnitArrayFormulaEmbeddedMap();
     }
 
     /**

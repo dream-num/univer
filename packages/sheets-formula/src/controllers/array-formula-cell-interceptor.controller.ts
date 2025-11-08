@@ -15,11 +15,11 @@
  */
 
 import type { ICellData, ICommandInfo } from '@univerjs/core';
-import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
+import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, ObjectMatrix } from '@univerjs/core';
-import { FormulaDataModel, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
+import { FormulaDataModel, IDefinedNamesService, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, SetDefinedNameMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
@@ -30,7 +30,8 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IFunctionService private readonly _functionService: IFunctionService
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
     ) {
         super();
 
@@ -64,13 +65,36 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                 // Note the logic should only be executed in exporting and hence shall be set once.
                 if (this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.writeArrayFormulaToSnapshot) {
                     this._writeArrayFormulaToSnapshot(arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded);
-                    this._addPrefixToFunction();
+                    this._addPrefixToFunctionSnapshot();
+                    this._addPreixToDefinedNamesFunctionSnapshot();
                 }
             })
         );
     }
 
-    private _addPrefixToFunction() {
+    private _addPreixToDefinedNamesFunctionSnapshot() {
+        const allDefinedNames = this._definedNamesService.getAllDefinedNames();
+        Object.entries(allDefinedNames).forEach(([unitId, definedNames]) => {
+            definedNames && Array.from(Object.entries(definedNames)).forEach(([_, definedName]) => {
+                const { formulaOrRefString } = definedName;
+                if (formulaOrRefString.substring(0, 1) === '=') {
+                    const newFormula = this._lexerTreeBuilder.getNewFormulaWithPrefix(formulaOrRefString, this._functionService.hasExecutor.bind(this._functionService));
+                    if (newFormula) {
+                        this._commandService.executeCommand<ISetDefinedNameMutationParam>(SetDefinedNameMutation.id, {
+                            ...definedName,
+                            unitId,
+                            formulaOrRefStringWithPrefix: newFormula,
+                        }, {
+                            onlyLocal: true,
+                            fromFormula: true,
+                        });
+                    }
+                }
+            });
+        });
+    }
+
+    private _addPrefixToFunctionSnapshot() {
         const dataModel = this._formulaDataModel.getFormulaData();
         Object.entries(dataModel).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, formulaDataItem]) => {

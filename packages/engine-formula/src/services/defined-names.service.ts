@@ -27,7 +27,7 @@ export interface IDefinedNamesServiceParam {
     comment?: string;
     localSheetId?: string;
     hidden?: boolean;
-
+    formulaOrRefStringWithPrefix?: string; // for excel
 }
 
 export interface IDefinedNamesServiceFocusParam extends IDefinedNamesServiceParam {
@@ -74,6 +74,8 @@ export interface IDefinedNamesService {
     focusRange(unitId: string, id: string): void;
 
     getWorksheetByRef(unitId: string, ref: string): Nullable<Worksheet>;
+
+    getAllDefinedNames(): IDefinedNameMap;
 
 }
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
@@ -215,6 +217,10 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         }
         const size = Array.from(Object.values(this._definedNameMap[unitId])).length || 0;
         return size !== 0;
+    }
+
+    getAllDefinedNames() {
+        return this._definedNameMap;
     }
 
     private _update() {

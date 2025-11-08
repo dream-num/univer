@@ -1880,7 +1880,6 @@ export class LexerTreeBuilder extends Disposable {
         });
     }
 
-    // 请看单测
     getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean): string | null {
         return null;
     }

@@ -17,10 +17,48 @@
 import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
-import type { CustomData, IColumnData, IRange, IWorksheetData } from './typedef';
-import { getArrayLength } from '../shared/object-matrix';
+import type { CustomData, IColumnData, IRange, IScopeColumnDataInfo, IWorksheetData } from './typedef';
+import { getArrayLength, insertMatrixArray, moveMatrixArray, spliceArray } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
 import { RANGE_TYPE } from './typedef';
+
+function removeScopeDataByCol(
+    data: IScopeColumnDataInfo[],
+    col: number
+): IScopeColumnDataInfo[] {
+    let left = 0;
+    let right = data.length - 1;
+
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const info = data[mid];
+
+        if (col < info.s) {
+            right = mid - 1;
+        } else if (col > info.e) {
+            left = mid + 1;
+        } else {
+            // Found the scope containing the column
+            if (info.e - info.s > 0) {
+                // Split the scope into two parts
+                const newScopes = [];
+                if (info.s < col) {
+                    newScopes.push({ ...info, e: col - 1 });
+                }
+                if (info.e > col) {
+                    newScopes.push({ ...info, s: col + 1 });
+                }
+                return [...data.slice(0, mid), ...newScopes, ...data.slice(mid + 1)];
+            } else {
+                // Remove the scope if it's a single column
+                return [...data.slice(0, mid), ...data.slice(mid + 1)];
+            }
+        }
+    }
+
+    // If no scope contains the column, return the original data
+    return data;
+}
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
@@ -32,15 +70,73 @@ export class ColumnManager {
         private readonly _config: IWorksheetData,
         data: IObjectArrayPrimitiveType<Partial<IColumnData>>
     ) {
-        this._columnData = data;
+        if (data === undefined || data === null || getArrayLength(data) === 1) {
+            const scopeColumnInfo = this._config.scopeColumnInfo;
+            this._columnData = {};
+            if (scopeColumnInfo) {
+                for (const info of scopeColumnInfo) {
+                    this._expandColumnData(info);
+                }
+            }
+        } else {
+            this._columnData = data;
+        }
+    }
+
+    private _expandColumnData(info: IScopeColumnDataInfo) {
+        for (let i = info.s; i <= info.e; i++) {
+            this._columnData[i] = {
+                ...info.d,
+            };
+        }
+    }
+
+    private _removeScopeColumnData(index: number) {
+        const scopeColumnInfo = this._config.scopeColumnInfo;
+        if (scopeColumnInfo) {
+            this._config.scopeColumnInfo = removeScopeDataByCol(scopeColumnInfo, index);
+        }
     }
 
     /**
      * Get width and hidden status of columns in the sheet
+     * @deprecated The `getColumnData` method is deprecated.We will provide a group methods like add, remove, move, update.
      * @returns {IObjectArrayPrimitiveType<Partial<IColumnData>>} Column data, including width, hidden status, etc.
      */
     getColumnData(): IObjectArrayPrimitiveType<Partial<IColumnData>> {
         return this._columnData;
+    }
+
+    setColumnDataByCol(col: number, dataInfo: Nullable<IColumnData>) {
+        if (dataInfo === null || dataInfo === undefined) {
+            this.removeColumn(col);
+            return;
+        }
+        const currentColInfo = this.getColumnOrCreate(Number(col));
+        Object.assign(currentColInfo, dataInfo);
+    }
+
+    insertColumnData(range: IRange, colInfo: IObjectArrayPrimitiveType<IColumnData> | undefined) {
+        const columnPrimitive = this.getColumnData();
+        const columnWrapper = columnPrimitive;
+
+        const colIndex = range.startColumn;
+        const colCount = range.endColumn - range.startColumn + 1;
+        const defaultColWidth = this._config.defaultColumnWidth;
+        for (let j = colIndex; j < colIndex + colCount; j++) {
+            const defaultColInfo = {
+                w: defaultColWidth,
+                hd: 0,
+            };
+            if (colInfo) {
+                insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
+            }
+        }
+    }
+
+    moveColumnData(fromIndex: number, count: number, toIndex: number) {
+        const o = this.getColumnData();
+        moveMatrixArray(fromIndex, count, toIndex, o);
     }
 
     getColVisible(colPos: number): boolean {
@@ -50,6 +146,24 @@ export class ColumnManager {
             return true;
         }
         return col.hd !== BooleanNumber.TRUE;
+    }
+
+    setColVisible(colPos: number) {
+        const columnData = this.getColumnData();
+        if (columnData[colPos]?.hd === BooleanNumber.TRUE) {
+            delete columnData[colPos].hd;
+        }
+    }
+
+    setColHidden(colPos: number) {
+        const columnData = this.getColumnData();
+        if (columnData[colPos] && columnData[colPos].hd !== BooleanNumber.TRUE) {
+            columnData[colPos].hd = BooleanNumber.TRUE;
+        } else if (!columnData[colPos]) {
+            columnData[colPos] = {
+                hd: BooleanNumber.TRUE,
+            };
+        }
     }
 
     /**
@@ -222,6 +336,12 @@ export class ColumnManager {
      */
     removeColumn(columnPos: number) {
         delete this._columnData[columnPos];
+        this._removeScopeColumnData(columnPos);
+    }
+
+    removeColumns(start: number, end: number) {
+        const colCount = end - start + 1;
+        spliceArray(start, colCount, this.getColumnData());
     }
 
     /**

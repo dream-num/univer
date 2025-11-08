@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, IMutation, IRange } from '@univerjs/core';
-import { BooleanNumber, CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 export interface ISetColHiddenMutationParams {
     unitId: string;
@@ -53,10 +53,7 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                const column = manager.getColumnOrCreate(j);
-                if (column != null) {
-                    column.hd = BooleanNumber.TRUE;
-                }
+                manager.setColHidden(j);
             }
         }
 
@@ -100,10 +97,7 @@ export const SetColVisibleMutation: IMutation<ISetColVisibleMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                const column = manager.getColumnOrCreate(j);
-                if (column != null) {
-                    column.hd = BooleanNumber.FALSE;
-                }
+                manager.setColVisible(j);
             }
         }
 

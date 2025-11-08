@@ -26,7 +26,6 @@ import type {
     ICellData,
     ICellInfo,
     ICellWithCoord,
-    IColumnData,
     IPosition,
     IRange,
     IRowData,
@@ -260,30 +259,23 @@ export class SheetSkeleton extends Skeleton {
     }
 
     /**
-     * Calc columnWidthAccumulation by columnData
+     * Calc columnWidthAccumulation by columnManager
      * @param colCount
-     * @param columnData
-     * @param defaultColumnWidth
+     * @param defaultColumnWidth Maybe this parameter is not used, because columnManager.getColumnWidth() will always return the default width if the column is not set.
      */
     private _generateColumnMatrixCache(
         colCount: number,
-        columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>,
         defaultColumnWidth: number
     ): { columnTotalWidth: number; columnWidthAccumulation: number[] } {
         let columnTotalWidth = 0;
         const columnWidthAccumulation: number[] = [];
 
-        const data = columnData;
+        const columnManager = this.worksheet.getColumnManager();
 
         for (let c = 0; c < colCount; c++) {
             let columnWidth = defaultColumnWidth;
-
-            if (data[c] != null) {
-                const columnDataItem = data[c];
-
-                if (!columnDataItem) {
-                    continue;
-                }
+            const columnDataItem = columnManager.getColumn(c);
+            if (columnDataItem) {
                 if (columnDataItem.w != null) {
                     columnWidth = columnDataItem.w;
                 }
@@ -402,7 +394,6 @@ export class SheetSkeleton extends Skeleton {
 
         const {
             rowData,
-            columnData,
             defaultRowHeight,
             defaultColumnWidth,
             rowCount,
@@ -417,7 +408,6 @@ export class SheetSkeleton extends Skeleton {
         const { columnTotalWidth, columnWidthAccumulation } =
             this._generateColumnMatrixCache(
                 columnCount,
-                columnData,
                 defaultColumnWidth
             );
 

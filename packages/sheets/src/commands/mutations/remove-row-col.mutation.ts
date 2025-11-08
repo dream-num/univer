@@ -15,14 +15,14 @@
  */
 
 import type { IAccessor, IColumnData, IMutation, IObjectArrayPrimitiveType, IRowData, Worksheet } from '@univerjs/core';
-import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray, spliceArray } from '@univerjs/core';
-
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+
+import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray, spliceArray } from '@univerjs/core';
 
 export const RemoveRowsUndoMutationFactory = (
     params: IRemoveRowsMutationParams,
@@ -136,9 +136,10 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
 
         const range = params.range;
         const manager = worksheet.getColumnManager();
-        const colPrimitive = manager.getColumnData();
+        manager.removeColumns(range.startColumn, range.endColumn);
+        // const colPrimitive = manager.getColumnData();
         const colCount = range.endColumn - range.startColumn + 1;
-        spliceArray(range.startColumn, colCount, colPrimitive);
+        // spliceArray(range.startColumn, colCount, colPrimitive);
         worksheet.setColumnCount(worksheet.getColumnCount() - colCount);
 
         // remove cells contents by directly mutating worksheetCellMatrix

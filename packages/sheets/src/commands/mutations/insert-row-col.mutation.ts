@@ -23,6 +23,8 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
 
+import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
+
 export const InsertRowMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertRowMutationParams
@@ -120,23 +122,10 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         if (!worksheet) return false;
         const manager = worksheet.getColumnManager();
         const { range, colInfo } = params;
-        const columnPrimitive = manager.getColumnData();
-        const columnWrapper = columnPrimitive;
 
-        const colIndex = range.startColumn;
         const colCount = range.endColumn - range.startColumn + 1;
-        const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
-        for (let j = colIndex; j < colIndex + colCount; j++) {
-            const defaultColInfo = {
-                w: defaultColWidth,
-                hd: 0,
-            };
-            if (colInfo) {
-                insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
-            } else {
-                insertMatrixArray(j, defaultColInfo, columnWrapper);
-            }
-        }
+
+        manager.insertColumnData(range, colInfo);
 
         worksheet.setColumnCount(worksheet.getColumnCount() + range.endColumn - range.startColumn + 1);
 

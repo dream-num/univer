@@ -475,7 +475,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     calculateAutoHeightForCell(row: number, col: number) {
-        const { columnData, defaultColumnWidth } = this._worksheetData;
+        const { defaultColumnWidth } = this._worksheetData;
+        const columnManager = this.worksheet.getColumnManager();
         const cellMergeInfo = this.worksheet.getCellInfoInMergeData(row, col);
         if (this._skipAutoHeightForMergedCells) {
             if (cellMergeInfo.isMerged || cellMergeInfo.isMergedMainCell) {
@@ -499,7 +500,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
         const isRichText = cell?.p || vertexAngle || centerAngle;
 
-        let colWidth = columnData[col]?.w ?? defaultColumnWidth;
+        let colWidth = columnManager.getColumnWidth(col) ?? defaultColumnWidth;
         if (cellMergeInfo.isMergedMainCell) {
             const mergeCellStartCol = cellMergeInfo.startColumn;
             const mergeCellEndCol = cellMergeInfo.endColumn;
@@ -508,7 +509,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 { length: mergeCellEndCol - mergeCellStartCol + 1 },
                 (_, index) => mergeCellStartCol + index
             ).reduce((sum, colIndex) => {
-                return sum + (columnData[colIndex]?.w ?? defaultColumnWidth);
+                return sum + (columnManager.getColumnWidth(colIndex) ?? defaultColumnWidth);
             }, 0);
         }
 
@@ -1468,6 +1469,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
+    // eslint-disable-next-line complexity
     private _setMergeBorderProps(type: BORDER_LTRB, cache: IStylesCache, mergeRange: IRange): void {
         if (!this.worksheet || !cache.border) return;
 

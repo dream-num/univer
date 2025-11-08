@@ -37,7 +37,9 @@ export { HideColConfirmCommand, HideRowConfirmCommand } from './commands/command
 export {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
+    SetRangeFontDecreaseCommand,
     SetRangeFontFamilyCommand,
+    SetRangeFontIncreaseCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,

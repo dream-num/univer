@@ -64,7 +64,9 @@ import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-ran
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
 import {
     SetRangeBoldCommand,
+    SetRangeFontDecreaseCommand,
     SetRangeFontFamilyCommand,
+    SetRangeFontIncreaseCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
@@ -96,6 +98,7 @@ import { RenameSheetOperation } from '../commands/operations/rename-sheet.operat
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
 import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
+import { FontSizeDecreaseMenuItemFactory, FontSizeIncreaseMenuItemFactory, FontSizeSelectorMenuItemFactory } from './menu/font.menu';
 import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
@@ -118,7 +121,6 @@ import {
     // CutMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
-    FontSizeSelectorMenuItemFactory,
     FormatPainterMenuItemFactory,
     FrozenColMenuItemFactory,
     FrozenMenuItemFactory,
@@ -196,8 +198,14 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: FontSizeSelectorMenuItemFactory,
             },
-        // TODO: fontsize +
-        // TODO: fontsize -
+            [SetRangeFontIncreaseCommand.id]: {
+                order: 2.1,
+                menuItemFactory: FontSizeIncreaseMenuItemFactory,
+            },
+            [SetRangeFontDecreaseCommand.id]: {
+                order: 2.2,
+                menuItemFactory: FontSizeDecreaseMenuItemFactory,
+            },
             [SetRangeBoldCommand.id]: {
                 order: 5,
                 menuItemFactory: BoldMenuItemFactory,

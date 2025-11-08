@@ -38,12 +38,10 @@ import {
 import {
     DEFAULT_TOKEN_CUBE_FUNCTION_NAME,
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
-    DEFAULT_TOKEN_LET_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
-import { NEW_EXCEL_FUNCTIONS } from '../../functions/new-excel-functions';
 import { isReferenceStringWithEffectiveColumn, replaceRefPrefixString, serializeRangeToRefString } from '../utils/reference';
 import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
@@ -53,20 +51,6 @@ enum bracketType {
     NORMAL,
     FUNCTION,
     LAMBDA,
-}
-
-enum NewExcelFunctionNodeType {
-    NORMAL,
-    LET,
-    LAMBDA,
-    ROOT,
-    PARAMETER,
-    LAMBDA_PARAMETER,
-    FUNCTION,
-    SUFFIX,
-    COLON,
-    MINUS,
-    OTHER,
 }
 
 const FORMULA_CACHE_LRU_COUNT = 2000;
@@ -1896,218 +1880,8 @@ export class LexerTreeBuilder extends Disposable {
         });
     }
 
-    private _hasNewExcelFunction = false;
-
-    private _lambdaFunctionParameterSet = new Set<string>();
-
     // 请看单测
-    getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean) {
-        const lexerNode = this.treeBuilder(formulaString, false);
-        if (!lexerNode || lexerNode === ErrorType.VALUE || (Array.isArray(lexerNode))) {
-            return null;
-        }
-
-        const formulaStrings: (string | number | boolean)[] = [];
-        this._hasNewExcelFunction = false;
-        this._generateNewFunctionString(lexerNode as LexerNode, formulaStrings, hasFunction);
-
-        if (this._hasNewExcelFunction) {
-            return `=${formulaStrings.join('')}`;
-        }
-    }
-
-    // eslint-disable-next-line complexity, max-lines-per-function
-    private _generateNewFunctionString(lexerNode: LexerNode, formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean, parentNodeType = NewExcelFunctionNodeType.NORMAL, parentChildrenIndex?: number, parentChildrenCount?: number) {
-        const token = lexerNode.getToken();
-
-        const tokenTrim = token.trim();
-        const tokenTrimUpper = tokenTrim.toUpperCase();
-
-        const tokenForFunction = this._clearFunctionString(tokenTrimUpper);
-        const isFunctionNode = hasFunction(tokenForFunction);
-
-        let curNodeType = NewExcelFunctionNodeType.NORMAL;
-
-        if (token === DEFAULT_TOKEN_TYPE_ROOT) {
-            curNodeType = NewExcelFunctionNodeType.ROOT;
-        } else if (token === DEFAULT_TOKEN_TYPE_PARAMETER) {
-            curNodeType = NewExcelFunctionNodeType.PARAMETER;
-        } else if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
-            curNodeType = NewExcelFunctionNodeType.LAMBDA_PARAMETER;
-        } else if (NEW_EXCEL_FUNCTIONS.has(tokenForFunction)) {
-            formulaStrings.push(`_xlfn.${tokenTrim}`);
-            this._hasNewExcelFunction = true;
-        } else if (tokenTrimUpper === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
-            formulaStrings.push(`_xlfn.${tokenTrim}`);
-            this._hasNewExcelFunction = true;
-            curNodeType = NewExcelFunctionNodeType.LAMBDA;
-        } else if (tokenTrimUpper === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
-            formulaStrings.push(`_xlfn.${tokenTrim}`);
-            this._hasNewExcelFunction = true;
-            curNodeType = NewExcelFunctionNodeType.LET;
-        } else if (tokenTrimUpper === matchToken.COLON) {
-            curNodeType = NewExcelFunctionNodeType.COLON;
-        } else if (SUFFIX_TOKEN_SET.has(tokenTrimUpper)) {
-            curNodeType = NewExcelFunctionNodeType.SUFFIX;
-        } else if (tokenTrimUpper === prefixToken.MINUS) {
-            if (this._checkAddBracketForMinus(lexerNode)) {
-                curNodeType = NewExcelFunctionNodeType.MINUS;
-            }
-            formulaStrings.push(token);
-        } else {
-            formulaStrings.push(token);
-            curNodeType = NewExcelFunctionNodeType.OTHER;
-        }
-
-        if (parentChildrenIndex != null && parentChildrenCount != null) {
-            if (parentNodeType === NewExcelFunctionNodeType.LAMBDA && parentChildrenIndex !== 0 && parentChildrenIndex !== parentChildrenCount - 1) {
-                /**
-                 * 处理lambda表达式，根据lexerNode的结构，lambda表达式的参数位于出了开头和结尾的节点，并且以P_1的子节点存储
-                 */
-                const varName = lexerNode.getChildren()[0];
-                if (typeof varName === 'string') {
-                    if (this._lambdaFunctionParameterSet.has(varName)) {
-                        console.error(`Lambda parameter name "${varName}" is duplicated.`);
-                    }
-                    this._lambdaFunctionParameterSet.add(varName);
-
-                    formulaStrings.push(`_xlpm.${varName}`);
-                    this._hasNewExcelFunction = true;
-
-                    return;
-                }
-            } else if (parentNodeType === NewExcelFunctionNodeType.LET && parentChildrenIndex % 2 === 0 && parentChildrenIndex !== parentChildrenCount - 1) {
-                /**
-                 * 处理let表达式，根据lexerNode的结构，let表达式的变量位于除了最后一个节点的偶数节点，并且以P_1的子节点存储
-                 */
-                const varName = lexerNode.getChildren()[0];
-                if (typeof varName === 'string') {
-                    if (this._lambdaFunctionParameterSet.has(varName)) {
-                        console.error(`Let variable name "${varName}" is duplicated.`);
-                    }
-                    this._lambdaFunctionParameterSet.add(varName);
-                    formulaStrings.push(`_xlpm.${varName}`);
-                    this._hasNewExcelFunction = true;
-
-                    return;
-                }
-            }
-        }
-
-        if (isFunctionNode) {
-            if (curNodeType !== NewExcelFunctionNodeType.LAMBDA && curNodeType !== NewExcelFunctionNodeType.LET) {
-                curNodeType = NewExcelFunctionNodeType.FUNCTION;
-            }
-            formulaStrings.push('(');
-        } else if (curNodeType === NewExcelFunctionNodeType.MINUS) {
-            formulaStrings.push('(');
-        }
-
-        const children = lexerNode.getChildren();
-        const childrenCount = children.length;
-        let firstChild: string | LexerNode | null = null;
-
-        // lambda表达式的第一个子节点存放了入参，得把它处理到参数后并加括号，例如：LAMBDA(a,b, a*b)(x, y)中得 x,y
-        if (curNodeType === NewExcelFunctionNodeType.LAMBDA) {
-            firstChild = children[0];
-        } else if (curNodeType === NewExcelFunctionNodeType.COLON) {
-            const firstNode = children[0];
-            const secondNode = children[1];
-
-            this._handleNewFunctionChild(firstNode, formulaStrings, hasFunction, curNodeType, 0, 2, firstChild);
-            formulaStrings.push(token);
-            this._handleNewFunctionChild(secondNode, formulaStrings, hasFunction, curNodeType, 1, 2, firstChild);
-
-            return;
-        }
-
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            this._handleNewFunctionChild(item, formulaStrings, hasFunction, curNodeType, i, childrenCount, firstChild);
-
-            if (item instanceof LexerNode && !(firstChild && i === 0)) {
-                const nextItem = children[i + 1];
-                if (nextItem && nextItem instanceof LexerNode) {
-                    formulaStrings.push(',');
-                }
-            }
-        }
-
-        if (curNodeType === NewExcelFunctionNodeType.SUFFIX) {
-            formulaStrings.push(token);
-        }
-
-        if (isFunctionNode) {
-            formulaStrings.push(')');
-        } else if (curNodeType === NewExcelFunctionNodeType.MINUS) {
-            formulaStrings.push(')');
-        }
-
-        if (firstChild) {
-            formulaStrings.push('(');
-            this._generateNewFunctionString(firstChild as LexerNode, formulaStrings, hasFunction, curNodeType, 0, childrenCount);
-            formulaStrings.push(')');
-        }
-    }
-
-    private _handleNewFunctionChild(item: string | LexerNode, formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean, curNodeType = NewExcelFunctionNodeType.NORMAL, i?: number, childrenCount?: number, firstChild?: string | LexerNode | null) {
-        if (item instanceof LexerNode) {
-            if (!(firstChild && i === 0)) {
-                this._generateNewFunctionString(item, formulaStrings, hasFunction, curNodeType, i, childrenCount);
-            }
-        } else {
-            if (this._lambdaFunctionParameterSet.has(item)) {
-                formulaStrings.push(`_xlpm.${item}`);
-                this._hasNewExcelFunction = true;
-            } else {
-                formulaStrings.push(item);
-            }
-        }
-    }
-
-    private _clearFunctionString(token: string): string {
-        let t = token.trim();
-        if (!t) return t;
-
-        const firstChar = t[0];
-        if (
-            firstChar === prefixToken.AT ||
-            firstChar === prefixToken.MINUS ||
-            firstChar === prefixToken.PLUS
-        ) {
-            t = t.slice(1);
-        }
-
-        if (!t) return t;
-
-        const lastChar = t[t.length - 1];
-        if (SUFFIX_TOKEN_SET.has(lastChar)) {
-            t = t.slice(0, -1);
-        }
-
-        return t;
-    }
-
-    private _checkAddBracketForMinus(node: LexerNode) {
-        const childrenFirst = node.getChildren()[0];
-        if (!childrenFirst || !(childrenFirst instanceof LexerNode) || node.getChildren().length > 1) {
-            return false;
-        }
-        const children = childrenFirst.getChildren();
-        const childrenCount = children.length;
-
-        if (childrenCount === 1) {
-            return false;
-        }
-
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-
-            if (!(item instanceof LexerNode) && OPERATOR_TOKEN_SET.has(item)) {
-                return true;
-            }
-        }
-
-        return false;
+    getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean): string | null {
+        return null;
     }
 }

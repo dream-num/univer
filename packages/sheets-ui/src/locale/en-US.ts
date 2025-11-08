@@ -24,6 +24,8 @@ const locale = {
         formatPainter: 'Paint format',
         font: 'Font',
         fontSize: 'Font size',
+        fontSizeIncrease: 'Increase font size',
+        fontSizeDecrease: 'Decrease font size',
         bold: 'Bold',
         italic: 'Italic',
         strikethrough: 'Strikethrough',

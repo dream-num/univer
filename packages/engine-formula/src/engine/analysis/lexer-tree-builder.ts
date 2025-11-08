@@ -1998,6 +1998,10 @@ export class LexerTreeBuilder extends Disposable {
                     formulaStrings.push(item);
                 }
             }
+
+            if (isFunctionNode && i !== childrenCount - 1) {
+                formulaStrings.push(',');
+            }
         }
 
         if (isFunctionNode) {

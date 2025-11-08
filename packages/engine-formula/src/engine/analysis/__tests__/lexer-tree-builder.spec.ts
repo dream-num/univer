@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-import type { IFunctionNames } from '../../../basics/function';
-
 import type { LexerNode } from '../lexer-node';
 import { AbsoluteRefType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
-import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
-import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
-import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
-import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/function-names';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 
 describe('lexer nodeMaker test', () => {
@@ -746,49 +740,6 @@ describe('lexer nodeMaker test', () => {
 
             result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
             expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
-        });
-    });
-
-    describe('getNewFormulaWithPrefix', () => {
-        const hasFunction = (functionToken: IFunctionNames) => {
-            const functionList = [
-                FUNCTION_NAMES_STATISTICAL.MAX,
-                FUNCTION_NAMES_LOGICAL.LAMBDA,
-                FUNCTION_NAMES_MATH.SUM,
-                FUNCTION_NAMES_LOOKUP.OFFSET,
-                FUNCTION_NAMES_LOOKUP.INDIRECT,
-                FUNCTION_NAMES_STATISTICAL.CHISQ_DIST,
-                FUNCTION_NAMES_STATISTICAL.CHISQ_DIST_RT,
-                FUNCTION_NAMES_LOOKUP.XLOOKUP,
-                FUNCTION_NAMES_STATISTICAL.MAXIFS,
-                FUNCTION_NAMES_MATH.ACOT,
-                FUNCTION_NAMES_LOGICAL.LET,
-            ] as IFunctionNames[];
-
-            if (functionList.includes(functionToken)) {
-                return true;
-            }
-
-            return false;
-        };
-        it('lambda prefix simple1', () => {
-            const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)', hasFunction);
-            expect(newFunctionString).toStrictEqual('=_xlfn.lambda(_xlpm.x,_xlpm.y,_xlpm.x*_xlpm.y*_xlpm.x)(sum(1,(1+2)*3),2)+1-max(100,200)');
-        });
-
-        it('lambda prefix mixed2', () => {
-            const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect(A5):B10# + B6# + A1:offset(C5, 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) + sum((1+2%)*30%, 1+2)%', hasFunction);
-            expect(newFunctionString).toStrictEqual('=(-(1+2)--@A1:B2 +5)/2 +-sum(indirect(A5):B10#+B6#+A1:offset(C5,1,1),100)+{1,2,3;4,5,6;7,8,10}+_xlfn.lambda(_xlpm.x,_xlpm.y,_xlpm.z,_xlpm.x*_xlpm.y*_xlpm.z)(sum(1,(1+2)*3),2,_xlfn.lambda(_xlpm.x,_xlpm.y,@offset(A1:B0,_xlpm.x#*_xlpm.y#))(1,2):C20)+sum((1+2%)*30%,1+2)%');
-        });
-
-        it('normal prefix', () => {
-            const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=MAXIFS(D18:D27,E18:E27,ACOT(XLOOKUP(A18:A27, B18:B27, C18:C27)))', hasFunction);
-            expect(newFunctionString).toStrictEqual('=_xlfn.MAXIFS(D18:D27,E18:E27,_xlfn.ACOT(_xlfn.XLOOKUP(A18:A27,B18:B27,C18:C27)))');
-        });
-
-        it('let prefix simple1', () => {
-            const newFunctionString = lexerTreeBuilder.getNewFormulaWithPrefix('=let(x,5,y,4,sum(x,y)+x)', hasFunction);
-            expect(newFunctionString).toStrictEqual('=_xlfn.let(_xlpm.x,5,_xlpm.y,4,sum(_xlpm.x,_xlpm.y)+_xlpm.x)');
         });
     });
 

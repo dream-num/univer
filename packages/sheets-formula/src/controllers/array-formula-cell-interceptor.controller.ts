@@ -31,7 +31,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IFunctionService private readonly _functionService: IFunctionService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 

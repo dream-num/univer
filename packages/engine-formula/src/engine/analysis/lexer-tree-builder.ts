@@ -1930,11 +1930,14 @@ export class LexerTreeBuilder extends Disposable {
             curNodeType = NewExcelFunctionNodeType.LAMBDA_PARAMETER;
         } else if (NEW_EXCEL_FUNCTIONS.has(tokenTrimUpper)) {
             formulaStrings.push(`_xlfn.${tokenTrim}`);
+            this._hasNewExcelFunction = true;
         } else if (tokenTrimUpper === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
             formulaStrings.push(`_xlfn.${tokenTrim}`);
+            this._hasNewExcelFunction = true;
             curNodeType = NewExcelFunctionNodeType.LAMBDA;
         } else if (tokenTrimUpper === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
             formulaStrings.push(`_xlfn.${tokenTrim}`);
+            this._hasNewExcelFunction = true;
             curNodeType = NewExcelFunctionNodeType.LET;
         } else {
             formulaStrings.push(token);
@@ -1954,6 +1957,7 @@ export class LexerTreeBuilder extends Disposable {
                     this._lambdaFunctionParameterSet.add(varName);
 
                     formulaStrings.push(`_xlpm.${varName}`);
+                    this._hasNewExcelFunction = true;
 
                     return;
                 }
@@ -1968,6 +1972,7 @@ export class LexerTreeBuilder extends Disposable {
                     }
                     this._lambdaFunctionParameterSet.add(varName);
                     formulaStrings.push(`_xlpm.${varName}`);
+                    this._hasNewExcelFunction = true;
 
                     return;
                 }
@@ -1988,6 +1993,7 @@ export class LexerTreeBuilder extends Disposable {
             } else {
                 if (this._lambdaFunctionParameterSet.has(item)) {
                     formulaStrings.push(`_xlpm.${item}`);
+                    this._hasNewExcelFunction = true;
                 } else {
                     formulaStrings.push(item);
                 }

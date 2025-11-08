@@ -15,13 +15,14 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '../../basics/common';
 
-import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '../../basics/common';
+import { CommandType } from '@univerjs/core';
 
 export interface ISetArrayFormulaDataMutationParams {
     arrayFormulaRange: IArrayFormulaRangeType;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
+    arrayFormulaEmbedded: IArrayFormulaEmbeddedMap;
 }
 
 /**

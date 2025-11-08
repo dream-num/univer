@@ -115,6 +115,10 @@ export interface IArrayFormulaRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IRange> }>;
 }
 
+export interface IArrayFormulaEmbeddedMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<boolean> }>;
+}
+
 export interface IFeatureDirtyRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IRange[] }>;
 }

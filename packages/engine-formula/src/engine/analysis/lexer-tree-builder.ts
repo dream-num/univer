@@ -17,11 +17,12 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitSheetDefinedNameMap } from '../../basics/common';
 
+import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
 import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
 import { regexTestSingeRange } from '../../basics/regex';
@@ -1877,5 +1878,9 @@ export class LexerTreeBuilder extends Disposable {
             cur,
             currentLexerNode: this._currentLexerNode,
         });
+    }
+
+    getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean): string | null {
+        return null;
     }
 }

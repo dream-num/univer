@@ -145,14 +145,14 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyResult(data: IAllRuntimeData) {
-        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, arrayFormulaEmbedded } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
             return;
         }
 
-        if (arrayFormulaRange) {
+        if (arrayFormulaRange || arrayFormulaEmbedded) {
             this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
             this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
             this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
@@ -162,6 +162,7 @@ export class CalculateController extends Disposable {
                 {
                     arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
                     arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                    arrayFormulaEmbedded,
                 },
                 {
                     onlyLocal: true,

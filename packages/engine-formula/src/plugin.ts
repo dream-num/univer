@@ -123,8 +123,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [GlobalComputingStatusService],
             // Models
             [FormulaDataModel],
-            // Engine
-            [LexerTreeBuilder],
             //Controllers
             [FormulaController],
             [SetSuperTableController],
@@ -165,6 +163,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     protected _initializeWithOverride() {
+        this._injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
         if (!this._config?.notExecuteFormula) {
             // only worker
             const dependencies: Dependency[] = [

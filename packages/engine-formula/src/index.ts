@@ -15,6 +15,7 @@
  */
 
 export type {
+    IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
     IDirtyUnitFeatureMap,
@@ -42,7 +43,8 @@ export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } fro
 export { matchRefDrawToken } from './basics/match-token';
 export { isReferenceString } from './basics/regex';
 export { convertUnitDataToRuntime } from './basics/runtime';
-export { compareToken, matchToken, operatorToken } from './basics/token';
+export { compareToken, matchToken, OPERATOR_TOKEN_SET, operatorToken, prefixToken, SUFFIX_TOKEN_SET } from './basics/token';
+export { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME, DEFAULT_TOKEN_LET_FUNCTION_NAME, DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from './basics/token-type';
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export { type ISetArrayFormulaDataMutationParams, SetArrayFormulaDataMutation } from './commands/mutations/set-array-formula-data.mutation';
 export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from './commands/mutations/set-defined-name.mutation';
@@ -142,6 +144,7 @@ export { FUNCTION_NAMES_LOOKUP } from './functions/lookup/function-names';
 export { functionMath } from './functions/math/function-map';
 export { FUNCTION_NAMES_MATH } from './functions/math/function-names';
 export { functionMeta } from './functions/meta/function-map';
+export { NEW_EXCEL_FUNCTIONS } from './functions/new-excel-functions';
 export { functionStatistical } from './functions/statistical/function-map';
 export { FUNCTION_NAMES_STATISTICAL } from './functions/statistical/function-names';
 export { functionText } from './functions/text/function-map';

@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { CellValueType, Disposable, IConfigService, Inject, isRealNum, LocaleService, numfmt } from '@univerjs/core';
+import { CellValueType, Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleService, numfmt } from '@univerjs/core';
 import { IZenZoneService } from '@univerjs/ui';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -50,11 +50,26 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
 
-                if (!worksheet) return;
+                if (!worksheet) return this._hideAlert();
 
                 const cellData = worksheet.getCell(location.row, location.col);
 
-                if (!cellData || cellData.v === null || cellData.v === undefined) return;
+                if (!cellData || cellData.v === null || cellData.v === undefined) return this._hideAlert();
+
+                let numfmtValue;
+
+                if (cellData?.s) {
+                    const style = workbook.getStyles().get(cellData.s);
+                    if (style?.n) {
+                        numfmtValue = style.n;
+                    }
+                }
+
+                // If the cell has text format, follow the logic of text format and do not show the force string alert.
+                if (isTextFormat(numfmtValue?.pattern)) {
+                    this._hideAlert();
+                    return;
+                }
 
                 /**
                  * If the cell type is string or force string, and the value is a pure number or a string that can be converted to a number, show the force string alert.
@@ -68,24 +83,21 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                     (cellData.t === CellValueType.FORCE_STRING || cellData.t === CellValueType.STRING) &&
                     (isRealNum(cellData.v) || (typeof cellData.v === 'string' && numfmt.parseNumber(cellData.v)))
                 ) {
-                    const currentAlerts = this._cellAlertManagerService.currentAlert;
-
-                    for (const [_, value] of currentAlerts.entries()) {
-                        const currentLoc = value?.alert?.location;
-
-                        if (
-                            currentLoc &&
-                            currentLoc.row === location.row &&
-                            currentLoc.col === location.col &&
-                            currentLoc.subUnitId === location.subUnitId &&
-                            currentLoc.unitId === location.unitId
-                        ) {
-                            return;
-                        }
-                    }
-
                     // If the user has disabled the force string alert, do not show it
                     if (this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.disableForceStringAlert) {
+                        return;
+                    }
+
+                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
+                    const currentLoc = currentAlert?.alert?.location;
+                    if (
+                        currentLoc &&
+                        currentLoc.row === cellPos.location.row &&
+                        currentLoc.col === cellPos.location.col &&
+                        currentLoc.subUnitId === cellPos.location.subUnitId &&
+                        currentLoc.unitId === cellPos.location.unitId
+                    ) {
+                        this._hideAlert();
                         return;
                     }
 

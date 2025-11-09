@@ -166,7 +166,7 @@ export class TableReferenceObject extends BaseReferenceObject {
                 return { startColumn: fullStartCol, endColumn: fullEndCol, type: typeMaybe };
             }
             // Not a Section: Treat as column name (rare, but for error tolerance)
-            const { startColumn, endColumn } = this._parseColumnOrRange(s, titleMap);
+            const { startColumn, endColumn } = this._parseColumnOrRange(s, titleMap, fullStartCol);
             return { startColumn, endColumn, type: TableOptionType.DATA };
         }
 
@@ -190,7 +190,7 @@ export class TableReferenceObject extends BaseReferenceObject {
                 return { startColumn: fullStartCol, endColumn: fullEndCol, type: TableOptionType.DATA };
             }
             // Not a Section: column/column range. Note: passing original s (with brackets) is more robust.
-            const { startColumn, endColumn } = this._parseColumnOrRange(body, titleMap);
+            const { startColumn, endColumn } = this._parseColumnOrRange(body, titleMap, fullStartCol);
             return { startColumn, endColumn, type: TableOptionType.DATA };
         }
 
@@ -199,7 +199,7 @@ export class TableReferenceObject extends BaseReferenceObject {
         const columnsRaw = body.slice(commaAt + 1).trim(); // May be "[Col]" or "[[ColA]:[ColB]]" or "Col"
 
         const section = this._parseSectionMaybeBracketed(sectionRaw);
-        const { startColumn, endColumn } = this._parseColumnOrRange(columnsRaw, titleMap);
+        const { startColumn, endColumn } = this._parseColumnOrRange(columnsRaw, titleMap, fullStartCol);
 
         return { startColumn, endColumn, type: section };
     }
@@ -270,7 +270,8 @@ export class TableReferenceObject extends BaseReferenceObject {
      */
     private _parseColumnOrRange(
         raw: string,
-        titleMap: Map<string, number>
+        titleMap: Map<string, number>,
+        fullStartCol: number
     ): { startColumn: number; endColumn: number } {
         const s = raw.trim();
 
@@ -280,7 +281,7 @@ export class TableReferenceObject extends BaseReferenceObject {
             // Single column (may be "[Col]" or "Col")
             const name = this._stripOuterBracketIfAny(s);
             const idx = this._titleToIndex(name, titleMap);
-            return { startColumn: idx, endColumn: idx };
+            return { startColumn: fullStartCol + idx, endColumn: +fullStartCol + idx };
         }
 
         // Range: Left and right may be "[ColA]" / "ColA"
@@ -295,9 +296,9 @@ export class TableReferenceObject extends BaseReferenceObject {
 
         // Excel requires l <= r; swap for error tolerance here (could throw error for strict conformance)
         if (l !== -1 && r !== -1 && l > r) {
-            return { startColumn: r, endColumn: l };
+            return { startColumn: fullStartCol + r, endColumn: fullStartCol + l };
         }
-        return { startColumn: l, endColumn: r };
+        return { startColumn: fullStartCol + l, endColumn: fullStartCol + r };
     }
 
     /** Strip one layer of outer brackets; return as-is if none (compatible with "[Col]" and "Col") */

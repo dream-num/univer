@@ -32,6 +32,7 @@ import { Plus } from '../../../functions/meta/plus';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { ISuperTableService } from '../../../services/super-table.service';
 import { Interpreter } from '../../interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
 import { Lexer } from '../lexer';
@@ -58,6 +59,8 @@ describe('Test indirect', () => {
         const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
 
         const formulaRuntimeService = get(IFormulaRuntimeService);
+
+        const superTableService = get(ISuperTableService);
 
         formulaCurrentConfigService.load({
             formulaData: {},
@@ -92,6 +95,22 @@ describe('Test indirect', () => {
             new Divided(FUNCTION_NAMES_META.DIVIDED),
             new Pi(FUNCTION_NAMES_MATH.PI)
         );
+
+        superTableService.registerTable(testBed.unitId, 'Table1', {
+            sheetId: testBed.sheetId,
+            titleMap: new Map([
+                ['col1', 0],
+                ['col2', 1],
+                ['col3', 2],
+                ['col4', 3],
+            ]),
+            range: {
+                startRow: 0,
+                endRow: 3,
+                startColumn: 0,
+                endColumn: 4,
+            },
+        });
     });
 
     describe('normal', () => {
@@ -313,6 +332,16 @@ describe('Test indirect', () => {
 
         it('test array formula correctly', async () => {
             const lexerNode = lexer.treeBuilder('={10,2,3;4,5,6}');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(10);
+        });
+
+        it('test super formula correctly', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[col1]:[col4]])');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 

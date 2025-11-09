@@ -62,6 +62,7 @@ export {
 export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
+export type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from './commands/mutations/set-super-table.mutation';
 export { CalculateController } from './controller/calculate.controller';
 export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, type IUniverEngineFormulaConfig } from './controller/config.schema';
 export { Lexer } from './engine/analysis/lexer';

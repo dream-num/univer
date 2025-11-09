@@ -547,6 +547,13 @@ export class SheetCanvasPopManagerService extends Disposable {
             disposableCollection.add(workbook.activeSheet$.subscribe((worksheet) => {
                 renderPopup(worksheet);
             }));
+            // the scroll info of the scene won't update until the skeleton changed.
+            const currentRender = this._renderManagerService.getRenderById(_unitId);
+            if (currentRender) {
+                disposableCollection.add(currentRender.with(SheetSkeletonManagerService).currentSkeleton$.subscribe(() => {
+                    renderPopup(workbook.getActiveSheet());
+                }));
+            }
         } else {
             // no worksheet specified, use the currently active worksheet, popup may exist across worksheets.
 
@@ -668,6 +675,13 @@ export class SheetCanvasPopManagerService extends Disposable {
             disposableCollection.add(workbook.activeSheet$.subscribe((worksheet) => {
                 renderPopup(worksheet);
             }));
+            // the scroll info of the scene won't update until the skeleton changed.
+            const currentRender = this._renderManagerService.getRenderById(_unitId);
+            if (currentRender) {
+                disposableCollection.add(currentRender.with(SheetSkeletonManagerService).currentSkeleton$.subscribe(() => {
+                    renderPopup(workbook.getActiveSheet());
+                }));
+            }
         } else {
             // no worksheet specified, use the currently active worksheet, popup may exist across worksheets.
 

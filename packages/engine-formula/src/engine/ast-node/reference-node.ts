@@ -21,6 +21,7 @@ import {
     regexTestReferenceTableAllColumn,
     regexTestReferenceTableMultipleColumn,
     regexTestReferenceTableSingleColumn,
+    regexTestReferenceTableTitleOnlyAnyHash,
     regexTestSingeRange,
     regexTestSingleColumn,
     regexTestSingleRow,
@@ -228,7 +229,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     }
 
     private _checkTokenIsTableReference(token: string): boolean {
-        return regexTestReferenceTableAllColumn(token) || regexTestReferenceTableSingleColumn(token) || regexTestReferenceTableMultipleColumn(token);
+        return regexTestReferenceTableAllColumn(token) || regexTestReferenceTableSingleColumn(token) || regexTestReferenceTableMultipleColumn(token) || regexTestReferenceTableTitleOnlyAnyHash(token);
     }
 
     private _checkParentIsUnionOperator(param: LexerNode) {

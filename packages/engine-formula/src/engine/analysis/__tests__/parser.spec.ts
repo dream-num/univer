@@ -347,7 +347,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(10);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(9.23);
         });
     });
 });

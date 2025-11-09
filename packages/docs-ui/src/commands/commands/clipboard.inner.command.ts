@@ -32,6 +32,7 @@ import {
     CommandType,
     generateRandomId,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
@@ -40,7 +41,7 @@ import {
     TextXActionType,
     Tools,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocumentEditablePermission, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
@@ -94,6 +95,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const permissionService = accessor.get(IPermissionService);
         const selections = docSelectionManagerService.getTextRanges();
         const rectRanges = docSelectionManagerService.getRectRanges();
         const { body, tableSource, drawings } = doc;
@@ -107,6 +109,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
         const unitId = docDataModel.getUnitId();
+
+        // Check if document is editable (using permission system)
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
+            return false;
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -487,6 +495,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const permissionService = accessor.get(IPermissionService);
 
         const { segmentId, textRanges, selections = docSelectionManagerService.getTextRanges(), rectRanges = docSelectionManagerService.getRectRanges() } = params;
 
@@ -499,6 +508,12 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
         const unitId = univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
         if (!unitId) {
+            return false;
+        }
+
+        // Check if document is editable (using permission system)
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
             return false;
         }
 

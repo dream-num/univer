@@ -22,6 +22,7 @@ import {
     CommandType,
     generateRandomId,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
@@ -32,7 +33,7 @@ import {
     TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocumentEditablePermission, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 import { getCurrentParagraph } from './util';
 
@@ -49,6 +50,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
+        const permissionService = accessor.get(IPermissionService);
 
         const listType: string = params.listType;
 
@@ -56,6 +58,12 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const docRanges = params.docRange ?? docSelectionManagerService.getDocRanges() ?? [];
 
         if (docDataModel == null || docRanges.length === 0) {
+            return false;
+        }
+
+        const unitId = docDataModel.getUnitId();
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
             return false;
         }
 
@@ -70,8 +78,6 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         }
 
         const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(docRanges, paragraphs, dataStream);
-
-        const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -117,10 +123,17 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
+        const permissionService = accessor.get(IPermissionService);
         const { listType } = params;
         const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRanges = params.docRange ?? docSelectionManagerService.getDocRanges();
         if (docDataModel == null || activeRanges == null || !activeRanges.length) {
+            return false;
+        }
+
+        const unitId = docDataModel.getUnitId();
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
             return false;
         }
 
@@ -135,7 +148,6 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
 
         const currentParagraphs = BuildTextUtils.range.getParagraphsInRanges(activeRanges, paragraphs, dataStream);
 
-        const unitId = docDataModel.getUnitId();
         const textX = BuildTextUtils.paragraph.bullet.set({
             paragraphs: currentParagraphs,
             listType,

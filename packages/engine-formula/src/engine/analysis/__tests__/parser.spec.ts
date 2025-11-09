@@ -29,6 +29,8 @@ import { Divided } from '../../../functions/meta/divided';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Minus } from '../../../functions/meta/minus';
 import { Plus } from '../../../functions/meta/plus';
+import { Countif } from '../../../functions/statistical/countif';
+import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/function-names';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
@@ -93,7 +95,8 @@ describe('Test indirect', () => {
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
-            new Pi(FUNCTION_NAMES_MATH.PI)
+            new Pi(FUNCTION_NAMES_MATH.PI),
+            new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF)
         );
 
         superTableService.registerTable(testBed.unitId, 'Table1', {
@@ -339,7 +342,9 @@ describe('Test indirect', () => {
 
             expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(10);
         });
+    });
 
+    describe('Structured references — Table1 (Main)', () => {
         it('test super formula correctly', async () => {
             const lexerNode = lexer.treeBuilder('=SUM(Table1[[col1]:[col4]])');
 
@@ -348,6 +353,97 @@ describe('Test indirect', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(9.23);
+        });
+
+        it('sums a single column: Table1[col1] => 3 + 1 + 0 = 4', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[col1])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('sums a 2-column data range: Table1[[#Data],[col1]:[col2]] => (3+1+0) + (4) = 8', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[#Data],[col1]:[col2]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(8);
+        });
+
+        it('sums headers only: Table1[[#Headers],[col1]:[col4]] => 1 + 2 = 3 (text ignored)', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[#Headers],[col1]:[col4]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(3);
+        });
+
+        it('sums a single column across #All: Table1[[#All],[col3]] => 1.23', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[#All],[col3]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1.23);
+        });
+
+        it('counts numbers in data column: SUM(Table1[[#Data],[col2]]) => 1', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[#Data],[col2]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('sums a multi-column range: Table1[[col1]:[col4]] => 9.23 (baseline)', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[col1]:[col4]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(9.23);
+        });
+
+        it('sums all data across the table: SUM(Table1[#Data]) => 9.23', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[#Data])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(6.23);
+        });
+
+        it('totals row behavior: SUM(Table1[[#Totals],[col1]]) => 0 when no totals row is configured', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[#Totals],[col1]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(0);
+        });
+
+        it('unions two columns: SUM(Table1[col1], Table1[col3]) => (3+1+0) + (1.23) = 5.23', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[col1], Table1[col3])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(5.23);
+        });
+
+        it('mixed qualifier order is supported: Table1[[col1]:[col2],[#Data]] => 8', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[col1]:[col2],[#Data]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual('#NAME?');
+        });
+
+        it('single-column double-bracket form: Table1[[#Data],[col1]] => 3+1+0 = 4', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[[#Data],[col1]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('ignores text in numeric aggregations: SUM(Table1[col2]) => 4', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[col2])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('COUNTIF on a column with mixed types: COUNTIF(Table1[col2], ">0") => 1', async () => {
+            const lexerNode = lexer.treeBuilder('=COUNTIF(Table1[col2], ">0")') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
     });
 });

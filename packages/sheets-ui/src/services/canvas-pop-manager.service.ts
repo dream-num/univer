@@ -365,45 +365,83 @@ export class SheetCanvasPopManagerService extends Disposable {
 
     // #region attach to absolute position
     attachPopupToAbsolutePosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return null;
+        let popupId: string | null = null;
+        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+
+        const disposableCollection = new DisposableCollection();
+        const popupDisposables = new DisposableCollection();
+        disposableCollection.add(popupDisposables);
+
+        const renderPopup = (worksheet: Nullable<Worksheet>) => {
+            popupDisposables.dispose();
+
+            if (!worksheet) {
+                return null;
+            }
+
+            const unitId = workbook.getUnitId();
+            // _unitId is designed to be nullable, the former implementation does not respect this design
+            if (_unitId) {
+                if (unitId !== _unitId) {
+                    return null;
+                }
+            }
+
+            const subUnitId = worksheet.getSheetId();
+            // _subUnitId is designed to be nullable, the former implementation does not respect the design
+            if (_subUnitId) {
+                if (subUnitId !== _subUnitId) {
+                    return null;
+                }
+            }
+
+            const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            if (!currentRender || !skeleton) {
+                return null;
+            }
+
+            if (this._isSelectionMoving && !popup.showOnSelectionMoving) {
+                return;
+            }
+
+            const position$ = new BehaviorSubject(bound);
+            const id = this._globalPopupManagerService.addPopup({
+                ...popup,
+                unitId,
+                subUnitId,
+                anchorRect: bound,
+                anchorRect$: position$.asObservable(),
+                canvasElement: currentRender.engine.getCanvasElement(),
+            });
+            popupId = id;
+            popupDisposables.add(toDisposable(() => {
+                this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+            }));
+        };
+
+        if (_unitId && _subUnitId) {
+            // targets specified, subscribe to activeSheet$ Observable to render popup only on the worksheet specified.
+            disposableCollection.add(workbook.activeSheet$.subscribe((worksheet) => {
+                renderPopup(worksheet);
+            }));
+        } else {
+            // no worksheet specified, use the currently active worksheet, popup may exist across worksheets.
+
+            // this branch is reserved as the _unitId and _subUnitId are nullable in respect to the original method description,
+            // while the case when those ids are null makes little sense to me.
+            renderPopup(workbook.getActiveSheet());
         }
-
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-        if ((_unitId && unitId !== _unitId) || (_subUnitId && _subUnitId !== subUnitId)) {
-            return null;
-        }
-
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-        if (!currentRender || !skeleton) {
-            return null;
-        }
-
-        if (this._isSelectionMoving && !popup.showOnSelectionMoving) {
-            return;
-        }
-
-        const position$ = new BehaviorSubject(bound);
-        const id = this._globalPopupManagerService.addPopup({
-            ...popup,
-            unitId,
-            subUnitId,
-            anchorRect: bound,
-            anchorRect$: position$.asObservable(),
-            canvasElement: currentRender.engine.getCanvasElement(),
-        });
 
         return {
             dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                position$.complete();
+                disposableCollection.dispose();
+                //@ts-ignore
+                workbook = null;
             },
-            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+            canDispose: () => this._globalPopupManagerService.activePopupId !== popupId,
         };
     }
     // #endregion
@@ -422,78 +460,109 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
+        let popupId: string | null = null;
         let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        let worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return null;
-        }
 
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-        if ((_unitId && unitId !== _unitId) || (_subUnitId && subUnitId !== _subUnitId)) {
-            return null;
-        }
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-        const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
-        const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
-
-        if (!currentRender || !skeleton || !sheetSelectionRenderService) {
-            return null;
-        }
-
-        if (this._isSelectionMoving && (!popup.showOnSelectionMoving)) {
-            return;
-        }
-
-        const activeViewport = viewport ?? getViewportByCell(row, col, currentRender.scene, worksheet);
-        if (!activeViewport) {
-            return null;
-        }
-
-        const { position, position$, disposable: positionObserverDisposable, updateRowCol } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
-        const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
-            row,
-            column: col,
-            worksheet,
-            skeleton,
-            currentRender,
-        });
-        const id = this._globalPopupManagerService.addPopup({
-            ...popup,
-            unitId,
-            subUnitId,
-            anchorRect: position,
-            anchorRect$: position$,
-            canvasElement: currentRender.engine.getCanvasElement(),
-            hiddenRects$: rects$,
-        });
         const disposableCollection = new DisposableCollection();
-        disposableCollection.add(positionObserverDisposable);
-        disposableCollection.add(toDisposable(() => {
-            this._globalPopupManagerService.removePopup(id);
-            position$.complete();
-        }));
-        disposableCollection.add(rectsObserverDisposable);
+        const popupDisposables = new DisposableCollection();
+        disposableCollection.add(popupDisposables);
 
-        // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
-        const watchedRange: IRange = { startRow: row, endRow: row, startColumn: col, endColumn: col };
-        disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
-            if (!after) {
-                disposableCollection.dispose();
-            } else {
-                updateRowCol(after.startRow, after.startColumn);
+        const renderPopup = (worksheet: Nullable<Worksheet>) => {
+            popupDisposables.dispose();
+            if (!worksheet) {
+                return null;
             }
-        }));
+
+            const unitId = workbook.getUnitId();
+            // _unitId is designed to be nullable, the former implementation does not respect this design
+            if (_unitId) {
+                if (unitId !== _unitId) {
+                    return null;
+                }
+            }
+
+            const subUnitId = worksheet.getSheetId();
+            // _subUnitId is designed to be nullable, the former implementation does not respect the design
+            if (_subUnitId) {
+                if (subUnitId !== _subUnitId) {
+                    return null;
+                }
+            }
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+            const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
+
+            if (!currentRender || !skeleton || !sheetSelectionRenderService) {
+                return null;
+            }
+
+            if (this._isSelectionMoving && (!popup.showOnSelectionMoving)) {
+                return;
+            }
+
+            const activeViewport = viewport ?? getViewportByCell(row, col, currentRender.scene, worksheet);
+            if (!activeViewport) {
+                return null;
+            }
+
+            const { position, position$, disposable: positionObserverDisposable, updateRowCol } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
+            const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
+                row,
+                column: col,
+                worksheet,
+                skeleton,
+                currentRender,
+            });
+            const id = this._globalPopupManagerService.addPopup({
+                ...popup,
+                unitId,
+                subUnitId,
+                anchorRect: position,
+                anchorRect$: position$,
+                canvasElement: currentRender.engine.getCanvasElement(),
+                hiddenRects$: rects$,
+            });
+            popupId = id;
+            popupDisposables.add(positionObserverDisposable);
+            popupDisposables.add(toDisposable(() => {
+                this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+            }));
+            popupDisposables.add(rectsObserverDisposable);
+
+            // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
+            const watchedRange: IRange = { startRow: row, endRow: row, startColumn: col, endColumn: col };
+            popupDisposables.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
+                if (!after) {
+                    popupDisposables.dispose();
+                } else {
+                    updateRowCol(after.startRow, after.startColumn);
+                }
+            }));
+        };
+
+        if (_unitId && _subUnitId) {
+            // targets specified, subscribe to activeSheet$ Observable to render popup only on the worksheet specified.
+            disposableCollection.add(workbook.activeSheet$.subscribe((worksheet) => {
+                renderPopup(worksheet);
+            }));
+        } else {
+            // no worksheet specified, use the currently active worksheet, popup may exist across worksheets.
+
+            // this branch is reserved as the _unitId and _subUnitId are nullable in respect to the original method description,
+            // while the case when those ids are null makes little sense to me.
+            renderPopup(workbook.getActiveSheet());
+        }
 
         return {
             dispose() {
                 disposableCollection.dispose();
                 //@ts-ignore
-                worksheet = null;
-                //@ts-ignore
                 workbook = null;
+                popupId = null;
             },
-            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+            canDispose: () => this._globalPopupManagerService.activePopupId !== popupId,
         };
     }
 
@@ -507,78 +576,114 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param showOnSelectionMoving
      */
     attachRangePopup(range: IRange, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<INeedCheckDisposable> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return null;
-        }
+        let popupId: string | null = null;
+        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-        if ((_unitId && unitId !== _unitId) || (_subUnitId && subUnitId !== _subUnitId)) {
-            return null;
-        }
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-        const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
-            sheetId: subUnitId,
-        });
-        const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
-
-        if (!currentRender || !skeleton || !sheetSelectionRenderService) {
-            return null;
-        }
-
-        if (sheetSelectionRenderService.selectionMoving && !showOnSelectionMoving) {
-            return;
-        }
-
-        const activeViewport = viewport ?? getViewportByCell(range.startRow, range.startColumn, currentRender.scene, worksheet);
-        if (!activeViewport) {
-            return null;
-        }
-
-        const { position, position$, disposable: positionObserverDisposable, updateRange, topLeftPos$, rightBottomPos$ } = this._createRangePositionObserver(range, currentRender, skeleton, activeViewport);
-
-        const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
-            row: range.startRow,
-            column: range.startColumn,
-            worksheet,
-            skeleton,
-            currentRender,
-        });
-        const id = this._globalPopupManagerService.addPopup({
-            ...popup,
-            unitId,
-            subUnitId,
-            anchorRect: position,
-            anchorRect$: position$,
-            canvasElement: currentRender.engine.getCanvasElement(),
-            hiddenRects$: rects$,
-        });
         const disposableCollection = new DisposableCollection();
-        disposableCollection.add(positionObserverDisposable);
-        disposableCollection.add(toDisposable(() => {
-            this._globalPopupManagerService.removePopup(id);
-            topLeftPos$.complete();
-            rightBottomPos$.complete();
-        }));
-        disposableCollection.add(rectsObserverDisposable);
+        const popupDisposables = new DisposableCollection();
+        disposableCollection.add(popupDisposables);
 
-        // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
-        const watchedRange = { ...range };
-        disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
-            if (!after) {
-                disposableCollection.dispose();
-            } else {
-                updateRange(after);
+        const renderPopup = (worksheet: Nullable<Worksheet>) => {
+            popupDisposables.dispose();
+
+            if (!worksheet) {
+                return null;
             }
-        }));
+
+            const unitId = workbook.getUnitId();
+            // _unitId is designed to be nullable, the former implementation does not respect this design
+            if (_unitId) {
+                if (unitId !== _unitId) {
+                    return null;
+                }
+            }
+
+            const subUnitId = worksheet.getSheetId();
+            // _subUnitId is designed to be nullable, the former implementation does not respect the design
+            if (_subUnitId) {
+                if (subUnitId !== _subUnitId) {
+                    return null;
+                }
+            }
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
+                sheetId: subUnitId,
+            });
+            const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
+
+            if (!currentRender || !skeleton || !sheetSelectionRenderService) {
+                return null;
+            }
+
+            if (sheetSelectionRenderService.selectionMoving && !showOnSelectionMoving) {
+                return null;
+            }
+
+            const activeViewport = viewport ?? getViewportByCell(range.startRow, range.startColumn, currentRender.scene, worksheet);
+            if (!activeViewport) {
+                return null;
+            }
+
+            const { position, position$, disposable: positionObserverDisposable, updateRange, topLeftPos$, rightBottomPos$ } = this._createRangePositionObserver(range, currentRender, skeleton, activeViewport);
+
+            const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
+                row: range.startRow,
+                column: range.startColumn,
+                worksheet,
+                skeleton,
+                currentRender,
+            });
+            const id = this._globalPopupManagerService.addPopup({
+                ...popup,
+                unitId,
+                subUnitId,
+                anchorRect: position,
+                anchorRect$: position$,
+                canvasElement: currentRender.engine.getCanvasElement(),
+                hiddenRects$: rects$,
+            });
+            popupId = id;
+            popupDisposables.add(positionObserverDisposable);
+            popupDisposables.add(toDisposable(() => {
+                this._globalPopupManagerService.removePopup(id);
+                topLeftPos$.complete();
+                rightBottomPos$.complete();
+            }));
+            popupDisposables.add(rectsObserverDisposable);
+
+            // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
+            const watchedRange = { ...range };
+            popupDisposables.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
+                if (!after) {
+                    popupDisposables.dispose();
+                } else {
+                    updateRange(after);
+                }
+            }));
+        };
+
+        if (_unitId && _subUnitId) {
+            // targets specified, subscribe to activeSheet$ Observable to render popup only on the worksheet specified.
+            disposableCollection.add(workbook.activeSheet$.subscribe((worksheet) => {
+                renderPopup(worksheet);
+            }));
+        } else {
+            // no worksheet specified, use the currently active worksheet, popup may exist across worksheets.
+
+            // this branch is reserved as the _unitId and _subUnitId are nullable in respect to the original method description,
+            // while the case when those ids are null makes little sense to me.
+            renderPopup(workbook.getActiveSheet());
+        }
 
         return {
             dispose() {
                 disposableCollection.dispose();
+                //@ts-ignore
+                workbook = null;
+                popupId = null;
             },
-            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+            canDispose: () => this._globalPopupManagerService.activePopupId !== popupId,
         };
     }
 

@@ -162,23 +162,20 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         const isSuperTableDirectly = tableMap?.has(tokenTrim);
 
         let node: Nullable<ReferenceNode>;
-        if (regexTestSingeRange(tokenTrim) && !isSuperTableDirectly) {
-            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.CELL, isPrepareMerge);
-        } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode) && !isSuperTableDirectly) {
-            if (regexTestSingleRow(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.ROW, isPrepareMerge);
-            } else if (regexTestSingleColumn(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.COLUMN, isPrepareMerge);
+        if (!isSuperTableDirectly) {
+            if (regexTestSingeRange(tokenTrim)) {
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.CELL, isPrepareMerge);
+            } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
+                if (regexTestSingleRow(tokenTrim)) {
+                    node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.ROW, isPrepareMerge);
+                } else if (regexTestSingleColumn(tokenTrim)) {
+                    node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.COLUMN, isPrepareMerge);
+                }
+            } else {
+                node = this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, false);
             }
         } else {
-            if (!this._checkTokenIsTableReference(tokenTrim) && !isSuperTableDirectly) {
-                return;
-            }
-
-            const tableReferenceNode = this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge);
-            if (tableReferenceNode) {
-                node = tableReferenceNode;
-            }
+            node = this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, true);
         }
 
         if (node) {
@@ -199,7 +196,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         return this._superTableService.getTableMap(unitId);
     }
 
-    private _getTableReferenceNode(tokenTrim: string, isLexerNode: boolean, isPrepareMerge: boolean) {
+    private _getTableReferenceNode(tokenTrim: string, isLexerNode: boolean, isPrepareMerge: boolean, isSuperTableDirectly: boolean = false) {
+        if (!this._checkTokenIsTableReference(tokenTrim) && !isSuperTableDirectly) {
+            return;
+        }
         const { tableName, columnStruct } = this._splitTableStructuredRef(tokenTrim);
         const tableMap = this._getTableMap();
         if (!isLexerNode && tableMap?.has(tableName)) {

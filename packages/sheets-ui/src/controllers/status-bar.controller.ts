@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, ICommandInfo, IRange, ISelectionCell, IStyleData, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
+import type { CellValue, ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, ISelectionCell, IStyleData, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
@@ -257,18 +257,18 @@ export class StatusBarController extends Disposable {
         };
     }
 
-    private _getCellValue(unitId: string, subUnitId: string, row: number, col: number, sheet: Worksheet): Nullable<ICellData> {
+    private _getCellValue(row: number, col: number, sheet: Worksheet, sheetArrayFormulaCellData?: IObjectMatrixPrimitiveType<Nullable<ICellData>>): Nullable<ICellData> {
         const rawCell = sheet.getCellRaw(row, col);
 
         // Check array formula cell data if raw cell has no value
-        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-        const arrayCell = arrayFormulaCellData?.[unitId]?.[subUnitId]?.[row]?.[col];
+        const arrayCell = sheetArrayFormulaCellData?.[row]?.[col];
 
         if (arrayCell) {
-            // Merge array formula cell data with raw cell data
+            // Merge only the necessary properties (t, v, s) to avoid full object spread and improve performance
             return {
-                ...rawCell,
-                ...arrayCell,
+                t: arrayCell.t ?? rawCell?.t,
+                v: arrayCell.v ?? rawCell?.v,
+                s: arrayCell.s ?? rawCell?.s,
             };
         }
 
@@ -332,11 +332,15 @@ export class StatusBarController extends Disposable {
             const styles = workbook.getStyles();
             const patternInfoRecord: Record<string, any> = {};
 
+            // Cache arrayFormulaCellData outside the loop to avoid repeated calls
+            const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+            const sheetArrayFormulaCellData = arrayFormulaCellData?.[unitId]?.[sheetId];
+
             for (const range of noDuplicate) {
                 const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
-                        const value = this._getCellValue(unitId, sheetId, r, c, sheet);
+                        const value = this._getCellValue(r, c, sheet, sheetArrayFormulaCellData);
                         calculateValueSet.add(value, styles, patternInfoRecord);
                     }
                 }

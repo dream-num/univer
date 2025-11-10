@@ -295,6 +295,7 @@ export interface IFWorkbookSheetsUIMixin {
      * ```
      */
     showSelection(): FWorkbook;
+
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {

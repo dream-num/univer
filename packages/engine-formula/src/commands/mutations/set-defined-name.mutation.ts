@@ -29,6 +29,7 @@ export interface ISetDefinedNameMutationParam extends ISetDefinedNameMutationSea
     comment?: string;
     localSheetId?: string;
     hidden?: boolean;
+    formulaOrRefStringWithPrefix?: string; // for excel
 }
 
 /**
@@ -65,7 +66,7 @@ export const SetDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
         }
 
         const definedNamesService = accessor.get(IDefinedNamesService);
-        const { id, unitId, name, formulaOrRefString, comment, hidden, localSheetId } = params as ISetDefinedNameMutationParam;
+        const { id, unitId, name, formulaOrRefString, comment, hidden, localSheetId, formulaOrRefStringWithPrefix } = params as ISetDefinedNameMutationParam;
         definedNamesService.registerDefinedName(unitId, {
             id,
             name: name.trim(),
@@ -73,6 +74,7 @@ export const SetDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
             comment: comment?.trim(),
             hidden,
             localSheetId,
+            formulaOrRefStringWithPrefix,
         });
 
         return true;

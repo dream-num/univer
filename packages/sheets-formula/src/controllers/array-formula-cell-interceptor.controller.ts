@@ -15,11 +15,11 @@
  */
 
 import type { ICellData, ICommandInfo } from '@univerjs/core';
-import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
+import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, ObjectMatrix } from '@univerjs/core';
-import { FormulaDataModel, serializeRange, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
+import { FormulaDataModel, IDefinedNamesService, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, SetDefinedNameMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
@@ -28,7 +28,10 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 
@@ -55,21 +58,80 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     return;
                 }
 
-                const { arrayFormulaRange, arrayFormulaCellData } = params;
+                const { arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded } = params;
                 this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
                 this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
 
                 // Note the logic should only be executed in exporting and hence shall be set once.
                 if (this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.writeArrayFormulaToSnapshot) {
-                    this._writeArrayFormulaToSnapshot(arrayFormulaRange, arrayFormulaCellData);
+                    this._writeArrayFormulaToSnapshot(arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded);
+                    this._addPrefixToFunctionSnapshot();
+                    this._addPreixToDefinedNamesFunctionSnapshot();
                 }
             })
         );
     }
 
-    private _writeArrayFormulaToSnapshot(arrayFormulaRange: IArrayFormulaRangeType, arrayFormulaCellData: IArrayFormulaUnitCellType) {
+    private _addPreixToDefinedNamesFunctionSnapshot() {
+        const allDefinedNames = this._definedNamesService.getAllDefinedNames();
+        Object.entries(allDefinedNames).forEach(([unitId, definedNames]) => {
+            definedNames && Array.from(Object.entries(definedNames)).forEach(([_, definedName]) => {
+                const { formulaOrRefString } = definedName;
+                if (formulaOrRefString.substring(0, 1) === '=') {
+                    const newFormula = this._lexerTreeBuilder.getNewFormulaWithPrefix(formulaOrRefString, this._functionService.hasExecutor.bind(this._functionService));
+                    if (newFormula) {
+                        this._commandService.executeCommand<ISetDefinedNameMutationParam>(SetDefinedNameMutation.id, {
+                            ...definedName,
+                            unitId,
+                            formulaOrRefStringWithPrefix: newFormula,
+                        }, {
+                            onlyLocal: true,
+                            fromFormula: true,
+                        });
+                    }
+                }
+            });
+        });
+    }
+
+    private _addPrefixToFunctionSnapshot() {
+        const dataModel = this._formulaDataModel.getFormulaData();
+        Object.entries(dataModel).forEach(([unitId, subUnitData]) => {
+            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, formulaDataItem]) => {
+                // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
+                if (!formulaDataItem) {
+                    return;
+                }
+                const cellValue = new ObjectMatrix<ICellData>();
+                const matrix = new ObjectMatrix(formulaDataItem);
+                matrix.forValue((row, col, value) => {
+                    const functionText = value?.f;
+                    if (!functionText || functionText.length === 0) {
+                        return;
+                    }
+
+                    const newFormula = this._lexerTreeBuilder.getNewFormulaWithPrefix(functionText, this._functionService.hasExecutor.bind(this._functionService));
+                    if (newFormula) {
+                        cellValue.setValue(row, col, { xf: newFormula });
+                    }
+                });
+
+                // Keep this local to avoid triggering re-calculate in the worker.
+                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                    unitId,
+                    subUnitId,
+                    cellValue: cellValue.getMatrix(),
+                }, {
+                    onlyLocal: true,
+                    fromFormula: true,
+                });
+            });
+        });
+    }
+
+    private _writeArrayFormulaToSnapshot(arrayFormulaRange: IArrayFormulaRangeType, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaEmbedded: IArrayFormulaEmbeddedMap) {
         // Write values to the `ref` property of the array formula range.
-        Object.entries(arrayFormulaRange).forEach(([unitId, subUnitData]) => {
+        arrayFormulaRange && Object.entries(arrayFormulaRange).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
                 // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
                 const cellValue = new ObjectMatrix<ICellData>();
@@ -90,8 +152,40 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
             });
         });
 
+        // <f t="array" ref="E7">SUM(A1:A7*B1:B7)</f> , write ref for embedded array formula cells
+        arrayFormulaEmbedded && Object.entries(arrayFormulaEmbedded).forEach(([unitId, subUnitData]) => {
+            subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
+                const cellValue = new ObjectMatrix<ICellData>();
+                const matrix = new ObjectMatrix(rangeData);
+                matrix.forValue((row, col) => {
+                    const existingArrayRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
+                    if (existingArrayRange) {
+                        return; // Skip if there is already an array formula range at this position
+                    }
+                    cellValue.setValue(row, col, {
+                        ref: serializeRange({
+                            startRow: row,
+                            endRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                        }),
+                    }); // convert to ref string
+                });
+
+                // Keep this local to avoid triggering re-calculate in the worker.
+                this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {
+                    unitId,
+                    subUnitId,
+                    cellValue: cellValue.getMatrix(),
+                }, {
+                    onlyLocal: true,
+                    fromFormula: true,
+                });
+            });
+        });
+
         // Write values to the 'v' property of the cell data.
-        Array.from(Object.entries(arrayFormulaCellData)).forEach(([unitId, subUnitData]) => {
+        arrayFormulaCellData && Object.entries(arrayFormulaCellData).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rowData]) => {
                 // Keep this local to avoid triggering re-calculate in the worker.
                 this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {

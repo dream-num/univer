@@ -128,6 +128,14 @@ describe('Test textjoin function', () => {
             });
             const result6 = testFunction.calculate(delimiter, ignoreEmpty6, text);
             expect(getObjectValue(result6)).toStrictEqual('Hi, Univer, test');
+
+            const text2 = StringValueObject.create('');
+            const text3 = StringValueObject.create('1');
+            const text4 = StringValueObject.create('2');
+            const text5 = StringValueObject.create('3');
+            const ignoreEmpty7 = BooleanValueObject.create(true);
+            const result7 = testFunction.calculate(delimiter, ignoreEmpty7, text2, text3, text2, text2, text4, text2, text5);
+            expect(getObjectValue(result7)).toStrictEqual('1, 2, 3');
         });
 
         it('Text value test', () => {

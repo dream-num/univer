@@ -32,10 +32,14 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
     private _pattern: CanvasPattern | null;
 
     private _img = new Image();
+    protected _shadowStrategy: 'always' | 'non-editable' | 'non-viewable' | 'none' = 'always';
 
-    constructor() {
+    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
         super();
         this._img.src = base64;
+        if (shadowStrategy) {
+            this._shadowStrategy = shadowStrategy;
+        }
     }
 
     override draw(
@@ -73,11 +77,46 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         }
 
         ctx.fillStyle = this._pattern;
-        if (hasWorksheetRule) {
+
+        // Apply shadow strategy for worksheet protection
+        let shouldRenderShadow = hasWorksheetRule;
+
+        // If strategy is 'none', never show shadow
+        if (this._shadowStrategy === 'none') {
+            shouldRenderShadow = false;
+        } else if (hasWorksheetRule && selectionProtection.length > 0) {
+            const cellProtectionConfig = selectionProtection[0];
+
+            if (this._shadowStrategy === 'non-editable') {
+                // Only show shadow if edit permission is false
+                shouldRenderShadow = cellProtectionConfig?.[UnitAction.Edit] === false;
+            } else if (this._shadowStrategy === 'non-viewable') {
+                // Only show shadow if view permission is false
+                shouldRenderShadow = cellProtectionConfig?.[UnitAction.View] === false;
+            }
+            // For 'always' strategy, shouldRenderShadow remains true (hasWorksheetRule)
+        }
+
+        if (shouldRenderShadow) {
             ctx.fillRect(start.startX, start.startY, end.endX - start.startX, end.endY - start.startY);
         }
 
         ctx.restore();
+    }
+
+    /**
+     * Set the shadow strategy for this extension
+     * @param strategy The shadow strategy
+     */
+    setShadowStrategy(strategy: 'always' | 'non-editable' | 'non-viewable' | 'none'): void {
+        this._shadowStrategy = strategy;
+    }
+
+    /**
+     * Get the current shadow strategy
+     */
+    getShadowStrategy(): 'always' | 'non-editable' | 'non-viewable' | 'none' {
+        return this._shadowStrategy;
     }
 
     setZIndex(zIndex: number) {

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-table",
-    "version": "0.10.14",
+    "version": "0.11.0",
     "private": false,
     "description": "A library for connect and bind data from other sources to Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -75,6 +75,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

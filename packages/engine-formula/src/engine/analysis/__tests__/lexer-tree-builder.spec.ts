@@ -15,7 +15,6 @@
  */
 
 import type { LexerNode } from '../lexer-node';
-
 import { AbsoluteRefType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';

@@ -266,6 +266,12 @@ export interface ICellData {
     ref?: Nullable<string>;
 
     /**
+     * New Excel formulas need to add prefixes for differentiation, e.g., _xlfn._xlws. _xlfn. _xlws. _xludf.
+     * @ignore
+     */
+    xf?: Nullable<string>;
+
+    /**
      * Id of the formula.
      */
     si?: Nullable<string>;

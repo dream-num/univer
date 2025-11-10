@@ -63,7 +63,7 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
 
-                if (!worksheet) return;
+                if (!worksheet) return this._hideAlert();
 
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
@@ -92,6 +92,7 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
                         currentLoc.subUnitId === cellPos.location.subUnitId &&
                         currentLoc.unitId === cellPos.location.unitId
                     ) {
+                        this._hideAlert();
                         return;
                     }
 

@@ -26,6 +26,8 @@ const locale: typeof enUS = {
         formatPainter: 'کپی قالب',
         font: 'فونت',
         fontSize: 'اندازه فونت',
+        fontSizeIncrease: 'افزایش اندازه فونت',
+        fontSizeDecrease: 'کاهش اندازه فونت',
         bold: 'پررنگ',
         italic: 'ایتالیک',
         strikethrough: 'خط‌دار',

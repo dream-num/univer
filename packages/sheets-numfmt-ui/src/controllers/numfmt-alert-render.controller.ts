@@ -51,7 +51,7 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                 const location = cellPos.location;
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
-                if (!worksheet) return;
+                if (!worksheet) return this._hideAlert();
 
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
@@ -82,20 +82,17 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
                         return;
                     }
 
-                    const currentAlerts = this._cellAlertManagerService.currentAlert;
-
-                    for (const [_, value] of currentAlerts.entries()) {
-                        const currentLoc = value?.alert?.location;
-
-                        if (
-                            currentLoc &&
-                            currentLoc.row === location.row &&
-                            currentLoc.col === location.col &&
-                            currentLoc.subUnitId === location.subUnitId &&
-                            currentLoc.unitId === location.unitId
-                        ) {
-                            return;
-                        }
+                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
+                    const currentLoc = currentAlert?.alert?.location;
+                    if (
+                        currentLoc &&
+                        currentLoc.row === location.row &&
+                        currentLoc.col === location.col &&
+                        currentLoc.subUnitId === location.subUnitId &&
+                        currentLoc.unitId === location.unitId
+                    ) {
+                        this._hideAlert();
+                        return;
                     }
 
                     this._cellAlertManagerService.showAlert({

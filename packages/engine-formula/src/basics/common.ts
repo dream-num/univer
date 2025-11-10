@@ -15,7 +15,6 @@
  */
 
 import type {
-    BooleanNumber,
     ICellData,
     IColumnData,
     IObjectArrayPrimitiveType,
@@ -115,6 +114,10 @@ export interface IArrayFormulaRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IRange> }>;
 }
 
+export interface IArrayFormulaEmbeddedMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<boolean> }>;
+}
+
 export interface IFeatureDirtyRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IRange[] }>;
 }
@@ -159,7 +162,6 @@ export interface IOtherFormulaDataItem {
 
 export interface ISuperTable {
     sheetId: string;
-    hasCustomTitle: BooleanNumber;
     titleMap: Map<string, number>;
     range: IRange;
 }
@@ -169,6 +171,7 @@ export enum TableOptionType {
     DATA = '#Data',
     HEADERS = '#Headers',
     TOTALS = '#Totals',
+    THIS_ROW = '#This Row',
 }
 
 export interface IUnitExcludedCell {

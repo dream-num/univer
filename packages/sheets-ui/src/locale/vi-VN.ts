@@ -26,6 +26,8 @@ const locale: typeof enUS = {
         formatPainter: 'Chổi định dạng',
         font: 'Phông chữ',
         fontSize: 'Cỡ chữ',
+        fontSizeIncrease: 'Tăng cỡ chữ',
+        fontSizeDecrease: 'Giảm cỡ chữ',
         bold: 'In đậm',
         italic: 'In nghiêng',
         strikethrough: 'Gạch ngang',

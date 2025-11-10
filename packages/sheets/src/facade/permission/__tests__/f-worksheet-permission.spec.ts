@@ -16,11 +16,11 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService, IPermissionService } from '@univerjs/core';
+import type { RangeProtectionRule } from '../permission-types';
+import { ICommandService } from '@univerjs/core';
 import {
     AddRangeProtectionMutation,
     DeleteRangeProtectionMutation,
-    RangeProtectionRuleModel,
     SetRangeProtectionMutation,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -30,17 +30,13 @@ import { WorksheetPermissionPoint } from '../permission-types';
 describe('Test FWorksheetPermission', () => {
     let get: Injector['get'];
     let univerAPI: FUniver;
-    let permissionService: IPermissionService;
     let commandService: ICommandService;
-    let rangeProtectionRuleModel: RangeProtectionRuleModel;
 
     beforeEach(() => {
         const testBed = createFacadeTestBed();
         get = testBed.get;
         univerAPI = testBed.univerAPI;
-        permissionService = get(IPermissionService);
         commandService = get(ICommandService);
-        rangeProtectionRuleModel = get(RangeProtectionRuleModel);
 
         // Register commands
         commandService.registerCommand(AddRangeProtectionMutation);
@@ -450,7 +446,7 @@ describe('Test FWorksheetPermission', () => {
                 throw new Error('Permission or worksheet is null');
             }
 
-            const changes: any[] = [];
+            const changes: Array<{ type: 'add' | 'update' | 'delete'; rules: RangeProtectionRule[] }> = [];
             const subscription = permission.rangeProtectionChange$.subscribe((change) => {
                 changes.push(change);
             });
@@ -488,6 +484,114 @@ describe('Test FWorksheetPermission', () => {
 
             expect(rulesReceived).toBe(true);
             subscription.unsubscribe();
+        });
+    });
+
+    describe('applyConfig', () => {
+        it('should apply mode configuration', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            await permission.applyConfig({
+                mode: 'readOnly',
+            });
+
+            expect(permission.getPoint(WorksheetPermissionPoint.View)).toBe(true);
+            expect(permission.getPoint(WorksheetPermissionPoint.Edit)).toBe(false);
+        });
+
+        it('should apply permission points configuration', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            await permission.applyConfig({
+                points: {
+                    [WorksheetPermissionPoint.Edit]: false,
+                    [WorksheetPermissionPoint.Sort]: true,
+                },
+            });
+
+            expect(permission.getPoint(WorksheetPermissionPoint.Edit)).toBe(false);
+            expect(permission.getPoint(WorksheetPermissionPoint.Sort)).toBe(true);
+        });
+
+        it('should apply range protections configuration', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission || !worksheet) {
+                throw new Error('Permission or worksheet is null');
+            }
+
+            await permission.applyConfig({
+                rangeProtections: [
+                    {
+                        rangeRefs: ['A1:A5'],
+                        options: { name: 'Protected A' },
+                    },
+                    {
+                        rangeRefs: ['B1:B5', 'C1:C5'],
+                        options: { name: 'Protected B&C', allowEdit: true },
+                    },
+                ],
+            });
+
+            const rules = await permission.listRangeProtectionRules();
+            expect(rules.length).toBe(2);
+
+            const ruleA = rules.find((r) => r.options.name === 'Protected A');
+            const ruleBC = rules.find((r) => r.options.name === 'Protected B&C');
+
+            expect(ruleA).toBeDefined();
+            expect(ruleA?.ranges.length).toBe(1);
+            expect(ruleA?.ranges[0].getA1Notation()).toBe('A1:A5');
+
+            expect(ruleBC).toBeDefined();
+            expect(ruleBC?.ranges.length).toBe(2);
+            expect(ruleBC?.ranges[0].getA1Notation()).toBe('B1:B5');
+            expect(ruleBC?.ranges[1].getA1Notation()).toBe('C1:C5');
+        });
+
+        it('should apply complete configuration with all fields', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission || !worksheet) {
+                throw new Error('Permission or worksheet is null');
+            }
+
+            await permission.applyConfig({
+                mode: 'editable',
+                points: {
+                    [WorksheetPermissionPoint.InsertRow]: false,
+                },
+                rangeProtections: [
+                    {
+                        rangeRefs: ['D1:D10'],
+                        options: { name: 'Formula Column' },
+                    },
+                ],
+            });
+
+            // Check mode applied
+            expect(permission.getPoint(WorksheetPermissionPoint.Edit)).toBe(true);
+
+            // Check points override
+            expect(permission.getPoint(WorksheetPermissionPoint.InsertRow)).toBe(false);
+
+            // Check range protection
+            const rules = await permission.listRangeProtectionRules();
+            const formulaRule = rules.find((r) => r.options.name === 'Formula Column');
+            expect(formulaRule).toBeDefined();
+            expect(formulaRule?.ranges[0].getA1Notation()).toBe('D1:D10');
         });
     });
 });

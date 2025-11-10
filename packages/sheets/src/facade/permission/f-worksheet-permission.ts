@@ -40,8 +40,8 @@ import {
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { FRangeProtectionRule } from './f-range-protection-rule';
-import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
-import { WorksheetPermissionPoint } from './permission-types';
+import { RANGE_PERMISSION_POINT_MAP, WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
+import { RangePermissionPoint, WorksheetPermissionPoint } from './permission-types';
 
 /**
  * Implementation class for WorksheetPermission
@@ -149,6 +149,25 @@ export class FWorksheetPermission implements WorksheetPermission {
     }
 
     /**
+     * Read the actual edit permission from a rule's permissionId
+     */
+    private _getRuleEditPermission(rule: { permissionId: string }): boolean {
+        const PermissionPointClass = RANGE_PERMISSION_POINT_MAP[RangePermissionPoint.Edit];
+        if (!PermissionPointClass) {
+            return false;
+        }
+
+        const permissionPoint = new PermissionPointClass(
+            this._unitId,
+            this._subUnitId,
+            rule.permissionId
+        );
+
+        const permission = this._permissionService.getPermissionPoint(permissionPoint.id);
+        return permission?.value ?? false;
+    }
+
+    /**
      * Build permission snapshot
      */
     private _buildSnapshot(): WorksheetPermissionSnapshot {
@@ -185,7 +204,7 @@ export class FWorksheetPermission implements WorksheetPermission {
                 ranges,
                 {
                     name: rule.description || '',
-                    allowEdit: true, // TODO: Read from permission point
+                    allowEdit: this._getRuleEditPermission(rule),
                 }
             );
         });
@@ -286,8 +305,7 @@ export class FWorksheetPermission implements WorksheetPermission {
                     col <= range.endColumn
                 ) {
                     // Cell is within protected range, check the rule's edit permission
-                    // TODO: Read actual edit permission from permissionId
-                    return false; // Simplified: assume protected means not editable
+                    return this._getRuleEditPermission(rule);
                 }
             }
         }
@@ -331,7 +349,7 @@ export class FWorksheetPermission implements WorksheetPermission {
                         ),
                         options: {
                             name: rule.description || '',
-                            allowEdit: true, // TODO: Read from permission point
+                            allowEdit: this._getRuleEditPermission(rule),
                         },
                     });
                     break;
@@ -427,8 +445,11 @@ export class FWorksheetPermission implements WorksheetPermission {
 
         // Batch create range protection
         if (config.rangeProtections && config.rangeProtections.length > 0) {
-            // TODO: Need to convert rangeRefs to FRange[]
-            // Simplified, not implemented for now
+            const protectionConfigs = config.rangeProtections.map((protection) => ({
+                ranges: protection.rangeRefs.map((rangeRef) => this._worksheet.getRange(rangeRef)),
+                options: protection.options,
+            }));
+            await this.protectRanges(protectionConfigs);
         }
     }
 

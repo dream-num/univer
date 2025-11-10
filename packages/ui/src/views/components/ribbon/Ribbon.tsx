@@ -277,7 +277,11 @@ export function Ribbon(props: IRibbonProps) {
 
     return (
         <>
-            <div className="univer-relative univer-h-9 univer-select-none">
+            <div
+                className={clsx('univer-relative univer-select-none', {
+                    'univer-h-9': ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0),
+                })}
+            >
                 {ribbonType === 'classic' && ribbon.length > 1 && (
                     <ClassicMenu
                         ribbon={ribbon}

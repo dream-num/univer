@@ -131,7 +131,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
 
     private _writeArrayFormulaToSnapshot(arrayFormulaRange: IArrayFormulaRangeType, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaEmbedded: IArrayFormulaEmbeddedMap) {
         // Write values to the `ref` property of the array formula range.
-        Object.entries(arrayFormulaRange).forEach(([unitId, subUnitData]) => {
+        arrayFormulaRange && Object.entries(arrayFormulaRange).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
                 // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
                 const cellValue = new ObjectMatrix<ICellData>();
@@ -153,7 +153,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         });
 
         // <f t="array" ref="E7">SUM(A1:A7*B1:B7)</f> , write ref for embedded array formula cells
-        Array.from(Object.entries(arrayFormulaEmbedded)).forEach(([unitId, subUnitData]) => {
+        arrayFormulaEmbedded && Object.entries(arrayFormulaEmbedded).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rangeData]) => {
                 const cellValue = new ObjectMatrix<ICellData>();
                 const matrix = new ObjectMatrix(rangeData);
@@ -185,7 +185,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         });
 
         // Write values to the 'v' property of the cell data.
-        Array.from(Object.entries(arrayFormulaCellData)).forEach(([unitId, subUnitData]) => {
+        arrayFormulaCellData && Object.entries(arrayFormulaCellData).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, rowData]) => {
                 // Keep this local to avoid triggering re-calculate in the worker.
                 this._commandService.executeCommand<ISetRangeValuesMutationParams>(SetRangeValuesMutation.id, {

@@ -30,7 +30,6 @@ export class DocumentEditablePermission implements IPermissionPoint {
     subType = UnitAction.Edit;
 
     constructor(public unitId: string) {
-        this.unitId = unitId;
         this.id = `${this.type}.${UnitAction.Edit}_${unitId}`;
     }
 }

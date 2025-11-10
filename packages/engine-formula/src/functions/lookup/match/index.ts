@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { ArrayOrderSearchType } from '../../../engine/utils/compare';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { ArrayOrderSearchType } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -82,9 +82,12 @@ export class Match extends BaseFunction {
         searchArray: ArrayValueObject,
         matchTypeValue: number
     ) {
+        // The blank cell in Excel will be treated as 0 in MATCH function.
+        const _value = value.isNull() ? NumberValueObject.create(0) : value;
+
         const searchType = this._getSearchModeValue(matchTypeValue);
 
-        const result = searchArray.orderSearch(value, searchType);
+        const result = searchArray.orderSearch(_value, searchType);
 
         if (result == null) {
             return ErrorValueObject.create(ErrorType.NA);

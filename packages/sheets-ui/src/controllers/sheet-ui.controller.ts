@@ -41,7 +41,9 @@ import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/comman
 import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
+    SetRangeFontDecreaseCommand,
     SetRangeFontFamilyCommand,
+    SetRangeFontIncreaseCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
@@ -192,6 +194,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initCommands(): void {
         [
             AddWorksheetMergeAllCommand,
@@ -223,6 +226,8 @@ export class SheetUIController extends Disposable {
             SetRangeSubscriptCommand,
             SetRangeSuperscriptCommand,
             SetRangeFontSizeCommand,
+            SetRangeFontIncreaseCommand,
+            SetRangeFontDecreaseCommand,
             SetRangeFontFamilyCommand,
             SetRangeTextColorCommand,
             ResetRangeTextColorCommand,

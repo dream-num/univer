@@ -26,6 +26,8 @@ const locale: typeof enUS = {
         formatPainter: '서식 페인트',
         font: '글꼴',
         fontSize: '글꼴 크기',
+        fontSizeIncrease: '글꼴 크기 증가',
+        fontSizeDecrease: '글꼴 크기 감소',
         bold: '굵게',
         italic: '기울임',
         strikethrough: '취소선',

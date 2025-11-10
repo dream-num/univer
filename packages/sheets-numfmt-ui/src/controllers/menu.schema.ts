@@ -16,31 +16,31 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { AddDecimalCommand, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
-import { RibbonDataGroup } from '@univerjs/ui';
+import { RibbonStartGroup } from '@univerjs/ui';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { AddDecimalMenuItem, CurrencySymbolIconMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonDataGroup.FORMULAS]: {
+    [RibbonStartGroup.LAYOUT]: {
+        [OpenNumfmtPanelOperator.id]: {
+            order: 9,
+            menuItemFactory: FactoryOtherMenuItem,
+        },
+        [SetPercentCommand.id]: {
+            order: 9.1,
+            menuItemFactory: PercentMenuItem,
+        },
         [SetCurrencyCommand.id]: {
-            order: 0,
+            order: 9.2,
             menuItemFactory: CurrencySymbolIconMenuItem,
         },
         [AddDecimalCommand.id]: {
-            order: 1,
+            order: 9.3,
             menuItemFactory: AddDecimalMenuItem,
         },
         [SubtractDecimalCommand.id]: {
-            order: 2,
+            order: 9.4,
             menuItemFactory: SubtractDecimalMenuItem,
-        },
-        [SetPercentCommand.id]: {
-            order: 3,
-            menuItemFactory: PercentMenuItem,
-        },
-        [OpenNumfmtPanelOperator.id]: {
-            order: 4,
-            menuItemFactory: FactoryOtherMenuItem,
         },
     },
 };

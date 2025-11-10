@@ -29,6 +29,7 @@ import { SetSheetTableMutation } from './commands/mutations/set-sheet-table.muta
 import { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
 import { PLUGIN_NAME } from './const';
 import { defaultPluginConfig, SHEETS_TABLE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetTableFormulaController } from './controllers/sheet-table-formula.controller';
 import { SheetTableRangeController } from './controllers/sheet-table-range.controller';
 import { SheetTableRefRangeController } from './controllers/sheet-table-ref-range.controller';
 import { SheetsTableThemeController } from './controllers/sheet-table-theme.controller';
@@ -68,9 +69,13 @@ export class UniverSheetsTablePlugin extends Plugin {
             [TableFilterController],
             [SheetTableRangeController],
             [SheetTableRefRangeController],
+            [SheetTableFormulaController],
         ]);
+    }
 
+    override onReady(): void {
         touchDependencies(this._injector, [
+            [SheetTableFormulaController],
             [SheetTableRangeController],
             [SheetTableRefRangeController],
             [SheetsTableThemeController],
@@ -78,9 +83,7 @@ export class UniverSheetsTablePlugin extends Plugin {
             [SheetTableService],
             [TableFilterController],
         ]);
-    }
 
-    override onReady(): void {
         touchDependencies(this._injector, [
             [TableManager],
         ]);

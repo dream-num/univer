@@ -76,7 +76,17 @@ export const REFERENCE_TABLE_SINGLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABL
 
 export const REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABLE_NAME_REGEX}(\\[${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$|^${TABLE_NAME_REGEX}(\\[${TABLE_TITLE_REGEX}${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$`; // =Table1[[#Title],[Column1]:[Column2]] | =Table1[[Column1]:[Column2]]
 
-export const SUPER_TABLE_COLUMN_REGEX = '[.*?]';
+export const REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX = `^(${UNIT_NAME_REGEX})?${TABLE_NAME_REGEX}\\[\\s*#([^\\]]+)\\s*\\]$`; // =Table1[#All] | =Table1[#Data] | =Table1[#Headers] | =Table1[#Totals] | =Table1[#This Row]
+
+export const REFERENCE_TABLE_ALL_COLUMN_REGEX_PRECOMPILING = new RegExp(REFERENCE_TABLE_ALL_COLUMN_REGEX);
+
+export const REFERENCE_TABLE_SINGLE_COLUMN_REGEX_PRECOMPILING = new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX);
+
+export const REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX_PRECOMPILING = new RegExp(REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX);
+
+export const REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX_PRECOMPILING = new RegExp(REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX);
+
+export const SUPER_TABLE_COLUMN_REGEX = '\\[[^\\]]*?]';
 
 export const SUPER_TABLE_COLUMN_REGEX_PRECOMPILING = new RegExp(SUPER_TABLE_COLUMN_REGEX, 'g');
 
@@ -117,6 +127,26 @@ export function regexTestSingleColumn(token: string): boolean {
 export function regexTestSuperTableColumn(token: string): boolean {
     SUPER_TABLE_COLUMN_REGEX_PRECOMPILING.lastIndex = 0;
     return SUPER_TABLE_COLUMN_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestReferenceTableAllColumn(token: string): boolean {
+    REFERENCE_TABLE_ALL_COLUMN_REGEX_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_TABLE_ALL_COLUMN_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestReferenceTableSingleColumn(token: string): boolean {
+    REFERENCE_TABLE_SINGLE_COLUMN_REGEX_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_TABLE_SINGLE_COLUMN_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestReferenceTableMultipleColumn(token: string): boolean {
+    REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestReferenceTableTitleOnlyAnyHash(token: string): boolean {
+    REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX_PRECOMPILING.test(token);
 }
 
 export function regexTestArrayValue(token: string): boolean {

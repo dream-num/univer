@@ -15,9 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { ISuperTable, TableOptionType } from '../basics/common';
+import type { Observable } from 'rxjs';
+import type { ISuperTable } from '../basics/common';
 
 import { createIdentifier, Disposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { TableOptionType } from '../basics/common';
 
 export interface ISuperTableOptionParam {
     tableOption: string;
@@ -34,6 +37,8 @@ export interface ISuperTableService {
     registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType): void;
 
     remove(unitId: string, tableName: string): void;
+
+    update$: Observable<unknown>;
 }
 
 export class SuperTableService extends Disposable implements ISuperTableService {
@@ -43,15 +48,28 @@ export class SuperTableService extends Disposable implements ISuperTableService 
     // 18.5.1.2 table (Table) for I18N
     private _tableOptionMap: Map<string, TableOptionType> = new Map();
 
+    private readonly _update$ = new Subject();
+    readonly update$ = this._update$.asObservable();
+
+    constructor() {
+        super();
+        this.registerTableOptionMap(TableOptionType.ALL, TableOptionType.ALL);
+        this.registerTableOptionMap(TableOptionType.DATA, TableOptionType.DATA);
+        this.registerTableOptionMap(TableOptionType.HEADERS, TableOptionType.HEADERS);
+        this.registerTableOptionMap(TableOptionType.TOTALS, TableOptionType.TOTALS);
+        this.registerTableOptionMap(TableOptionType.THIS_ROW, TableOptionType.THIS_ROW);
+    }
+
     override dispose(): void {
         super.dispose();
-
+        this._update$.complete();
         this._tableMap.clear();
         this._tableOptionMap.clear();
     }
 
     remove(unitId: string, tableName: string) {
         this._tableMap.get(unitId)?.delete(tableName);
+        this._update();
     }
 
     getTableMap(unitId: string) {
@@ -67,10 +85,15 @@ export class SuperTableService extends Disposable implements ISuperTableService 
             this._tableMap.set(unitId, new Map());
         }
         this._tableMap.get(unitId)?.set(tableName, reference);
+        this._update();
     }
 
     registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType) {
         this._tableOptionMap.set(tableOption, tableOptionType);
+    }
+
+    private _update() {
+        this._update$.next(null);
     }
 }
 

@@ -278,7 +278,7 @@ export function Ribbon(props: IRibbonProps) {
     return (
         <>
             {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
-                <header className={clsx('univer-relative univer-h-11 univer-select-none', borderBottomClassName)}>
+                <header className={clsx('univer-relative univer-h-10 univer-select-none', borderBottomClassName)}>
                     <div
                         className={`
                           univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center

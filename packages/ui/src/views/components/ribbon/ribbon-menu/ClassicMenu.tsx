@@ -32,8 +32,8 @@ export function ClassicMenu({
     return (
         <div
             className={`
-              univer-flex univer-w-full univer-items-center univer-justify-center univer-gap-1 univer-overflow-x-auto
-              univer-rounded-md univer-bg-gray-50 univer-px-3 univer-py-1.5
+              univer-flex univer-h-9 univer-w-full univer-items-center univer-justify-center univer-gap-1
+              univer-overflow-x-auto univer-rounded-md univer-bg-gray-50 univer-px-3
               dark:!univer-bg-gray-900
             `}
             role="tablist"

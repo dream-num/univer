@@ -122,7 +122,7 @@ function createNewInstance() {
         [UniverRenderEnginePlugin],
         [UniverUIPlugin, {
             container: 'app',
-            ribbonType: 'classic',
+            // ribbonType: 'classic',
         }],
         [UniverWebComponentAdapterPlugin],
         [UniverVue3AdapterPlugin],

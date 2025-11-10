@@ -37,6 +37,7 @@ import {
 } from '@univerjs/core';
 
 import {
+    FormulaDataModel,
     FUNCTION_NAMES_MATH,
     FUNCTION_NAMES_STATISTICAL,
 } from '@univerjs/engine-formula';
@@ -157,7 +158,8 @@ export class StatusBarController extends Disposable {
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(INumfmtService) private _numfmtService: INumfmtService
+        @Inject(INumfmtService) private _numfmtService: INumfmtService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -255,6 +257,24 @@ export class StatusBarController extends Disposable {
         };
     }
 
+    private _getCellValue(unitId: string, subUnitId: string, row: number, col: number, sheet: Worksheet): Nullable<ICellData> {
+        const rawCell = sheet.getCellRaw(row, col);
+
+        // Check array formula cell data if raw cell has no value
+        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+        const arrayCell = arrayFormulaCellData?.[unitId]?.[subUnitId]?.[row]?.[col];
+
+        if (arrayCell) {
+            // Merge array formula cell data with raw cell data
+            return {
+                ...rawCell,
+                ...arrayCell,
+            };
+        }
+
+        return rawCell;
+    }
+
     // eslint-disable-next-line max-lines-per-function
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -316,7 +336,7 @@ export class StatusBarController extends Disposable {
                 const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
-                        const value = sheet.getCellRaw(r, c);
+                        const value = this._getCellValue(unitId, sheetId, r, c, sheet);
                         calculateValueSet.add(value, styles, patternInfoRecord);
                     }
                 }

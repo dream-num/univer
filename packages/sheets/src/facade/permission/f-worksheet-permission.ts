@@ -16,6 +16,7 @@
 
 import type { Observable } from 'rxjs';
 import type { FRange } from '../f-range';
+import type { FWorksheet } from '../f-worksheet';
 import type {
     CellPermissionDebugInfo,
     RangeProtectionOptions,
@@ -92,9 +93,11 @@ export class FWorksheetPermission implements WorksheetPermission {
      */
     readonly rangeProtectionRules$: Observable<RangeProtectionRule[]>;
 
+    private readonly _unitId: string;
+    private readonly _subUnitId: string;
+
     constructor(
-        private readonly _unitId: string,
-        private readonly _subUnitId: string,
+        private readonly _worksheet: FWorksheet,
         @Inject(Injector) private readonly _injector: Injector,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IAuthzIoService private readonly _authzIoService: IAuthzIoService,
@@ -102,6 +105,9 @@ export class FWorksheetPermission implements WorksheetPermission {
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private readonly _worksheetProtectionPointModel: WorksheetProtectionPointModel
     ) {
+        // Get unitId and subUnitId from worksheet
+        this._unitId = this._worksheet.getWorkbook().getUnitId();
+        this._subUnitId = this._worksheet.getSheetId();
         // Initialize BehaviorSubject
         this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
         this.permission$ = this._permissionSubject.asObservable().pipe(
@@ -160,16 +166,23 @@ export class FWorksheetPermission implements WorksheetPermission {
     private _buildRangeProtectionRules(): RangeProtectionRule[] {
         const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
         return rules.map((rule) => {
-            // Convert raw rules to FRangeProtectionRule instances
-            // Note: Need to convert IRange to FRange, simplified here with empty array
-            // Actual implementation should create FRange instances based on range data
+            // Convert IRange to FRange using worksheet
+            const ranges = rule.ranges.map((range) =>
+                this._worksheet.getRange(
+                    range.startRow,
+                    range.startColumn,
+                    range.endRow - range.startRow + 1,
+                    range.endColumn - range.startColumn + 1
+                )
+            );
+
             return this._injector.createInstance(
                 FRangeProtectionRule,
                 this._unitId,
                 this._subUnitId,
                 rule.id,
                 rule.permissionId,
-                [], // TODO: Convert ranges to FRange[]
+                ranges,
                 {
                     name: rule.description || '',
                     allowEdit: true, // TODO: Read from permission point

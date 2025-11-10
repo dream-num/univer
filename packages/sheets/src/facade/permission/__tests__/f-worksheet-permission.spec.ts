@@ -332,6 +332,46 @@ describe('Test FWorksheetPermission', () => {
             expect(ruleNames).toContain('Rule A');
             expect(ruleNames).toContain('Rule B');
         });
+
+        it('should return correct ranges for protection rules', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission || !worksheet) {
+                throw new Error('Permission or worksheet is null');
+            }
+
+            const range1 = worksheet.getRange('C1:C5');
+            const range2 = worksheet.getRange('D10:F15');
+
+            await permission.protectRanges([
+                { ranges: [range1], options: { name: 'Range Test 1' } },
+                { ranges: [range2], options: { name: 'Range Test 2' } },
+            ]);
+
+            const allRules = await permission.listRangeProtectionRules();
+
+            // Find our test rules
+            const rule1 = allRules.find((r) => r.options.name === 'Range Test 1');
+            const rule2 = allRules.find((r) => r.options.name === 'Range Test 2');
+
+            expect(rule1).toBeDefined();
+            expect(rule2).toBeDefined();
+
+            // Verify rule1 has correct ranges
+            if (rule1) {
+                expect(rule1.ranges.length).toBe(1);
+                const actualRange1 = rule1.ranges[0];
+                expect(actualRange1.getA1Notation()).toBe('C1:C5');
+            }
+
+            // Verify rule2 has correct ranges
+            if (rule2) {
+                expect(rule2.ranges.length).toBe(1);
+                const actualRange2 = rule2.ranges[0];
+                expect(actualRange2.getA1Notation()).toBe('D10:F15');
+            }
+        });
     });
 
     describe('Debug Utilities', () => {

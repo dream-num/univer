@@ -2595,8 +2595,7 @@ export class FWorksheet extends FBaseInitialable {
     getWorksheetPermission(): FWorksheetPermission {
         return this._injector.createInstance(
             FWorksheetPermission,
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId()
+            this
         );
     }
 }

@@ -277,8 +277,16 @@ export function Ribbon(props: IRibbonProps) {
 
     return (
         <>
-            {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
-                <header className={clsx('univer-relative univer-h-10 univer-select-none', borderBottomClassName)}>
+            <div className="univer-relative univer-h-9 univer-select-none">
+                {ribbonType === 'classic' && ribbon.length > 1 && (
+                    <ClassicMenu
+                        ribbon={ribbon}
+                        activatedTab={activatedTab}
+                        onSelectTab={handleSelectTab}
+                    />
+                )}
+
+                {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
                     <div
                         className={`
                           univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
@@ -290,16 +298,8 @@ export function Ribbon(props: IRibbonProps) {
                     >
                         <ComponentContainer components={headerMenuComponents} />
                     </div>
-                </header>
-            )}
-
-            {ribbonType === 'classic' && ribbon.length > 1 && (
-                <ClassicMenu
-                    ribbon={ribbon}
-                    activatedTab={activatedTab}
-                    onSelectTab={handleSelectTab}
-                />
-            )}
+                )}
+            </div>
 
             <div
                 className={clsx(`

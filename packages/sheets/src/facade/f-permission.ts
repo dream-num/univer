@@ -24,6 +24,29 @@ import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRange
 
 /**
  * @description Used to generate permission instances to control permissions for the entire workbook
+ * @deprecated This class is deprecated. Use the new permission API instead:
+ * - For workbook-level permissions, use `workbook.getWorkbookPermission()`
+ * - For worksheet-level permissions, use `worksheet.getWorksheetPermission()`
+ * - For range-level permissions, use `range.getRangePermission()`
+ *
+ * The new API provides:
+ * - More intuitive and type-safe interfaces
+ * - Better support for RxJS Observable streams
+ * - Enum-based permission points instead of class constructors
+ * - Simplified collaborator management
+ * - Mode-based permission settings (viewer, editor, owner, etc.)
+ *
+ * Migration examples:
+ * ```ts
+ * // Old API
+ * const permission = workbook.getPermission();
+ * await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
+ *
+ * // New API
+ * const worksheet = workbook.getSheetBySheetId(subUnitId);
+ * const permission = worksheet.getWorksheetPermission();
+ * await permission.protectRanges([{ ranges, options: { name: 'Protected', allowEdit: false } }]);
+ * ```
  * @hideconstructor
  */
 export class FPermission extends FBase {
@@ -304,6 +327,7 @@ export class FPermission extends FBase {
      * Adds a range protection to the worksheet.
      * Note that after adding, only the background mask of the permission module will be rendered. If you want to modify the function permissions,
      * you need to modify the permission points with the permissionId returned by this function.
+     * @deprecated Use `worksheet.getWorksheetPermission().protectRanges()` instead
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {FRange[]} ranges - The ranges to be protected.
@@ -311,6 +335,7 @@ export class FPermission extends FBase {
      *
      * @example
      * ```typescript
+     * // Old API
      * const workbook = univerAPI.getActiveWorkbook();
      * const permission = workbook.getPermission();
      * const unitId = workbook.getId();
@@ -319,11 +344,18 @@ export class FPermission extends FBase {
      * const range = worksheet.getRange('A1:B2');
      * const ranges = [];
      * ranges.push(range);
-     * // Note that there will be no permission changes after this step is completed. It only returns an ID for subsequent permission changes.
-     * // For details, please see the example of the **`setRangeProtectionPermissionPoint`** API.
      * const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
      * const {permissionId, ruleId} = res;
      * console.log('debugger', permissionId, ruleId);
+     *
+     * // New API (recommended)
+     * const worksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const permission = worksheet.getWorksheetPermission();
+     * const range = worksheet.getRange('A1:B2');
+     * await permission.protectRanges([{
+     *   ranges: [range],
+     *   options: { name: 'Protected Area', allowEdit: false }
+     * }]);
      * ```
      */
     async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: FRange[]): Promise<{
@@ -378,12 +410,14 @@ export class FPermission extends FBase {
 
     /**
      * Removes the range protection from the worksheet.
+     * @deprecated Use `worksheet.getWorksheetPermission().unprotectRules()` instead
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {string[]} ruleIds - The rule IDs of the range protection to be removed.
      *
      * @example
      * ```typescript
+     * // Old API
      * const workbook = univerAPI.getActiveWorkbook();
      * const permission = workbook.getPermission();
      * const unitId = workbook.getId();
@@ -395,6 +429,11 @@ export class FPermission extends FBase {
      * const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
      * const ruleId = res.ruleId;
      * permission.removeRangeProtection(unitId, subUnitId, [ruleId]);
+     *
+     * // New API (recommended)
+     * const worksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const permission = worksheet.getWorksheetPermission();
+     * await permission.unprotectRules([ruleId]);
      * ```
      */
     removeRangeProtection(unitId: string, subUnitId: string, ruleIds: string[]): void {

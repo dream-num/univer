@@ -92,7 +92,6 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         },
                         4: {
                             f: '=IF(B8<>"","Trip #"&1+SUBSTITUTE(LOOKUP(2,1/($C$4:$C7<>""),$C$4:$C7),"Trip #",""),"")',
-                            v: 'Trip #3',
                             t: 1,
                         },
                     },

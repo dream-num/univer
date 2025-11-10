@@ -16,6 +16,7 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { WorkbookPermissionSnapshot } from '../permission-types';
 import { IPermissionService } from '@univerjs/core';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -215,7 +216,7 @@ describe('Test FWorkbookPermission', () => {
                 throw new Error('Permission is null');
             }
 
-            const snapshots: any[] = [];
+            const snapshots: WorkbookPermissionSnapshot[] = [];
             const subscription = permission.permission$.subscribe((snapshot) => {
                 snapshots.push(snapshot);
             });
@@ -279,6 +280,120 @@ describe('Test FWorkbookPermission', () => {
                 const valueAfter = permission.getPoint(point);
                 expect(valueAfter).toBe(true);
             }
+        });
+    });
+
+    describe('Permission Change Listener', () => {
+        it('should listen to permission service updates and emit pointChange$', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission || !workbook) {
+                throw new Error('Permission or workbook is null');
+            }
+
+            const changes: Array<{
+                point: WorkbookPermissionPoint;
+                value: boolean;
+                oldValue: boolean;
+            }> = [];
+
+            const subscription = permission.pointChange$.subscribe((change) => {
+                changes.push(change);
+            });
+
+            // Change a permission point, which should trigger the listener
+            await permission.setPoint(WorkbookPermissionPoint.Edit, false);
+            await permission.setPoint(WorkbookPermissionPoint.Print, false);
+
+            // Wait a bit for async updates
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            // Should have captured the changes
+            expect(changes.length).toBeGreaterThanOrEqual(2);
+            expect(changes.some((c) => c.point === WorkbookPermissionPoint.Edit)).toBe(true);
+            expect(changes.some((c) => c.point === WorkbookPermissionPoint.Print)).toBe(true);
+
+            subscription.unsubscribe();
+        });
+
+        it('should update snapshot when permission service emits changes', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission || !workbook) {
+                throw new Error('Permission or workbook is null');
+            }
+
+            const snapshots: WorkbookPermissionPoint[][] = [];
+            const subscription = permission.permission$.subscribe((snapshot) => {
+                const changedPoints = Object.keys(snapshot).filter(
+                    (key) => snapshot[key as WorkbookPermissionPoint] === false
+                );
+                snapshots.push(changedPoints as WorkbookPermissionPoint[]);
+            });
+
+            const initialSnapshotCount = snapshots.length;
+
+            // Trigger permission change
+            await permission.setPoint(WorkbookPermissionPoint.Export, false);
+
+            // Wait for async updates
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            // Should have received a new snapshot
+            expect(snapshots.length).toBeGreaterThan(initialSnapshotCount);
+
+            subscription.unsubscribe();
+        });
+
+        it('should only react to permission changes for this workbook', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission || !workbook) {
+                throw new Error('Permission or workbook is null');
+            }
+
+            const changes: Array<{
+                point: WorkbookPermissionPoint;
+                value: boolean;
+                oldValue: boolean;
+            }> = [];
+
+            const subscription = permission.pointChange$.subscribe((change) => {
+                changes.push(change);
+            });
+
+            // Create a permission point for a different unitId (should be ignored)
+            const differentUnitId = 'different-unit-id';
+            const differentPermissionPoint = new WorkbookEditablePermission(differentUnitId);
+            permissionService.addPermissionPoint(differentPermissionPoint);
+            permissionService.updatePermissionPoint(differentPermissionPoint.id, false);
+
+            // Change permission for current workbook
+            await permission.setPoint(WorkbookPermissionPoint.View, false);
+
+            // Wait for async updates
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            // Should only have changes for the current workbook
+            expect(changes.every((c) => c.point === WorkbookPermissionPoint.View)).toBe(true);
+            expect(changes.length).toBeGreaterThanOrEqual(1);
+
+            subscription.unsubscribe();
+        });
+
+        it('should properly dispose subscriptions', () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Dispose should not throw
+            expect(() => permission.dispose()).not.toThrow();
         });
     });
 });

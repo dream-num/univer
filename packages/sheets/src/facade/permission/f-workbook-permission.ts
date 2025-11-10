@@ -105,8 +105,48 @@ export class FWorkbookPermission implements WorkbookPermission {
      * Listen to permission point changes
      */
     private _listenToPermissionChanges(): void {
-        // TODO: Listen to IPermissionService change events
-        // When permission points change, update snapshot and trigger corresponding Observable
+        // Subscribe to permission point updates from IPermissionService
+        const subscription = this._permissionService.permissionPointUpdate$.subscribe((permissionPoint) => {
+            // Check if this permission point belongs to this workbook
+            // Workbook permission points have format: "WorkbookEditPermission.{unitId}"
+            const pointId = permissionPoint.id;
+            if (!pointId.includes(this._unitId)) {
+                return; // Not related to this workbook
+            }
+
+            // Find which WorkbookPermissionPoint this corresponds to
+            for (const point in WorkbookPermissionPoint) {
+                const pointKey = WorkbookPermissionPoint[point as keyof typeof WorkbookPermissionPoint];
+                const PointClass = WORKBOOK_PERMISSION_POINT_MAP[pointKey];
+                if (!PointClass) {
+                    continue;
+                }
+
+                const instance = new PointClass(this._unitId);
+                if (instance.id === pointId) {
+                    // Found matching point, get old value
+                    const snapshot = this._permissionSubject.getValue();
+                    const oldValue = snapshot[pointKey];
+                    const newValue = permissionPoint.value as boolean;
+
+                    if (oldValue !== newValue) {
+                        // Emit point change event
+                        this._pointChangeSubject.next({
+                            point: pointKey,
+                            value: newValue,
+                            oldValue,
+                        });
+
+                        // Update snapshot
+                        const newSnapshot = this._buildSnapshot();
+                        this._permissionSubject.next(newSnapshot);
+                    }
+                    break;
+                }
+            }
+        });
+
+        this._subscriptions.push(subscription);
     }
 
     /**

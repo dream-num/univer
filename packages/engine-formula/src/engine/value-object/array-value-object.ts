@@ -640,7 +640,8 @@ export class ArrayValueObject extends BaseValueObject {
         let maxOrMinPosition: Nullable<{ row: number; column: number }>;
 
         const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
-            if (itemValue == null) {
+            // Skip the blank cells
+            if (itemValue == null || itemValue.isNull()) {
                 return true;
             }
 

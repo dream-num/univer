@@ -191,7 +191,8 @@ export class FRangePermission implements RangePermission {
     async unprotect(): Promise<void> {
         const rule = this._getProtectionRule();
         if (!rule) {
-            throw new Error('Range is not protected');
+            // Silently handle unprotecting a non-protected range
+            return;
         }
 
         await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {

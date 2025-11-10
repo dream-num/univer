@@ -30,12 +30,14 @@ import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, I
 import {
     AddRangeProtectionMutation,
     DeleteRangeProtectionMutation,
+    EditStateEnum,
     RangeProtectionRuleModel,
     UnitObject,
+    ViewStateEnum,
     WorksheetProtectionPointModel,
 } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
 import { WorksheetPermissionPoint } from './permission-types';
@@ -110,10 +112,32 @@ export class FWorksheetPermission implements WorksheetPermission {
         this.pointChange$ = this._pointChangeSubject.asObservable();
         this.rangeProtectionChange$ = this._rangeProtectionChangeSubject.asObservable();
 
-        // Range rules list stream
-        this.rangeProtectionRules$ = this._rangeProtectionRuleModel.ruleChange$.pipe(
-            filter((change) => change.unitId === this._unitId && change.subUnitId === this._subUnitId),
-            map(() => this._buildRangeProtectionRules()),
+        // Range rules list stream - use BehaviorSubject to emit initial value
+        const rangeRulesSubject = new BehaviorSubject<RangeProtectionRule[]>(this._buildRangeProtectionRules());
+
+        // Update when rules change
+        this._rangeProtectionRuleModel.ruleChange$.subscribe((change) => {
+            if (change.unitId === this._unitId && change.subUnitId === this._subUnitId) {
+                const rules = this._buildRangeProtectionRules();
+                rangeRulesSubject.next(rules);
+
+                // Also emit rangeProtectionChange event
+                const changeType: 'add' | 'update' | 'delete' = change.oldRule ? 'update' : 'add';
+                this._rangeProtectionChangeSubject.next({
+                    type: changeType,
+                    rules,
+                });
+            }
+        });
+
+        this.rangeProtectionRules$ = rangeRulesSubject.asObservable().pipe(
+            distinctUntilChanged((prev, curr) => {
+                // Compare by rule IDs instead of JSON.stringify to avoid circular reference issues
+                if (prev.length !== curr.length) {
+                    return false;
+                }
+                return prev.every((p, i) => p.id === curr[i].id);
+            }),
             shareReplay(1)
         );
     }
@@ -260,11 +284,11 @@ export class FWorksheetPermission implements WorksheetPermission {
 
     /**
      * Check if a specific cell can be viewed
-     * @param row - Row index
-     * @param col - Column index
+     * @param _row - Row index (unused, for API consistency)
+     * @param _col - Column index (unused, for API consistency)
      * @returns true if the cell can be viewed, false otherwise
      */
-    canViewCell(row: number, col: number): boolean {
+    canViewCell(_row: number, _col: number): boolean {
         // View permission is usually true by default
         return this.getPoint(WorksheetPermissionPoint.View);
     }
@@ -433,7 +457,9 @@ export class FWorksheetPermission implements WorksheetPermission {
             subUnitId: this._subUnitId,
             ranges: c.ranges.map((r) => r.getRange()),
             id: `ruleId_${generateRandomId(6)}`,
-            name: c.options?.name || '',
+            description: c.options?.name || '',
+            viewState: ViewStateEnum.OthersCanView,
+            editState: c.options?.allowEdit ? EditStateEnum.DesignedUserCanEdit : EditStateEnum.OnlyMe,
         }));
 
         const result = await this._commandService.executeCommand(AddRangeProtectionMutation.id, {

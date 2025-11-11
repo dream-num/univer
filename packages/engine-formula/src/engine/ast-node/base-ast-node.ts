@@ -71,9 +71,9 @@ export class BaseAstNode {
         return NodeType.BASE;
     }
 
-    clearValue() {
+    resetCalculationState() {
         this._children.forEach((node) => {
-            node.clearValue();
+            node.resetCalculationState();
         });
         this._valueObject = null;
         this._calculateState = false;

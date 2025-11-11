@@ -42,8 +42,11 @@ import { RangePermissionPoint } from './permission-types';
 export class FRangePermission implements IRangePermission {
     private readonly _permission$: BehaviorSubject<RangePermissionSnapshot>;
     private readonly _protectionChange$ = new Subject<{
-        type: 'protected' | 'unprotected';
-        rules: IFRangeProtectionRule[];
+        type: 'protected';
+        rule: IFRangeProtectionRule;
+    } | {
+        type: 'unprotected';
+        ruleId: string;
     }>();
 
     constructor(
@@ -67,15 +70,70 @@ export class FRangePermission implements IRangePermission {
         // Listen to protection rule changes
         this._rangeProtectionRuleModel.ruleChange$.subscribe((change) => {
             if (change.unitId === this._unitId && change.subUnitId === this._subUnitId) {
-                const rules = this._buildProtectionRules();
-                const isProtected = this.isProtected();
-                this._protectionChange$.next({
-                    type: isProtected ? 'protected' : 'unprotected',
-                    rules,
-                });
+                // Only emit protectionChange$ for changes that affect this specific range
+                const currentRule = this._getProtectionRule();
+
+                if (change.type === 'delete' && change.rule.id === currentRule?.id) {
+                    // This range was just unprotected
+                    this._protectionChange$.next({
+                        type: 'unprotected',
+                        ruleId: change.rule.id,
+                    });
+                } else if (change.type === 'add' && this._rangeMatches(change.rule)) {
+                    // This range was just protected
+                    const rule = this._createFacadeRule(change.rule);
+                    this._protectionChange$.next({
+                        type: 'protected',
+                        rule,
+                    });
+                }
+
                 this._permission$.next(this._buildSnapshot());
             }
         });
+    }
+
+    /**
+     * Check if a protection rule matches this range
+     */
+    private _rangeMatches(rule: IRangeProtectionRule): boolean {
+        const range = this._range.getRange();
+        return rule.ranges.some((ruleRange) =>
+            range.startRow === ruleRange.startRow &&
+            range.startColumn === ruleRange.startColumn &&
+            range.endRow === ruleRange.endRow &&
+            range.endColumn === ruleRange.endColumn
+        );
+    }
+
+    /**
+     * Create a Facade rule from internal rule
+     */
+    private _createFacadeRule(rule: IRangeProtectionRule): IFRangeProtectionRule {
+        const ranges = rule.ranges.map((range) =>
+            this._worksheet.getRange(
+                range.startRow,
+                range.startColumn,
+                range.endRow - range.startRow + 1,
+                range.endColumn - range.startColumn + 1
+            )
+        );
+
+        const options: IRangeProtectionOptions = {
+            name: rule.description || '',
+            allowViewByOthers: rule.viewState !== ViewStateEnum.NoOneElseCanView,
+            allowEdit: rule.editState === EditStateEnum.DesignedUserCanEdit,
+        };
+
+        return this._injector.createInstance(
+            FRangeProtectionRule,
+            this._unitId,
+            this._subUnitId,
+            rule.id,
+            rule.permissionId,
+            ranges,
+            options
+        );
     }
 
     /**
@@ -91,8 +149,11 @@ export class FRangePermission implements IRangePermission {
      * @returns Observable that emits when protection state changes
      */
     get protectionChange$(): Observable<{
-        type: 'protected' | 'unprotected';
-        rules: IFRangeProtectionRule[];
+        type: 'protected';
+        rule: IFRangeProtectionRule;
+    } | {
+        type: 'unprotected';
+        ruleId: string;
     }> {
         return this._protectionChange$.asObservable();
     }
@@ -371,8 +432,7 @@ export class FRangePermission implements IRangePermission {
             options || {}
         );
 
-        const rules = this._buildProtectionRules();
-        this._protectionChange$.next({ type: 'protected', rules });
+        this._protectionChange$.next({ type: 'protected', rule });
 
         return rule;
     }
@@ -464,14 +524,15 @@ export class FRangePermission implements IRangePermission {
             return;
         }
 
+        const ruleId = rule.id;
+
         await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {
             unitId: this._unitId,
             subUnitId: this._subUnitId,
-            ruleIds: [rule.id],
+            ruleIds: [ruleId],
         });
 
-        const rules = this._buildProtectionRules();
-        this._protectionChange$.next({ type: 'unprotected', rules });
+        this._protectionChange$.next({ type: 'unprotected', ruleId });
     }
 
     /**

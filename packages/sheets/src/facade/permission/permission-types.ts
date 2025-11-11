@@ -567,8 +567,11 @@ export interface IRangePermission {
      * Protection state change stream
      */
     readonly protectionChange$: Observable<{
-        type: 'protected' | 'unprotected';
-        rules: IRangeProtectionRule[];
+        type: 'protected';
+        rule: IRangeProtectionRule;
+    } | {
+        type: 'unprotected';
+        ruleId: string;
     }>;
 
     /**

@@ -84,6 +84,9 @@ export function findNextRange(
             if (next <= boundary.endRow) {
                 destRange.startRow = next;
                 destRange.endRow = next;
+            } else if (next === worksheet.getRowCount()) {
+                destRange.startRow = next - 1;
+                destRange.endRow = next - 1;
             } else if (isGoBack) {
                 destRange.startRow = boundary.startRow;
                 destRange.endRow = boundary.startRow;

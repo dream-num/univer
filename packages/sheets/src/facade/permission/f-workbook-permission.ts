@@ -16,7 +16,7 @@
 
 import type { ICollaborator as IProtocolCollaborator } from '@univerjs/protocol';
 import type { Observable, Subscription } from 'rxjs';
-import type { ICollaborator, UnsubscribeFn, WorkbookMode, WorkbookPermission, WorkbookPermissionSnapshot } from './permission-types';
+import type { ICollaborator, IWorkbookPermission, UnsubscribeFn, WorkbookMode, WorkbookPermissionSnapshot } from './permission-types';
 import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
@@ -29,7 +29,7 @@ import { UnitRole, WorkbookPermissionPoint } from './permission-types';
  *
  * @hideconstructor
  */
-export class FWorkbookPermission implements WorkbookPermission {
+export class FWorkbookPermission implements IWorkbookPermission {
     private readonly _permissionSubject: BehaviorSubject<WorkbookPermissionSnapshot>;
     private readonly _pointChangeSubject = new Subject<{
         point: WorkbookPermissionPoint;

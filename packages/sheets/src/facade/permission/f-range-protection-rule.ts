@@ -15,7 +15,7 @@
  */
 
 import type { FRange } from '../f-range';
-import type { RangeProtectionOptions, RangeProtectionRule } from './permission-types';
+import type { IRangeProtectionOptions, IRangeProtectionRule } from './permission-types';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation } from '@univerjs/sheets';
 
@@ -25,14 +25,14 @@ import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtec
  *
  * @hideconstructor
  */
-export class FRangeProtectionRule implements RangeProtectionRule {
+export class FRangeProtectionRule implements IRangeProtectionRule {
     constructor(
         private readonly _unitId: string,
         private readonly _subUnitId: string,
         private readonly _ruleId: string,
         private readonly _permissionId: string,
         private readonly _ranges: FRange[],
-        private readonly _options: RangeProtectionOptions,
+        private readonly _options: IRangeProtectionOptions,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
@@ -58,7 +58,7 @@ export class FRangeProtectionRule implements RangeProtectionRule {
      * Get the protection options
      * @returns Copy of the protection options
      */
-    get options(): RangeProtectionOptions {
+    get options(): IRangeProtectionOptions {
         return { ...this._options };
     }
 
@@ -114,7 +114,7 @@ export class FRangeProtectionRule implements RangeProtectionRule {
      * Update protection options
      * @param options - Partial options to update (will be merged with existing options)
      */
-    async updateOptions(options: Partial<RangeProtectionOptions>): Promise<void> {
+    async updateOptions(options: Partial<IRangeProtectionOptions>): Promise<void> {
         const rule = this._rangeProtectionRuleModel.getRule(this._unitId, this._subUnitId, this._ruleId);
         if (!rule) {
             throw new Error(`Rule ${this._ruleId} not found`);
@@ -153,9 +153,8 @@ export class FRangeProtectionRule implements RangeProtectionRule {
 
     /**
      * Check if two ranges intersect
-     * @param range1 - First range
-     * @param range2 - Second range
      * @returns true if ranges intersect, false otherwise
+     * @private
      */
     private _rangesIntersect(
         range1: { startRow: number; startColumn: number; endRow: number; endColumn: number },

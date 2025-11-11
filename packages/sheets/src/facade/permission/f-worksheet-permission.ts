@@ -18,13 +18,13 @@ import type { Observable } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type {
-    CellPermissionDebugInfo,
-    RangeProtectionOptions,
-    RangeProtectionRule,
+    ICellPermissionDebugInfo,
+    IRangeProtectionOptions,
+    IRangeProtectionRule,
+    IWorksheetPermission,
+    IWorksheetPermissionConfig,
     UnsubscribeFn,
     WorksheetMode,
-    WorksheetPermission,
-    WorksheetPermissionConfig,
     WorksheetPermissionSnapshot,
 } from './permission-types';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
@@ -49,7 +49,7 @@ import { RangePermissionPoint, WorksheetPermissionPoint } from './permission-typ
  *
  * @hideconstructor
  */
-export class FWorksheetPermission implements WorksheetPermission {
+export class FWorksheetPermission implements IWorksheetPermission {
     private readonly _permissionSubject: BehaviorSubject<WorksheetPermissionSnapshot>;
     private readonly _pointChangeSubject = new Subject<{
         point: WorksheetPermissionPoint;
@@ -59,7 +59,7 @@ export class FWorksheetPermission implements WorksheetPermission {
 
     private readonly _rangeProtectionChangeSubject = new Subject<{
         type: 'add' | 'update' | 'delete';
-        rules: RangeProtectionRule[];
+        rules: IRangeProtectionRule[];
     }>();
 
     /**
@@ -84,14 +84,14 @@ export class FWorksheetPermission implements WorksheetPermission {
      */
     readonly rangeProtectionChange$: Observable<{
         type: 'add' | 'update' | 'delete';
-        rules: RangeProtectionRule[];
+        rules: IRangeProtectionRule[];
     }>;
 
     /**
      * Observable stream of current range protection rules list (BehaviorSubject)
      * Emits immediately on subscription with current rules, then auto-updates when rules change
      */
-    readonly rangeProtectionRules$: Observable<RangeProtectionRule[]>;
+    readonly rangeProtectionRules$: Observable<IRangeProtectionRule[]>;
 
     private readonly _unitId: string;
     private readonly _subUnitId: string;
@@ -119,7 +119,7 @@ export class FWorksheetPermission implements WorksheetPermission {
         this.rangeProtectionChange$ = this._rangeProtectionChangeSubject.asObservable();
 
         // Range rules list stream - use BehaviorSubject to emit initial value
-        const rangeRulesSubject = new BehaviorSubject<RangeProtectionRule[]>(this._buildRangeProtectionRules());
+        const rangeRulesSubject = new BehaviorSubject<IRangeProtectionRule[]>(this._buildRangeProtectionRules());
 
         // Update when rules change
         this._rangeProtectionRuleModel.ruleChange$.subscribe((change) => {
@@ -182,7 +182,7 @@ export class FWorksheetPermission implements WorksheetPermission {
     /**
      * Build range protection rules list
      */
-    private _buildRangeProtectionRules(): RangeProtectionRule[] {
+    private _buildRangeProtectionRules(): IRangeProtectionRule[] {
         const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
         return rules.map((rule) => {
             // Convert IRange to FRange using worksheet
@@ -330,7 +330,7 @@ export class FWorksheetPermission implements WorksheetPermission {
      * @param col - Column index
      * @returns Debug information about which rules affect this cell, or null if no rules apply
      */
-    debugCellPermission(row: number, col: number): CellPermissionDebugInfo | null {
+    debugCellPermission(row: number, col: number): ICellPermissionDebugInfo | null {
         const hitRules = [];
         const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
 
@@ -430,7 +430,7 @@ export class FWorksheetPermission implements WorksheetPermission {
      * Apply a permission configuration to the worksheet
      * @param config - The configuration to apply
      */
-    async applyConfig(config: WorksheetPermissionConfig): Promise<void> {
+    async applyConfig(config: IWorksheetPermissionConfig): Promise<void> {
         // Apply mode
         if (config.mode) {
             await this.setMode(config.mode);
@@ -439,14 +439,16 @@ export class FWorksheetPermission implements WorksheetPermission {
         // Apply permission point configuration
         if (config.points) {
             for (const [point, value] of Object.entries(config.points)) {
-                await this.setPoint(point as WorksheetPermissionPoint, value);
+                if (typeof value === 'boolean') {
+                    await this.setPoint(point as WorksheetPermissionPoint, value);
+                }
             }
         }
 
         // Batch create range protection
         if (config.rangeProtections && config.rangeProtections.length > 0) {
-            const protectionConfigs = config.rangeProtections.map((protection) => ({
-                ranges: protection.rangeRefs.map((rangeRef) => this._worksheet.getRange(rangeRef)),
+            const protectionConfigs = config.rangeProtections.map((protection: { rangeRefs: string[]; options?: IRangeProtectionOptions }) => ({
+                ranges: protection.rangeRefs.map((rangeRef: string) => this._worksheet.getRange(rangeRef)),
                 options: protection.options,
             }));
             await this.protectRanges(protectionConfigs);
@@ -461,9 +463,9 @@ export class FWorksheetPermission implements WorksheetPermission {
     async protectRanges(
         configs: Array<{
             ranges: FRange[];
-            options?: RangeProtectionOptions;
+            options?: IRangeProtectionOptions;
         }>
-    ): Promise<RangeProtectionRule[]> {
+    ): Promise<IRangeProtectionRule[]> {
         if (!configs || configs.length === 0) {
             throw new Error('Configs cannot be empty');
         }
@@ -554,7 +556,7 @@ export class FWorksheetPermission implements WorksheetPermission {
      * List all range protection rules for the worksheet
      * @returns Array of protection rules
      */
-    async listRangeProtectionRules(): Promise<RangeProtectionRule[]> {
+    async listRangeProtectionRules(): Promise<IRangeProtectionRule[]> {
         return this._buildRangeProtectionRules();
     }
 

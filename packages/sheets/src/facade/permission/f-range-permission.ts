@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { IRangeProtectionRule } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
-import type { RangePermission, RangePermissionSnapshot, RangeProtectionOptions, RangeProtectionRule } from './permission-types';
+import type {
+    IRangeProtectionRule as IFRangeProtectionRule,
+    IRangePermission,
+    IRangeProtectionOptions,
+    RangePermissionSnapshot,
+} from './permission-types';
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -31,11 +38,11 @@ import { RangePermissionPoint } from './permission-types';
  *
  * @hideconstructor
  */
-export class FRangePermission implements RangePermission {
+export class FRangePermission implements IRangePermission {
     private readonly _permission$: BehaviorSubject<RangePermissionSnapshot>;
     private readonly _protectionChange$ = new Subject<{
         type: 'protected' | 'unprotected';
-        rules: RangeProtectionRule[];
+        rules: IFRangeProtectionRule[];
     }>();
 
     constructor(
@@ -84,7 +91,7 @@ export class FRangePermission implements RangePermission {
      */
     get protectionChange$(): Observable<{
         type: 'protected' | 'unprotected';
-        rules: RangeProtectionRule[];
+        rules: IFRangeProtectionRule[];
     }> {
         return this._protectionChange$.asObservable();
     }
@@ -143,7 +150,7 @@ export class FRangePermission implements RangePermission {
      * @param options - Protection options
      * @returns The created protection rule
      */
-    async protect(options?: RangeProtectionOptions): Promise<RangeProtectionRule> {
+    async protect(options?: IRangeProtectionOptions): Promise<IFRangeProtectionRule> {
         if (this.isProtected()) {
             throw new Error('Range is already protected');
         }
@@ -209,7 +216,7 @@ export class FRangePermission implements RangePermission {
      * List all protection rules
      * @returns Array of protection rules
      */
-    async listRules(): Promise<RangeProtectionRule[]> {
+    async listRules(): Promise<IFRangeProtectionRule[]> {
         return this._buildProtectionRules();
     }
 
@@ -226,7 +233,7 @@ export class FRangePermission implements RangePermission {
     /**
      * Get the protection rule for the current range
      */
-    private _getProtectionRule(): any {
+    private _getProtectionRule(): Nullable<IRangeProtectionRule> {
         const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
         const range = this._range.getRange();
 

@@ -205,7 +205,7 @@ export type UnsubscribeFn = () => void;
 /**
  * Range protection options configuration
  */
-export interface RangeProtectionOptions {
+export interface IRangeProtectionOptions {
     /** Whether to allow current user to edit (default false = protected, not editable) */
     allowEdit?: boolean;
 
@@ -223,7 +223,7 @@ export interface RangeProtectionOptions {
  * Range protection rule Facade
  * Encapsulates internal permissionId / ruleId
  */
-export interface RangeProtectionRule {
+export interface IRangeProtectionRule {
     /** Internal rule id, for debugging/logging, generally not directly used by callers */
     readonly id: string;
 
@@ -231,13 +231,13 @@ export interface RangeProtectionRule {
     readonly ranges: FRange[];
 
     /** Current rule configuration */
-    readonly options: RangeProtectionOptions;
+    readonly options: IRangeProtectionOptions;
 
     /** Update protected ranges */
     updateRanges(ranges: FRange[]): Promise<void>;
 
     /** Partially update configuration */
-    updateOptions(options: Partial<RangeProtectionOptions>): Promise<void>;
+    updateOptions(options: Partial<IRangeProtectionOptions>): Promise<void>;
 
     /** Delete current protection rule */
     remove(): Promise<void>;
@@ -246,21 +246,21 @@ export interface RangeProtectionRule {
 /**
  * Cell permission debug rule information
  */
-export interface CellPermissionDebugRuleInfo {
+export interface ICellPermissionDebugRuleInfo {
     ruleId: string;
     /** Range reference string list, e.g., ['A1:B10', 'D1:D5'] */
     rangeRefs: string[];
-    options: RangeProtectionOptions;
+    options: IRangeProtectionOptions;
 }
 
 /**
  * Cell permission debug information
  */
-export interface CellPermissionDebugInfo {
+export interface ICellPermissionDebugInfo {
     row: number;
     col: number;
     /** List of protection rules that apply */
-    hitRules: CellPermissionDebugRuleInfo[];
+    hitRules: ICellPermissionDebugRuleInfo[];
 }
 
 /**
@@ -272,7 +272,7 @@ export interface CellPermissionDebugInfo {
 /**
  * Workbook-level permission Facade interface
  */
-export interface WorkbookPermission {
+export interface IWorkbookPermission {
     /**
      * High-level mode setting: By Owner / Editor / Viewer / Commenter semantics
      * Internally automatically combines multiple WorkbookPermissionPoints
@@ -367,7 +367,7 @@ export interface WorkbookPermission {
 /**
  * Worksheet permission configuration
  */
-export interface WorksheetPermissionConfig {
+export interface IWorksheetPermissionConfig {
     /** One-time mode setting */
     mode?: WorksheetMode;
 
@@ -377,14 +377,14 @@ export interface WorksheetPermissionConfig {
     /** Batch range protection configuration (optional, for simplified scenarios) */
     rangeProtections?: Array<{
         rangeRefs: string[]; // e.g., ['A1:B10', 'D1:D5']
-        options?: RangeProtectionOptions; // If not provided, defaults to "protected, not editable"
+        options?: IRangeProtectionOptions; // If not provided, defaults to "protected, not editable"
     }>;
 }
 
 /**
  * Worksheet-level permission Facade interface
  */
-export interface WorksheetPermission {
+export interface IWorksheetPermission {
     /**
      * Set worksheet overall mode:
      * - 'readOnly'       → Lock write-related points
@@ -412,7 +412,7 @@ export interface WorksheetPermission {
     /**
      * Debug use: View protection rule information for a specific cell
      */
-    debugCellPermission(row: number, col: number): CellPermissionDebugInfo | null;
+    debugCellPermission(row: number, col: number): ICellPermissionDebugInfo | null;
 
     /**
      * Point operations (low-level)
@@ -425,7 +425,7 @@ export interface WorksheetPermission {
      * Batch apply permission configuration (for "configuration-driven" scenarios)
      * Internally uses Command to ensure undo/redo
      */
-    applyConfig(config: WorksheetPermissionConfig): Promise<void>;
+    applyConfig(config: IWorksheetPermissionConfig): Promise<void>;
 
     /**
      * Range protection management
@@ -434,8 +434,8 @@ export interface WorksheetPermission {
     /** Batch create multiple range protection rules (one-time operation, better performance) */
     protectRanges(configs: Array<{
         ranges: FRange[];
-        options?: RangeProtectionOptions;
-    }>): Promise<RangeProtectionRule[]>;
+        options?: IRangeProtectionOptions;
+    }>): Promise<IRangeProtectionRule[]>;
 
     /** Batch delete multiple protection rules */
     unprotectRules(ruleIds: string[]): Promise<void>;
@@ -443,7 +443,7 @@ export interface WorksheetPermission {
     /**
      * List all range protection rules on current sheet
      */
-    listRangeProtectionRules(): Promise<RangeProtectionRule[]>;
+    listRangeProtectionRules(): Promise<IRangeProtectionRule[]>;
 
     /**
      * ========================
@@ -472,14 +472,14 @@ export interface WorksheetPermission {
      */
     readonly rangeProtectionChange$: Observable<{
         type: 'add' | 'update' | 'delete';
-        rules: RangeProtectionRule[];
+        rules: IRangeProtectionRule[];
     }>;
 
     /**
      * Current all range protection rules list stream (BehaviorSubject)
      * Immediately provides current rule list on subscription, auto-updates when rules change
      */
-    readonly rangeProtectionRules$: Observable<RangeProtectionRule[]>;
+    readonly rangeProtectionRules$: Observable<IRangeProtectionRule[]>;
 
     /**
      * Compatibility method: Simplified subscription (for users unfamiliar with RxJS)
@@ -497,12 +497,12 @@ export interface WorksheetPermission {
 /**
  * Range-level permission Facade interface
  */
-export interface RangePermission {
+export interface IRangePermission {
     /**
      * Create protection rule on current range
      * - Default options.allowEdit = false → Treated as "locked"
      */
-    protect(options?: RangeProtectionOptions): Promise<RangeProtectionRule>;
+    protect(options?: IRangeProtectionOptions): Promise<IRangeProtectionRule>;
 
     /**
      * Remove all protection rules covered by current range
@@ -528,7 +528,7 @@ export interface RangePermission {
     /**
      * Get snapshot of all protection rules in current worksheet (can also proxy worksheet interface)
      */
-    listRules(): Promise<RangeProtectionRule[]>;
+    listRules(): Promise<IRangeProtectionRule[]>;
 
     /**
      * ========================
@@ -546,7 +546,7 @@ export interface RangePermission {
      */
     readonly protectionChange$: Observable<{
         type: 'protected' | 'unprotected';
-        rules: RangeProtectionRule[];
+        rules: IRangeProtectionRule[];
     }>;
 
     /**

@@ -62,7 +62,7 @@ export class SheetsFilterPermissionController extends Disposable {
                         permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                             worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
-                        }, [filterRange]);
+                        }, [filterRange], unitId, subUnitId);
                     } else {
                         const range = this._sheetsSelectionService.getCurrentLastSelection()?.range;
                         if (range) {
@@ -96,7 +96,7 @@ export class SheetsFilterPermissionController extends Disposable {
                         const permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                             worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
-                        }, [colRange]);
+                        }, [colRange], unitId, subUnitId);
                         if (!permission) {
                             this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.filterErr'));
                         }

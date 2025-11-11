@@ -436,12 +436,29 @@ export class BooleanValueObject extends BaseValueObject {
 }
 
 export class NumberValueObject extends BaseValueObject {
+    private static _instance: Map<string, NumberValueObject> = new Map();
+
     private _value: number = 0;
 
-    static create(value: number, pattern: string = '') {
+    static create(value: number, pattern = '') {
+        const shouldCache = value === 0 || value === 1;
+        const key = shouldCache ? `${value}-${pattern}` : null;
+
+        if (shouldCache && key) {
+            const cached = this._instance.get(key);
+            if (cached) {
+                return cached;
+            }
+        }
+
         const instance = new NumberValueObject(value);
+
         if (pattern) {
             instance.setPattern(pattern);
+        }
+
+        if (shouldCache && key) {
+            this._instance.set(key, instance);
         }
 
         return instance;
@@ -1350,7 +1367,13 @@ export class StringValueObject extends BaseValueObject {
     private _isHyperlink: boolean = false;
     private _hyperlinkUrl: string = '';
 
+    private static _instance = new StringValueObject('');
+
     static create(value: string, options?: IStringValueObjectOptions) {
+        if (value === '') {
+            return this._instance;
+        }
+
         const cached = StringValueObjectCache.get(value);
         if (cached && options && this.checkCacheByOptions(cached, options)) {
             return cached;

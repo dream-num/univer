@@ -97,9 +97,16 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * Get the value of a specific permission point
-     * @param point - The permission point to query
-     * @returns true if allowed, false if denied
+     * Get the value of a specific permission point.
+     * @param {RangePermissionPoint} point The permission point to query.
+     * @returns {boolean} true if allowed, false if denied.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * const canEdit = permission?.getPoint(RangePermissionPoint.Edit);
+     * console.log(canEdit);
+     * ```
      */
     getPoint(point: RangePermissionPoint): boolean {
         const rule = this._getProtectionRule();
@@ -119,24 +126,46 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * Get the current permission snapshot
-     * @returns Snapshot of all permission points
+     * Get the current permission snapshot.
+     * @returns {RangePermissionSnapshot} Snapshot of all permission points.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * const snapshot = permission?.getSnapshot();
+     * console.log(snapshot);
+     * ```
      */
     getSnapshot(): RangePermissionSnapshot {
         return this._buildSnapshot();
     }
 
     /**
-     * Check if the current range is protected
-     * @returns true if protected, false otherwise
+     * Check if the current range is protected.
+     * @returns {boolean} true if protected, false otherwise.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * const isProtected = permission?.isProtected();
+     * console.log(isProtected);
+     * ```
      */
     isProtected(): boolean {
         return this._getProtectionRule() !== null;
     }
 
     /**
-     * Check if the current user can edit this range
-     * @returns true if editable, false otherwise
+     * Check if the current user can edit this range.
+     * @returns {boolean} true if editable, false otherwise.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * if (permission?.canEdit()) {
+     *   console.log('You can edit this range');
+     * }
+     * ```
      */
     canEdit(): boolean {
         if (!this.isProtected()) {
@@ -146,9 +175,19 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * Protect the current range
-     * @param options - Protection options
-     * @returns The created protection rule
+     * Protect the current range.
+     * @param {IRangeProtectionOptions} options Protection options.
+     * @returns {Promise<IFRangeProtectionRule>} The created protection rule.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * const rule = await permission?.protect({
+     *   name: 'My protected range',
+     *   allowEdit: false
+     * });
+     * console.log(rule);
+     * ```
      */
     async protect(options?: IRangeProtectionOptions): Promise<IFRangeProtectionRule> {
         if (this.isProtected()) {
@@ -193,7 +232,14 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * Unprotect the current range
+     * Unprotect the current range.
+     * @returns {Promise<void>} A promise that resolves when the range is unprotected.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * await permission?.unprotect();
+     * ```
      */
     async unprotect(): Promise<void> {
         const rule = this._getProtectionRule();
@@ -213,17 +259,34 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * List all protection rules
-     * @returns Array of protection rules
+     * List all protection rules.
+     * @returns {Promise<IFRangeProtectionRule[]>} Array of protection rules.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * const rules = await permission?.listRules();
+     * console.log(rules);
+     * ```
      */
     async listRules(): Promise<IFRangeProtectionRule[]> {
         return this._buildProtectionRules();
     }
 
     /**
-     * Subscribe to permission changes (simplified interface)
-     * @param listener - Callback function to be called when permissions change
-     * @returns Unsubscribe function
+     * Subscribe to permission changes (simplified interface).
+     * @param {Function} listener Callback function to be called when permissions change.
+     * @returns {Function} Unsubscribe function.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.permission();
+     * const unsubscribe = permission?.subscribe((snapshot) => {
+     *   console.log('Permission changed:', snapshot);
+     * });
+     * // Later, to stop listening:
+     * unsubscribe?.();
+     * ```
      */
     subscribe(listener: (snapshot: RangePermissionSnapshot) => void): (() => void) {
         const subscription = this._permission$.subscribe(listener);

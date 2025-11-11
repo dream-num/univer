@@ -211,8 +211,15 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Set permission mode for the worksheet
-     * @param mode - The permission mode to set ('editable' | 'readOnly' | 'filterOnly' | 'commentOnly')
+     * Set permission mode for the worksheet.
+     * @param {WorksheetMode} mode The permission mode to set ('editable' | 'readOnly' | 'filterOnly' | 'commentOnly').
+     * @returns {Promise<void>} A promise that resolves when the mode is set.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * await permission?.setMode('readOnly');
+     * ```
      */
     async setMode(mode: WorksheetMode): Promise<void> {
         const pointsToSet: Partial<Record<WorksheetPermissionPoint, boolean>> = {};
@@ -261,32 +268,61 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Set the worksheet to read-only mode
+     * Set the worksheet to read-only mode.
+     * @returns {Promise<void>} A promise that resolves when the mode is set.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * await permission?.setReadOnly();
+     * ```
      */
     async setReadOnly(): Promise<void> {
         await this.setMode('readOnly');
     }
 
     /**
-     * Set the worksheet to editable mode
+     * Set the worksheet to editable mode.
+     * @returns {Promise<void>} A promise that resolves when the mode is set.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * await permission?.setEditable();
+     * ```
      */
     async setEditable(): Promise<void> {
         await this.setMode('editable');
     }
 
     /**
-     * Check if the worksheet is editable
-     * @returns true if the worksheet can be edited, false otherwise
+     * Check if the worksheet is editable.
+     * @returns {boolean} true if the worksheet can be edited, false otherwise.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * if (permission?.canEdit()) {
+     *   console.log('Worksheet is editable');
+     * }
+     * ```
      */
     canEdit(): boolean {
         return this.getPoint(WorksheetPermissionPoint.Edit);
     }
 
     /**
-     * Check if a specific cell can be edited
-     * @param row - Row index
-     * @param col - Column index
-     * @returns true if the cell can be edited, false otherwise
+     * Check if a specific cell can be edited.
+     * @param {number} row Row index.
+     * @param {number} col Column index.
+     * @returns {boolean} true if the cell can be edited, false otherwise.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const canEdit = permission?.canEditCell(0, 0);
+     * console.log(canEdit);
+     * ```
      */
     canEditCell(row: number, col: number): boolean {
         // First check worksheet-level permission
@@ -314,10 +350,17 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Check if a specific cell can be viewed
-     * @param _row - Row index (unused, for API consistency)
-     * @param _col - Column index (unused, for API consistency)
-     * @returns true if the cell can be viewed, false otherwise
+     * Check if a specific cell can be viewed.
+     * @param {number} _row Row index (unused, for API consistency).
+     * @param {number} _col Column index (unused, for API consistency).
+     * @returns {boolean} true if the cell can be viewed, false otherwise.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const canView = permission?.canViewCell(0, 0);
+     * console.log(canView);
+     * ```
      */
     canViewCell(_row: number, _col: number): boolean {
         // View permission is usually true by default
@@ -325,10 +368,17 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Debug cell permission information
-     * @param row - Row index
-     * @param col - Column index
-     * @returns Debug information about which rules affect this cell, or null if no rules apply
+     * Debug cell permission information.
+     * @param {number} row Row index.
+     * @param {number} col Column index.
+     * @returns {ICellPermissionDebugInfo | null} Debug information about which rules affect this cell, or null if no rules apply.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const debugInfo = permission?.debugCellPermission(0, 0);
+     * console.log(debugInfo);
+     * ```
      */
     debugCellPermission(row: number, col: number): ICellPermissionDebugInfo | null {
         const hitRules = [];
@@ -369,9 +419,16 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Set a specific permission point for the worksheet
-     * @param point - The permission point to set
-     * @param value - The value to set (true = allowed, false = denied)
+     * Set a specific permission point for the worksheet.
+     * @param {WorksheetPermissionPoint} point The permission point to set.
+     * @param {boolean} value The value to set (true = allowed, false = denied).
+     * @returns {Promise<void>} A promise that resolves when the point is set.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * await permission?.setPoint(WorksheetPermissionPoint.InsertRow, false);
+     * ```
      */
     async setPoint(point: WorksheetPermissionPoint, value: boolean): Promise<void> {
         const PointClass = WORKSHEET_PERMISSION_POINT_MAP[point];
@@ -402,9 +459,16 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Get the value of a specific permission point
-     * @param point - The permission point to query
-     * @returns true if allowed, false if denied
+     * Get the value of a specific permission point.
+     * @param {WorksheetPermissionPoint} point The permission point to query.
+     * @returns {boolean} true if allowed, false if denied.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const canInsertRow = permission?.getPoint(WorksheetPermissionPoint.InsertRow);
+     * console.log(canInsertRow);
+     * ```
      */
     getPoint(point: WorksheetPermissionPoint): boolean {
         const PointClass = WORKSHEET_PERMISSION_POINT_MAP[point];
@@ -419,16 +483,36 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Get a snapshot of all permission points
-     * @returns An object containing all permission point values
+     * Get a snapshot of all permission points.
+     * @returns {WorksheetPermissionSnapshot} An object containing all permission point values.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const snapshot = permission?.getSnapshot();
+     * console.log(snapshot);
+     * ```
      */
     getSnapshot(): WorksheetPermissionSnapshot {
         return this._buildSnapshot();
     }
 
     /**
-     * Apply a permission configuration to the worksheet
-     * @param config - The configuration to apply
+     * Apply a permission configuration to the worksheet.
+     * @param {IWorksheetPermissionConfig} config The configuration to apply.
+     * @returns {Promise<void>} A promise that resolves when the configuration is applied.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * await permission?.applyConfig({
+     *   mode: 'readOnly',
+     *   points: {
+     *     [WorksheetPermissionPoint.View]: true,
+     *     [WorksheetPermissionPoint.Edit]: false
+     *   }
+     * });
+     * ```
      */
     async applyConfig(config: IWorksheetPermissionConfig): Promise<void> {
         // Apply mode
@@ -456,9 +540,25 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Protect multiple ranges at once (batch operation)
-     * @param configs - Array of protection configurations
-     * @returns Array of created protection rules
+     * Protect multiple ranges at once (batch operation).
+     * @param {Array<{ ranges: FRange[]; options?: IRangeProtectionOptions }>} configs Array of protection configurations.
+     * @returns {Promise<IRangeProtectionRule[]>} Array of created protection rules.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.protectRanges([
+     *   {
+     *     ranges: [worksheet.getRange('A1:B2')],
+     *     options: { name: 'Protected Area 1', allowEdit: false }
+     *   },
+     *   {
+     *     ranges: [worksheet.getRange('C3:D4')],
+     *     options: { name: 'Protected Area 2', allowEdit: true }
+     *   }
+     * ]);
+     * console.log(rules);
+     * ```
      */
     async protectRanges(
         configs: Array<{
@@ -531,8 +631,15 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * Remove multiple protection rules at once
-     * @param ruleIds - Array of rule IDs to remove
+     * Remove multiple protection rules at once.
+     * @param {string[]} ruleIds Array of rule IDs to remove.
+     * @returns {Promise<void>} A promise that resolves when the rules are removed.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * await permission?.unprotectRules(['rule1', 'rule2']);
+     * ```
      */
     async unprotectRules(ruleIds: string[]): Promise<void> {
         if (!ruleIds || ruleIds.length === 0) {
@@ -553,17 +660,34 @@ export class FWorksheetPermission implements IWorksheetPermission {
     }
 
     /**
-     * List all range protection rules for the worksheet
-     * @returns Array of protection rules
+     * List all range protection rules for the worksheet.
+     * @returns {Promise<IRangeProtectionRule[]>} Array of protection rules.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * console.log(rules);
+     * ```
      */
     async listRangeProtectionRules(): Promise<IRangeProtectionRule[]> {
         return this._buildRangeProtectionRules();
     }
 
     /**
-     * Subscribe to permission changes (simplified interface for users not familiar with RxJS)
-     * @param listener - Callback function to be called when permissions change
-     * @returns Unsubscribe function
+     * Subscribe to permission changes (simplified interface for users not familiar with RxJS).
+     * @param {Function} listener Callback function to be called when permissions change.
+     * @returns {UnsubscribeFn} Unsubscribe function.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const unsubscribe = permission?.subscribe((snapshot) => {
+     *   console.log('Permission changed:', snapshot);
+     * });
+     * // Later, to stop listening:
+     * unsubscribe?.();
+     * ```
      */
     subscribe(listener: (snapshot: WorksheetPermissionSnapshot) => void): UnsubscribeFn {
         const subscription = this.permission$.subscribe(listener);

@@ -150,8 +150,15 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Set permission mode for the workbook
-     * @param mode - The permission mode to set ('owner' | 'editor' | 'viewer' | 'commenter')
+     * Set permission mode for the workbook.
+     * @param {WorkbookMode} mode The permission mode to set ('owner' | 'editor' | 'viewer' | 'commenter').
+     * @returns {Promise<void>} A promise that resolves when the mode is set.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.setMode('editor');
+     * ```
      */
     async setMode(mode: WorkbookMode): Promise<void> {
         const pointsToSet: Partial<Record<WorkbookPermissionPoint, boolean>> = {};
@@ -223,31 +230,60 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Set the workbook to read-only mode (viewer mode)
+     * Set the workbook to read-only mode (viewer mode).
+     * @returns {Promise<void>} A promise that resolves when the mode is set.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.setReadOnly();
+     * ```
      */
     async setReadOnly(): Promise<void> {
         await this.setMode('viewer');
     }
 
     /**
-     * Set the workbook to editable mode (editor mode)
+     * Set the workbook to editable mode (editor mode).
+     * @returns {Promise<void>} A promise that resolves when the mode is set.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.setEditable();
+     * ```
      */
     async setEditable(): Promise<void> {
         await this.setMode('editor');
     }
 
     /**
-     * Check if the workbook is editable
-     * @returns true if the workbook can be edited, false otherwise
+     * Check if the workbook is editable.
+     * @returns {boolean} true if the workbook can be edited, false otherwise.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * if (permission?.canEdit()) {
+     *   console.log('Workbook is editable');
+     * }
+     * ```
      */
     canEdit(): boolean {
         return this.getPoint(WorkbookPermissionPoint.Edit);
     }
 
     /**
-     * Set a specific permission point
-     * @param point - The permission point to set
-     * @param value - The value to set (true = allowed, false = denied)
+     * Set a specific permission point.
+     * @param {WorkbookPermissionPoint} point The permission point to set.
+     * @param {boolean} value The value to set (true = allowed, false = denied).
+     * @returns {Promise<void>} A promise that resolves when the point is set.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.setPoint(WorkbookPermissionPoint.Print, false);
+     * ```
      */
     async setPoint(point: WorkbookPermissionPoint, value: boolean): Promise<void> {
         const PointClass = WORKBOOK_PERMISSION_POINT_MAP[point];
@@ -278,9 +314,16 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Get the value of a specific permission point
-     * @param point - The permission point to query
-     * @returns true if allowed, false if denied
+     * Get the value of a specific permission point.
+     * @param {WorkbookPermissionPoint} point The permission point to query.
+     * @returns {boolean} true if allowed, false if denied.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * const canPrint = permission?.getPoint(WorkbookPermissionPoint.Print);
+     * console.log(canPrint);
+     * ```
      */
     getPoint(point: WorkbookPermissionPoint): boolean {
         const PointClass = WORKBOOK_PERMISSION_POINT_MAP[point];
@@ -295,16 +338,33 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Get a snapshot of all permission points
-     * @returns An object containing all permission point values
+     * Get a snapshot of all permission points.
+     * @returns {WorkbookPermissionSnapshot} An object containing all permission point values.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * const snapshot = permission?.getSnapshot();
+     * console.log(snapshot);
+     * ```
      */
     getSnapshot(): WorkbookPermissionSnapshot {
         return this._buildSnapshot();
     }
 
     /**
-     * Set multiple collaborators at once (replaces existing collaborators)
-     * @param collaborators - Array of collaborators with userId and role
+     * Set multiple collaborators at once (replaces existing collaborators).
+     * @param {Array<{ userId: string; role: UnitRole }>} collaborators Array of collaborators with userId and role.
+     * @returns {Promise<void>} A promise that resolves when the collaborators are set.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.setCollaborators([
+     *   { userId: 'user1', role: UnitRole.Editor },
+     *   { userId: 'user2', role: UnitRole.Reader }
+     * ]);
+     * ```
      */
     async setCollaborators(collaborators: Array<{ userId: string; role: UnitRole }>): Promise<void> {
         // Convert to protocol format
@@ -338,9 +398,16 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Add a single collaborator
-     * @param userId - The user ID
-     * @param role - The role to assign
+     * Add a single collaborator.
+     * @param {string} userId The user ID.
+     * @param {UnitRole} role The role to assign.
+     * @returns {Promise<void>} A promise that resolves when the collaborator is added.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.addCollaborator('user1', UnitRole.Editor);
+     * ```
      */
     async addCollaborator(userId: string, role: UnitRole): Promise<void> {
         await this._authzIoService.createCollaborator({
@@ -367,9 +434,16 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Update an existing collaborator's role
-     * @param userId - The user ID
-     * @param role - The new role to assign
+     * Update an existing collaborator's role.
+     * @param {string} userId The user ID.
+     * @param {UnitRole} role The new role to assign.
+     * @returns {Promise<void>} A promise that resolves when the collaborator is updated.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.updateCollaborator('user1', UnitRole.Reader);
+     * ```
      */
     async updateCollaborator(userId: string, role: UnitRole): Promise<void> {
         await this._authzIoService.updateCollaborator({
@@ -396,8 +470,15 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Remove a collaborator from the workbook
-     * @param userId - The user ID to remove
+     * Remove a collaborator from the workbook.
+     * @param {string} userId The user ID to remove.
+     * @returns {Promise<void>} A promise that resolves when the collaborator is removed.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.removeCollaborator('user1');
+     * ```
      */
     async removeCollaborator(userId: string): Promise<void> {
         await this._authzIoService.deleteCollaborator({
@@ -416,8 +497,15 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Remove multiple collaborators at once
-     * @param userIds - Array of user IDs to remove
+     * Remove multiple collaborators at once.
+     * @param {string[]} userIds Array of user IDs to remove.
+     * @returns {Promise<void>} A promise that resolves when the collaborators are removed.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * await permission?.removeCollaborators(['user1', 'user2']);
+     * ```
      */
     async removeCollaborators(userIds: string[]): Promise<void> {
         for (const userId of userIds) {
@@ -426,8 +514,15 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * List all collaborators of the workbook
-     * @returns Array of collaborators with their roles
+     * List all collaborators of the workbook.
+     * @returns {Promise<ICollaborator[]>} Array of collaborators with their roles.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * const collaborators = await permission?.listCollaborators();
+     * console.log(collaborators);
+     * ```
      */
     async listCollaborators(): Promise<ICollaborator[]> {
         const protocolCollaborators = await this._authzIoService.listCollaborators({
@@ -445,9 +540,19 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }
 
     /**
-     * Subscribe to permission changes (simplified interface for users not familiar with RxJS)
-     * @param listener - Callback function to be called when permissions change
-     * @returns Unsubscribe function
+     * Subscribe to permission changes (simplified interface for users not familiar with RxJS).
+     * @param {Function} listener Callback function to be called when permissions change.
+     * @returns {UnsubscribeFn} Unsubscribe function.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const permission = workbook?.permission();
+     * const unsubscribe = permission?.subscribe((snapshot) => {
+     *   console.log('Permission changed:', snapshot);
+     * });
+     * // Later, to stop listening:
+     * unsubscribe?.();
+     * ```
      */
     subscribe(listener: (snapshot: WorkbookPermissionSnapshot) => void): UnsubscribeFn {
         const subscription = this.permission$.subscribe(listener);

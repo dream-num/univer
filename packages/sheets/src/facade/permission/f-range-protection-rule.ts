@@ -39,32 +39,65 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
     ) {}
 
     /**
-     * Get the rule ID
-     * @returns The unique identifier of this protection rule
+     * Get the rule ID.
+     * @returns {string} The unique identifier of this protection rule.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * const ruleId = rules?.[0]?.id;
+     * console.log(ruleId);
+     * ```
      */
     get id(): string {
         return this._ruleId;
     }
 
     /**
-     * Get the protected ranges
-     * @returns Array of protected ranges
+     * Get the protected ranges.
+     * @returns {FRange[]} Array of protected ranges.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * const ranges = rules?.[0]?.ranges;
+     * console.log(ranges);
+     * ```
      */
     get ranges(): FRange[] {
         return this._ranges;
     }
 
     /**
-     * Get the protection options
-     * @returns Copy of the protection options
+     * Get the protection options.
+     * @returns {IRangeProtectionOptions} Copy of the protection options.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * const options = rules?.[0]?.options;
+     * console.log(options);
+     * ```
      */
     get options(): IRangeProtectionOptions {
         return { ...this._options };
     }
 
     /**
-     * Update the protected ranges
-     * @param ranges - New ranges to protect
+     * Update the protected ranges.
+     * @param {FRange[]} ranges New ranges to protect.
+     * @returns {Promise<void>} A promise that resolves when the ranges are updated.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * const rule = rules?.[0];
+     * await rule?.updateRanges([worksheet.getRange('A1:C3')]);
+     * ```
      */
     async updateRanges(ranges: FRange[]): Promise<void> {
         if (!ranges || ranges.length === 0) {
@@ -111,8 +144,17 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
     }
 
     /**
-     * Update protection options
-     * @param options - Partial options to update (will be merged with existing options)
+     * Update protection options.
+     * @param {Partial<IRangeProtectionOptions>} options Partial options to update (will be merged with existing options).
+     * @returns {Promise<void>} A promise that resolves when the options are updated.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * const rule = rules?.[0];
+     * await rule?.updateOptions({ name: 'New Protection Name', allowEdit: true });
+     * ```
      */
     async updateOptions(options: Partial<IRangeProtectionOptions>): Promise<void> {
         const rule = this._rangeProtectionRuleModel.getRule(this._unitId, this._subUnitId, this._ruleId);
@@ -141,7 +183,16 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
     }
 
     /**
-     * Delete the current protection rule
+     * Delete the current protection rule.
+     * @returns {Promise<void>} A promise that resolves when the rule is removed.
+     * @example
+     * ```ts
+     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+     * const permission = worksheet?.permission();
+     * const rules = await permission?.listRangeProtectionRules();
+     * const rule = rules?.[0];
+     * await rule?.remove();
+     * ```
      */
     async remove(): Promise<void> {
         await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {

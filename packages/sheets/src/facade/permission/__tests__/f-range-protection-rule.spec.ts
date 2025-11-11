@@ -505,5 +505,53 @@ describe('Test FRangeProtectionRule', () => {
             const unchangedRange = rule.ranges[0].getRange();
             expect(unchangedRange.startColumn).toBe(1); // Still column B
         });
+
+        it('should throw error when updating with empty ranges', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission || !worksheet) {
+                throw new Error('Permission or worksheet is null');
+            }
+
+            const range = worksheet.getRange('A1:B2');
+            const rules = await permission.protectRanges([
+                {
+                    ranges: [range],
+                    options: { name: 'Test' },
+                },
+            ]);
+
+            const rule = rules[0];
+
+            // Try to update with empty ranges
+            await expect(rule.updateRanges([])).rejects.toThrow('Ranges cannot be empty');
+        });
+
+        it('should throw error when updating non-existent rule ranges', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission || !worksheet) {
+                throw new Error('Permission or worksheet is null');
+            }
+
+            const range = worksheet.getRange('A1:B2');
+            const rules = await permission.protectRanges([
+                {
+                    ranges: [range],
+                    options: { name: 'Test' },
+                },
+            ]);
+
+            const rule = rules[0];
+
+            // Remove the rule first
+            await rule.remove();
+
+            // Try to update after removal
+            const range2 = worksheet.getRange('C1:D2');
+            await expect(rule.updateRanges([range2])).rejects.toThrow();
+        });
     });
 });

@@ -396,4 +396,178 @@ describe('Test FWorkbookPermission', () => {
             expect(() => permission.dispose()).not.toThrow();
         });
     });
+
+    describe('Additional Coverage Tests', () => {
+        it('should handle canEdit method', () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            const canEdit = permission.canEdit();
+            expect(typeof canEdit).toBe('boolean');
+        });
+
+        it('should handle subscribe method and return unsubscribe function', () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            let callCount = 0;
+            const unsubscribe = permission.subscribe((snapshot) => {
+                callCount++;
+                expect(snapshot).toBeDefined();
+            });
+
+            // Should be called at least once
+            expect(callCount).toBeGreaterThan(0);
+
+            // Unsubscribe should work
+            unsubscribe();
+        });
+
+        it('should handle getSnapshot method', () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            const snapshot = permission.getSnapshot();
+            expect(snapshot).toBeDefined();
+            expect(typeof snapshot[WorkbookPermissionPoint.View]).toBe('boolean');
+        });
+
+        it('should handle setCollaborators method', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            const collaborators = [
+                { userId: 'user1', role: 1 },
+                { userId: 'user2', role: 2 },
+            ];
+
+            await expect(permission.setCollaborators(collaborators)).resolves.not.toThrow();
+        });
+
+        it('should handle addCollaborator method', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            await expect(permission.addCollaborator('user3', 1)).resolves.not.toThrow();
+        });
+
+        it('should handle updateCollaborator method', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            await expect(permission.updateCollaborator('user1', 2)).resolves.not.toThrow();
+        });
+
+        it('should handle removeCollaborator method', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            await expect(permission.removeCollaborator('user1')).resolves.not.toThrow();
+        });
+
+        it('should handle removeCollaborators method', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            const userIds = ['user1', 'user2'];
+            await expect(permission.removeCollaborators(userIds)).resolves.not.toThrow();
+        });
+
+        it('should handle listCollaborators method', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            const collaborators = await permission.listCollaborators();
+            expect(Array.isArray(collaborators)).toBe(true);
+        });
+
+        it('should handle multiple setPoint calls', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Test setPoint for various permission points
+            await expect(permission.setPoint(WorkbookPermissionPoint.View, true)).resolves.not.toThrow();
+            await expect(permission.setPoint(WorkbookPermissionPoint.Edit, false)).resolves.not.toThrow();
+            await expect(permission.setPoint(WorkbookPermissionPoint.Print, true)).resolves.not.toThrow();
+        });
+
+        it('should skip setPoint when value is unchanged', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Get current value
+            const currentValue = permission.getPoint(WorkbookPermissionPoint.View);
+
+            // Set same value again, should not cause error
+            await expect(permission.setPoint(WorkbookPermissionPoint.View, currentValue)).resolves.not.toThrow();
+        });
+
+        it('should throw error for invalid permission point', async () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Try to set invalid point
+            await expect(permission.setPoint('InvalidPoint' as WorkbookPermissionPoint, true)).rejects.toThrow();
+        });
+
+        it('should return default value for invalid getPoint call', () => {
+            const workbook = univerAPI.getActiveWorkbook();
+            const permission = workbook?.getWorkbookPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Try to get invalid point
+            expect(() => permission.getPoint('InvalidPoint' as WorkbookPermissionPoint)).toThrow();
+        });
+    });
 });

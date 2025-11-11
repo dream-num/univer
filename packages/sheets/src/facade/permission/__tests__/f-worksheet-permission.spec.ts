@@ -594,4 +594,115 @@ describe('Test FWorksheetPermission', () => {
             expect(formulaRule?.ranges[0].getA1Notation()).toBe('D1:D10');
         });
     });
+
+    describe('Additional Coverage Tests', () => {
+        it('should throw error when protectRanges is called with empty configs', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Try to protect with empty configs
+            await expect(permission.protectRanges([])).rejects.toThrow('Configs cannot be empty');
+        });
+
+        it('should handle subscribe method and return unsubscribe function', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            let callCount = 0;
+            const unsubscribe = permission.subscribe((snapshot) => {
+                callCount++;
+                expect(snapshot).toBeDefined();
+            });
+
+            // Should be called at least once
+            expect(callCount).toBeGreaterThan(0);
+
+            // Unsubscribe should work
+            unsubscribe();
+        });
+
+        it('should handle getSnapshot method', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            const snapshot = permission.getSnapshot();
+            expect(snapshot).toBeDefined();
+            expect(typeof snapshot[WorksheetPermissionPoint.View]).toBe('boolean');
+        });
+
+        it('should handle multiple setPoint calls with same value', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Get current value
+            const currentValue = permission.getPoint(WorksheetPermissionPoint.Edit);
+
+            // Set same value again, should not cause error
+            await expect(permission.setPoint(WorksheetPermissionPoint.Edit, currentValue)).resolves.not.toThrow();
+        });
+
+        it('should throw error for invalid worksheet permission point in setPoint', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Try to set invalid point
+            await expect(permission.setPoint('InvalidPoint' as WorksheetPermissionPoint, true)).rejects.toThrow();
+        });
+
+        it('should throw error for invalid worksheet permission point in getPoint', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Try to get invalid point
+            expect(() => permission.getPoint('InvalidPoint' as WorksheetPermissionPoint)).toThrow();
+        });
+
+        it('should handle unprotectRules with empty array', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Should not throw when called with empty array
+            await expect(permission.unprotectRules([])).resolves.not.toThrow();
+        });
+
+        it('should handle dispose method', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const permission = worksheet?.getWorksheetPermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Dispose should not throw
+            expect(() => permission.dispose()).not.toThrow();
+        });
+    });
 });

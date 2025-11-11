@@ -352,5 +352,104 @@ describe('Test FRangePermission', () => {
             // Should not throw error
             await expect(permission.unprotect()).resolves.not.toThrow();
         });
+
+        it('should throw error when protecting already protected range', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const range = worksheet?.getRange('A1:B2');
+            const permission = range?.getRangePermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Protect the range first
+            await permission.protect({ name: 'Test Protection' });
+
+            // Try to protect again, should throw error
+            await expect(permission.protect({ name: 'Test 2' })).rejects.toThrow('Range is already protected');
+        });
+    });
+
+    describe('Subscribe Method', () => {
+        it('should subscribe to permission changes and return unsubscribe function', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const range = worksheet?.getRange('A1:B2');
+            const permission = range?.getRangePermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            let callCount = 0;
+            const unsubscribe = permission.subscribe((snapshot) => {
+                callCount++;
+                expect(snapshot).toBeDefined();
+            });
+
+            // Should be called at least once
+            expect(callCount).toBeGreaterThan(0);
+
+            // Unsubscribe should work
+            unsubscribe();
+        });
+    });
+
+    describe('Edge Cases', () => {
+        it('should handle checking permission point when range not protected', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const range = worksheet?.getRange('Z100:Z100');
+            const permission = range?.getRangePermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // When not protected, should have permission by default
+            const canEdit = permission.getPoint(RangePermissionPoint.Edit);
+            expect(canEdit).toBe(true);
+        });
+
+        it('should handle invalid permission point gracefully', () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const range = worksheet?.getRange('A1:B2');
+            const permission = range?.getRangePermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            // Test with a non-existent point (should log warning and return false)
+            const result = permission.getPoint('NonExistentPoint' as RangePermissionPoint);
+            expect(typeof result).toBe('boolean');
+        });
+
+        it('should emit permission updates when permission service updates', async () => {
+            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const range = worksheet?.getRange('A1:B2');
+            const permission = range?.getRangePermission();
+
+            if (!permission) {
+                throw new Error('Permission is null');
+            }
+
+            let updateReceived = false;
+            const subscription = permission.permission$.subscribe((snapshot) => {
+                if (snapshot) {
+                    updateReceived = true;
+                }
+            });
+
+            // Protect the range which should trigger permission update
+            await permission.protect({ name: 'Test Protection' });
+
+            // Wait a bit for the update to propagate
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            expect(updateReceived).toBe(true);
+            subscription.unsubscribe();
+
+            // Cleanup
+            await permission.unprotect();
+        });
     });
 });

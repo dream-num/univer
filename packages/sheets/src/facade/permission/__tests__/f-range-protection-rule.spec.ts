@@ -526,6 +526,9 @@ describe('Test FRangeProtectionRule', () => {
 
             // Try to update with empty ranges
             await expect(rule.updateRanges([])).rejects.toThrow('Ranges cannot be empty');
+
+            // Cleanup - remove the rule
+            await rule.remove();
         });
 
         it('should throw error when updating non-existent rule ranges', async () => {

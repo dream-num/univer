@@ -525,10 +525,20 @@ describe('Test FWorkbookPermission', () => {
                 throw new Error('Permission is null');
             }
 
+            // Save original values
+            const originalView = permission.getPoint(WorkbookPermissionPoint.View);
+            const originalEdit = permission.getPoint(WorkbookPermissionPoint.Edit);
+            const originalPrint = permission.getPoint(WorkbookPermissionPoint.Print);
+
             // Test setPoint for various permission points
             await expect(permission.setPoint(WorkbookPermissionPoint.View, true)).resolves.not.toThrow();
             await expect(permission.setPoint(WorkbookPermissionPoint.Edit, false)).resolves.not.toThrow();
             await expect(permission.setPoint(WorkbookPermissionPoint.Print, true)).resolves.not.toThrow();
+
+            // Restore original values
+            await permission.setPoint(WorkbookPermissionPoint.View, originalView);
+            await permission.setPoint(WorkbookPermissionPoint.Edit, originalEdit);
+            await permission.setPoint(WorkbookPermissionPoint.Print, originalPrint);
         });
 
         it('should skip setPoint when value is unchanged', async () => {

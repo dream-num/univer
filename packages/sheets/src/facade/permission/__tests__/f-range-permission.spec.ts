@@ -323,7 +323,7 @@ describe('Test FRangePermission', () => {
                 throw new Error('Permission is null');
             }
 
-            const changes: any[] = [];
+            const changes: unknown[] = [];
             const subscription = permission.protectionChange$.subscribe((change) => {
                 changes.push(change);
             });
@@ -335,6 +335,9 @@ describe('Test FRangePermission', () => {
             expect(changes.length).toBeGreaterThan(0);
 
             subscription.unsubscribe();
+
+            // Cleanup - unprotect the range
+            await permission.unprotect();
         });
     });
 
@@ -367,6 +370,9 @@ describe('Test FRangePermission', () => {
 
             // Try to protect again, should throw error
             await expect(permission.protect({ name: 'Test 2' })).rejects.toThrow('Range is already protected');
+
+            // Cleanup - unprotect the range
+            await permission.unprotect();
         });
     });
 

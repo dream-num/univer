@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUser } from '@univerjs/protocol';
 import type { Observable } from 'rxjs';
 import type { FRange } from '../f-range';
 
@@ -160,6 +161,8 @@ export enum RangePermissionPoint {
     Edit = 'RangeEdit',
     /** View permission */
     View = 'RangeView',
+    ManageCollaborator = 'RangeManageCollaborator',
+    Delete = 'RangeDeleteProtection',
 }
 
 /**
@@ -211,6 +214,8 @@ export interface IRangeProtectionOptions {
 
     /** Whitelist of users allowed to edit; empty means determined by role or global policy */
     allowedUsers?: string[];
+
+    allowViewByOthers?: boolean;
 
     /** Rule name for UI display and management */
     name?: string;
@@ -293,13 +298,13 @@ export interface IWorkbookPermission {
      */
 
     /** Batch set collaborators (replace mode, overwrites existing collaborator list) */
-    setCollaborators(collaborators: Array<{ userId: string; role: UnitRole }>): Promise<void>;
+    setCollaborators(collaborators: Array<{ user: IUser; role: UnitRole }>): Promise<void>;
 
     /** Add a single collaborator */
-    addCollaborator(userId: string, role: UnitRole): Promise<void>;
+    addCollaborator(user: IUser, role: UnitRole): Promise<void>;
 
-    /** Update collaborator role */
-    updateCollaborator(userId: string, role: UnitRole): Promise<void>;
+    /** Update collaborator role and information */
+    updateCollaborator(user: IUser, role: UnitRole): Promise<void>;
 
     /** Remove collaborator */
     removeCollaborator(userId: string): Promise<void>;
@@ -518,12 +523,29 @@ export interface IRangePermission {
     /** Whether current user can edit this range (combines Worksheet / Workbook / Range levels) */
     canEdit(): boolean;
 
+    /** Whether current user can view this range */
+    canView(): boolean;
+
     /**
      * Range-level point reading (generally for debugging / advanced scenarios)
      * Usually only need Edit/View two points
      */
     getPoint(point: RangePermissionPoint): boolean;
     getSnapshot(): RangePermissionSnapshot;
+
+    /**
+     * Set a specific permission point for the range (low-level API for local runtime control)
+     * @param {RangePermissionPoint} point The permission point to set
+     * @param {boolean} value The value to set (true = allowed, false = denied)
+     * @returns {Promise<void>} A promise that resolves when the point is set
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
+     * const permission = range?.getRangePermission();
+     * await permission?.setPoint(RangePermissionPoint.Edit, false); // Disable edit for current user
+     * ```
+     */
+    setPoint(point: RangePermissionPoint, value: boolean): Promise<void>;
 
     /**
      * Get snapshot of all protection rules in current worksheet (can also proxy worksheet interface)

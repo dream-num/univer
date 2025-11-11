@@ -16,6 +16,7 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { IUser } from '@univerjs/protocol';
 import type { WorkbookPermissionSnapshot } from '../permission-types';
 import { IPermissionService } from '@univerjs/core';
 import { WorkbookEditablePermission } from '@univerjs/sheets';
@@ -453,8 +454,26 @@ describe('Test FWorkbookPermission', () => {
             }
 
             const collaborators = [
-                { userId: 'user1', role: 1 },
-                { userId: 'user2', role: 2 },
+                {
+                    user: {
+                        userID: 'user1',
+                        name: 'User 1',
+                        avatar: '',
+                        anonymous: false,
+                        canBindAnonymous: false,
+                    } as IUser,
+                    role: 1,
+                },
+                {
+                    user: {
+                        userID: 'user2',
+                        name: 'User 2',
+                        avatar: '',
+                        anonymous: false,
+                        canBindAnonymous: false,
+                    } as IUser,
+                    role: 2,
+                },
             ];
 
             await expect(permission.setCollaborators(collaborators)).resolves.not.toThrow();
@@ -468,7 +487,15 @@ describe('Test FWorkbookPermission', () => {
                 throw new Error('Permission is null');
             }
 
-            await expect(permission.addCollaborator('user3', 1)).resolves.not.toThrow();
+            const user = {
+                userID: 'user3',
+                name: 'User 3',
+                avatar: '',
+                anonymous: false,
+                canBindAnonymous: false,
+            } as IUser;
+
+            await expect(permission.addCollaborator(user, 1)).resolves.not.toThrow();
         });
 
         it('should handle updateCollaborator method', async () => {
@@ -479,7 +506,18 @@ describe('Test FWorkbookPermission', () => {
                 throw new Error('Permission is null');
             }
 
-            await expect(permission.updateCollaborator('user1', 2)).resolves.not.toThrow();
+            const user: IUser = {
+                userID: 'user1',
+                name: 'User 1',
+                avatar: '',
+                anonymous: false,
+                canBindAnonymous: false,
+                phone: '',
+                email: '',
+                createTimestamp: 0,
+            };
+
+            await expect(permission.updateCollaborator(user, 2)).resolves.not.toThrow();
         });
 
         it('should handle removeCollaborator method', async () => {

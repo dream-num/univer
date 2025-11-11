@@ -16,7 +16,9 @@
 
 import type { RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import {
+    RangeProtectionPermissionDeleteProtectionPoint,
     RangeProtectionPermissionEditPoint,
+    RangeProtectionPermissionManageCollaPoint,
     RangeProtectionPermissionViewPoint,
     WorkbookCommentPermission,
     WorkbookCopyPermission,
@@ -125,4 +127,6 @@ export const WORKSHEET_PERMISSION_POINT_MAP: Record<WorksheetPermissionPoint, Wo
 export const RANGE_PERMISSION_POINT_MAP: Record<RangePermissionPoint, RangePermissionPointConstructor> = {
     [RangePermissionPoint.Edit]: RangeProtectionPermissionEditPoint,
     [RangePermissionPoint.View]: RangeProtectionPermissionViewPoint,
+    [RangePermissionPoint.ManageCollaborator]: RangeProtectionPermissionManageCollaPoint,
+    [RangePermissionPoint.Delete]: RangeProtectionPermissionDeleteProtectionPoint,
 };

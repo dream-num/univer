@@ -28,6 +28,7 @@ import type {
     WorksheetPermissionSnapshot,
 } from './permission-types';
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
+import { UnitRole } from '@univerjs/protocol';
 import {
     AddRangeProtectionMutation,
     DeleteRangeProtectionMutation,
@@ -222,48 +223,91 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * ```
      */
     async setMode(mode: WorksheetMode): Promise<void> {
-        const pointsToSet: Partial<Record<WorksheetPermissionPoint, boolean>> = {};
+        const pointsToSet = this._getModePermissions(mode);
+        await this._batchSetPermissionPoints(pointsToSet);
+    }
+
+    /**
+     * Get permission configuration for a specific mode
+     * @private
+     */
+    private _getModePermissions(mode: WorksheetMode): Record<WorksheetPermissionPoint, boolean> {
+        // Initialize all permission points to false first
+        const pointsToSet: Record<WorksheetPermissionPoint, boolean> = {} as Record<WorksheetPermissionPoint, boolean>;
+        Object.values(WorksheetPermissionPoint).forEach((point) => {
+            pointsToSet[point] = false;
+        });
 
         switch (mode) {
             case 'editable':
-                // Fully editable
+                // Fully editable - set all to true
                 Object.values(WorksheetPermissionPoint).forEach((point) => {
                     pointsToSet[point] = true;
                 });
                 break;
             case 'readOnly':
-                // Fully read-only
+                // Fully read-only - only View is allowed
                 pointsToSet[WorksheetPermissionPoint.View] = true;
-                pointsToSet[WorksheetPermissionPoint.Edit] = false;
-                pointsToSet[WorksheetPermissionPoint.SetCellValue] = false;
-                pointsToSet[WorksheetPermissionPoint.SetCellStyle] = false;
-                pointsToSet[WorksheetPermissionPoint.InsertRow] = false;
-                pointsToSet[WorksheetPermissionPoint.InsertColumn] = false;
-                pointsToSet[WorksheetPermissionPoint.DeleteRow] = false;
-                pointsToSet[WorksheetPermissionPoint.DeleteColumn] = false;
-                pointsToSet[WorksheetPermissionPoint.Sort] = false;
-                pointsToSet[WorksheetPermissionPoint.Filter] = false;
+                // All other permissions remain false
                 break;
             case 'filterOnly':
                 // Can only filter/sort
                 pointsToSet[WorksheetPermissionPoint.View] = true;
                 pointsToSet[WorksheetPermissionPoint.Sort] = true;
                 pointsToSet[WorksheetPermissionPoint.Filter] = true;
-                pointsToSet[WorksheetPermissionPoint.Edit] = false;
-                pointsToSet[WorksheetPermissionPoint.SetCellValue] = false;
-                pointsToSet[WorksheetPermissionPoint.SetCellStyle] = false;
+                // All other permissions remain false
                 break;
             case 'commentOnly':
                 // Can only comment
                 pointsToSet[WorksheetPermissionPoint.View] = true;
-                pointsToSet[WorksheetPermissionPoint.Edit] = false;
-                pointsToSet[WorksheetPermissionPoint.SetCellValue] = false;
+                // All other permissions remain false
                 break;
         }
 
-        // Batch set permission points
+        return pointsToSet;
+    }
+
+    /**
+     * Batch set multiple permission points efficiently
+     * @private
+     */
+    private async _batchSetPermissionPoints(pointsToSet: Record<WorksheetPermissionPoint, boolean>): Promise<void> {
+        // Note: IPermissionService doesn't have a batch update API, so we update individually
+        // but we optimize by only updating the snapshot once at the end
+        const pointsChanged: Array<{ point: WorksheetPermissionPoint; value: boolean; oldValue: boolean }> = [];
+
         for (const [point, value] of Object.entries(pointsToSet)) {
-            await this.setPoint(point as WorksheetPermissionPoint, value);
+            const pointKey = point as WorksheetPermissionPoint;
+            const PointClass = WORKSHEET_PERMISSION_POINT_MAP[pointKey];
+            if (!PointClass) {
+                throw new Error(`Unknown worksheet permission point: ${pointKey}`);
+            }
+
+            const oldValue = this.getPoint(pointKey);
+            if (oldValue === value) {
+                continue; // Skip unchanged values
+            }
+
+            const instance = new PointClass(this._unitId, this._subUnitId);
+            const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
+
+            if (!permissionPoint) {
+                this._permissionService.addPermissionPoint(instance);
+            }
+
+            this._permissionService.updatePermissionPoint(instance.id, value);
+            pointsChanged.push({ point: pointKey, value, oldValue });
+        }
+
+        // Emit all change events
+        pointsChanged.forEach(({ point, value, oldValue }) => {
+            this._pointChangeSubject.next({ point, value, oldValue });
+        });
+
+        // Update snapshot once at the end
+        if (pointsChanged.length > 0) {
+            const newSnapshot = this._buildSnapshot();
+            this._permissionSubject.next(newSnapshot);
         }
     }
 
@@ -550,11 +594,11 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * const rules = await permission?.protectRanges([
      *   {
      *     ranges: [worksheet.getRange('A1:B2')],
-     *     options: { name: 'Protected Area 1', allowEdit: false }
+     *     options: { name: 'Protected Area 1', allowEdit: false, allowView: true }
      *   },
      *   {
      *     ranges: [worksheet.getRange('C3:D4')],
-     *     options: { name: 'Protected Area 2', allowEdit: true }
+     *     options: { name: 'Protected Area 2', allowEdit: true, allowView: false }
      *   }
      * ]);
      * console.log(rules);
@@ -576,7 +620,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
                 this._authzIoService.create({
                     objectType: UnitObject.SelectRange,
                     selectRangeObject: {
-                        collaborators: [],
+                        collaborators: c.options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
                         unitID: this._unitId,
                         name: c.options?.name || '',
                         scope: undefined,
@@ -585,30 +629,41 @@ export class FWorksheetPermission implements IWorksheetPermission {
             )
         );
 
-        // 2. Add multiple rules at once (reuse underlying batch capability)
-        const ruleParams = configs.map((c, i) => ({
-            permissionId: permissionIds[i],
-            unitType: UnitObject.SelectRange,
-            unitId: this._unitId,
-            subUnitId: this._subUnitId,
-            ranges: c.ranges.map((r) => r.getRange()),
-            id: this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId),
-            description: c.options?.name || '',
-            viewState: ViewStateEnum.OthersCanView,
-            editState: c.options?.allowEdit ? EditStateEnum.DesignedUserCanEdit : EditStateEnum.OnlyMe,
-        }));
+        // 2. Build rule parameters with proper viewState and editState
+        const ruleParams = configs.map((c, i) => {
+            const viewState = this._determineViewState(c.options);
+            const editState = this._determineEditState(c.options);
 
+            return {
+                permissionId: permissionIds[i],
+                unitType: UnitObject.SelectRange,
+                unitId: this._unitId,
+                subUnitId: this._subUnitId,
+                ranges: c.ranges.map((r) => r.getRange()),
+                id: this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId),
+                description: c.options?.name || '',
+                viewState,
+                editState,
+            };
+        });
+
+        // 3. Execute command to add multiple rules at once
         const result = await this._commandService.executeCommand(AddRangeProtectionMutation.id, {
             unitId: this._unitId,
             subUnitId: this._subUnitId,
-            rules: ruleParams, // ✅ Batch pass multiple rules
+            rules: ruleParams,
         });
 
         if (!result) {
             throw new Error('Failed to create range protection rules');
         }
 
-        // 3. Create RangeProtectionRule objects
+        // 4. Set permission points for each rule
+        await Promise.all(
+            configs.map((c, i) => this._setPermissionPoints(permissionIds[i], c.options))
+        );
+
+        // 5. Create RangeProtectionRule objects
         const rules = ruleParams.map((param, i) =>
             this._injector.createInstance(
                 FRangeProtectionRule,
@@ -628,6 +683,72 @@ export class FWorksheetPermission implements IWorksheetPermission {
         });
 
         return rules;
+    }
+
+    /**
+     * Determine view state from options
+     * @private
+     */
+    private _determineViewState(options?: IRangeProtectionOptions): ViewStateEnum {
+        if (options?.allowViewByOthers === false) {
+            return ViewStateEnum.NoOneElseCanView; // Only owner can view
+        }
+        return ViewStateEnum.OthersCanView;
+    }
+
+    /**
+     * Determine edit state from options
+     * @private
+     */
+    private _determineEditState(options?: IRangeProtectionOptions): EditStateEnum {
+        if (options?.allowEdit === true || Array.isArray(options?.allowEdit)) {
+            return EditStateEnum.DesignedUserCanEdit; // Designed users can edit
+        }
+        return EditStateEnum.OnlyMe;
+    }
+
+    /**
+     * Set permission points based on options (for local runtime control)
+     * @private
+     */
+    private async _setPermissionPoints(permissionId: string, options?: IRangeProtectionOptions): Promise<void> {
+        if (!options) {
+            return;
+        }
+
+        const getPermissionValue = (option: boolean | string[] | undefined, defaultValue: boolean): boolean => {
+            if (option === undefined) {
+                return defaultValue;
+            }
+            if (typeof option === 'boolean') {
+                return option;
+            }
+            return true; // For string[] whitelist
+        };
+
+        // Set permission points
+        await this._setPermissionPoint(permissionId, RangePermissionPoint.Edit, getPermissionValue(options.allowEdit, false));
+        await this._setPermissionPoint(permissionId, RangePermissionPoint.View, getPermissionValue(options.allowViewByOthers, true));
+    }
+
+    /**
+     * Set a single permission point
+     * @private
+     */
+    private async _setPermissionPoint(permissionId: string, point: RangePermissionPoint, value: boolean): Promise<void> {
+        const PermissionPointClass = RANGE_PERMISSION_POINT_MAP[point];
+        if (!PermissionPointClass) {
+            return;
+        }
+
+        const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, permissionId);
+        const existingPoint = this._permissionService.getPermissionPoint(permissionPoint.id);
+
+        if (!existingPoint) {
+            this._permissionService.addPermissionPoint(permissionPoint);
+        }
+
+        this._permissionService.updatePermissionPoint(permissionPoint.id, value);
     }
 
     /**

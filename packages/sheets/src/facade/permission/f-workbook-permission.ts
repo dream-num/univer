@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICollaborator as IProtocolCollaborator } from '@univerjs/protocol';
+import type { ICollaborator as IProtocolCollaborator, IUser } from '@univerjs/protocol';
 import type { Observable, Subscription } from 'rxjs';
 import type { ICollaborator, IWorkbookPermission, UnsubscribeFn, WorkbookMode, WorkbookPermissionSnapshot } from './permission-types';
 import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
@@ -156,12 +156,25 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.setMode('editor');
      * ```
      */
     async setMode(mode: WorkbookMode): Promise<void> {
-        const pointsToSet: Partial<Record<WorkbookPermissionPoint, boolean>> = {};
+        const pointsToSet = this._getModePermissions(mode);
+        await this._batchSetPermissionPoints(pointsToSet);
+    }
+
+    /**
+     * Get permission configuration for a specific mode
+     * @private
+     */
+    private _getModePermissions(mode: WorkbookMode): Record<WorkbookPermissionPoint, boolean> {
+        // Initialize all permission points to false first
+        const pointsToSet: Record<WorkbookPermissionPoint, boolean> = {} as Record<WorkbookPermissionPoint, boolean>;
+        Object.values(WorkbookPermissionPoint).forEach((point) => {
+            pointsToSet[point] = false;
+        });
 
         switch (mode) {
             case 'owner':
@@ -171,7 +184,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
                 });
                 break;
             case 'editor':
-                // Editor can edit, view, print, but cannot manage collaborators, share, etc.
+                // Editor can edit, view, print, export, and perform basic operations
                 pointsToSet[WorkbookPermissionPoint.Edit] = true;
                 pointsToSet[WorkbookPermissionPoint.View] = true;
                 pointsToSet[WorkbookPermissionPoint.Print] = true;
@@ -182,50 +195,74 @@ export class FWorkbookPermission implements IWorkbookPermission {
                 pointsToSet[WorkbookPermissionPoint.DeleteSheet] = true;
                 pointsToSet[WorkbookPermissionPoint.RenameSheet] = true;
                 pointsToSet[WorkbookPermissionPoint.MoveSheet] = true;
+                pointsToSet[WorkbookPermissionPoint.HideSheet] = true;
                 pointsToSet[WorkbookPermissionPoint.InsertRow] = true;
                 pointsToSet[WorkbookPermissionPoint.InsertColumn] = true;
                 pointsToSet[WorkbookPermissionPoint.DeleteRow] = true;
                 pointsToSet[WorkbookPermissionPoint.DeleteColumn] = true;
-                // Not allowed: ManageCollaborator, Share, DuplicateFile, ManageHistory, etc.
-                pointsToSet[WorkbookPermissionPoint.ManageCollaborator] = false;
-                pointsToSet[WorkbookPermissionPoint.Share] = false;
-                pointsToSet[WorkbookPermissionPoint.DuplicateFile] = false;
+                pointsToSet[WorkbookPermissionPoint.CopySheet] = true;
+                pointsToSet[WorkbookPermissionPoint.CreateProtection] = true;
+                // Not allowed: ManageCollaborator, Share, DuplicateFile, etc. (remain false)
                 break;
             case 'viewer':
                 // Viewer can only view and print
                 pointsToSet[WorkbookPermissionPoint.View] = true;
                 pointsToSet[WorkbookPermissionPoint.Print] = true;
-                // Disable all editing permissions
-                pointsToSet[WorkbookPermissionPoint.Edit] = false;
-                pointsToSet[WorkbookPermissionPoint.Export] = false;
-                pointsToSet[WorkbookPermissionPoint.CopyContent] = false;
-                pointsToSet[WorkbookPermissionPoint.Comment] = false;
-                pointsToSet[WorkbookPermissionPoint.CreateSheet] = false;
-                pointsToSet[WorkbookPermissionPoint.DeleteSheet] = false;
-                pointsToSet[WorkbookPermissionPoint.RenameSheet] = false;
-                pointsToSet[WorkbookPermissionPoint.MoveSheet] = false;
-                pointsToSet[WorkbookPermissionPoint.InsertRow] = false;
-                pointsToSet[WorkbookPermissionPoint.InsertColumn] = false;
-                pointsToSet[WorkbookPermissionPoint.DeleteRow] = false;
-                pointsToSet[WorkbookPermissionPoint.DeleteColumn] = false;
-                pointsToSet[WorkbookPermissionPoint.ManageCollaborator] = false;
-                pointsToSet[WorkbookPermissionPoint.Share] = false;
+                // All other permissions remain false
                 break;
             case 'commenter':
-                // Commenter can view and comment
+                // Commenter can view, comment, and print
                 pointsToSet[WorkbookPermissionPoint.View] = true;
                 pointsToSet[WorkbookPermissionPoint.Comment] = true;
                 pointsToSet[WorkbookPermissionPoint.Print] = true;
-                // Disable editing permissions
-                pointsToSet[WorkbookPermissionPoint.Edit] = false;
-                pointsToSet[WorkbookPermissionPoint.CreateSheet] = false;
-                pointsToSet[WorkbookPermissionPoint.DeleteSheet] = false;
+                // All other permissions remain false
                 break;
         }
 
-        // Batch set permission points
+        return pointsToSet;
+    }
+
+    /**
+     * Batch set multiple permission points efficiently
+     * @private
+     */
+    private async _batchSetPermissionPoints(pointsToSet: Record<WorkbookPermissionPoint, boolean>): Promise<void> {
+        // Note: IPermissionService doesn't have a batch update API, so we update individually
+        // but we optimize by only updating the snapshot once at the end
+        const pointsChanged: Array<{ point: WorkbookPermissionPoint; value: boolean; oldValue: boolean }> = [];
+
         for (const [point, value] of Object.entries(pointsToSet)) {
-            await this.setPoint(point as WorkbookPermissionPoint, value);
+            const pointKey = point as WorkbookPermissionPoint;
+            const PointClass = WORKBOOK_PERMISSION_POINT_MAP[pointKey];
+            if (!PointClass) {
+                throw new Error(`Unknown workbook permission point: ${pointKey}`);
+            }
+
+            const oldValue = this.getPoint(pointKey);
+            if (oldValue === value) {
+                continue; // Skip unchanged values
+            }
+
+            const instance = new PointClass(this._unitId);
+            const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
+
+            if (!permissionPoint) {
+                this._permissionService.addPermissionPoint(instance);
+            }
+
+            this._permissionService.updatePermissionPoint(instance.id, value);
+            pointsChanged.push({ point: pointKey, value, oldValue });
+        }
+
+        // Emit all change events
+        pointsChanged.forEach(({ point, value, oldValue }) => {
+            this._pointChangeSubject.next({ point, value, oldValue });
+        });
+
+        // Update snapshot once at the end
+        if (pointsChanged.length > 0) {
+            const newSnapshot = this._buildSnapshot();
+            this._permissionSubject.next(newSnapshot);
         }
     }
 
@@ -235,7 +272,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.setReadOnly();
      * ```
      */
@@ -249,7 +286,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.setEditable();
      * ```
      */
@@ -263,7 +300,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * if (permission?.canEdit()) {
      *   console.log('Workbook is editable');
      * }
@@ -281,7 +318,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.setPoint(WorkbookPermissionPoint.Print, false);
      * ```
      */
@@ -320,7 +357,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * const canPrint = permission?.getPoint(WorkbookPermissionPoint.Print);
      * console.log(canPrint);
      * ```
@@ -343,7 +380,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * const snapshot = permission?.getSnapshot();
      * console.log(snapshot);
      * ```
@@ -354,27 +391,29 @@ export class FWorkbookPermission implements IWorkbookPermission {
 
     /**
      * Set multiple collaborators at once (replaces existing collaborators).
-     * @param {Array<{ userId: string; role: UnitRole }>} collaborators Array of collaborators with userId and role.
+     * @param {Array<{ user: IUser; role: UnitRole }>} collaborators Array of collaborators with user information and role.
      * @returns {Promise<void>} A promise that resolves when the collaborators are set.
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.setCollaborators([
-     *   { userId: 'user1', role: UnitRole.Editor },
-     *   { userId: 'user2', role: UnitRole.Reader }
+     *   {
+     *     user: { userID: 'user1', name: 'John Doe', avatar: 'https://...' },
+     *     role: UnitRole.Editor
+     *   },
+     *   {
+     *     user: { userID: 'user2', name: 'Jane Smith', avatar: '' },
+     *     role: UnitRole.Reader
+     *   }
      * ]);
      * ```
      */
-    async setCollaborators(collaborators: Array<{ userId: string; role: UnitRole }>): Promise<void> {
+    async setCollaborators(collaborators: Array<{ user: IUser; role: UnitRole }>): Promise<void> {
         // Convert to protocol format
         const protocolCollaborators: IProtocolCollaborator[] = collaborators.map((c) => ({
-            id: c.userId,
-            subject: {
-                userID: c.userId,
-                name: '',
-                avatar: '',
-            },
+            id: c.user.userID,
+            subject: c.user,
             role: c.role,
         }));
 
@@ -390,7 +429,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
             this._collaboratorChangeSubject.next({
                 type: 'add',
                 collaborator: {
-                    user: { id: c.userId },
+                    user: { id: c.user.userID },
                     role: c.role,
                 },
             });
@@ -399,27 +438,26 @@ export class FWorkbookPermission implements IWorkbookPermission {
 
     /**
      * Add a single collaborator.
-     * @param {string} userId The user ID.
+     * @param {IUser} user The user information (userID, name, avatar).
      * @param {UnitRole} role The role to assign.
      * @returns {Promise<void>} A promise that resolves when the collaborator is added.
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
-     * await permission?.addCollaborator('user1', UnitRole.Editor);
+     * const permission = workbook?.getWorkbookPermission();
+     * await permission?.addCollaborator(
+     *   { userID: 'user1', name: 'John Doe', avatar: 'https://...' },
+     *   UnitRole.Editor
+     * );
      * ```
      */
-    async addCollaborator(userId: string, role: UnitRole): Promise<void> {
+    async addCollaborator(user: IUser, role: UnitRole): Promise<void> {
         await this._authzIoService.createCollaborator({
             objectID: this._unitId,
             unitID: this._unitId,
             collaborators: [{
-                id: userId,
-                subject: {
-                    userID: userId,
-                    name: '',
-                    avatar: '',
-                },
+                id: user.userID,
+                subject: user,
                 role,
             }],
         });
@@ -427,35 +465,34 @@ export class FWorkbookPermission implements IWorkbookPermission {
         this._collaboratorChangeSubject.next({
             type: 'add',
             collaborator: {
-                user: { id: userId },
+                user: { id: user.userID },
                 role,
             },
         });
     }
 
     /**
-     * Update an existing collaborator's role.
-     * @param {string} userId The user ID.
+     * Update an existing collaborator's role and information.
+     * @param {IUser} user The updated user information (userID, name, avatar).
      * @param {UnitRole} role The new role to assign.
      * @returns {Promise<void>} A promise that resolves when the collaborator is updated.
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
-     * await permission?.updateCollaborator('user1', UnitRole.Reader);
+     * const permission = workbook?.getWorkbookPermission();
+     * await permission?.updateCollaborator(
+     *   { userID: 'user1', name: 'John Doe Updated', avatar: 'https://...' },
+     *   UnitRole.Reader
+     * );
      * ```
      */
-    async updateCollaborator(userId: string, role: UnitRole): Promise<void> {
+    async updateCollaborator(user: IUser, role: UnitRole): Promise<void> {
         await this._authzIoService.updateCollaborator({
             objectID: this._unitId,
             unitID: this._unitId,
             collaborator: {
-                id: userId,
-                subject: {
-                    userID: userId,
-                    name: '',
-                    avatar: '',
-                },
+                id: user.userID,
+                subject: user,
                 role,
             },
         });
@@ -463,7 +500,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
         this._collaboratorChangeSubject.next({
             type: 'update',
             collaborator: {
-                user: { id: userId },
+                user: { id: user.userID },
                 role,
             },
         });
@@ -476,7 +513,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.removeCollaborator('user1');
      * ```
      */
@@ -503,7 +540,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * await permission?.removeCollaborators(['user1', 'user2']);
      * ```
      */
@@ -519,7 +556,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * const collaborators = await permission?.listCollaborators();
      * console.log(collaborators);
      * ```
@@ -546,7 +583,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
-     * const permission = workbook?.permission();
+     * const permission = workbook?.getWorkbookPermission();
      * const unsubscribe = permission?.subscribe((snapshot) => {
      *   console.log('Permission changed:', snapshot);
      * });

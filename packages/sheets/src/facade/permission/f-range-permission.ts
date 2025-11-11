@@ -26,7 +26,7 @@ import type {
     RangePermissionSnapshot,
 } from './permission-types';
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
-import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, EditStateEnum, RangeProtectionRuleModel, UnitObject, ViewStateEnum } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
@@ -194,7 +194,16 @@ export class FRangePermission implements IRangePermission {
             throw new Error('Range is already protected');
         }
 
-        const permissionId = `range-protection-${this._unitId}-${this._subUnitId}-${Date.now()}`;
+        // Create permissionId through authz service (consistent with f-worksheet-permission.ts)
+        const permissionId = await this._authzIoService.create({
+            objectType: UnitObject.SelectRange,
+            selectRangeObject: {
+                collaborators: [],
+                unitID: this._unitId,
+                name: options?.name || '',
+                scope: undefined,
+            },
+        });
         const ruleId = this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId);
 
         const range = this._range.getRange();

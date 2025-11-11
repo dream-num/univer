@@ -27,7 +27,7 @@ import type {
     WorksheetMode,
     WorksheetPermissionSnapshot,
 } from './permission-types';
-import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
+import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import {
     AddRangeProtectionMutation,
     DeleteRangeProtectionMutation,
@@ -592,7 +592,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
             unitId: this._unitId,
             subUnitId: this._subUnitId,
             ranges: c.ranges.map((r) => r.getRange()),
-            id: `ruleId_${generateRandomId(6)}`,
+            id: this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId),
             description: c.options?.name || '',
             viewState: ViewStateEnum.OthersCanView,
             editState: c.options?.allowEdit ? EditStateEnum.DesignedUserCanEdit : EditStateEnum.OnlyMe,

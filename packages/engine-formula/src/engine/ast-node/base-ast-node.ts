@@ -75,7 +75,6 @@ export class BaseAstNode {
         this._children.forEach((node) => {
             node.clearValue();
         });
-        this._valueObject?.dispose();
         this._valueObject = null;
         this._calculateState = false;
     }

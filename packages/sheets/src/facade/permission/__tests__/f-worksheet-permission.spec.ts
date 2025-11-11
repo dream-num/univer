@@ -16,7 +16,7 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import type { RangeProtectionRule } from '../permission-types';
+import type { IRangeProtectionRule } from '../permission-types';
 import { ICommandService } from '@univerjs/core';
 import {
     AddRangeProtectionMutation,
@@ -446,7 +446,7 @@ describe('Test FWorksheetPermission', () => {
                 throw new Error('Permission or worksheet is null');
             }
 
-            const changes: Array<{ type: 'add' | 'update' | 'delete'; rules: RangeProtectionRule[] }> = [];
+            const changes: Array<{ type: 'add' | 'update' | 'delete'; rules: IRangeProtectionRule[] }> = [];
             const subscription = permission.rangeProtectionChange$.subscribe((change) => {
                 changes.push(change);
             });

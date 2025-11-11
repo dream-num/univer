@@ -67,7 +67,7 @@ export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';
 export { AppendRowCommand, type IAppendRowCommandParams } from './commands/commands/append-row.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
-export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
+export { ClearSelectionContentCommand, type IClearSelectionContentCommandParams } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export type { ICopySheetCommandParams } from './commands/commands/copy-worksheet.command';

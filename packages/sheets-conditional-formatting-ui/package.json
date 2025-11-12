@@ -75,6 +75,7 @@
         "@univerjs/icons": "^1.0.2",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"

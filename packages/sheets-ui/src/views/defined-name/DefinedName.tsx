@@ -14,20 +14,36 @@
  * limitations under the License.
  */
 
+import type { Workbook, Worksheet } from '@univerjs/core';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
+import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString } from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
+import { getPrimaryForRange, SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
+import { genNormalSelectionStyle } from '../../services/selection/const';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 
 export function DefinedName({ disable }: { disable: boolean }) {
     const [rangeString, setRangeString] = useState('');
+    const [inputValue, setInputValue] = useState('');
     const definedNamesService = useDependency(IDefinedNamesService);
+    const commandService = useDependency(ICommandService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const worksheet = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+    const unitId = worksheet?.getUnitId();
+    const subUnitId = worksheet?.getSheetId();
+    const themeService = useDependency(ThemeService);
 
     useEffect(() => {
         const subscription = definedNamesService.currentRange$.subscribe(() => {
-            setRangeString(definedNamesService.getCurrentRangeForString());
+            const range = definedNamesService.getCurrentRangeForString();
+            setRangeString(range);
+            setInputValue(range);
         });
 
         return () => {
@@ -35,9 +51,73 @@ export function DefinedName({ disable }: { disable: boolean }) {
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
-    // TODO: @DR-Univer: Should be implemented
-    function handleChangeSelection() {
+    function handleChangeSelection(e: ChangeEvent<HTMLInputElement>) {
+        setInputValue(e.target.value.trim());
+    }
 
+    // TODO: need implemented set defined name if value not referenceString
+    function confirm() {
+        if (inputValue === rangeString) return;
+        if (!isReferenceString(inputValue)) {
+            resetValue();
+            return;
+        };
+
+        setRangeString(inputValue);
+
+        getSelections(worksheet, inputValue).then((selections) => {
+            if (!selections) return;
+
+            commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId,
+                subUnitId,
+                selections,
+            });
+
+            commandService.executeCommand(
+                ScrollToCellCommand.id,
+                { range: selections[0].range } as IScrollToCellCommandParams
+            );
+        });
+    }
+
+    function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+        if (disable) return;
+
+        if (e.key === 'Enter') {
+            confirm();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            resetValue();
+        }
+    }
+
+    function resetValue() {
+        setInputValue(rangeString);
+    }
+
+    async function getSelections(worksheet: Worksheet, formulaOrRefString: string) {
+        if (!worksheet) return;
+
+        const unitRange = deserializeRangeWithSheet(formulaOrRefString.trim());
+
+        const range = unitRange.range;
+        const { startRow, startColumn, endRow, endColumn } = range;
+        const primary = getPrimaryForRange({
+            startRow,
+            startColumn,
+            endRow,
+            endColumn,
+        }, worksheet);
+
+        const selections = [];
+        selections.push({
+            range: unitRange.range,
+            style: genNormalSelectionStyle(themeService),
+            primary,
+        });
+
+        return selections;
     }
 
     return (
@@ -58,8 +138,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     'univer-cursor-not-allowed': disable,
                 })}
                 type="text"
-                value={rangeString}
+                value={inputValue}
                 onChange={handleChangeSelection}
+                onKeyDown={handleKeyDown}
             />
 
             <Dropdown

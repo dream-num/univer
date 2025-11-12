@@ -19,6 +19,7 @@ import type { IWorksheetProtectionRule } from '../../services/permission/type';
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { AddWorksheetProtectionMutation } from '../mutations/add-worksheet-protection.mutation';
 import { DeleteWorksheetProtectionMutation } from '../mutations/delete-worksheet-protection.mutation';
+import { SetWorksheetPermissionPointsMutation } from '../mutations/set-worksheet-permission-points.mutation';
 
 export interface IAddWorksheetProtectionParams {
     unitId: string;
@@ -44,7 +45,27 @@ export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionPara
         });
 
         if (result) {
-            const redoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } }];
+            console.log('[AddWorksheetProtectionCommand] Adding worksheet protection point rule:', JSON.stringify({
+                unitId,
+                subUnitId,
+                permissionId: rule.permissionId,
+            }, null, 2));
+            
+            // Also add the permission point rule
+            await commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, {
+                rule: {
+                    unitId,
+                    subUnitId,
+                    permissionId: rule.permissionId,
+                },
+                unitId,
+                subUnitId,
+            });
+
+            const redoMutations = [
+                { id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } },
+                { id: SetWorksheetPermissionPointsMutation.id, params: { rule: { unitId, subUnitId, permissionId: rule.permissionId }, unitId, subUnitId } },
+            ];
             const undoMutations = [{ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } }];
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

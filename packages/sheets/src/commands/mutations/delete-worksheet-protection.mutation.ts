@@ -41,7 +41,6 @@ export const DeleteWorksheetProtectionMutation: IMutation<IDeleteWorksheetProtec
         }
         const { unitId, subUnitId } = params;
 
-        console.log('[DeleteWorksheetProtectionMutation] Deleting worksheet protection:', JSON.stringify({ unitId, subUnitId }, null, 2));
         worksheetProtectionRuleModel.deleteRule(unitId, subUnitId);
         worksheetProtectionPointModel.deleteRule(unitId, subUnitId);
         return true;

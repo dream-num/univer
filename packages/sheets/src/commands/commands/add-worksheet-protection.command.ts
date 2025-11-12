@@ -45,12 +45,6 @@ export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionPara
         });
 
         if (result) {
-            console.log('[AddWorksheetProtectionCommand] Adding worksheet protection point rule:', JSON.stringify({
-                unitId,
-                subUnitId,
-                permissionId: rule.permissionId,
-            }, null, 2));
-            
             // Also add the permission point rule
             await commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, {
                 rule: {

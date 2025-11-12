@@ -176,8 +176,7 @@ export type WorkbookMode = 'owner' | 'editor' | 'viewer' | 'commenter';
 export type WorksheetMode =
     | 'editable' // Fully editable
     | 'readOnly' // Fully read-only
-    | 'filterOnly' // Filter / sort only
-    | 'commentOnly'; // Comment only, no editing
+    | 'filterOnly'; // Filter / sort only
 
 /**
  * Workbook permission snapshot (state of all permission points)

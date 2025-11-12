@@ -257,11 +257,6 @@ export class FWorksheetPermission implements IWorksheetPermission {
                 pointsToSet[WorksheetPermissionPoint.Filter] = true;
                 // All other permissions remain false
                 break;
-            case 'commentOnly':
-                // Can only comment
-                pointsToSet[WorksheetPermissionPoint.View] = true;
-                // All other permissions remain false
-                break;
         }
 
         return pointsToSet;

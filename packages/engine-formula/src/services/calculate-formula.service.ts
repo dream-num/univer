@@ -346,6 +346,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     this._runtimeService.setRuntimeData(value);
                 }
             }
+
+            nodeData.node?.resetCalculationState();
         }
 
         // clear all pending tasks

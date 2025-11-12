@@ -197,13 +197,10 @@ export class FRangePermission implements IRangePermission {
             return localPermission.value;
         }
 
-        // Default values when no permission point is set
-        // Edit: false (not allowed by default), View: true (allowed by default)
-        // ManageCollaborator: false, Delete: false
-        if (point === RangePermissionPoint.View) {
-            return true;
-        }
-        return false;
+        // Default to true (allowed) when no permission point is set
+        // This aligns with worksheet-level permission behavior
+        // If a range is not explicitly protected, it should be accessible
+        return true;
     }
 
     /**

@@ -55,13 +55,13 @@ describe('Test text function', () => {
         });
 
         it('Text is string format dddd (align with current year)', () => {
-            // 当前年份
+            // Current year
             const year = new Date().getFullYear();
 
-            // 当前年份 9 月 6 日（注意：JS 的月份是 0-based，这里用 8）
+            // September 6th of the current year (JS months are 0-based, so use 8)
             const jsDate = new Date(year, 8, 6);
 
-            // 用 JS 计算期望的英文星期几
+            // Compute the expected weekday in English using JS
             const expectedWeekday = jsDate.toLocaleDateString('en-US', {
                 weekday: 'long',
             });

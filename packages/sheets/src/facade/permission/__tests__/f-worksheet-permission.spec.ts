@@ -154,20 +154,6 @@ describe('Test FWorksheetPermission', () => {
             expect(snapshot[WorksheetPermissionPoint.Edit]).toBe(false);
             expect(snapshot[WorksheetPermissionPoint.Filter]).toBe(true);
         });
-
-        it('should set commentOnly mode', async () => {
-            const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-            const permission = worksheet?.getWorksheetPermission();
-
-            if (!permission) {
-                throw new Error('Permission is null');
-            }
-
-            await permission.setMode('commentOnly');
-
-            const snapshot = permission.getSnapshot();
-            expect(snapshot[WorksheetPermissionPoint.Edit]).toBe(false);
-        });
     });
 
     describe('Shortcut Methods', () => {

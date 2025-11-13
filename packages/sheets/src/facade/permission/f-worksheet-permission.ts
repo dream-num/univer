@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type {
@@ -38,8 +38,8 @@ import {
     ViewStateEnum,
     WorksheetProtectionPointModel,
 } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { RANGE_PERMISSION_POINT_MAP, WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
 import { RangePermissionPoint, WorksheetPermissionPoint } from './permission-types';
@@ -52,16 +52,6 @@ import { RangePermissionPoint, WorksheetPermissionPoint } from './permission-typ
  */
 export class FWorksheetPermission implements IWorksheetPermission {
     private readonly _permissionSubject: BehaviorSubject<WorksheetPermissionSnapshot>;
-    private readonly _pointChangeSubject = new Subject<{
-        point: WorksheetPermissionPoint;
-        value: boolean;
-        oldValue: boolean;
-    }>();
-
-    private readonly _rangeProtectionChangeSubject = new Subject<{
-        type: 'add' | 'update' | 'delete';
-        rules: IRangeProtectionRule[];
-    }>();
 
     /**
      * Observable stream of permission snapshot changes (BehaviorSubject)
@@ -96,6 +86,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
 
     private readonly _unitId: string;
     private readonly _subUnitId: string;
+    private readonly _subscriptions: Subscription[] = [];
 
     constructor(
         private readonly _worksheet: FWorksheet,
@@ -109,44 +100,108 @@ export class FWorksheetPermission implements IWorksheetPermission {
         // Get unitId and subUnitId from worksheet
         this._unitId = this._worksheet.getWorkbook().getUnitId();
         this._subUnitId = this._worksheet.getSheetId();
+
         // Initialize BehaviorSubject
         this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
-        this.permission$ = this._permissionSubject.asObservable().pipe(
+
+        // Setup observables from internal services
+        this.permission$ = this._createPermissionStream();
+        this.pointChange$ = this._createPointChangeStream();
+        this.rangeProtectionChange$ = this._createRangeProtectionChangeStream();
+        this.rangeProtectionRules$ = this._createRangeProtectionRulesStream();
+    }
+
+    /**
+     * Create permission snapshot stream from IPermissionService
+     * @private
+     */
+    private _createPermissionStream(): Observable<WorksheetPermissionSnapshot> {
+        // Listen to permission point changes from IPermissionService
+        const permissionSub = this._permissionService.permissionPointUpdate$.pipe(
+            filter((point) => point.id.includes(this._unitId) && point.id.includes(this._subUnitId))
+        ).subscribe(() => {
+            this._permissionSubject.next(this._buildSnapshot());
+        });
+        this._subscriptions.push(permissionSub);
+
+        return this._permissionSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
             shareReplay(1)
         );
+    }
 
-        this.pointChange$ = this._pointChangeSubject.asObservable();
-        this.rangeProtectionChange$ = this._rangeProtectionChangeSubject.asObservable();
+    /**
+     * Create point change stream from IPermissionService
+     * @private
+     */
+    private _createPointChangeStream(): Observable<{ point: WorksheetPermissionPoint; value: boolean; oldValue: boolean }> {
+        return this._permissionService.permissionPointUpdate$.pipe(
+            filter((point) => point.id.includes(this._unitId) && point.id.includes(this._subUnitId)),
+            map((point) => {
+                const pointType = this._extractWorksheetPointType(point.id);
+                if (!pointType) return null;
+                return {
+                    point: pointType,
+                    value: point.value ?? false,
+                    oldValue: !(point.value ?? false),
+                };
+            }),
+            filter((change): change is { point: WorksheetPermissionPoint; value: boolean; oldValue: boolean } => change !== null),
+            shareReplay(1)
+        );
+    }
 
-        // Range rules list stream - use BehaviorSubject to emit initial value
-        const rangeRulesSubject = new BehaviorSubject<IRangeProtectionRule[]>(this._buildRangeProtectionRules());
-
-        // Update when rules change
-        this._rangeProtectionRuleModel.ruleChange$.subscribe((change) => {
-            if (change.unitId === this._unitId && change.subUnitId === this._subUnitId) {
+    /**
+     * Create range protection change stream from RangeProtectionRuleModel
+     * @private
+     */
+    private _createRangeProtectionChangeStream(): Observable<{ type: 'add' | 'update' | 'delete'; rules: IRangeProtectionRule[] }> {
+        return this._rangeProtectionRuleModel.ruleChange$.pipe(
+            filter((change) => change.unitId === this._unitId && change.subUnitId === this._subUnitId),
+            map((change) => {
                 const rules = this._buildRangeProtectionRules();
-                rangeRulesSubject.next(rules);
+                const type: 'add' | 'update' | 'delete' = change.type === 'delete' ? 'delete' : (change.type === 'set' ? 'update' : 'add');
+                return { type, rules };
+            }),
+            shareReplay(1)
+        );
+    }
 
-                // Also emit rangeProtectionChange event
-                const changeType: 'add' | 'update' | 'delete' = change.oldRule ? 'update' : 'add';
-                this._rangeProtectionChangeSubject.next({
-                    type: changeType,
-                    rules,
-                });
-            }
+    /**
+     * Create range protection rules list stream from RangeProtectionRuleModel
+     * @private
+     */
+    private _createRangeProtectionRulesStream(): Observable<IRangeProtectionRule[]> {
+        const rangeRulesSubject = new BehaviorSubject<IRangeProtectionRule[]>(this._buildRangeProtectionRules());
+        const ruleChangeSub = this._rangeProtectionRuleModel.ruleChange$.pipe(
+            filter((change) => change.unitId === this._unitId && change.subUnitId === this._subUnitId)
+        ).subscribe(() => {
+            rangeRulesSubject.next(this._buildRangeProtectionRules());
         });
+        this._subscriptions.push(ruleChangeSub);
 
-        this.rangeProtectionRules$ = rangeRulesSubject.asObservable().pipe(
+        return rangeRulesSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => {
-                // Compare by rule IDs instead of JSON.stringify to avoid circular reference issues
-                if (prev.length !== curr.length) {
-                    return false;
-                }
+                if (prev.length !== curr.length) return false;
                 return prev.every((p, i) => p.id === curr[i].id);
             }),
             shareReplay(1)
         );
+    }
+
+    /**
+     * Extract WorksheetPermissionPoint type from permission point ID
+     * @private
+     */
+    private _extractWorksheetPointType(pointId: string): WorksheetPermissionPoint | null {
+        // Try to match against known worksheet permission points
+        for (const [pointName, PointClass] of Object.entries(WORKSHEET_PERMISSION_POINT_MAP)) {
+            const testPoint = new PointClass(this._unitId, this._subUnitId);
+            if (testPoint.id === pointId) {
+                return pointName as WorksheetPermissionPoint;
+            }
+        }
+        return null;
     }
 
     /**
@@ -294,12 +349,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
             pointsChanged.push({ point: pointKey, value, oldValue });
         }
 
-        // Emit all change events
-        pointsChanged.forEach(({ point, value, oldValue }) => {
-            this._pointChangeSubject.next({ point, value, oldValue });
-        });
-
-        // Update snapshot once at the end
+        // Update snapshot once at the end (the Observable stream will pick up the changes automatically)
         if (pointsChanged.length > 0) {
             const newSnapshot = this._buildSnapshot();
             this._permissionSubject.next(newSnapshot);
@@ -489,10 +539,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
 
         this._permissionService.updatePermissionPoint(instance.id, value);
 
-        // Trigger change event
-        this._pointChangeSubject.next({ point, value, oldValue });
-
-        // Update snapshot
+        // Update snapshot (the Observable stream will automatically emit the change)
         const newSnapshot = this._buildSnapshot();
         this._permissionSubject.next(newSnapshot);
     }
@@ -671,12 +718,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
             )
         );
 
-        // Trigger change event
-        this._rangeProtectionChangeSubject.next({
-            type: 'add',
-            rules,
-        });
-
+        // The Observable stream will automatically emit the change event
         return rules;
     }
 
@@ -768,11 +810,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
             ruleIds,
         });
 
-        // Trigger change event
-        this._rangeProtectionChangeSubject.next({
-            type: 'delete',
-            rules: [], // Deleted rules
-        });
+        // The Observable stream will automatically emit the change event
     }
 
     /**
@@ -814,8 +852,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * Clean up resources
      */
     dispose(): void {
+        this._subscriptions.forEach((sub) => sub.unsubscribe());
         this._permissionSubject.complete();
-        this._pointChangeSubject.complete();
-        this._rangeProtectionChangeSubject.complete();
     }
 }

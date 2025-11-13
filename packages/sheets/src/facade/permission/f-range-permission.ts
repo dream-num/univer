@@ -28,7 +28,8 @@ import type {
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { UnitRole } from '@univerjs/protocol';
 import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, EditStateEnum, RangeProtectionRuleModel, UnitObject, ViewStateEnum } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
 import { RangePermissionPoint } from './permission-types';
@@ -40,14 +41,25 @@ import { RangePermissionPoint } from './permission-types';
  * @hideconstructor
  */
 export class FRangePermission implements IRangePermission {
-    private readonly _permission$: BehaviorSubject<RangePermissionSnapshot>;
-    private readonly _protectionChange$ = new Subject<{
+    private readonly _permissionSubject: BehaviorSubject<RangePermissionSnapshot>;
+
+    /**
+     * Observable stream of permission snapshot changes
+     * @returns Observable that emits when permission snapshot changes
+     */
+    readonly permission$: Observable<RangePermissionSnapshot>;
+
+    /**
+     * Observable stream of protection state changes
+     * @returns Observable that emits when protection state changes
+     */
+    readonly protectionChange$: Observable<{
         type: 'protected';
         rule: IFRangeProtectionRule;
     } | {
         type: 'unprotected';
         ruleId: string;
-    }>();
+    }>;
 
     constructor(
         private readonly _unitId: string,
@@ -60,37 +72,85 @@ export class FRangePermission implements IRangePermission {
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {
-        this._permission$ = new BehaviorSubject<RangePermissionSnapshot>(this._buildSnapshot());
+        this._permissionSubject = new BehaviorSubject<RangePermissionSnapshot>(this._buildSnapshot());
 
-        // Listen to permission point changes
-        this._permissionService.permissionPointUpdate$.subscribe(() => {
-            this._permission$.next(this._buildSnapshot());
+        // Create permission$ stream from IPermissionService
+        this.permission$ = this._createPermissionStream();
+
+        // Create protectionChange$ stream from RangeProtectionRuleModel
+        this.protectionChange$ = this._createProtectionChangeStream();
+    }
+
+    /**
+     * Create permission snapshot stream from IPermissionService
+     * @private
+     */
+    private _createPermissionStream(): Observable<RangePermissionSnapshot> {
+        // Listen to permission point changes from IPermissionService
+        this._permissionService.permissionPointUpdate$.pipe(
+            filter((point) => {
+                // Filter for permission points related to this range
+                const pointId = point.id;
+                return pointId.includes(this._unitId) && pointId.includes(this._subUnitId);
+            })
+        ).subscribe(() => {
+            this._permissionSubject.next(this._buildSnapshot());
         });
 
-        // Listen to protection rule changes
-        this._rangeProtectionRuleModel.ruleChange$.subscribe((change) => {
-            if (change.unitId === this._unitId && change.subUnitId === this._subUnitId) {
-                // Only emit protectionChange$ for changes that affect this specific range
-                const currentRule = this._getProtectionRule();
+        return this._permissionSubject.asObservable().pipe(
+            distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+            shareReplay(1)
+        );
+    }
 
-                if (change.type === 'delete' && change.rule.id === currentRule?.id) {
-                    // This range was just unprotected
-                    this._protectionChange$.next({
-                        type: 'unprotected',
-                        ruleId: change.rule.id,
-                    });
-                } else if (change.type === 'add' && this._rangeMatches(change.rule)) {
-                    // This range was just protected
-                    const rule = this._createFacadeRule(change.rule);
-                    this._protectionChange$.next({
-                        type: 'protected',
-                        rule,
-                    });
+    /**
+     * Create protection change stream from RangeProtectionRuleModel
+     * @private
+     */
+    private _createProtectionChangeStream(): Observable<{
+        type: 'protected';
+        rule: IFRangeProtectionRule;
+    } | {
+        type: 'unprotected';
+        ruleId: string;
+    }> {
+        return this._rangeProtectionRuleModel.ruleChange$.pipe(
+            filter((change) => {
+                // Only process changes for this worksheet
+                if (change.unitId !== this._unitId || change.subUnitId !== this._subUnitId) {
+                    return false;
                 }
 
-                this._permission$.next(this._buildSnapshot());
-            }
-        });
+                // Only emit for changes that affect this specific range
+                if (change.type === 'delete') {
+                    // Check if the deleted rule was protecting this range
+                    return this._rangeMatches(change.rule);
+                } else if (change.type === 'add') {
+                    // Check if the new rule protects this range
+                    return this._rangeMatches(change.rule);
+                }
+                return false;
+            }),
+            map((change) => {
+                // Also update permission snapshot
+                this._permissionSubject.next(this._buildSnapshot());
+
+                if (change.type === 'delete') {
+                    return {
+                        type: 'unprotected' as const,
+                        ruleId: change.rule.id,
+                    };
+                } else {
+                    // change.type === 'add'
+                    const rule = this._createFacadeRule(change.rule);
+                    return {
+                        type: 'protected' as const,
+                        rule,
+                    };
+                }
+            }),
+            shareReplay(1)
+        );
     }
 
     /**
@@ -134,28 +194,6 @@ export class FRangePermission implements IRangePermission {
             ranges,
             options
         );
-    }
-
-    /**
-     * Observable stream of permission snapshot changes
-     * @returns Observable that emits when permission snapshot changes
-     */
-    get permission$(): Observable<RangePermissionSnapshot> {
-        return this._permission$.asObservable();
-    }
-
-    /**
-     * Observable stream of protection state changes
-     * @returns Observable that emits when protection state changes
-     */
-    get protectionChange$(): Observable<{
-        type: 'protected';
-        rule: IFRangeProtectionRule;
-    } | {
-        type: 'unprotected';
-        ruleId: string;
-    }> {
-        return this._protectionChange$.asObservable();
     }
 
     /**
@@ -345,8 +383,8 @@ export class FRangePermission implements IRangePermission {
 
         this._permissionService.updatePermissionPoint(permissionPoint.id, value);
 
-        // Update snapshot
-        this._permission$.next(this._buildSnapshot());
+        // Update snapshot (the Observable stream will automatically emit the change)
+        this._permissionSubject.next(this._buildSnapshot());
     }
 
     /**
@@ -429,8 +467,7 @@ export class FRangePermission implements IRangePermission {
             options || {}
         );
 
-        this._protectionChange$.next({ type: 'protected', rule });
-
+        // The Observable stream will automatically emit the change
         return rule;
     }
 
@@ -529,7 +566,7 @@ export class FRangePermission implements IRangePermission {
             ruleIds: [ruleId],
         });
 
-        this._protectionChange$.next({ type: 'unprotected', ruleId });
+        // The Observable stream will automatically emit the change
     }
 
     /**
@@ -563,7 +600,7 @@ export class FRangePermission implements IRangePermission {
      * ```
      */
     subscribe(listener: (snapshot: RangePermissionSnapshot) => void): (() => void) {
-        const subscription = this._permission$.subscribe(listener);
+        const subscription = this.permission$.subscribe(listener);
         return () => subscription.unsubscribe();
     }
 

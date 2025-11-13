@@ -19,7 +19,7 @@ import type { Observable, Subscription } from 'rxjs';
 import type { ICollaborator, IWorkbookPermission, UnsubscribeFn, WorkbookMode, WorkbookPermissionSnapshot } from './permission-types';
 import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 import { WORKBOOK_PERMISSION_POINT_MAP } from './permission-point-map';
 import { UnitRole, WorkbookPermissionPoint } from './permission-types';
 
@@ -31,12 +31,9 @@ import { UnitRole, WorkbookPermissionPoint } from './permission-types';
  */
 export class FWorkbookPermission implements IWorkbookPermission {
     private readonly _permissionSubject: BehaviorSubject<WorkbookPermissionSnapshot>;
-    private readonly _pointChangeSubject = new Subject<{
-        point: WorkbookPermissionPoint;
-        value: boolean;
-        oldValue: boolean;
-    }>();
 
+    // Collaborator changes are tracked manually since IAuthzIoService doesn't provide an observable
+    // TODO: If IAuthzIoService adds an observable in the future, migrate to use that
     private readonly _collaboratorChangeSubject = new Subject<{
         type: 'add' | 'update' | 'delete';
         collaborator: ICollaborator;
@@ -77,16 +74,89 @@ export class FWorkbookPermission implements IWorkbookPermission {
     ) {
         // Initialize BehaviorSubject (with initial value)
         this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
-        this.permission$ = this._permissionSubject.asObservable().pipe(
+
+        // Setup observables from internal services
+        this.permission$ = this._createPermissionStream();
+        this.pointChange$ = this._createPointChangeStream();
+
+        // Collaborator changes are tracked manually since IAuthzIoService doesn't provide an observable
+        this.collaboratorChange$ = this._collaboratorChangeSubject.asObservable().pipe(
+            shareReplay(1)
+        );
+    }
+
+    /**
+     * Create permission snapshot stream from IPermissionService
+     * @private
+     */
+    private _createPermissionStream(): Observable<WorkbookPermissionSnapshot> {
+        const permissionSub = this._permissionService.permissionPointUpdate$.pipe(
+            filter((point) => point.id.includes(this._unitId))
+        ).subscribe(() => {
+            this._permissionSubject.next(this._buildSnapshot());
+        });
+        this._subscriptions.push(permissionSub);
+
+        return this._permissionSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
             shareReplay(1)
         );
+    }
 
-        this.pointChange$ = this._pointChangeSubject.asObservable();
-        this.collaboratorChange$ = this._collaboratorChangeSubject.asObservable();
+    /**
+     * Create point change stream from IPermissionService
+     * @private
+     */
+    private _createPointChangeStream(): Observable<{ point: WorkbookPermissionPoint; value: boolean; oldValue: boolean }> {
+        // Cache to store previous values for comparison
+        const valueCache = new Map<WorkbookPermissionPoint, boolean>();
 
-        // Listen to permission point changes
-        this._listenToPermissionChanges();
+        // Initialize cache with current values for all permission points
+        for (const point in WorkbookPermissionPoint) {
+            const pointKey = WorkbookPermissionPoint[point as keyof typeof WorkbookPermissionPoint];
+            valueCache.set(pointKey, this.getPoint(pointKey));
+        }
+
+        return this._permissionService.permissionPointUpdate$.pipe(
+            filter((point) => point.id.includes(this._unitId)),
+            map((permissionPoint) => {
+                // Find which WorkbookPermissionPoint this corresponds to
+                const pointType = this._extractWorkbookPointType(permissionPoint.id);
+                if (!pointType) return null;
+
+                const newValue: boolean = Boolean(permissionPoint.value);
+
+                // Get old value from cache
+                const oldValue: boolean = valueCache.get(pointType)!;
+
+                // Update cache for next time
+                valueCache.set(pointType, newValue);
+
+                if (oldValue === newValue) return null;
+
+                return { point: pointType, value: newValue, oldValue };
+            }),
+            filter((change): change is { point: WorkbookPermissionPoint; value: boolean; oldValue: boolean } => change !== null),
+            shareReplay(1)
+        );
+    }
+
+    /**
+     * Extract WorkbookPermissionPoint type from permission point ID
+     * @private
+     */
+    private _extractWorkbookPointType(pointId: string): WorkbookPermissionPoint | null {
+        for (const point in WorkbookPermissionPoint) {
+            const pointKey = WorkbookPermissionPoint[point as keyof typeof WorkbookPermissionPoint];
+            const PointClass = WORKBOOK_PERMISSION_POINT_MAP[pointKey];
+            if (!PointClass) continue;
+
+            const instance = new PointClass(this._unitId);
+            if (instance.id === pointId) {
+                return pointKey;
+            }
+        }
+        return null;
     }
 
     /**
@@ -103,52 +173,6 @@ export class FWorkbookPermission implements IWorkbookPermission {
 
     /**
      * Listen to permission point changes
-     */
-    private _listenToPermissionChanges(): void {
-        // Subscribe to permission point updates from IPermissionService
-        const subscription = this._permissionService.permissionPointUpdate$.subscribe((permissionPoint) => {
-            // Check if this permission point belongs to this workbook
-            // Workbook permission points have format: "WorkbookEditPermission.{unitId}"
-            const pointId = permissionPoint.id;
-            if (!pointId.includes(this._unitId)) {
-                return; // Not related to this workbook
-            }
-
-            // Find which WorkbookPermissionPoint this corresponds to
-            for (const point in WorkbookPermissionPoint) {
-                const pointKey = WorkbookPermissionPoint[point as keyof typeof WorkbookPermissionPoint];
-                const PointClass = WORKBOOK_PERMISSION_POINT_MAP[pointKey];
-                if (!PointClass) {
-                    continue;
-                }
-
-                const instance = new PointClass(this._unitId);
-                if (instance.id === pointId) {
-                    // Found matching point, get old value
-                    const snapshot = this._permissionSubject.getValue();
-                    const oldValue = snapshot[pointKey];
-                    const newValue = permissionPoint.value as boolean;
-
-                    if (oldValue !== newValue) {
-                        // Emit point change event
-                        this._pointChangeSubject.next({
-                            point: pointKey,
-                            value: newValue,
-                            oldValue,
-                        });
-
-                        // Update snapshot
-                        const newSnapshot = this._buildSnapshot();
-                        this._permissionSubject.next(newSnapshot);
-                    }
-                    break;
-                }
-            }
-        });
-
-        this._subscriptions.push(subscription);
-    }
-
     /**
      * Set permission mode for the workbook.
      * @param {WorkbookMode} mode The permission mode to set ('owner' | 'editor' | 'viewer' | 'commenter').
@@ -254,12 +278,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
             pointsChanged.push({ point: pointKey, value, oldValue });
         }
 
-        // Emit all change events
-        pointsChanged.forEach(({ point, value, oldValue }) => {
-            this._pointChangeSubject.next({ point, value, oldValue });
-        });
-
-        // Update snapshot once at the end
+        // Update snapshot once at the end (the Observable stream will pick up the changes automatically)
         if (pointsChanged.length > 0) {
             const newSnapshot = this._buildSnapshot();
             this._permissionSubject.next(newSnapshot);
@@ -342,10 +361,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
 
         this._permissionService.updatePermissionPoint(instance.id, value);
 
-        // Trigger change event
-        this._pointChangeSubject.next({ point, value, oldValue });
-
-        // Update snapshot
+        // Update snapshot (the Observable stream will automatically emit the change)
         const newSnapshot = this._buildSnapshot();
         this._permissionSubject.next(newSnapshot);
     }
@@ -602,7 +618,6 @@ export class FWorkbookPermission implements IWorkbookPermission {
     dispose(): void {
         this._subscriptions.forEach((s) => s.unsubscribe());
         this._permissionSubject.complete();
-        this._pointChangeSubject.complete();
         this._collaboratorChangeSubject.complete();
     }
 }

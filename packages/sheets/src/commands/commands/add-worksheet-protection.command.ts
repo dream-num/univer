@@ -38,6 +38,17 @@ export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionPara
         const { rule, unitId } = params;
         const subUnitId = rule.subUnitId;
 
+        // Add the permission point rule first
+        await commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, {
+            rule: {
+                unitId,
+                subUnitId,
+                permissionId: rule.permissionId,
+            },
+            unitId,
+            subUnitId,
+        });
+
         const result = await commandService.executeCommand(AddWorksheetProtectionMutation.id, {
             unitId,
             rule,
@@ -45,20 +56,9 @@ export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionPara
         });
 
         if (result) {
-            // Also add the permission point rule
-            await commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, {
-                rule: {
-                    unitId,
-                    subUnitId,
-                    permissionId: rule.permissionId,
-                },
-                unitId,
-                subUnitId,
-            });
-
             const redoMutations = [
-                { id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } },
                 { id: SetWorksheetPermissionPointsMutation.id, params: { rule: { unitId, subUnitId, permissionId: rule.permissionId }, unitId, subUnitId } },
+                { id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } },
             ];
             const undoMutations = [{ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } }];
             undoRedoService.pushUndoRedo({

@@ -54,6 +54,13 @@ describe('Test text function', () => {
             expect(getObjectValue(result)).toBe('0');
         });
 
+        it('Text is string format dddd', () => {
+            const text1 = StringValueObject.create('05-Sep');
+            const formatText = StringValueObject.create('dddd');
+            const result = testFunction.calculate(text1, formatText);
+            expect(getObjectValue(result)).toBe('Saturday');
+        });
+
         it('Text is array, format text is array', () => {
             const text1 = new ArrayValueObject({
                 calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null, 0, '100', '2.34', 'test', -3, ErrorType.NAME]]),

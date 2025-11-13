@@ -54,6 +54,26 @@ describe('Test text function', () => {
             expect(getObjectValue(result)).toBe('0');
         });
 
+        it('Text is string format dddd (align with current year)', () => {
+            // Current year
+            const year = new Date().getFullYear();
+
+            // September 6th of the current year (JS months are 0-based, so use 8)
+            const jsDate = new Date(year, 8, 6);
+
+            // Compute the expected weekday in English using JS
+            const expectedWeekday = jsDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+            });
+
+            const text1 = StringValueObject.create('06-Sep');
+            const formatText = StringValueObject.create('dddd');
+
+            const result = testFunction.calculate(text1, formatText);
+
+            expect(getObjectValue(result)).toBe(expectedWeekday);
+        });
+
         it('Text is array, format text is array', () => {
             const text1 = new ArrayValueObject({
                 calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null, 0, '100', '2.34', 'test', -3, ErrorType.NAME]]),

@@ -70,11 +70,109 @@ export class Subtotal extends BaseFunction {
             return functionNum;
         }
 
-        if (functionNum.isReferenceObject()) {
-            return (functionNum as BaseReferenceObject).toArrayValueObject().mapValue((valueObject) => this._handleSingleObject(valueObject, ...refs));
+        const multiAreaRefs: FunctionVariantType[] = [];
+        const normalRefs: FunctionVariantType[] = [];
+
+        refs.forEach((ref) => {
+            if (ref.isReferenceObject() && (ref as BaseReferenceObject).isMultiArea?.()) {
+                multiAreaRefs.push(ref);
+            } else {
+                normalRefs.push(ref);
+            }
+        });
+
+        // No multi-area references: keep the original behavior
+        if (multiAreaRefs.length === 0) {
+            if (functionNum.isReferenceObject()) {
+                return (functionNum as BaseReferenceObject)
+                    .toArrayValueObject()
+                    .mapValue((valueObject) => this._handleSingleObject(valueObject, ...refs));
+            }
+
+            return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
         }
 
-        return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
+        // -------- Multi-area branch below --------
+
+        // 1. Normalize functionNum to a flat list of BaseValueObject.
+        //    We keep it simple: row-wise list, then each slot (row) has one functionNum value.
+        let fnList: BaseValueObject[] = [];
+
+        if (functionNum.isReferenceObject()) {
+            const fnArray = (functionNum as BaseReferenceObject).toArrayValueObject().flatten();
+            fnList = fnArray.getArrayValue()[0] as BaseValueObject[];
+        } else if (functionNum.isArray()) {
+            const fnArray = (functionNum as ArrayValueObject).flatten();
+            fnList = fnArray.getArrayValue()[0] as BaseValueObject[];
+        } else {
+            fnList = [functionNum as BaseValueObject];
+        }
+
+        // 2. Build a map: multi-area ref -> its area list
+        interface MultiAreaInfo {
+            ref: FunctionVariantType;
+            areas: BaseReferenceObject[];
+        }
+
+        const multiAreaInfoList: MultiAreaInfo[] = multiAreaRefs.map((ref) => {
+            const refObj = ref as BaseReferenceObject & { getAreas?: () => BaseReferenceObject[] };
+            const areas = refObj.getAreas ? refObj.getAreas() : [refObj];
+
+            return {
+                ref,
+                areas,
+            };
+        });
+
+        const multiAreaMap = new Map<FunctionVariantType, BaseReferenceObject[]>();
+        multiAreaInfoList.forEach((info) => {
+            multiAreaMap.set(info.ref, info.areas);
+        });
+
+        // 3. Determine how many rows we need to expand.
+        //    - functionNum length
+        //    - the number of areas in each multi-area ref
+        const maxAreasLen = multiAreaInfoList.reduce(
+            (max, info) => Math.max(max, info.areas.length || 1),
+            1
+        );
+        const maxLen = Math.max(fnList.length || 1, maxAreasLen);
+
+        const rowResults: BaseValueObject[][] = [];
+
+        // 4. For each "row index", pick:
+        //    - one functionNum value (repeat last if shorter)
+        //    - for each multi-area ref: its N-th area (repeat last if shorter)
+        //    - for normal refs: reuse the same ref
+        for (let index = 0; index < maxLen; index++) {
+            const fnIndex = index < fnList.length ? index : fnList.length - 1;
+            const fnValue = fnList[fnIndex];
+
+            const refsForRow: FunctionVariantType[] = refs.map((ref) => {
+                const areas = multiAreaMap.get(ref);
+
+                if (areas) {
+                    const areaIndex = index < areas.length ? index : areas.length - 1;
+                    return areas[areaIndex];
+                }
+
+                // Not a multi-area reference: reused for all rows
+                return ref;
+            });
+
+            const rowResult = this._handleSingleObject(fnValue, ...refsForRow);
+            rowResults.push([rowResult]);
+        }
+
+        // 5. If there is only one row, return scalar. Otherwise, return an ArrayValueObject (row-wise)
+        if (rowResults.length === 1) {
+            return rowResults[0][0];
+        }
+
+        // Shape: maxLen rows × 1 column (expanded by row)
+        const arrayResult = createNewArray(rowResults, rowResults.length, 1);
+
+        return arrayResult;
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

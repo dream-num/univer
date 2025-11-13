@@ -57,7 +57,7 @@ export class Sumproduct extends BaseFunction {
                     variantColumnCount = (variants[i] as ArrayValueObject).getColumnCount();
                 }
 
-                if (variantRowCount !== rowCount || variantColumnCount !== columnCount) {
+                if (variantRowCount !== rowCount && variantColumnCount !== columnCount) {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 }
 

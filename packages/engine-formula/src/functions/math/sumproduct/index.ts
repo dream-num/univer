@@ -51,14 +51,13 @@ export class Sumproduct extends BaseFunction {
 
         // 3. Validate variants (errors + dimension)
         const variantError = this._validateVariants(variants, rowCount, columnCount);
+
         if (variantError) {
             return variantError;
         }
 
         // 4. Core: sum-product over all cells
-        const sum = this._sumProduct(baseArray, variants, rowCount, columnCount);
-
-        return NumberValueObject.create(sum);
+        return this._sumProduct(baseArray, variants, rowCount, columnCount);
     }
 
     /**
@@ -105,7 +104,7 @@ export class Sumproduct extends BaseFunction {
         variants: BaseValueObject[],
         rowCount: number,
         columnCount: number
-    ): number {
+    ): BaseValueObject {
         let sum = 0;
 
         for (let r = 0; r < rowCount; r++) {
@@ -121,12 +120,12 @@ export class Sumproduct extends BaseFunction {
                         // Cannot throw directly here; need to wrap it in ErrorValueObject for the caller.
                         // But to keep the signature simple, we let _getVariantCell return null,
                         // and convert it to ErrorValueObject here uniformly.
-                        throw ErrorValueObject.create(ErrorType.VALUE);
+                        return ErrorValueObject.create(ErrorType.VALUE);
                     }
 
                     if (variantValueObject.isError()) {
                         // Bubble up error via exception; caller will catch and return
-                        throw variantValueObject;
+                        return variantValueObject as ErrorValueObject;
                     }
 
                     if (variantValueObject.isNumber()) {
@@ -141,7 +140,7 @@ export class Sumproduct extends BaseFunction {
             }
         }
 
-        return sum;
+        return NumberValueObject.create(sum);
     }
 
     /**

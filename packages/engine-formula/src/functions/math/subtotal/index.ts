@@ -16,6 +16,7 @@
 
 import type { IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../../../models/formula-data.model';
@@ -81,7 +82,7 @@ export class Subtotal extends BaseFunction {
             }
         });
 
-        // No multi-area references: keep the original behavior
+        // --------- 没有 multi-area：保持原来的逻辑 ---------
         if (multiAreaRefs.length === 0) {
             if (functionNum.isReferenceObject()) {
                 return (functionNum as BaseReferenceObject)
@@ -92,10 +93,9 @@ export class Subtotal extends BaseFunction {
             return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
         }
 
-        // -------- Multi-area branch below --------
+        // --------- 有 multi-area：按“行”展开 ---------
 
-        // 1. Normalize functionNum to a flat list of BaseValueObject.
-        //    We keep it simple: row-wise list, then each slot (row) has one functionNum value.
+        // 1. 把 functionNum 变成一维 BaseValueObject 列表（按行）
         let fnList: BaseValueObject[] = [];
 
         if (functionNum.isReferenceObject()) {
@@ -108,55 +108,82 @@ export class Subtotal extends BaseFunction {
             fnList = [functionNum as BaseValueObject];
         }
 
-        // 2. Build a map: multi-area ref -> its area list
+        // 2. 把 MultiAreaReferenceObject 的二维 areas 映射成「按行的代表 Area」
+        //    每一行我们取该行中第一个非 error 的 area，保持“表格按行展开”的语义
         interface MultiAreaInfo {
             ref: FunctionVariantType;
-            areas: BaseReferenceObject[];
+            rowAreas: MultiAreaValue[]; // 每个元素代表一行
         }
 
         const multiAreaInfoList: MultiAreaInfo[] = multiAreaRefs.map((ref) => {
-            const refObj = ref as BaseReferenceObject & { getAreas?: () => BaseReferenceObject[] };
-            const areas = refObj.getAreas ? refObj.getAreas() : [refObj];
+            const refObj = ref as BaseReferenceObject & { getAreas?: () => MultiAreaValue[][] | MultiAreaValue[] };
+
+            let rowAreas: MultiAreaValue[] = [];
+
+            if (typeof refObj.getAreas === 'function') {
+                const raw = refObj.getAreas();
+
+                // 新版 MultiAreaReferenceObject：MultiAreaValue[][]
+                if (Array.isArray(raw) && raw.length > 0 && Array.isArray(raw[0])) {
+                    const areas2D = raw as MultiAreaValue[][];
+                    rowAreas = areas2D.map((row) => {
+                        if (!row || row.length === 0) {
+                            // 这行完全没 area，就占位一下，用原 ref 本身
+                            return refObj as MultiAreaValue;
+                        }
+                        // 找这一行第一个非 error 的 area，没有就用第一个
+                        const firstNonError = row.find((a) => !a.isError());
+                        return (firstNonError ?? row[0]) as MultiAreaValue;
+                    });
+                } else {
+                    // 兼容老的 getAreas(): MultiAreaValue[]
+                    rowAreas = raw as MultiAreaValue[];
+                }
+            } else {
+                // 理论上 isMultiArea() 就应该有 getAreas，这里兜个底
+                rowAreas = [refObj as MultiAreaValue];
+            }
 
             return {
                 ref,
-                areas,
+                rowAreas,
             };
         });
 
-        const multiAreaMap = new Map<FunctionVariantType, BaseReferenceObject[]>();
+        const multiAreaInfoMap = new Map<FunctionVariantType, MultiAreaInfo>();
         multiAreaInfoList.forEach((info) => {
-            multiAreaMap.set(info.ref, info.areas);
+            multiAreaInfoMap.set(info.ref, info);
         });
 
-        // 3. Determine how many rows we need to expand.
-        //    - functionNum length
-        //    - the number of areas in each multi-area ref
+        // 3. 计算要展开多少“行”
         const maxAreasLen = multiAreaInfoList.reduce(
-            (max, info) => Math.max(max, info.areas.length || 1),
+            (max, info) => Math.max(max, info.rowAreas.length || 1),
             1
         );
         const maxLen = Math.max(fnList.length || 1, maxAreasLen);
 
         const rowResults: BaseValueObject[][] = [];
 
-        // 4. For each "row index", pick:
-        //    - one functionNum value (repeat last if shorter)
-        //    - for each multi-area ref: its N-th area (repeat last if shorter)
-        //    - for normal refs: reuse the same ref
+        // 4. 对每一行 index：
+        //    - 取对应的 functionNum 值（不够就用最后一个）
+        //    - 对每个 multi-area ref：取对应行的代表 Area（不够行就用最后一行）
+        //    - normalRefs 直接复用
         for (let index = 0; index < maxLen; index++) {
             const fnIndex = index < fnList.length ? index : fnList.length - 1;
             const fnValue = fnList[fnIndex];
 
             const refsForRow: FunctionVariantType[] = refs.map((ref) => {
-                const areas = multiAreaMap.get(ref);
+                const info = multiAreaInfoMap.get(ref);
+                if (info) {
+                    const rowIndex = index < info.rowAreas.length ? index : info.rowAreas.length - 1;
+                    const area = info.rowAreas[rowIndex];
 
-                if (areas) {
-                    const areaIndex = index < areas.length ? index : areas.length - 1;
-                    return areas[areaIndex];
+                    // area 可能是 ErrorValueObject 或 BaseReferenceObject，
+                    // 都是 FunctionVariantType 合法成员，直接返回即可
+                    return area as FunctionVariantType;
                 }
 
-                // Not a multi-area reference: reused for all rows
+                // 非 multi-area 引用：所有行共用同一个
                 return ref;
             });
 
@@ -164,14 +191,12 @@ export class Subtotal extends BaseFunction {
             rowResults.push([rowResult]);
         }
 
-        // 5. If there is only one row, return scalar. Otherwise, return an ArrayValueObject (row-wise)
+        // 5. 只有一行就直接返回标量，多行返回 ArrayValueObject（按行展开）
         if (rowResults.length === 1) {
             return rowResults[0][0];
         }
 
-        // Shape: maxLen rows × 1 column (expanded by row)
         const arrayResult = createNewArray(rowResults, rowResults.length, 1);
-
         return arrayResult;
     }
 

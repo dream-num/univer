@@ -17,15 +17,20 @@
 import type { Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
-import { CubeValueObject } from '../value-object/cube-value-object';
+import { createNewArray } from '../utils/array-object';
 import { BaseReferenceObject } from './base-reference-object';
 
-type AreaValue = BaseReferenceObject | ErrorValueObject;
+export type MultiAreaValue = BaseReferenceObject | ErrorValueObject;
 
 export class MultiAreaReferenceObject extends BaseReferenceObject {
-    private _areas: AreaValue [] = [];
+    /**
+     * 二维结构：
+     * - 第一维：按“行”存放
+     * - 第二维：这一行里的每一个 AreaValue
+     */
+    private _areas: MultiAreaValue[][] = [];
 
-    constructor(token: string, areas: AreaValue[] = []) {
+    constructor(token: string, areas: MultiAreaValue[][] = []) {
         // The parent class's rangeData becomes meaningless for multi-area.
         // We only reuse the generic infrastructure from BaseReferenceObject.
         super(token);
@@ -33,7 +38,9 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     }
 
     override dispose(): void {
-        this._areas.forEach((a) => a.dispose());
+        this._areas.forEach((row) => {
+            row.forEach((a) => a.dispose());
+        });
         this._areas = [];
         super.dispose();
     }
@@ -42,16 +49,32 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     // Area Management
     // ------------------------------------------------------------
 
-    getAreas(): AreaValue[] {
+    getAreas(): MultiAreaValue[][] {
         return this._areas;
     }
 
-    setAreas(areas: AreaValue[]): void {
+    setAreas(areas: MultiAreaValue[][]): void {
         this._areas = areas;
     }
 
-    addArea(area: AreaValue): void {
-        this._areas.push(area);
+    /**
+     * 追加一个 area：
+     * - 传单个 AreaValue 时，自动包成一行；
+     * - 传 AreaValue[] 时，当成一整“行”插入。
+     */
+    addArea(area: MultiAreaValue | MultiAreaValue[]): void {
+        if (Array.isArray(area)) {
+            this._areas.push(area);
+        } else {
+            this._areas.push([area]);
+        }
+    }
+
+    /** 扁平化二维 areas，方便重用一维逻辑 */
+    private _flatAreas(): MultiAreaValue[] {
+        // TS 4.x 对 flat 的类型不太聪明时，可以手写 reduce：
+        // return this._areas.reduce<AreaValue[]>((acc, row) => acc.concat(row), []);
+        return this._areas.flat();
     }
 
     // ------------------------------------------------------------
@@ -86,7 +109,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     override getRowCount(): number {
         // Total rows across all areas
         let total = 0;
-        for (const a of this._areas) {
+        for (const a of this._flatAreas()) {
             if (a.isError()) {
                 continue;
             }
@@ -100,7 +123,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         // Excel usually treats multi-area as NOT having a single column count.
         // Returning the sum is the safest for aggregations.
         let total = 0;
-        for (const a of this._areas) {
+        for (const a of this._flatAreas()) {
             if (a.isError()) {
                 continue;
             }
@@ -110,7 +133,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     }
 
     override isExceedRange(): boolean {
-        return this._areas.some((a) => {
+        return this._flatAreas().some((a) => {
             if (a.isError()) {
                 return false;
             }
@@ -121,7 +144,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     override setRefOffset(x = 0, y = 0): void {
         super.setRefOffset(x, y);
         // Propagate offset to sub-areas
-        this._areas.forEach((a) => {
+        this._flatAreas().forEach((a) => {
             if (a.isError()) {
                 return;
             }
@@ -129,8 +152,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         });
     }
 
-    private _getReferenceArea() {
-        return this._areas.find((a) => !a.isError()) as BaseReferenceObject | undefined;
+    private _getReferenceArea(): BaseReferenceObject | undefined {
+        const flat = this._flatAreas();
+        const first = flat.find((a) => !a.isError()) as BaseReferenceObject | undefined;
+        return first;
     }
 
     // ------------------------------------------------------------
@@ -165,24 +190,40 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     /**
      * Iterate through all areas in order, flattening the multi-area into
      * a sequence of cells.
+     *
+     * 注意：这里是“先行后列”的顺序：
+     *   先按 _areas 的行顺序遍历，再在每一行内按 area 顺序遍历。
      */
     override iterator(
         callback: (v: Nullable<BaseValueObject>, row: number, col: number) => Nullable<boolean>
     ) {
-        for (const area of this._areas) {
-            let stop = false;
-            if (area.isError()) {
-                continue;
-            }
-            (area as BaseReferenceObject).iterator((v, r, c) => {
-                const res = callback(v, r, c);
-                if (res === false) {
-                    stop = true;
-                    return false;
+        for (const row of this._areas) {
+            let stopRow = false;
+
+            for (const area of row) {
+                if (area.isError()) {
+                    continue;
                 }
-                return res;
-            });
-            if (stop) return;
+
+                let stopArea = false;
+                (area as BaseReferenceObject).iterator((v, r, c) => {
+                    const res = callback(v, r, c);
+                    if (res === false) {
+                        stopArea = true;
+                        stopRow = true;
+                        return false;
+                    }
+                    return res;
+                });
+
+                if (stopArea) {
+                    break;
+                }
+            }
+
+            if (stopRow) {
+                return;
+            }
         }
     }
 
@@ -203,31 +244,68 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     // ------------------------------------------------------------
 
     /**
-     * Multi-area cannot be flattened into a rectangular ArrayValueObject.
-     * Excel also rejects A1:A3,C1:C3 as a single array.
+     * For multi-area, we only take the *first cell* of each area and
+     * arrange them into a 2D ArrayValueObject:
+     *
+     * - outer `_areas` dimension => rows
+     * - inner `_areas[row]` dimension => columns
      */
-    override toArrayValueObject(useCache = true): ArrayValueObject {
-        throw new Error('Cannot convert MultiAreaReferenceObject to ArrayValueObject');
-    }
+    override toArrayValueObject(): ArrayValueObject {
+        const rows = this._areas.length;
 
-    /**
-     * Convert each area to ArrayValueObject and wrap them into a CubeValueObject.
-     * This is the correct representation for discontiguous references.
-     */
-    toCubeValueObject(useCache = true): CubeValueObject {
-        const arrays = this._areas.map((a) => {
-            if (a.isError()) {
-                return a as ErrorValueObject;
+        if (rows === 0) {
+            // 如果你们有专门的空数组工厂，这里可以替换为对应实现
+            return createNewArray([], 0, 0);
+        }
+
+        // 按第一行的长度作为列数（假设各行长度一致；如果不一致多出来的你可以后面再补）
+        const cols = this._areas[0]?.length ?? 0;
+
+        // 创建目标 ArrayValueObject（具体工厂根据你们项目稍微改下就行）
+        const array = createNewArray([], rows, cols);
+
+        for (let r = 0; r < rows; r++) {
+            const rowAreas = this._areas[r];
+            if (!rowAreas) continue;
+
+            for (let c = 0; c < cols; c++) {
+                const area = rowAreas[c];
+                if (!area) {
+                    continue;
+                }
+
+                // 如果本身就是错误值，直接塞进去
+                if (area.isError()) {
+                    array.set(r, c, area as ErrorValueObject);
+                    continue;
+                }
+
+                // 否则取该 area 的第一个单元格
+                let firstValue: Nullable<BaseValueObject> = null;
+
+                (area as BaseReferenceObject).iterator((v) => {
+                    firstValue = v ?? null;
+                    // 只要第一个，立刻终止遍历
+                    return false;
+                });
+
+                if (firstValue != null) {
+                    array.set(r, c, firstValue as BaseValueObject);
+                }
+                // 如果 firstValue 也是 null，你可以视需求：
+                // - 保持为空（ArrayValueObject 默认空值）
+                // - 或者填一个 NullValueObject / EmptyValueObject
             }
-            return (a as BaseReferenceObject).toArrayValueObject(useCache);
-        });
-        return CubeValueObject.create(arrays);
+        }
+
+        return array;
     }
 
     override getRangePosition() {
+        const flat = this._flatAreas();
+
         // If there is no area, fall back to BaseReferenceObject behavior.
-        const areas = this._areas;
-        if (!areas.length) {
+        if (!flat.length) {
             return super.getRangePosition();
         }
 
@@ -236,7 +314,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         let maxEndRow = Number.NEGATIVE_INFINITY;
         let maxEndColumn = Number.NEGATIVE_INFINITY;
 
-        for (const area of areas) {
+        for (const area of flat) {
             if (area.isError()) {
                 continue;
             }
@@ -256,7 +334,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
             if (startRow < minStartRow) minStartRow = startRow;
             if (startColumn < minStartColumn) minStartColumn = startColumn;
             if (endRow > maxEndRow) maxEndRow = endRow;
-            if (endColumn > maxEndColumn) maxEndColumn = endColumn;
+            if (endColumn > maxEndColumn) maxEndColumn = maxEndColumn < endColumn ? endColumn : maxEndColumn;
         }
 
         // If all areas were invalid, defer to the parent implementation.
@@ -293,11 +371,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     }
 
     override getRangeData() {
-        const areas = this._areas;
+        const flat = this._flatAreas();
 
         // No areas: fall back to the base implementation (which usually returns the
         // internal _rangeData or some default).
-        if (!areas.length) {
+        if (!flat.length) {
             return super.getRangeData();
         }
 
@@ -306,7 +384,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         let maxEndRow = Number.NEGATIVE_INFINITY;
         let maxEndColumn = Number.NEGATIVE_INFINITY;
 
-        for (const area of areas) {
+        for (const area of flat) {
             if (area.isError()) {
                 continue;
             }

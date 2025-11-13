@@ -15,6 +15,7 @@
  */
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -139,39 +140,47 @@ export class Offset extends BaseFunction {
         const heightArray = expandArrayValueObject(maxRowLength, maxColumnLength, _height, ErrorValueObject.create(ErrorType.NA));
         const widthArray = expandArrayValueObject(maxRowLength, maxColumnLength, _width, ErrorValueObject.create(ErrorType.NA));
 
-        const multiArea: (BaseReferenceObject | ErrorValueObject)[] = [];
+        const multiAreaValue: MultiAreaValue[][] = [];
+
         rowsArray.iterator((rowsValue, rowIndex, columnIndex) => {
             const columnsValue = columnsArray.get(rowIndex, columnIndex) as BaseValueObject;
             const heightValue = heightArray.get(rowIndex, columnIndex) as BaseValueObject;
             const widthValue = widthArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (!rowsValue) {
+            multiAreaValue[rowIndex] = multiAreaValue[rowIndex] || [];
+
+            if (rowsValue == null) {
+                multiAreaValue[rowIndex][columnIndex] = ErrorValueObject.create(ErrorType.NA);
                 return;
             }
 
             if (rowsValue.isError()) {
+                multiAreaValue[rowIndex][columnIndex] = rowsValue as ErrorValueObject;
                 return;
             }
 
             if (columnsValue.isError()) {
+                multiAreaValue[rowIndex][columnIndex] = columnsValue as ErrorValueObject;
                 return;
             }
 
             if (heightValue.isError()) {
+                multiAreaValue[rowIndex][columnIndex] = heightValue as ErrorValueObject;
                 return;
             }
 
             if (widthValue.isError()) {
+                multiAreaValue[rowIndex][columnIndex] = widthValue as ErrorValueObject;
                 return;
             }
 
             // Ensure that the callback function returns a BaseValueObject
-            const result = this._handleSingleObject(reference as BaseReferenceObject, rowsValue, columnsValue, heightValue, widthValue);
+            const result = this._handleSingleObject(reference as BaseReferenceObject, rowsValue, columnsValue, heightValue, widthValue) as BaseReferenceObject | ErrorValueObject;
 
-            multiArea.push(result as BaseReferenceObject | ErrorValueObject);
+            multiAreaValue[rowIndex][columnIndex] = result;
         });
 
-        return new MultiAreaReferenceObject('', multiArea);
+        return new MultiAreaReferenceObject('', multiAreaValue);
     }
 
     // eslint-disable-next-line

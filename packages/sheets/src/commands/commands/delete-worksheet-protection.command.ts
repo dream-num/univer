@@ -19,7 +19,6 @@ import type { IWorksheetProtectionRule } from '../../services/permission/type';
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { AddWorksheetProtectionMutation } from '../mutations/add-worksheet-protection.mutation';
 import { DeleteWorksheetProtectionMutation } from '../mutations/delete-worksheet-protection.mutation';
-import { SetWorksheetPermissionPointsMutation } from '../mutations/set-worksheet-permission-points.mutation';
 
 export interface IDeleteWorksheetProtectionParams {
     unitId: string;
@@ -44,10 +43,7 @@ export const DeleteWorksheetProtectionCommand: ICommand<IDeleteWorksheetProtecti
         });
 
         const redoMutations = [{ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } }];
-        const undoMutations = [
-            { id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId } },
-            { id: SetWorksheetPermissionPointsMutation.id, params: { rule: { unitId, subUnitId, permissionId: rule.permissionId }, unitId, subUnitId } },
-        ];
+        const undoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId } }];
         undoRedoService.pushUndoRedo({
             unitID: unitId,
             redoMutations,

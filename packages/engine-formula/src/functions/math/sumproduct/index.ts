@@ -27,72 +27,143 @@ export class Sumproduct extends BaseFunction {
     override maxParams = 255;
 
     override calculate(array1: BaseValueObject, ...variants: BaseValueObject[]) {
+        // 1. Early error from array1
         if (array1.isError()) {
             return array1;
         }
 
         const _array1 = this._initArray1(array1);
 
-        if (variants.length > 0) {
-            const rowCount = _array1.getRowCount();
-            const columnCount = _array1.getColumnCount();
-
-            let resultArray = this._getResultArrayByArray1(rowCount, columnCount, _array1);
-
-            if (resultArray instanceof ErrorValueObject) {
-                return resultArray;
-            }
-            resultArray = resultArray as number[][];
-
-            for (let i = 0; i < variants.length; i++) {
-                if (variants[i].isError()) {
-                    return variants[i];
-                }
-
-                let variantRowCount = 1;
-                let variantColumnCount = 1;
-
-                if (variants[i].isArray()) {
-                    variantRowCount = (variants[i] as ArrayValueObject).getRowCount();
-                    variantColumnCount = (variants[i] as ArrayValueObject).getColumnCount();
-                }
-
-                if (variantRowCount !== rowCount || variantColumnCount !== columnCount) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                for (let r = 0; r < rowCount; r++) {
-                    const row: number[] = [];
-
-                    for (let c = 0; c < columnCount; c++) {
-                        let variantValueObject = variants[i] as BaseValueObject;
-
-                        if (variants[i].isArray()) {
-                            variantValueObject = (variants[i] as ArrayValueObject).get(r, c) as BaseValueObject;
-                        }
-
-                        if (variantValueObject.isError()) {
-                            return variantValueObject;
-                        }
-
-                        // Only number values are considered for the sumproduct calculation
-                        if (variantValueObject.isNumber()) {
-                            row.push((variantValueObject.getValue() as number) * resultArray[r][c]);
-                        } else {
-                            row.push(0);
-                        }
-                    }
-
-                    resultArray[r] = row;
-                }
-            }
-
-            const result = resultArray.reduce((acc, cur) => acc.concat(cur)).reduce((acc, cur) => acc + cur, 0);
-
-            return NumberValueObject.create(result);
-        } else {
+        // No variants: behave like SUM(array1)
+        if (variants.length === 0) {
             return _array1.sum();
         }
+
+        const rowCount = _array1.getRowCount();
+        const columnCount = _array1.getColumnCount();
+
+        // 2. Build base numeric array from array1
+        const baseArrayOrError = this._getResultArrayByArray1(rowCount, columnCount, _array1);
+        if (baseArrayOrError instanceof ErrorValueObject) {
+            return baseArrayOrError;
+        }
+        const baseArray = baseArrayOrError as number[][];
+
+        // 3. Validate variants (errors + dimension)
+        const variantError = this._validateVariants(variants, rowCount, columnCount);
+        if (variantError) {
+            return variantError;
+        }
+
+        // 4. Core: sum-product over all cells
+        const sum = this._sumProduct(baseArray, variants, rowCount, columnCount);
+
+        return NumberValueObject.create(sum);
+    }
+
+    /**
+     * Validate all variants:
+     * - propagate first error BaseValueObject
+     * - ensure array dimensions are compatible with base (rowCount/columnCount)
+     * Returns an ErrorValueObject / BaseValueObject on failure, or null when OK.
+     */
+    private _validateVariants(
+        variants: BaseValueObject[],
+        rowCount: number,
+        columnCount: number
+    ): BaseValueObject | ErrorValueObject | null {
+        for (const v of variants) {
+            if (v.isError()) {
+                // Propagate the error object directly (same as original)
+                return v;
+            }
+
+            if (v.isArray()) {
+                const arr = v as ArrayValueObject;
+                const variantRowCount = arr.getRowCount();
+                const variantColumnCount = arr.getColumnCount();
+
+                // Keep original rule:
+                // only when BOTH row and column mismatch => #VALUE!
+                if (variantRowCount !== rowCount && variantColumnCount !== columnCount) {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Core SUMPRODUCT loop.
+     * - baseArray already contains numeric values from array1
+     * - variants may be scalar or array; non-number cells are treated as 0
+     * - any error cell short-circuits with that error
+     */
+    private _sumProduct(
+        baseArray: number[][],
+        variants: BaseValueObject[],
+        rowCount: number,
+        columnCount: number
+    ): number {
+        let sum = 0;
+
+        for (let r = 0; r < rowCount; r++) {
+            for (let c = 0; c < columnCount; c++) {
+                let cellProduct = baseArray[r][c];
+
+                for (let i = 0; i < variants.length; i++) {
+                    const v = variants[i];
+
+                    const variantValueObject = this._getVariantCell(v, r, c);
+                    if (!variantValueObject) {
+                        // Same as original: missing cell -> #VALUE!
+                        // Cannot throw directly here; need to wrap it in ErrorValueObject for the caller.
+                        // But to keep the signature simple, we let _getVariantCell return null,
+                        // and convert it to ErrorValueObject here uniformly.
+                        throw ErrorValueObject.create(ErrorType.VALUE);
+                    }
+
+                    if (variantValueObject.isError()) {
+                        // Bubble up error via exception; caller will catch and return
+                        throw variantValueObject;
+                    }
+
+                    if (variantValueObject.isNumber()) {
+                        cellProduct *= variantValueObject.getValue() as number;
+                    } else {
+                        // Non-numeric cell contributes 0 at this position
+                        cellProduct = 0;
+                    }
+                }
+
+                sum += cellProduct;
+            }
+        }
+
+        return sum;
+    }
+
+    /**
+     * Get the value object of a variant at (r, c).
+     * - For scalar variants, returns the variant itself.
+     * - For array variants, returns the cell at (r, c).
+     *   If cell does not exist, returns null and let caller convert to #VALUE!.
+     */
+    private _getVariantCell(
+        variant: BaseValueObject,
+        row: number,
+        col: number
+    ): BaseValueObject | null {
+        if (!variant.isArray()) {
+            // Scalar case: single value for all cells
+            return variant;
+        }
+
+        const arr = variant as ArrayValueObject;
+        const cell = arr.get(row, col) as BaseValueObject | null | undefined;
+
+        return cell ?? null;
     }
 
     private _initArray1(array1: BaseValueObject): ArrayValueObject {

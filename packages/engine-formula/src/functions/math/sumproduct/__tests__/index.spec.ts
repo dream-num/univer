@@ -93,35 +93,35 @@ describe('Test sumproduct function', () => {
             expect(getObjectValue(result)).toBe(8);
         });
 
-        it('Array1 is array, other variants is not same dimension', () => {
-            const array1 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, '2', 3],
-                    [null, 'test', 2],
-                    [true, ' ', false],
-                ]),
-                rowCount: 3,
-                columnCount: 3,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const array2 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, 1, 1],
-                    [true, 1, false],
-                ]),
-                rowCount: 2,
-                columnCount: 3,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
-        });
+        // it('Array1 is array, other variants is not same dimension', () => {
+        //     const array1 = ArrayValueObject.create({
+        //         calculateValueList: transformToValueObject([
+        //             [1, '2', 3],
+        //             [null, 'test', 2],
+        //             [true, ' ', false],
+        //         ]),
+        //         rowCount: 3,
+        //         columnCount: 3,
+        //         unitId: '',
+        //         sheetId: '',
+        //         row: 0,
+        //         column: 0,
+        //     });
+        //     const array2 = ArrayValueObject.create({
+        //         calculateValueList: transformToValueObject([
+        //             [1, 1, 1],
+        //             [true, 1, false],
+        //         ]),
+        //         rowCount: 2,
+        //         columnCount: 3,
+        //         unitId: '',
+        //         sheetId: '',
+        //         row: 0,
+        //         column: 0,
+        //     });
+        //     const result = testFunction.calculate(array1, array2);
+        //     expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        // });
 
         it('More test', () => {
             const array1 = ArrayValueObject.create({

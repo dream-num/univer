@@ -408,6 +408,10 @@ export class BaseReferenceObject extends ObjectClassType {
         return false;
     }
 
+    isMultiArea(): boolean {
+        return false;
+    }
+
     unionBy(referenceObject: BaseReferenceObject): NodeValueType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.REF);

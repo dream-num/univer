@@ -71,6 +71,10 @@ export class Sumproduct extends BaseFunction {
                             variantValueObject = (variants[i] as ArrayValueObject).get(r, c) as BaseValueObject;
                         }
 
+                        if (!variantValueObject) {
+                            return ErrorValueObject.create(ErrorType.VALUE);
+                        }
+
                         if (variantValueObject.isError()) {
                             return variantValueObject;
                         }

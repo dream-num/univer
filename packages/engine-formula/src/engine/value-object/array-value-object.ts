@@ -20,7 +20,7 @@ import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
+import { CELL_INVERTED_INDEX_CACHE, DEFAULT_EMPTY_CELL_KEY } from '../../basics/inverted-index-cache';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
@@ -1525,7 +1525,7 @@ export class ArrayValueObject extends BaseValueObject {
                         unitId,
                         sheetId,
                         column + startColumn,
-                        valueObject.getValue(),
+                        valueObject.isNull() ? null : valueObject.getValue(),
                         rowsInCache
                     );
 
@@ -1722,27 +1722,12 @@ export class ArrayValueObject extends BaseValueObject {
             result[r][column] = ErrorValueObject.create(ErrorType.NA);
         }
 
-        /**
-         * Inverted indexing enhances matching performance.
-         */
-        if (currentValue == null) {
-            return;
-        }
-
-        /**
-         * The blank cell are not stored in the inverted index, so skip it.
-         * If needed store it in the future. ask @DR-Univer
-         */
-        if (currentValue.isNull()) {
-            return;
-        }
-
-        if (currentValue.isError()) {
+        if (!currentValue || currentValue?.isNull()) {
             CELL_INVERTED_INDEX_CACHE.set(
                 unitId,
                 sheetId,
                 column + startColumn,
-                (currentValue as ErrorValueObject).getErrorType(),
+                DEFAULT_EMPTY_CELL_KEY,
                 r + startRow
             );
         } else {

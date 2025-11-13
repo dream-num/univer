@@ -52,6 +52,7 @@ import { RangePermissionPoint, WorksheetPermissionPoint } from './permission-typ
  */
 export class FWorksheetPermission implements IWorksheetPermission {
     private readonly _permissionSubject: BehaviorSubject<WorksheetPermissionSnapshot>;
+    private readonly _rangeRulesSubject: BehaviorSubject<IRangeProtectionRule[]>;
 
     /**
      * Observable stream of permission snapshot changes (BehaviorSubject)
@@ -103,6 +104,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
 
         // Initialize BehaviorSubject
         this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
+        this._rangeRulesSubject = new BehaviorSubject<IRangeProtectionRule[]>(this._buildRangeProtectionRules());
 
         // Setup observables from internal services
         this.permission$ = this._createPermissionStream();
@@ -126,7 +128,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
 
         return this._permissionSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -147,7 +149,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
                 };
             }),
             filter((change): change is { point: WorksheetPermissionPoint; value: boolean; oldValue: boolean } => change !== null),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -163,7 +165,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
                 const type: 'add' | 'update' | 'delete' = change.type === 'delete' ? 'delete' : (change.type === 'set' ? 'update' : 'add');
                 return { type, rules };
             }),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -172,20 +174,19 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @private
      */
     private _createRangeProtectionRulesStream(): Observable<IRangeProtectionRule[]> {
-        const rangeRulesSubject = new BehaviorSubject<IRangeProtectionRule[]>(this._buildRangeProtectionRules());
         const ruleChangeSub = this._rangeProtectionRuleModel.ruleChange$.pipe(
             filter((change) => change.unitId === this._unitId && change.subUnitId === this._subUnitId)
         ).subscribe(() => {
-            rangeRulesSubject.next(this._buildRangeProtectionRules());
+            this._rangeRulesSubject.next(this._buildRangeProtectionRules());
         });
         this._subscriptions.push(ruleChangeSub);
 
-        return rangeRulesSubject.asObservable().pipe(
+        return this._rangeRulesSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => {
                 if (prev.length !== curr.length) return false;
                 return prev.every((p, i) => p.id === curr[i].id);
             }),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -854,5 +855,6 @@ export class FWorksheetPermission implements IWorksheetPermission {
     dispose(): void {
         this._subscriptions.forEach((sub) => sub.unsubscribe());
         this._permissionSubject.complete();
+        this._rangeRulesSubject.complete();
     }
 }

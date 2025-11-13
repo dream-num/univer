@@ -81,7 +81,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
 
         // Collaborator changes are tracked manually since IAuthzIoService doesn't provide an observable
         this.collaboratorChange$ = this._collaboratorChangeSubject.asObservable().pipe(
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -99,7 +99,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
 
         return this._permissionSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -137,7 +137,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
                 return { point: pointType, value: newValue, oldValue };
             }),
             filter((change): change is { point: WorkbookPermissionPoint; value: boolean; oldValue: boolean } => change !== null),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 

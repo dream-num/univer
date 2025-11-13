@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type {
@@ -42,6 +42,7 @@ import { RangePermissionPoint } from './permission-types';
  */
 export class FRangePermission implements IRangePermission {
     private readonly _permissionSubject: BehaviorSubject<RangePermissionSnapshot>;
+    private readonly _subscriptions: Subscription[] = [];
 
     /**
      * Observable stream of permission snapshot changes
@@ -87,7 +88,7 @@ export class FRangePermission implements IRangePermission {
      */
     private _createPermissionStream(): Observable<RangePermissionSnapshot> {
         // Listen to permission point changes from IPermissionService
-        this._permissionService.permissionPointUpdate$.pipe(
+        const sub = this._permissionService.permissionPointUpdate$.pipe(
             filter((point) => {
                 // Filter for permission points related to this range
                 const pointId = point.id;
@@ -97,9 +98,12 @@ export class FRangePermission implements IRangePermission {
             this._permissionSubject.next(this._buildSnapshot());
         });
 
+        // Store subscription for cleanup
+        this._subscriptions.push(sub);
+
         return this._permissionSubject.asObservable().pipe(
             distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -149,7 +153,7 @@ export class FRangePermission implements IRangePermission {
                     };
                 }
             }),
-            shareReplay(1)
+            shareReplay({ bufferSize: 1, refCount: true })
         );
     }
 
@@ -752,5 +756,13 @@ export class FRangePermission implements IRangePermission {
         });
 
         return snapshot;
+    }
+
+    /**
+     * Clean up resources
+     */
+    dispose(): void {
+        this._subscriptions.forEach((sub) => sub.unsubscribe());
+        this._permissionSubject.complete();
     }
 }

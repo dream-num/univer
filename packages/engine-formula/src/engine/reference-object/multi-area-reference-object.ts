@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { createNewArray } from '../utils/array-object';
+import { NullValueObject } from '../value-object/primitive-object';
 import { BaseReferenceObject } from './base-reference-object';
 
 export type MultiAreaValue = BaseReferenceObject | ErrorValueObject;
@@ -261,12 +262,13 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         // 按第一行的长度作为列数（假设各行长度一致；如果不一致多出来的你可以后面再补）
         const cols = this._areas[0]?.length ?? 0;
 
-        // 创建目标 ArrayValueObject（具体工厂根据你们项目稍微改下就行）
-        const array = createNewArray([], rows, cols);
+        const result: BaseValueObject[][] = [];
 
         for (let r = 0; r < rows; r++) {
             const rowAreas = this._areas[r];
             if (!rowAreas) continue;
+
+            result[r] = result[r] || [];
 
             for (let c = 0; c < cols; c++) {
                 const area = rowAreas[c];
@@ -276,7 +278,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
 
                 // 如果本身就是错误值，直接塞进去
                 if (area.isError()) {
-                    array.set(r, c, area as ErrorValueObject);
+                    result[r][c] = area as ErrorValueObject;
                     continue;
                 }
 
@@ -290,15 +292,16 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
                 });
 
                 if (firstValue != null) {
-                    array.set(r, c, firstValue as BaseValueObject);
+                    result[r][c] = firstValue as BaseValueObject;
                 }
                 // 如果 firstValue 也是 null，你可以视需求：
                 // - 保持为空（ArrayValueObject 默认空值）
                 // - 或者填一个 NullValueObject / EmptyValueObject
+                result[r][c] = NullValueObject.create();
             }
         }
 
-        return array;
+        return createNewArray(result, rows, cols);
     }
 
     override getRangePosition() {

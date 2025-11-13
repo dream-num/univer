@@ -17,6 +17,7 @@
 import type { NumericTuple } from '@flatten-js/interval-tree';
 import IntervalTree from '@flatten-js/interval-tree';
 
+export const DEFAULT_EMPTY_CELL_KEY = Symbol('EMPTY_CELL');
 export class InvertedIndexCache {
     /**
      * {
@@ -30,11 +31,11 @@ export class InvertedIndexCache {
      *    }
      * }
      */
-    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null, Set<number>>>>> = new Map();
+    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null | symbol, Set<number>>>>> = new Map();
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
-    set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null, row: number, isForceUpdate: boolean = false) {
+    set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null | symbol, row: number, isForceUpdate: boolean = false) {
         if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row) && !isForceUpdate) {
             return;
         }
@@ -83,9 +84,12 @@ export class InvertedIndexCache {
         return this._cache.get(unitId)?.get(sheetId)?.get(column);
     }
 
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: NumericTuple[]) {
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean | symbol, rowsInCache: NumericTuple[]) {
         // Because the inverted index cache is used for compare operation, it should be case-insensitive.
-        const _value = typeof value === 'string' ? value.toLowerCase() : value;
+        let _value = typeof value === 'string' ? value.toLowerCase() : value;
+        if (_value === '' || _value === false) {
+            _value = DEFAULT_EMPTY_CELL_KEY;
+        }
         const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(_value);
         return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }

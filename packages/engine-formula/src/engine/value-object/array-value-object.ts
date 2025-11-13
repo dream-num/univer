@@ -20,7 +20,7 @@ import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
+import { CELL_INVERTED_INDEX_CACHE, DEFAULT_EMPTY_CELL_KEY } from '../../basics/inverted-index-cache';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
@@ -152,7 +152,7 @@ export class ArrayValueObject extends BaseValueObject {
     /**
      * The default value of the array, null values in comparison results support setting to false
      */
-    private _defaultValue: Nullable<BaseValueObject> = null;
+    private _defaultValue = NullValueObject.create();
 
     private _flattenPosition: Nullable<{
         stringArray: BaseValueObject[];
@@ -175,8 +175,6 @@ export class ArrayValueObject extends BaseValueObject {
         // });
 
         this._values = [];
-
-        this._defaultValue = null;
 
         this._flattenPosition = null;
 
@@ -245,10 +243,6 @@ export class ArrayValueObject extends BaseValueObject {
 
     override isArray() {
         return true;
-    }
-
-    setDefaultValue(value: Nullable<BaseValueObject>) {
-        this._defaultValue = value;
     }
 
     get(row: number, column: number) {
@@ -445,8 +439,6 @@ export class ArrayValueObject extends BaseValueObject {
 
         const arrayV = this._createNewArray(newValue, 1, newValue[0].length);
 
-        arrayV.setDefaultValue(this._defaultValue);
-
         this._flattenCache = arrayV;
 
         return arrayV;
@@ -585,9 +577,6 @@ export class ArrayValueObject extends BaseValueObject {
 
         const newResultArray = this._createNewArray(result, result.length, result[0].length, startRow, startColumn);
 
-        // Synchronize defaultValue
-        newResultArray.setDefaultValue(this._defaultValue);
-
         this._sliceCache.set(cacheKey, newResultArray);
 
         return newResultArray;
@@ -617,7 +606,6 @@ export class ArrayValueObject extends BaseValueObject {
 
         const newArray = this._createNewArray(transposeArray, columnCount, rowCount);
 
-        newArray.setDefaultValue(this._defaultValue);
         return newArray;
     }
 
@@ -1484,9 +1472,6 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         const newArray = this._createNewArray(result, rowCount, columnCount);
-
-        // Mark empty values in the array as false
-        newArray.setDefaultValue(BooleanValueObject.create(false));
         return newArray;
     }
 
@@ -1723,18 +1708,17 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         /**
-         * Inverted indexing enhances matching performance.
-         */
-        if (currentValue == null) {
-            return;
-        }
-
-        /**
          * The blank cell are not stored in the inverted index, so skip it.
          * If needed store it in the future. ask @DR-Univer
          */
         if (currentValue.isNull()) {
-            return;
+            CELL_INVERTED_INDEX_CACHE.set(
+                unitId,
+                sheetId,
+                column + startColumn,
+                DEFAULT_EMPTY_CELL_KEY,
+                r + startRow
+            );
         }
 
         if (currentValue.isError()) {

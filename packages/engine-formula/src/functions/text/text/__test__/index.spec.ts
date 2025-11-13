@@ -54,11 +54,24 @@ describe('Test text function', () => {
             expect(getObjectValue(result)).toBe('0');
         });
 
-        it('Text is string format dddd', () => {
-            const text1 = StringValueObject.create('05-Sep');
+        it('Text is string format dddd (align with current year)', () => {
+            // 当前年份
+            const year = new Date().getFullYear();
+
+            // 当前年份 9 月 6 日（注意：JS 的月份是 0-based，这里用 8）
+            const jsDate = new Date(year, 8, 6);
+
+            // 用 JS 计算期望的英文星期几
+            const expectedWeekday = jsDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+            });
+
+            const text1 = StringValueObject.create('06-Sep');
             const formatText = StringValueObject.create('dddd');
+
             const result = testFunction.calculate(text1, formatText);
-            expect(getObjectValue(result)).toBe('Saturday');
+
+            expect(getObjectValue(result)).toBe(expectedWeekday);
         });
 
         it('Text is array, format text is array', () => {

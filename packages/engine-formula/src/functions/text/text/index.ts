@@ -86,6 +86,8 @@ export class Text extends BaseFunction {
                 if (isRealNum(textValueNumber)) {
                     textValueNumber = Number(textValueNumber);
                 } else {
+                    // The text parameter needs to check if it can be converted to a number format. If convertible, format it as the converted number.
+                    // The format text does not need this check and is processed directly as a string.
                     const parsedValue = getNumfmtParseValueFilter(`${textValueNumber}`);
 
                     if (parsedValue && parsedValue.v != null && typeof parsedValue.v === 'number') {

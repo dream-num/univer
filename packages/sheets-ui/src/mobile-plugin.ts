@@ -29,6 +29,7 @@ import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -260,6 +261,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [FormatPainterRenderController],
             [ClipboardRenderController],
             [CellAlertRenderController],
+            [CellPopupEditorController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],
             [HoverRenderController],

@@ -16,14 +16,16 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { CubeValueObject } from '../value-object/cube-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 
-export class MultiAreaReferenceObject extends BaseReferenceObject {
-    private _areas: BaseReferenceObject[] = [];
+type AreaValue = BaseReferenceObject | ErrorValueObject;
 
-    constructor(token: string, areas: BaseReferenceObject[] = []) {
+export class MultiAreaReferenceObject extends BaseReferenceObject {
+    private _areas: AreaValue [] = [];
+
+    constructor(token: string, areas: AreaValue[] = []) {
         // The parent class's rangeData becomes meaningless for multi-area.
         // We only reuse the generic infrastructure from BaseReferenceObject.
         super(token);
@@ -40,15 +42,15 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     // Area Management
     // ------------------------------------------------------------
 
-    getAreas(): BaseReferenceObject[] {
+    getAreas(): AreaValue[] {
         return this._areas;
     }
 
-    setAreas(areas: BaseReferenceObject[]): void {
+    setAreas(areas: AreaValue[]): void {
         this._areas = areas;
     }
 
-    addArea(area: BaseReferenceObject): void {
+    addArea(area: AreaValue): void {
         this._areas.push(area);
     }
 
@@ -85,7 +87,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         // Total rows across all areas
         let total = 0;
         for (const a of this._areas) {
-            total += a.getRowCount();
+            if (a.isError()) {
+                continue;
+            }
+            total += (a as BaseReferenceObject).getRowCount();
         }
         return total;
     }
@@ -96,19 +101,36 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         // Returning the sum is the safest for aggregations.
         let total = 0;
         for (const a of this._areas) {
-            total += a.getColumnCount();
+            if (a.isError()) {
+                continue;
+            }
+            total += (a as BaseReferenceObject).getColumnCount();
         }
         return total;
     }
 
     override isExceedRange(): boolean {
-        return this._areas.some((a) => a.isExceedRange());
+        return this._areas.some((a) => {
+            if (a.isError()) {
+                return false;
+            }
+            return (a as BaseReferenceObject).isExceedRange();
+        });
     }
 
     override setRefOffset(x = 0, y = 0): void {
         super.setRefOffset(x, y);
         // Propagate offset to sub-areas
-        this._areas.forEach((a) => a.setRefOffset(x, y));
+        this._areas.forEach((a) => {
+            if (a.isError()) {
+                return;
+            }
+            (a as BaseReferenceObject).setRefOffset(x, y);
+        });
+    }
+
+    private _getReferenceArea() {
+        return this._areas.find((a) => !a.isError()) as BaseReferenceObject | undefined;
     }
 
     // ------------------------------------------------------------
@@ -121,19 +143,19 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * by returning the first area’s identifiers.
      */
     override getUnitId(): string {
-        return this._areas[0]?.getUnitId() ?? super.getUnitId();
+        return this._getReferenceArea()?.getUnitId() ?? super.getUnitId();
     }
 
     override getSheetId(): string {
-        return this._areas[0]?.getSheetId() ?? super.getSheetId();
+        return this._getReferenceArea()?.getSheetId() ?? super.getSheetId();
     }
 
     override getActiveSheetRowCount(): number {
-        return this._areas[0]?.getActiveSheetRowCount() ?? 0;
+        return this._getReferenceArea()?.getActiveSheetRowCount() ?? 0;
     }
 
     override getActiveSheetColumnCount(): number {
-        return this._areas[0]?.getActiveSheetColumnCount() ?? 0;
+        return this._getReferenceArea()?.getActiveSheetColumnCount() ?? 0;
     }
 
     // ------------------------------------------------------------
@@ -149,7 +171,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     ) {
         for (const area of this._areas) {
             let stop = false;
-            area.iterator((v, r, c) => {
+            if (area.isError()) {
+                continue;
+            }
+            (area as BaseReferenceObject).iterator((v, r, c) => {
                 const res = callback(v, r, c);
                 if (res === false) {
                     stop = true;
@@ -166,7 +191,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * as the first cell of the first area.
      */
     override getFirstCell() {
-        const first = this._areas[0];
+        const first = this._getReferenceArea();
         if (!first) {
             return super.getFirstCell(); // fallback
         }
@@ -182,8 +207,7 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * Excel also rejects A1:A3,C1:C3 as a single array.
      */
     override toArrayValueObject(useCache = true): ArrayValueObject {
-        const areas = this.toCubeValueObject(useCache);
-        return areas.toArrayValueObject();
+        throw new Error('Cannot convert MultiAreaReferenceObject to ArrayValueObject');
     }
 
     /**
@@ -191,7 +215,12 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * This is the correct representation for discontiguous references.
      */
     toCubeValueObject(useCache = true): CubeValueObject {
-        const arrays = this._areas.map((a) => a.toArrayValueObject(useCache));
+        const arrays = this._areas.map((a) => {
+            if (a.isError()) {
+                return a as ErrorValueObject;
+            }
+            return (a as BaseReferenceObject).toArrayValueObject(useCache);
+        });
         return CubeValueObject.create(arrays);
     }
 
@@ -208,7 +237,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         let maxEndColumn = Number.NEGATIVE_INFINITY;
 
         for (const area of areas) {
-            const { startRow, startColumn, endRow, endColumn } = area.getRangePosition();
+            if (area.isError()) {
+                continue;
+            }
+
+            const { startRow, startColumn, endRow, endColumn } = (area as BaseReferenceObject).getRangePosition();
 
             // Skip any invalid range silently.
             if (
@@ -274,8 +307,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         let maxEndColumn = Number.NEGATIVE_INFINITY;
 
         for (const area of areas) {
+            if (area.isError()) {
+                continue;
+            }
             // Use the raw rangeData (without offset) of each area
-            const { startRow, startColumn, endRow, endColumn } = area.getRangeData();
+            const { startRow, startColumn, endRow, endColumn } = (area as BaseReferenceObject).getRangeData();
 
             // Skip invalid/NaN ranges silently
             if (

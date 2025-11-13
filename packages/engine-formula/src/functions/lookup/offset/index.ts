@@ -139,7 +139,7 @@ export class Offset extends BaseFunction {
         const heightArray = expandArrayValueObject(maxRowLength, maxColumnLength, _height, ErrorValueObject.create(ErrorType.NA));
         const widthArray = expandArrayValueObject(maxRowLength, maxColumnLength, _width, ErrorValueObject.create(ErrorType.NA));
 
-        const multiArea: BaseReferenceObject[] = [];
+        const multiArea: (BaseReferenceObject | ErrorValueObject)[] = [];
         rowsArray.iterator((rowsValue, rowIndex, columnIndex) => {
             const columnsValue = columnsArray.get(rowIndex, columnIndex) as BaseValueObject;
             const heightValue = heightArray.get(rowIndex, columnIndex) as BaseValueObject;
@@ -168,11 +168,7 @@ export class Offset extends BaseFunction {
             // Ensure that the callback function returns a BaseValueObject
             const result = this._handleSingleObject(reference as BaseReferenceObject, rowsValue, columnsValue, heightValue, widthValue);
 
-            if (result.isError()) {
-                return;
-            }
-
-            multiArea.push(result as BaseReferenceObject);
+            multiArea.push(result as BaseReferenceObject | ErrorValueObject);
         });
 
         return new MultiAreaReferenceObject('', multiArea);

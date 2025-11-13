@@ -15,13 +15,14 @@
  */
 
 import type { ArrayValueObject } from './array-value-object';
-import { ErrorType } from '../../basics/error-type';
-import { createNewArray } from '../utils/array-object';
-import { BaseValueObject, ErrorValueObject } from './base-value-object';
+import type { ErrorValueObject } from './base-value-object';
+import { BaseValueObject } from './base-value-object';
 import { NumberValueObject } from './primitive-object';
 
+type CubeValue = ArrayValueObject | ErrorValueObject;
+
 export class CubeValueObject extends BaseValueObject {
-    static create(values: ArrayValueObject[]) {
+    static create(values: CubeValue[]) {
         return new CubeValueObject(values);
     }
 
@@ -29,9 +30,9 @@ export class CubeValueObject extends BaseValueObject {
         return true;
     }
 
-    private _values: ArrayValueObject[] = [];
+    private _values: CubeValue[] = [];
 
-    constructor(values: ArrayValueObject[]) {
+    constructor(values: CubeValue[]) {
         super('');
         this._values = values;
     }
@@ -43,7 +44,7 @@ export class CubeValueObject extends BaseValueObject {
         this._values = [];
     }
 
-    getCubeValues(): ArrayValueObject[] {
+    getCubeValues(): CubeValue[] {
         return this._values;
     }
 
@@ -105,22 +106,15 @@ export class CubeValueObject extends BaseValueObject {
         return count;
     }
 
-    toArrayValueObject(): ArrayValueObject {
-        const result: BaseValueObject[][] = [];
+    toValue() {
+        const arrayValueList: Array<Array<Array<string | number | boolean | null>> | string> = [];
         this._values.forEach((arr) => {
-            arr.iterator((valueObject, rowIndex, columnIndex) => {
-                if (!result[rowIndex]) {
-                    result[rowIndex] = [];
-                }
-
-                if (!valueObject) {
-                    result[rowIndex][columnIndex] = ErrorValueObject.create(ErrorType.VALUE);
-                    return;
-                }
-
-                result[rowIndex][columnIndex] = valueObject as BaseValueObject;
-            });
+            if (arr.isError()) {
+                arrayValueList.push((arr as ErrorValueObject).getErrorType());
+            } else {
+                arrayValueList.push((arr as ArrayValueObject).toValue());
+            }
         });
-        return createNewArray(result, result.length, this._values[0].getColumnCount());
+        return arrayValueList;
     }
 }

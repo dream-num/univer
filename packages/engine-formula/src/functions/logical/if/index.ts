@@ -19,7 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
@@ -78,11 +78,7 @@ export class If extends BaseFunction {
 
         // true or non-zero
         return logicalTestValue
-            ? valueIfTrue.isNull()
-                ? NumberValueObject.create(0)
-                : valueIfTrue
-            : valueIfFalse.isNull()
-                ? NumberValueObject.create(0)
-                : valueIfFalse;
+            ? valueIfTrue
+            : valueIfFalse;
     }
 }

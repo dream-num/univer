@@ -1696,7 +1696,13 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         return null;
     }
     const { pages } = skeletonData;
+    if (!pages || pages.length === 0) {
+        return null;
+    }
     const lastPage = pages[pages.length - 1];
+    if (!lastPage) {
+        return null;
+    }
     const { width, height } = lastPage;
 
     if (angle === 0) {

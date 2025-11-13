@@ -15,7 +15,9 @@
  */
 
 import type { ArrayValueObject } from './array-value-object';
-import { BaseValueObject } from './base-value-object';
+import { ErrorType } from '../../basics/error-type';
+import { createNewArray } from '../utils/array-object';
+import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { NumberValueObject } from './primitive-object';
 
 export class CubeValueObject extends BaseValueObject {
@@ -101,5 +103,24 @@ export class CubeValueObject extends BaseValueObject {
             count.plus(arr.countBlank());
         });
         return count;
+    }
+
+    toArrayValueObject(): ArrayValueObject {
+        const result: BaseValueObject[][] = [];
+        this._values.forEach((arr) => {
+            arr.iterator((valueObject, rowIndex, columnIndex) => {
+                if (!result[rowIndex]) {
+                    result[rowIndex] = [];
+                }
+
+                if (!valueObject) {
+                    result[rowIndex][columnIndex] = ErrorValueObject.create(ErrorType.VALUE);
+                    return;
+                }
+
+                result[rowIndex][columnIndex] = valueObject as BaseValueObject;
+            });
+        });
+        return createNewArray(result, result.length, this._values[0].getColumnCount());
     }
 }

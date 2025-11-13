@@ -181,10 +181,9 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * Multi-area cannot be flattened into a rectangular ArrayValueObject.
      * Excel also rejects A1:A3,C1:C3 as a single array.
      */
-    override toArrayValueObject(): ArrayValueObject {
-        throw new Error(
-            'Cannot convert MultiAreaReferenceObject into ArrayValueObject because the areas are not contiguous.'
-        );
+    override toArrayValueObject(useCache = true): ArrayValueObject {
+        const areas = this.toCubeValueObject(useCache);
+        return areas.toArrayValueObject();
     }
 
     /**

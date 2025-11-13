@@ -25,9 +25,9 @@ export type MultiAreaValue = BaseReferenceObject | ErrorValueObject;
 
 export class MultiAreaReferenceObject extends BaseReferenceObject {
     /**
-     * 二维结构：
-     * - 第一维：按“行”存放
-     * - 第二维：这一行里的每一个 AreaValue
+     * 2D structure:
+     * - First dimension: stored by rows
+     * - Second dimension: each AreaValue within that row
      */
     private _areas: MultiAreaValue[][] = [];
 
@@ -59,9 +59,9 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     }
 
     /**
-     * 追加一个 area：
-     * - 传单个 AreaValue 时，自动包成一行；
-     * - 传 AreaValue[] 时，当成一整“行”插入。
+     * Append an area:
+     * - If a single AreaValue is passed, it will be wrapped as one row.
+     * - If an AreaValue[] is passed, it will be inserted as an entire row.
      */
     addArea(area: MultiAreaValue | MultiAreaValue[]): void {
         if (Array.isArray(area)) {
@@ -71,9 +71,9 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         }
     }
 
-    /** 扁平化二维 areas，方便重用一维逻辑 */
+    /** Flatten the 2D areas to reuse 1D logic */
     private _flatAreas(): MultiAreaValue[] {
-        // TS 4.x 对 flat 的类型不太聪明时，可以手写 reduce：
+        // When TS 4.x isn't smart about flat's types, you can handwrite reduce:
         // return this._areas.reduce<AreaValue[]>((acc, row) => acc.concat(row), []);
         return this._areas.flat();
     }
@@ -192,8 +192,8 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * Iterate through all areas in order, flattening the multi-area into
      * a sequence of cells.
      *
-     * 注意：这里是“先行后列”的顺序：
-     *   先按 _areas 的行顺序遍历，再在每一行内按 area 顺序遍历。
+     * Note: The order here is "row-major":
+     *   iterate by the row order of _areas, then within each row by the area order.
      */
     override iterator(
         callback: (v: Nullable<BaseValueObject>, row: number, col: number) => Nullable<boolean>
@@ -255,11 +255,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         const rows = this._areas.length;
 
         if (rows === 0) {
-            // 如果你们有专门的空数组工厂，这里可以替换为对应实现
+            // If you have a dedicated empty-array factory, replace with your implementation
             return createNewArray([], 0, 0);
         }
 
-        // 按第一行的长度作为列数（假设各行长度一致；如果不一致多出来的你可以后面再补）
+        // Use the first row's length as the column count (assuming rows are consistent; otherwise fill extras later)
         const cols = this._areas[0]?.length ?? 0;
 
         const result: BaseValueObject[][] = [];
@@ -276,27 +276,27 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
                     continue;
                 }
 
-                // 如果本身就是错误值，直接塞进去
+                // If it's already an error value, put it directly
                 if (area.isError()) {
                     result[r][c] = area as ErrorValueObject;
                     continue;
                 }
 
-                // 否则取该 area 的第一个单元格
+                // Otherwise take the first cell of that area
                 let firstValue: Nullable<BaseValueObject> = null;
 
                 (area as BaseReferenceObject).iterator((v) => {
                     firstValue = v ?? null;
-                    // 只要第一个，立刻终止遍历
+                    // Only need the first one; stop iteration immediately
                     return false;
                 });
 
                 if (firstValue != null) {
                     result[r][c] = firstValue as BaseValueObject;
                 }
-                // 如果 firstValue 也是 null，你可以视需求：
-                // - 保持为空（ArrayValueObject 默认空值）
-                // - 或者填一个 NullValueObject / EmptyValueObject
+                // If firstValue is also null, depending on needs:
+                // - keep it empty (ArrayValueObject's default empty value)
+                // - or fill a NullValueObject / EmptyValueObject
                 result[r][c] = NullValueObject.create();
             }
         }

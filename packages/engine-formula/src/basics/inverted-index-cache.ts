@@ -17,7 +17,9 @@
 import type { NumericTuple } from '@flatten-js/interval-tree';
 import IntervalTree from '@flatten-js/interval-tree';
 
+// empty cell, empty string and null value share the same inverted index cache key
 export const DEFAULT_EMPTY_CELL_KEY = Symbol('EMPTY_CELL');
+
 export class InvertedIndexCache {
     /**
      * {
@@ -69,7 +71,10 @@ export class InvertedIndexCache {
         }
 
         // Because the inverted index cache is used for compare operation, it should be case-insensitive.
-        const _value = typeof value === 'string' ? value.toLowerCase() : value;
+        let _value = typeof value === 'string' ? value.toLowerCase() : value;
+        if (_value === '' || _value === null) {
+            _value = DEFAULT_EMPTY_CELL_KEY;
+        }
 
         let cellList = columnMap.get(_value);
         if (cellList == null) {
@@ -84,10 +89,10 @@ export class InvertedIndexCache {
         return this._cache.get(unitId)?.get(sheetId)?.get(column);
     }
 
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean | symbol, rowsInCache: NumericTuple[]) {
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean | null | symbol, rowsInCache: NumericTuple[]) {
         // Because the inverted index cache is used for compare operation, it should be case-insensitive.
         let _value = typeof value === 'string' ? value.toLowerCase() : value;
-        if (_value === '' || _value === false) {
+        if (_value === '' || _value === null) {
             _value = DEFAULT_EMPTY_CELL_KEY;
         }
         const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(_value);

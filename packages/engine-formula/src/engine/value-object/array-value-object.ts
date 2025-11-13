@@ -152,7 +152,7 @@ export class ArrayValueObject extends BaseValueObject {
     /**
      * The default value of the array, null values in comparison results support setting to false
      */
-    private _defaultValue = NullValueObject.create();
+    private _defaultValue: Nullable<BaseValueObject> = null;
 
     private _flattenPosition: Nullable<{
         stringArray: BaseValueObject[];
@@ -175,6 +175,8 @@ export class ArrayValueObject extends BaseValueObject {
         // });
 
         this._values = [];
+
+        this._defaultValue = null;
 
         this._flattenPosition = null;
 
@@ -243,6 +245,10 @@ export class ArrayValueObject extends BaseValueObject {
 
     override isArray() {
         return true;
+    }
+
+    setDefaultValue(value: Nullable<BaseValueObject>) {
+        this._defaultValue = value;
     }
 
     get(row: number, column: number) {
@@ -439,6 +445,8 @@ export class ArrayValueObject extends BaseValueObject {
 
         const arrayV = this._createNewArray(newValue, 1, newValue[0].length);
 
+        arrayV.setDefaultValue(this._defaultValue);
+
         this._flattenCache = arrayV;
 
         return arrayV;
@@ -577,6 +585,9 @@ export class ArrayValueObject extends BaseValueObject {
 
         const newResultArray = this._createNewArray(result, result.length, result[0].length, startRow, startColumn);
 
+        // Synchronize defaultValue
+        newResultArray.setDefaultValue(this._defaultValue);
+
         this._sliceCache.set(cacheKey, newResultArray);
 
         return newResultArray;
@@ -606,6 +617,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         const newArray = this._createNewArray(transposeArray, columnCount, rowCount);
 
+        newArray.setDefaultValue(this._defaultValue);
         return newArray;
     }
 
@@ -1472,6 +1484,9 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         const newArray = this._createNewArray(result, rowCount, columnCount);
+
+        // Mark empty values in the array as false
+        newArray.setDefaultValue(BooleanValueObject.create(false));
         return newArray;
     }
 
@@ -1510,7 +1525,7 @@ export class ArrayValueObject extends BaseValueObject {
                         unitId,
                         sheetId,
                         column + startColumn,
-                        valueObject.getValue(),
+                        valueObject.isNull() ? null : valueObject.getValue(),
                         rowsInCache
                     );
 
@@ -1707,26 +1722,12 @@ export class ArrayValueObject extends BaseValueObject {
             result[r][column] = ErrorValueObject.create(ErrorType.NA);
         }
 
-        /**
-         * The blank cell are not stored in the inverted index, so skip it.
-         * If needed store it in the future. ask @DR-Univer
-         */
-        if (currentValue.isNull()) {
+        if (!currentValue || currentValue?.isNull()) {
             CELL_INVERTED_INDEX_CACHE.set(
                 unitId,
                 sheetId,
                 column + startColumn,
                 DEFAULT_EMPTY_CELL_KEY,
-                r + startRow
-            );
-        }
-
-        if (currentValue.isError()) {
-            CELL_INVERTED_INDEX_CACHE.set(
-                unitId,
-                sheetId,
-                column + startColumn,
-                (currentValue as ErrorValueObject).getErrorType(),
                 r + startRow
             );
         } else {

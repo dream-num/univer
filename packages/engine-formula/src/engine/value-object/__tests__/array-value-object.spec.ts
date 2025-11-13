@@ -16,13 +16,12 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseValueObject } from '../base-value-object';
-import type { BooleanValueObject } from '../primitive-object';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
-import { NumberValueObject } from '../primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
     const originArrayValueObject = ArrayValueObject.create({
@@ -458,6 +457,8 @@ describe('arrayValueObject test', () => {
                 row: 0,
                 column: 0,
             });
+
+            arrayValueObject.setDefaultValue(BooleanValueObject.create(false));
 
             // getFirstCell
             expect(arrayValueObject.getFirstCell().getValue()).toStrictEqual(false);

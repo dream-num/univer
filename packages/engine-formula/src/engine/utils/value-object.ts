@@ -136,8 +136,7 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
 
         if (vo.isNull()) {
             return {
-                v: 0,
-                t: CellValueType.BOOLEAN,
+                v: null,
                 ...cellWithStyle,
                 ...cellWithCustomData,
             };

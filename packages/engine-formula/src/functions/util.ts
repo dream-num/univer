@@ -15,6 +15,7 @@
  */
 
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { stripErrorMargin } from '../engine/utils/math-kit';
@@ -22,6 +23,22 @@ import { stripArrayValue } from './__tests__/create-function-test-bed';
 
 export function getObjectValue(result: FunctionVariantType, isUseStrip: boolean = false) {
     if (result.isReferenceObject()) {
+        if ((result as BaseReferenceObject).isMultiArea()) {
+            const arrayValues = (result as MultiAreaReferenceObject).toCubeValueObject().toValue();
+            const arrayValue: (string | number | boolean | null)[][] = [];
+
+            arrayValues.forEach((area) => {
+                if (area instanceof Object) {
+                    area.forEach((row) => {
+                        arrayValue.push(row);
+                    });
+                } else {
+                    arrayValue.push([area]);
+                }
+            });
+
+            return isUseStrip ? stripArrayValue(arrayValue) : arrayValue;
+        }
         const arrayValue = (result as BaseReferenceObject).toArrayValueObject().toValue();
 
         return isUseStrip ? stripArrayValue(arrayValue) : arrayValue;

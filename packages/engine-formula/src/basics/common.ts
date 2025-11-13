@@ -15,7 +15,6 @@
  */
 
 import type {
-    BooleanNumber,
     ICellData,
     IColumnData,
     IObjectArrayPrimitiveType,
@@ -163,7 +162,6 @@ export interface IOtherFormulaDataItem {
 
 export interface ISuperTable {
     sheetId: string;
-    hasCustomTitle: BooleanNumber;
     titleMap: Map<string, number>;
     range: IRange;
 }
@@ -173,6 +171,7 @@ export enum TableOptionType {
     DATA = '#Data',
     HEADERS = '#Headers',
     TOTALS = '#Totals',
+    THIS_ROW = '#This Row',
 }
 
 export interface IUnitExcludedCell {

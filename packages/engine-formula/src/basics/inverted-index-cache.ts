@@ -67,10 +67,13 @@ export class InvertedIndexCache {
             }
         }
 
-        let cellList = columnMap.get(value);
+        // Because the inverted index cache is used for compare operation, it should be case-insensitive.
+        const _value = typeof value === 'string' ? value.toLowerCase() : value;
+
+        let cellList = columnMap.get(_value);
         if (cellList == null) {
             cellList = new Set<number>();
-            columnMap.set(value, cellList);
+            columnMap.set(_value, cellList);
         }
 
         cellList.add(row);
@@ -81,8 +84,9 @@ export class InvertedIndexCache {
     }
 
     getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: NumericTuple[]) {
-        const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
-        // return rows?.values().filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+        // Because the inverted index cache is used for compare operation, it should be case-insensitive.
+        const _value = typeof value === 'string' ? value.toLowerCase() : value;
+        const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(_value);
         return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }
 

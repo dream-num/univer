@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
+import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
@@ -100,11 +101,16 @@ export class SheetPermissionCheckController extends Disposable {
 
                 break;
             case ClearSelectionContentCommand.id:
-                permission = this.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookEditablePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                    worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
-                });
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                        worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
+                    },
+                    (params as IClearSelectionContentCommandParams).ranges,
+                    (params as IClearSelectionContentCommandParams).unitId,
+                    (params as IClearSelectionContentCommandParams).subUnitId
+                );
                 errorMsg = this._localeService.t('permission.dialog.editErr');
                 break;
             case DeltaColumnWidthCommand.id:
@@ -160,19 +166,29 @@ export class SheetPermissionCheckController extends Disposable {
                 break;
 
             case SetSpecificColsVisibleCommand.id:
-                permission = this.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookEditablePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                    worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
-                }, (params as ISetSpecificColsVisibleCommandParams).ranges);
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
+                    },
+                    (params as ISetSpecificColsVisibleCommandParams).ranges,
+                    (params as ISetSpecificColsVisibleCommandParams).unitId,
+                    (params as ISetSpecificColsVisibleCommandParams).subUnitId
+                );
                 errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
                 break;
             case SetSpecificRowsVisibleCommand.id:
-                permission = this.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookEditablePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                    worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
-                }, (params as ISetSpecificRowsVisibleCommandParams).ranges);
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
+                    },
+                    (params as ISetSpecificRowsVisibleCommandParams).ranges,
+                    (params as ISetSpecificRowsVisibleCommandParams).unitId,
+                    (params as ISetSpecificRowsVisibleCommandParams).subUnitId
+                );
                 errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
                 break;
             case SetSelectedColsVisibleCommand.id:

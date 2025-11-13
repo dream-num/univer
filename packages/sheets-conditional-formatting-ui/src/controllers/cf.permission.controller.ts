@@ -36,11 +36,12 @@ export class ConditionalFormattingPermissionController extends Disposable {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 if (command.id === AddCfCommand.id) {
+                    const { unitId, subUnitId, rule: { ranges } } = command.params as IAddCfCommandParams;
                     const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
-                    }, (command.params as IAddCfCommandParams).rule.ranges);
+                    }, ranges, unitId, subUnitId);
                     if (!permission) {
                         this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }

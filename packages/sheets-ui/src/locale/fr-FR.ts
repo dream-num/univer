@@ -26,6 +26,8 @@ const locale: typeof enUS = {
         formatPainter: 'Reproduire la mise en forme',
         font: 'Police',
         fontSize: 'Taille de police',
+        fontSizeIncrease: 'Augmenter la taille de la police',
+        fontSizeDecrease: 'Diminuer la taille de la police',
         bold: 'Gras',
         italic: 'Italique',
         strikethrough: 'Barré',

@@ -27,6 +27,8 @@ const locale: typeof enUS = {
         formatPainter: '格式刷',
         font: '字体',
         fontSize: '字号',
+        fontSizeIncrease: '增大字号',
+        fontSizeDecrease: '减小字号',
         bold: '粗体',
         italic: '斜体',
         strikethrough: '删除线',

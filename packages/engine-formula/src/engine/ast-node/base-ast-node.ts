@@ -71,6 +71,14 @@ export class BaseAstNode {
         return NodeType.BASE;
     }
 
+    resetCalculationState() {
+        this._children.forEach((node) => {
+            node.resetCalculationState();
+        });
+        this._valueObject = null;
+        this._calculateState = false;
+    }
+
     isAsync() {
         return this._async;
     }

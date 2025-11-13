@@ -16,7 +16,7 @@
 
 import { createIdentifier } from '@univerjs/core';
 
-export type RibbonType = 'default' | 'simple';
+export type RibbonType = 'default' | 'simple' | 'classic';
 
 export interface IWorkbenchOptions {
     container?: string | HTMLElement;

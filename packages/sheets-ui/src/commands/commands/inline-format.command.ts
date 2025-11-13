@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService, ThemeService } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
+import { CommandType, DEFAULT_STYLES, EDITOR_ACTIVATED, ICommandService, IContextService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatFontFamilyCommand,
@@ -35,7 +35,9 @@ import {
     SetStrikeThroughCommand,
     SetTextColorCommand,
     SetUnderlineCommand,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { getFontStyleAtCursor } from '../../controllers/menu/utils';
 
 /**
  * It is used to set the bold style of selections or one cell, need to distinguish between
@@ -152,6 +154,90 @@ export const SetRangeFontSizeCommand: ICommand = {
         }
 
         return commandService.executeCommand(SetFontSizeCommand.id, params);
+    },
+};
+
+export const SetRangeFontIncreaseCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-font-increase',
+    handler: async (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+
+        const defaultValue = DEFAULT_STYLES.fs;
+
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        const primary = selectionManagerService.getCurrentLastSelection()?.primary;
+
+        const params = {
+            value: defaultValue,
+        };
+
+        if (isCellEditorFocus) {
+            const textRun = getFontStyleAtCursor(accessor);
+            if (textRun != null) {
+                const value = textRun.ts?.fs ?? defaultValue;
+
+                params.value = value >= 400 ? 400 : value + 1;
+            }
+
+            return commandService.executeCommand(SetInlineFormatFontSizeCommand.id, params);
+        }
+
+        if (primary != null) {
+            const style = worksheet.getComposedCellStyle(primary.startRow, primary.startColumn);
+            const value = style.fs ?? defaultValue;
+            params.value = value >= 400 ? 400 : value + 1;
+            return commandService.executeCommand(SetFontSizeCommand.id, params);
+        }
+
+        return false;
+    },
+};
+
+export const SetRangeFontDecreaseCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-font-decrease',
+    handler: async (accessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+
+        const defaultValue = DEFAULT_STYLES.fs;
+
+        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        const primary = selectionManagerService.getCurrentLastSelection()?.primary;
+
+        const params = {
+            value: defaultValue,
+        };
+
+        if (isCellEditorFocus) {
+            const textRun = getFontStyleAtCursor(accessor);
+            if (textRun != null) {
+                const value = textRun.ts?.fs ?? defaultValue;
+
+                params.value = value <= 6 ? 6 : value - 1;
+            }
+
+            return commandService.executeCommand(SetInlineFormatFontSizeCommand.id, params);
+        }
+
+        if (primary != null) {
+            const style = worksheet.getComposedCellStyle(primary.startRow, primary.startColumn);
+            const value = style.fs ?? defaultValue;
+            params.value = value <= 6 ? 6 : value - 1;
+            return commandService.executeCommand(SetFontSizeCommand.id, params);
+        }
+
+        return false;
     },
 };
 

@@ -26,6 +26,8 @@ const locale: typeof enUS = {
         formatPainter: 'Copiar format',
         font: 'Tipus de lletra',
         fontSize: 'Mida de la lletra',
+        fontSizeIncrease: 'Augmentar la mida de la lletra',
+        fontSizeDecrease: 'Disminuir la mida de la lletra',
         bold: 'Negreta',
         italic: 'Cursiva',
         strikethrough: 'Ratllat',

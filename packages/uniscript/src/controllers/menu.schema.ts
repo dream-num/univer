@@ -15,14 +15,14 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup } from '@univerjs/ui';
+import { RibbonOthersGroup } from '@univerjs/ui';
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 import { UniscriptMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonOthersGroup.OTHERS]: {
         [ToggleScriptPanelOperation.id]: {
-            order: 2,
+            order: 0,
             menuItemFactory: UniscriptMenuItemFactory,
         },
     },

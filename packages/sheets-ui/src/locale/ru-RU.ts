@@ -26,6 +26,8 @@ const locale: typeof enUS = {
         formatPainter: 'Копировать формат',
         font: 'Шрифт',
         fontSize: 'Размер шрифта',
+        fontSizeIncrease: 'Увеличить размер шрифта',
+        fontSizeDecrease: 'Уменьшить размер шрифта',
         bold: 'Жирный',
         italic: 'Курсив',
         strikethrough: 'Зачеркнутый',

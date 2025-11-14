@@ -620,11 +620,7 @@ export class BaseFunction {
         object.setUnitData(reference.getUnitData());
         object.setRuntimeData(reference.getRuntimeData());
         object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
-        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
-
-        object.setRuntimeFeatureCellData(reference.getRuntimeFeatureCellData());
         object.setUnitStylesData(reference.getUnitStylesData());
-        object.setRuntimeFeatureCellData(reference.getRuntimeFeatureCellData());
 
         return object;
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getNumfmtParseValueFilter, isRealNum } from '@univerjs/core';
+import { getNumfmtParseValueFilter, isRealNum, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -645,11 +645,22 @@ export class NumberValueObject extends BaseValueObject {
         return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
+    override isDateFormat(): boolean {
+        const pattern = this.getPattern();
+        return numfmt.isDateFormat(pattern);
+    }
+
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.compare(this, reverseCompareOperator(operator));
         }
-        return this.compareBy(valueObject.getValue(), operator);
+
+        let isDateCompare = false;
+        if (valueObject.isDateFormat() && this.isDateFormat()) {
+            isDateCompare = true;
+        }
+
+        return this.compareBy(valueObject.getValue(), operator, isDateCompare);
     }
 
     override plusBy(value: string | number | boolean): BaseValueObject {
@@ -756,9 +767,21 @@ export class NumberValueObject extends BaseValueObject {
         return NumberValueObject.create(result);
     }
 
-    override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
-        const currentValue = this.getValue();
+    override compareBy(valueRaw: string | number | boolean, operator: compareToken, isDateCompare: boolean = false): BaseValueObject {
+        const currentValueRaw = this.getValue();
         let result = false;
+
+        let currentValue = currentValueRaw;
+        let value = valueRaw;
+
+        /**
+         * When comparing dates, round to 6 decimal places to avoid precision issues
+         * e.g. 44561.99999999999 and 44562 both represent the date 2022-01-01
+         */
+        if (isDateCompare) {
+            currentValue = Math.round(currentValueRaw * 1e8) / 1e8;
+            value = Math.round((valueRaw as number) * 1e8) / 1e8;
+        }
 
         if (typeof value === 'string') {
             result = this._compareString(operator);

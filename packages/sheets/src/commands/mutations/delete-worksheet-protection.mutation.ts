@@ -30,6 +30,13 @@ export const DeleteWorksheetProtectionMutation: IMutation<IDeleteWorksheetProtec
         const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
         const { unitId, subUnitId } = params;
         worksheetProtectionRuleModel.deleteRule(unitId, subUnitId);
+        
+        console.log('===DeleteRangeProtectionMutation', params);
+        console.log('===Current Rules', worksheetProtectionRuleModel.getRulesByUnitId(unitId, ));
+
+        setTimeout(() => {
+             console.log('===Current Rules111', worksheetProtectionRuleModel.getRulesByUnitId(unitId, ));
+        },100);
         return true;
     },
 };

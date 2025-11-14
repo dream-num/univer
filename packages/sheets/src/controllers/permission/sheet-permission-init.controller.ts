@@ -97,7 +97,7 @@ export class SheetPermissionInitController extends Disposable {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
                     if (rule) {
                         // Re-check if the rule still exists, as it may have been deleted during the async operation
-                        const currentRule = this._rangeProtectionRuleModel.getRule(unitId, rule.subUnitId, item.objectID);
+                        const currentRule = this._rangeProtectionRuleModel.getRule(unitId, rule.subUnitId, rule.id);
                         if (!currentRule) {
                             return;
                         }
@@ -131,7 +131,7 @@ export class SheetPermissionInitController extends Disposable {
                         actions: baseProtectionActions,
                     }).then((actionList) => {
                         // Re-check if the rule still exists, as it may have been deleted during the async operation
-                        const currentRule = this._rangeProtectionRuleModel.getRule(info.unitId, info.subUnitId, info.rule.permissionId);
+                        const currentRule = this._rangeProtectionRuleModel.getRule(info.unitId, info.subUnitId, info.rule.id);
                         if (!currentRule) {
                             return;
                         }

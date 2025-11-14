@@ -116,6 +116,7 @@ Univer soporta múltiples idiomas, incluyendo:
 - `ru-RU`
 - `vi-VN`
 - `fa-IR`
+- `ja-JP`
 - `ko-KR`
 - `es-ES`
 - `ca-ES`

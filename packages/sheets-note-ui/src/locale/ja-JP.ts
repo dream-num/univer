@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    rightClick: {
+        addNote: 'コメントを追加',
+        deleteNote: 'コメントを削除',
+        toggleNote: 'コメントの表示/非表示',
+    },
+    note: {
+        placeholder: 'ここに入力',
+    },
+};
+
+export default locale;

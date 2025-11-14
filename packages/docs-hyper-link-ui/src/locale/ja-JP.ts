@@ -17,13 +17,25 @@
 import type enUS from './en-US';
 
 const locale: typeof enUS = {
-    rightClick: {
-        zenEditor: '젠 에디터',
-    },
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '젠 편집 취소',
-            'zen-edit-confirm': '젠 편집 확인',
+    docLink: {
+        edit: {
+            confirm: 'OK',
+            cancel: 'キャンセル',
+            title: 'リンク',
+            address: 'アドレス',
+            placeholder: 'リンクのURLを入力してください',
+            addressError: 'URLが正しくありません！',
+            label: '表示文字列',
+            labelError: 'リンクの表示文字列を入力してください',
+        },
+        info: {
+            copy: 'コピー',
+            edit: '編集',
+            cancel: 'リンク解除',
+            coped: 'リンクがクリップボードにコピーされました',
+        },
+        menu: {
+            tooltip: 'ハイパーリンクの挿入',
         },
     },
 };

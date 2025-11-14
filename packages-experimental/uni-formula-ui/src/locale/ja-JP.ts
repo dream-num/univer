@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'uni-formula': {
+        popup: {
+            title: {
+                new: '新しい数式を作成',
+                existing: '数式を編集',
+            },
+            placeholder: '数式を挿入するか、入力を続けて閉じます...',
+            button: {
+                confirm: '確定',
+                cancel: 'キャンセル',
+            },
+        },
+        command: {
+            'stream-placeholder': 'Uni Formula',
+        },
+    },
+};
+
+export default locale;

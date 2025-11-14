@@ -44,6 +44,10 @@ const locales = [
         value: LocaleType.VI_VN,
     },
     {
+        label: '日本語',
+        value: LocaleType.JA_JP,
+    },
+    {
         label: '한국어',
         value: LocaleType.KO_KR,
     },
@@ -77,6 +81,9 @@ export function useLocale() {
                 break;
             case LocaleType.VI_VN:
                 locales = await import('@univerjs/mockdata/locales/vi-VN');
+                break;
+            case LocaleType.JA_JP:
+                locales = await import('@univerjs/mockdata/locales/ja-JP');
                 break;
             case LocaleType.KO_KR:
                 locales = await import('@univerjs/mockdata/locales/ko-KR');

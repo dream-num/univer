@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'script-panel': {
+        title: 'Uniscript',
+        tooltip: {
+            'menu-button': 'Uniscriptパネルを切り替え',
+        },
+        panel: {
+            execute: 'スクリプトを実行',
+        },
+    },
+    uniscript: {
+        message: {
+            success: '実行に成功しました',
+            failed: '実行に失敗しました',
+        },
+    },
+};
+
+export default locale;

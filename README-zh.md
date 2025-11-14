@@ -116,6 +116,7 @@ Univer 内置多种语言支持，包括：
 - `ru-RU`
 - `vi-VN`
 - `fa-IR`
+- `ja-JP`
 - `ko-KR`
 - `es-ES`
 - `ca-ES`

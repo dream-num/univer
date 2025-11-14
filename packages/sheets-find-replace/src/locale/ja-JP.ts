@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-export { default as enUS } from './en-US';
-export { default as faIR } from './fa-IR';
-export { default as frFR } from './fr-FR';
-export { default as ruRU } from './ru-RU';
-export { default as viVN } from './vi-VN';
-export { default as zhCN } from './zh-CN';
-export { default as zhTW } from './zh-TW';
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'sheet-find-replace': {
+        replace: {
+            'partial-failure': '一部のセルの置換に失敗しました',
+            failure: 'すべてのセルの置換に失敗しました',
+        },
+    },
+};
+
+export default locale;

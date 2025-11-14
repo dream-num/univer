@@ -116,6 +116,7 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 - `ru-RU`
 - `vi-VN`
 - `fa-IR`
+- `ja-JP`
 - `ko-KR`
 - `es-ES`
 - `ca-ES`

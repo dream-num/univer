@@ -41,7 +41,6 @@ export class WorksheetPermissionService extends RxDisposable {
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(ILogService) private _logService: ILogService
     ) {
-        console.trace('===init');
         super();
         this._init();
         this._initRuleChange();

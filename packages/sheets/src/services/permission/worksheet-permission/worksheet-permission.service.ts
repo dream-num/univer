@@ -150,7 +150,6 @@ export class WorksheetPermissionService extends RxDisposable {
                 pluginName: RULE_MODEL_PLUGIN_NAME,
                 businesses: [UniverType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
-                    console.log('===load', resources)
                     this._worksheetProtectionRuleModel.fromObject(resources);
                     Object.keys(resources).forEach((subUnitId) => {
                         getAllWorksheetPermissionPoint().forEach((F) => {

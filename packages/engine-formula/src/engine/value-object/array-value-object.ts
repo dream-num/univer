@@ -1458,7 +1458,7 @@ export class ArrayValueObject extends BaseValueObject {
             } else if (valueRowCount === 1 && this._columnCount > 1) {
                 const list = (valueObject as ArrayValueObject).getArrayValue();
                 for (let c = 0; c < columnCount; c++) {
-                    if (list[0]) {
+                    if (list[0] && list[0][c]) {
                         valueList.push(list[0][c] as BaseValueObject);
                     } else {
                         valueList.push(NullValueObject.create());

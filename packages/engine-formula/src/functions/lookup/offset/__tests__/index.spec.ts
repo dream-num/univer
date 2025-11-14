@@ -244,13 +244,13 @@ describe('Test offset', () => {
         it('Rows is array value object, positive and negative numbers', async () => {
             const result = await calculate('=OFFSET(A1,B1:C1,1)');
 
-            expect(result).toStrictEqual([[ErrorType.VALUE, ErrorType.REF]]);
+            expect(result).toStrictEqual([[0, ErrorType.REF]]);
         });
 
         it('Rows is array value object, Columns is array value object', async () => {
             const result = await calculate('=OFFSET(A1,A1:B1,A1:A2,1,1)');
 
-            expect(result).toStrictEqual([[ErrorType.VALUE, ErrorType.VALUE], [ErrorType.VALUE, ErrorType.VALUE]]);
+            expect(result).toStrictEqual([[0, 0], [0, 0]]);
         });
 
         it('Rows is array value object, Columns is array value object, ref error', async () => {

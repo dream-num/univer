@@ -113,7 +113,7 @@ export class Npv extends BaseFunction {
                         return false;
                     }
 
-                    if (_variantOject.isNull() || _variantOject.isBoolean()) {
+                    if (_variantOject.isNull() || _variantOject.isBoolean() || (_variantOject.isString() && _variantOject.getValue() === '')) {
                         return true;
                     }
 

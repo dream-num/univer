@@ -1571,7 +1571,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
                             }
 
-                            if (matchResult.isError() || (matchResult as BooleanValueObject).getValue() === true) {
+                            if (matchResult.isError() || matchResult.isBoolean()) {
                                 rowPositions.forEach((index) => {
                                     if (index >= startRow && index <= startRow + rowCount - 1) {
                                         if (result[index - startRow] == null) {

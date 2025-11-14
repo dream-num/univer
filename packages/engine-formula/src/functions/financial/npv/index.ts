@@ -17,20 +17,11 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateNpv } from '../../../basics/financial';
 import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-
-// Core formula: same as Excel NPV
-function calculateNpv(rate: number, values: number[]): number {
-    let npv = 0;
-    for (let i = 0; i < values.length; i++) {
-        // Excel: first cash flow occurs at end of period 1 → exponent starts at 1
-        npv += values[i] / (1 + rate) ** (i + 1);
-    }
-    return npv;
-}
 
 interface IValuesType {
     isError: boolean;
@@ -40,7 +31,9 @@ interface IValuesType {
 
 export class Npv extends BaseFunction {
     override minParams = 2;
+
     override maxParams = 255;
+
     override needsLocale = true;
 
     override calculate(rate: BaseValueObject, ...variants: BaseValueObject[]): BaseValueObject {
@@ -51,44 +44,39 @@ export class Npv extends BaseFunction {
         const { isError, errorObject, values } = this._getValues(variants);
 
         if (rate.isArray()) {
-            return (rate as ArrayValueObject).map((rateObject, rowIndex, columnIndex) =>
-                this._handleSingleObject(rateObject, isError, errorObject, values, rowIndex, columnIndex)
-            );
+            return (rate as ArrayValueObject).map((rateObject, rowIndex, columnIndex) => this._handleSingleObject(rateObject, isError, errorObject, values, rowIndex, columnIndex));
         }
 
         return this._handleSingleObject(rate, isError, errorObject, values);
     }
 
     private _handleSingleObject(
-        rateObj: BaseValueObject,
+        rate: BaseValueObject,
         isError: boolean,
         errorObject: ErrorValueObject | undefined,
         values: number[] | undefined,
         rowIndex: number = 0,
         columnIndex: number = 0
     ): BaseValueObject {
-        if (rateObj.isString()) {
-            // Excel: string cannot be used; text is ignored → but rate cannot be text → #VALUE!
-            return ErrorValueObject.create(ErrorType.VALUE);
+        let _rate = rate;
+
+        if (_rate.isString()) {
+            _rate = _rate.convertToNumberObjectValue();
         }
 
-        if (rateObj.isError()) {
-            return rateObj;
+        if (_rate.isError()) {
+            return _rate;
         }
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const rateValue = +rateObj.getValue();
-
-        if (Number.isNaN(rateValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+        const rateValue = +rate.getValue();
 
         const result = calculateNpv(rateValue, values as number[]);
 
-        if (!Number.isFinite(result)) {
+        if (Number.isNaN(result) || Math.abs(result) === Infinity) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
@@ -103,59 +91,64 @@ export class Npv extends BaseFunction {
         const values: number[] = [];
 
         for (let i = 0; i < variants.length; i++) {
-            const v = variants[i];
+            const variant = variants[i];
 
-            if (v.isError()) {
-                return { isError: true, errorObject: v as ErrorValueObject };
+            if (variant.isError()) {
+                return {
+                    isError: true,
+                    errorObject: variant as ErrorValueObject,
+                };
             }
 
-            // Array parameter
-            if (v.isArray()) {
-                let hasErr = false;
-                let errObj: ErrorValueObject | undefined;
+            if (variant.isArray()) {
+                let isError = false;
+                let errorObject = ErrorValueObject.create(ErrorType.VALUE);
 
-                (v as ArrayValueObject).iterator((item) => {
-                    const obj = item as BaseValueObject;
+                (variant as ArrayValueObject).iterator((variantOject) => {
+                    const _variantOject = variantOject as BaseValueObject;
 
-                    if (obj.isError()) {
-                        hasErr = true;
-                        errObj = obj as ErrorValueObject;
+                    if (_variantOject.isError()) {
+                        isError = true;
+                        errorObject = _variantOject as ErrorValueObject;
                         return false;
                     }
 
-                    if (obj.isNull() || obj.isBoolean() || obj.isString()) {
-                        // Excel: ignore empty + boolean + ANY text (including "123")
+                    if (_variantOject.isNull() || _variantOject.isBoolean() || (_variantOject.isString() && _variantOject.getValue() === '')) {
                         return true;
                     }
 
-                    const num = +obj.getValue();
-                    if (Number.isFinite(num)) {
-                        values.push(num);
+                    const value = +_variantOject.getValue();
+
+                    if (Number.isNaN(value)) {
+                        return true;
                     }
-                    // If NaN: ignore
-                    return true;
+
+                    values.push(value);
                 });
 
-                if (hasErr) {
-                    return { isError: true, errorObject: errObj };
+                if (isError) {
+                    return {
+                        isError,
+                        errorObject,
+                    };
                 }
             } else {
-                // Scalar parameter
-                if (v.isNull() || v.isBoolean() || v.isString()) {
-                    // Excel: ignore
-                    continue;
+                const value = +variant.getValue();
+
+                if (Number.isNaN(value)) {
+                    return {
+                        isError: true,
+                        errorObject: ErrorValueObject.create(ErrorType.VALUE),
+                    };
                 }
 
-                const num = +v.getValue();
-                if (Number.isNaN(num)) {
-                    // Excel: ignore
-                    continue;
-                }
-
-                values.push(num);
+                values.push(value);
             }
         }
 
-        return { isError: false, values };
+        return {
+            isError: false,
+            values,
+        };
     }
 }

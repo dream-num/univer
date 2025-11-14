@@ -27,6 +27,7 @@ import enUS from '@univerjs/mockdata/locales/en-US';
 import esES from '@univerjs/mockdata/locales/es-ES';
 import faIR from '@univerjs/mockdata/locales/fa-IR';
 import frFR from '@univerjs/mockdata/locales/fr-FR';
+import jaJP from '@univerjs/mockdata/locales/ja-JP';
 import koKR from '@univerjs/mockdata/locales/ko-KR';
 import ruRU from '@univerjs/mockdata/locales/ru-RU';
 import viVN from '@univerjs/mockdata/locales/vi-VN';
@@ -105,6 +106,7 @@ function createNewInstance() {
             [LocaleType.ES_ES]: esES,
             [LocaleType.FA_IR]: faIR,
             [LocaleType.FR_FR]: frFR,
+            [LocaleType.JA_JP]: jaJP,
             [LocaleType.KO_KR]: koKR,
             [LocaleType.RU_RU]: ruRU,
             [LocaleType.VI_VN]: viVN,

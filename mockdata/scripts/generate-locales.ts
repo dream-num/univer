@@ -29,6 +29,7 @@ const locales = [
     'vi-VN',
     'fa-IR',
     'ko-KR',
+    'ja-JP',
     'es-ES',
     'ca-ES',
 ];

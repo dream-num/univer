@@ -219,7 +219,7 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
     };
 };
 
-describe('Test inverted index cache', () => {
+describe('Test inverted index cache 1', () => {
     let get: Injector['get'];
     let worksheet: Worksheet;
     let formulaEngine: FFormula;

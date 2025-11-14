@@ -590,7 +590,8 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
  */
 export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaDataItem>): Nullable<ICellData> {
     if (formulaDataItem == null) {
-        return;
+        // null presents clearing cell content
+        return null;
     }
     const { f, si, x = 0, y = 0 } = formulaDataItem;
     const checkFormulaString = isFormulaString(f);
@@ -637,7 +638,8 @@ export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IF
         const cellDataItem = formulaDataItemToCellData(formulaDataItem);
 
         // Originally matrix clone would filter out undefined, but after changing to getMatrix, you need to filter manually here
-        if (!cellDataItem) {
+        //  Filter out meaningless undefined, but consider null meaningful because null represents clearing cell content
+        if (cellDataItem === undefined) {
             return;
         }
 

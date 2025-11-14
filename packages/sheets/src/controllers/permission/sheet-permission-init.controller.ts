@@ -96,6 +96,12 @@ export class SheetPermissionInitController extends Disposable {
                 permissionMap.forEach((item) => {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
                     if (rule) {
+                        // Re-check if the rule still exists, as it may have been deleted during the async operation
+                        const currentRule = this._rangeProtectionRuleModel.getRule(unitId, rule.subUnitId, rule.id);
+                        if (!currentRule) {
+                            return;
+                        }
+
                         getAllRangePermissionPoint().forEach((F) => {
                             const instance = new F(unitId, rule.subUnitId, item.objectID);
                             const unitActionName = instance.subType;
@@ -124,6 +130,12 @@ export class SheetPermissionInitController extends Disposable {
                         objectType: UnitObject.SelectRange,
                         actions: baseProtectionActions,
                     }).then((actionList) => {
+                        // Re-check if the rule still exists, as it may have been deleted during the async operation
+                        const currentRule = this._rangeProtectionRuleModel.getRule(info.unitId, info.subUnitId, info.rule.id);
+                        if (!currentRule) {
+                            return;
+                        }
+
                         getAllRangePermissionPoint().forEach((F) => {
                             if (info.type === 'set') {
                                 const { rule, oldRule } = info;
@@ -193,6 +205,12 @@ export class SheetPermissionInitController extends Disposable {
                         objectType: UnitObject.Worksheet,
                         actions: baseProtectionActions,
                     }).then((actionList) => {
+                        // Re-check if the rule still exists, as it may have been deleted during the async operation
+                        const currentRule = this._worksheetProtectionRuleModel.getRule(info.unitId, info.subUnitId);
+                        if (!currentRule || currentRule.permissionId !== info.rule.permissionId) {
+                            return;
+                        }
+
                         getAllWorksheetPermissionPoint().forEach((F) => {
                             const instance = new F(info.unitId, info.subUnitId);
                             const unitActionName = instance.subType;
@@ -223,6 +241,12 @@ export class SheetPermissionInitController extends Disposable {
                     objectType: UnitObject.Worksheet,
                     actions: defaultWorksheetPermissionPoint,
                 }).then((actionList) => {
+                    // Re-check if the rule still exists, as it may have been deleted during the async operation
+                    const currentRule = this._worksheetProtectionPointRuleModel.getRule(info.unitId, info.subUnitId);
+                    if (!currentRule || currentRule.permissionId !== info.permissionId) {
+                        return;
+                    }
+
                     getAllWorksheetPermissionPointByPointPanel().forEach((F) => {
                         const instance = new F(info.unitId, info.subUnitId);
                         const unitActionName = instance.subType;
@@ -281,6 +305,13 @@ export class SheetPermissionInitController extends Disposable {
                 permissionMap.forEach((item) => {
                     const rule = permissionIdWithRuleInstanceMap.get(item.objectID);
                     if (rule) {
+                        // Re-check if the rule still exists, as it may have been deleted during the async operation
+                        const currentRule = this._worksheetProtectionRuleModel.getRule(unitId, rule.subUnitId)
+                            || this._worksheetProtectionPointRuleModel.getRule(unitId, rule.subUnitId);
+                        if (!currentRule || currentRule.permissionId !== item.objectID) {
+                            return;
+                        }
+
                         [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                             const instance = new F(unitId, rule.subUnitId);
                             const unitActionName = instance.subType;
@@ -364,6 +395,12 @@ export class SheetPermissionInitController extends Disposable {
                 objectType: UnitObject.Worksheet,
                 actions: baseProtectionActions,
             }).then((actionList) => {
+                // Re-check if the rule still exists, as it may have been deleted during the async operation
+                const currentRuleItem = this._worksheetProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+                if (!currentRuleItem) {
+                    return;
+                }
+
                 let key = '';
                 getAllWorksheetPermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId);
@@ -393,6 +430,12 @@ export class SheetPermissionInitController extends Disposable {
                 objectType: UnitObject.Worksheet,
                 actions: defaultWorksheetPermissionPoint,
             }).then((actionList) => {
+                // Re-check if the rule still exists, as it may have been deleted during the async operation
+                const currentPointItem = this._worksheetProtectionPointRuleModel.getTargetByPermissionId(unitId, permissionId);
+                if (!currentPointItem) {
+                    return;
+                }
+
                 getAllWorksheetPermissionPointByPointPanel().forEach((F) => {
                     const instance = new F(unitId, subUnitId);
                     const unitActionName = instance.subType;
@@ -419,6 +462,12 @@ export class SheetPermissionInitController extends Disposable {
                 objectType: UnitObject.SelectRange,
                 actions: baseProtectionActions,
             }).then((actionList) => {
+                // Re-check if the rule still exists, as it may have been deleted during the async operation
+                const currentRangeItem = this._rangeProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+                if (!currentRangeItem) {
+                    return;
+                }
+
                 let key = '';
                 getAllRangePermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId, permissionId);

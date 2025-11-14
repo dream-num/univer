@@ -173,6 +173,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             return true;
         }
 
+        FORMULA_REF_TO_ARRAY_CACHE.clear();
+
         this._currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
 
         await this._apply(true);

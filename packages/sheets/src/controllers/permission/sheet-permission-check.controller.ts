@@ -107,9 +107,9 @@ export class SheetPermissionCheckController extends Disposable {
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
                     },
-                    (params as IClearSelectionContentCommandParams).ranges,
-                    (params as IClearSelectionContentCommandParams).unitId,
-                    (params as IClearSelectionContentCommandParams).subUnitId
+                    (params as IClearSelectionContentCommandParams)?.ranges,
+                    (params as IClearSelectionContentCommandParams)?.unitId,
+                    (params as IClearSelectionContentCommandParams)?.subUnitId
                 );
                 errorMsg = this._localeService.t('permission.dialog.editErr');
                 break;

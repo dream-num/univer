@@ -103,6 +103,10 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
+    isDateFormat() {
+        return false;
+    }
+
     override isError() {
         return false;
     }
@@ -256,7 +260,7 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
+    compareBy(value: string | number | boolean, operator: compareToken, isDateCompare: boolean = false): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.NAME);
     }

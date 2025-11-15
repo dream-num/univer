@@ -185,7 +185,7 @@ export interface IFormulaRuntimeService {
 
     setUnitArrayFormulaEmbeddedMap(): void;
 
-    clearRuntimeArrayObjectCache(): void;
+    clearArrayObjectCache(): void;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -758,7 +758,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         };
     }
 
-    clearRuntimeArrayObjectCache() {
+    clearArrayObjectCache() {
         FORMULA_REF_TO_ARRAY_CACHE.clear();
     }
 

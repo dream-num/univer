@@ -810,10 +810,12 @@ export class ObjectMatrix<T> {
         });
     }
 
-    concat(newObject: ObjectMatrix<T>) {
-        newObject.forValue((row, column, value) => {
-            this.setValue(row, column, value);
-        });
+    concatRows(newObject: ObjectMatrix<T>) {
+        const newMatrix = newObject.getMatrix();
+        for (const rowKey in newMatrix) {
+            const rowIndex = Number(rowKey);
+            this.setRow(rowIndex, newMatrix[rowIndex]);
+        }
     }
 
     private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {

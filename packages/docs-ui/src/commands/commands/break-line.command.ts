@@ -16,8 +16,8 @@
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraph, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, generateRandomId, ICommandService, IPermissionService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { DocSelectionManagerService, DocumentEditablePermission, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
@@ -113,6 +113,13 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         }
 
         const unitId = docDataModel.getUnitId();
+
+        // Check if document is editable (using permission system)
+        const permissionService = accessor.get(IPermissionService);
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
+            return false;
+        }
 
         const { startOffset, endOffset } = activeTextRange;
 

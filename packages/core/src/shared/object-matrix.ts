@@ -514,6 +514,25 @@ export class ObjectMatrix<T> {
         return objectMatrix;
     }
 
+    getSliceDataAndCellCountByRows(startRow: number, endRow: number): {
+        sliceData: ObjectMatrix<T>;
+        cellCount: number;
+    } {
+        const objectMatrix = new ObjectMatrix<T>();
+        let cellCount = 0;
+        for (let r = startRow; r <= endRow; r++) {
+            const row = this.getRow(r);
+            if (row) {
+                objectMatrix.setRow(r, row);
+                cellCount += Object.keys(row).length;
+            }
+        }
+        return {
+            sliceData: objectMatrix,
+            cellCount,
+        };
+    }
+
     getSizeOf(): number {
         const keys = Object.keys(this._matrix);
         return keys.length;
@@ -541,6 +560,41 @@ export class ObjectMatrix<T> {
             startRow,
             startColumn,
             endRow,
+            endColumn,
+        };
+    }
+
+    getRealRange(): IRange {
+        const rows = Object.keys(this._matrix);
+        const startRow = rows.length > 0 ? Number(rows[0]) : 0;
+        const endRow = rows.length > 0 ? Number(rows[rows.length - 1]) : 0;
+
+        let startColumn = 0;
+        let endColumn = 0;
+
+        for (const rowKey of rows) {
+            const row = this.getRow(Number(rowKey));
+            if (row) {
+                const columns = Object.keys(row);
+                if (columns.length > 0) {
+                    const rowStartColumn = Number(columns[0]);
+                    const rowEndColumn = Number(columns[columns.length - 1]);
+
+                    if (startColumn === 0 || rowStartColumn < startColumn) {
+                        startColumn = rowStartColumn;
+                    }
+
+                    if (rowEndColumn > endColumn) {
+                        endColumn = rowEndColumn;
+                    }
+                }
+            }
+        }
+
+        return {
+            startRow,
+            endRow,
+            startColumn,
             endColumn,
         };
     }
@@ -753,6 +807,12 @@ export class ObjectMatrix<T> {
             if (cellValue != null) {
                 this.setValue(row, column, cellValue);
             }
+        });
+    }
+
+    concat(newObject: ObjectMatrix<T>) {
+        newObject.forValue((row, column, value) => {
+            this.setValue(row, column, value);
         });
     }
 

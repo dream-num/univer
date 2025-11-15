@@ -32,5 +32,6 @@ export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './servi
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { RegisterOtherFormulaService } from './services/register-other-formula.service';
+export { type IFormulaCellAndFeatureItem, IRemoteFormulaDependencyGenerator, RemoteFormulaDependencyGeneratorService } from './services/remote/remote-formula-dependency-generator.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';

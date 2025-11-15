@@ -274,7 +274,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * await permission?.setMode('readOnly');
      * ```
      */
@@ -363,7 +363,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * await permission?.setReadOnly();
      * ```
      */
@@ -377,7 +377,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * await permission?.setEditable();
      * ```
      */
@@ -391,7 +391,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * if (permission?.canEdit()) {
      *   console.log('Worksheet is editable');
      * }
@@ -409,7 +409,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const canEdit = permission?.canEditCell(0, 0);
      * console.log(canEdit);
      * ```
@@ -447,7 +447,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const canView = permission?.canViewCell(0, 0);
      * console.log(canView);
      * ```
@@ -465,7 +465,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const debugInfo = permission?.debugCellPermission(0, 0);
      * console.log(debugInfo);
      * ```
@@ -516,7 +516,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * await permission?.setPoint(WorksheetPermissionPoint.InsertRow, false);
      * ```
      */
@@ -552,7 +552,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const canInsertRow = permission?.getPoint(WorksheetPermissionPoint.InsertRow);
      * console.log(canInsertRow);
      * ```
@@ -575,7 +575,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const snapshot = permission?.getSnapshot();
      * console.log(snapshot);
      * ```
@@ -591,7 +591,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * await permission?.applyConfig({
      *   mode: 'readOnly',
      *   points: {
@@ -633,7 +633,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.protectRanges([
      *   {
      *     ranges: [worksheet.getRange('A1:B2')],
@@ -739,7 +739,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @private
      */
     private _determineEditState(options?: IRangeProtectionOptions): EditStateEnum {
-        if (options?.allowEdit === true || Array.isArray(options?.allowEdit)) {
+        if (options?.allowEdit === true && options?.allowedUsers?.length) {
             return EditStateEnum.DesignedUserCanEdit; // Designed users can edit
         }
         return EditStateEnum.OnlyMe;
@@ -796,7 +796,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * await permission?.unprotectRules(['rule1', 'rule2']);
      * ```
      */
@@ -820,7 +820,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * console.log(rules);
      * ```
@@ -836,7 +836,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const unsubscribe = permission?.subscribe((snapshot) => {
      *   console.log('Permission changed:', snapshot);
      * });

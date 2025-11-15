@@ -427,7 +427,7 @@ export class FRangePermission implements IRangePermission {
         const permissionId = await this._authzIoService.create({
             objectType: UnitObject.SelectRange,
             selectRangeObject: {
-                collaborators: Array.isArray(options?.allowEdit) ? options.allowEdit.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) : [],
+                collaborators: options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
                 unitID: this._unitId,
                 name: options?.name || '',
                 scope: undefined,
@@ -492,7 +492,7 @@ export class FRangePermission implements IRangePermission {
      * @private
      */
     private _determineEditState(options?: IRangeProtectionOptions): EditStateEnum {
-        if (Array.isArray(options?.allowEdit)) {
+        if (options?.allowEdit === true && options?.allowedUsers?.length) {
             return EditStateEnum.DesignedUserCanEdit; // Designed users can edit
         }
         // For false or undefined, default to OnlyMe

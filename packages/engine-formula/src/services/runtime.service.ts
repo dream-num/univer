@@ -32,6 +32,7 @@ import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { isNullCellForFormula } from '../basics/is-null-cell';
+import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
@@ -183,6 +184,8 @@ export interface IFormulaRuntimeService {
     getUnitArrayFormulaEmbeddedMap(): IArrayFormulaEmbeddedMap;
 
     setUnitArrayFormulaEmbeddedMap(): void;
+
+    clearArrayObjectCache(): void;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -753,6 +756,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             formulaCycleIndex: this.getFormulaCycleIndex(),
         };
+    }
+
+    clearArrayObjectCache() {
+        FORMULA_REF_TO_ARRAY_CACHE.clear();
     }
 
     // eslint-disable-next-line complexity

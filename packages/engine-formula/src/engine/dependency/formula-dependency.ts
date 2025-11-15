@@ -137,6 +137,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
         this._dependencyRTreeCacheForAddressFunction.clear();
 
+        this._runtimeService.clearArrayObjectCache();
+
         return Promise.resolve(finalTreeList);
     }
 

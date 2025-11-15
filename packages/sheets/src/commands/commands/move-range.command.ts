@@ -23,6 +23,8 @@ import {
     CommandType,
     ErrorService,
     ICommandService,
+    isFormulaId,
+    isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -174,7 +176,12 @@ export function getMoveRangeUndoRedoMutations(
 
         Range.foreach(fromRange, (row, col) => {
             const cellData = fromCellMatrix.getValue(row, col);
-            fromCellValue.setValue(row, col, Tools.deepClone(cellData));
+            const clonedCellData = Tools.deepClone(cellData);
+            // If cell.v is also moved, the calculation result will be stored on the server in a collaborative environment, causing the calculation not to be triggered after refreshing the page, even though the referenced cell may have changed.
+            if (clonedCellData && (isFormulaString(clonedCellData.f) || isFormulaId(clonedCellData.si))) {
+                delete clonedCellData.v;
+            }
+            fromCellValue.setValue(row, col, clonedCellData);
             if (cellData) {
                 const style = workbook?.getStyles().get(cellData.s);
                 fromCellStyle.setValue(row, col, Tools.deepClone(style));

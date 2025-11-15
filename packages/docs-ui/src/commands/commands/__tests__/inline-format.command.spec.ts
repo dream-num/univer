@@ -15,7 +15,15 @@
  */
 
 import type { DocumentDataModel, ICommand, Injector, IStyleBase, Univer } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ICommandService,
+    IUniverInstanceService,
+    RedoCommand,
+    TextDecoration,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -146,17 +154,18 @@ describe('Test inline format commands', () => {
             const commandParams = {
                 segmentId: '',
                 preCommandId: SetInlineFormatUnderlineCommand.id,
+                value: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE },
             };
 
             await commandService.executeCommand(SetInlineFormatCommand.id, commandParams);
 
-            expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+            expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE, t: TextDecoration.SINGLE });
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getFormatValueAt('ul', 1)).toStrictEqual(undefined);
 
             await commandService.executeCommand(RedoCommand.id);
-            expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+            expect(getFormatValueAt('ul', 1)).toStrictEqual({ s: BooleanNumber.TRUE, t: TextDecoration.SINGLE });
         });
     });
 
@@ -167,17 +176,18 @@ describe('Test inline format commands', () => {
             const commandParams = {
                 segmentId: '',
                 preCommandId: SetInlineFormatStrikethroughCommand.id,
+                value: { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE },
             };
 
             await commandService.executeCommand(SetInlineFormatCommand.id, commandParams);
 
-            expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+            expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE, t: TextDecoration.SINGLE });
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getFormatValueAt('st', 1)).toStrictEqual(undefined);
 
             await commandService.executeCommand(RedoCommand.id);
-            expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE });
+            expect(getFormatValueAt('st', 1)).toStrictEqual({ s: BooleanNumber.TRUE, t: TextDecoration.SINGLE });
         });
     });
 

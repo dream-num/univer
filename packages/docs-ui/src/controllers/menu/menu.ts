@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ITextDecoration, PresetListType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
@@ -30,6 +30,7 @@ import {
     IUniverInstanceService,
     NAMED_STYLE_MAP,
     NamedStyleType,
+    TextDecoration,
     ThemeService,
     Tools,
     UniverInstanceType,
@@ -66,7 +67,7 @@ import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.co
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { DocOpenPageSettingCommand } from '../../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../../commands/util';
-import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
+import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT, UNDERLINE_TYPE_COMPONENT } from '../../components/list-type-picker';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 
 function getInsertTableHiddenObservable(
@@ -318,15 +319,50 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<ITextDecoration, ITextDecoration | undefined> {
     const commandService = accessor.get(ICommandService);
 
     return {
         id: SetInlineFormatUnderlineCommand.id,
-        type: MenuItemType.BUTTON,
+        type: MenuItemType.BUTTON_SELECTOR,
         icon: 'UnderlineIcon',
-        title: 'Set underline',
-        tooltip: 'toolbar.underline',
+        tooltip: 'toolbar.underline.none',
+        selections: [
+            {
+                label: {
+                    name: UNDERLINE_TYPE_COMPONENT,
+                    hoverable: false,
+                    selectable: false,
+                },
+                value$: new Observable<ITextDecoration>((subscriber) => {
+                    const defaultValue = DEFAULT_STYLES.ul;
+
+                    const calc = () => {
+                        const textRun = getFontStyleAtCursor(accessor);
+
+                        if (!textRun) {
+                            subscriber.next(defaultValue);
+                            return;
+                        }
+                        const ul = textRun.ts?.ul;
+                        subscriber.next(ul ?? defaultValue);
+                    };
+
+                    const disposable = commandService.onCommandExecuted((c) => {
+                        const id = c.id;
+
+                        if (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) {
+                            const underline = (c.params as { value: ITextDecoration }).value;
+                            subscriber.next(underline ?? defaultValue);
+                        }
+                    });
+
+                    calc();
+                    return disposable.dispose;
+                }
+                ),
+            },
+        ],
         activated$: new Observable<boolean>((subscriber) => {
             const calc = () => {
                 const textRun = getFontStyleAtCursor(accessor);
@@ -350,6 +386,32 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             calc();
 
+            return disposable.dispose;
+        }),
+        value$: new Observable<ITextDecoration>((subscriber) => {
+            const defaultValue = DEFAULT_STYLES.ul;
+
+            const calc = () => {
+                const textRun = getFontStyleAtCursor(accessor);
+
+                if (!textRun) {
+                    subscriber.next(defaultValue);
+                    return;
+                }
+
+                const ul = textRun?.ts?.ul;
+                subscriber.next(ul?.s === BooleanNumber.FALSE ? { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE } : defaultValue);
+            };
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetInlineFormatCommand.id) {
+                    const ul = (c.params as { value: ITextDecoration }).value;
+                    subscriber.next(ul?.s === BooleanNumber.FALSE ? { s: BooleanNumber.TRUE, t: TextDecoration.SINGLE } : defaultValue);
+                }
+            });
+
+            calc();
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),

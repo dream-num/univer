@@ -18,6 +18,7 @@ import type { compareToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
@@ -96,6 +97,13 @@ export class OperatorNode extends BaseAstNode {
      */
     private _setEmbeddedArrayFormulaToResult(result: FunctionVariantType) {
         if (!result.isArray()) {
+            return;
+        }
+
+        const rowCount = (result as ArrayValueObject).getRowCount();
+        const colCount = (result as ArrayValueObject).getColumnCount();
+
+        if (rowCount <= 1 && colCount <= 1) {
             return;
         }
 

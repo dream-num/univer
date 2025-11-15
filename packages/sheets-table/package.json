@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-table",
-    "version": "0.11.0",
+    "version": "0.12.0",
     "private": false,
     "description": "A library for connect and bind data from other sources to Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",

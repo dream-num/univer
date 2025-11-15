@@ -165,6 +165,13 @@ export class FunctionNode extends BaseAstNode {
             return;
         }
 
+        const rowCount = (result as ArrayValueObject).getRowCount();
+        const colCount = (result as ArrayValueObject).getColumnCount();
+
+        if (rowCount <= 1 && colCount <= 1) {
+            return;
+        }
+
         this._runtimeService.setUnitArrayFormulaEmbeddedMap();
     }
 

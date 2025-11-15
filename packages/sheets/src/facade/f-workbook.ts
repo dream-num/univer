@@ -26,6 +26,7 @@ import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
+import { FWorkbookPermission } from './permission/f-workbook-permission';
 
 /**
  * Facade API object bounded to a workbook. It provides a set of methods to interact with the workbook.
@@ -802,6 +803,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Get the PermissionInstance.
      * @returns {FPermission} - The PermissionInstance.
+     * @deprecated Use `getWorkbookPermission()` instead for the new permission API
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -811,6 +813,35 @@ export class FWorkbook extends FBaseInitialable {
      */
     getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
+    }
+
+    /**
+     * Get the WorkbookPermission instance for managing workbook-level permissions.
+     * This is the new permission API that provides a more intuitive and type-safe interface.
+     * @returns {FWorkbookPermission} - The WorkbookPermission instance.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const permission = fWorkbook.getWorkbookPermission();
+     *
+     * // Set workbook to read-only mode
+     * await permission.setMode('viewer');
+     *
+     * // Add a collaborator
+     * await permission.addCollaborator({
+     *   userId: 'user123',
+     *   name: 'John Doe',
+     *   role: 'editor'
+     * });
+     *
+     * // Subscribe to permission changes
+     * permission.permission$.subscribe(snapshot => {
+     *   console.log('Permissions changed:', snapshot);
+     * });
+     * ```
+     */
+    getWorkbookPermission(): FWorkbookPermission {
+        return this._injector.createInstance(FWorkbookPermission, this._workbook.getUnitId());
     }
 
     /**

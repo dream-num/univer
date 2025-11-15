@@ -25,6 +25,7 @@ import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearS
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
+import { FWorksheetPermission } from './permission/f-worksheet-permission';
 import { covertToColRange, covertToRowRange } from './utils';
 
 export interface IFacadeClearOptions {
@@ -2560,5 +2561,41 @@ export class FWorksheet extends FBaseInitialable {
             columnCount,
         });
         return this;
+    }
+
+    /**
+     * Get the WorksheetPermission instance for managing worksheet-level permissions.
+     * This is the new permission API that provides worksheet-specific permission control.
+     * @returns {FWorksheetPermission} - The WorksheetPermission instance.
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const permission = fWorksheet.getWorksheetPermission();
+     *
+     * // Set worksheet to read-only mode
+     * await permission.setMode('readOnly');
+     *
+     * // Check if a specific cell can be edited
+     * const canEdit = permission.canEditCell(0, 0);
+     *
+     * // Protect multiple ranges at once
+     * const range1 = fWorksheet.getRange('A1:B10');
+     * const range2 = fWorksheet.getRange('D1:E10');
+     * await permission.protectRanges([
+     *   { ranges: [range1], options: { name: 'Range 1', allowEdit: false } },
+     *   { ranges: [range2], options: { name: 'Range 2', allowEdit: false } }
+     * ]);
+     *
+     * // Subscribe to permission changes
+     * permission.permission$.subscribe(snapshot => {
+     *   console.log('Worksheet permissions changed:', snapshot);
+     * });
+     * ```
+     */
+    getWorksheetPermission(): FWorksheetPermission {
+        return this._injector.createInstance(
+            FWorksheetPermission,
+            this
+        );
     }
 }

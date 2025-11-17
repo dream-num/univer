@@ -16,8 +16,8 @@
 
 const locale = {
     CRYPTO_PRICE: {
-        description: 'Get the price of a cryptocurrency.',
-        abstract: 'Get the price of a cryptocurrency.',
+        description: 'Get the price of a cryptocurrency. For example, Bitcoin (BTC).',
+        abstract: 'Get the price of a cryptocurrency',
         links: [
             {
                 title: 'Instruction',
@@ -25,7 +25,7 @@ const locale = {
             },
         ],
         functionParameter: {
-            id: { name: 'The cryptocurrency ID', detail: 'The cryptocurrency ID' },
+            symbol: { name: 'The cryptocurrency symbol', detail: 'The cryptocurrency symbol' },
         },
     },
 };

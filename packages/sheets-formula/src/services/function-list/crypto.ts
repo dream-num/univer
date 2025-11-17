@@ -25,8 +25,8 @@ export const FUNCTION_LIST_CRYPTO: IFunctionInfo[] = [
         abstract: 'formula.functionList.CRYPTO_PRICE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.CRYPTO_PRICE.functionParameter.id.name',
-                detail: 'formula.functionList.CRYPTO_PRICE.functionParameter.id.detail',
+                name: 'formula.functionList.CRYPTO_PRICE.functionParameter.symbol.name',
+                detail: 'formula.functionList.CRYPTO_PRICE.functionParameter.symbol.detail',
                 example: '"BTC"',
                 require: 1,
                 repeat: 0,

@@ -18,8 +18,8 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     CRYPTO_PRICE: {
-        description: '获取加密货币的价格。',
-        abstract: '获取加密货币的价格。',
+        description: '获取加密货币的价格。比如比特币（BTC）。',
+        abstract: '获取加密货币的价格',
         links: [
             {
                 title: '使用说明',
@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            id: { name: '加密货币 ID', detail: '加密货币 ID' },
+            symbol: { name: '加密货币符号', detail: '加密货币符号' },
         },
     },
 };

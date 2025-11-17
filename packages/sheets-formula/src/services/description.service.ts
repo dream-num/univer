@@ -22,6 +22,7 @@ import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable }
 import {
     functionArray,
     functionCompatibility,
+    functionCrypto,
     functionCube,
     functionDatabase,
     functionDate,
@@ -255,6 +256,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
             ...functionText,
             ...functionUniver,
             ...functionWeb,
+            ...functionCrypto,
         ].map((item) => item[1]) as IFunctionNames[];
 
         const filterFunctionList = FUNCTION_LIST.filter((item) => {

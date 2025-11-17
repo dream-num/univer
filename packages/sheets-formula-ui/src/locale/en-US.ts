@@ -16,6 +16,7 @@
 
 import array from './function-list/array/en-US';
 import compatibility from './function-list/compatibility/en-US';
+import crypto from './function-list/crypto/en-US';
 import cube from './function-list/cube/en-US';
 import database from './function-list/database/en-US';
 import date from './function-list/date/en-US';
@@ -62,6 +63,7 @@ const locale = {
             ...web,
             ...array,
             ...univer,
+            ...crypto,
         },
         prompt: {
             helpExample: 'EXAMPLE',

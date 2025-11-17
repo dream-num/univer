@@ -125,6 +125,8 @@ export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';
 export { functionCompatibility } from './functions/compatibility/function-map';
 export { FUNCTION_NAMES_COMPATIBILITY } from './functions/compatibility/function-names';
+export { functionCrypto } from './functions/crypto/function-map';
+export { FUNCTION_NAMES_CRYPTO } from './functions/crypto/function-names';
 export { functionCube } from './functions/cube/function-map';
 export { FUNCTION_NAMES_CUBE } from './functions/cube/function-names';
 export { AsyncCustomFunction, CustomFunction } from './functions/custom-function';

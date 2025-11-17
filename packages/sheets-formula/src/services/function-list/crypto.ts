@@ -1,0 +1,36 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_CRYPTO, FunctionType } from '@univerjs/engine-formula';
+
+export const FUNCTION_LIST_CRYPTO: IFunctionInfo[] = [
+    {
+        functionName: FUNCTION_NAMES_CRYPTO.CRYPTO_PRICE,
+        functionType: FunctionType.Crypto,
+        description: 'formula.functionList.CRYPTO_PRICE.description',
+        abstract: 'formula.functionList.CRYPTO_PRICE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.CRYPTO_PRICE.functionParameter.id.name',
+                detail: 'formula.functionList.CRYPTO_PRICE.functionParameter.id.detail',
+                example: '"BTC"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+];

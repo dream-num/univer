@@ -17,6 +17,7 @@
 import type enUS from './en-US';
 import array from './function-list/array/fa-IR';
 import compatibility from './function-list/compatibility/fa-IR';
+import crypto from './function-list/crypto/fa-IR';
 import cube from './function-list/cube/fa-IR';
 import database from './function-list/database/fa-IR';
 import date from './function-list/date/fa-IR';
@@ -63,6 +64,7 @@ const locale: typeof enUS = {
             ...web,
             ...array,
             ...univer,
+            ...crypto,
         },
         prompt: {
             helpExample: 'مثال',

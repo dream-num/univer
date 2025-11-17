@@ -18,6 +18,7 @@ import type { BooleanNumber } from '@univerjs/core';
 
 import type { FUNCTION_NAMES_ARRAY } from '../functions/array/function-names';
 import type { FUNCTION_NAMES_COMPATIBILITY } from '../functions/compatibility/function-names';
+import type { FUNCTION_NAMES_CRYPTO } from '../functions/crypto/function-names';
 import type { FUNCTION_NAMES_CUBE } from '../functions/cube/function-names';
 import type { FUNCTION_NAMES_DATABASE } from '../functions/database/function-names';
 import type { FUNCTION_NAMES_DATE } from '../functions/date/function-names';
@@ -126,6 +127,11 @@ export enum FunctionType {
      * Super Table name
      */
     Table,
+
+    /**
+     * Crypto Functions
+     */
+    Crypto,
 }
 
 export interface IFunctionParam {
@@ -210,4 +216,5 @@ export type IFunctionNames =
     | FUNCTION_NAMES_STATISTICAL
     | FUNCTION_NAMES_TEXT
     | FUNCTION_NAMES_UNIVER
-    | FUNCTION_NAMES_WEB;
+    | FUNCTION_NAMES_WEB
+    | FUNCTION_NAMES_CRYPTO;

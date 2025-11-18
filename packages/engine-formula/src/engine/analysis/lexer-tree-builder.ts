@@ -63,6 +63,7 @@ interface IInjectDefinedNameParam {
     unitId: Nullable<string>;
     getValueByName(unitId: string, name: string): Nullable<IDefinedNamesServiceParam>;
     getDirtyDefinedNameMap(): IDirtyUnitSheetDefinedNameMap;
+    getSheetName: (unitId: string, sheetId: string) => string;
 }
 
 export class LexerTreeBuilder extends Disposable {
@@ -399,6 +400,8 @@ export class LexerTreeBuilder extends Disposable {
 
         if (node instanceof LexerNode) {
             return true;
+        } else if (this._passArrayOperator(node)) {
+            return true;
         }
 
         if (
@@ -409,6 +412,34 @@ export class LexerTreeBuilder extends Disposable {
             || node === matchToken.COLON
             || node === matchToken.OPEN_BRACKET
         ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * ={0,1,2,3,4,5,6} + {0;1;2;3;4;5;6}*7
+     */
+    private _passArrayOperator(s: string) {
+        if (s.length === 0) {
+            return false;
+        }
+
+        if (!(s[0] === '{' && s[s.length - 1] === '}')) {
+            return false;
+        }
+
+        const curChildren = this._currentLexerNode.getChildren();
+
+        const lastNode = curChildren[curChildren.length - 1];
+
+        if (lastNode instanceof LexerNode) {
+            return false;
+        }
+
+        if (
+            OPERATOR_TOKEN_SET.has(lastNode)) {
             return true;
         }
 
@@ -699,7 +730,7 @@ export class LexerTreeBuilder extends Disposable {
         hasDefinedName: boolean;
         definedNames: string[];
     } {
-        const { unitId, getValueByName } = param;
+        const { unitId, getValueByName, getSheetName } = param;
 
         if (unitId == null) {
             return {
@@ -721,9 +752,13 @@ export class LexerTreeBuilder extends Disposable {
                 continue;
             }
 
-            const { nodeType, token } = node;
-
+            const { nodeType, token: tokenRaw } = node;
+            let token = tokenRaw;
             if (nodeType === sequenceNodeType.REFERENCE || nodeType === sequenceNodeType.FUNCTION) {
+                if (nodeType === sequenceNodeType.FUNCTION) {
+                    token = this._getHasSheetNameDefinedName(tokenRaw, unitId, param);
+                }
+
                 const definedContent = getValueByName(unitId, token);
                 if (definedContent) {
                     const refString = definedContent.formulaOrRefString;
@@ -761,6 +796,39 @@ export class LexerTreeBuilder extends Disposable {
             hasDefinedName,
             definedNames,
         };
+    }
+
+    private _getHasSheetNameDefinedName(tokenRaw: string, unitId: string, param: IInjectDefinedNameParam) {
+        if (!tokenRaw.includes('!')) {
+            return tokenRaw;
+        }
+
+        const parts = tokenRaw.split('!');
+        if (parts.length !== 2) {
+            return tokenRaw;
+        }
+
+        const sheetName = parts[0];
+        const tokenLike = parts[1];
+        const definedContent = param.getValueByName(unitId, tokenLike);
+        if (!definedContent) {
+            return tokenRaw;
+        }
+
+        const definedSheetId = definedContent.localSheetId;
+        if (definedSheetId !== undefined) {
+            if (definedSheetId === 'AllDefaultWorkbook') {
+                return tokenLike;
+            }
+            const actualSheetName = param.getSheetName(unitId, definedSheetId);
+            if (sheetName === actualSheetName) {
+                return tokenLike;
+            }
+        } else {
+            return tokenLike;
+        }
+
+        return tokenRaw;
     }
 
     private _handleNestedDefinedName(refString: string, param: IInjectDefinedNameParam) {

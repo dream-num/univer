@@ -292,6 +292,11 @@ describe('lexer nodeMaker test', () => {
             expect(node).toStrictEqual(ErrorType.VALUE);
         });
 
+        it('Braces operator', () => {
+            const node = lexerTreeBuilder.treeBuilder('={0,1,2,3,4,5,6} + {0;1;2;3;4;5;6}*7') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["{0,1,2,3,4,5,6}","{0;1;2;3;4;5;6}","7","*","+"]}');
+        });
+
         it('Lack braces error!', () => {
             const node = lexerTreeBuilder.treeBuilder('=sum((1)') as LexerNode;
             expect(node).toStrictEqual(ErrorType.VALUE);

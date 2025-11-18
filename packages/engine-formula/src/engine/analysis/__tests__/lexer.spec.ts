@@ -253,5 +253,30 @@ describe('lexer test', () => {
                 ],
             });
         });
+
+        it('defined name nest struct', () => {
+            definedNamesService.registerDefinedName('test1', {
+                id: 'test1',
+                name: 'myName1',
+                localSheetId: 'sheet1',
+                formulaOrRefString: '$A$10:$C$100',
+            });
+
+            definedNamesService.registerDefinedName('test2', {
+                id: 'test2',
+                name: 'myName2',
+                formulaOrRefString: '=sheet1!myName1 + 100',
+            });
+
+            definedNamesService.registerDefinedName('test3', {
+                id: 'test3',
+                name: 'myName3',
+                formulaOrRefString: '=myName2',
+            });
+
+            const node = lexer.treeBuilder('=myName') as LexerNode;
+
+            expect(node.serialize()).toStrictEqual({});
+        });
     });
 });

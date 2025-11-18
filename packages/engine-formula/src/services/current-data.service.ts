@@ -111,6 +111,8 @@ export interface IFormulaCurrentConfigService {
     getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
 
     getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
+
+    setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -248,6 +250,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         }
 
         return this._sheetIdToNameMap[unitId]![sheetId] || '';
+    }
+
+    setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap) {
+        this._sheetIdToNameMap = sheetIdToNameMap;
     }
 
     getClearDependencyTreeCache() {

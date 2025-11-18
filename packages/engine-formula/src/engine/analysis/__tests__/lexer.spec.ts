@@ -30,6 +30,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     sheets: {
         sheet1: {
             id: 'sheet1',
+            name: 'sheetName1',
             cellData: {
                 0: {
                     0: {
@@ -81,6 +82,7 @@ describe('lexer test', () => {
 
         formulaCurrentConfigService.setExecuteUnitId('test');
         formulaCurrentConfigService.setExecuteSubUnitId('sheet1');
+        formulaCurrentConfigService.setSheetNameMap({ test: { sheet1: 'sheetName1' } });
 
         // runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
 
@@ -255,28 +257,69 @@ describe('lexer test', () => {
         });
 
         it('defined name nest struct', () => {
-            definedNamesService.registerDefinedName('test1', {
+            definedNamesService.registerDefinedName('test', {
                 id: 'test1',
                 name: 'myName1',
                 localSheetId: 'sheet1',
                 formulaOrRefString: '$A$10:$C$100',
             });
 
-            definedNamesService.registerDefinedName('test2', {
+            definedNamesService.registerDefinedName('test', {
                 id: 'test2',
                 name: 'myName2',
-                formulaOrRefString: '=sheet1!myName1 + 100',
+                formulaOrRefString: '=sheetName1!myName1 + 100',
             });
 
-            definedNamesService.registerDefinedName('test3', {
+            definedNamesService.registerDefinedName('test', {
                 id: 'test3',
                 name: 'myName3',
                 formulaOrRefString: '=myName2',
             });
 
-            const node = lexer.treeBuilder('=myName') as LexerNode;
+            const node = lexer.treeBuilder('=myName3') as LexerNode;
 
-            expect(node.serialize()).toStrictEqual({});
+            expect(node.serialize()).toStrictEqual({
+                children: [
+                    {
+                        children: [
+                            {
+                                children: [
+                                    {
+                                        children: [],
+                                        ed: -1,
+                                        st: -1,
+                                        token: '$A$10',
+                                    },
+                                ],
+                                ed: -1,
+                                st: -1,
+                                token: 'P_1',
+                            },
+                            {
+                                children: [
+                                    {
+                                        children: [],
+                                        ed: -1,
+                                        st: -1,
+                                        token: '$C$100',
+                                    },
+                                ],
+                                ed: -1,
+                                st: -1,
+                                token: 'P_1',
+                            },
+                        ],
+                        ed: -1,
+                        st: -1,
+                        token: ':',
+                    },
+                    '100',
+                    '+',
+                ],
+                ed: -1,
+                st: -1,
+                token: 'R_1',
+            });
         });
     });
 });

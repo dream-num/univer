@@ -809,7 +809,7 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         const sheetName = parts[0];
-        const tokenLike = parts[1];
+        const tokenLike = parts[1].trim();
         const definedContent = param.getValueByName(unitId, tokenLike);
         if (!definedContent) {
             return tokenRaw;

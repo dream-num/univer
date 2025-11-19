@@ -35,8 +35,16 @@ export class Unique extends BaseFunction {
     override maxParams = 3;
 
     override calculate(array: BaseValueObject, byCol?: BaseValueObject, exactlyOnce?: BaseValueObject) {
-        const _byCol = byCol ?? BooleanValueObject.create(false);
-        const _exactlyOnce = exactlyOnce ?? BooleanValueObject.create(false);
+        let _byCol = byCol ?? BooleanValueObject.create(false);
+        let _exactlyOnce = exactlyOnce ?? BooleanValueObject.create(false);
+
+        if (_byCol.isNull()) {
+            _byCol = BooleanValueObject.create(false);
+        }
+
+        if (_exactlyOnce.isNull()) {
+            _exactlyOnce = BooleanValueObject.create(false);
+        }
 
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;

@@ -40,6 +40,10 @@ export class Imlog extends BaseFunction {
 
         let _base = base ?? NumberValueObject.create(10);
 
+        if (_base.isNull()) {
+            _base = NumberValueObject.create(10);
+        }
+
         if (_base.isArray()) {
             const rowCount = (_base as ArrayValueObject).getRowCount();
             const columnCount = (_base as ArrayValueObject).getColumnCount();

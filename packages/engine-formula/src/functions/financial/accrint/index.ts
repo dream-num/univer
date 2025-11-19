@@ -39,7 +39,11 @@ export class Accrint extends BaseFunction {
         calcMethod?: BaseValueObject
     ): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
-        const _calcMethod = calcMethod ?? BooleanValueObject.create(true);
+        let _calcMethod = calcMethod ?? BooleanValueObject.create(true);
+
+        if (_calcMethod.isNull()) {
+            _calcMethod = BooleanValueObject.create(true);
+        }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, firstInterest, settlement, rate, par, frequency, _basis);
 

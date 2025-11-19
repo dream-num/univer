@@ -29,7 +29,11 @@ export class Torow extends BaseFunction {
 
     override calculate(array: BaseValueObject, ignore?: BaseValueObject, scanByColumn?: BaseValueObject): BaseValueObject {
         const _ignore = ignore ?? NumberValueObject.create(0);
-        const _scanByColumn = scanByColumn ?? BooleanValueObject.create(false);
+        let _scanByColumn = scanByColumn ?? BooleanValueObject.create(false);
+
+        if (_scanByColumn.isNull()) {
+            _scanByColumn = BooleanValueObject.create(false);
+        }
 
         const maxRowLength = Math.max(
             _ignore.isArray() ? (_ignore as ArrayValueObject).getRowCount() : 1,

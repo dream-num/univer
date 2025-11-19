@@ -35,6 +35,10 @@ export class Weeknum extends BaseFunction {
         let _serialNumber = serialNumber;
         let _returnType = returnType ?? NumberValueObject.create(1);
 
+        if (_returnType.isValueObject() && (_returnType as BaseValueObject).isNull()) {
+            _returnType = NumberValueObject.create(1);
+        }
+
         if (_serialNumber.isArray()) {
             const rowCount = (_serialNumber as ArrayValueObject).getRowCount();
             const columnCount = (_serialNumber as ArrayValueObject).getColumnCount();

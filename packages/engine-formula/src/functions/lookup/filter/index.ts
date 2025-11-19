@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 
 import { BaseFunction } from '../../base-function';
@@ -28,6 +28,10 @@ export class Filter extends BaseFunction {
 
     override calculate(array: BaseValueObject, include: BaseValueObject, ifEmpty?: BaseValueObject) {
         const _ifEmpty = ifEmpty ?? ErrorValueObject.create(ErrorType.CALC);
+
+        if (_ifEmpty.isNull()) {
+            return ErrorValueObject.create(ErrorType.CALC);
+        }
 
         if (array.isError()) {
             return array;

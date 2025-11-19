@@ -28,7 +28,11 @@ export class Log extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, base?: BaseValueObject) {
-        const _base = base ?? NumberValueObject.create(10);
+        let _base = base ?? NumberValueObject.create(10);
+
+        if (_base.isNull()) {
+            _base = NumberValueObject.create(10);
+        }
 
         if (number.isError()) {
             return number;

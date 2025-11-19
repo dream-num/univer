@@ -31,7 +31,11 @@ export class Searchb extends BaseFunction {
     override maxParams = 3;
 
     override calculate(findText: BaseValueObject, withinText: BaseValueObject, startNum?: BaseValueObject): BaseValueObject {
-        const _startNum = startNum ?? NumberValueObject.create(1);
+        let _startNum = startNum ?? NumberValueObject.create(1);
+
+        if (_startNum.isNull()) {
+            _startNum = NumberValueObject.create(1);
+        }
 
         const maxRowLength = Math.max(
             findText.isArray() ? (findText as ArrayValueObject).getRowCount() : 1,

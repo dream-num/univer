@@ -49,11 +49,19 @@ export class Linest extends BaseFunction {
 
         let _constb = constb ?? BooleanValueObject.create(true);
 
+        if (_constb.isNull()) {
+            _constb = BooleanValueObject.create(true);
+        }
+
         if (_constb.isArray()) {
             _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         let _stats = stats ?? BooleanValueObject.create(false);
+
+        if (_stats.isNull()) {
+            _stats = BooleanValueObject.create(false);
+        }
 
         if (_stats.isArray()) {
             _stats = (_stats as ArrayValueObject).get(0, 0) as BaseValueObject;

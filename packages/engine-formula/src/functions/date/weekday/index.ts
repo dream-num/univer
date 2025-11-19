@@ -33,7 +33,11 @@ export class Weekday extends BaseFunction {
     override maxParams = 2;
 
     override calculate(serialNumber: BaseValueObject, returnType?: BaseValueObject) {
-        const _returnType = returnType ?? NumberValueObject.create(1);
+        let _returnType = returnType ?? NumberValueObject.create(1);
+
+        if (_returnType.isValueObject() && (_returnType as BaseValueObject).isNull()) {
+            _returnType = NumberValueObject.create(1);
+        }
 
         if (serialNumber.isError()) {
             return serialNumber;

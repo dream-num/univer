@@ -55,6 +55,10 @@ export class Trend extends BaseFunction {
 
         let _constb = constb ?? BooleanValueObject.create(true);
 
+        if (_constb.isNull()) {
+            _constb = BooleanValueObject.create(true);
+        }
+
         if (_constb.isArray()) {
             _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;
         }

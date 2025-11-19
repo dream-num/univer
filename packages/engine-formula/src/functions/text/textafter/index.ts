@@ -39,7 +39,11 @@ export class Textafter extends BaseFunction {
         const onlyThreeVariant = !matchMode;
         const _matchMode = matchMode ?? NumberValueObject.create(0);
         const _matchEnd = matchEnd ?? NumberValueObject.create(0);
-        const _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
+        let _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
+
+        if (_ifNotFound.isNull()) {
+            _ifNotFound = ErrorValueObject.create(ErrorType.NA);
+        }
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,

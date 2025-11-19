@@ -30,7 +30,11 @@ export class Left extends BaseFunction {
     override maxParams = 2;
 
     override calculate(text: BaseValueObject, numChars?: BaseValueObject): BaseValueObject {
-        const _numChars = numChars ?? NumberValueObject.create(1);
+        let _numChars = numChars ?? NumberValueObject.create(1);
+
+        if (_numChars.isNull()) {
+            _numChars = NumberValueObject.create(1);
+        }
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,

@@ -55,7 +55,11 @@ export class Vlookup extends BaseFunction {
             return rangeLookup;
         }
 
-        const _rangeLookup = rangeLookup ?? BooleanValueObject.create(true);
+        let _rangeLookup = rangeLookup ?? BooleanValueObject.create(true);
+
+        if (_rangeLookup.isNull()) {
+            _rangeLookup = BooleanValueObject.create(true);
+        }
 
         // When neither lookupValue nor rangeLookup is an array, but colIndexNum is an array, expansion is allowed based on the value of colIndexNum. However, if an error is encountered in subsequent matching, the first error needs to be returned (not the entire array)
         // Otherwise colIndexNum takes the first value

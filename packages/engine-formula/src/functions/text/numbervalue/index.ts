@@ -33,7 +33,11 @@ export class Numbervalue extends BaseFunction {
     }
 
     override calculate(text: BaseValueObject, decimalSeparator?: BaseValueObject, groupSeparator?: BaseValueObject): BaseValueObject {
-        const _decimalSeparator = decimalSeparator ?? StringValueObject.create('.');
+        let _decimalSeparator = decimalSeparator ?? StringValueObject.create('.');
+
+        if (_decimalSeparator.isNull()) {
+            _decimalSeparator = StringValueObject.create('.');
+        }
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,

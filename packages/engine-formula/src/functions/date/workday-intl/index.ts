@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { getDateSerialNumberByObject, getDateSerialNumberByWorkingDays, isValidWeekend } from '../../../basics/date';
-import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { getDateSerialNumberByObject, getDateSerialNumberByWorkingDays, isValidWeekend } from '../../../basics/date';
+import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -52,7 +52,11 @@ export class WorkdayIntl extends BaseFunction {
     }
 
     private _handleSingleObject(startDate: BaseValueObject, days: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
-        const _weekend = weekend ?? NumberValueObject.create(1);
+        let _weekend = weekend ?? NumberValueObject.create(1);
+
+        if (_weekend.isNull()) {
+            _weekend = NumberValueObject.create(1);
+        }
 
         const _startDate = this._checkArrayError(startDate);
 

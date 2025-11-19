@@ -31,7 +31,11 @@ export class Leftb extends BaseFunction {
     override maxParams = 2;
 
     override calculate(text: BaseValueObject, numBytes?: BaseValueObject): BaseValueObject {
-        const _numBytes = numBytes ?? NumberValueObject.create(1);
+        let _numBytes = numBytes ?? NumberValueObject.create(1);
+
+        if (_numBytes.isNull()) {
+            _numBytes = NumberValueObject.create(1);
+        }
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,

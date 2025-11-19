@@ -29,7 +29,11 @@ export class Days360 extends BaseFunction {
     override maxParams = 3;
 
     override calculate(startDate: BaseValueObject, endDate: BaseValueObject, method?: BaseValueObject) {
-        const _method = method ?? BooleanValueObject.create(false);
+        let _method = method ?? BooleanValueObject.create(false);
+
+        if (_method.isNull()) {
+            _method = BooleanValueObject.create(false);
+        }
 
         if (startDate.isError()) {
             return startDate;

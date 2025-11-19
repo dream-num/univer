@@ -31,7 +31,15 @@ export class Textsplit extends BaseFunction {
         let _rowDelimiter = rowDelimiter ?? StringValueObject.create('\\s');
         const _ignoreEmpty = ignoreEmpty ?? NumberValueObject.create(0);
         const _matchMode = matchMode ?? NumberValueObject.create(0);
-        const _padWith = padWith ?? StringValueObject.create(ErrorType.NA);
+        let _padWith = padWith ?? StringValueObject.create(ErrorType.NA);
+
+        if (_rowDelimiter.isNull()) {
+            _rowDelimiter = StringValueObject.create('\\s');
+        }
+
+        if (_padWith.isNull()) {
+            _padWith = StringValueObject.create(ErrorType.NA);
+        }
 
         const { _variant: _colDelimiter, values: colDelimiterValue } = this._getStringValues(colDelimiter);
 

@@ -29,8 +29,12 @@ export class FloorMath extends BaseFunction {
     override maxParams = 3;
 
     override calculate(number: BaseValueObject, significance?: BaseValueObject, mode?: BaseValueObject) {
-        const _significance = significance ?? NumberValueObject.create(1);
+        let _significance = significance ?? NumberValueObject.create(1);
         const _mode = mode ?? NumberValueObject.create(0);
+
+        if (_significance.isNull()) {
+            _significance = NumberValueObject.create(1);
+        }
 
         // get max row length
         const maxRowLength = Math.max(

@@ -67,6 +67,10 @@ export class Index extends BaseFunction {
 
         let _areaNum = areaNum ?? NumberValueObject.create(1);
 
+        if (_areaNum.isValueObject() && (_areaNum as BaseValueObject).isNull()) {
+            _areaNum = NumberValueObject.create(1);
+        }
+
         if (_areaNum.isReferenceObject()) {
             _areaNum = (areaNum as BaseReferenceObject).toArrayValueObject();
         }

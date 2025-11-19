@@ -34,8 +34,16 @@ export class Isbetween extends BaseFunction {
         lowerValueIsInclusive?: BaseValueObject,
         upperValueIsInclusive?: BaseValueObject
     ): BaseValueObject {
-        const _lowerValueIsInclusive = lowerValueIsInclusive ?? BooleanValueObject.create(true);
-        const _upperValueIsInclusive = upperValueIsInclusive ?? BooleanValueObject.create(true);
+        let _lowerValueIsInclusive = lowerValueIsInclusive ?? BooleanValueObject.create(true);
+        let _upperValueIsInclusive = upperValueIsInclusive ?? BooleanValueObject.create(true);
+
+        if (_lowerValueIsInclusive.isNull()) {
+            _lowerValueIsInclusive = BooleanValueObject.create(true);
+        }
+
+        if (_upperValueIsInclusive.isNull()) {
+            _upperValueIsInclusive = BooleanValueObject.create(true);
+        }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArray(valueToCompare, lowerValue, upperValue, _lowerValueIsInclusive, _upperValueIsInclusive);
 

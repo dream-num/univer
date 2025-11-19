@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Expand extends BaseFunction {
     override minParams = 2;
@@ -34,6 +34,10 @@ export class Expand extends BaseFunction {
         let _rows = rows;
         let _columns = columns ?? NumberValueObject.create(arrayColumnCount);
         const _padWith = padWith ?? ErrorValueObject.create(ErrorType.NA);
+
+        if (_columns.isNull()) {
+            _columns = NumberValueObject.create(arrayColumnCount);
+        }
 
         if (rows.isNull()) {
             _rows = NumberValueObject.create(arrayRowCount);

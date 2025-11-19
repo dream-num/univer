@@ -60,9 +60,21 @@ export class Address extends BaseFunction {
             return sheetText;
         }
 
-        const _absNumber = absNumber ?? NumberValueObject.create(1);
-        const _a1 = a1 ?? BooleanValueObject.create(true);
-        const _sheetText = sheetText ?? StringValueObject.create('');
+        let _absNumber = absNumber ?? NumberValueObject.create(1);
+        let _a1 = a1 ?? BooleanValueObject.create(true);
+        let _sheetText = sheetText ?? StringValueObject.create('');
+
+        if (_absNumber.isNull()) {
+            _absNumber = NumberValueObject.create(1);
+        }
+
+        if (_a1.isNull()) {
+            _a1 = BooleanValueObject.create(true);
+        }
+
+        if (_sheetText.isNull()) {
+            _sheetText = StringValueObject.create('');
+        }
 
         // get max row length
         const maxRowLength = Math.max(

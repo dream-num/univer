@@ -32,7 +32,11 @@ export class Epochtodate extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(timestamp: FunctionVariantType, unit?: FunctionVariantType): BaseValueObject {
-        const _unit = unit ?? NumberValueObject.create(1);
+        let _unit = unit ?? NumberValueObject.create(1);
+
+        if (_unit.isValueObject() && (_unit as BaseValueObject).isNull()) {
+            _unit = NumberValueObject.create(1);
+        }
 
         const { isError, errorObject, timestampIsReferenceObject, timestampObject, unitObject } = this._checkVariants(timestamp, _unit);
 

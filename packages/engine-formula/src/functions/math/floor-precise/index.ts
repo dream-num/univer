@@ -29,7 +29,11 @@ export class FloorPrecise extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, significance?: BaseValueObject) {
-        const _significance = significance ?? NumberValueObject.create(1);
+        let _significance = significance ?? NumberValueObject.create(1);
+
+        if (_significance.isNull()) {
+            _significance = NumberValueObject.create(1);
+        }
 
         if (number.isError()) {
             return number;

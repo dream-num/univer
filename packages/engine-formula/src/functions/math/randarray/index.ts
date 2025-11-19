@@ -50,11 +50,23 @@ export class Randarray extends BaseFunction {
             return wholeNumber;
         }
 
-        const _rows = rows ?? NumberValueObject.create(1);
-        const _columns = columns ?? NumberValueObject.create(1);
+        let _rows = rows ?? NumberValueObject.create(1);
+        let _columns = columns ?? NumberValueObject.create(1);
         const _min = min ?? NumberValueObject.create(0);
-        const _max = max ?? NumberValueObject.create(1);
+        let _max = max ?? NumberValueObject.create(1);
         const _wholeNumber = wholeNumber ?? NumberValueObject.create(0);
+
+        if (_rows.isNull()) {
+            _rows = NumberValueObject.create(1);
+        }
+
+        if (_columns.isNull()) {
+            _columns = NumberValueObject.create(1);
+        }
+
+        if (_max.isNull()) {
+            _max = NumberValueObject.create(1);
+        }
 
         return this._calculateResult(_rows, _columns, _min, _max, _wholeNumber);
     }

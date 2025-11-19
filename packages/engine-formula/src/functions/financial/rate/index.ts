@@ -31,7 +31,11 @@ export class Rate extends BaseFunction {
     override calculate(nper: BaseValueObject, pmt: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject, guess?: BaseValueObject): BaseValueObject {
         const _fv = fv ?? NumberValueObject.create(0);
         const _type = type ?? NumberValueObject.create(0);
-        const _guess = guess ?? NumberValueObject.create(0.1);
+        let _guess = guess ?? NumberValueObject.create(0.1);
+
+        if (_guess.isNull()) {
+            _guess = NumberValueObject.create(0.1);
+        }
 
         const maxRowLength = Math.max(
             nper.isArray() ? (nper as ArrayValueObject).getRowCount() : 1,

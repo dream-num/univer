@@ -1200,6 +1200,11 @@ export class ArrayValueObject extends BaseValueObject {
         return sum.divided(ddof === 0 ? count : count.minusBy(1));
     }
 
+    /**
+     * TODO: @DR-Univer
+     * This calculation method contains an error, please note.
+     * Please refer `getMedianResult` function in /engine-formula/src/basics/statistical.ts
+     */
     override median(): BaseValueObject {
         const numberArray = this.flattenPosition().numberArray;
 

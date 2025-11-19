@@ -95,8 +95,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            functionNum: { name: 'núm_función', detail: 'Un número de 1 a 19 que especifica la función que se usará.' },
+            options: { name: 'opciones', detail: 'Un valor numérico que determina qué valores del rango de evaluación de la función se omitirán.' },
+            ref1: { name: 'ref1', detail: 'El primer argumento numérico para las funciones que tienen varios argumentos numéricos de los que desea obtener el valor agregado.' },
+            ref2: { name: 'ref2', detail: 'Argumentos numéricos 2 a 252 cuyo valor agregado desea obtener.' },
         },
     },
     ARABIC: {

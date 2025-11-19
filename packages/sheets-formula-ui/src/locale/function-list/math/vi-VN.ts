@@ -83,17 +83,19 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
-        description: 'Returns an aggregate in a list or database',
-        abstract: 'Returns an aggregate in a list or database',
+        description: 'Trả về tổng gộp trong một danh sách hoặc một cơ sở dữ liệu.',
+        abstract: 'Trả về tổng gộp trong một danh sách hoặc một cơ sở dữ liệu.',
         links: [
             {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/aggregate-function-43b9278e-6aa7-4f17-92b6-e19993fa26df',
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/aggregate-function-43b9278e-6aa7-4f17-92b6-e19993fa26df',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: 'function_num', detail: 'Một số từ 1 đến 19 chỉ rõ hàm cần dùng.' },
+            options: { name: 'options', detail: 'Một giá trị số xác định những giá trị nào cần bỏ qua trong phạm vi định trị của hàm.' },
+            ref1: { name: 'ref1', detail: 'Đối số dạng số thứ nhất cho những hàm có nhiều đối số dạng số mà bạn muốn có giá trị tổng gộp.' },
+            ref2: { name: 'ref2', detail: 'Đối số dạng số 2 đến 252 mà bạn muốn có giá trị tổng gộp.' },
         },
     },
     ARABIC: {

@@ -95,8 +95,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: '첫 번째' },
-            number2: { name: 'number2', detail: '두 번째' },
+            functionNum: { name: 'function_num', detail: '사용할 함수를 지정하는 1에서 19 사이의 숫자입니다.' },
+            options: { name: 'options', detail: '함수의 계산 범위에서 무시할 값을 결정하는 숫자 값입니다.' },
+            ref1: { name: 'ref1', detail: '집계 값을 구할 인수가 여러 개인 함수의 첫 번째 인수입니다.' },
+            ref2: { name: 'ref2', detail: '집계 값을 구할 인수로, 2개에서 252개까지 사용할 수 있습니다.' },
         },
     },
     ARABIC: {

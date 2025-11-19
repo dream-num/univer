@@ -93,8 +93,10 @@ const locale = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: 'function_num', detail: 'A number 1 to 19 that specifies which function to use.' },
+            options: { name: 'options', detail: 'A numerical value that determines which values to ignore in the evaluation range for the function.' },
+            ref1: { name: 'ref1', detail: 'The first numeric argument for functions that take multiple numeric arguments for which you want the aggregate value.' },
+            ref2: { name: 'ref2', detail: 'Numeric arguments 2 to 252 for which you want the aggregate value.' },
         },
     },
     ARABIC: {

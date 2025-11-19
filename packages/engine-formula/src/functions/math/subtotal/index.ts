@@ -14,46 +14,35 @@
  * limitations under the License.
  */
 
-import type { IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
+import type { MultiAreaReferenceObject, MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../../../models/formula-data.model';
-import { BooleanNumber } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { AggregateFunctionType, getAggregateResult, parseAggregateDataRefs } from '../../../basics/statistical';
 import { createNewArray } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-enum FunctionNum {
-    AVERAGE = 1,
-    COUNT = 2,
-    COUNTA = 3,
-    MAX = 4,
-    MIN = 5,
-    PRODUCT = 6,
-    STDEV = 7,
-    STDEVP = 8,
-    SUM = 9,
-    VAR = 10,
-    VARP = 11,
+interface IMultiAreaInfo {
+    ref: FunctionVariantType;
+    rowAreas: MultiAreaValue[]; // Each element represents a row
 }
 
-enum FunctionNumIgnoreHidden {
-    AVERAGE = 101,
-    COUNT = 102,
-    COUNTA = 103,
-    MAX = 104,
-    MIN = 105,
-    PRODUCT = 106,
-    STDEV = 107,
-    STDEVP = 108,
-    SUM = 109,
-    VAR = 110,
-    VARP = 111,
-}
+const AggregateFunctionMap: Record<number, AggregateFunctionType> = {
+    1: AggregateFunctionType.AVERAGE,
+    2: AggregateFunctionType.COUNT,
+    3: AggregateFunctionType.COUNTA,
+    4: AggregateFunctionType.MAX,
+    5: AggregateFunctionType.MIN,
+    6: AggregateFunctionType.PRODUCT,
+    7: AggregateFunctionType.STDEV,
+    8: AggregateFunctionType.STDEVP,
+    9: AggregateFunctionType.SUM,
+    10: AggregateFunctionType.VAR,
+    11: AggregateFunctionType.VARP,
+};
 
 export class Subtotal extends BaseFunction {
     override minParams = 2;
@@ -67,505 +56,200 @@ export class Subtotal extends BaseFunction {
     override needsFormulaDataModel = true;
 
     override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
-        if (functionNum.isError()) {
-            return functionNum;
-        }
-
-        const multiAreaRefs: FunctionVariantType[] = [];
-        const normalRefs: FunctionVariantType[] = [];
-
-        refs.forEach((ref) => {
-            if (ref.isReferenceObject() && (ref as BaseReferenceObject).isMultiArea?.()) {
-                multiAreaRefs.push(ref);
-            } else {
-                normalRefs.push(ref);
-            }
-        });
-
-        // --------- 没有 multi-area：保持原来的逻辑 ---------
-        if (multiAreaRefs.length === 0) {
-            if (functionNum.isReferenceObject()) {
-                return (functionNum as BaseReferenceObject)
-                    .toArrayValueObject()
-                    .mapValue((valueObject) => this._handleSingleObject(valueObject, ...refs));
-            }
-
-            return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
-        }
-
-        // --------- 有 multi-area：按“行”展开 ---------
-
-        // 1. 把 functionNum 变成一维 BaseValueObject 列表（按行）
-        let fnList: BaseValueObject[] = [];
+        let _functionNum: BaseValueObject;
 
         if (functionNum.isReferenceObject()) {
-            const fnArray = (functionNum as BaseReferenceObject).toArrayValueObject().flatten();
-            fnList = fnArray.getArrayValue()[0] as BaseValueObject[];
-        } else if (functionNum.isArray()) {
-            const fnArray = (functionNum as ArrayValueObject).flatten();
-            fnList = fnArray.getArrayValue()[0] as BaseValueObject[];
+            _functionNum = (functionNum as BaseReferenceObject).toArrayValueObject();
         } else {
-            fnList = [functionNum as BaseValueObject];
+            _functionNum = functionNum as BaseValueObject;
         }
 
-        // 2. 把 MultiAreaReferenceObject 的二维 areas 映射成「按行的代表 Area」
-        //    每一行我们取该行中第一个非 error 的 area，保持“表格按行展开”的语义
-        interface MultiAreaInfo {
-            ref: FunctionVariantType;
-            rowAreas: MultiAreaValue[]; // 每个元素代表一行
+        const { isError, multiAreaRefs, normalRefs } = parseAggregateDataRefs(refs);
+
+        // If there is multi-area reference, we need to expand the result by "rows".
+        if (!isError && multiAreaRefs.length > 0) {
+            return this._handleMultiAreaRefs(_functionNum, multiAreaRefs, refs as BaseReferenceObject[]);
         }
 
-        const multiAreaInfoList: MultiAreaInfo[] = multiAreaRefs.map((ref) => {
-            const refObj = ref as BaseReferenceObject & { getAreas?: () => MultiAreaValue[][] | MultiAreaValue[] };
+        // If there is no multi-area reference, keep the original logic.
+        if (_functionNum.isArray()) {
+            const resultArray = (_functionNum as ArrayValueObject).mapValue((valueObject) => this._handleSingleObject(valueObject, {
+                isError,
+                refs: normalRefs,
+            }));
 
-            let rowAreas: MultiAreaValue[] = [];
-
-            if (typeof refObj.getAreas === 'function') {
-                const raw = refObj.getAreas();
-
-                // 新版 MultiAreaReferenceObject：MultiAreaValue[][]
-                if (Array.isArray(raw) && raw.length > 0 && Array.isArray(raw[0])) {
-                    const areas2D = raw as MultiAreaValue[][];
-                    rowAreas = areas2D.map((row) => {
-                        if (!row || row.length === 0) {
-                            // 这行完全没 area，就占位一下，用原 ref 本身
-                            return refObj as MultiAreaValue;
-                        }
-                        // 找这一行第一个非 error 的 area，没有就用第一个
-                        const firstNonError = row.find((a) => !a.isError());
-                        return (firstNonError ?? row[0]) as MultiAreaValue;
-                    });
-                } else {
-                    // 兼容老的 getAreas(): MultiAreaValue[]
-                    rowAreas = raw as MultiAreaValue[];
-                }
-            } else {
-                // 理论上 isMultiArea() 就应该有 getAreas，这里兜个底
-                rowAreas = [refObj as MultiAreaValue];
+            if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+                return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
             }
 
-            return {
-                ref,
-                rowAreas,
-            };
-        });
-
-        const multiAreaInfoMap = new Map<FunctionVariantType, MultiAreaInfo>();
-        multiAreaInfoList.forEach((info) => {
-            multiAreaInfoMap.set(info.ref, info);
-        });
-
-        // 3. 计算要展开多少“行”
-        const maxAreasLen = multiAreaInfoList.reduce(
-            (max, info) => Math.max(max, info.rowAreas.length || 1),
-            1
-        );
-        const maxLen = Math.max(fnList.length || 1, maxAreasLen);
-
-        const rowResults: BaseValueObject[][] = [];
-
-        // 4. 对每一行 index：
-        //    - 取对应的 functionNum 值（不够就用最后一个）
-        //    - 对每个 multi-area ref：取对应行的代表 Area（不够行就用最后一行）
-        //    - normalRefs 直接复用
-        for (let index = 0; index < maxLen; index++) {
-            const fnIndex = index < fnList.length ? index : fnList.length - 1;
-            const fnValue = fnList[fnIndex];
-
-            const refsForRow: FunctionVariantType[] = refs.map((ref) => {
-                const info = multiAreaInfoMap.get(ref);
-                if (info) {
-                    const rowIndex = index < info.rowAreas.length ? index : info.rowAreas.length - 1;
-                    const area = info.rowAreas[rowIndex];
-
-                    // area 可能是 ErrorValueObject 或 BaseReferenceObject，
-                    // 都是 FunctionVariantType 合法成员，直接返回即可
-                    return area as FunctionVariantType;
-                }
-
-                // 非 multi-area 引用：所有行共用同一个
-                return ref;
-            });
-
-            const rowResult = this._handleSingleObject(fnValue, ...refsForRow);
-            rowResults.push([rowResult]);
+            return resultArray;
         }
 
-        // 5. 只有一行就直接返回标量，多行返回 ArrayValueObject（按行展开）
-        if (rowResults.length === 1) {
-            return rowResults[0][0];
-        }
-
-        const arrayResult = createNewArray(rowResults, rowResults.length, 1);
-        return arrayResult;
+        return this._handleSingleObject(_functionNum, {
+            isError,
+            refs: normalRefs,
+        });
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
-    private _handleSingleObject(functionNum: Nullable<BaseValueObject>, ...refs: FunctionVariantType[]) {
-        const indexNum = this._getIndexNumValue(functionNum);
-        let result;
+    private _handleSingleObject(
+        functionNum: BaseValueObject,
+        options: {
+            isError: boolean;
+            refs: BaseReferenceObject[];
+        }
+    ): BaseValueObject {
+        const { isError = false, refs } = options;
 
-        if (indexNum instanceof ErrorValueObject) {
-            return indexNum;
+        let _functionNum = functionNum;
+
+        if (functionNum.isString()) {
+            _functionNum = functionNum.convertToNumberObjectValue();
         }
 
-        switch (indexNum) {
-            case FunctionNum.AVERAGE:
-                result = this._average(false, ...refs);
-                break;
-            case FunctionNum.COUNT:
-                result = this._count(false, ...refs);
-                break;
-            case FunctionNum.COUNTA:
-                result = this._counta(false, ...refs);
-                break;
-            case FunctionNum.MAX:
-                result = this._max(false, ...refs);
-                break;
-            case FunctionNum.MIN:
-                result = this._min(false, ...refs);
-                break;
-            case FunctionNum.PRODUCT:
-                result = this._product(false, ...refs);
-                break;
-            case FunctionNum.STDEV:
-                result = this._stdev(false, ...refs);
-                break;
-            case FunctionNum.STDEVP:
-                result = this._stdevp(false, ...refs);
-                break;
-            case FunctionNum.SUM:
-                result = this._sum(false, ...refs);
-                break;
-            case FunctionNum.VAR:
-                result = this._var(false, ...refs);
-                break;
-            case FunctionNum.VARP:
-                result = this._varp(false, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.AVERAGE:
-                result = this._average(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.COUNT:
-                result = this._count(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.COUNTA:
-                result = this._counta(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.MAX:
-                result = this._max(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.MIN:
-                result = this._min(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.PRODUCT:
-                result = this._product(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.STDEV:
-                result = this._stdev(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.STDEVP:
-                result = this._stdevp(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.SUM:
-                result = this._sum(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.VAR:
-                result = this._var(true, ...refs);
-                break;
-            case FunctionNumIgnoreHidden.VARP:
-                result = this._varp(true, ...refs);
-                break;
-            default:
-                result = ErrorValueObject.create(ErrorType.VALUE);
+        if (_functionNum.isError()) {
+            return _functionNum;
         }
 
-        return result as BaseValueObject;
-    }
-
-    private _getIndexNumValue(indexNum: Nullable<BaseValueObject>) {
-        // null, true, false, 0 , 1, '  1',
-        const indexNumValue = indexNum ? Number(indexNum.getValue()) : 0;
-
-        if (Number.isNaN(indexNumValue)) {
+        // If the refs has invalid reference, return #VALUE! error.
+        if (isError) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const indexNumValueInt = Math.floor(indexNumValue);
+        let functionNumValue = Math.floor(+_functionNum.getValue());
 
-        // 1-11, or 101-111
-        if ((indexNumValueInt >= 1 && indexNumValueInt <= 11) || (indexNumValueInt >= 101 && indexNumValueInt <= 111)) {
-            return indexNumValueInt;
+        if (functionNumValue < 1 || (functionNumValue > 11 && functionNumValue < 101) || functionNumValue > 111) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return ErrorValueObject.create(ErrorType.VALUE);
-    }
+        let ignoreRowHidden = false;
 
-    private _average(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
+        if (functionNumValue >= 101) {
+            functionNumValue -= 100;
+            ignoreRowHidden = true;
         }
 
-        return flattenArray.mean();
+        return getAggregateResult({
+            type: AggregateFunctionMap[functionNumValue],
+            ignoreRowHidden,
+            ignoreErrorValues: false,
+            ignoreNested: true,
+            formulaDataModel: this._formulaDataModel as FormulaDataModel,
+        }, refs);
     }
 
-    private _count(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
-        for (let i = 0; i < refs.length; i++) {
-            const variant = refs[i];
+    private _handleMultiAreaRefs(functionNum: BaseValueObject, multiAreaRefs: MultiAreaReferenceObject[], refs: BaseReferenceObject[]) {
+        const rowCount = functionNum.isArray() ? (functionNum as ArrayValueObject).getRowCount() : 1;
+        const columnCount = functionNum.isArray() ? (functionNum as ArrayValueObject).getColumnCount() : 1;
+        const { multiAreaInfoMap, maxAreasLen } = this._getMultiAreaInfo(multiAreaRefs);
+        const maxLen = Math.max(rowCount, maxAreasLen);
 
-            if (!variant.isReferenceObject()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+        const results: BaseValueObject[][] = [];
+        /**
+         * For each row index:
+         * - Take the corresponding functionNum value (use the last one if not enough)
+         * - For each multi-area ref: take the representative Area for the corresponding row (use the last row if not enough)
+         * - normalRefs are reused directly
+         */
+        for (let index = 0; index < maxLen; index++) {
+            const fnRowIndex = index < rowCount ? index : rowCount - 1;
+            const rowResults: BaseValueObject[] = [];
+
+            /**
+             * For each column in functionNum should produce a result.
+             */
+            for (let c = 0; c < columnCount; c++) {
+                /**
+                 * If the functionNum is multi-row and the current row index exceeds its row count, return #N/A error:
+                 * For example, `=SUBTOTAL(A1:B2,OFFSET(J$16,ROW(J$16:J$107)-MIN(ROW($J$16:$J$107)),0))`.
+                 *
+                 * If the functionNum is only one row, all rows share the same functionNum value:
+                 * For example, `=SUBTOTAL(A1:B1,OFFSET(J$16,ROW(J$16:J$107)-MIN(ROW($J$16:$J$107)),0))`.
+                 */
+                if (rowCount > 1 && index >= rowCount) {
+                    rowResults.push(ErrorValueObject.create(ErrorType.NA));
+                    continue;
+                }
+
+                const fnValueObject = functionNum.isArray() ? (functionNum as ArrayValueObject).get(fnRowIndex, c) as BaseValueObject : functionNum;
+                const refsForRow: BaseReferenceObject[] = [];
+
+                for (let refIndex = 0; refIndex < refs.length; refIndex++) {
+                    const ref = refs[refIndex];
+                    const info = multiAreaInfoMap.get(ref);
+
+                    if (info) {
+                        const rowIndex = index < info.rowAreas.length ? index : info.rowAreas.length - 1;
+                        const area = info.rowAreas[rowIndex];
+
+                        if (area.isError()) {
+                            rowResults.push(area as ErrorValueObject);
+                            break;
+                        }
+
+                        /**
+                         * The area may be an ErrorValueObject or a BaseReferenceObject,
+                         * both of which are valid members of FunctionVariantType and can be returned directly.
+                         */
+                        refsForRow.push(area as BaseReferenceObject);
+                        continue;
+                    }
+
+                    // Non multi-area reference: all rows share the same one
+                    refsForRow.push(ref);
+                }
+
+                const rowResult = this._handleSingleObject(fnValueObject, {
+                    isError: false,
+                    refs: refsForRow,
+                });
+                rowResults.push(rowResult);
             }
 
-            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
-            const rowData = (variant as BaseReferenceObject).getRowData();
+            results.push(rowResults);
+        }
 
-            (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
-                // Filtered rows are always excluded.
-                if (filteredOutRows.includes(rowIndex)) {
-                    return true; // continue
+        // If there is only one row, return the scalar directly; for multiple rows, return an ArrayValueObject (expanded by row).
+        if (results.length === 1) {
+            return results[0][0];
+        }
+
+        return createNewArray(results, results.length, columnCount);
+    }
+
+    private _getMultiAreaInfo(multiAreaRefs: MultiAreaReferenceObject[]) {
+        /**
+         * Map the two-dimensional areas of MultiAreaReferenceObject into "representative Area by row".
+         * For each row, we take the first non-error area to maintain the semantics of "table expanded by row".
+         */
+        const multiAreaInfoMap = new Map<BaseReferenceObject, IMultiAreaInfo>();
+
+        // Calculate the maximum number of rows to expand.
+        let maxAreasLen = 1;
+
+        multiAreaRefs.forEach((ref) => {
+            const rowAreas: MultiAreaValue[] = ref.getAreas().map((row) => {
+                if (!row || row.length === 0) {
+                    // If the row has no area, use the original ref itself as a placeholder.
+                    return ref;
                 }
 
-                if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
-                    return true;
-                }
+                // Find the first non-error area in this row, or use the first one if none exist.
+                const firstNonError = row.find((a) => !a.isError());
 
-                if (valueObject?.isNumber()) {
-                    accumulatorAll = accumulatorAll.plusBy(1);
-                }
+                return firstNonError ?? row[0];
             });
-        }
 
-        return accumulatorAll;
-    }
-
-    private _counta(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
-        for (let i = 0; i < refs.length; i++) {
-            const variant = refs[i];
-
-            if (!variant.isReferenceObject()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
-            const rowData = (variant as BaseReferenceObject).getRowData();
-
-            (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
-                // Filtered rows are always excluded.
-                if (filteredOutRows.includes(rowIndex)) {
-                    return true; // continue
-                }
-
-                if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
-                    return true;
-                }
-
-                if (valueObject == null || valueObject.isNull()) {
-                    return true;
-                }
-
-                accumulatorAll = accumulatorAll.plusBy(1);
+            multiAreaInfoMap.set(ref, {
+                ref,
+                rowAreas,
             });
-        }
 
-        return accumulatorAll;
-    }
-
-    private _max(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return NumberValueObject.create(0);
-        }
-
-        return flattenArray.max();
-    }
-
-    private _min(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return NumberValueObject.create(0);
-        }
-
-        return flattenArray.min();
-    }
-
-    private _product(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return NumberValueObject.create(0);
-        }
-
-        let result: NumberValueObject = NumberValueObject.create(1);
-        (flattenArray as ArrayValueObject).iterator((valueObject) => {
-            result = result.multiply(
-                valueObject as BaseValueObject
-            ) as NumberValueObject;
+            maxAreasLen = Math.max(maxAreasLen, rowAreas.length || 1);
         });
 
-        return result;
-    }
-
-    private _stdev(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        return flattenArray.std(1);
-    }
-
-    private _stdevp(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        return flattenArray.std();
-    }
-
-    private _sum(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        return flattenArray.sum();
-    }
-
-    private _var(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        return flattenArray.var(1);
-    }
-
-    private _varp(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
-
-        if (flattenArray.isError()) {
-            return flattenArray;
-        }
-
-        if (this._isBlankArrayObject(flattenArray)) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        return flattenArray.var();
-    }
-
-    private _flattenRefArray(ignoreHidden: boolean, ...variants: FunctionVariantType[]) {
-        const flattenValues: BaseValueObject[][] = [];
-        flattenValues[0] = [];
-
-        for (let i = 0; i < variants.length; i++) {
-            const variant = variants[i];
-
-            if (variant.isError()) {
-                return variant as ErrorValueObject;
-            }
-
-            if (!variant.isReferenceObject()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const filteredOutRows = (variant as BaseReferenceObject).getFilteredOutRows();
-            const rowData = (variant as BaseReferenceObject).getRowData();
-            const unitId = (variant as BaseReferenceObject).getUnitId();
-            const sheetId = (variant as BaseReferenceObject).getSheetId();
-            const unitData = (variant as BaseReferenceObject).getUnitData();
-            const cellData = unitData[unitId]?.[sheetId]?.cellData;
-
-            let errorValue: Nullable<BaseValueObject>;
-
-            (variant as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
-                // Filtered rows are always excluded.
-                if (filteredOutRows.includes(rowIndex)) {
-                    return true; // continue
-                }
-
-                if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
-                    return true; // continue
-                }
-
-                // Ignore other SUBTOTAL formula results
-                const cellValue = cellData.getValue(rowIndex, columnIndex);
-                if (cellValue?.f || cellValue?.si) {
-                    const formulaString = (this._formulaDataModel as FormulaDataModel).getFormulaStringByCell(rowIndex, columnIndex, sheetId, unitId);
-
-                    // match 'SUBTOTAL(' for simple check
-                    if (formulaString && formulaString.indexOf(`${this.name}(`) > -1) {
-                        return true; // continue
-                    }
-                }
-
-                // 'test', ' ',  blank cell, TRUE and FALSE are ignored
-                if (valueObject == null || valueObject.isNull() || valueObject.isString() || valueObject.isBoolean()) {
-                    return true;
-                }
-
-                if (valueObject.isError()) {
-                    errorValue = valueObject;
-                    return false; // break
-                }
-
-                flattenValues[0].push(valueObject);
-            });
-
-            if (errorValue?.isError()) {
-                return errorValue;
-            }
-        }
-
-        return createNewArray(flattenValues, 1, flattenValues[0].length);
-    }
-
-    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number) {
-        const row = rowData[rowIndex];
-        if (!row) {
-            return false;
-        }
-
-        return row.hd === BooleanNumber.TRUE;
-    }
-
-    private _isBlankArrayObject(arrayObject: BaseValueObject) {
-        return arrayObject.getArrayValue()[0].length === 0;
+        return {
+            multiAreaInfoMap,
+            maxAreasLen,
+        };
     }
 }

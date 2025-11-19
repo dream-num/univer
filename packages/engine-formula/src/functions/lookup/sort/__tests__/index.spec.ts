@@ -215,7 +215,7 @@ describe('Test sort function', () => {
             const byCol = BooleanValueObject.create(true);
             const resultObject = testFunction.calculate(array, sortIndex, sortOrder, byCol);
             expect(getObjectValue(resultObject)).toStrictEqual([
-                ['T-16-6-2, T-16-7-4'],
+                ['T-16-6-2', 'T-16-7-4'],
             ]);
         });
     });

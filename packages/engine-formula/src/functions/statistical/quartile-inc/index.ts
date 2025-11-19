@@ -15,12 +15,9 @@
  */
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
-import { ErrorType } from '../../../basics/error-type';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { getArrayValuesByAggregateIgnoreOptions, getQuartileIncResult } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class QuartileInc extends BaseFunction {
@@ -29,7 +26,7 @@ export class QuartileInc extends BaseFunction {
     override maxParams = 2;
 
     override calculate(array: BaseValueObject, quart: BaseValueObject): BaseValueObject {
-        const arrayValues = this._getValues(array);
+        const arrayValues = getArrayValuesByAggregateIgnoreOptions(array);
 
         if (quart.isArray()) {
             const resultArray = (quart as ArrayValueObject).mapValue((quartObject) => this._handleSingleObject(arrayValues, quartObject));
@@ -45,8 +42,8 @@ export class QuartileInc extends BaseFunction {
     }
 
     private _handleSingleObject(array: number[] | ErrorValueObject, quart: BaseValueObject): BaseValueObject {
-        if (array instanceof ErrorValueObject) {
-            return array;
+        if (!Array.isArray(array)) {
+            return array as ErrorValueObject;
         }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(quart);
@@ -56,61 +53,8 @@ export class QuartileInc extends BaseFunction {
         }
 
         const [quartObject] = variants as BaseValueObject[];
-
         const quartValue = Math.floor(+quartObject.getValue());
 
-        if (quartValue < 0 || quartValue > 4) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        const k = quartValue / 4;
-        const n = array.length;
-
-        const kIndex = k * (n - 1);
-        const integerPart = Math.floor(kIndex);
-        const fractionPart = kIndex - integerPart;
-
-        if (fractionPart === 0) {
-            return NumberValueObject.create(array[integerPart]);
-        }
-
-        const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
-
-        return NumberValueObject.create(result);
-    }
-
-    private _getValues(array: BaseValueObject): number[] | ErrorValueObject {
-        const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
-        const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
-
-        const values: number[] = [];
-
-        for (let r = 0; r < rowCount; r++) {
-            for (let c = 0; c < columnCount; c++) {
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
-
-                if (valueObject.isError()) {
-                    return valueObject as ErrorValueObject;
-                }
-
-                if (valueObject.isNull() || valueObject.isBoolean()) {
-                    continue;
-                }
-
-                const value = valueObject.getValue();
-
-                if (!isRealNum(value)) {
-                    continue;
-                }
-
-                values.push(+value);
-            }
-        }
-
-        if (values.length === 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return values.sort((a, b) => a - b);
+        return getQuartileIncResult(array, quartValue);
     }
 }

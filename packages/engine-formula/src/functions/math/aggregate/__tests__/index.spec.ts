@@ -30,7 +30,7 @@ import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Subtotal } from '../index';
+import { Aggregate } from '../index';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -129,7 +129,7 @@ const getTestWorkbookData = (): IWorkbookData => {
     };
 };
 
-describe('Test subtotal', () => {
+describe('Test aggregate', () => {
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -179,7 +179,7 @@ describe('Test subtotal', () => {
         );
 
         functionService.registerExecutors(
-            new Subtotal(FUNCTION_NAMES_MATH.SUBTOTAL)
+            new Aggregate(FUNCTION_NAMES_MATH.AGGREGATE)
         );
 
         calculate = (formula: string) => {
@@ -193,76 +193,82 @@ describe('Test subtotal', () => {
         };
     });
 
-    describe('Subtotal common', () => {
+    describe('Aggregate common', () => {
         it('FunctionNum is normal number, refs is non-reference object', () => {
             // number
-            let result = calculate('=SUBTOTAL(1,1)');
+            let result = calculate('=AGGREGATE(1,,1)');
             expect(result).toBe(ErrorType.VALUE);
 
             // string normal
-            result = calculate('=SUBTOTAL(2,"test")');
+            result = calculate('=AGGREGATE(2,,"test")');
             expect(result).toBe(ErrorType.VALUE);
 
             // string number
-            result = calculate('=SUBTOTAL(3,"1")');
+            result = calculate('=AGGREGATE(3,,"1")');
             expect(result).toBe(ErrorType.VALUE);
 
             // boolean true
-            result = calculate('=SUBTOTAL(4,true)');
+            result = calculate('=AGGREGATE(4,,true)');
             expect(result).toBe(ErrorType.VALUE);
 
             // boolean false
-            result = calculate('=SUBTOTAL(5,false)');
+            result = calculate('=AGGREGATE(5,,false)');
             expect(result).toBe(ErrorType.VALUE);
         });
 
         it('FunctionNum is normal number, refs is error or blank cell', () => {
             // error
-            let result = calculate('=SUBTOTAL(7,C1)');
+            let result = calculate('=AGGREGATE(7,,C1)');
             expect(result).toBe(ErrorType.NAME);
 
             // null
-            result = calculate('=SUBTOTAL(1,D1)');
+            result = calculate('=AGGREGATE(1,,D1)');
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
 
-            result = calculate('=SUBTOTAL(2,D1)');
+            result = calculate('=AGGREGATE(2,,D1)');
             expect(result).toBe(0);
 
-            result = calculate('=SUBTOTAL(3,D1)');
+            result = calculate('=AGGREGATE(3,,D1)');
             expect(result).toBe(0);
 
-            result = calculate('=SUBTOTAL(4,D1)');
+            result = calculate('=AGGREGATE(4,,D1)');
             expect(result).toBe(0);
 
-            result = calculate('=SUBTOTAL(5,D1)');
+            result = calculate('=AGGREGATE(5,,D1)');
             expect(result).toBe(0);
 
-            result = calculate('=SUBTOTAL(6,D1)');
+            result = calculate('=AGGREGATE(6,,D1)');
             expect(result).toBe(0);
 
-            result = calculate('=SUBTOTAL(7,D1)');
+            result = calculate('=AGGREGATE(7,,D1)');
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
 
-            result = calculate('=SUBTOTAL(8,D1)');
+            result = calculate('=AGGREGATE(8,,D1)');
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
 
-            result = calculate('=SUBTOTAL(9,D1)');
+            result = calculate('=AGGREGATE(9,,D1)');
             expect(result).toBe(0);
 
-            result = calculate('=SUBTOTAL(10,D1)');
+            result = calculate('=AGGREGATE(10,,D1)');
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
 
-            result = calculate('=SUBTOTAL(11,D1)');
+            result = calculate('=AGGREGATE(11,,D1)');
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
+
+            result = calculate('=AGGREGATE(12,,D1)');
+            expect(result).toBe(ErrorType.NUM);
+
+            result = calculate('=AGGREGATE(13,,D1)');
+            expect(result).toBe(ErrorType.NA);
         });
 
         it('FunctionNum is normal number, ref1 is array, ref2 is array includes error', () => {
-            const result = calculate('=SUBTOTAL(9,A1:B2,C1:C2)');
+            const result = calculate('=AGGREGATE(9,,A1:B2,C1:C2)');
             expect(result).toBe(ErrorType.NAME);
         });
 
         it('FunctionNum ia array', () => {
-            const result = calculate('=SUBTOTAL(A1:B2,A1:B2)');
+            const result = calculate('=AGGREGATE(A1:B2,,A1:B2)');
             expect(result).toStrictEqual([
                 [2.5, 4],
                 [4, 4],
@@ -270,97 +276,152 @@ describe('Test subtotal', () => {
         });
     });
 
-    describe('Subtotal every function, function number is single number', () => {
+    describe('Aggregate every function, function number is single number', () => {
         it('Average, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(1,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(1,,A1:B2,A3:F4)');
             expect(result).toBe(11.157);
         });
         it('Count, Var1 is array, var2 is array', () => {
-            let result = calculate('=SUBTOTAL(2,A1:B2,A3:F4)');
+            let result = calculate('=AGGREGATE(2,,A1:B2,A3:F4)');
             expect(result).toBe(10);
-            result = calculate('=SUBTOTAL(2,B1:C1)');
+            result = calculate('=AGGREGATE(2,,B1:C1)');
             expect(result).toBe(1);
         });
         it('Counta, Var1 is array, var2 is array', () => {
-            let result = calculate('=SUBTOTAL(3,A1:B2,A3:F4)');
+            let result = calculate('=AGGREGATE(3,,A1:B2,A3:F4)');
             expect(result).toBe(14);
-            result = calculate('=SUBTOTAL(3,B1:C1)');
+            result = calculate('=AGGREGATE(3,,B1:C1)');
             expect(result).toBe(2);
         });
         it('Max, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(4,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(4,,A1:B2,A3:F4)');
             expect(result).toBe(100);
         });
         it('Min, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(5,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(5,,A1:B2,A3:F4)');
             expect(result).toBe(-3);
         });
         it('Product, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(6,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(6,,A1:B2,A3:F4)');
             expect(typeof result === 'number' && Math.abs(result)).toBe(0);
         });
         it('Stdev.s, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(7,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(7,,A1:B2,A3:F4)');
             expect(result).toBe(31.273350405);
         });
         it('Stdev.p, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(8,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(8,,A1:B2,A3:F4)');
             expect(result).toBe(29.6685052033);
         });
         it('sum, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(9,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(9,,A1:B2,A3:F4)');
             expect(result).toBe(111.57);
         });
         it('Var.s, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(10,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(10,,A1:B2,A3:F4)');
             expect(result).toBeCloseTo(978.0224456, 7);
         });
         it('Var.p, Var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(11,A1:B2,A3:F4)');
+            const result = calculate('=AGGREGATE(11,,A1:B2,A3:F4)');
             expect(result).toBe(880.220201);
         });
-    });
-
-    describe('Subtotal every function, function number is array', () => {
-        it('Function num is array, var1 is array, var2 is array', () => {
-            const result = calculate('=SUBTOTAL(A1:B2,A1:B2,A3:F4)');
-            expect(result).toStrictEqual([[11.157, 10], [14, 100]]);
+        it('Median, Var1 is array, var2 is array', () => {
+            const result = calculate('=AGGREGATE(12,,A1:B2,A3:F4)');
+            expect(result).toBe(1.615);
+        });
+        it('Mode.sngl, Var1 is array, var2 is array', () => {
+            const result = calculate('=AGGREGATE(13,,A1:B2,A3:F4)');
+            expect(result).toBe(1);
         });
     });
-    describe('Subtotal every function, including hidden row', () => {
+
+    describe('Aggregate every function, function number is array', () => {
+        it('Function num is array, var1 is array, var2 is array', () => {
+            const result = calculate('=AGGREGATE(A1:B2,,A1:B2,A3:F4)');
+            expect(result).toStrictEqual([
+                [11.157, 10],
+                [14, 100],
+            ]);
+        });
+    });
+
+    describe('Aggregate every function, including hidden row', () => {
         it('Function num is normal number, var1 is array', () => {
-            let result = calculate('=SUBTOTAL(101,A3:F4)');
+            let result = calculate('=AGGREGATE(1,5,A3:F4)');
             expect(result).toBe(1.115);
 
-            result = calculate('=SUBTOTAL(102,A3:F4)');
+            result = calculate('=AGGREGATE(2,5,A3:F4)');
             expect(result).toBe(2);
 
-            result = calculate('=SUBTOTAL(103,A3:F4)');
+            result = calculate('=AGGREGATE(3,5,A3:F4)');
             expect(result).toBe(5);
 
-            result = calculate('=SUBTOTAL(104,A3:F4)');
+            result = calculate('=AGGREGATE(4,5,A3:F4)');
             expect(result).toBe(1.23);
 
-            result = calculate('=SUBTOTAL(105,A3:F4)');
+            result = calculate('=AGGREGATE(5,5,A3:F4)');
             expect(result).toBe(1);
 
-            result = calculate('=SUBTOTAL(106,A3:F4)');
+            result = calculate('=AGGREGATE(6,5,A3:F4)');
             expect(result).toBe(1.23);
 
-            result = calculate('=SUBTOTAL(107,A3:F4)');
+            result = calculate('=AGGREGATE(7,5,A3:F4)');
             expect(result).toBeCloseTo(0.16263456, 7);
 
-            result = calculate('=SUBTOTAL(108,A3:F4)');
+            result = calculate('=AGGREGATE(8,5,A3:F4)');
             expect(result).toBe(0.115);
 
-            result = calculate('=SUBTOTAL(109,A3:F4)');
+            result = calculate('=AGGREGATE(9,5,A3:F4)');
             expect(result).toBe(2.23);
 
-            result = calculate('=SUBTOTAL(110,A3:F4)');
+            result = calculate('=AGGREGATE(10,5,A3:F4)');
             expect(result).toBe(0.02645);
 
-            result = calculate('=SUBTOTAL(111,A3:F4)');
+            result = calculate('=AGGREGATE(11,5,A3:F4)');
             expect(result).toBe(0.013225);
+
+            result = calculate('=AGGREGATE(12,5,A3:F4)');
+            expect(result).toBe(1.115);
+
+            result = calculate('=AGGREGATE(13,5,A3:F4)');
+            expect(result).toBe(ErrorType.NA);
+        });
+    });
+
+    describe('Aggregate function num 14-19', () => {
+        it('Refs is not match array and k', () => {
+            const result = calculate('=AGGREGATE(14,,A1:B2,2,3)');
+            expect(result).toBe(ErrorType.VALUE);
+        });
+
+        it('Test LARGE function', () => {
+            const result = calculate('=AGGREGATE(14,,A1:B2,2)');
+            expect(result).toBe(3);
+        });
+
+        it('Test SMALL function', () => {
+            const result = calculate('=AGGREGATE(15,,A1:B2,2)');
+            expect(result).toBe(2);
+        });
+
+        it('Test PERCENTILE.INC function', () => {
+            const result = calculate('=AGGREGATE(16,,A1:B2,0.5)');
+            expect(result).toBe(2.5);
+        });
+
+        it('Test QUARTILE.INC function', () => {
+            const result = calculate('=AGGREGATE(17,,A1:B2,2)');
+            expect(result).toBe(2.5);
+        });
+
+        it('Test PERCENTILE.EXC function', () => {
+            const result = calculate('=AGGREGATE(18,,A1:B2,0.5)');
+            expect(result).toBe(2.5);
+        });
+
+        it('Test QUARTILE.EXC function', () => {
+            const result = calculate('=AGGREGATE(19,,A1:B2,2)');
+            expect(result).toBe(2.5);
         });
     });
 });

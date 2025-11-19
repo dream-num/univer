@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
+import type { modeSnglValueCountMapType } from '../../../basics/statistical';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { getModeSnglResult } from '../../../basics/statistical';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-
-type valueMapType = Record<number, {
-    count: number;
-    order: number;
-}>;
 
 export class ModeSngl extends BaseFunction {
     override minParams = 1;
@@ -33,10 +29,10 @@ export class ModeSngl extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
-        const valueMap: valueMapType = {};
+        const valueCountMap: modeSnglValueCountMapType = {};
 
         let order = 0;
-        let maxCount = 1;
+        let valueMaxCount = 1;
 
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
@@ -74,32 +70,23 @@ export class ModeSngl extends BaseFunction {
                         continue;
                     }
 
-                    if (valueMap[+value]) {
-                        valueMap[+value].count++;
+                    if (valueCountMap[+value]) {
+                        valueCountMap[+value].count++;
 
-                        if (valueMap[+value].count > maxCount) {
-                            maxCount = valueMap[+value].count;
+                        if (valueCountMap[+value].count > valueMaxCount) {
+                            valueMaxCount = valueCountMap[+value].count;
                         }
                     } else {
-                        valueMap[+value] = { count: 1, order: order++ };
+                        valueCountMap[+value] = { count: 1, order: order++ };
                     }
                 }
             }
         }
 
-        if (order === 0 || maxCount === 1) {
+        if (order === 0 || valueMaxCount === 1) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        return this._getResult(valueMap, maxCount);
-    }
-
-    private _getResult(valueMap: valueMapType, maxCount: number): BaseValueObject {
-        const result = Object.entries(valueMap)
-            .filter(([_, { count }]) => count === maxCount)
-            .sort((a, b) => a[1].order - b[1].order)
-            .map(([value]) => +value);
-
-        return NumberValueObject.create(result[0]);
+        return getModeSnglResult(valueCountMap, valueMaxCount);
     }
 }

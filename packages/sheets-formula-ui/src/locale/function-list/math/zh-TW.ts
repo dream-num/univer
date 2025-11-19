@@ -94,8 +94,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: 'function_num', detail: '數字 1 到 19，指定要使用哪一個函數。' },
+            options: { name: 'options', detail: '一個數值，決定函數的評估範圍中要忽略哪些值。' },
+            ref1: { name: 'ref1', detail: '接受多個數值引數之函數的第一個數值引數，這是您要計算彙總值的引數。' },
+            ref2: { name: 'ref2', detail: '這是您要計算彙總值的第 2 個到第 253 個數值引數。' },
         },
     },
     ARABIC: {

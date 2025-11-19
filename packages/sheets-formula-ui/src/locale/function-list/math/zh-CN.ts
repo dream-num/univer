@@ -94,8 +94,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: '函数编号', detail: '一个介于 1 到 19 之间的数字，指定要使用的函数。' },
+            options: { name: '选项', detail: '一个数值，决定在函数的计算区域内要忽略哪些值。' },
+            ref1: { name: '引用1', detail: '函数的第一个数值参数，这些函数具有要计算聚合值的多个数值参数。' },
+            ref2: { name: '引用2', detail: '要计算聚合值的 2 至 252 个数值参数。' },
         },
     },
     ARABIC: {

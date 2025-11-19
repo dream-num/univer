@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { BooleanValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Sort } from '../index';
@@ -195,6 +195,27 @@ describe('Test sort function', () => {
             expect(getObjectValue(resultObject2)).toStrictEqual([
                 [ErrorType.VALUE, 0],
                 [2, ErrorType.NAME],
+            ]);
+        });
+
+        it('SortIndex is NullValueObject', async () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['T-16-7-4', 'T-16-6-2'],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const sortIndex = NullValueObject.create();
+            const sortOrder = NumberValueObject.create(1);
+            const byCol = BooleanValueObject.create(true);
+            const resultObject = testFunction.calculate(array, sortIndex, sortOrder, byCol);
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                ['T-16-6-2, T-16-7-4'],
             ]);
         });
     });

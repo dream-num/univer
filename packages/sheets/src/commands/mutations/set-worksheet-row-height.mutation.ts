@@ -59,7 +59,7 @@ export const SetWorksheetRowHeightMutationFactory = (
         unitId,
         subUnitId,
         ranges,
-        rowHeight: { compress: true, data: packNumberMap(rowHeight as Record<string, number>) },
+        rowHeight: { compress: true, data: packNumberMap(rowHeight) },
     };
 };
 

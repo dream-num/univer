@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+import type { IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
+
 export type IntervalValue = number | [number, number];
 
 export type PackedNumberMap = Record<string, IntervalValue[] | number>;
 /**
  * Compression function (Map -> PackedNumberMap)
  */
-export function packNumberMap(originalData: Record<string, number>): PackedNumberMap {
+export function packNumberMap(originalData: IObjectArrayPrimitiveType<Nullable<number>>): PackedNumberMap {
     const result: PackedNumberMap = {};
 
     // 1. Grouping: Classify data by Value, collect all Indices
@@ -36,6 +39,8 @@ export function packNumberMap(originalData: Record<string, number>): PackedNumbe
 
     for (const idx of sortedIndices) {
         const val = originalData[idx];
+        // Skip null/undefined values
+        if (!Tools.isDefine(val)) continue;
         // Note: Convert value to string as key here
         const valStr = String(val);
 
@@ -94,8 +99,8 @@ export function packNumberMap(originalData: Record<string, number>): PackedNumbe
 /**
  * Unpack function (PackedNumberMap -> Map)
  */
-export function unpackNumberMap(compactData: PackedNumberMap): Record<string, number> {
-    const resultMap: Record<string, number> = {};
+export function unpackNumberMap(compactData: PackedNumberMap): IObjectArrayPrimitiveType<number> {
+    const resultMap: IObjectArrayPrimitiveType<number> = {};
 
     for (const [valStr, data] of Object.entries(compactData)) {
         const value = Number(valStr);

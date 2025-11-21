@@ -58,8 +58,6 @@ import {
     IFormulaRuntimeService,
     IFunctionService,
     IHyperlinkEngineFormulaService,
-    IImageEngineFormulaService,
-    ImageEngineFormulaService,
     Interpreter,
     IOtherFormulaManagerService,
     ISheetRowFilteredService,
@@ -200,7 +198,6 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
-            injector.add([IImageEngineFormulaService, { useClass: ImageEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);

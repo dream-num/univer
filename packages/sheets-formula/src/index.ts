@@ -19,6 +19,7 @@ export { QuickSumCommand } from './commands/commands/quick-sum.command';
 export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './controllers/config.schema';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
+export { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 export { UpdateFormulaController } from './controllers/update-formula.controller';

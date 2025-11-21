@@ -34,6 +34,7 @@ import { FormulaEditorShowController } from './controllers/formula-editor-show.c
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
+import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
@@ -79,6 +80,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
             [FormulaReorderController],
+            [ImageFormulaRenderController],
         ]);
 
         this._initUIPart();
@@ -104,6 +106,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaUIController], // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
             [FormulaClipboardController],
             [FormulaRenderManagerController],
+            [ImageFormulaRenderController],
         ]);
     }
 

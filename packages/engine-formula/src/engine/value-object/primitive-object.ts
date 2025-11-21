@@ -1360,6 +1360,17 @@ export class NumberValueObject extends BaseValueObject {
     }
 }
 
+export interface IImageFormulaInfo {
+    source: string;
+    altText: string;
+    sizing: number;
+    height: number;
+    width: number;
+    isErrorImage?: boolean;
+    imageNaturalHeight?: number;
+    imageNaturalWidth?: number;
+}
+
 export interface IStringValueObjectOptions {
     /**
      * Whether it is a hyperlink value from HYPERLINK function
@@ -1370,13 +1381,7 @@ export interface IStringValueObjectOptions {
      * Whether it is an image value from IMAGE function
      */
     isImage?: boolean;
-    imageInfo?: {
-        source: string;
-        altText: string;
-        sizing: number;
-        height: number;
-        width: number;
-    };
+    imageInfo?: IImageFormulaInfo;
 }
 
 const STRING_CACHE_LRU_COUNT = 100000;

@@ -22,10 +22,14 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Image extends BaseFunction {
+export class ImageFunction extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 5;
+
+    override isAsync() {
+        return true;
+    }
 
     // eslint-disable-next-line complexity
     override calculate(source: BaseValueObject, altText?: BaseValueObject, sizing?: BaseValueObject, height?: BaseValueObject, width?: BaseValueObject): BaseValueObject {
@@ -51,27 +55,27 @@ export class Image extends BaseFunction {
         const heightArray = height ? expandArrayValueObject(maxRowLength, maxColumnLength, height, ErrorValueObject.create(ErrorType.NA)) : undefined;
         const widthArray = width ? expandArrayValueObject(maxRowLength, maxColumnLength, width, ErrorValueObject.create(ErrorType.NA)) : undefined;
 
-        const resultArray = sourceArray.mapValue((sourceObject, row, column) => {
+        const resultArray = sourceArray.mapValue((sourceObject, rowIndex, columnIndex) => {
             if (sourceObject.isError()) {
                 return sourceObject;
             }
 
-            const altTextObject = altTextArray ? altTextArray.get(row, column) as BaseValueObject : undefined;
+            const altTextObject = altTextArray ? altTextArray.get(rowIndex, columnIndex) as BaseValueObject : undefined;
             if (altTextObject?.isError()) {
                 return altTextObject;
             }
 
-            const sizingObject = sizingArray ? sizingArray.get(row, column) as BaseValueObject : undefined;
+            const sizingObject = sizingArray ? sizingArray.get(rowIndex, columnIndex) as BaseValueObject : undefined;
             if (sizingObject?.isError()) {
                 return sizingObject;
             }
 
-            const heightObject = heightArray ? heightArray.get(row, column) as BaseValueObject : undefined;
+            const heightObject = heightArray ? heightArray.get(rowIndex, columnIndex) as BaseValueObject : undefined;
             if (heightObject?.isError()) {
                 return heightObject;
             }
 
-            const widthObject = widthArray ? widthArray.get(row, column) as BaseValueObject : undefined;
+            const widthObject = widthArray ? widthArray.get(rowIndex, columnIndex) as BaseValueObject : undefined;
             if (widthObject?.isError()) {
                 return widthObject;
             }
@@ -79,7 +83,7 @@ export class Image extends BaseFunction {
             return this._handleSingleObject(sourceObject, altTextObject, sizingObject, heightObject, widthObject);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+        if (maxRowLength === 1 && maxColumnLength === 1) {
             return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
@@ -104,47 +108,51 @@ export class Image extends BaseFunction {
         }
 
         let _sizing = sizing ?? NumberValueObject.create(0);
-        if (_sizing.isString() || _sizing.isBoolean() || _sizing.isNull()) {
+        if (_sizing.isString()) {
             _sizing = _sizing.convertToNumberObjectValue();
         }
         if (_sizing.isError()) {
             return _sizing;
         }
 
-        const sizingValue = Math.abs(Math.trunc(_sizing.getValue() as number));
+        const sizingValue = Math.abs(Math.trunc(+_sizing.getValue()));
+
+        // If sizing is not between 0-3, return #VALUE! error.
         if (sizingValue < 0 || sizingValue > 3) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        // If sizing is 0, 1, or 2 and height or width is provided, return #VALUE! error.
         if ([0, 1, 2].includes(sizingValue) && (height || width)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         let _height = height ?? NumberValueObject.create(0);
-        if (_height.isString() || _height.isBoolean() || _height.isNull()) {
+        if (_height.isString()) {
             _height = _height.convertToNumberObjectValue();
         }
         if (_height.isError()) {
             return _height;
         }
 
-        const heightValue = Math.ceil(_height.getValue() as number);
+        const heightValue = Math.ceil(+_height.getValue());
 
         let _width = width ?? NumberValueObject.create(0);
-        if (_width.isString() || _width.isBoolean() || _width.isNull()) {
+        if (_width.isString()) {
             _width = _width.convertToNumberObjectValue();
         }
         if (_width.isError()) {
             return _width;
         }
 
-        const widthValue = Math.ceil(_width.getValue() as number);
+        const widthValue = Math.ceil(+_width.getValue());
 
+        // If sizing is 3 and height or width is less than 1, return #VALUE! error.
         if (sizingValue === 3 && heightValue < 1 && widthValue < 1) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return StringValueObject.create(sourceValue, {
+        return StringValueObject.create('', {
             isImage: true,
             imageInfo: {
                 source: sourceValue,

@@ -27,10 +27,6 @@ export class ImageFunction extends BaseFunction {
 
     override maxParams = 5;
 
-    override isAsync() {
-        return true;
-    }
-
     // eslint-disable-next-line complexity
     override calculate(source: BaseValueObject, altText?: BaseValueObject, sizing?: BaseValueObject, height?: BaseValueObject, width?: BaseValueObject): BaseValueObject {
         const maxRowLength = Math.max(

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.12.2](https://github.com/dream-num/univer/compare/v0.12.1...v0.12.2) (2025-11-22)
+
+
+### Bug Fixes
+
+* fix objectMatrix getRealRange function ([#6193](https://github.com/dream-num/univer/issues/6193)) ([711c9ae](https://github.com/dream-num/univer/commit/711c9ae67d846be0dbda27b2a0db9eae0293f487))
+
+
+### Reverts
+
+* "feat(sheets): add compress for set-worksheet-col-width & row-height" ([#6192](https://github.com/dream-num/univer/issues/6192)) ([386e689](https://github.com/dream-num/univer/commit/386e68937a99a50bd854edbd56640fb06a0daeac))
+
 ## [0.12.1](https://github.com/dream-num/univer/compare/v0.12.0...v0.12.1) (2025-11-22)
 
 

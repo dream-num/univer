@@ -18,7 +18,7 @@ import type { ComponentType } from 'react';
 import type { Observable } from 'rxjs';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { IUniverInstanceService, throttle } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
 import { MoreFunctionIcon } from '@univerjs/icons';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -43,6 +43,7 @@ export function Ribbon(props: IRibbonProps) {
 
     const menuManagerService = useDependency(IMenuManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const localeService = useDependency(LocaleService);
 
     const [menuChangedTimes, setMenuChangedTimes] = useState(0);
 
@@ -278,6 +279,7 @@ export function Ribbon(props: IRibbonProps) {
     return (
         <>
             <div
+                data-u-comp="ribbon-header-menu"
                 className={clsx('univer-relative univer-select-none', {
                     'univer-h-9': ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0),
                 })}
@@ -328,6 +330,8 @@ export function Ribbon(props: IRibbonProps) {
                     className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
                         'univer-justify-center': ribbonType === 'classic',
                     })}
+                    role="toolbar"
+                    aria-label={localeService.t(activatedTab)}
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
@@ -376,9 +380,14 @@ export function Ribbon(props: IRibbonProps) {
                                     </div>
                                 )}
                             >
-                                <a className={toolbarButtonClassName} type="button">
+                                <button
+                                    type="button"
+                                    className={toolbarButtonClassName}
+                                    aria-label={localeService.t('ribbon.more')}
+                                    aria-haspopup="true"
+                                >
                                     <MoreFunctionIcon />
-                                </a>
+                                </button>
                             </Dropdown>
                         </div>
                     )}

@@ -182,9 +182,9 @@ export function mergeSetRangeValues(mutations: IMutationInfo[]) {
 
 export function spilitLargeSetRangeValuesMutations(
     mutation: IMutationInfo<ISetRangeValuesMutationParams>,
-    options: { maxRows?: number; maxCols?: number; maxCells?: number } = {}
+    options: { maxCellsPerChunk?: number; threshold?: number } = {}
 ): IMutationInfo<ISetRangeValuesMutationParams>[] {
-    const { maxRows = 50, maxCols = 50, maxCells = 2500 } = options;
+    const { maxCellsPerChunk = 2500, threshold = 6000 } = options;
 
     if (mutation.id !== SetRangeValuesMutation.id) {
         return [mutation];
@@ -196,7 +196,7 @@ export function spilitLargeSetRangeValuesMutations(
 
     const matrix = new ObjectMatrix(cellValue);
 
-    // 计算单元格数量
+    // 计算单元格数量和边界
     let cellCount = 0;
     let minRow = Infinity;
     let maxRow = -Infinity;
@@ -212,43 +212,43 @@ export function spilitLargeSetRangeValuesMutations(
     });
 
     // 如果没有数据或单元格数量小于阈值，不拆分
-    if (minRow === Infinity || cellCount <= maxCells) {
+    if (minRow === Infinity || cellCount <= threshold) {
         return [mutation];
     }
 
     const chunks: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
 
-    // 按照 maxRows × maxCols 的块大小进行拆分
-    for (let rowStart = minRow; rowStart <= maxRow; rowStart += maxRows) {
-        const rowEnd = Math.min(rowStart + maxRows - 1, maxRow);
+    // 根据列数计算每个块的行数
+    const colCount = maxCol - minCol + 1;
+    const rowsPerChunk = Math.max(1, Math.floor(maxCellsPerChunk / colCount));
 
-        for (let colStart = minCol; colStart <= maxCol; colStart += maxCols) {
-            const colEnd = Math.min(colStart + maxCols - 1, maxCol);
+    // 按照计算出的行数进行拆分
+    for (let rowStart = minRow; rowStart <= maxRow; rowStart += rowsPerChunk) {
+        const rowEnd = Math.min(rowStart + rowsPerChunk - 1, maxRow);
 
-            const chunkMatrix = new ObjectMatrix<Nullable<ICellData>>();
-            let hasData = false;
+        const chunkMatrix = new ObjectMatrix<Nullable<ICellData>>();
+        let hasData = false;
 
-            // 提取当前块的数据
-            for (let row = rowStart; row <= rowEnd; row++) {
-                for (let col = colStart; col <= colEnd; col++) {
-                    const value = matrix.getValue(row, col);
-                    if (value !== undefined) {
-                        chunkMatrix.setValue(row, col, value);
-                        hasData = true;
-                    }
+        // 提取当前块的数据
+        for (let row = rowStart; row <= rowEnd; row++) {
+            for (let col = minCol; col <= maxCol; col++) {
+                const value = matrix.getValue(row, col);
+                if (value !== undefined) {
+                    chunkMatrix.setValue(row, col, value);
+                    hasData = true;
                 }
             }
+        }
 
-            // 只有当块中有数据时才创建 mutation
-            if (hasData) {
-                chunks.push({
-                    ...mutation,
-                    params: {
-                        ...mutation.params,
-                        cellValue: chunkMatrix.getMatrix(),
-                    },
-                });
-            }
+        // 只有当块中有数据时才创建 mutation
+        if (hasData) {
+            chunks.push({
+                ...mutation,
+                params: {
+                    ...mutation.params,
+                    cellValue: chunkMatrix.getMatrix(),
+                },
+            });
         }
     }
 

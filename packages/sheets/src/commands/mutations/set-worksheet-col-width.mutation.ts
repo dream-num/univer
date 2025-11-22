@@ -15,15 +15,17 @@
  */
 
 import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { PackedNumberMap } from '../utils/pack-number-map';
 
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
+import { packNumberMap, unpackNumberMap } from '../utils/pack-number-map';
 
 export interface ISetWorksheetColWidthMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-    colWidth: number | IObjectArrayPrimitiveType<Nullable<number>>;
+    colWidth: number | IObjectArrayPrimitiveType<Nullable<number>> | { compress: true; data: PackedNumberMap };
 }
 
 /**
@@ -51,7 +53,7 @@ export const SetWorksheetColWidthMutationFactory = (
         unitId,
         subUnitId,
         ranges,
-        colWidth,
+        colWidth: { compress: true, data: packNumberMap(colWidth as Record<string, number>) },
     };
 };
 
@@ -77,6 +79,12 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
                 if (!visible) continue;
                 if (typeof params.colWidth === 'number') {
                     manager.setColumnWidth(j, params.colWidth);
+                } else if (params.colWidth && typeof params.colWidth === 'object' && 'compress' in params.colWidth) {
+                    const { data } = params.colWidth;
+                    const map = unpackNumberMap(data);
+                    if (Tools.isDefine(map[j])) {
+                        manager.setColumnWidth(j, map[j]);
+                    }
                 } else if (Tools.isDefine(params.colWidth[j])) {
                     manager.setColumnWidth(j, params.colWidth[j] as number);
                 }

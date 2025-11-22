@@ -24,7 +24,6 @@ import { Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     getSheetCommandTarget,
-    packNumberMap,
     SetWorksheetColWidthMutation,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -50,7 +49,7 @@ export const createAutoColWidthUndoMutationsByRedos = (
         unitId,
         subUnitId,
         ranges,
-        colWidth: { compress: true, data: packNumberMap(colWidthObj as Record<string, number>) },
+        colWidth: colWidthObj,
     };
 };
 
@@ -85,7 +84,7 @@ export class AutoWidthController extends Disposable {
             subUnitId,
             unitId,
             ranges: params.ranges,
-            colWidth: { compress: true, data: packNumberMap(colWidthObject as Record<string, number>) },
+            colWidth: colWidthObject,
         };
         const undoParams: ISetWorksheetColWidthMutationParams = createAutoColWidthUndoMutationsByRedos(redoParams, worksheet);
         return {

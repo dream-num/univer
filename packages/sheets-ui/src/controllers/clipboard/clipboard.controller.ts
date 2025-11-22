@@ -79,7 +79,6 @@ import {
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
-    packNumberMap,
     RemoveColMutation,
     RemoveRowMutation,
     SetRangeValuesMutation,
@@ -451,7 +450,7 @@ export class SheetClipboardController extends RxDisposable {
                             startColumn: range.cols[0],
                             endColumn: range.cols[range.cols.length - 1],
                         }],
-                        rowHeight: { compress: true, data: packNumberMap(rowHeight) },
+                        rowHeight,
                     };
                     redoMutations.push({
                         id: SetWorksheetRowHeightMutation.id,
@@ -462,7 +461,7 @@ export class SheetClipboardController extends RxDisposable {
                         id: SetWorksheetRowHeightMutation.id,
                         params: {
                             ...setRowPropertyMutation,
-                            rowHeight: { compress: true, data: packNumberMap(originRowHeight) },
+                            rowHeight: originRowHeight,
                         },
                     });
                 }
@@ -533,26 +532,24 @@ export class SheetClipboardController extends RxDisposable {
 
                 // apply col properties to the existing rows
                 if (colProperties.length > 0) {
-                    const colWidth = colProperties
-                        .slice(0, existingColsCount)
-                        .reduce((p, c, index) => {
-                            p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
-                            return p;
-                        }, {} as IObjectArrayPrimitiveType<number>);
                     const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
                         ...targetSetColPropertyParams,
-                        colWidth: { compress: true, data: packNumberMap(colWidth) },
+                        colWidth: colProperties
+                            .slice(0, existingColsCount)
+                            .reduce((p, c, index) => {
+                                p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
+                                return p;
+                            }, {} as IObjectArrayPrimitiveType<number>),
                     };
 
-                    const undoColWidth = colProperties
-                        .slice(0, existingColsCount)
-                        .reduce((p, c, index) => {
-                            p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
-                            return p;
-                        }, {} as IObjectArrayPrimitiveType<Nullable<number>>);
                     const undoSetColPropertyParams: ISetWorksheetColWidthMutationParams = {
                         ...targetSetColPropertyParams,
-                        colWidth: { compress: true, data: packNumberMap(undoColWidth as Record<string, number>) },
+                        colWidth: colProperties
+                            .slice(0, existingColsCount)
+                            .reduce((p, c, index) => {
+                                p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
+                                return p;
+                            }, {} as IObjectArrayPrimitiveType<Nullable<number>>),
                     };
 
                     redoMutations.push({
@@ -796,12 +793,6 @@ export class SheetClipboardController extends RxDisposable {
                 const existingColsCount = colProperties.length - addingColsCount;
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
 
-                const colWidth = colProperties
-                    .slice(0, existingColsCount)
-                    .reduce((p, c, index) => {
-                        p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
-                        return p;
-                    }, {} as IObjectArrayPrimitiveType<number>);
                 const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
                     unitId: unitId!,
                     subUnitId: subUnitId!,
@@ -811,15 +802,14 @@ export class SheetClipboardController extends RxDisposable {
                         startColumn: range.cols[0],
                         endColumn: range.cols[range.cols.length - 1],
                     }],
-                    colWidth: { compress: true, data: packNumberMap(colWidth) },
+                    colWidth: colProperties
+                        .slice(0, existingColsCount)
+                        .reduce((p, c, index) => {
+                            p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
+                            return p;
+                        }, {} as IObjectArrayPrimitiveType<number>),
                 };
 
-                const undoColWidth = colProperties
-                    .slice(0, existingColsCount)
-                    .reduce((p, c, index) => {
-                        p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
-                        return p;
-                    }, {} as IObjectArrayPrimitiveType<Nullable<number>>);
                 const undoSetColPropertyMutation: ISetWorksheetColWidthMutationParams = {
                     unitId: unitId!,
                     subUnitId: subUnitId!,
@@ -829,7 +819,12 @@ export class SheetClipboardController extends RxDisposable {
                         startColumn: range.cols[0],
                         endColumn: range.cols[range.cols.length - 1],
                     }],
-                    colWidth: { compress: true, data: packNumberMap(undoColWidth as Record<string, number>) },
+                    colWidth: colProperties
+                        .slice(0, existingColsCount)
+                        .reduce((p, c, index) => {
+                            p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
+                            return p;
+                        }, {} as IObjectArrayPrimitiveType<Nullable<number>>),
                 };
 
                 redoMutations.push({

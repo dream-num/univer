@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-note",
-    "version": "0.12.0",
+    "version": "0.12.1",
     "private": false,
     "description": "Univer sheets note base plugin",
     "author": "DreamNum <developer@univer.ai>",

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.1](https://github.com/dream-num/univer/compare/v0.12.0...v0.12.1) (2025-11-22)
+
+
+### Bug Fixes
+
+* **formula:** defined name nest and lexer ([#6174](https://github.com/dream-num/univer/issues/6174)) ([b54d9cb](https://github.com/dream-num/univer/commit/b54d9cb5cf4e89b4420bb7a4709acc9ea5e0c4d7))
+* **formula:** sort function error ([#6179](https://github.com/dream-num/univer/issues/6179)) ([2cafca1](https://github.com/dream-num/univer/commit/2cafca1df6a30d157d9a5298ebb1b1b26e8bdfd4))
+* **formula:** update node ([#6165](https://github.com/dream-num/univer/issues/6165)) ([aa959d4](https://github.com/dream-num/univer/commit/aa959d4903592c3d109f1ac108bcfffe8ffb5631))
+
+
+### Features
+
+* **formula:** add support for AGGREGATE formula ([#6177](https://github.com/dream-num/univer/issues/6177)) ([d0e1838](https://github.com/dream-num/univer/commit/d0e1838f4cee8b6b3792d34654b29db1e1e89197))
+* **formula:** add support for IMAGE formula ([#6189](https://github.com/dream-num/univer/issues/6189)) ([b788105](https://github.com/dream-num/univer/commit/b788105044945081ecc989ea0b14080bb1a7adff))
+* **sheets:** add compress for set-worksheet-col-width & row-height ([#6187](https://github.com/dream-num/univer/issues/6187)) ([46688a8](https://github.com/dream-num/univer/commit/46688a829cf05faab5f5d475479c3ab1fb94aaf5))
+* **ui:** improve accessibility attributes ([#6190](https://github.com/dream-num/univer/issues/6190)) ([733b238](https://github.com/dream-num/univer/commit/733b23878377260c345b323a09ec0c3d1dc13ccd))
+
 # [0.12.0](https://github.com/dream-num/univer/compare/v0.11.0...v0.12.0) (2025-11-15)
 
 

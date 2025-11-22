@@ -2261,7 +2261,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Returns a Range corresponding to the dimensions in which data is present.
-     * This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
+     * This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumn(), Sheet.getLastRow()).
      * @returns {FRange} The range of the data in the sheet.
      * @example
      * ```ts
@@ -2274,9 +2274,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getDataRange(): FRange {
-        const lastRow = this.getLastRows();
-        const lastColumn = this.getLastColumns();
-        return this.getRange(0, 0, lastRow + 1, lastColumn + 1);
+        const { startRow, endRow, startColumn, endColumn } = this._worksheet.getDataRealRange();
+        return this.getRange(startRow, startColumn, endRow - startRow + 1, endColumn - startColumn + 1);
     }
 
     /**

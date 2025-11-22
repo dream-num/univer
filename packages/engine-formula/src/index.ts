@@ -26,9 +26,11 @@ export type {
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
+    IRuntimeImageFormulaDataType,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
+    IUnitImageFormulaDataType,
     IUnitSheetNameMap,
 } from './basics/common';
 export { BooleanValue } from './basics/common';
@@ -60,6 +62,7 @@ export {
     SetFormulaCalculationStopMutation,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
+export { type ISetImageFormulaDataMutationParams, SetImageFormulaDataMutation } from './commands/mutations/set-image-formula-data.mutation';
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from './commands/mutations/set-super-table.mutation';
@@ -118,7 +121,7 @@ export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
 export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
-export type { FormulaFunctionResultValueType, FormulaFunctionValueType, PrimitiveValueType } from './engine/value-object/primitive-object';
+export type { FormulaFunctionResultValueType, FormulaFunctionValueType, IImageFormulaInfo, PrimitiveValueType } from './engine/value-object/primitive-object';
 export { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './engine/value-object/primitive-object';
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';

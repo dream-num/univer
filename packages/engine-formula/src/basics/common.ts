@@ -26,6 +26,7 @@ import type {
     ObjectMatrix,
     Styles,
 } from '@univerjs/core';
+import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -120,6 +121,17 @@ export interface IArrayFormulaEmbeddedMap {
 
 export interface IFeatureDirtyRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IRange[] }>;
+}
+
+export interface IRuntimeImageFormulaDataType extends IImageFormulaInfo {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
+}
+
+export interface IUnitImageFormulaDataType {
+    [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<Nullable<IImageFormulaInfo>> }>;
 }
 
 export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType {}

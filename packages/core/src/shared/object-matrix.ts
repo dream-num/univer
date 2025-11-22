@@ -566,10 +566,11 @@ export class ObjectMatrix<T> {
 
     getRealRange(): IRange {
         const rows = Object.keys(this._matrix);
-        const startRow = rows.length > 0 ? Number(rows[0]) : 0;
-        const endRow = rows.length > 0 ? Number(rows[rows.length - 1]) : 0;
+        const rowLength = rows.length;
+        const startRow = rowLength > 0 ? Number(rows[0]) : 0;
+        const endRow = rowLength > 0 ? Number(rows[rowLength - 1]) : 0;
 
-        let startColumn = 0;
+        let startColumn = -Infinity;
         let endColumn = 0;
 
         for (const rowKey of rows) {
@@ -580,7 +581,7 @@ export class ObjectMatrix<T> {
                     const rowStartColumn = Number(columns[0]);
                     const rowEndColumn = Number(columns[columns.length - 1]);
 
-                    if (startColumn === 0 || rowStartColumn < startColumn) {
+                    if (startColumn === -Infinity || rowStartColumn < startColumn) {
                         startColumn = rowStartColumn;
                     }
 
@@ -596,6 +597,18 @@ export class ObjectMatrix<T> {
             endRow,
             startColumn,
             endColumn,
+        };
+    }
+
+    getRealRowRange() {
+        const rows = Object.keys(this._matrix);
+        const rowLength = rows.length;
+        const startRow = rowLength > 0 ? Number(rows[0]) : 0;
+        const endRow = rowLength > 0 ? Number(rows[rowLength - 1]) : 0;
+
+        return {
+            startRow,
+            endRow,
         };
     }
 

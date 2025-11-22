@@ -29,10 +29,8 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
-
 import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
-
 import {
     Disposable,
     ICommandService,
@@ -44,7 +42,6 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaCalculationStartMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
@@ -169,6 +166,9 @@ export class UpdateFormulaController extends Disposable {
         // update formula model
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+
+        // update image formula data
+        this._formulaDataModel.updateImageFormulaData(unitId, sheetId, cellValue);
 
         // TODO@Dushusir: When the amount of data is large, the communication overhead is high. The main thread and the worker update their own models to reduce the communication overhead.
         this._commandService.executeCommand(

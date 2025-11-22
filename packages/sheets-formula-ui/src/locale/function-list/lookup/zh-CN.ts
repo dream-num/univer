@@ -263,8 +263,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            source: { name: '图像源', detail: '图像文件的 URL 路径（使用“https”协议）。' },
+            altText: { name: '描述文字', detail: '描述图像以提供辅助功能的可选文字。' },
+            sizing: { name: '维度', detail: '指定图像维度。' },
+            height: { name: '高度', detail: '图像的自定义高度（以像素为单位）。' },
+            width: { name: '宽度', detail: '图像的自定义宽度（以像素为单位）。' },
         },
     },
     INDEX: {

@@ -938,7 +938,7 @@ export class Worksheet {
      * @returns the position of the last row that has content.
      */
     getLastRowWithContent(): number {
-        return this._cellData.getLength() - 1;
+        return this._cellData.getRealRowRange().endRow;
     }
 
     /**
@@ -946,7 +946,11 @@ export class Worksheet {
      * @returns the position of the last column that has content.
      */
     getLastColumnWithContent(): number {
-        return this._cellData.getRange().endColumn;
+        return this.getDataRealRange().endColumn;
+    }
+
+    getDataRealRange(): IRange {
+        return this._cellData.getRealRange();
     }
 
     getDataRangeScope(): IRange {

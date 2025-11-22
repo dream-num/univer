@@ -592,6 +592,10 @@ export class ObjectMatrix<T> {
             }
         }
 
+        if (startColumn === -Infinity) {
+            startColumn = 0;
+        }
+
         return {
             startRow,
             endRow,

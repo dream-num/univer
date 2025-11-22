@@ -15,6 +15,7 @@
  */
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import { getRepeatRange, mergeSetRangeValues, spilitLargeSetRangeValuesMutations } from '../utils';
@@ -198,25 +199,25 @@ describe('test "mergeSetRangeValues"', () => {
 
 describe('test "spilitLargeSetRangeValuesMutations"', () => {
     it('should not split if mutation is not SetRangeValuesMutation', () => {
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: 'other.mutation',
-            params: { cellValue: {} },
+            params: { unitId: '1', subUnitId: '1', cellValue: {} },
         };
-        const result = spilitLargeSetRangeValuesMutations(mutation as any);
+        const result = spilitLargeSetRangeValuesMutations(mutation);
         expect(result).toStrictEqual([mutation]);
     });
 
     it('should not split if cellValue is empty', () => {
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: SetRangeValuesMutation.id,
             params: { unitId: '1', subUnitId: '1', cellValue: undefined },
         };
-        const result = spilitLargeSetRangeValuesMutations(mutation as any);
+        const result = spilitLargeSetRangeValuesMutations(mutation);
         expect(result).toStrictEqual([mutation]);
     });
 
     it('should not split if cell count is below threshold', () => {
-        const cellValue: any = {};
+        const cellValue: Record<number, Record<number, { v: string }>> = {};
         // Create 100 cells (10x10)
         for (let row = 0; row < 10; row++) {
             cellValue[row] = {};
@@ -225,18 +226,18 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
             }
         }
 
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: SetRangeValuesMutation.id,
             params: { unitId: '1', subUnitId: '1', cellValue },
         };
 
-        const result = spilitLargeSetRangeValuesMutations(mutation as any, { threshold: 6000 });
+        const result = spilitLargeSetRangeValuesMutations(mutation, { threshold: 6000 });
         expect(result).toHaveLength(1);
         expect(result[0]).toStrictEqual(mutation);
     });
 
     it('should split large mutation into chunks based on maxCellsPerChunk', () => {
-        const cellValue: any = {};
+        const cellValue: Record<number, Record<number, { v: string }>> = {};
         // Create 150 cells (50 rows x 3 cols)
         for (let row = 0; row < 50; row++) {
             cellValue[row] = {};
@@ -245,14 +246,14 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
             }
         }
 
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: SetRangeValuesMutation.id,
             params: { unitId: '1', subUnitId: '1', cellValue },
         };
 
         // With 3 cols and maxCellsPerChunk=30, each chunk should have 10 rows (30/3=10)
         // So 50 rows should be split into 5 chunks
-        const result = spilitLargeSetRangeValuesMutations(mutation as any, {
+        const result = spilitLargeSetRangeValuesMutations(mutation, {
             threshold: 100,
             maxCellsPerChunk: 30,
         });
@@ -266,7 +267,7 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
     });
 
     it('should preserve cell data correctly when splitting', () => {
-        const cellValue: any = {};
+        const cellValue: Record<number, Record<number, { v: string }>> = {};
         // Create 20 cells (10 rows x 2 cols)
         for (let row = 0; row < 10; row++) {
             cellValue[row] = {};
@@ -275,13 +276,13 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
             }
         }
 
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: SetRangeValuesMutation.id,
             params: { unitId: '1', subUnitId: '1', cellValue },
         };
 
         // With 2 cols and maxCellsPerChunk=6, each chunk should have 3 rows (6/2=3)
-        const result = spilitLargeSetRangeValuesMutations(mutation as any, {
+        const result = spilitLargeSetRangeValuesMutations(mutation, {
             threshold: 10,
             maxCellsPerChunk: 6,
         });
@@ -290,28 +291,28 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
 
         // Verify first chunk has rows 0-2
         const firstChunk = result[0].params.cellValue;
-        expect(firstChunk![0][0].v).toBe('cell_0_0');
-        expect(firstChunk![2][1].v).toBe('cell_2_1');
+        expect(firstChunk![0]![0]!.v).toBe('cell_0_0');
+        expect(firstChunk![2]![1]!.v).toBe('cell_2_1');
 
         // Verify last chunk has rows 9
         const lastChunk = result[3].params.cellValue;
-        expect(lastChunk![9][0].v).toBe('cell_9_0');
-        expect(lastChunk![9][1].v).toBe('cell_9_1');
+        expect(lastChunk![9]![0]!.v).toBe('cell_9_0');
+        expect(lastChunk![9]![1]!.v).toBe('cell_9_1');
     });
 
     it('should handle sparse matrices correctly', () => {
-        const cellValue: any = {
+        const cellValue: Record<number, Record<number, { v: string }>> = {
             0: { 0: { v: 'cell_0_0' } },
             5: { 5: { v: 'cell_5_5' } },
             10: { 10: { v: 'cell_10_10' } },
         };
 
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: SetRangeValuesMutation.id,
             params: { unitId: '1', subUnitId: '1', cellValue },
         };
 
-        const result = spilitLargeSetRangeValuesMutations(mutation as any, {
+        const result = spilitLargeSetRangeValuesMutations(mutation, {
             threshold: 2,
             maxCellsPerChunk: 1,
         });
@@ -320,36 +321,37 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
         expect(result.length).toBeGreaterThan(1);
 
         // Verify all cells are preserved
-        const allCells: any = {};
+        const allCells: Record<string, Record<string, { v: string }>> = {};
         result.forEach((chunk) => {
             const chunkCellValue = chunk.params.cellValue!;
-            Object.keys(chunkCellValue).forEach((row) => {
-                if (!allCells[row]) allCells[row] = {};
-                Object.keys(chunkCellValue[Number(row)]).forEach((col) => {
-                    allCells[row][col] = chunkCellValue[Number(row)][Number(col)];
+            Object.keys(chunkCellValue).forEach((rowKey) => {
+                if (!allCells[rowKey]) allCells[rowKey] = {};
+                Object.keys(chunkCellValue[Number(rowKey)]).forEach((colKey) => {
+                    const cellData = chunkCellValue[Number(rowKey)][Number(colKey)]!;
+                    allCells[rowKey][colKey] = { v: cellData.v as string };
                 });
             });
         });
 
-        expect(allCells[0][0].v).toBe('cell_0_0');
-        expect(allCells[5][5].v).toBe('cell_5_5');
-        expect(allCells[10][10].v).toBe('cell_10_10');
+        expect(allCells['0']['0'].v).toBe('cell_0_0');
+        expect(allCells['5']['5'].v).toBe('cell_5_5');
+        expect(allCells['10']['10'].v).toBe('cell_10_10');
     });
 
     it('should handle custom options correctly', () => {
-        const cellValue: any = {};
+        const cellValue: Record<number, Record<number, { v: string }>> = {};
         // Create 100 cells (100 rows x 1 col)
         for (let row = 0; row < 100; row++) {
             cellValue[row] = { 0: { v: `cell_${row}_0` } };
         }
 
-        const mutation: IMutationInfo = {
+        const mutation: IMutationInfo<ISetRangeValuesMutationParams> = {
             id: SetRangeValuesMutation.id,
             params: { unitId: '1', subUnitId: '1', cellValue },
         };
 
         // With 1 col and maxCellsPerChunk=25, each chunk should have 25 rows
-        const result = spilitLargeSetRangeValuesMutations(mutation as any, {
+        const result = spilitLargeSetRangeValuesMutations(mutation, {
             threshold: 50,
             maxCellsPerChunk: 25,
         });

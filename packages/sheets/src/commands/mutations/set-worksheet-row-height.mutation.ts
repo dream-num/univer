@@ -15,16 +15,14 @@
  */
 
 import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Worksheet } from '@univerjs/core';
-import type { PackedNumberMap } from '../utils/pack-number-map';
 import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
-import { packNumberMap, unpackNumberMap } from '../utils/pack-number-map';
 
 export interface ISetWorksheetRowHeightMutationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-    rowHeight: number | IObjectArrayPrimitiveType<Nullable<number>> | { compress: true; data: PackedNumberMap };
+    rowHeight: number | IObjectArrayPrimitiveType<Nullable<number>>;
 }
 
 export interface ISetWorksheetRowIsAutoHeightMutationParams {
@@ -59,7 +57,7 @@ export const SetWorksheetRowHeightMutationFactory = (
         unitId,
         subUnitId,
         ranges,
-        rowHeight: { compress: true, data: packNumberMap(rowHeight) },
+        rowHeight,
     };
 };
 
@@ -125,12 +123,6 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
                 if (typeof rowHeight === 'number') {
                     manager.setRowHeight(rowIndex, rowHeight);
-                } else if (rowHeight && typeof rowHeight === 'object' && 'compress' in rowHeight) {
-                    const { data } = rowHeight;
-                    const map = unpackNumberMap(data);
-                    if (Tools.isDefine(map[rowIndex])) {
-                        manager.setRowHeight(rowIndex, map[rowIndex]);
-                    }
                 } else if (Tools.isDefine(rowHeight[rowIndex])) {
                     manager.setRowHeight(rowIndex, rowHeight[rowIndex] as number);
                 }

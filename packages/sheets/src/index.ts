@@ -317,7 +317,6 @@ export { handleDeleteRangeMutation } from './commands/utils/handle-range-mutatio
 export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/utils/handle-range-mutation';
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
-export { type IntervalValue, type PackedNumberMap, packNumberMap, unpackNumberMap } from './commands/utils/pack-number-map';
 export { getSelectionsService } from './commands/utils/selection-command-util';
 export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';

@@ -71,7 +71,12 @@ export class LexerTreeBuilder extends Disposable {
 
     private _upLevel = 0;
 
-    private _segment = '';
+    // 当前正在解析的公式源字符串
+    private _formulaSource: string = '';
+
+    // segment 不再保存字符串，只保存 [start, end] 在 _formulaSource 中的区间
+    private _segmentStart: number = -1;
+    private _segmentEnd: number = -1;
 
     private _bracketState: bracketType[] = []; // ()
 
@@ -1030,8 +1035,65 @@ export class LexerTreeBuilder extends Disposable {
         this._currentLexerNode = new LexerNode();
     }
 
-    private _resetSegment() {
-        this._segment = '';
+    private _startSegmentIfNeeded(pos: number) {
+        if (this._segmentStart === -1) {
+            this._segmentStart = pos;
+        }
+        this._segmentEnd = pos;
+    }
+
+    private _appendCharToSegment(pos: number) {
+        // 对于逐字符前进的扫描，只要更新 end 即可
+        if (this._segmentStart === -1) {
+            this._segmentStart = pos;
+        }
+        this._segmentEnd = pos;
+    }
+
+    private _resetSegmentPos() {
+        this._segmentStart = -1;
+        this._segmentEnd = -1;
+    }
+
+    private _segmentIsEmpty(): boolean {
+        return this._segmentStart === -1 || this._segmentStart > this._segmentEnd;
+    }
+
+    // 需要真的取出当前 segment 内容时才 slice
+    private _getSegmentRaw(): string {
+        if (this._segmentIsEmpty()) {
+            return '';
+        }
+        return this._formulaSource.slice(this._segmentStart, this._segmentEnd + 1);
+    }
+
+    // trim 后的子区间，尽量少造新字符串
+    private _getSegmentTrimInfo(): { text: string; start: number; end: number } {
+        if (this._segmentIsEmpty()) {
+            return { text: '', start: -1, end: -1 };
+        }
+        let s = this._segmentStart;
+        let e = this._segmentEnd;
+        const src = this._formulaSource;
+
+        while (s <= e && src.charCodeAt(s) === 32 /* ' ' */) s++;
+        while (e >= s && src.charCodeAt(e) === 32 /* ' ' */) e--;
+
+        if (s > e) {
+            return { text: '', start: -1, end: -1 };
+        }
+
+        return {
+            text: src.slice(s, e + 1),
+            start: s,
+            end: e,
+        };
+    }
+
+    // 原来的 this._segment.trim().length
+    private _segmentCount(): number {
+        const { text } = this._getSegmentTrimInfo();
+        return text.length;
     }
 
     private _openBracket(type: bracketType = bracketType.NORMAL) {
@@ -1189,14 +1251,6 @@ export class LexerTreeBuilder extends Disposable {
         return state;
     }
 
-    private _segmentCount() {
-        return this._segment.trim().length;
-    }
-
-    private _pushSegment(value: string) {
-        this._segment += value;
-    }
-
     private _pushNodeToChildren(valueRaw: LexerNode | string, isUnshift = false) {
         let value = valueRaw;
         if (value !== '') {
@@ -1253,9 +1307,9 @@ export class LexerTreeBuilder extends Disposable {
      * =+
      * =sum(A1+)
      */
-    private _formulaErrorLastTokenCheck(formulaStringArray: string[], indexRaw: number) {
-        const lastToken = this._findPreviousToken(formulaStringArray, indexRaw) || '';
-        const isFirstCheck = formulaStringArray.length - 1 === indexRaw;
+    private _formulaErrorLastTokenCheck(indexRaw: number, lastNonSpaceChar: string) {
+        const lastToken = lastNonSpaceChar || '';
+        const isFirstCheck = this._formulaSource.length - 1 === indexRaw;
         if (!isFirstCheck && this._isOperatorToken(lastToken)) {
             return true;
         }
@@ -1265,7 +1319,7 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         if (SUFFIX_TOKEN_SET.has(lastToken)) {
-            const lastTwoToken = this._findSecondLastNonSpaceToken(formulaStringArray, indexRaw);
+            const lastTwoToken = this._findSecondLastNonSpaceToken(this._formulaSource, indexRaw);
 
             if (lastTwoToken == null || isTokenCannotPrecedeSuffixToken(lastTwoToken)) {
                 return true;
@@ -1275,18 +1329,7 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _findPreviousToken(data: string[], indexRaw: number) {
-        let index = indexRaw;
-        while (index >= 0) {
-            const token = data[index];
-            if (token !== ' ') {
-                return token;
-            }
-            index--;
-        }
-    }
-
-    private _findSecondLastNonSpaceToken(data: string[], indexRaw: number): string | null {
+    private _findSecondLastNonSpaceToken(data: string, indexRaw: number): string | null {
         let index = indexRaw;
         let nonSpaceTokenCount = 0;
         while (index >= 0) {
@@ -1302,10 +1345,10 @@ export class LexerTreeBuilder extends Disposable {
         return null;
     }
 
-    private _findNextToken(data: string[], indexRaw: number) {
+    private _findNextToken(indexRaw: number) {
         let index = indexRaw;
         while (index >= 0) {
-            const token = data[index];
+            const token = this._formulaSource[index];
             if (token !== ' ') {
                 return token;
             }
@@ -1358,7 +1401,9 @@ export class LexerTreeBuilder extends Disposable {
 
         this._upLevel = 0;
 
-        this._segment = '';
+        this._formulaSource = '';
+
+        this._resetSegmentPos();
 
         this._bracketState = []; // ()
 
@@ -1399,16 +1444,16 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _checkSimilarErrorToken(currentString: string, curRow: number, formulaStringArray: string[]): boolean {
+    private _checkSimilarErrorToken(currentString: string, curRow: number): boolean {
         let cur = curRow;
         if (currentString !== suffixToken.POUND) {
             return true;
         }
 
-        let currentText = formulaStringArray[++cur];
+        let currentText = this._formulaSource[++cur];
 
         while (currentText === ' ') {
-            currentText = formulaStringArray[++cur];
+            currentText = this._formulaSource[++cur];
         }
 
         if (isFormulaLexerToken(currentText)) {
@@ -1418,8 +1463,8 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _checkIfErrorObject(cur: number, formulaStringArray: string[]): boolean {
-        const errorType = this._findErrorObject(cur, formulaStringArray);
+    private _checkIfErrorObject(cur: number): boolean {
+        const errorType = this._findErrorObject(cur, this._formulaSource);
         if (!errorType) {
             return false;
         }
@@ -1427,11 +1472,11 @@ export class LexerTreeBuilder extends Disposable {
         return true;
     }
 
-    private _findErrorObject(curRaw: number, formulaStringArray: string[]): Nullable<string> {
+    private _findErrorObject(curRaw: number, formulaString: string): Nullable<string> {
         for (let i = 0; i < ERROR_TYPE_COUNT_ARRAY.length; i++) {
             const errorTypeCount = ERROR_TYPE_COUNT_ARRAY[i];
 
-            const errorType = formulaStringArray.slice(curRaw, curRaw + errorTypeCount).join('').toUpperCase();
+            const errorType = formulaString.slice(curRaw, curRaw + errorTypeCount).toUpperCase();
 
             if (ERROR_TYPE_SET.has(errorType as ErrorType)) {
                 return errorType;
@@ -1449,21 +1494,28 @@ export class LexerTreeBuilder extends Disposable {
             formulaString = formulaString.substring(1);
         }
 
-        const formulaChars = formulaString.split('');
-        const charsCount = formulaChars.length;
-
         this._resetTemp();
 
-        if (this._formulaErrorLastTokenCheck(formulaChars, charsCount - 1)) {
-            this._formalErrorOccurred();
-        }
+        this._formulaSource = formulaString;
+        const charsCount = formulaString.length;
+
+        // 新增：记录上一个非空白字符，替代 _findPreviousToken 的 O(n) 扫描
+        let lastNonSpaceChar: string = '';
+        // 记录上一个非空白字符的 index，用于需要 index 的地方（如果你后面对 index 有使用需求）
+        let lastNonSpaceIndex: number = -1;
 
         let cur = 0;
         while (cur < charsCount) {
-            const currentString = formulaChars[cur];
+            const currentString = this._formulaSource[cur];
 
             if (matchCurrentNodeIndex === cur) {
                 return [this._currentLexerNode, currentString];
+            }
+
+            // 维护 lastNonSpaceChar
+            if (currentString !== ' ') {
+                lastNonSpaceChar = currentString;
+                lastNonSpaceIndex = cur;
             }
 
             if (currentString === suffixToken.POUND &&
@@ -1471,20 +1523,20 @@ export class LexerTreeBuilder extends Disposable {
                 this.isDoubleQuotationClose() &&
                 this.isBracesClose() &&
                 this.isSquareBracketClose() &&
-                this._checkIfErrorObject(cur, formulaChars)
+                this._checkIfErrorObject(cur)
             ) {
-                const errorType = this._findErrorObject(cur, formulaChars);
+                const errorType = this._findErrorObject(cur, this._formulaSource);
                 if (errorType == null) {
                     return ErrorType.VALUE;
                 }
                 this._pushNodeToChildren(errorType);
                 for (let i = 0; i < errorType.length; i++) {
-                    const curStr = formulaChars[cur];
-                    this._pushSegment(curStr);
+                    const curStr = this._formulaSource[cur];
+                    this._appendCharToSegment(cur);
                     this._addSequenceArray(sequenceArray, curStr, cur);
                     cur++;
                 }
-                this._resetSegment();
+                this._resetSegmentPos();
                 // this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
                 // cur += errorType.length;
                 continue;
@@ -1495,14 +1547,14 @@ export class LexerTreeBuilder extends Disposable {
             ) {
                 if (this._segmentCount() > 0 || this.isLambdaOpen()) {
                     if (this.isLambdaClose()) {
-                        this._newAndPushCurrentLexerNode(this._segment, cur);
-                        this._resetSegment();
+                        this._newAndPushCurrentLexerNode(this._getSegmentRaw(), cur);
+                        this._resetSegmentPos();
                     }
 
                     this._openBracket(bracketType.FUNCTION);
                     this._closeLambda();
 
-                    const nextCurrentString = formulaChars[cur + 1];
+                    const nextCurrentString = this._formulaSource[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.CLOSE_BRACKET) {
                         // when function has not parameter, return to parentNode , e.g. row()
                         if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
@@ -1526,25 +1578,25 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     this._pushNodeToChildren(currentString);
                     this._openBracket(bracketType.NORMAL);
-                    this._resetSegment();
+                    this._resetSegmentPos();
                 }
             } else if (
                 currentString === matchToken.CLOSE_BRACKET &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
-                if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
+                if (this._formulaErrorLastTokenCheck(cur - 1, lastNonSpaceChar)) {
                     this._formalErrorOccurred();
                 }
 
-                this._pushNodeToChildren(this._segment);
-                this._resetSegment();
+                this._pushNodeToChildren(this._getSegmentRaw());
+                this._resetSegmentPos();
                 const currentBracket = this._getCurrentBracket();
                 if (currentBracket === bracketType.NORMAL) {
                     this._pushNodeToChildren(currentString);
                 } else if (currentBracket === bracketType.FUNCTION) {
                     // function close
-                    const nextCurrentString = formulaChars[cur + 1];
+                    const nextCurrentString = this._formulaSource[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.OPEN_BRACKET) {
                         // lambda handler, e.g. =lambda(x,y, x*y*x)(1,2)
                         if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
@@ -1567,7 +1619,7 @@ export class LexerTreeBuilder extends Disposable {
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
-                this._pushSegment(currentString);
+                this._appendCharToSegment(cur);
                 this._openBraces();
 
                 if (!this._formulaSpellCheck()) {
@@ -1578,19 +1630,19 @@ export class LexerTreeBuilder extends Disposable {
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
-                this._pushSegment(currentString);
-                this._pushNodeToChildren(this._segment);
-                this._resetSegment();
+                this._appendCharToSegment(cur);
+                this._pushNodeToChildren(this._getSegmentRaw());
+                this._resetSegmentPos();
                 this._closeBraces();
             } else if (
                 currentString === matchToken.OPEN_SQUARE_BRACKET &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
-                if (this._segment.length > 0) {
+                if (this._segmentCount() > 0) {
                     this._openTableBracket();
                 }
-                this._pushSegment(currentString);
+                this._appendCharToSegment(cur);
                 this._openSquareBracket();
             } else if (
                 currentString === matchToken.CLOSE_SQUARE_BRACKET &&
@@ -1599,14 +1651,14 @@ export class LexerTreeBuilder extends Disposable {
             ) {
                 this._closeSquareBracket();
                 if (this.isSquareBracketClose()) {
-                    this._pushSegment(currentString);
+                    this._appendCharToSegment(cur);
                     if (this._isTableBracket()) {
-                        this._pushNodeToChildren(this._segment);
-                        this._resetSegment();
+                        this._pushNodeToChildren(this._getSegmentRaw());
+                        this._resetSegmentPos();
                     }
                     this._closeTableBracket();
                 } else {
-                    this._pushSegment(currentString);
+                    this._appendCharToSegment(cur);
                 }
             } else if (
                 currentString === matchToken.DOUBLE_QUOTATION &&
@@ -1616,7 +1668,7 @@ export class LexerTreeBuilder extends Disposable {
                 if (this.isDoubleQuotationClose()) {
                     this._openDoubleQuotation();
                 } else {
-                    const nextCurrentString = formulaChars[cur + 1];
+                    const nextCurrentString = this._formulaSource[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.DOUBLE_QUOTATION) {
                         cur++;
                     } else {
@@ -1624,7 +1676,7 @@ export class LexerTreeBuilder extends Disposable {
                     }
                 }
                 // this._pushNodeToChildren(currentString);
-                this._pushSegment(currentString);
+                this._appendCharToSegment(cur);
             } else if (currentString === matchToken.SINGLE_QUOTATION && this.isDoubleQuotationClose()) {
                 if (this.isSingleQuotationClose()) {
                     this._openSingleQuotation();
@@ -1633,20 +1685,20 @@ export class LexerTreeBuilder extends Disposable {
                     // Process the space before the double single quotes of sheet name.
                     // e.g. = 'dv-test'!C27
                     if (this._segmentCount() === 0) {
-                        this._resetSegment();
+                        this._resetSegmentPos();
                     }
                 } else {
-                    const nextCurrentString = formulaChars[cur + 1];
+                    const nextCurrentString = this._formulaSource[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
                         // handle 'Sheet'1'!A1
 
                         // Add the first single quotation
-                        this._pushSegment(currentString);
+                        this._appendCharToSegment(cur);
                         this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
 
                         // Add the second single quotation
-                        this._pushSegment(nextCurrentString);
+                        this._appendCharToSegment(cur + 1);
                         this._addSequenceArray(sequenceArray, nextCurrentString, cur);
                         cur++;
                         continue;
@@ -1655,7 +1707,7 @@ export class LexerTreeBuilder extends Disposable {
                     }
                 }
                 // this._pushNodeToChildren(currentString);
-                this._pushSegment(currentString);
+                this._appendCharToSegment(cur);
             } else if (
                 currentString === matchToken.COMMA &&
                 this.isSingleQuotationClose() &&
@@ -1663,7 +1715,7 @@ export class LexerTreeBuilder extends Disposable {
                 this.isBracesClose() &&
                 this.isSquareBracketClose()
             ) {
-                if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
+                if (this._formulaErrorLastTokenCheck(cur - 1, lastNonSpaceChar)) {
                     this._formalErrorOccurred();
                 }
 
@@ -1674,8 +1726,8 @@ export class LexerTreeBuilder extends Disposable {
                  * [currentBracket == null] is for the situation where [=A1:B1, B5:A10] occurs
                  */
                 if (currentBracket === bracketType.FUNCTION || currentBracket == null) {
-                    this._pushNodeToChildren(this._segment);
-                    this._resetSegment();
+                    this._pushNodeToChildren(this._getSegmentRaw());
+                    this._resetSegmentPos();
                     if (
                         !this._setParentCurrentLexerNode() &&
                         cur !== charsCount - 1 &&
@@ -1711,8 +1763,8 @@ export class LexerTreeBuilder extends Disposable {
                     }
 
                     this._changeCurrentBracket(bracketType.FUNCTION);
-                    this._pushNodeToChildren(this._segment);
-                    this._resetSegment();
+                    this._pushNodeToChildren(this._getSegmentRaw());
+                    this._resetSegmentPos();
                     this._currentLexerNode = cubeNode;
                     this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                 }
@@ -1744,7 +1796,7 @@ export class LexerTreeBuilder extends Disposable {
                     let subLexerNode_minus: Nullable<LexerNode>;
                     let subLexerNode_at: Nullable<LexerNode>;
                     let sliceLength = 0;
-                    const segmentTrim = this._segment.trim();
+                    let segmentTrim = this._getSegmentRaw().trim();
                     const lastString = segmentTrim[0];
                     const twoLastString = segmentTrim[1];
 
@@ -1769,7 +1821,7 @@ export class LexerTreeBuilder extends Disposable {
                     }
 
                     if (sliceLength > 0) {
-                        this._segment = segmentTrim.slice(sliceLength);
+                        segmentTrim = segmentTrim.slice(sliceLength);
                     }
 
                     upLevel = sliceLength;
@@ -1792,11 +1844,11 @@ export class LexerTreeBuilder extends Disposable {
                     }
 
                     const subLexerNode_ref = new LexerNode();
-                    subLexerNode_ref.setToken(this._segment);
+                    subLexerNode_ref.setToken(segmentTrim);
                     subLexerNode_ref.setParent(subLexerNode_left);
 
                     subLexerNode_left.getChildren().push(subLexerNode_ref);
-                    this._resetSegment();
+                    this._resetSegmentPos();
                 } else {
                     // e.g. indirect("A5"):B10
                     const lastChildNode = this._getLastChildCurrentLexerNode();
@@ -1810,13 +1862,13 @@ export class LexerTreeBuilder extends Disposable {
                 this._openColon(upLevel);
             } else if (
                 SUFFIX_TOKEN_SET.has(currentString) &&
-                this._checkSimilarErrorToken(currentString, cur, formulaChars) &&
+                this._checkSimilarErrorToken(currentString, cur) &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
                 this.isSquareBracketClose() &&
                 this.isBracesClose()
             ) {
-                this._pushNodeToChildren(this._segment);
+                this._pushNodeToChildren(this._getSegmentRaw());
 
                 // this._pushNodeToChildren(currentString);
 
@@ -1834,7 +1886,7 @@ export class LexerTreeBuilder extends Disposable {
                 this._pushNodeToChildren(subLexerNode);
                 subLexerNode.setParent(this._currentLexerNode);
 
-                this._resetSegment();
+                this._resetSegmentPos();
             } else if (
                 OPERATOR_TOKEN_SET.has(currentString) &&
                 this.isSingleQuotationClose() &&
@@ -1842,54 +1894,56 @@ export class LexerTreeBuilder extends Disposable {
                 this.isSquareBracketClose() &&
                 this.isBracesClose()
             ) {
-                let trimSegment = this._segment.trim();
+                let trimSegment = this._getSegmentRaw().trim();
 
                 if (currentString === operatorToken.MINUS && (trimSegment === '')) {
                     // negative number
-                    const prevString = this._findPreviousToken(formulaChars, cur - 1) || '';
-                    const nextString = this._findNextToken(formulaChars, cur + 1) || '';
+                    const prevString = lastNonSpaceChar || '';
+                    const nextString = this._findNextToken(cur + 1) || '';
                     if (this._unexpectedEndingTokenExcludeOperator(prevString) && this._isOperatorToken(nextString)) {
                         this._pushNodeToChildren('0');
                         this._pushNodeToChildren(operatorToken.MINUS);
                         this._addSequenceArray(sequenceArray, currentString, cur);
-                        this._resetSegment();
+                        this._resetSegmentPos();
                         cur++;
                         continue;
                     } else if (this._unexpectedEndingToken(prevString)) {
                         if (nextString === operatorToken.PLUS) {
-                            this._pushSegment(operatorToken.MINUS);
+                            // this._appendCharToSegment(cur);
+                            this._pushNodeToChildren(operatorToken.MINUS);
                             // this._pushSegment(operatorToken.PLUS);
                             this._addSequenceArray(sequenceArray, currentString, cur);
                             this._addSequenceArray(sequenceArray, operatorToken.PLUS, cur + 1);
                             cur += 2;
                             continue;
                         } else {
-                            this._pushSegment(operatorToken.MINUS);
+                            // this._appendCharToSegment(cur);
+                            this._pushNodeToChildren(operatorToken.MINUS);
                             this._addSequenceArray(sequenceArray, currentString, cur);
                             cur++;
                             continue;
                         }
                     }
-                } else if (this._segment.length > 0 && this._isScientificNotation(formulaChars, cur, currentString)) {
-                    this._pushSegment(currentString);
+                } else if (this._segmentCount() > 0 && this._isScientificNotation(cur, currentString)) {
+                    this._appendCharToSegment(cur);
 
                     this._addSequenceArray(sequenceArray, currentString, cur);
 
                     cur++;
                     continue;
-                } else if (this._segment.length > 0 && trimSegment === '') {
-                    trimSegment = this._segment;
+                } else if (this._segmentCount() > 0 && trimSegment === '') {
+                    trimSegment = this._getSegmentRaw();
                 } else {
-                    this._pushNodeToChildren(this._segment);
+                    this._pushNodeToChildren(this._getSegmentRaw());
                     trimSegment = '';
                 }
 
                 if (currentString === operatorToken.LESS_THAN || currentString === operatorToken.GREATER_THAN) {
-                    const nextCurrentString = formulaChars[cur + 1];
+                    const nextCurrentString = this._formulaSource[cur + 1];
                     if (nextCurrentString && OPERATOR_TOKEN_SET.has(currentString + nextCurrentString)) {
                         this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
 
-                        this._resetSegment();
+                        this._resetSegmentPos();
                         this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
                         this._addSequenceArray(sequenceArray, nextCurrentString, cur);
@@ -1901,11 +1955,11 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     this._pushNodeToChildren(trimSegment + currentString);
                 }
-                this._resetSegment();
+                this._resetSegmentPos();
             } else {
                 // Do not push a space when the segment is empty, consuming useless spaces here.
-                if (this._segment !== '' || currentString !== ' ') {
-                    this._pushSegment(currentString);
+                if (this._getSegmentRaw() !== '' || currentString !== ' ') {
+                    this._appendCharToSegment(cur);
                 }
             }
 
@@ -1913,15 +1967,15 @@ export class LexerTreeBuilder extends Disposable {
             cur++;
         }
 
-        this._pushNodeToChildren(this._segment);
+        this._pushNodeToChildren(this._getSegmentRaw());
 
         if (this._checkErrorState()) {
             return ErrorType.VALUE;
         }
     }
 
-    private _isScientificNotation(formulaStringArray: string[], cur: number, currentString: string) {
-        const preTwoChar = formulaStringArray[cur - 2];
+    private _isScientificNotation(cur: number, currentString: string) {
+        const preTwoChar = this._formulaSource[cur - 2];
         if (preTwoChar && Number.isNaN(Number(preTwoChar))) {
             return false;
         }
@@ -1930,18 +1984,18 @@ export class LexerTreeBuilder extends Disposable {
             return false;
         }
 
-        const nextOneChar = formulaStringArray[cur + 1];
+        const nextOneChar = this._formulaSource[cur + 1];
         if (nextOneChar && Number.isNaN(Number(nextOneChar))) {
             return false;
         }
 
-        const preOneChar = formulaStringArray[cur - 1];
+        const preOneChar = this._formulaSource[cur - 1];
         return preOneChar && preOneChar.toUpperCase() === 'E';
     }
 
     private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number) {
         sequenceArray?.push({
-            segment: this._segment,
+            segment: this._getSegmentRaw(),
             currentString,
             cur,
             currentLexerNode: this._currentLexerNode,

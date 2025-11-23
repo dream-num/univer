@@ -184,31 +184,29 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         const currentConfigService = this._currentConfigService;
         const runtimeService = this._formulaRuntimeService;
 
-        const tableMap = this._getTableMap();
-        const isSuperTableDirect = tableMap?.has(tokenTrim) ?? false;
-
-        const isCellRange = regexTestSingeRange(tokenTrim);
-        const parentIsUnion = isLexerNode && this._checkParentIsUnionOperator(param as LexerNode);
-        const isRowRef = parentIsUnion && regexTestSingleRow(tokenTrim);
-        const isColRef = parentIsUnion && regexTestSingleColumn(tokenTrim);
-
         const makeRef = (type: ReferenceObjectType) =>
             new ReferenceNode(currentConfigService, runtimeService, tokenTrim, type, isPrepareMerge);
 
-        if (isSuperTableDirect) {
-            return this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, true);
-        }
-
+        const isCellRange = regexTestSingeRange(tokenTrim);
         if (isCellRange) {
             return makeRef(ReferenceObjectType.CELL);
         }
+        const parentIsUnion = isLexerNode && this._checkParentIsUnionOperator(param as LexerNode);
+        const isRowRef = parentIsUnion && regexTestSingleRow(tokenTrim);
 
         if (isRowRef) {
             return makeRef(ReferenceObjectType.ROW);
         }
+        const isColRef = parentIsUnion && regexTestSingleColumn(tokenTrim);
 
         if (isColRef) {
             return makeRef(ReferenceObjectType.COLUMN);
+        }
+
+        const tableMap = this._getTableMap();
+        const isSuperTableDirect = tableMap?.has(tokenTrim) ?? false;
+        if (isSuperTableDirect) {
+            return this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, true);
         }
 
         return this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, false);

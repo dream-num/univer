@@ -174,7 +174,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     }
 
     private _displayArrayFormulaRangeShape(matrixRange: IObjectMatrixPrimitiveType<IRange>, row: number, col: number, unitId: string, subUnitId: string, worksheet: Worksheet, cellInfo: Nullable<ICellDataForSheetInterceptor>): Nullable<ICellDataForSheetInterceptor> {
-        const sheetFormulaData = this._formulaDataModel.getSheetFormulaData(unitId, subUnitId);
+        // const sheetFormulaData = this._formulaDataModel.getSheetFormulaData(unitId, subUnitId);
 
         new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
             if (range == null) {
@@ -188,19 +188,13 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             if (row >= startRow && row <= endRow && col >= startColumn && col <= endColumn) {
                 const mainCellValue = worksheet.getCell(startRow, startColumn);
 
-                if (mainCellValue?.v === ErrorType.SPILL) {
+                if (mainCellValue?.v === ErrorType.SPILL || mainCellValue?.f == null) {
                     return;
-                }
-
-                const formulaDataItem = sheetFormulaData?.[rowIndex]?.[columnIndex];
-
-                if (formulaDataItem == null || formulaDataItem.f == null) {
-                    return true;
                 }
 
                 if (cellInfo == null) {
                     cellInfo = {
-                        f: formulaDataItem.f,
+                        f: mainCellValue.f,
                         isInArrayFormulaRange: true,
                     };
                 }

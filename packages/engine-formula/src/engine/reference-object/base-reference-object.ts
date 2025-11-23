@@ -124,7 +124,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getRangePosition() {
         const { x, y } = this.getRefOffset();
-        let { startRow, startColumn, endRow, endColumn } = moveRangeByOffset(this.getRangeData(), x, y);
+        const rangeData = this.getRangeData();
+        let { startRow, startColumn, endRow, endColumn } = moveRangeByOffset(rangeData, x, y);
 
         if (Number.isNaN(startRow)) {
             startRow = 0;
@@ -143,7 +144,6 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         return {
-            ...this.getRangeData(),
             startRow,
             endRow,
             startColumn,

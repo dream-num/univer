@@ -15,13 +15,12 @@
  */
 
 export function hashAlgorithm(str: string): number {
-    // FNV-1a 32-bit offset basis
-    let hash = 0x811C9DC5 >>> 0;
+    let hash = 0;
 
-    for (let i = 0, len = str.length; i < len; i++) {
-        hash ^= str.charCodeAt(i);
-        hash = Math.imul(hash, 0x01000193); // 16777619
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + (hash << 6) + (hash << 16) - hash;
     }
 
+    // Convert it to an unsigned 32-bit integer.
     return hash >>> 0;
 }

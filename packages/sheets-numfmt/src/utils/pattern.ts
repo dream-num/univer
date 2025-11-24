@@ -27,19 +27,24 @@ interface IPatternPreview {
 
 export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocaleTag = 'en'): IPatternPreview => {
     // in the source code of numfmt, the formatColor function will read the the partitions[3]
-    const formatColor = numfmt.formatColor(pattern, value);
-    const color = formatColor ? String(formatColor) : undefined;
-    const result = numfmt.format(pattern, value, { locale, throws: false });
-    if (value < 0) {
-        // pay attention, controllers/numfmt.controller.ts
-        // in the pattern, the negative value color may be upper case one , so if we read a color with UpperCase, we should return the color with lower case for our theme system
-        return {
-            result,
-            color,
-        };
+    try {
+        const formatColor = numfmt.formatColor(pattern, value);
+        const color = formatColor ? String(formatColor) : undefined;
+        const result = numfmt.format(pattern, value, { locale, throws: false });
+        if (value < 0) {
+            // pay attention, controllers/numfmt.controller.ts
+            // in the pattern, the negative value color may be upper case one , so if we read a color with UpperCase, we should return the color with lower case for our theme system
+            return {
+                result,
+                color,
+            };
+        }
+    } catch (e) {
+        console.warn('getPatternPreview error:', pattern, e);
     }
+
     return {
-        result,
+        result: String(value),
     };
 };
 

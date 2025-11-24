@@ -44,7 +44,7 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * const ruleId = rules?.[0]?.id;
      * console.log(ruleId);
@@ -60,7 +60,7 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * const ranges = rules?.[0]?.ranges;
      * console.log(ranges);
@@ -76,7 +76,7 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * const options = rules?.[0]?.options;
      * console.log(options);
@@ -93,7 +93,7 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * const rule = rules?.[0];
      * await rule?.updateRanges([worksheet.getRange('A1:C3')]);
@@ -150,7 +150,7 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * const rule = rules?.[0];
      * await rule?.updateOptions({ name: 'New Protection Name', allowEdit: true });
@@ -188,7 +188,7 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
      * @example
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.permission();
+     * const permission = worksheet?.getWorksheetPermission();
      * const rules = await permission?.listRangeProtectionRules();
      * const rule = rules?.[0];
      * await rule?.remove();

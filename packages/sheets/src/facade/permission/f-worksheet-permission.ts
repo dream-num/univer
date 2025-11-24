@@ -517,7 +517,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
      * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.setPoint(WorksheetPermissionPoint.InsertRow, false);
+     * await permission?.setPoint(univerAPI.Enum.WorksheetPermissionPoint.InsertRow, false);
      * ```
      */
     async setPoint(point: WorksheetPermissionPoint, value: boolean): Promise<void> {
@@ -553,7 +553,7 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * ```ts
      * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
      * const permission = worksheet?.getWorksheetPermission();
-     * const canInsertRow = permission?.getPoint(WorksheetPermissionPoint.InsertRow);
+     * const canInsertRow = permission?.getPoint(univerAPI.Enum.WorksheetPermissionPoint.InsertRow);
      * console.log(canInsertRow);
      * ```
      */
@@ -595,8 +595,8 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * await permission?.applyConfig({
      *   mode: 'readOnly',
      *   points: {
-     *     [WorksheetPermissionPoint.View]: true,
-     *     [WorksheetPermissionPoint.Edit]: false
+     *     [univerAPI.Enum.WorksheetPermissionPoint.View]: true,
+     *     [univerAPI.Enum.WorksheetPermissionPoint.Edit]: false
      *   }
      * });
      * ```
@@ -637,11 +637,11 @@ export class FWorksheetPermission implements IWorksheetPermission {
      * const rules = await permission?.protectRanges([
      *   {
      *     ranges: [worksheet.getRange('A1:B2')],
-     *     options: { name: 'Protected Area 1', allowEdit: false, allowView: true }
+     *     options: { name: 'Protected Area 1', allowEdit: false, allowViewByOthers: true }
      *   },
      *   {
      *     ranges: [worksheet.getRange('C3:D4')],
-     *     options: { name: 'Protected Area 2', allowEdit: true, allowView: false }
+     *     options: { name: 'Protected Area 2', allowEdit: true, allowViewByOthers: false }
      *   }
      * ]);
      * console.log(rules);

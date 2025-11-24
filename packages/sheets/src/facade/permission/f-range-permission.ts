@@ -208,7 +208,7 @@ export class FRangePermission implements IRangePermission {
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
      * const permission = range?.getRangePermission();
-     * const canEdit = permission?.getPoint(RangePermissionPoint.Edit);
+     * const canEdit = permission?.getPoint(univerAPI.Enum.RangePermissionPoint.Edit);
      * console.log(canEdit);
      * ```
      */
@@ -359,8 +359,8 @@ export class FRangePermission implements IRangePermission {
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
      * const permission = range?.getRangePermission();
      * // Can set permission points without calling protect() first (local-only mode)
-     * await permission?.setPoint(RangePermissionPoint.Edit, false); // Disable edit
-     * await permission?.setPoint(RangePermissionPoint.View, true);  // Enable view
+     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false); // Disable edit
+     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);  // Enable view
      * ```
      */
     async setPoint(point: RangePermissionPoint, value: boolean): Promise<void> {

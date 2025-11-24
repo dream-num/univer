@@ -180,11 +180,12 @@ export function mergeSetRangeValues(mutations: IMutationInfo[]) {
     return newMutations;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function spilitLargeSetRangeValuesMutations(
     mutation: IMutationInfo<ISetRangeValuesMutationParams>,
-    options: { maxCellsPerChunk?: number; threshold?: number } = {}
+    options: { maxCellsPerChunk?: number; threshold?: number; maxChunks?: number } = {}
 ): IMutationInfo<ISetRangeValuesMutationParams>[] {
-    const { maxCellsPerChunk = 2500, threshold = 6000 } = options;
+    const { maxCellsPerChunk = 2500, threshold = 6000, maxChunks = 10 } = options;
 
     if (mutation.id !== SetRangeValuesMutation.id) {
         return [mutation];
@@ -220,7 +221,15 @@ export function spilitLargeSetRangeValuesMutations(
 
     // 根据列数计算每个块的行数
     const colCount = maxCol - minCol + 1;
-    const rowsPerChunk = Math.max(1, Math.floor(maxCellsPerChunk / colCount));
+    let rowsPerChunk = Math.max(1, Math.floor(maxCellsPerChunk / colCount));
+
+    // 确保不会拆分成超过 maxChunks 个块
+    const totalRows = maxRow - minRow + 1;
+    const estimatedChunks = Math.ceil(totalRows / rowsPerChunk);
+    if (estimatedChunks > maxChunks) {
+        // 重新计算 rowsPerChunk，使得拆分后的块数不超过 maxChunks
+        rowsPerChunk = Math.ceil(totalRows / maxChunks);
+    }
 
     // 按照计算出的行数进行拆分
     for (let rowStart = minRow; rowStart <= maxRow; rowStart += rowsPerChunk) {

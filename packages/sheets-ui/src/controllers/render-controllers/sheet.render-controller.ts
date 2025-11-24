@@ -449,6 +449,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _markUnitDirty(command: ICommandInfo) {
+        if (command.id.substring(0, 3) === 'doc') {
+            return;
+        }
+
         const { mainComponent: spreadsheet, scene } = this._context;
 
         if (command.id === SetFormulaCalculationNotificationMutation.id) {

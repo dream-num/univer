@@ -39,6 +39,9 @@ export const getPatternPreview = (pattern: string, value: number, locale: INumfm
                 color,
             };
         }
+        return {
+            result,
+        };
     } catch (e) {
         console.warn('getPatternPreview error:', pattern, e);
     }

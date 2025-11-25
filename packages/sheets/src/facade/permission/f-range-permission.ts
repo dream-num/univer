@@ -20,8 +20,6 @@ import type { Observable, Subscription } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type {
-    IRangeProtectionRule as IFRangeProtectionRule,
-    IRangePermission,
     IRangeProtectionOptions,
     RangePermissionSnapshot,
 } from './permission-types';
@@ -41,7 +39,7 @@ import { RangePermissionPoint } from './permission-types';
  *
  * @hideconstructor
  */
-export class FRangePermission implements IRangePermission {
+export class FRangePermission {
     private readonly _permissionSubject: BehaviorSubject<RangePermissionSnapshot>;
     private readonly _subscriptions: Subscription[] = [];
     private readonly _fPermission: FPermission;
@@ -58,7 +56,7 @@ export class FRangePermission implements IRangePermission {
      */
     readonly protectionChange$: Observable<{
         type: 'protected';
-        rule: IFRangeProtectionRule;
+        rule: FRangeProtectionRule;
     } | {
         type: 'unprotected';
         ruleId: string;
@@ -118,7 +116,7 @@ export class FRangePermission implements IRangePermission {
      */
     private _createProtectionChangeStream(): Observable<{
         type: 'protected';
-        rule: IFRangeProtectionRule;
+        rule: FRangeProtectionRule;
     } | {
         type: 'unprotected';
         ruleId: string;
@@ -178,7 +176,7 @@ export class FRangePermission implements IRangePermission {
     /**
      * Create a Facade rule from internal rule
      */
-    private _createFacadeRule(rule: IRangeProtectionRule): IFRangeProtectionRule {
+    private _createFacadeRule(rule: IRangeProtectionRule): FRangeProtectionRule {
         const ranges = rule.ranges.map((range) =>
             this._worksheet.getRange(
                 range.startRow,
@@ -401,7 +399,7 @@ export class FRangePermission implements IRangePermission {
     /**
      * Protect the current range.
      * @param {IRangeProtectionOptions} options Protection options.
-     * @returns {Promise<IFRangeProtectionRule>} The created protection rule.
+     * @returns {Promise<FRangeProtectionRule>} The created protection rule.
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
@@ -416,7 +414,7 @@ export class FRangePermission implements IRangePermission {
      * console.log(rule);
      * ```
      */
-    async protect(options?: IRangeProtectionOptions): Promise<IFRangeProtectionRule> {
+    async protect(options?: IRangeProtectionOptions): Promise<FRangeProtectionRule> {
         if (this.isProtected()) {
             throw new Error('Range is already protected');
         }
@@ -542,7 +540,7 @@ export class FRangePermission implements IRangePermission {
 
     /**
      * List all protection rules.
-     * @returns {Promise<IFRangeProtectionRule[]>} Array of protection rules.
+     * @returns {Promise<FRangeProtectionRule[]>} Array of protection rules.
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
@@ -551,7 +549,7 @@ export class FRangePermission implements IRangePermission {
      * console.log(rules);
      * ```
      */
-    async listRules(): Promise<IFRangeProtectionRule[]> {
+    async listRules(): Promise<FRangeProtectionRule[]> {
         return await this._buildProtectionRulesAsync();
     }
 

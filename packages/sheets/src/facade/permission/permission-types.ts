@@ -16,7 +16,6 @@
 
 import type { IUser } from '@univerjs/protocol';
 import type { Observable } from 'rxjs';
-import type { FRange } from '../f-range';
 
 /**
  * ========================
@@ -244,27 +243,6 @@ export interface IRangeProtectionOptions {
 }
 
 /**
- * Range protection rule Facade
- * Encapsulates internal permissionId / ruleId
- */
-export interface IRangeProtectionRule {
-    /** Internal rule id, for debugging/logging, generally not directly used by callers */
-    readonly id: string;
-
-    /** List of ranges covered by this rule */
-    readonly ranges: FRange[];
-
-    /** Current rule configuration */
-    readonly options: IRangeProtectionOptions;
-
-    /** Update protected ranges */
-    updateRanges(ranges: FRange[]): Promise<void>;
-
-    /** Delete current protection rule */
-    remove(): Promise<void>;
-}
-
-/**
  * Cell permission debug rule information
  */
 export interface ICellPermissionDebugRuleInfo {
@@ -272,16 +250,6 @@ export interface ICellPermissionDebugRuleInfo {
     /** Range reference string list, e.g., ['A1:B10', 'D1:D5'] */
     rangeRefs: string[];
     options: IRangeProtectionOptions;
-}
-
-/**
- * Cell permission debug information
- */
-export interface ICellPermissionDebugInfo {
-    row: number;
-    col: number;
-    /** List of protection rules that apply */
-    hitRules: ICellPermissionDebugRuleInfo[];
 }
 
 /**
@@ -403,208 +371,12 @@ export interface IWorksheetPermissionConfig {
 }
 
 /**
- * Worksheet-level permission Facade interface
- */
-export interface IWorksheetPermission {
-    /**
-     * Create worksheet protection (must be called before setting permission points)
-     * This creates the base permission structure with collaborators support
-     */
-    protect(options?: IWorksheetProtectionOptions): Promise<string>;
-
-    /**
-     * Remove worksheet protection
-     * This removes the protection rule and resets all permission points to allowed
-     */
-    unprotect(): Promise<void>;
-
-    /**
-     * Check if worksheet is currently protected
-     */
-    isProtected(): boolean;
-
-    /**
-     * Set worksheet overall mode:
-     * - 'readOnly'       → Lock write-related points
-     * - 'filterOnly'     → Only enable Filter/Sort, close other write-related points
-     * - 'commentOnly'    → Close write, keep comment
-     * - 'editable'       → Most write-related points enabled
-     */
-    setMode(mode: WorksheetMode): Promise<void>;
-
-    /** Shortcut: Read-only */
-    setReadOnly(): Promise<void>;
-
-    /** Shortcut: Editable */
-    setEditable(): Promise<void>;
-
-    /** Whether current user can "overall" edit this sheet (not considering local range protection) */
-    canEdit(): boolean;
-
-    /**
-     * Cell-level high-level check (combines sheet-level & range-level rules)
-     */
-    canEditCell(row: number, col: number): boolean;
-    canViewCell(row: number, col: number): boolean;
-
-    /**
-     * Point operations (low-level)
-     */
-    setPoint(point: WorksheetPermissionPoint, value: boolean): Promise<void>;
-    getPoint(point: WorksheetPermissionPoint): boolean;
-    getSnapshot(): WorksheetPermissionSnapshot;
-
-    /**
-     * Batch apply permission configuration (for "configuration-driven" scenarios)
-     * Internally uses Command to ensure undo/redo
-     */
-    applyConfig(config: IWorksheetPermissionConfig): Promise<void>;
-
-    /**
-     * Range protection management
-     */
-
-    /** Batch create multiple range protection rules (one-time operation, better performance) */
-    protectRanges(configs: Array<{
-        ranges: FRange[];
-        options?: IRangeProtectionOptions;
-    }>): Promise<IRangeProtectionRule[]>;
-
-    /** Batch delete multiple protection rules */
-    unprotectRules(ruleIds: string[]): Promise<void>;
-
-    /**
-     * List all range protection rules on current sheet
-     */
-    listRangeProtectionRules(): Promise<IRangeProtectionRule[]>;
-
-    /**
-     * ========================
-     * RxJS Observable Reactive Interface
-     * ========================
-     */
-
-    /**
-     * Permission snapshot change stream (BehaviorSubject, immediately provides current state on subscription)
-     * Triggers when any permission point changes
-     */
-    readonly permission$: Observable<WorksheetPermissionSnapshot>;
-
-    /**
-     * Single permission point change stream
-     * For scenarios that only care about specific permission point changes
-     */
-    readonly pointChange$: Observable<{
-        point: WorksheetPermissionPoint;
-        value: boolean;
-        oldValue: boolean;
-    }>;
-
-    /**
-     * Range protection rule change stream (add, delete, update)
-     */
-    readonly rangeProtectionChange$: Observable<{
-        type: 'add' | 'update' | 'delete';
-        rules: IRangeProtectionRule[];
-    }>;
-
-    /**
-     * Current all range protection rules list stream (BehaviorSubject)
-     * Immediately provides current rule list on subscription, auto-updates when rules change
-     */
-    readonly rangeProtectionRules$: Observable<IRangeProtectionRule[]>;
-
-    /**
-     * Compatibility method: Simplified subscription (for users unfamiliar with RxJS)
-     * Internally implemented based on permission$ Observable
-     */
-    subscribe(listener: (snapshot: WorksheetPermissionSnapshot) => void): UnsubscribeFn;
-}
-
-/**
  * ========================
  * Facade: RangePermission
  * ========================
  */
 
-/**
- * Range-level permission Facade interface
- */
-export interface IRangePermission {
-    /**
-     * Create protection rule on current range
-     * - Default options.allowEdit = false → Treated as "locked"
-     */
-    protect(options?: IRangeProtectionOptions): Promise<IRangeProtectionRule>;
-
-    /**
-     * Remove all protection rules covered by current range
-     * (Internally can calculate range → ruleId mapping)
-     */
-    unprotect(): Promise<void>;
-
-    /**
-     * Whether current range is in protected state (for current user)
-     */
-    isProtected(): boolean;
-
-    /** Whether current user can edit this range (combines Worksheet / Workbook / Range levels) */
-    canEdit(): boolean;
-
-    /** Whether current user can view this range */
-    canView(): boolean;
-
-    /**
-     * Range-level point reading (generally for debugging / advanced scenarios)
-     * Usually only need Edit/View two points
-     */
-    getPoint(point: RangePermissionPoint): boolean;
-    getSnapshot(): RangePermissionSnapshot;
-
-    /**
-     * Set a specific permission point for the range (low-level API for local runtime control)
-     * @param {RangePermissionPoint} point The permission point to set
-     * @param {boolean} value The value to set (true = allowed, false = denied)
-     * @returns {Promise<void>} A promise that resolves when the point is set
-     * @example
-     * ```ts
-     * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
-     * const permission = range?.getRangePermission();
-     * await permission?.setPoint(RangePermissionPoint.Edit, false); // Disable edit for current user
-     * ```
-     */
-    setPoint(point: RangePermissionPoint, value: boolean): Promise<void>;
-
-    /**
-     * Get snapshot of all protection rules in current worksheet (can also proxy worksheet interface)
-     */
-    listRules(): Promise<IRangeProtectionRule[]>;
-
-    /**
-     * ========================
-     * RxJS Observable Reactive Interface
-     * ========================
-     */
-
-    /**
-     * Permission snapshot change stream (BehaviorSubject, immediately provides current state on subscription)
-     */
-    readonly permission$: Observable<RangePermissionSnapshot>;
-
-    /**
-     * Protection state change stream
-     */
-    readonly protectionChange$: Observable<{
-        type: 'protected';
-        rule: IRangeProtectionRule;
-    } | {
-        type: 'unprotected';
-        ruleId: string;
-    }>;
-
-    /**
-     * Compatibility method: Simplified subscription (for users unfamiliar with RxJS)
-     * Internally implemented based on permission$ Observable
-     */
-    subscribe(listener: (snapshot: RangePermissionSnapshot) => void): UnsubscribeFn;
+export interface ICellPermissionDebugInfo {
+    permissionId: string;
+    ruleId: string;
 }

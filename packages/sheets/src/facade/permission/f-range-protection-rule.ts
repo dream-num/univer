@@ -15,7 +15,7 @@
  */
 
 import type { FRange } from '../f-range';
-import type { IRangeProtectionOptions, IRangeProtectionRule } from './permission-types';
+import type { IRangeProtectionOptions } from './permission-types';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation } from '@univerjs/sheets';
 
@@ -25,7 +25,7 @@ import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtec
  *
  * @hideconstructor
  */
-export class FRangeProtectionRule implements IRangeProtectionRule {
+export class FRangeProtectionRule {
     constructor(
         private readonly _unitId: string,
         private readonly _subUnitId: string,

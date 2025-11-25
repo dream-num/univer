@@ -180,10 +180,10 @@ export class FPermission extends FBase {
      * ```
      */
     async addWorksheetBasePermission(unitId: string, subUnitId: string, options?: IWorksheetProtectionOptions): Promise<string | undefined> {
-        const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
-        if (hasRangeProtection) {
-            throw new Error('sheet protection cannot intersect with range protection');
-        }
+        // const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+        // if (hasRangeProtection) {
+        //     throw new Error('sheet protection cannot intersect with range protection');
+        // }
         let collaborators: ICollaborator[] = [];
         if (options?.allowedUsers) {
             collaborators = options.allowedUsers.map((id) => ({ id, role: UnitRole.Editor, subject: undefined }));
@@ -270,10 +270,10 @@ export class FPermission extends FBase {
         const isBasePoint = FPointClass === WorksheetEditPermission || FPointClass === WorksheetViewPermission;
         if (isBasePoint) {
             if (!hasBasePermission) {
-                const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
-                if (hasRangeProtection) {
-                    throw new Error('sheet protection cannot intersect with range protection');
-                }
+                // const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+                // if (hasRangeProtection) {
+                //     throw new Error('sheet protection cannot intersect with range protection');
+                // }
                 permissionId = await this.addWorksheetBasePermission(unitId, subUnitId);
             } else {
                 permissionId = hasBasePermission.permissionId;
@@ -389,10 +389,10 @@ export class FPermission extends FBase {
             },
         });
         const ruleId = `ruleId_${generateRandomId(6)}`;
-        const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-        if (worksheetProtection) {
-            throw new Error('sheet protection cannot intersect with range protection');
-        }
+        // const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+        // if (worksheetProtection) {
+        //     throw new Error('sheet protection cannot intersect with range protection');
+        // }
         const subunitRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
         const overlap = subunitRuleList.some((rule) => {
             return rule.ranges.some((range) => {

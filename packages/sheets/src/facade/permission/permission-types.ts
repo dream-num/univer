@@ -200,6 +200,26 @@ export type UnsubscribeFn = () => void;
 
 /**
  * ========================
+ * Worksheet Protection Configuration
+ * ========================
+ */
+
+/**
+ * Worksheet protection options configuration
+ */
+export interface IWorksheetProtectionOptions {
+    /** Whitelist of users allowed to edit; empty means only owner */
+    allowedUsers?: string[];
+
+    /** Protection name for UI display */
+    name?: string;
+
+    /** Custom metadata */
+    metadata?: Record<string, unknown>;
+}
+
+/**
+ * ========================
  * Range Protection Configuration and Rules
  * ========================
  */
@@ -387,6 +407,23 @@ export interface IWorksheetPermissionConfig {
  */
 export interface IWorksheetPermission {
     /**
+     * Create worksheet protection (must be called before setting permission points)
+     * This creates the base permission structure with collaborators support
+     */
+    protect(options?: IWorksheetProtectionOptions): Promise<string>;
+
+    /**
+     * Remove worksheet protection
+     * This removes the protection rule and resets all permission points to allowed
+     */
+    unprotect(): Promise<void>;
+
+    /**
+     * Check if worksheet is currently protected
+     */
+    isProtected(): boolean;
+
+    /**
      * Set worksheet overall mode:
      * - 'readOnly'       → Lock write-related points
      * - 'filterOnly'     → Only enable Filter/Sort, close other write-related points
@@ -409,11 +446,6 @@ export interface IWorksheetPermission {
      */
     canEditCell(row: number, col: number): boolean;
     canViewCell(row: number, col: number): boolean;
-
-    /**
-     * Debug use: View protection rule information for a specific cell
-     */
-    debugCellPermission(row: number, col: number): ICellPermissionDebugInfo | null;
 
     /**
      * Point operations (low-level)

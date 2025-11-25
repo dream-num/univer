@@ -27,9 +27,10 @@ import type {
 } from './permission-types';
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { UnitRole } from '@univerjs/protocol';
-import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, EditStateEnum, RangeProtectionRuleModel, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
+import { FPermission } from '../f-permission';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
 import { RangePermissionPoint } from './permission-types';
@@ -43,6 +44,7 @@ import { RangePermissionPoint } from './permission-types';
 export class FRangePermission implements IRangePermission {
     private readonly _permissionSubject: BehaviorSubject<RangePermissionSnapshot>;
     private readonly _subscriptions: Subscription[] = [];
+    private readonly _fPermission: FPermission;
 
     /**
      * Observable stream of permission snapshot changes
@@ -73,6 +75,9 @@ export class FRangePermission implements IRangePermission {
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {
+        // Initialize FPermission instance
+        this._fPermission = this._injector.createInstance(FPermission);
+
         this._permissionSubject = new BehaviorSubject<RangePermissionSnapshot>(this._buildSnapshot());
 
         // Create permission$ stream from IPermissionService
@@ -385,14 +390,9 @@ export class FRangePermission implements IRangePermission {
         }
 
         const permissionId = rule.permissionId;
-        const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, permissionId);
-        const existingPoint = this._permissionService.getPermissionPoint(permissionPoint.id);
 
-        if (!existingPoint) {
-            this._permissionService.addPermissionPoint(permissionPoint);
-        }
-
-        this._permissionService.updatePermissionPoint(permissionPoint.id, value);
+        // Use FPermission's setRangeProtectionPermissionPoint method
+        this._fPermission.setRangeProtectionPermissionPoint(this._unitId, this._subUnitId, permissionId, PermissionPointClass, value);
 
         // Update snapshot (the Observable stream will automatically emit the change)
         this._permissionSubject.next(this._buildSnapshot());
@@ -421,39 +421,19 @@ export class FRangePermission implements IRangePermission {
             throw new Error('Range is already protected');
         }
 
-        // Create permissionId through authz service
-        const permissionId = await this._authzIoService.create({
-            objectType: UnitObject.SelectRange,
-            selectRangeObject: {
-                collaborators: options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
-                unitID: this._unitId,
-                name: options?.name || '',
-                scope: undefined,
-            },
-        });
+        // Use FPermission's addRangeBaseProtection method
+        const result = await this._fPermission.addRangeBaseProtection(
+            this._unitId,
+            this._subUnitId,
+            [this._range],
+            options
+        );
 
-        const ruleId = this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId);
-        const range = this._range.getRange();
+        if (!result) {
+            throw new Error('Failed to create range protection');
+        }
 
-        // Determine view and edit states
-        const viewState = this._determineViewState(options);
-        const editState = this._determineEditState(options);
-
-        await this._commandService.executeCommand(AddRangeProtectionMutation.id, {
-            unitId: this._unitId,
-            subUnitId: this._subUnitId,
-            rules: [{
-                id: ruleId,
-                permissionId,
-                unitType: 3, // UnitObject.SelectRange
-                unitId: this._unitId,
-                subUnitId: this._subUnitId,
-                ranges: [range],
-                description: options?.name,
-                viewState,
-                editState,
-            }],
-        });
+        const { permissionId, ruleId } = result;
 
         // Set permission points for local runtime control
         await this._setPermissionPoints(permissionId, options);
@@ -533,14 +513,8 @@ export class FRangePermission implements IRangePermission {
             return;
         }
 
-        const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, permissionId);
-        const existingPoint = this._permissionService.getPermissionPoint(permissionPoint.id);
-
-        if (!existingPoint) {
-            this._permissionService.addPermissionPoint(permissionPoint);
-        }
-
-        this._permissionService.updatePermissionPoint(permissionPoint.id, value);
+        // Use FPermission's setRangeProtectionPermissionPoint method
+        this._fPermission.setRangeProtectionPermissionPoint(this._unitId, this._subUnitId, permissionId, PermissionPointClass, value);
     }
 
     /**
@@ -562,13 +536,8 @@ export class FRangePermission implements IRangePermission {
 
         const ruleId = rule.id;
 
-        await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {
-            unitId: this._unitId,
-            subUnitId: this._subUnitId,
-            ruleIds: [ruleId],
-        });
-
-        // The Observable stream will automatically emit the change
+        // Use FPermission's removeRangeProtection method
+        this._fPermission.removeRangeProtection(this._unitId, this._subUnitId, [ruleId]);
     }
 
     /**

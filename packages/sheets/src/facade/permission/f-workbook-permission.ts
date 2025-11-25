@@ -20,6 +20,7 @@ import type { ICollaborator, IWorkbookPermission, UnsubscribeFn, WorkbookMode, W
 import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
+import { FPermission } from '../f-permission';
 import { WORKBOOK_PERMISSION_POINT_MAP } from './permission-point-map';
 import { UnitRole, WorkbookPermissionPoint } from './permission-types';
 
@@ -65,6 +66,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }>;
 
     private _subscriptions: Subscription[] = [];
+    private readonly _fPermission: FPermission;
 
     constructor(
         private readonly _unitId: string,
@@ -72,6 +74,9 @@ export class FWorkbookPermission implements IWorkbookPermission {
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IAuthzIoService private readonly _authzIoService: IAuthzIoService
     ) {
+        // Initialize FPermission instance
+        this._fPermission = this._injector.createInstance(FPermission);
+
         // Initialize BehaviorSubject (with initial value)
         this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
 
@@ -267,14 +272,8 @@ export class FWorkbookPermission implements IWorkbookPermission {
                 continue; // Skip unchanged values
             }
 
-            const instance = new PointClass(this._unitId);
-            const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-
-            if (!permissionPoint) {
-                this._permissionService.addPermissionPoint(instance);
-            }
-
-            this._permissionService.updatePermissionPoint(instance.id, value);
+            // Use FPermission's setWorkbookPermissionPoint method
+            this._fPermission.setWorkbookPermissionPoint(this._unitId, PointClass, value);
             pointsChanged.push({ point: pointKey, value, oldValue });
         }
 
@@ -352,14 +351,8 @@ export class FWorkbookPermission implements IWorkbookPermission {
             return; // Value unchanged, no update needed
         }
 
-        const instance = new PointClass(this._unitId);
-        const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-
-        if (!permissionPoint) {
-            this._permissionService.addPermissionPoint(instance);
-        }
-
-        this._permissionService.updatePermissionPoint(instance.id, value);
+        // Use FPermission's setWorkbookPermissionPoint method
+        this._fPermission.setWorkbookPermissionPoint(this._unitId, PointClass, value);
 
         // Update snapshot (the Observable stream will automatically emit the change)
         const newSnapshot = this._buildSnapshot();

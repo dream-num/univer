@@ -195,6 +195,47 @@ function createNewInstance() {
 
     customRegisterEvent(univer, window.univerAPI!);
     customRangePopups(univer, window.univerAPI!);
+
+    // Demo: Test setPoint method for range permission
+    setTimeout(() => {
+        const univerAPI = window.univerAPI;
+        if (univerAPI) {
+            const workbook = univerAPI.getActiveWorkbook();
+            const sheet = workbook?.getActiveSheet();
+            const range = sheet?.getRange('D4:E5');
+            const permission = range?.getRangePermission();
+
+            // Test 1: Try to set permission point without protection rule (should fail)
+            permission?.canEdit();
+            permission?.canView();
+            permission?.isProtected();
+
+            permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false);
+
+            // Test 2: Create protection rule first, then use setPoint
+            setTimeout(async () => {
+                    // First protect the range
+                await permission?.protect({
+                    name: 'Protected Range D4:E5',
+                    allowEdit: true, // Initially allow edit
+                    allowViewByOthers: true,
+                });
+                permission?.canEdit();
+                permission?.isProtected();
+
+                    // Now setPoint should work
+                await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false);
+                permission?.canEdit();
+
+                    // Toggle back to allow edit
+                setTimeout(async () => {
+                    await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, true);
+                    permission?.canEdit();
+                    permission?.getSnapshot();
+                }, 2000);
+            }, 1000);
+        }
+    }, 2000);
 }
 
 createNewInstance();

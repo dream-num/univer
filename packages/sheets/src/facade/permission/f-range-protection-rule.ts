@@ -144,45 +144,6 @@ export class FRangeProtectionRule implements IRangeProtectionRule {
     }
 
     /**
-     * Update protection options.
-     * @param {Partial<IRangeProtectionOptions>} options Partial options to update (will be merged with existing options).
-     * @returns {Promise<void>} A promise that resolves when the options are updated.
-     * @example
-     * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
-     * const rule = rules?.[0];
-     * await rule?.updateOptions({ name: 'New Protection Name', allowEdit: true });
-     * ```
-     */
-    async updateOptions(options: Partial<IRangeProtectionOptions>): Promise<void> {
-        const rule = this._rangeProtectionRuleModel.getRule(this._unitId, this._subUnitId, this._ruleId);
-        if (!rule) {
-            throw new Error(`Rule ${this._ruleId} not found`);
-        }
-
-        // Merge options
-        const newOptions = { ...this._options, ...options };
-
-        // Execute update
-        await this._commandService.executeCommand(SetRangeProtectionMutation.id, {
-            unitId: this._unitId,
-            subUnitId: this._subUnitId,
-            ruleId: this._ruleId,
-            rule: {
-                ...rule,
-                // Note: Current underlying implementation may not support storing options directly,
-                // may need to update through permissionId
-                // This is just an example, actual implementation may need adjustment
-            },
-        });
-
-        // Update local reference
-        Object.assign(this._options, newOptions);
-    }
-
-    /**
      * Delete the current protection rule.
      * @returns {Promise<void>} A promise that resolves when the rule is removed.
      * @example

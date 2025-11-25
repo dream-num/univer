@@ -240,9 +240,6 @@ export interface IRangeProtectionRule {
     /** Update protected ranges */
     updateRanges(ranges: FRange[]): Promise<void>;
 
-    /** Partially update configuration */
-    updateOptions(options: Partial<IRangeProtectionOptions>): Promise<void>;
-
     /** Delete current protection rule */
     remove(): Promise<void>;
 }

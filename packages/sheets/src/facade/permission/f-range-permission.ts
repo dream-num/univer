@@ -219,7 +219,7 @@ export class FRangePermission implements IRangePermission {
             return false;
         }
 
-        // First try to get permission from protection rule
+        // Try to get permission from protection rule
         const rule = this._getProtectionRule();
         if (rule) {
             const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, rule.permissionId);
@@ -227,16 +227,6 @@ export class FRangePermission implements IRangePermission {
             if (permission) {
                 return permission.value;
             }
-        }
-
-        // If no rule exists, try to get local-only permission point
-        const localPermissionId = this._getLocalPermissionId();
-        const localPermissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, localPermissionId);
-        const localPermission = this._permissionService.getPermissionPoint(localPermissionPoint.id);
-
-        // If local permission exists, return its value
-        if (localPermission) {
-            return localPermission.value;
         }
 
         // Default to true (allowed) when no permission point is set
@@ -348,19 +338,33 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * Set a specific permission point for the range (low-level API for local runtime control).
-     * This method directly sets the permission point value for the current range protection rule.
-     * If no protection rule exists, it will create permission points without a rule (local-only mode).
+     * Set a specific permission point for the range (low-level API).
+     *
+     * **Important:** This method only updates the permission point value for an existing protection rule.
+     * It does NOT create permission checks that will block actual editing operations.
+     * You must call `protect()` first to create a protection rule before using this method.
+     *
+     * This method is useful for:
+     * - Fine-tuning permissions after creating a protection rule with `protect()`
+     * - Dynamically adjusting permissions based on runtime conditions
+     * - Advanced permission management scenarios
+     *
      * @param {RangePermissionPoint} point The permission point to set.
      * @param {boolean} value The value to set (true = allowed, false = denied).
      * @returns {Promise<void>} A promise that resolves when the point is set.
+     * @throws {Error} If no protection rule exists for this range.
+     *
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
      * const permission = range?.getRangePermission();
-     * // Can set permission points without calling protect() first (local-only mode)
-     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false); // Disable edit
-     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);  // Enable view
+     *
+     * // First, create a protection rule
+     * await permission?.protect({ name: 'My Range', allowEdit: true });
+     *
+     * // Then you can dynamically update permission points
+     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false); // Now disable edit
+     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);  // Ensure view is enabled
      * ```
      */
     async setPoint(point: RangePermissionPoint, value: boolean): Promise<void> {
@@ -369,15 +373,18 @@ export class FRangePermission implements IRangePermission {
             throw new Error(`Unknown permission point: ${point}`);
         }
 
+        // Must have a protection rule to set permission points
+        const rule = this._getProtectionRule();
+        if (!rule) {
+            throw new Error('Cannot set permission point: No protection rule exists for this range. Call protect() first.');
+        }
+
         const oldValue = this.getPoint(point);
         if (oldValue === value) {
             return; // Value unchanged, no update needed
         }
 
-        // Get permissionId from rule, or use a local-only permissionId
-        const rule = this._getProtectionRule();
-        const permissionId = rule?.permissionId || this._getLocalPermissionId();
-
+        const permissionId = rule.permissionId;
         const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, permissionId);
         const existingPoint = this._permissionService.getPermissionPoint(permissionPoint.id);
 
@@ -389,15 +396,6 @@ export class FRangePermission implements IRangePermission {
 
         // Update snapshot (the Observable stream will automatically emit the change)
         this._permissionSubject.next(this._buildSnapshot());
-    }
-
-    /**
-     * Get a local-only permission ID for this range (used when no protection rule exists)
-     * @private
-     */
-    private _getLocalPermissionId(): string {
-        const range = this._range.getRange();
-        return `local-${this._unitId}-${this._subUnitId}-${range.startRow}-${range.startColumn}-${range.endRow}-${range.endColumn}`;
     }
 
     /**

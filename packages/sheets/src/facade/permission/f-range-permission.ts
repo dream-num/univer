@@ -406,10 +406,9 @@ export class FRangePermission {
      * const permission = range?.getRangePermission();
      * const rule = await permission?.protect({
      *   name: 'My protected range',
-     *   allowEdit: false,
-     *   allowView: true,
-     *   allowManageCollaborator: false,
-     *   allowDeleteRule: false
+     *   allowEdit: true,
+     *   allowedUsers: ['user1', 'user2'],
+     *   allowViewByOthers: false,
      * });
      * console.log(rule);
      * ```

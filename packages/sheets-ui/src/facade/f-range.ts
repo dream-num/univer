@@ -238,6 +238,25 @@ interface IFRangeSheetsUIMixin {
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const fRange = fWorksheet.getRange('A1:A4');
      *
+     * // Auto-fill without specifying applyType (default behavior)
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'))
+     *
+     * // Auto-fill with 'COPY' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'COPY')
+     *
+     * // Auto-fill with 'SERIES' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'SERIES')
+     * ```
+     *
+     * ```ts
+     * // Operate on a specific worksheet
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getSheetBySheetId('sheetId');
+     * const fRange = fWorksheet.getRange('A1:A4');
+     *
+     * // Auto-fill without specifying applyType (default behavior)
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'))
+     *
      * // Auto-fill with 'COPY' type
      * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'COPY')
      *
@@ -414,6 +433,8 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         return this._commandService.executeCommand(AutoFillCommand.id, {
             sourceRange: _sourceRange,
             targetRange: _targetRange,
+            unitId: this.getUnitId(),
+            subUnitId: this.getSheetId(),
             applyType,
         });
     }

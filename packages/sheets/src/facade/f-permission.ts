@@ -22,7 +22,7 @@ import type { FRange } from './f-range';
 import type { IRangeProtectionOptions, IWorksheetProtectionOptions } from './permission/permission-types';
 import { cellToRange, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorkbookPermissionService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, EditStateEnum, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, ViewStateEnum, WorkbookEditablePermission, WorkbookPermissionService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { UnitRole } from './permission/permission-types';
 
 /**
@@ -436,22 +436,22 @@ export class FPermission extends FBase {
      * Determine view state from range protection options
      * @private
      */
-    private _determineRangeViewState(options?: IRangeProtectionOptions): number {
+    private _determineRangeViewState(options?: IRangeProtectionOptions): ViewStateEnum {
         if (options?.allowViewByOthers === false) {
-            return 0; // ViewStateEnum.NoOneElseCanView
+            return ViewStateEnum.NoOneElseCanView; // ViewStateEnum.NoOneElseCanView
         }
-        return 1; // ViewStateEnum.OthersCanView
+        return ViewStateEnum.OthersCanView; // ViewStateEnum.OthersCanView
     }
 
     /**
      * Determine edit state from range protection options
      * @private
      */
-    private _determineRangeEditState(options?: IRangeProtectionOptions): number {
+    private _determineRangeEditState(options?: IRangeProtectionOptions): EditStateEnum {
         if (options?.allowEdit === true && options?.allowedUsers?.length) {
-            return 1; // EditStateEnum.DesignedUserCanEdit
+            return EditStateEnum.DesignedUserCanEdit;
         }
-        return 0; // EditStateEnum.OnlyMe
+        return EditStateEnum.OnlyMe;
     }
 
     /**

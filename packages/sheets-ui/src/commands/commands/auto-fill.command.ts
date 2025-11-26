@@ -16,14 +16,15 @@
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { APPLY_TYPE } from '../../services/auto-fill/type';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
-
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 
 export interface IAutoFillCommandParams {
     sourceRange: IRange;
     targetRange: IRange;
+    applyType?: APPLY_TYPE; // manual apply type
 }
 
 export const AutoFillCommand: ICommand = {
@@ -34,13 +35,13 @@ export const AutoFillCommand: ICommand = {
         const autoFillService = accessor.get(IAutoFillService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const { sourceRange, targetRange } = params;
+        const { sourceRange, targetRange, applyType } = params;
 
         const commandTarget = getSheetCommandTarget(univerInstanceService);
         if (!commandTarget) return false;
 
         const { subUnitId, unitId } = commandTarget;
-        return autoFillService.triggerAutoFill(unitId, subUnitId, sourceRange, targetRange);
+        return autoFillService.triggerAutoFill(unitId, subUnitId, sourceRange, targetRange, applyType);
     },
 };
 

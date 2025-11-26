@@ -16,11 +16,11 @@
 
 import type { ICellWithCoord, IDisposable, ISelectionCell, Nullable } from '@univerjs/core';
 import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
-import type { ICanvasPopup, ICellAlert, IDropdownParam } from '@univerjs/sheets-ui';
+import type { APPLY_TYPE, ICanvasPopup, ICellAlert, IDropdownParam } from '@univerjs/sheets-ui';
 import type { ComponentType } from '@univerjs/ui';
-import { DisposableCollection, generateRandomId, ILogService, toDisposable } from '@univerjs/core';
+import { DisposableCollection, generateRandomId, ILogService, Rectangle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CellAlertManagerService, IMarkSelectionService, ISheetCellDropdownManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { AutoFillCommand, CellAlertManagerService, IMarkSelectionService, ISheetCellDropdownManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -225,6 +225,27 @@ interface IFRangeSheetsUIMixin {
      * ```
      */
     showDropdown(param: IDropdownParam): IDisposable;
+
+    /**
+     * Fills the target range with data based on the data in the current range.
+     * @param {FRange} targetRange - The range to be filled with data.
+     * @param {APPLY_TYPE} [applyType] - The type of data fill to be applied.
+     * @returns {Promise<boolean>} A promise that resolves to true if the fill operation was successful, false otherwise.
+     * @example
+     * ```ts
+     * // Auto-fill the range D1:D10 based on the data in the range C1:C2
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:A4');
+     *
+     * // Auto-fill with 'COPY' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'COPY')
+     *
+     * // Auto-fill with 'SERIES' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'SERIES')
+     * ```
+     */
+    autoFill(targetRange: FRange, applyType?: APPLY_TYPE): Promise<boolean>;
 }
 
 class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
@@ -354,6 +375,47 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     override showDropdown(param: IDropdownParam): IDisposable {
         const cellDropdownManagerService = this._injector.get(ISheetCellDropdownManagerService);
         return cellDropdownManagerService.showDropdown(param);
+    }
+
+    override async autoFill(targetRange: FRange, applyType?: APPLY_TYPE): Promise<boolean> {
+        const _sourceRange = this.getRange();
+        const _targetRange = targetRange.getRange();
+
+        if (!Rectangle.contains(_targetRange, _sourceRange)) {
+            throw new Error('AutoFill target range must contain source range');
+        }
+
+        const { startRow: sourceStartRow, startColumn: sourceStartColumn, endRow: sourceEndRow, endColumn: sourceEndColumn } = _sourceRange;
+        const { startRow: targetStartRow, startColumn: targetStartColumn, endRow: targetEndRow, endColumn: targetEndColumn } = _targetRange;
+
+        // If both row and column count are different, throw error
+        if ((sourceEndRow - sourceStartRow) !== (targetEndRow - targetStartRow) && (sourceEndColumn - sourceStartColumn) !== (targetEndColumn - targetStartColumn)) {
+            throw new Error('AutoFill can only fill in one direction');
+        }
+
+        // If the direction includes both left and right, throw error
+        if (
+            (sourceEndRow - sourceStartRow) === (targetEndRow - targetStartRow) &&
+            sourceStartColumn !== targetStartColumn &&
+            sourceEndColumn !== targetEndColumn
+        ) {
+            throw new Error('AutoFill can only fill in one direction');
+        }
+
+        // If the direction includes both up and down, throw error
+        if (
+            (sourceEndColumn - sourceStartColumn) === (targetEndColumn - targetStartColumn) &&
+            sourceStartRow !== targetStartRow &&
+            sourceEndRow !== targetEndRow
+        ) {
+            throw new Error('AutoFill can only fill in one direction');
+        }
+
+        return this._commandService.executeCommand(AutoFillCommand.id, {
+            sourceRange: _sourceRange,
+            targetRange: _targetRange,
+            applyType,
+        });
     }
 }
 

@@ -16,7 +16,7 @@
 
 import type { RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
-import type { ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
+import type { IAddRangeProtectionMutationParams, ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { FRange } from './f-range';
 import type { IRangeProtectionOptions, IWorksheetProtectionOptions } from './permission/permission-types';
@@ -408,8 +408,7 @@ export class FPermission extends FBase {
         // Determine view and edit states
         const viewState = this._determineRangeViewState(options);
         const editState = this._determineRangeEditState(options);
-
-        const res = this._commandService.syncExecuteCommand(AddRangeProtectionMutation.id, {
+        const params: IAddRangeProtectionMutationParams = {
             unitId,
             subUnitId,
             rules: [{
@@ -423,7 +422,9 @@ export class FPermission extends FBase {
                 viewState,
                 editState,
             }],
-        });
+        };
+
+        const res = this._commandService.syncExecuteCommand(AddRangeProtectionMutation.id, params);
         if (res) {
             return {
                 permissionId,

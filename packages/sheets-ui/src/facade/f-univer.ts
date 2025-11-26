@@ -31,7 +31,7 @@ import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, IShe
 import type { FRange } from '@univerjs/sheets/facade';
 import type { Observable } from 'rxjs';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams, ISheetZoomEvent } from './f-event';
-import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, ILogService, IPermissionService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -158,6 +158,17 @@ export interface IFUniverSheetsUIMixin {
      * ```
      */
     getProtectedRangeShadowStrategy$(): Observable<'always' | 'non-editable' | 'non-viewable' | 'none'>;
+
+    /**
+     * Set visibility of unauthorized pop-up window
+     * @param {boolean} visible - visibility of unauthorized pop-up window
+     * @example
+     * ```ts
+     * const univerAPI = FUniver.newAPI(univer);
+     * univerAPI.setPermissionDialogVisible(false);
+     * ```
+     */
+    setPermissionDialogVisible(visible: boolean): void;
 }
 
 export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
@@ -1050,6 +1061,11 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     override getProtectedRangeShadowStrategy$(): Observable<'always' | 'non-editable' | 'non-viewable' | 'none'> {
         const service = this._injector.get(SheetPermissionRenderManagerService);
         return service.getProtectedRangeShadowStrategy$();
+    }
+
+    override setPermissionDialogVisible(visible: boolean): void {
+        const permissionService = this._injector.get(IPermissionService);
+        permissionService.setShowComponents(visible);
     }
 }
 

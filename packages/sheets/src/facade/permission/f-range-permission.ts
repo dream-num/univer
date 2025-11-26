@@ -20,16 +20,15 @@ import type { Observable, Subscription } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type {
-    IRangeProtectionRule as IFRangeProtectionRule,
-    IRangePermission,
     IRangeProtectionOptions,
     RangePermissionSnapshot,
 } from './permission-types';
 import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { UnitRole } from '@univerjs/protocol';
-import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, EditStateEnum, RangeProtectionRuleModel, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
+import { FPermission } from '../f-permission';
 import { FRangeProtectionRule } from './f-range-protection-rule';
 import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
 import { RangePermissionPoint } from './permission-types';
@@ -40,9 +39,10 @@ import { RangePermissionPoint } from './permission-types';
  *
  * @hideconstructor
  */
-export class FRangePermission implements IRangePermission {
+export class FRangePermission {
     private readonly _permissionSubject: BehaviorSubject<RangePermissionSnapshot>;
     private readonly _subscriptions: Subscription[] = [];
+    private readonly _fPermission: FPermission;
 
     /**
      * Observable stream of permission snapshot changes
@@ -56,7 +56,7 @@ export class FRangePermission implements IRangePermission {
      */
     readonly protectionChange$: Observable<{
         type: 'protected';
-        rule: IFRangeProtectionRule;
+        rule: FRangeProtectionRule;
     } | {
         type: 'unprotected';
         ruleId: string;
@@ -73,6 +73,9 @@ export class FRangePermission implements IRangePermission {
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {
+        // Initialize FPermission instance
+        this._fPermission = this._injector.createInstance(FPermission);
+
         this._permissionSubject = new BehaviorSubject<RangePermissionSnapshot>(this._buildSnapshot());
 
         // Create permission$ stream from IPermissionService
@@ -113,7 +116,7 @@ export class FRangePermission implements IRangePermission {
      */
     private _createProtectionChangeStream(): Observable<{
         type: 'protected';
-        rule: IFRangeProtectionRule;
+        rule: FRangeProtectionRule;
     } | {
         type: 'unprotected';
         ruleId: string;
@@ -173,7 +176,7 @@ export class FRangePermission implements IRangePermission {
     /**
      * Create a Facade rule from internal rule
      */
-    private _createFacadeRule(rule: IRangeProtectionRule): IFRangeProtectionRule {
+    private _createFacadeRule(rule: IRangeProtectionRule): FRangeProtectionRule {
         const ranges = rule.ranges.map((range) =>
             this._worksheet.getRange(
                 range.startRow,
@@ -219,7 +222,7 @@ export class FRangePermission implements IRangePermission {
             return false;
         }
 
-        // First try to get permission from protection rule
+        // Try to get permission from protection rule
         const rule = this._getProtectionRule();
         if (rule) {
             const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, rule.permissionId);
@@ -227,16 +230,6 @@ export class FRangePermission implements IRangePermission {
             if (permission) {
                 return permission.value;
             }
-        }
-
-        // If no rule exists, try to get local-only permission point
-        const localPermissionId = this._getLocalPermissionId();
-        const localPermissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, localPermissionId);
-        const localPermission = this._permissionService.getPermissionPoint(localPermissionPoint.id);
-
-        // If local permission exists, return its value
-        if (localPermission) {
-            return localPermission.value;
         }
 
         // Default to true (allowed) when no permission point is set
@@ -348,19 +341,33 @@ export class FRangePermission implements IRangePermission {
     }
 
     /**
-     * Set a specific permission point for the range (low-level API for local runtime control).
-     * This method directly sets the permission point value for the current range protection rule.
-     * If no protection rule exists, it will create permission points without a rule (local-only mode).
+     * Set a specific permission point for the range (low-level API).
+     *
+     * **Important:** This method only updates the permission point value for an existing protection rule.
+     * It does NOT create permission checks that will block actual editing operations.
+     * You must call `protect()` first to create a protection rule before using this method.
+     *
+     * This method is useful for:
+     * - Fine-tuning permissions after creating a protection rule with `protect()`
+     * - Dynamically adjusting permissions based on runtime conditions
+     * - Advanced permission management scenarios
+     *
      * @param {RangePermissionPoint} point The permission point to set.
      * @param {boolean} value The value to set (true = allowed, false = denied).
      * @returns {Promise<void>} A promise that resolves when the point is set.
+     * @throws {Error} If no protection rule exists for this range.
+     *
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
      * const permission = range?.getRangePermission();
-     * // Can set permission points without calling protect() first (local-only mode)
-     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false); // Disable edit
-     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);  // Enable view
+     *
+     * // First, create a protection rule
+     * await permission?.protect({ name: 'My Range', allowEdit: true });
+     *
+     * // Then you can dynamically update permission points
+     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false); // Now disable edit
+     * await permission?.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);  // Ensure view is enabled
      * ```
      */
     async setPoint(point: RangePermissionPoint, value: boolean): Promise<void> {
@@ -369,93 +376,61 @@ export class FRangePermission implements IRangePermission {
             throw new Error(`Unknown permission point: ${point}`);
         }
 
+        // Must have a protection rule to set permission points
+        const rule = this._getProtectionRule();
+        if (!rule) {
+            throw new Error('Cannot set permission point: No protection rule exists for this range. Call protect() first.');
+        }
+
         const oldValue = this.getPoint(point);
         if (oldValue === value) {
             return; // Value unchanged, no update needed
         }
 
-        // Get permissionId from rule, or use a local-only permissionId
-        const rule = this._getProtectionRule();
-        const permissionId = rule?.permissionId || this._getLocalPermissionId();
+        const permissionId = rule.permissionId;
 
-        const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, permissionId);
-        const existingPoint = this._permissionService.getPermissionPoint(permissionPoint.id);
-
-        if (!existingPoint) {
-            this._permissionService.addPermissionPoint(permissionPoint);
-        }
-
-        this._permissionService.updatePermissionPoint(permissionPoint.id, value);
+        // Use FPermission's setRangeProtectionPermissionPoint method
+        this._fPermission.setRangeProtectionPermissionPoint(this._unitId, this._subUnitId, permissionId, PermissionPointClass, value);
 
         // Update snapshot (the Observable stream will automatically emit the change)
         this._permissionSubject.next(this._buildSnapshot());
     }
 
     /**
-     * Get a local-only permission ID for this range (used when no protection rule exists)
-     * @private
-     */
-    private _getLocalPermissionId(): string {
-        const range = this._range.getRange();
-        return `local-${this._unitId}-${this._subUnitId}-${range.startRow}-${range.startColumn}-${range.endRow}-${range.endColumn}`;
-    }
-
-    /**
      * Protect the current range.
      * @param {IRangeProtectionOptions} options Protection options.
-     * @returns {Promise<IFRangeProtectionRule>} The created protection rule.
+     * @returns {Promise<FRangeProtectionRule>} The created protection rule.
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
      * const permission = range?.getRangePermission();
      * const rule = await permission?.protect({
      *   name: 'My protected range',
-     *   allowEdit: false,
-     *   allowView: true,
-     *   allowManageCollaborator: false,
-     *   allowDeleteRule: false
+     *   allowEdit: true,
+     *   allowedUsers: ['user1', 'user2'],
+     *   allowViewByOthers: false,
      * });
      * console.log(rule);
      * ```
      */
-    async protect(options?: IRangeProtectionOptions): Promise<IFRangeProtectionRule> {
+    async protect(options?: IRangeProtectionOptions): Promise<FRangeProtectionRule> {
         if (this.isProtected()) {
             throw new Error('Range is already protected');
         }
 
-        // Create permissionId through authz service
-        const permissionId = await this._authzIoService.create({
-            objectType: UnitObject.SelectRange,
-            selectRangeObject: {
-                collaborators: options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
-                unitID: this._unitId,
-                name: options?.name || '',
-                scope: undefined,
-            },
-        });
+        // Use FPermission's addRangeBaseProtection method
+        const result = await this._fPermission.addRangeBaseProtection(
+            this._unitId,
+            this._subUnitId,
+            [this._range],
+            options
+        );
 
-        const ruleId = this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId);
-        const range = this._range.getRange();
+        if (!result) {
+            throw new Error('Failed to create range protection');
+        }
 
-        // Determine view and edit states
-        const viewState = this._determineViewState(options);
-        const editState = this._determineEditState(options);
-
-        await this._commandService.executeCommand(AddRangeProtectionMutation.id, {
-            unitId: this._unitId,
-            subUnitId: this._subUnitId,
-            rules: [{
-                id: ruleId,
-                permissionId,
-                unitType: 3, // UnitObject.SelectRange
-                unitId: this._unitId,
-                subUnitId: this._subUnitId,
-                ranges: [range],
-                description: options?.name,
-                viewState,
-                editState,
-            }],
-        });
+        const { permissionId, ruleId } = result;
 
         // Set permission points for local runtime control
         await this._setPermissionPoints(permissionId, options);
@@ -535,14 +510,8 @@ export class FRangePermission implements IRangePermission {
             return;
         }
 
-        const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, permissionId);
-        const existingPoint = this._permissionService.getPermissionPoint(permissionPoint.id);
-
-        if (!existingPoint) {
-            this._permissionService.addPermissionPoint(permissionPoint);
-        }
-
-        this._permissionService.updatePermissionPoint(permissionPoint.id, value);
+        // Use FPermission's setRangeProtectionPermissionPoint method
+        this._fPermission.setRangeProtectionPermissionPoint(this._unitId, this._subUnitId, permissionId, PermissionPointClass, value);
     }
 
     /**
@@ -564,18 +533,13 @@ export class FRangePermission implements IRangePermission {
 
         const ruleId = rule.id;
 
-        await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {
-            unitId: this._unitId,
-            subUnitId: this._subUnitId,
-            ruleIds: [ruleId],
-        });
-
-        // The Observable stream will automatically emit the change
+        // Use FPermission's removeRangeProtection method
+        this._fPermission.removeRangeProtection(this._unitId, this._subUnitId, [ruleId]);
     }
 
     /**
      * List all protection rules.
-     * @returns {Promise<IFRangeProtectionRule[]>} Array of protection rules.
+     * @returns {Promise<FRangeProtectionRule[]>} Array of protection rules.
      * @example
      * ```ts
      * const range = univerAPI.getActiveWorkbook()?.getActiveSheet()?.getRange('A1:B2');
@@ -584,7 +548,7 @@ export class FRangePermission implements IRangePermission {
      * console.log(rules);
      * ```
      */
-    async listRules(): Promise<IFRangeProtectionRule[]> {
+    async listRules(): Promise<FRangeProtectionRule[]> {
         return await this._buildProtectionRulesAsync();
     }
 

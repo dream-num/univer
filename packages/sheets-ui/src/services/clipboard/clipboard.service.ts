@@ -24,7 +24,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type {
@@ -84,7 +84,7 @@ import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange, spilitLargeSetRangeValuesMutations } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -819,6 +819,21 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);
         undoMutationsInfo = mergeSetRangeValues(undoMutationsInfo);
+
+        // Split large SetRangeValuesMutation to avoid performance issues
+        redoMutationsInfo = redoMutationsInfo.flatMap((mutation) =>
+            spilitLargeSetRangeValuesMutations(mutation as IMutationInfo<ISetRangeValuesMutationParams>, {
+                threshold: 20000,
+                maxCellsPerChunk: 10000,
+            })
+        );
+        undoMutationsInfo = undoMutationsInfo.flatMap((mutation) =>
+            spilitLargeSetRangeValuesMutations(mutation as IMutationInfo<ISetRangeValuesMutationParams>, {
+                threshold: 20000,
+                maxCellsPerChunk: 10000,
+            })
+        );
+
         undoMutationsInfo.push({ id: SetWorksheetActiveOperation.id, params: { unitId: target.unitId, subUnitId: target.subUnitId } });
 
         this._logService.log('[SheetClipboardService]', 'pasting mutations', {

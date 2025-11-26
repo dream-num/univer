@@ -180,6 +180,90 @@ export function mergeSetRangeValues(mutations: IMutationInfo[]) {
     return newMutations;
 }
 
+// eslint-disable-next-line max-lines-per-function
+export function spilitLargeSetRangeValuesMutations(
+    mutation: IMutationInfo<ISetRangeValuesMutationParams>,
+    options: { maxCellsPerChunk?: number; threshold?: number; maxChunks?: number } = {}
+): IMutationInfo<ISetRangeValuesMutationParams>[] {
+    const { maxCellsPerChunk = 2500, threshold = 6000, maxChunks = 10 } = options;
+
+    if (mutation.id !== SetRangeValuesMutation.id) {
+        return [mutation];
+    }
+    const { cellValue } = mutation.params;
+    if (!cellValue) {
+        return [mutation];
+    }
+
+    const matrix = new ObjectMatrix(cellValue);
+
+    // 计算单元格数量和边界
+    let cellCount = 0;
+    let minRow = Infinity;
+    let maxRow = -Infinity;
+    let minCol = Infinity;
+    let maxCol = -Infinity;
+
+    matrix.forValue((row, col) => {
+        cellCount++;
+        minRow = Math.min(minRow, row);
+        maxRow = Math.max(maxRow, row);
+        minCol = Math.min(minCol, col);
+        maxCol = Math.max(maxCol, col);
+    });
+
+    // 如果没有数据或单元格数量小于阈值，不拆分
+    if (minRow === Infinity || cellCount <= threshold) {
+        return [mutation];
+    }
+
+    const chunks: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
+
+    // 根据列数计算每个块的行数
+    const colCount = maxCol - minCol + 1;
+    let rowsPerChunk = Math.max(1, Math.floor(maxCellsPerChunk / colCount));
+
+    // 确保不会拆分成超过 maxChunks 个块
+    const totalRows = maxRow - minRow + 1;
+    const estimatedChunks = Math.ceil(totalRows / rowsPerChunk);
+    if (estimatedChunks > maxChunks) {
+        // 重新计算 rowsPerChunk，使得拆分后的块数不超过 maxChunks
+        rowsPerChunk = Math.ceil(totalRows / maxChunks);
+    }
+
+    // 按照计算出的行数进行拆分
+    for (let rowStart = minRow; rowStart <= maxRow; rowStart += rowsPerChunk) {
+        const rowEnd = Math.min(rowStart + rowsPerChunk - 1, maxRow);
+
+        const chunkMatrix = new ObjectMatrix<Nullable<ICellData>>();
+        let hasData = false;
+
+        // 提取当前块的数据
+        for (let row = rowStart; row <= rowEnd; row++) {
+            for (let col = minCol; col <= maxCol; col++) {
+                const value = matrix.getValue(row, col);
+                if (value !== undefined) {
+                    chunkMatrix.setValue(row, col, value);
+                    hasData = true;
+                }
+            }
+        }
+
+        // 只有当块中有数据时才创建 mutation
+        if (hasData) {
+            chunks.push({
+                ...mutation,
+                params: {
+                    ...mutation.params,
+                    cellValue: chunkMatrix.getMatrix(),
+                },
+            });
+        }
+    }
+
+    return chunks.length > 0 ? chunks : [mutation];
+}
+
 export function rangeIntersectWithDiscreteRange(range: IRange, discrete: IDiscreteRange) {
     const { startRow, endRow, startColumn, endColumn } = range;
     for (let i = startRow; i <= endRow; i++) {

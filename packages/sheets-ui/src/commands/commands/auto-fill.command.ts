@@ -24,6 +24,8 @@ import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 export interface IAutoFillCommandParams {
     sourceRange: IRange;
     targetRange: IRange;
+    unitId?: string; // if not provided, use current unitId
+    subUnitId?: string; // if not provided, use current subUnitId
     applyType?: APPLY_TYPE; // manual apply type
 }
 
@@ -37,7 +39,7 @@ export const AutoFillCommand: ICommand = {
 
         const { sourceRange, targetRange, applyType } = params;
 
-        const commandTarget = getSheetCommandTarget(univerInstanceService);
+        const commandTarget = getSheetCommandTarget(univerInstanceService, params);
         if (!commandTarget) return false;
 
         const { subUnitId, unitId } = commandTarget;

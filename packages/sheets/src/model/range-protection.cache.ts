@@ -189,8 +189,8 @@ export class RangeProtectionCache extends Disposable {
     }
 
     private _getSelectionActions(unitId: string, subUnitId: string, rule: IRangeProtectionRule) {
-        const edit = this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
-        const view = this._permissionService.getPermissionPoint(new RangeProtectionPermissionViewPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
+        const edit = this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? false;
+        const view = this._permissionService.getPermissionPoint(new RangeProtectionPermissionViewPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? false;
         const manageProtection = this._permissionService.getPermissionPoint(new RangeProtectionPermissionManageCollaPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? false;
         const deleteProtection = this._permissionService.getPermissionPoint(new RangeProtectionPermissionDeleteProtectionPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? false;
         const selectionProtection = {

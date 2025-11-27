@@ -16,9 +16,17 @@
 
 import type { ICellDataForSheetInterceptor, Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { CellModeEnum, CellValueType, createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import {
+    CellModeEnum,
+    CellValueType,
+    createInterceptorKey,
+    ICommandService,
+    InterceptorManager,
+    IUniverInstanceService,
+    LocaleType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
-
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';

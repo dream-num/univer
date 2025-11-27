@@ -20,7 +20,6 @@ import type { FUniver } from '@univerjs/core/facade';
 import { LifecycleStages } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
-
 import '@univerjs/sheets/facade';
 
 describe('Test FRange', () => {

@@ -32,7 +32,6 @@ import {
     SetSelectedRowsVisibleCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 import {

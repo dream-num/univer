@@ -27,6 +27,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^5.9.3",
-        "vitest": "^3.2.4"
+        "vitest": "^4.0.14"
     }
 }

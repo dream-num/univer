@@ -17,7 +17,6 @@
 import type { Injector, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { SetWorksheetNameMutation } from '../../mutations/set-worksheet-name.mutation';
 import { SetWorksheetNameCommand } from '../set-worksheet-name.command';
 import { createCommandTestBed } from './create-command-test-bed';

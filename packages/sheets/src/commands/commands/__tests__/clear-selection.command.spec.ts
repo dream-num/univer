@@ -24,7 +24,6 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';

@@ -15,7 +15,6 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { ErrorType } from '../../../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cache';
 import { compareToken } from '../../../../basics/token';

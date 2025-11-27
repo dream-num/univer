@@ -30,7 +30,6 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';

@@ -15,7 +15,25 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ceil, divide, equals, floor, getFractionalPart, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, stripErrorMargin } from '../math-kit';
+import {
+    ceil,
+    divide,
+    equals,
+    floor,
+    getFractionalPart,
+    greaterThan,
+    greaterThanOrEquals,
+    lessThan,
+    lessThanOrEquals,
+    minus,
+    mod,
+    multiply,
+    plus,
+    pow,
+    round,
+    sqrt,
+    stripErrorMargin,
+} from '../math-kit';
 
 describe('Test math kit', () => {
     it('Function plus', () => {

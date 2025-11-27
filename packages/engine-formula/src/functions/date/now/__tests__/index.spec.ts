@@ -14,32 +14,21 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
-
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Now } from '../index';
-import { stripErrorMargin } from '../../../../engine/utils/math-kit';
-
-// mock new Date() use V
-const _Date = Date;
-global.Date = vi.fn((...params) => {
-    if (params.length === 1) {
-        return new _Date(params[0]);
-    }
-
-    if (params.length === 3) {
-        return new _Date(params[0], params[1], params[2]);
-    }
-
-    if (params.length === 6) {
-        return new _Date(params[0], params[1], params[2], params[3], params[4], params[5]);
-    }
-
-    return new _Date(2020, 0, 1, 2, 3, 4);
-}) as any;
-global.Date.UTC = _Date.UTC;
 
 describe('Test now function', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date(2020, 0, 1, 2, 3, 4));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     const testFunction = new Now(FUNCTION_NAMES_DATE.NOW);
 
     describe('Now', () => {

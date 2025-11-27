@@ -28,7 +28,7 @@
         "@typescript-eslint/parser": "^8.48.0",
         "@vitejs/plugin-react": "^5.1.1",
         "@vitejs/plugin-vue": "^6.0.2",
-        "@vitest/coverage-istanbul": "^3.2.4",
+        "@vitest/coverage-istanbul": "^4.0.14",
         "autoprefixer": "^10.4.22",
         "eslint-plugin-better-tailwindcss": "^3.7.11",
         "eslint-plugin-header": "^3.1.1",
@@ -45,7 +45,7 @@
         "vite": "^7.2.4",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
-        "vitest": "^3.2.4"
+        "vitest": "^4.0.14"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

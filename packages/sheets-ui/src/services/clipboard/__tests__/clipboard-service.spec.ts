@@ -27,7 +27,6 @@ import {
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { discreteRangeToRange } from '../../../controllers/utils/range-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../clipboard.service';

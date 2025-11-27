@@ -19,14 +19,14 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     sheets: {
         tabs: {
-            sheetCopy: '(복사본{0})',
-            sheet: '시트',
+            sheetCopy: '(コピー{0})',
+            sheet: 'シート',
         },
         info: {
-            overlappingSelections: '겹치는 영역에서는 해당 명령을 사용할 수 없습니다.',
-            acrossMergedCell: '병합된 셀을 가로지름',
-            partOfCell: '병합된 셀의 일부만 선택됨',
-            hideSheet: '이 시트를 숨기면 표시되는 시트가 없습니다.',
+            overlappingSelections: 'そのコマンドは、重なり合う選択範囲に対しては使用できません。',
+            acrossMergedCell: '結合セルをまたいでいます',
+            partOfCell: '結合セルの一部が選択されています',
+            hideSheet: '表示されるシートがなくなるため、このシートを非表示にできません。',
         },
     },
 };

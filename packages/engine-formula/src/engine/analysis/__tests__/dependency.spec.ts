@@ -15,7 +15,6 @@
  */
 
 import type { Injector } from '@univerjs/core';
-
 import type { FormulaDependencyTreeVirtual } from '../../dependency/dependency-tree';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';

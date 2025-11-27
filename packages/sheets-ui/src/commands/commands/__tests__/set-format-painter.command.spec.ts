@@ -37,7 +37,6 @@ import {
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';

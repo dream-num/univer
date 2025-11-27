@@ -15,7 +15,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Today } from '../index';
 

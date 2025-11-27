@@ -15,10 +15,16 @@
  */
 
 import type { IRange } from '../../sheets/typedef';
-
 import { describe, expect, it } from 'vitest';
 import { AbsoluteRefType, RANGE_TYPE } from '../../sheets/typedef';
-import { getIntersectRange, mergeHorizontalRanges, mergeRanges, mergeVerticalRanges, moveRangeByOffset, splitIntoGrid } from '../range';
+import {
+    getIntersectRange,
+    mergeHorizontalRanges,
+    mergeRanges,
+    mergeVerticalRanges,
+    moveRangeByOffset,
+    splitIntoGrid,
+} from '../range';
 
 const stringifyRanges = (ranges: IRange[]) => {
     return ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn).map((range) => `${range.startRow},${range.startColumn},${range.endRow},${range.endColumn}`);

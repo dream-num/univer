@@ -57,7 +57,6 @@ import {
 import { IConfirmService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { getClearContentMutationParamForRange } from '../../../common/utils';
 import {
     AddWorksheetMergeAllCommand,

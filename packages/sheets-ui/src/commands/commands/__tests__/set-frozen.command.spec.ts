@@ -18,7 +18,6 @@ import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univer
 import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {

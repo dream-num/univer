@@ -16,7 +16,6 @@
 
 import type { ICommandInfo, IMutationInfo, IRange } from '@univerjs/core';
 import type { IRemoveSheetMutationParams } from '../../../basics';
-
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../commands/commands/insert-row-col.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../../commands/commands/remove-row-col.command';
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';

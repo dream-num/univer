@@ -15,7 +15,17 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isReferenceString, REFERENCE_TABLE_ALL_COLUMN_REGEX, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX, REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX, regexTestColumn, regexTestMultipleRange, regexTestRow, regexTestSingeRange } from '../regex';
+import {
+    isReferenceString,
+    REFERENCE_TABLE_ALL_COLUMN_REGEX,
+    REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX,
+    REFERENCE_TABLE_SINGLE_COLUMN_REGEX,
+    REFERENCE_TABLE_TITLE_ONLY_ANY_HASH_REGEX,
+    regexTestColumn,
+    regexTestMultipleRange,
+    regexTestRow,
+    regexTestSingeRange,
+} from '../regex';
 
 describe('Test ref regex', () => {
     it('Single range', () => {

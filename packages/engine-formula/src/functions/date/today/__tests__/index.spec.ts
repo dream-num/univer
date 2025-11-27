@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Today } from '../index';
 
-// mock new Date() use V
-const _Date = Date;
-global.Date = vi.fn((...params) => {
-    if (params.length === 1) {
-        return new _Date(params[0]);
-    }
-
-    if (params.length === 3) {
-        return new _Date(params[0], params[1], params[2]);
-    }
-
-    return new _Date(2020, 0, 1);
-}) as any;
-global.Date.UTC = _Date.UTC;
-
 describe('Test today function', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date(2020, 0, 1));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     const testFunction = new Today(FUNCTION_NAMES_DATE.TODAY);
 
     describe('Today', () => {

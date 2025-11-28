@@ -190,5 +190,40 @@ describe('Test rate function', () => {
             );
             expect(getObjectValue(result)).toBe(ErrorType.NUM); // PV and FV same sign
         });
+
+        // Test type parameter boolean conversion: non-zero values should be treated as 1, only 0 as 0
+        it('Converts type parameter using standard boolean conversion (non-zero = 1, zero = 0)', () => {
+            const nper = NumberValueObject.create(48);
+            const pmt = NumberValueObject.create(-1000);
+            const pv = NumberValueObject.create(100000);
+            const fv = NumberValueObject.create(0);
+            const guess = NumberValueObject.create(0.1);
+
+            // type = 0 should give one result
+            const result0 = testFunction.calculate(nper, pmt, pv, fv, NumberValueObject.create(0), guess);
+            const value0 = getObjectValue(result0, true) as number;
+
+            // type = 1 should give a different result
+            const result1 = testFunction.calculate(nper, pmt, pv, fv, NumberValueObject.create(1), guess);
+            const value1 = getObjectValue(result1, true) as number;
+
+            // Verify 0 and 1 produce different results
+            expect(value0).not.toBe(value1);
+
+            // Non-zero values (0.2, -1, 0.49) should be treated as 1 (true)
+            const result02 = testFunction.calculate(nper, pmt, pv, fv, NumberValueObject.create(0.2), guess);
+            const resultNeg1 = testFunction.calculate(nper, pmt, pv, fv, NumberValueObject.create(-1), guess);
+            const result049 = testFunction.calculate(nper, pmt, pv, fv, NumberValueObject.create(0.49), guess);
+
+            // All non-zero values should match type=1, not type=0
+            expect(getObjectValue(result02, true)).toBe(value1);
+            expect(getObjectValue(resultNeg1, true)).toBe(value1);
+            expect(getObjectValue(result049, true)).toBe(value1);
+
+            // Verify they don't match type=0
+            expect(getObjectValue(result02, true)).not.toBe(value0);
+            expect(getObjectValue(resultNeg1, true)).not.toBe(value0);
+            expect(getObjectValue(result049, true)).not.toBe(value0);
+        });
     });
 });

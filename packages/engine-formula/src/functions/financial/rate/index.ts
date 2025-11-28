@@ -80,7 +80,7 @@ export class Rate extends BaseFunction {
             let typeValue = +_typeObject.getValue();
             const guessValue = +_guessObject.getValue();
 
-            typeValue = typeValue >= 0.5 ? 1 : 0;
+            typeValue = typeValue ? 1 : 0;
 
             if (nperValue <= 0) {
                 return ErrorValueObject.create(ErrorType.NUM);

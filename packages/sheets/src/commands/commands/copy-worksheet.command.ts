@@ -16,25 +16,39 @@
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
+import type { IUniverSheetsConfig } from '../../controllers/config.schema';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
     CommandType,
     generateRandomId,
     ICommandService,
+    IConfigService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
+import { defaultCopySheetSplitConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-// Maximum number of cells per SetRangeValuesMutation to avoid overly large mutations
-const COPY_SHEET_CELL_BATCH_SIZE = 10000;
+/**
+ * Count the total number of cells in cellData
+ */
+function countCells(cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>): number {
+    let count = 0;
+    for (const rowKey of Object.keys(cellData)) {
+        const rowData = cellData[Number(rowKey)];
+        if (rowData) {
+            count += Object.keys(rowData).length;
+        }
+    }
+    return count;
+}
 
 /**
  * Split cellData into batches for SetRangeValuesMutation
@@ -134,6 +148,7 @@ interface ICopySheetMutationParams {
     unitId: string;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function buildCopySheetMutations(
     accessor: IAccessor,
     workbook: Workbook,
@@ -143,44 +158,66 @@ function buildCopySheetMutations(
     localeService: LocaleService,
     sheetInterceptorService: SheetInterceptorService
 ): ICopySheetMutationParams {
+    const configService = accessor.get(IConfigService);
+    const pluginConfig = configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+    const splitConfig = {
+        ...defaultCopySheetSplitConfig,
+        ...pluginConfig?.copySheetSplit,
+    };
+
     const config = Tools.deepClone(worksheet!.getConfig());
     config.name = getCopyUniqueSheetName(workbook, localeService, config.name);
     const newSheetId = generateRandomId();
     config.id = newSheetId;
     const sheetIndex = workbook.getSheetIndex(worksheet!);
 
-    // Extract cellData from config and create an empty sheet first
     const { cellData } = config;
-    const sheetConfigWithoutCellData = { ...config, cellData: {} };
+    const cellCount = countCells(cellData);
 
-    const insertSheetMutationParams: IInsertSheetMutationParams = {
-        index: sheetIndex + 1,
-        sheet: sheetConfigWithoutCellData,
-        unitId,
-    };
+    // Only split if the cell count exceeds the threshold
+    const shouldSplit = cellCount >= splitConfig.splitThreshold;
+
+    let insertSheetMutationParams: IInsertSheetMutationParams;
+    let setRangeValuesMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
+    let setRangeValuesUndoMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
+
+    if (shouldSplit) {
+        // Split mode: create empty sheet first, then set cell values in batches
+        const sheetConfigWithoutCellData = { ...config, cellData: {} };
+        insertSheetMutationParams = {
+            index: sheetIndex + 1,
+            sheet: sheetConfigWithoutCellData,
+            unitId,
+        };
+
+        setRangeValuesMutations = splitCellDataIntoBatches(
+            unitId,
+            newSheetId,
+            cellData,
+            splitConfig.batchSize
+        );
+
+        setRangeValuesUndoMutations = setRangeValuesMutations.map((mutation) => ({
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId,
+                subUnitId: newSheetId,
+                cellValue: createClearCellMatrix(mutation.params.cellValue),
+            } as ISetRangeValuesMutationParams,
+        }));
+    } else {
+        // No split: insert sheet with all cell data at once
+        insertSheetMutationParams = {
+            index: sheetIndex + 1,
+            sheet: config,
+            unitId,
+        };
+    }
 
     const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(
         accessor,
         insertSheetMutationParams
     );
-
-    // Split cellData into batches for SetRangeValuesMutation
-    const setRangeValuesMutations = splitCellDataIntoBatches(
-        unitId,
-        newSheetId,
-        cellData,
-        COPY_SHEET_CELL_BATCH_SIZE
-    );
-
-    // Generate undo mutations for SetRangeValuesMutation (clear the cells)
-    const setRangeValuesUndoMutations = setRangeValuesMutations.map((mutation) => ({
-        id: SetRangeValuesMutation.id,
-        params: {
-            unitId,
-            subUnitId: newSheetId,
-            cellValue: createClearCellMatrix(mutation.params.cellValue),
-        } as ISetRangeValuesMutationParams,
-    }));
 
     const intercepted = sheetInterceptorService.onCommandExecute({
         id: COPY_SHEET_COMMAND_ID,

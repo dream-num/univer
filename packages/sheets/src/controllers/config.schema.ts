@@ -20,6 +20,21 @@ export const SHEETS_PLUGIN_CONFIG_KEY = 'sheets.config';
 
 export const configSymbol = Symbol(SHEETS_PLUGIN_CONFIG_KEY);
 
+export interface ICopySheetSplitConfig {
+    /**
+     * The minimum number of cells required to trigger splitting when copying a sheet.
+     * If the sheet has fewer cells than this threshold, it will be copied as a whole.
+     * @default 20000
+     */
+    splitThreshold?: number;
+
+    /**
+     * The maximum number of cells per batch when splitting.
+     * @default 6000
+     */
+    batchSize?: number;
+}
+
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
     override?: DependencyOverride;
@@ -43,6 +58,17 @@ export interface IUniverSheetsConfig {
      * @default true
      */
     freezeSync?: boolean;
+
+    /**
+     * Configuration for copy sheet splitting behavior.
+     * When copying a large sheet, it can be split into multiple mutations to avoid overly large mutations.
+     */
+    copySheetSplit?: ICopySheetSplitConfig;
 }
+
+export const defaultCopySheetSplitConfig: Required<ICopySheetSplitConfig> = {
+    splitThreshold: 20000,
+    batchSize: 6000,
+};
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

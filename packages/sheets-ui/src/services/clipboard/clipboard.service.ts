@@ -136,7 +136,7 @@ export interface ISheetClipboardService {
     rePasteWithPasteType(type: IPasteHookKeyType): boolean;
     disposePasteOptionsCache(): void;
 
-    generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent>;
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, copyType?: COPY_TYPE): Nullable<ICopyContent>;
     copyContentCache(): CopyContentCache; // return the cache content for inner copy/cut/paste.
     addClipboardHook(hook: ISheetClipboardHook): IDisposable; // add a hook to the clipboard service
     getClipboardHooks(): ISheetClipboardHook[]; // get all hooks
@@ -239,7 +239,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range);
+        const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range, copyType);
 
         if (!copyContent) {
             return false;

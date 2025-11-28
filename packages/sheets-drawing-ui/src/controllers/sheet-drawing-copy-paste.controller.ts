@@ -120,10 +120,16 @@ export class SheetsDrawingCopyPasteController extends Disposable {
             id: 'SHEET_IMAGE_UI_PLUGIN',
 
             onBeforeCopy: (unitId, subUnitId, range, copyType) => {
+                this._copyInfo = null;
+
                 const focusDrawings = this._focusedDrawings;
                 if (focusDrawings.length > 0) {
                     // handle single drawing copy
                     const [drawing] = focusDrawings;
+
+                    if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                        return;
+                    }
 
                     if (copyType === COPY_TYPE.CUT) {
                         const params: IDeleteDrawingCommandParams = {
@@ -228,6 +234,9 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
         Object.keys(drawings).forEach((drawingId) => {
             const drawing = drawings[drawingId];
+            if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                return;
+            }
             const { transform } = drawing;
             if ((drawing as ISheetDrawing).anchorType !== SheetDrawingAnchorType.Both) {
                 return;

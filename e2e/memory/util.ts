@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Page } from '@playwright/test';
+import type { CDPSession, Page } from '@playwright/test';
 
 interface IMetrics {
     JSHeapUsedSize: number;
@@ -27,8 +27,7 @@ interface IMetrics {
  * @return {IMetrics}
  * @see {@link https://github.com/microsoft/playwright/issues/18071}
  */
-export async function getMetrics(page: Page): Promise<IMetrics> {
-    const client = await page.context().newCDPSession(page);
+export async function getMetrics(client: CDPSession): Promise<IMetrics> {
     await client.send('Performance.enable');
     await client.send('HeapProfiler.collectGarbage');
     const perfMetricObject = await client.send('Performance.getMetrics');

@@ -54,8 +54,7 @@ export class DataValidationListCacheService extends Disposable {
         this.disposeWithMe(
             this._dataValidationModel.ruleChange$.subscribe((change) => {
                 if (change.type === 'remove' || change.type === 'update') {
-                    const cache = this._cache.get(change.unitId)?.get(change.subUnitId);
-                    cache?.delete(change.rule.uid);
+                    this.markRuleDirty(change.unitId, change.subUnitId, change.rule.uid);
                 }
             })
         );

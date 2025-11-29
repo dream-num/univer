@@ -21,6 +21,7 @@ import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/dat
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
+import { DataValidationListCacheService } from './dv-list-cache.service';
 
 type RuleId = string;
 type UnitId = string;
@@ -34,7 +35,8 @@ export class DataValidationFormulaService extends Disposable {
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService
+        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService,
+        @Inject(DataValidationListCacheService) private readonly _listCacheService: DataValidationListCacheService
     ) {
         super();
         this._initFormulaResultHandler();
@@ -52,12 +54,16 @@ export class DataValidationFormulaService extends Disposable {
                     const results = unitMap[subUnitId];
                     const formulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
                     results.forEach((result) => {
-                        if (formulaMap.get(result.extra?.ruleId)) {
-                            const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
+                        const ruleId = result.extra?.ruleId;
+                        if (ruleId && formulaMap.get(ruleId)) {
+                            // Mark list cache dirty when formula result changes
+                            this._listCacheService.markRuleDirty(unitId, subUnitId, ruleId);
+
+                            const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
                             if (rule) {
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }
-                        };
+                        }
                     });
                 }
             }

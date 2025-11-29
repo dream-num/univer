@@ -39,7 +39,7 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationListCacheService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
@@ -96,6 +96,7 @@ export interface ITestBed {
     injector: Injector;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -126,6 +127,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
                 // data validation
                 [DataValidationCacheService],
                 [DataValidationFormulaService],
+                [DataValidationListCacheService],
                 [DataValidationCustomFormulaService],
                 [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],

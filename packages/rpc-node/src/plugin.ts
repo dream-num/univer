@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IMessageProtocol } from '@univerjs/rpc';
-import type { Serializable } from 'node:child_process';
+import type { ChildProcess, Serializable } from 'node:child_process';
 import type { IUniverRPCNodeMainConfig, IUniverRPCNodeWorkerThreadConfig } from './controllers/config.schema';
 import { fork } from 'node:child_process';
 import process from 'node:process';
@@ -36,6 +36,8 @@ import { defaultPluginMainThreadConfig, defaultPluginWorkerThreadConfig, PLUGIN_
 
 export class UniverRPCNodeMainPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_NODE_MAIN_PLUGIN';
+
+    private _child: ChildProcess | null = null;
 
     constructor(
         private readonly _config: Partial<IUniverRPCNodeMainConfig> = defaultPluginMainThreadConfig,
@@ -59,7 +61,7 @@ export class UniverRPCNodeMainPlugin extends Plugin {
             throw new Error('[UniverRPCNodeMainPlugin] workerSrc is required for UniverRPCNodeMainPlugin');
         }
 
-        const messageProtocol = createNodeMessagePortOnMain(this._injector, workerSrc);
+        const [messageProtocol, child] = createNodeMessagePortOnMain(this._injector, workerSrc);
 
         const dependencies: Dependency[] = [
             [IRPCChannelService, {
@@ -72,6 +74,16 @@ export class UniverRPCNodeMainPlugin extends Plugin {
         dependencies.forEach((dependency) => this._injector.add(dependency));
 
         this._injector.get(DataSyncPrimaryController);
+        this._child = child;
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        if (this._child) {
+            this._child.kill();
+            this._child = null;
+        }
     }
 }
 
@@ -107,7 +119,7 @@ export class UniverRPCNodeWorkerPlugin extends Plugin {
     }
 }
 
-function createNodeMessagePortOnMain(injector: Injector, path: string): IMessageProtocol {
+function createNodeMessagePortOnMain(injector: Injector, path: string): [IMessageProtocol, ChildProcess] {
     const logService = injector.get(ILogService);
 
     const child = fork(path);
@@ -128,7 +140,7 @@ function createNodeMessagePortOnMain(injector: Injector, path: string): IMessage
         }).pipe(shareReplay(1)),
     };
 
-    return messageProtocol;
+    return [messageProtocol, child];
 }
 
 function createNodeWorkerMessageProtocol(): IMessageProtocol {

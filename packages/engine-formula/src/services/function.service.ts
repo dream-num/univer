@@ -65,7 +65,6 @@ export class FunctionService extends Disposable implements IFunctionService {
 
     override dispose(): void {
         super.dispose();
-        console.trace(`[FunctionService] disposed: ${this._functionDescriptions.size} descriptions and ${this._functionExecutors.size} executors cleared.`);
         this._functionExecutors.clear();
         this._functionDescriptions.clear();
     }
@@ -75,7 +74,6 @@ export class FunctionService extends Disposable implements IFunctionService {
             const func = functions[i];
             this._functionExecutors.set(func.name, func);
         }
-        console.trace(`[FunctionService] registered ${functions.length} function executors. Current total function executors: ${this._functionExecutors.size}.`);
     }
 
     getExecutors() {

@@ -75,35 +75,43 @@ function splitCellDataIntoBatches(
     let currentBatch: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let cellCount = 0;
 
-    const rows = Object.keys(cellData).map(Number).sort((a, b) => a - b);
-
-    for (const row of rows) {
+    for (const rowKey in cellData) {
+        const row = Number(rowKey);
         const rowData = cellData[row];
         if (!rowData) continue;
 
-        const cols = Object.keys(rowData).map(Number).sort((a, b) => a - b);
-        for (const col of cols) {
-            const cell = rowData[col];
-            if (cell === undefined) continue;
+        const rowCellCount = Object.keys(rowData).length;
 
-            if (!currentBatch[row]) {
-                currentBatch[row] = {};
-            }
-            currentBatch[row]![col] = cell;
-            cellCount++;
+        // If adding this row would exceed the batch size, push current batch first
+        if (cellCount > 0 && cellCount + rowCellCount > actualBatchSize) {
+            mutations.push({
+                id: SetRangeValuesMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    cellValue: currentBatch,
+                },
+            });
+            currentBatch = {};
+            cellCount = 0;
+        }
 
-            if (cellCount >= actualBatchSize) {
-                mutations.push({
-                    id: SetRangeValuesMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        cellValue: currentBatch,
-                    },
-                });
-                currentBatch = {};
-                cellCount = 0;
-            }
+        // Add entire row at once
+        currentBatch[row] = rowData;
+        cellCount += rowCellCount;
+
+        // If batch is full, push it
+        if (cellCount >= actualBatchSize) {
+            mutations.push({
+                id: SetRangeValuesMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    cellValue: currentBatch,
+                },
+            });
+            currentBatch = {};
+            cellCount = 0;
         }
     }
 

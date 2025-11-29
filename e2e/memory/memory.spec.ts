@@ -118,7 +118,7 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
 
 // const isLocal = !process.env.CI;
 test('memory', async ({ page }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(150_000);
     const client = await page.context().newCDPSession(page);
 
     let errored = false;

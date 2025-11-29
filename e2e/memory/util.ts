@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CDPSession, Page } from '@playwright/test';
+import type { CDPSession } from '@playwright/test';
 
 interface IMetrics {
     JSHeapUsedSize: number;

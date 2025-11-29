@@ -20,6 +20,7 @@ import type { ICollaborator, IWorkbookPermission, UnsubscribeFn, WorkbookMode, W
 import { IAuthzIoService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
+import { FPermission } from '../f-permission';
 import { WORKBOOK_PERMISSION_POINT_MAP } from './permission-point-map';
 import { UnitRole, WorkbookPermissionPoint } from './permission-types';
 
@@ -65,6 +66,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
     }>;
 
     private _subscriptions: Subscription[] = [];
+    private readonly _fPermission: FPermission;
 
     constructor(
         private readonly _unitId: string,
@@ -72,6 +74,9 @@ export class FWorkbookPermission implements IWorkbookPermission {
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IAuthzIoService private readonly _authzIoService: IAuthzIoService
     ) {
+        // Initialize FPermission instance
+        this._fPermission = this._injector.createInstance(FPermission);
+
         // Initialize BehaviorSubject (with initial value)
         this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
 
@@ -267,14 +272,8 @@ export class FWorkbookPermission implements IWorkbookPermission {
                 continue; // Skip unchanged values
             }
 
-            const instance = new PointClass(this._unitId);
-            const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-
-            if (!permissionPoint) {
-                this._permissionService.addPermissionPoint(instance);
-            }
-
-            this._permissionService.updatePermissionPoint(instance.id, value);
+            // Use FPermission's setWorkbookPermissionPoint method
+            this._fPermission.setWorkbookPermissionPoint(this._unitId, PointClass, value);
             pointsChanged.push({ point: pointKey, value, oldValue });
         }
 
@@ -338,7 +337,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const permission = workbook?.getWorkbookPermission();
-     * await permission?.setPoint(WorkbookPermissionPoint.Print, false);
+     * await permission?.setPoint(univerAPI.Enum.WorkbookPermissionPoint.Print, false);
      * ```
      */
     async setPoint(point: WorkbookPermissionPoint, value: boolean): Promise<void> {
@@ -352,14 +351,8 @@ export class FWorkbookPermission implements IWorkbookPermission {
             return; // Value unchanged, no update needed
         }
 
-        const instance = new PointClass(this._unitId);
-        const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
-
-        if (!permissionPoint) {
-            this._permissionService.addPermissionPoint(instance);
-        }
-
-        this._permissionService.updatePermissionPoint(instance.id, value);
+        // Use FPermission's setWorkbookPermissionPoint method
+        this._fPermission.setWorkbookPermissionPoint(this._unitId, PointClass, value);
 
         // Update snapshot (the Observable stream will automatically emit the change)
         const newSnapshot = this._buildSnapshot();
@@ -374,7 +367,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const permission = workbook?.getWorkbookPermission();
-     * const canPrint = permission?.getPoint(WorkbookPermissionPoint.Print);
+     * const canPrint = permission?.getPoint(univerAPI.Enum.WorkbookPermissionPoint.Print);
      * console.log(canPrint);
      * ```
      */
@@ -416,11 +409,11 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * await permission?.setCollaborators([
      *   {
      *     user: { userID: 'user1', name: 'John Doe', avatar: 'https://...' },
-     *     role: UnitRole.Editor
+     *     role: univerAPI.Enum.UnitRole.Editor
      *   },
      *   {
      *     user: { userID: 'user2', name: 'Jane Smith', avatar: '' },
-     *     role: UnitRole.Reader
+     *     role: univerAPI.Enum.UnitRole.Reader
      *   }
      * ]);
      * ```
@@ -463,7 +456,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * const permission = workbook?.getWorkbookPermission();
      * await permission?.addCollaborator(
      *   { userID: 'user1', name: 'John Doe', avatar: 'https://...' },
-     *   UnitRole.Editor
+     *   univerAPI.Enum.UnitRole.Editor
      * );
      * ```
      */
@@ -498,7 +491,7 @@ export class FWorkbookPermission implements IWorkbookPermission {
      * const permission = workbook?.getWorkbookPermission();
      * await permission?.updateCollaborator(
      *   { userID: 'user1', name: 'John Doe Updated', avatar: 'https://...' },
-     *   UnitRole.Reader
+     *   univerAPI.Enum.UnitRole.Reader
      * );
      * ```
      */

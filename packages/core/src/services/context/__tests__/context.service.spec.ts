@@ -15,7 +15,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { ContextService } from '../context.service';
 
 const TEXT_CONTEXT_KEY = 'TEST_CONTEXT_KEY';

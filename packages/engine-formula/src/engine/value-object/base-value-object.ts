@@ -119,6 +119,10 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
+    isImage() {
+        return false;
+    }
+
     sum(): BaseValueObject {
         return ErrorValueObject.create(ErrorType.VALUE);
     }

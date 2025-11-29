@@ -31,6 +31,7 @@ import {
 } from './controllers/config.schema';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaController } from './controllers/formula.controller';
+import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import { SuperTableController } from './controllers/super-table.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
@@ -101,6 +102,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],
             [ArrayFormulaCellInterceptorController],
+            [ImageFormulaCellInterceptorController],
             [TriggerCalculationController],
             [UpdateFormulaController],
             [ActiveDirtyController],
@@ -126,6 +128,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaController],
             [ActiveDirtyController],
             [ArrayFormulaCellInterceptorController],
+            [ImageFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
         ]);

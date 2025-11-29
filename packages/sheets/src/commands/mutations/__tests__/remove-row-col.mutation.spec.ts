@@ -20,7 +20,6 @@ import type {
     IRemoveRowsMutationParams,
 } from '../../../basics/interfaces/mutation-interface';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-
 import { beforeEach, describe, expect, it } from 'vitest';
 import { InsertColMutation, InsertRowMutation } from '../insert-row-col.mutation';
 import {

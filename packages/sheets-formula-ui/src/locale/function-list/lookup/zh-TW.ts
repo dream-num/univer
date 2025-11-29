@@ -263,8 +263,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            source: { name: 'source', detail: '使用 「HTTP」 通訊協定之影像檔案的 URL 路徑。' },
+            altText: { name: 'alt_text', detail: '描述協助工具影像的替代文字。' },
+            sizing: { name: 'sizing', detail: '指定影像維度。' },
+            height: { name: 'height', detail: '影像的自訂高度 (像素)。' },
+            width: { name: 'width', detail: '影像的自訂寬度 (像素)。' },
         },
     },
     INDEX: {

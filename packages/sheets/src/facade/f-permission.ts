@@ -15,12 +15,15 @@
  */
 
 import type { RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
-import type { ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
+import type { ICollaborator } from '@univerjs/protocol';
+import type { IAddRangeProtectionMutationParams, ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { FRange } from './f-range';
+import type { IRangeProtectionOptions, IWorksheetProtectionOptions } from './permission/permission-types';
 import { cellToRange, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorkbookPermissionService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, EditStateEnum, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, ViewStateEnum, WorkbookEditablePermission, WorkbookPermissionService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { UnitRole } from './permission/permission-types';
 
 /**
  * @description Used to generate permission instances to control permissions for the entire workbook
@@ -156,6 +159,7 @@ export class FPermission extends FBase {
      * you need to modify the permission points with the permissionId returned by this function.
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
+     * @param {IWorksheetProtectionOptions} options - Optional protection options including allowed users and name.
      * @returns {Promise<string | undefined>} - Returns the `permissionId` if the permission is successfully added. If the operation fails or no result is returned, it resolves to `undefined`.
      *
      * @example
@@ -167,23 +171,31 @@ export class FPermission extends FBase {
      * const subUnitId = worksheet.getSheetId();
      * // Note that there will be no permission changes after this step is completed. It only returns an ID for subsequent permission changes.
      * // For details, please see the example of the **`setWorksheetPermissionPoint`** API.
-     * const permissionId = await permission.addWorksheetBasePermission(unitId, subUnitId)
+     * const permissionId = await permission.addWorksheetBasePermission(unitId, subUnitId, {
+     *   allowedUsers: ['user1', 'user2'],
+     *   name: 'My Protection'
+     * })
      * // Can still edit and read it.
      * console.log('debugger', permissionId)
      * ```
      */
-    async addWorksheetBasePermission(unitId: string, subUnitId: string): Promise<string | undefined> {
-        const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
-        if (hasRangeProtection) {
-            throw new Error('sheet protection cannot intersect with range protection');
+    async addWorksheetBasePermission(unitId: string, subUnitId: string, options?: IWorksheetProtectionOptions): Promise<string | undefined> {
+        // const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+        // if (hasRangeProtection) {
+        //     throw new Error('sheet protection cannot intersect with range protection');
+        // }
+        let collaborators: ICollaborator[] = [];
+        if (options?.allowedUsers) {
+            collaborators = options.allowedUsers.map((id) => ({ id, role: UnitRole.Editor, subject: undefined }));
         }
+
         const permissionId = await this._authzIoService.create({
             objectType: UnitObject.Worksheet,
             worksheetObject: {
-                collaborators: [],
+                collaborators,
                 unitID: unitId,
                 strategies: [],
-                name: '',
+                name: options?.name || '',
                 scope: undefined,
             },
         });
@@ -258,10 +270,10 @@ export class FPermission extends FBase {
         const isBasePoint = FPointClass === WorksheetEditPermission || FPointClass === WorksheetViewPermission;
         if (isBasePoint) {
             if (!hasBasePermission) {
-                const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
-                if (hasRangeProtection) {
-                    throw new Error('sheet protection cannot intersect with range protection');
-                }
+                // const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+                // if (hasRangeProtection) {
+                //     throw new Error('sheet protection cannot intersect with range protection');
+                // }
                 permissionId = await this.addWorksheetBasePermission(unitId, subUnitId);
             } else {
                 permissionId = hasBasePermission.permissionId;
@@ -331,6 +343,7 @@ export class FPermission extends FBase {
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {FRange[]} ranges - The ranges to be protected.
+     * @param {IRangeProtectionOptions} options - Optional protection options including allowed users and name.
      * @returns {Promise<{ permissionId: string, ruleId: string } | undefined>} - Returns an object containing the `permissionId` and `ruleId` if the range protection is successfully added. If the operation fails or no result is returned, it resolves to `undefined`. permissionId is used to stitch permission point ID，ruleId is used to store permission rules
      *
      * @example
@@ -344,7 +357,10 @@ export class FPermission extends FBase {
      * const range = worksheet.getRange('A1:B2');
      * const ranges = [];
      * ranges.push(range);
-     * const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
+     * const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges, {
+     *   name: 'Protected Area',
+     *   allowEdit: false
+     * });
      * const {permissionId, ruleId} = res;
      * console.log('debugger', permissionId, ruleId);
      *
@@ -358,25 +374,25 @@ export class FPermission extends FBase {
      * }]);
      * ```
      */
-    async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: FRange[]): Promise<{
+    async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: FRange[], options?: IRangeProtectionOptions): Promise<{
         permissionId: string;
         ruleId: string;
     } | undefined> {
-        // The permission ID generation here only provides the most basic permission type. If need collaborators later, need to expand this
+        // Create permission ID with collaborators support
         const permissionId = await this._authzIoService.create({
             objectType: UnitObject.SelectRange,
             selectRangeObject: {
-                collaborators: [],
+                collaborators: options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
                 unitID: unitId,
-                name: '',
+                name: options?.name || '',
                 scope: undefined,
             },
         });
         const ruleId = `ruleId_${generateRandomId(6)}`;
-        const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-        if (worksheetProtection) {
-            throw new Error('sheet protection cannot intersect with range protection');
-        }
+        // const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+        // if (worksheetProtection) {
+        //     throw new Error('sheet protection cannot intersect with range protection');
+        // }
         const subunitRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
         const overlap = subunitRuleList.some((rule) => {
             return rule.ranges.some((range) => {
@@ -388,7 +404,11 @@ export class FPermission extends FBase {
         if (overlap) {
             throw new Error('range protection cannot intersect');
         }
-        const res = this._commandService.syncExecuteCommand(AddRangeProtectionMutation.id, {
+
+        // Determine view and edit states
+        const viewState = this._determineRangeViewState(options);
+        const editState = this._determineRangeEditState(options);
+        const params: IAddRangeProtectionMutationParams = {
             unitId,
             subUnitId,
             rules: [{
@@ -398,14 +418,41 @@ export class FPermission extends FBase {
                 subUnitId,
                 ranges: ranges.map((range) => range.getRange()),
                 id: ruleId,
+                description: options?.name,
+                viewState,
+                editState,
             }],
-        });
+        };
+
+        const res = this._commandService.syncExecuteCommand(AddRangeProtectionMutation.id, params);
         if (res) {
             return {
                 permissionId,
                 ruleId,
             };
         }
+    }
+
+    /**
+     * Determine view state from range protection options
+     * @private
+     */
+    private _determineRangeViewState(options?: IRangeProtectionOptions): ViewStateEnum {
+        if (options?.allowViewByOthers === false) {
+            return ViewStateEnum.NoOneElseCanView; // ViewStateEnum.NoOneElseCanView
+        }
+        return ViewStateEnum.OthersCanView; // ViewStateEnum.OthersCanView
+    }
+
+    /**
+     * Determine edit state from range protection options
+     * @private
+     */
+    private _determineRangeEditState(options?: IRangeProtectionOptions): EditStateEnum {
+        if (options?.allowEdit === true && options?.allowedUsers?.length) {
+            return EditStateEnum.DesignedUserCanEdit;
+        }
+        return EditStateEnum.OnlyMe;
     }
 
     /**

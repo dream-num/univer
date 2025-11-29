@@ -15,12 +15,11 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-
-import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Randbetween } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_MATH } from '../../function-names';
+import { Randbetween } from '../index';
 
 describe('Test randbetween function', () => {
     const testFunction = new Randbetween(FUNCTION_NAMES_MATH.RANDBETWEEN);

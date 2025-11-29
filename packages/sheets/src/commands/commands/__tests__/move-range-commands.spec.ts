@@ -17,7 +17,6 @@
 import type { Injector, IRange, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, Tools, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections';

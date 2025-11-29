@@ -95,7 +95,7 @@ const locale: typeof enUS = {
         confirm: '確認',
         cancel: 'キャンセル',
     },
-    'global-shortcut': '전역 단축키',
+    'global-shortcut': 'グローバルショートカット',
     'zoom-slider': {
         resetTo: 'リセット',
     },

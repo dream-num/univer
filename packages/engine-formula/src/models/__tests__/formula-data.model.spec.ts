@@ -17,7 +17,6 @@
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { IUniverInstanceService, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
 

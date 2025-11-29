@@ -17,7 +17,6 @@
 import type { Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';

@@ -28,7 +28,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { BoldMenuItemFactory } from '../menu';
 import { createMenuTestBed } from './create-menu-test-bed';
 

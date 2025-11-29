@@ -21,22 +21,20 @@ import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { PrefixNode } from '../ast-node/prefix-node';
 
-const minusRegExp = new RegExp(prefixToken.MINUS, 'g');
-const atRegExp = new RegExp(prefixToken.AT, 'g');
+// const minusRegExp = new RegExp(prefixToken.MINUS, 'g');
+// const atRegExp = new RegExp(prefixToken.AT, 'g');
 
 export function prefixHandler(tokenTrimParam: string, functionService: IFunctionService, runtimeService: IFormulaRuntimeService) {
     let minusPrefixNode: Nullable<PrefixNode>;
     let atPrefixNode: Nullable<PrefixNode>;
     let tokenTrim = tokenTrimParam;
-    const prefix = tokenTrim.slice(0, 2);
+    const prefix = tokenTrim[0];
     let sliceLength = 0;
-    if (prefix[0] === prefixToken.MINUS) {
+    if (prefix === prefixToken.MINUS) {
         const functionExecutor = functionService.getExecutor(FUNCTION_NAMES_META.MINUS);
         minusPrefixNode = new PrefixNode(runtimeService, prefixToken.MINUS, functionExecutor);
         sliceLength++;
-    }
-
-    if (prefix[0] === prefixToken.AT) {
+    } else if (prefix === prefixToken.AT) {
         atPrefixNode = new PrefixNode(runtimeService, prefixToken.AT);
         if (minusPrefixNode) {
                 // minusPrefixNode.addChildren(atPrefixNode);

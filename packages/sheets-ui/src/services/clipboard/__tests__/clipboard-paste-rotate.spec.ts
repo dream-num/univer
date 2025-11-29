@@ -26,9 +26,8 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import { ISheetClipboardService } from '../clipboard.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
 import { rotateSampleByUniver } from './constant';
 

@@ -24,11 +24,12 @@ import type {
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
+    IUnitImageFormulaDataType,
     IUnitRowData,
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
-
+import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 import { BooleanNumber, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
@@ -43,6 +44,8 @@ export class FormulaDataModel extends Disposable {
 
     private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
 
+    private _unitImageFormulaData: IUnitImageFormulaDataType = {};
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
@@ -54,6 +57,7 @@ export class FormulaDataModel extends Disposable {
         super.dispose();
         this._arrayFormulaRange = {};
         this._arrayFormulaCellData = {};
+        this._unitImageFormulaData = {};
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
@@ -213,6 +217,14 @@ export class FormulaDataModel extends Disposable {
         this._arrayFormulaCellData = value;
     }
 
+    getUnitImageFormulaData() {
+        return this._unitImageFormulaData;
+    }
+
+    setUnitImageFormulaData(value: IUnitImageFormulaDataType) {
+        this._unitImageFormulaData = value;
+    }
+
     mergeArrayFormulaRange(formulaData: IArrayFormulaRangeType) {
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
@@ -238,6 +250,38 @@ export class FormulaDataModel extends Disposable {
                 }
             });
         });
+    }
+
+    mergeUnitImageFormulaData(formulaData: IUnitImageFormulaDataType) {
+        const unitIds = Object.keys(formulaData);
+
+        for (let i = 0; i < unitIds.length; i++) {
+            const unitId = unitIds[i];
+
+            const sheetData = formulaData[unitId];
+            if (!sheetData) continue;
+
+            if (!this._unitImageFormulaData[unitId]) {
+                this._unitImageFormulaData[unitId] = {};
+            }
+
+            const sheetIds = Object.keys(sheetData);
+
+            for (let j = 0; j < sheetIds.length; j++) {
+                const sheetId = sheetIds[j];
+
+                const imageFormulaMatrix = sheetData[sheetId];
+                if (!imageFormulaMatrix) continue;
+
+                if (!this._unitImageFormulaData[unitId][sheetId]) {
+                    this._unitImageFormulaData[unitId][sheetId] = new ObjectMatrix<Nullable<IImageFormulaInfo>>();
+                }
+
+                imageFormulaMatrix.forValue((r, c, v) => {
+                    this._unitImageFormulaData[unitId]![sheetId].setValue(r, c, v);
+                });
+            }
+        }
     }
 
     deleteArrayFormulaRange(unitId: string, sheetId: string, row: number, column: number) {
@@ -446,6 +490,19 @@ export class FormulaDataModel extends Disposable {
 
         cellMatrix.forValue((r, c, cell) => {
             clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
+        });
+    }
+
+    updateImageFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
+        const imageFormulaData = this._unitImageFormulaData[unitId]?.[sheetId];
+        if (!imageFormulaData) {
+            return;
+        }
+
+        const cellMatrix = new ObjectMatrix(cellValue);
+
+        cellMatrix.forValue((r, c) => {
+            imageFormulaData.realDeleteValue(r, c);
         });
     }
 

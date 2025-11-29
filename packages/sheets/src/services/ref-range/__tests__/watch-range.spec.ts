@@ -16,7 +16,6 @@
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
 import type { IRemoveColMutationParams, IRemoveRowsMutationParams } from '../../../basics';
-
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';

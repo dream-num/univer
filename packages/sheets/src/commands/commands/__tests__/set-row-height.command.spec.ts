@@ -25,7 +25,6 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import {

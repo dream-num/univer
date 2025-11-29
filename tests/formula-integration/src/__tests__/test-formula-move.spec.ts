@@ -15,7 +15,11 @@
  */
 
 import { describe, it } from 'vitest';
-import { expectMoveFormulaCellResultMatchesSnapshot, expectMoveFormulaRowsResultMatchesSnapshot, expectMoveFormulaSiRowsResultMatchesSnapshot } from '../__testing__/test-formula-move';
+import {
+    expectMoveFormulaCellResultMatchesSnapshot,
+    expectMoveFormulaRowsResultMatchesSnapshot,
+    expectMoveFormulaSiRowsResultMatchesSnapshot,
+} from '../__testing__/test-formula-move';
 
 describe('Test formula move', () => {
     it('move formula rows', () => {

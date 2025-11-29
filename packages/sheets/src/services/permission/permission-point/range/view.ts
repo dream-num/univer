@@ -22,7 +22,7 @@ export class RangeProtectionPermissionViewPoint implements IPermissionPoint {
     type = UnitObject.SelectRange;
     subType = UnitAction.View;
     status = PermissionStatus.INIT;
-    value = true;
+    value = false;
     id: string;
     unitId: string;
     subUnitId: string;

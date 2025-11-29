@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import { CellValueType } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { needsUpdateCellValue } from '../tools';
 
 describe('Test tool', () => {

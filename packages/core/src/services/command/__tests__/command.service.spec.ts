@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+import type { IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
-
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService } from '../../log/log.service';
-import type { IMultiCommand } from '../command.service';
 import {
     CommandService,
     CommandType,

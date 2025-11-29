@@ -15,8 +15,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { LocaleService } from '../locale.service';
 import { LocaleType } from '../../../types/enum/locale-type';
+import { LocaleService } from '../locale.service';
 
 describe('LocaleService', () => {
     let localeService: LocaleService;

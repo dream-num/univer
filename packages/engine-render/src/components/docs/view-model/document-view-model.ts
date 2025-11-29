@@ -111,6 +111,12 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
             const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
             const tempParagraphList = tableCellList.length > 0 ? cellParagraphList : paragraphList;
 
+            if (tempParagraphList.length === 0) {
+                const emptyParagraph = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, '');
+                emptyParagraph.setIndexRange(i, i - 1);
+                tempParagraphList.push(emptyParagraph);
+            }
+
             batchParent(sectionNode, tempParagraphList);
 
             const lastNode = tempParagraphList[tempParagraphList.length - 1];

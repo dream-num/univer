@@ -15,7 +15,6 @@
  */
 
 import { CellValueType } from '@univerjs/core';
-
 import { describe, expect, it } from 'vitest';
 import { extractFormulaNumber } from '../utils';
 

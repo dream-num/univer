@@ -68,7 +68,7 @@ export interface IAutoFillService {
     addHook(hook: ISheetAutoFillHook): IDisposable;
     fillData(applyType: APPLY_TYPE): boolean;
 
-    triggerAutoFill(unitId: string, subUnitId: string, source: IRange, target: IRange): Promise<boolean>;
+    triggerAutoFill(unitId: string, subUnitId: string, source: IRange, target: IRange, manualApplyType?: APPLY_TYPE): Promise<boolean>;
 }
 
 export interface IApplyMenuItem {
@@ -162,8 +162,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._prevUndos = [];
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    async triggerAutoFill(unitId: string, subUnitId: string, source: IRange, selection: IRange) {
+    // eslint-disable-next-line max-lines-per-function, complexity
+    async triggerAutoFill(unitId: string, subUnitId: string, source: IRange, selection: IRange, manualApplyType?: APPLY_TYPE) {
         // if source range === dest range, do nothing;
         if (
             source.startColumn === selection.startColumn &&
@@ -231,6 +231,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         if (!autoFillSource || !autoFillTarget) {
             return false;
         }
+
         this.autoFillLocation = {
             source: autoFillSource,
             target: autoFillTarget,
@@ -248,6 +249,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         });
 
         this._initPrevUndo();
+
+        // If manual apply type is given, use it
+        if (manualApplyType) {
+            return this.fillData(manualApplyType);
+        }
+
         // set apply type will trigger fillData
         for (let i = 0; i < preferTypes.length; i++) {
             const menuItem = this.menu.find((m) => m.value === preferTypes[i]);
@@ -255,6 +262,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                 return this.fillData(preferTypes[i]);
             }
         }
+
         // if no hook return apply type, use first available apply type
         const first = this.menu.find((m) => m.disable === false)?.value;
         if (first) {
@@ -379,7 +387,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     // eslint-disable-next-line max-lines-per-function
     fillData(applyType: APPLY_TYPE) {
         this.applyType = applyType;
-        const { source, target, unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(), subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId() } = this.autoFillLocation || {};
+        const activeWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const activeUnitId = activeWorkbook?.getUnitId();
+        const activeSubUnitId = activeWorkbook?.getActiveSheet()?.getSheetId();
+        const { source, target, unitId = activeUnitId, subUnitId = activeSubUnitId } = this.autoFillLocation || {};
 
         if (!source || !target || !unitId || !subUnitId) {
             return false;
@@ -398,19 +409,22 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const activeHooks = this.getActiveHooks();
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!;
 
-        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-            selections: [
-                {
-                    primary: { ...(this._selectionManagerService.getCurrentLastSelection()?.primary ?? selection) },
-                    range: {
-                        ...selection,
-                        rangeType: RANGE_TYPE.NORMAL,
+        // If filling the active sheet, update the selection immediately
+        if (unitId === activeUnitId && subUnitId === activeSubUnitId) {
+            this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                selections: [
+                    {
+                        primary: { ...(this._selectionManagerService.getCurrentLastSelection()?.primary ?? selection) },
+                        range: {
+                            ...selection,
+                            rangeType: RANGE_TYPE.NORMAL,
+                        },
                     },
-                },
-            ],
-            unitId,
-            subUnitId,
-        });
+                ],
+                unitId,
+                subUnitId,
+            });
+        }
 
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];

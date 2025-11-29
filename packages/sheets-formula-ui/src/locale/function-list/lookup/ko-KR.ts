@@ -272,8 +272,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: '첫 번째' },
-            number2: { name: 'number2', detail: '두 번째' },
+            source: { name: 'source', detail: '이미지 파일의 "https" 프로토콜을 사용하는 URL 경로입니다. 필수.' },
+            altText: { name: 'alt_text', detail: '접근성을 위해 이미지를 설명하는 대체 텍스트입니다.' },
+            sizing: { name: 'sizing', detail: '이미지 차원을 지정합니다.' },
+            height: { name: 'height', detail: '이미지의 사용자 지정 높이(픽셀)입니다.' },
+            width: { name: 'width', detail: '이미지의 사용자 지정 너비(픽셀)입니다.' },
         },
     },
     INDEX: {

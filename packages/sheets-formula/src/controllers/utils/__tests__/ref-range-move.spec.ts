@@ -15,7 +15,6 @@
  */
 
 import { RANGE_TYPE } from '@univerjs/core';
-
 import { describe, expect, it } from 'vitest';
 import { checkMoveEdge, OriginRangeEdgeType } from '../ref-range-move';
 

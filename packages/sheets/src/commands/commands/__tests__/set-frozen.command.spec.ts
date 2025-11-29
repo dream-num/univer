@@ -17,7 +17,6 @@
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { SetFrozenMutation } from '../../mutations/set-frozen.mutation';
 import { SetFrozenCommand } from '../set-frozen.command';
 import { createCommandTestBed } from './create-command-test-bed';

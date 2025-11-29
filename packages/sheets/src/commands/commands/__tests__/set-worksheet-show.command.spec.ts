@@ -17,7 +17,6 @@
 import type { Injector, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';

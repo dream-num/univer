@@ -272,8 +272,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'nombre1', detail: 'primer' },
-            number2: { name: 'nombre2', detail: 'segon' },
+            source: { name: 'origen', detail: 'La ruta de acceso URL, mediante un protocolo "https", del archivo de imagen.' },
+            altText: { name: 'texto_alternativo', detail: 'Texto alternativo que describe la imagen para accesibilidad.' },
+            sizing: { name: 'dimensiones', detail: 'Especifica las dimensiones de la imagen.' },
+            height: { name: 'alto', detail: 'La altura personalizada de la imagen en píxeles.' },
+            width: { name: 'ancho', detail: 'La anchura personalizada de la imagen en píxeles.' },
         },
     },
     INDEX: {

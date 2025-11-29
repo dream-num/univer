@@ -44,7 +44,6 @@ import {
 } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import type { Univer } from '../../univer';
 import type { Workbook } from '../workbook';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test workbook', () => {

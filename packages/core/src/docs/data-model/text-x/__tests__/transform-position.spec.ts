@@ -15,7 +15,6 @@
  */
 
 import type { TextXAction } from '../action-types';
-
 import { describe, expect, it } from 'vitest';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';

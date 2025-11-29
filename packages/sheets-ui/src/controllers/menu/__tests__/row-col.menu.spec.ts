@@ -15,6 +15,7 @@
  */
 
 import type { Univer, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     DisposableCollection,
     ICommandService,
@@ -37,9 +38,7 @@ import {
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { ShowColMenuItemFactory, ShowRowMenuItemFactory } from '../menu';
 import { createMenuTestBed } from './create-menu-test-bed';
 

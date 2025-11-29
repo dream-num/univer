@@ -258,6 +258,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     clearSelectedObjects() {
+        if (this._selectedObjectMap.size === 0) {
+            return;
+        }
+
         this._selectedObjectMap.clear();
         this._cancelFocusSubscription?.unsubscribe();
         this._cancelFocusSubscription = null;

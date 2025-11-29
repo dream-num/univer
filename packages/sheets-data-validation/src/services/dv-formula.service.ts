@@ -56,11 +56,10 @@ export class DataValidationFormulaService extends Disposable {
                     results.forEach((result) => {
                         const ruleId = result.extra?.ruleId;
                         if (ruleId && formulaMap.get(ruleId)) {
-                            // Mark list cache dirty when formula result changes
-                            this._listCacheService.markRuleDirty(unitId, subUnitId, ruleId);
-
                             const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
                             if (rule) {
+                                 // Mark list cache dirty when formula result changes
+                                this._listCacheService.markRuleDirty(unitId, subUnitId, ruleId);
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }
                         }

@@ -33,6 +33,13 @@ export interface ICopySheetSplitConfig {
      * @default 6000
      */
     batchSize?: number;
+
+    /**
+     * The maximum number of chunks (batches) allowed when splitting.
+     * If the number of chunks exceeds this limit, the batch size will be automatically adjusted.
+     * @default 10
+     */
+    maxChunks?: number;
 }
 
 export interface IUniverSheetsConfig {
@@ -69,6 +76,7 @@ export interface IUniverSheetsConfig {
 export const defaultCopySheetSplitConfig: Required<ICopySheetSplitConfig> = {
     splitThreshold: 20000,
     batchSize: 6000,
+    maxChunks: 10,
 };
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

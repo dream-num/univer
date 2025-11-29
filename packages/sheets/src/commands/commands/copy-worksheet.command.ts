@@ -52,13 +52,25 @@ function countCells(cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>): 
 
 /**
  * Split cellData into batches for SetRangeValuesMutation
+ * @param unitId - The unit ID
+ * @param subUnitId - The sub unit ID (sheet ID)
+ * @param cellData - The cell data to split
+ * @param batchSize - The maximum number of cells per batch
+ * @param maxChunks - The maximum number of chunks allowed. If exceeded, batchSize will be adjusted.
  */
 function splitCellDataIntoBatches(
     unitId: string,
     subUnitId: string,
     cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
-    batchSize: number
+    batchSize: number,
+    maxChunks: number
 ): IMutationInfo<ISetRangeValuesMutationParams>[] {
+    // Calculate actual batch size based on maxChunks limit
+    const totalCells = countCells(cellData);
+    const estimatedChunks = Math.ceil(totalCells / batchSize);
+    const actualBatchSize = estimatedChunks > maxChunks
+        ? Math.ceil(totalCells / maxChunks)
+        : batchSize;
     const mutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
     let currentBatch: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let cellCount = 0;
@@ -80,7 +92,7 @@ function splitCellDataIntoBatches(
             currentBatch[row]![col] = cell;
             cellCount++;
 
-            if (cellCount >= batchSize) {
+            if (cellCount >= actualBatchSize) {
                 mutations.push({
                     id: SetRangeValuesMutation.id,
                     params: {
@@ -194,7 +206,8 @@ function buildCopySheetMutations(
             unitId,
             newSheetId,
             cellData,
-            splitConfig.batchSize
+            splitConfig.batchSize,
+            splitConfig.maxChunks
         );
 
         setRangeValuesUndoMutations = setRangeValuesMutations.map((mutation) => ({

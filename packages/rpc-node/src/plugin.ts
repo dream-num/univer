@@ -81,7 +81,12 @@ export class UniverRPCNodeMainPlugin extends Plugin {
         super.dispose();
 
         if (this._child) {
-            this._child.kill();
+            try {
+                this._child.kill();
+            }
+            catch (e) {
+                console.error('Failed to kill child process:', e);
+            }
             this._child = null;
         }
     }

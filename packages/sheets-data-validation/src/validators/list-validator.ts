@@ -170,8 +170,13 @@ export class ListValidator extends BaseDataValidator {
     override async isValidType(cellInfo: IValidatorCellInfo<Nullable<CellValue>>, formula: IFormulaResult<string[] | undefined>, rule: IDataValidationRule): Promise<boolean> {
         const { value, unitId, subUnitId } = cellInfo;
         const { formula1 = '' } = rule;
-        const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formula1Result = isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
+        const formula1Result = isFormulaString(formula1)
+            ? this._listCacheService.getOrCompute(
+                unitId,
+                subUnitId,
+                rule
+            ).list
+            : deserializeListOptions(formula1);
         const selected = this.parseCellValue(value!);
         return selected.every((i) => formula1Result.includes(i));
     }

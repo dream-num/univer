@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.12.3](/compare/v0.12.2...v0.12.3) (2025-11-29)
+
+
+### Bug Fixes
+
+* **API:** fix premission api example (#6199) 8da3fe9, closes #6199
+* **drawing:** fix the issue of cut and delete float image (#6215) cc3be15, closes #6215
+* **engine-formula:** stabilize RATE function with fast-path and adaptive damping (#6055) 8fbbb2d, closes #6055
+* fix auto-fill api opreate in non-active sheet (#6205) 9259343, closes #6205
+* handle empty sections in `parseDataStreamToTree` by ensuring an … (#6188) 0cbc370, closes #6188
+* **permission:** update default permission values to false (#6206) 93ce16e, closes #6206
+* **selection:** clean up empty cell styles in copyRangeStyles function (#6184) 16fa81a, closes #6184
+* **sheet:** ensure numfmt crash not effect all (#6201) 57c1d68, closes #6201
+* **sheets:** permission api (#6202) c4d7fe7, closes #6202
+
+
+### Features
+
+* add dispose for close univer worker (#6216) b8d3a2c, closes #6216
+* **facade:** add auto-fill api (#6204) 6127c4b, closes #6204
+* **sheets:** split large set-range-values mutation (#6191) e161f5e, closes #6191
+* update Japanese localization for various packages (#6207) 1551b81, closes #6207
+
+
+### Performance Improvements
+
+* **selection:** formula and selection (#6197) 344f773, closes #6197
+
 ## [0.12.2](https://github.com/dream-num/univer/compare/v0.12.1...v0.12.2) (2025-11-22)
 
 

@@ -38,7 +38,7 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationListCacheService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
@@ -130,6 +130,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             ([
                 // data validation
                 [DataValidationCacheService],
+                [DataValidationListCacheService],
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
                 [RegisterOtherFormulaService],

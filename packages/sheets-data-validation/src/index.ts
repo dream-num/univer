@@ -39,6 +39,7 @@ export { UniverSheetsDataValidationPlugin } from './plugin';
 export { DataValidationCacheService } from './services/dv-cache.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { DataValidationFormulaService } from './services/dv-formula.service';
+export { DataValidationListCacheService, type IListCacheItem } from './services/dv-list-cache.service';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 export { createDefaultNewRule } from './utils/create';
 export { getFormulaCellData, getFormulaResult } from './utils/formula';

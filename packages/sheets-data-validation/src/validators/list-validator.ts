@@ -20,32 +20,37 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { DataValidationListCacheService } from '../services/dv-list-cache.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { deserializeListOptions } from './util';
 
-export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>) {
+// Keep getRuleFormulaResultSet for backward compatibility (used in isValidType)
+export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>): string[] {
     if (!result) {
         return [];
     }
-    const resultSet = new Set<string>();
-    result.forEach(
-        (row) => {
-            row.forEach((cell) => {
-                const value = getCellValueOrigin(cell);
-                if (value !== null && value !== undefined) {
-                    if (typeof value !== 'string' && typeof cell?.s === 'object' && cell.s?.n?.pattern) {
-                        resultSet.add(numfmt.format(cell.s.n.pattern, value, { throws: false }));
-                        return;
-                    }
 
-                    if (isLegalFormulaResult(value.toString())) {
-                        resultSet.add(value.toString());
-                    }
+    const resultSet = new Set<string>();
+    for (let i = 0, rowLen = result.length; i < rowLen; i++) {
+        const row = result[i];
+        if (!row) continue;
+        for (let j = 0, colLen = row.length; j < colLen; j++) {
+            const cell = row[j];
+            const value = getCellValueOrigin(cell);
+            if (value !== null && value !== undefined) {
+                if (typeof value !== 'string' && typeof cell?.s === 'object' && cell.s?.n?.pattern) {
+                    resultSet.add(numfmt.format(cell.s.n.pattern, value, { throws: false }));
+                    continue;
                 }
-            });
+
+                const valueStr = typeof value === 'string' ? value : String(value);
+                if (isLegalFormulaResult(valueStr)) {
+                    resultSet.add(valueStr);
+                }
+            }
         }
-    );
+    }
 
     return [...resultSet];
 }
@@ -92,6 +97,8 @@ export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
     private _lexer = this.injector.get(LexerTreeBuilder);
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
+    private _listCacheService = this.injector.get(DataValidationListCacheService);
+
     order = 50;
     override readonly offsetFormulaByRange = false;
 
@@ -177,52 +184,63 @@ export class ListValidator extends BaseDataValidator {
         return this.localeService.t('dataValidation.list.error');
     }
 
-    getList(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
-        const { formula1 = '' } = rule;
-        const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return [];
+    private _getUnitAndSubUnit(currentUnitId?: string, currentSubUnitId?: string): { unitId: string; subUnitId: string } | null {
+        const workbook = (currentUnitId ? this._univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined)
+            ?? this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return null;
 
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
-        if (!worksheet) return [];
+        if (!worksheet) return null;
 
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-        const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
+        return {
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+        };
+    }
+
+    getList(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string): string[] {
+        const location = this._getUnitAndSubUnit(currentUnitId, currentSubUnitId);
+        if (!location) return [];
+
+        const { unitId, subUnitId } = location;
+        return this._listCacheService.getOrCompute(
+            unitId,
+            subUnitId,
+            rule
+        ).list;
     }
 
     async getListAsync(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
         const { formula1 = '' } = rule;
-        const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return [];
+        const location = this._getUnitAndSubUnit(currentUnitId, currentSubUnitId);
+        if (!location) return [];
 
-        const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
-        if (!worksheet) return [];
-
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const { unitId, subUnitId } = location;
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
     }
 
-    getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
-        const list = this.getList(rule, currentUnitId, currentSubUnitId);
-        const colorList = (rule.formula2 || '').split(',');
+    getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string): Array<{ label: string; color: string }> {
+        const location = this._getUnitAndSubUnit(currentUnitId, currentSubUnitId);
+        if (!location) return [];
 
-        return list.map((label, i) => ({ label, color: colorList[i] }));
+        const { unitId, subUnitId } = location;
+        return this._listCacheService.getOrCompute(
+            unitId,
+            subUnitId,
+            rule
+        ).listWithColor;
     }
 
-    getListWithColorMap(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
-        const list = this.getListWithColor(rule, currentUnitId, currentSubUnitId);
-        const map: Record<string, string> = {};
+    getListWithColorMap(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string): Record<string, string> {
+        const location = this._getUnitAndSubUnit(currentUnitId, currentSubUnitId);
+        if (!location) return {};
 
-        list.forEach((item) => {
-            if (item.color) {
-                map[item.label] = item.color;
-            }
-        });
-        return map;
+        const { unitId, subUnitId } = location;
+        return this._listCacheService.getOrCompute(
+            unitId,
+            subUnitId,
+            rule
+        ).colorMap;
     }
 }

@@ -36,7 +36,7 @@
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "fs-extra": "^11.3.2",
         "happy-dom": "20.0.10",
-        "javascript-obfuscator": "^4.1.1",
+        "javascript-obfuscator": "^4.2.0",
         "postcss-preset-env": "^10.4.0",
         "postcss-replace": "^2.0.1",
         "sort-keys": "^6.0.0",

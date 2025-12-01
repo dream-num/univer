@@ -27,6 +27,7 @@ export interface IListCacheItem {
     list: string[];
     listWithColor: Array<{ label: string; color: string }>;
     colorMap: Record<string, string>;
+    set: Set<string>;
 }
 
 type UnitId = string;
@@ -151,8 +152,8 @@ export class DataValidationListCacheService extends Disposable {
                 colorMap[item.label] = item.color;
             }
         }
-
-        const cacheItem: IListCacheItem = { list, listWithColor, colorMap };
+        const set = new Set(list);
+        const cacheItem: IListCacheItem = { list, listWithColor, colorMap, set };
         this.setCache(unitId, subUnitId, rule.uid, cacheItem);
 
         return cacheItem;

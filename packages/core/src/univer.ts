@@ -29,7 +29,7 @@ import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
 import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 import { IAuthzIoService } from './services/authz-io/type';
-import { CommandService, ICommandService } from './services/command/command.service';
+import { COMMAND_LOG_EXECUTION_CONFIG_KEY, CommandService, ICommandService } from './services/command/command.service';
 import { ConfigService, IConfigService } from './services/config/config.service';
 import { ContextService, IContextService } from './services/context/context.service';
 import { ErrorService } from './services/error/error.service';
@@ -83,6 +83,12 @@ export interface IUniverConfig {
     logLevel?: LogLevel;
 
     /**
+     * Whether to enable logging for command execution.
+     * @default false
+     */
+    logCommandExecution?: boolean;
+
+    /**
      * The override dependencies of the Univer instance.
      */
     override?: DependencyOverride;
@@ -113,12 +119,15 @@ export class Univer implements IDisposable {
     constructor(config: Partial<IUniverConfig> = {}, parentInjector?: Injector) {
         const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
-        const { theme, darkMode, locale, locales, logLevel } = config;
+        const { theme, darkMode, locale, locales, logLevel, logCommandExecution } = config;
         if (theme) this._injector.get(ThemeService).setTheme(theme);
         if (darkMode) this._injector.get(ThemeService).setDarkMode(darkMode);
         if (locales) this._injector.get(LocaleService).load(locales);
         if (locale) this._injector.get(LocaleService).setLocale(locale);
         if (logLevel) this._injector.get(ILogService).setLogLevel(logLevel);
+        if (logCommandExecution !== undefined) {
+            this._injector.get(IConfigService).setConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY, logCommandExecution);
+        }
 
         this._init(injector);
     }

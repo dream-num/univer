@@ -80,6 +80,7 @@ export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service'
 export { IAuthzIoService } from './services/authz-io/type';
 export {
     type CommandListener,
+    COMMAND_LOG_EXECUTION_CONFIG_KEY,
     CommandService,
     CommandType,
     type ICommand,
@@ -171,6 +172,7 @@ export {
 export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
 export type { IPosition } from './sheets/typedef';
+export * from './sheets/clone';
 export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';

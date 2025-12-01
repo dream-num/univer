@@ -22,8 +22,16 @@ import { createIdentifier, Inject, Injector } from '../../common/di';
 import { CustomCommandExecutionError } from '../../common/error';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
+import { IConfigService } from '../config/config.service';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
+
+/**
+ * The config key for enabling command execution logging.
+ * Set via `logCommandExecution` in `IUniverConfig` when calling `new Univer()`.
+ * @default true
+ */
+export const COMMAND_LOG_EXECUTION_CONFIG_KEY = 'command.logExecution';
 
 /**
  * The type of a command.
@@ -103,6 +111,16 @@ export interface IMutationCommonParams {
      * It is used to indicate which {@link CommandType.COMMAND} triggers the mutation.
      */
     trigger?: string;
+
+    /**
+     * Mark this mutation as a split chunk from a large mutation.
+     * When collaboration layer encounters this flag, it will send this mutation
+     * in a separate changeset to avoid oversized payloads.
+     *
+     * This is typically set by operations that split large data (e.g., copy worksheet,
+     * paste large ranges) into smaller chunks for better network transmission.
+     */
+    __splitChunk__?: boolean;
 }
 
 /**
@@ -301,7 +319,8 @@ export class CommandService extends Disposable implements ICommandService {
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
@@ -487,10 +506,12 @@ export class CommandService extends Disposable implements ICommandService {
     }
 
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {
-        this._logService.debug(
-            '[CommandService]',
-            `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
-        );
+        if (this._configService.getConfig<boolean>(COMMAND_LOG_EXECUTION_CONFIG_KEY) !== false) {
+            this._logService.debug(
+                '[CommandService]',
+                `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
+            );
+        }
 
         this._commandExecutingLevel++;
         let result: R | boolean;
@@ -507,10 +528,12 @@ export class CommandService extends Disposable implements ICommandService {
     }
 
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): R {
-        this._logService.debug(
-            '[CommandService]',
-            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
-        );
+        if (this._configService.getConfig<boolean>(COMMAND_LOG_EXECUTION_CONFIG_KEY) !== false) {
+            this._logService.debug(
+                '[CommandService]',
+                `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
+            );
+        }
 
         this._commandExecutingLevel++;
         let result: R | boolean;

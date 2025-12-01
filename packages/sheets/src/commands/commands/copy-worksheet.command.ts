@@ -19,6 +19,7 @@ import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../
 import type { IUniverSheetsConfig } from '../../controllers/config.schema';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
+    cloneWorksheetData,
     CommandType,
     generateRandomId,
     ICommandService,
@@ -27,7 +28,6 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
-    Tools,
 } from '@univerjs/core';
 import { defaultCopySheetSplitConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -90,6 +90,7 @@ function splitCellDataIntoBatches(
                     unitId,
                     subUnitId,
                     cellValue: currentBatch,
+                    __splitChunk__: true,
                 },
             });
             currentBatch = {};
@@ -108,6 +109,7 @@ function splitCellDataIntoBatches(
                     unitId,
                     subUnitId,
                     cellValue: currentBatch,
+                    __splitChunk__: true,
                 },
             });
             currentBatch = {};
@@ -123,6 +125,7 @@ function splitCellDataIntoBatches(
                 unitId,
                 subUnitId,
                 cellValue: currentBatch,
+                __splitChunk__: true,
             },
         });
     }
@@ -185,7 +188,7 @@ function buildCopySheetMutations(
         ...pluginConfig?.copySheetSplit,
     };
 
-    const config = Tools.deepClone(worksheet!.getConfig());
+    const config = cloneWorksheetData(worksheet!.getConfig());
     config.name = getCopyUniqueSheetName(workbook, localeService, config.name);
     const newSheetId = generateRandomId();
     config.id = newSheetId;

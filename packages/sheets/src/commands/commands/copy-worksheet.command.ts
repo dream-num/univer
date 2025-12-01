@@ -56,21 +56,13 @@ function countCells(cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>): 
  * @param subUnitId - The sub unit ID (sheet ID)
  * @param cellData - The cell data to split
  * @param batchSize - The maximum number of cells per batch
- * @param maxChunks - The maximum number of chunks allowed. If exceeded, batchSize will be adjusted.
  */
 function splitCellDataIntoBatches(
     unitId: string,
     subUnitId: string,
     cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
-    batchSize: number,
-    maxChunks: number
+    batchSize: number
 ): IMutationInfo<ISetRangeValuesMutationParams>[] {
-    // Calculate actual batch size based on maxChunks limit
-    const totalCells = countCells(cellData);
-    const estimatedChunks = Math.ceil(totalCells / batchSize);
-    const actualBatchSize = estimatedChunks > maxChunks
-        ? Math.ceil(totalCells / maxChunks)
-        : batchSize;
     const mutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
     let currentBatch: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let cellCount = 0;
@@ -83,7 +75,7 @@ function splitCellDataIntoBatches(
         const rowCellCount = Object.keys(rowData).length;
 
         // If adding this row would exceed the batch size, push current batch first
-        if (cellCount > 0 && cellCount + rowCellCount > actualBatchSize) {
+        if (cellCount > 0 && cellCount + rowCellCount > batchSize) {
             mutations.push({
                 id: SetRangeValuesMutation.id,
                 params: {
@@ -102,7 +94,7 @@ function splitCellDataIntoBatches(
         cellCount += rowCellCount;
 
         // If batch is full, push it
-        if (cellCount >= actualBatchSize) {
+        if (cellCount >= batchSize) {
             mutations.push({
                 id: SetRangeValuesMutation.id,
                 params: {
@@ -217,8 +209,7 @@ function buildCopySheetMutations(
             unitId,
             newSheetId,
             cellData,
-            splitConfig.batchSize,
-            splitConfig.maxChunks
+            splitConfig.batchSize
         );
 
         setRangeValuesUndoMutations = setRangeValuesMutations.map((mutation) => ({

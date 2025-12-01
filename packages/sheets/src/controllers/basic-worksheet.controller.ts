@@ -18,6 +18,7 @@ import type { IDisposable, IMutation, IStyleData } from '@univerjs/core';
 import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
+import { AddWorkbookStylesCommand } from '../commands/commands/add-workbook-styles.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
 import { AppendRowCommand } from '../commands/commands/append-row.command';
@@ -54,6 +55,7 @@ import { RegisterWorksheetRangeThemeStyleCommand } from '../commands/commands/re
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
+import { RemoveWorkbookStylesCommand } from '../commands/commands/remove-workbook-styles.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
 import { ReorderRangeCommand } from '../commands/commands/reorder-range.command';
 import {
@@ -115,6 +117,7 @@ import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.co
 import { UnregisterWorksheetRangeThemeStyleCommand } from '../commands/commands/unregister-range-theme.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddRangeThemeMutation } from '../commands/mutations/add-range-theme.mutation';
+import { AddWorkbookStylesMutation } from '../commands/mutations/add-workbook-styles.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../commands/mutations/add-worksheet-range-theme.mutation';
@@ -132,6 +135,7 @@ import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/
 import { RemoveRangeThemeMutation } from '../commands/mutations/remove-range-theme.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
+import { RemoveWorkbookStylesMutation } from '../commands/mutations/remove-workbook-styles.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
@@ -198,6 +202,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveWorksheetMergeMutation,
             RemoveNumfmtMutation,
             AddWorksheetMergeMutation,
+            AddWorkbookStylesMutation,
+            RemoveWorkbookStylesMutation,
             SetWorkbookNameMutation,
             SetWorksheetNameMutation,
             SetNumfmtMutation,
@@ -286,6 +292,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetTextWrapCommand,
                 SetVerticalTextAlignCommand,
                 SetWorkbookNameCommand,
+                AddWorkbookStylesCommand,
+                RemoveWorkbookStylesCommand,
                 SetWorksheetActivateCommand,
                 SetWorksheetActiveOperation,
 

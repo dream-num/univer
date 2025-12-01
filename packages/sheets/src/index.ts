@@ -56,6 +56,8 @@ export { SplitDelimiterEnum, splitRangeText } from './basics/split-range-text';
 export { findFirstNonEmptyCell } from './basics/utils';
 export { generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange } from './basics/utils';
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
+export { AddWorkbookStylesCommand } from './commands/commands/add-workbook-styles.command';
+export type { IAddWorkbookStylesCommandParams } from './commands/commands/add-workbook-styles.command';
 export {
     addMergeCellsUtil,
     AddWorksheetMergeAllCommand,
@@ -109,6 +111,8 @@ export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-nam
 export { type IRemoveColByRangeCommandParams, type IRemoveRowByRangeCommandParams, type IRemoveRowColCommandInterceptParams, type IRemoveRowColCommandParams, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
 
 export { type IRemoveSheetCommandParams, RemoveSheetCommand } from './commands/commands/remove-sheet.command';
+export { RemoveWorkbookStylesCommand } from './commands/commands/remove-workbook-styles.command';
+export type { IRemoveWorkbookStylesCommandParams } from './commands/commands/remove-workbook-styles.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export { type IReorderRangeCommandParams, ReorderRangeCommand } from './commands/commands/reorder-range.command';
 export {
@@ -202,6 +206,8 @@ export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationT
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
 export { AddRangeThemeMutation } from './commands/mutations/add-range-theme.mutation';
 export type { IAddRangeThemeMutationParams } from './commands/mutations/add-range-theme.mutation';
+export { AddWorkbookStylesMutation } from './commands/mutations/add-workbook-styles.mutation';
+export type { IAddWorkbookStylesMutationParams } from './commands/mutations/add-workbook-styles.mutation';
 export { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
 export { SetWorksheetRangeThemeStyleMutation, SetWorksheetRangeThemeStyleMutationFactory } from './commands/mutations/add-worksheet-range-theme.mutation';
@@ -247,6 +253,8 @@ export { RemoveRangeThemeMutation } from './commands/mutations/remove-range-them
 export type { IRemoveRangeThemeMutationParams } from './commands/mutations/remove-range-theme.mutation';
 export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
+export { RemoveWorkbookStylesMutation, RemoveWorkbookStylesMutationFactory } from './commands/mutations/remove-workbook-styles.mutation';
+export type { IRemoveWorkbookStylesMutationParams } from './commands/mutations/remove-workbook-styles.mutation';
 export { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';
 export { type IReorderRangeMutationParams, ReorderRangeMutation, ReorderRangeUndoMutationFactory } from './commands/mutations/reorder-range.mutation';
 export { type ISetColDataMutationParams, SetColDataMutation, SetColDataMutationFactory } from './commands/mutations/set-col-data.mutation';

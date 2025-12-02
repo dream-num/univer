@@ -118,6 +118,7 @@ import { AddRangeThemeMutation } from '../commands/mutations/add-range-theme.mut
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../commands/mutations/add-worksheet-range-theme.mutation';
+import { CopyWorksheetEndMutation } from '../commands/mutations/copy-worksheet-end.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/delete-worksheet-range-theme.mutation';
@@ -208,6 +209,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             MarkDirtyRowAutoHeightMutation,
             CancelMarkDirtyRowAutoHeightMutation,
+            CopyWorksheetEndMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);

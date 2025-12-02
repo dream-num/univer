@@ -69,6 +69,9 @@ enum ScrollDirectionResponse {
     HORIZONTAL = 'HORIZONTAL',
     VERTICAL = 'VERTICAL',
 }
+
+export const SHEET_FLOAT_DOM_PREFIX = 'univer-sheet-float-dom-';
+
 export interface ICanvasFloatDomInfo {
     position$: BehaviorSubject<IFloatDomLayout>;
     dispose: IDisposable;
@@ -79,6 +82,7 @@ export interface ICanvasFloatDomInfo {
     scrollDirectionResponse?: ScrollDirectionResponse; // update float dom pos by scrolling
     domAnchor?: IDOMAnchor;
     id: string;
+    domId?: string; // Ensure unique id for dom element at runtime
 }
 
 export interface IDOMAnchor {
@@ -427,6 +431,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const initPosition = calcSheetFloatDomPosition(rect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                     const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
 
+                    const domId = `${SHEET_FLOAT_DOM_PREFIX}${generateRandomId(6)}`;
                     const info: ICanvasFloatDomInfo = {
                         dispose: disposableCollection,
                         rect,
@@ -434,11 +439,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         unitId,
                         subUnitId,
                         id: drawingId,
+                        domId,
                     };
 
                     this._canvasFloatDomService.addFloatDom({
                         position$,
                         id: drawingId,
+                        domId,
                         componentKey: floatDomParam.componentKey,
                         onPointerDown: (evt) => {
                             canvas.dispatchEvent(new PointerEvent(evt.type, evt));

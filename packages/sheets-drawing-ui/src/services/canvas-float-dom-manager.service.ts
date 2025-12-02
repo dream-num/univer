@@ -17,14 +17,14 @@
 import type { IDisposable, IDrawingSearch, IPosition, IRange, ITransformState, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetFrozenMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { ISetFrozenMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
@@ -559,6 +559,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 });
             } else if (commandInfo.id === SetFrozenMutation.id) {
                 const { unitId, subUnitId } = commandInfo.params as ISetFrozenMutationParams;
+                updateSheet(unitId, subUnitId);
+            } else if (commandInfo.id === SetSelectionsOperation.id) {
+                const { unitId, subUnitId } = commandInfo.params as ISetSelectionsOperationParams;
                 updateSheet(unitId, subUnitId);
             }
         }));

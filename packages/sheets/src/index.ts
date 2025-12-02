@@ -339,6 +339,7 @@ export type { IRangeThemeStyleItem } from './model/range-theme-util';
 export { UniverSheetsPlugin } from './plugin';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+export { SheetLazyExecuteScheduleService } from './services/lazy-execute-schedule.service';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';

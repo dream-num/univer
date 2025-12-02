@@ -35,8 +35,8 @@ import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionCache } from './model/range-protection.cache';
 import { SheetRangeThemeModel } from './model/range-theme-model';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
-import { CopySheetScheduleService } from './services/copy-sheet-schedule.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+import { SheetLazyExecuteScheduleService } from './services/lazy-execute-schedule.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
@@ -91,7 +91,7 @@ export class UniverSheetsPlugin extends Plugin {
         const dependencies: Dependency[] = [
             // services
             [BorderStyleManagerService],
-            [CopySheetScheduleService],
+            [SheetLazyExecuteScheduleService],
             [SheetsSelectionsService],
             [RefRangeService],
             [WorkbookPermissionService],

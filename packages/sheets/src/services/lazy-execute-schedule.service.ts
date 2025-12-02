@@ -35,7 +35,7 @@ interface IScheduledTask {
  * 3. Automatically canceling tasks if the sheet is deleted
  * 4. Warning user if they try to close while tasks are pending
  */
-export class CopySheetScheduleService extends Disposable {
+export class SheetLazyExecuteScheduleService extends Disposable {
     private _tasks: Map<string, IScheduledTask> = new Map();
     private _idleCallbackId: number | null = null;
     private _beforeUnloadHandler: ((e: BeforeUnloadEvent) => void) | null = null;

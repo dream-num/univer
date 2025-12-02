@@ -30,7 +30,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { defaultCopySheetSplitConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
-import { CopySheetScheduleService } from '../../services/copy-sheet-schedule.service';
+import { SheetLazyExecuteScheduleService } from '../../services/lazy-execute-schedule.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { CopyWorksheetEndMutation } from '../mutations/copy-worksheet-end.mutation';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
@@ -244,7 +244,7 @@ export const CopySheetCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const localeService = accessor.get(LocaleService);
-        const copySheetScheduleService = accessor.get(CopySheetScheduleService);
+        const sheetLazyExecuteScheduleService = accessor.get(SheetLazyExecuteScheduleService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) {
@@ -278,7 +278,7 @@ export const CopySheetCommand: ICommand = {
                 // Schedule remaining mutations for idle execution
                 if (scheduledMutations.length > 0) {
                     // Immediately sync all mutations to changeset (syncOnly: true means sync but don't execute)
-                    // The actual execution will happen in copySheetScheduleService with onlyLocal
+                    // The actual execution will happen in SheetLazyExecuteScheduleService with onlyLocal
                     for (const mutation of scheduledMutations) {
                         commandService.syncExecuteCommand(mutation.id, mutation.params, { syncOnly: true });
                     }
@@ -288,7 +288,7 @@ export const CopySheetCommand: ICommand = {
                     commandService.syncExecuteCommand(CopyWorksheetEndMutation.id, { unitId, subUnitId: newSheetId }, { syncOnly: true });
 
                     // Schedule local execution during idle time
-                    copySheetScheduleService.scheduleMutations(unitId, newSheetId, scheduledMutations);
+                    sheetLazyExecuteScheduleService.scheduleMutations(unitId, newSheetId, scheduledMutations);
                 }
             } else {
                 undoRedoService.pushUndoRedo({

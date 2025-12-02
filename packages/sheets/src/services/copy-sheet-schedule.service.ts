@@ -84,12 +84,10 @@ export class CopySheetScheduleService extends Disposable {
         mutations: IMutationInfo<ISetRangeValuesMutationParams>[]
     ): void {
         if (mutations.length === 0) {
-            console.log('[CopySheetSchedule] No mutations to schedule, skipping');
             return;
         }
 
         const taskKey = `${unitId}_${subUnitId}`;
-        console.log(`[CopySheetSchedule] Scheduling ${mutations.length} mutations for sheet ${subUnitId}`);
 
         // Cancel existing task for the same sheet if any
         this._cancelTask(taskKey);
@@ -114,14 +112,10 @@ export class CopySheetScheduleService extends Disposable {
     }
 
     private _cancelTask(taskKey: string): void {
-        if (this._tasks.has(taskKey)) {
-            console.log(`[CopySheetSchedule] Canceling task: ${taskKey}`);
-        }
         this._tasks.delete(taskKey);
 
         // If no more tasks, cancel the idle callback
         if (this._tasks.size === 0 && this._idleCallbackId !== null) {
-            console.log('[CopySheetSchedule] No more tasks, canceling idle callback');
             if (typeof cancelIdleCallback !== 'undefined') {
                 cancelIdleCallback(this._idleCallbackId);
             }
@@ -141,11 +135,9 @@ export class CopySheetScheduleService extends Disposable {
 
     private _scheduleNextIdle(): void {
         if (this._idleCallbackId !== null) {
-            console.log('[CopySheetSchedule] Idle callback already scheduled, skipping');
             return; // Already scheduled
         }
 
-        console.log('[CopySheetSchedule] Scheduling next idle callback');
         if (typeof requestIdleCallback !== 'undefined') {
             this._idleCallbackId = requestIdleCallback(
                 (deadline) => this._processIdleTasks(deadline),
@@ -161,14 +153,12 @@ export class CopySheetScheduleService extends Disposable {
 
     private _processIdleTasks(deadline: IdleDeadline | { didTimeout: boolean; timeRemaining: () => number }): void {
         this._idleCallbackId = null;
-        console.log(`[CopySheetSchedule] Processing idle tasks, timeRemaining: ${deadline.timeRemaining()}ms, didTimeout: ${deadline.didTimeout}`);
 
         // Process tasks while we have time
         for (const [taskKey, task] of this._tasks) {
             // Check if the sheet still exists
             if (!this._isSheetExist(task.unitId, task.subUnitId)) {
                 // Sheet was deleted, cancel the task
-                console.log(`[CopySheetSchedule] Sheet ${task.subUnitId} no longer exists, removing task`);
                 this._tasks.delete(taskKey);
                 continue;
             }
@@ -178,7 +168,6 @@ export class CopySheetScheduleService extends Disposable {
             while (task.currentIndex < task.mutations.length) {
                 if (deadline.timeRemaining() <= 0 && !deadline.didTimeout) {
                     // No more time, schedule next idle
-                    console.log(`[CopySheetSchedule] Time exhausted, processed ${task.currentIndex - startIndex} mutations, ${task.mutations.length - task.currentIndex} remaining`);
                     this._scheduleNextIdle();
                     return;
                 }
@@ -190,16 +179,12 @@ export class CopySheetScheduleService extends Disposable {
             }
 
             // Task completed, remove it
-            console.log(`[CopySheetSchedule] Task ${taskKey} completed, processed ${task.currentIndex} mutations total`);
             this._tasks.delete(taskKey);
         }
 
         // If there are still tasks remaining, schedule next idle
         if (this._tasks.size > 0) {
-            console.log(`[CopySheetSchedule] ${this._tasks.size} tasks remaining, scheduling next idle`);
             this._scheduleNextIdle();
-        } else {
-            console.log('[CopySheetSchedule] All tasks completed');
         }
     }
 

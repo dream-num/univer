@@ -24,7 +24,6 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { cloneCellDataWithSpanAndDisplay } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
@@ -41,6 +40,7 @@ import type {
 } from './type';
 import {
     CellModeEnum,
+    cloneCellDataWithSpanAndDisplay,
     createIdentifier,
     Disposable,
     ErrorService,
@@ -57,7 +57,6 @@ import {
     sequenceExecute,
     ThemeService,
     toDisposable,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
@@ -628,7 +627,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return res;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     private async _pasteInternal(copyId: string, pasteType: IPasteHookValueType): Promise<boolean> {
         // const target = this._getPastingTarget();
         // const { selection, unitId, subUnitId } = target;

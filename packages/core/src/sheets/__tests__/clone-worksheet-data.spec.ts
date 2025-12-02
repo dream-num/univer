@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IWorksheetData } from '../typedef';
 import { describe, expect, it } from 'vitest';
 import { Tools } from '../../shared/tools';
 import { BooleanNumber } from '../../types/enum';
-import type { IWorksheetData } from '../typedef';
 import { cloneWorksheetData } from '../clone';
 
 function createTestWorksheetData(rowCount: number, colCount: number): IWorksheetData {
@@ -159,11 +159,6 @@ describe('cloneWorksheetData', () => {
             const genericTime = endGeneric - startGeneric;
 
             const speedup = genericTime / optimizedTime;
-
-            console.log(`${label}:`);
-            console.log(`  cloneWorksheetData: ${(optimizedTime / iterations).toFixed(2)}ms per iteration`);
-            console.log(`  Tools.deepClone: ${(genericTime / iterations).toFixed(2)}ms per iteration`);
-            console.log(`  Speedup: ${speedup.toFixed(2)}x`);
 
             // The optimized version should be at least 2x faster
             expect(speedup).toBeGreaterThan(1.5);

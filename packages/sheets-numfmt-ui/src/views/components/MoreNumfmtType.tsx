@@ -27,7 +27,7 @@ import { MENU_OPTIONS } from '../../controllers/menu';
 export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';
 
-export const MoreNumfmtType = (props: { value?: string }) => {
+export function MoreNumfmtType(props: { value?: string }) {
     const { value } = props;
     const localeService = useDependency(LocaleService);
     const text = value ?? localeService.t('sheet.numfmt.general');
@@ -35,7 +35,7 @@ export const MoreNumfmtType = (props: { value?: string }) => {
     return <span className="univer-text-sm">{text}</span>;
 };
 
-export const Options = () => {
+export function Options() {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const layoutService = useDependency(ILayoutService);
@@ -66,7 +66,8 @@ export const Options = () => {
         const currencySymbol = localeCurrencySymbolMap.get(localeService.getCurrentLocale()) as string;
         return MENU_OPTIONS(currencySymbol);
     }, [localeService]);
-    const handleOnclick = (index: number) => {
+
+    const handleClick = (index: number) => {
         if (index === 0) {
             setNumfmt(null);
         } else if (index === menuOptions.length - 1) {
@@ -87,6 +88,7 @@ export const Options = () => {
                 if (item === '|') {
                     return <Separator key={index} />;
                 }
+
                 return (
                     <div
                         key={index}
@@ -96,9 +98,7 @@ export const Options = () => {
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `}
-                        onClick={() => {
-                            handleOnclick(index);
-                        }}
+                        onClick={() => handleClick(index)}
                     >
                         <span>{localeService.t(item.label)}</span>
 

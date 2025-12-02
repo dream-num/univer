@@ -75,7 +75,6 @@ import {
     CutCommand,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
-    FONT_FAMILY_LIST,
     getMenuHiddenObservable,
     IClipboardInterfaceService,
     MenuItemType,
@@ -400,13 +399,16 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
         label: FONT_FAMILY_COMPONENT,
-        selections: FONT_FAMILY_LIST.map((item) => ({
+        selections: [{
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
+                hoverable: false,
+                selectable: false,
+                props: {
+                    id: SetRangeFontFamilyCommand.id,
+                },
             },
-            value: item.value,
-        })),
-
+        }],
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],

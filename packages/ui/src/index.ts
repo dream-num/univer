@@ -24,7 +24,7 @@ export * from './components';
 export { COLOR_PICKER_COMPONENT } from './components/color-picker/interface';
 export { FontFamily } from './components/font-family/FontFamily';
 export { FontFamilyItem } from './components/font-family/FontFamilyItem';
-export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT, FONT_FAMILY_LIST, type IFontFamilyItemProps, type IFontFamilyProps } from './components/font-family/interface';
+export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT, type IFontFamilyProps } from './components/font-family/interface';
 export { FontSize } from './components/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './components/font-size/interface';
 export * from './components/hooks';
@@ -71,6 +71,7 @@ export { ContextMenuService, type IContextMenuHandler, IContextMenuService } fro
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
 export { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { type IFontConfig, IFontService } from './services/font.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 export { IGalleryService } from './services/gallery/gallery.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';

@@ -15,8 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
+import type { IUniverUIConfig } from '../controllers/config.schema';
+import { createIdentifier, IConfigService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
+import { UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 export const IFontService = createIdentifier<IFontService>('univer.font-service');
 
@@ -159,6 +161,17 @@ export interface IFontService {
 export class FontService implements IFontService, IDisposable {
     readonly fonts$: BehaviorSubject<IFontConfig[]> = new BehaviorSubject<IFontConfig[]>([...DEFAULT_FONT_LIST]);
 
+    constructor(@IConfigService protected readonly _configService: IConfigService) {
+        const config = this._configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
+        const { customFontFamily = [] } = config ?? {};
+        if (customFontFamily.length) {
+            customFontFamily.forEach((font) => this.addFont({
+                ...font,
+                isCustom: true,
+            }));
+        }
+    }
+
     dispose() {
         this.resetToDefaults();
         this.fonts$.complete();
@@ -172,8 +185,12 @@ export class FontService implements IFontService, IDisposable {
         return this.getFonts().find((font) => font.value === value);
     }
 
+    /**
+     * Check if the current browser environment supports the font
+     * @param fontValue
+     * @returns boolean Whether the font is supported
+     */
     isFontSupported(fontValue: string): boolean {
-        // Fallback using Canvas
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         if (!context) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IFontConfig } from '../../services/font.service';
 import { createIdentifier } from '@univerjs/core';
 
 export type RibbonType = 'default' | 'simple' | 'classic';
@@ -31,7 +32,15 @@ export interface IWorkbenchOptions {
      */
     toolbar?: boolean;
 
+    /**
+     * The type of ribbon to be used in the UI.
+     */
     ribbonType?: RibbonType;
+
+    /**
+     * Custom font family list to be added to the font service.
+     */
+    customFontFamily?: IFontConfig[];
 
     /**
      * If Univer should make the footer bar visible.

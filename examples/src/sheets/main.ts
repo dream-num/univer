@@ -125,6 +125,10 @@ function createNewInstance() {
         [UniverUIPlugin, {
             container: 'app',
             // ribbonType: 'classic',
+            customFontFamily: [
+                { value: 'PingFang SC', label: '苹方（简）', category: 'sans-serif' },
+                { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
+            ],
         }],
         [UniverWebComponentAdapterPlugin],
         [UniverVue3AdapterPlugin],

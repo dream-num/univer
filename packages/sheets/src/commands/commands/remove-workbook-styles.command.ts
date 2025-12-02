@@ -29,7 +29,7 @@ export interface IRemoveWorkbookStylesCommandParams {
 }
 
 export const RemoveWorkbookStylesCommand: ICommand = {
-    id: 'sheet.command.add-workbook-styles',
+    id: 'sheet.command.remove-workbook-styles',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: IRemoveWorkbookStylesCommandParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);

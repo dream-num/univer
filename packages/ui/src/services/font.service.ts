@@ -210,7 +210,7 @@ export class FontService implements IFontService, IDisposable {
     addFont(font: IFontConfig): void {
         const existingFont = this.getFontByValue(font.value);
         if (existingFont) {
-            throw new Error(`Font with value "${font.value}" already exists.`);
+            throw new Error(`[FontService]: Font with value "${font.value}" already exists.`);
         }
 
         const updatedFonts = [...this.getFonts(), font].sort();

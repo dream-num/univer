@@ -20,7 +20,7 @@ import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } fro
 import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
@@ -228,7 +228,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const disposable = new DisposableCollection();
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
+            if (shouldUpdatePosition(commandInfo.id)) {
                 position$.next(calc());
             }
         }));
@@ -616,11 +616,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 }
             }
 
-            if (
-                COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1 ||
-                commandInfo.id === SetScrollOperation.id ||
-                commandInfo.id === SetZoomRatioOperation.id
-            ) {
+            if (shouldUpdatePosition(commandInfo.id)) {
                 updatePosition();
             }
         }));
@@ -733,11 +729,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 }
             }
 
-            if (
-                COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1 ||
-                commandInfo.id === SetScrollOperation.id ||
-                commandInfo.id === SetZoomRatioOperation.id
-            ) {
+            if (shouldUpdatePosition(commandInfo.id)) {
                 updatePosition();
             }
         }));
@@ -781,4 +773,14 @@ export class SheetCanvasPopManagerService extends Disposable {
 
 function pxToNum(width: string): number {
     return Number.parseInt(width.replace('px', ''));
+}
+
+const POSITION_UPDATE_COMMANDS = new Set([
+    SetScrollOperation.id,
+    SetZoomRatioOperation.id,
+    SetSelectionsOperation.id,
+]);
+
+function shouldUpdatePosition(commandId: string): boolean {
+    return POSITION_UPDATE_COMMANDS.has(commandId) || COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId);
 }

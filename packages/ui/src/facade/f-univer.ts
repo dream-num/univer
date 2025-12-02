@@ -16,11 +16,11 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, IFontConfig, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, connectInjector, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
+import { ComponentManager, connectInjector, CopyCommand, IDialogService, IFontService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
@@ -418,6 +418,27 @@ export interface IFUniverUIMixin {
      * This will render `unit2` in the workbench's main area.
      */
     setCurrent(unitId: string): void;
+
+    /**
+     * Append custom fonts to the font list.
+     * @param fonts The array of font configurations to add.
+     * @example
+     * ```ts
+     * univerAPI.addFonts([
+     *   {
+     *     value: 'CustomFont1',
+     *     label: 'Custom Font 1',
+     *     category: 'sans-serif',
+     *   },
+     *   {
+     *     value: 'CustomFont2',
+     *     label: 'Custom Font 2',
+     *     category: 'serif',
+     *   },
+     * ]);
+     * ```
+     */
+    addFonts(fonts: IFontConfig[]): void;
 }
 
 /**
@@ -507,6 +528,16 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         }
 
         this._univerInstanceService.setCurrentUnitForType(unitId);
+    }
+
+    override addFonts(fonts: IFontConfig[]): void {
+        const fontService = this._injector.get(IFontService);
+        fonts.forEach((font) => {
+            fontService.addFont({
+                ...font,
+                isCustom: true,
+            });
+        });
     }
 }
 

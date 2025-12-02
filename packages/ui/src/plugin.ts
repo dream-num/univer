@@ -33,6 +33,7 @@ import { ContextMenuService, IContextMenuService } from './services/contextmenu/
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
@@ -119,6 +120,7 @@ export class UniverUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
+            [IFontService, { useClass: FontService }],
             [CanvasFloatDomService],
             [IUIController, {
                 useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),

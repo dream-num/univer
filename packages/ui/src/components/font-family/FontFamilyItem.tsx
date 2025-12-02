@@ -14,18 +14,69 @@
  * limitations under the License.
  */
 
-import type { IFontFamilyItemProps } from './interface';
-import { LocaleService } from '@univerjs/core';
+import type { IFontConfig } from '../../services/font.service';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { Tooltip } from '@univerjs/design';
+import { InfoIcon } from '@univerjs/icons';
+import { useEffect, useState } from 'react';
+import { IFontService } from '../../services/font.service';
 import { useDependency } from '../../utils/di';
 
-export const FontFamilyItem = (props: IFontFamilyItemProps) => {
-    const { value } = props;
+export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => {
+    const commandService = useDependency(ICommandService);
+    const fontService = useDependency(IFontService);
+
+    const [fonts, setFonts] = useState<IFontConfig[]>([]);
+
+    useEffect(() => {
+        const subscription = fontService.fonts$.subscribe((fonts) => {
+            setFonts(fonts);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     const localeService = useDependency(LocaleService);
 
+    function handleSelectFont(value: string) {
+        commandService.executeCommand(id, { value });
+    }
+
     return (
-        <span className="univer-text-sm" style={{ fontFamily: value }}>
-            {localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`)}
-        </span>
+        <ul
+            className="univer-m-0 univer-list-none univer-p-0 univer-text-sm"
+            style={{ fontFamily: value }}
+        >
+            {fonts.map((font) => (
+                <li key={font.value}>
+                    <button
+                        className={`
+                          univer-flex univer-h-7 univer-w-full univer-appearance-none univer-items-center
+                          univer-justify-between univer-gap-6 univer-rounded univer-border-none univer-bg-transparent
+                          univer-px-2
+                          hover:univer-bg-gray-100
+                          dark:hover:!univer-bg-gray-700
+                        `}
+                        type="button"
+                        onClick={() => handleSelectFont(font.value)}
+                    >
+                        {localeService.t(font.label)}
+
+                        {!fontService.isFontSupported(font.value) && (
+                            <Tooltip title={localeService.t('fontFamily.not-supported')}>
+                                <InfoIcon
+                                    className={`
+                                      univer-text-gray-300
+                                      dark:univer-text-gray-700
+                                    `}
+                                />
+                            </Tooltip>
+                        )}
+                    </button>
+                </li>
+            ))}
+        </ul>
     );
 };

@@ -192,6 +192,10 @@ function createNewInstance() {
 
     window.univer = univer;
     window.univerAPI = FUniver.newAPI(univer);
+    // window.univerAPI.addFonts([
+    //     { value: 'PingFang SC', label: '苹方（简）', category: 'sans-serif' },
+    //     { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
+    // ]);
 
     customRegisterEvent(univer, window.univerAPI!);
     customRangePopups(univer, window.univerAPI!);

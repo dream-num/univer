@@ -17,6 +17,7 @@
 import type { IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
+import { ConfigService, IConfigService } from '../../config/config.service';
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService } from '../../log/log.service';
 import {
@@ -39,6 +40,7 @@ describe('Test CommandService', () => {
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
 
         commandService = injector.get(ICommandService);
         commandService.registerCommand({

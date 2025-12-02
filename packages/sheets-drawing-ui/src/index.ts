@@ -33,6 +33,6 @@ export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing
 export type { IUniverSheetsDrawingUIConfig } from './controllers/config.schema';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
-export { calcSheetFloatDomPosition, type ICanvasFloatDom, type ICanvasFloatDomInfo, type IDOMAnchor, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+export { calcSheetFloatDomPosition, type ICanvasFloatDom, type ICanvasFloatDomInfo, type IDOMAnchor, SHEET_FLOAT_DOM_PREFIX, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';

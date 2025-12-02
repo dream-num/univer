@@ -224,15 +224,6 @@ function buildCopySheetMutations(
         ...intercepted.undos,
     ];
 
-    console.log('===redos', {
-         redos,
-        undos,
-        unitId,
-        newSheetId,
-        isSplit: shouldSplit,
-        scheduledMutations,
-    })
-
     return {
         redos,
         undos,

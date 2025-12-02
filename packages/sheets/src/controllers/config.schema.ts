@@ -24,13 +24,13 @@ export interface ICopySheetSplitConfig {
     /**
      * The minimum number of cells required to trigger splitting when copying a sheet.
      * If the sheet has fewer cells than this threshold, it will be copied as a whole.
-     * @default 20000
+     * @default 6000
      */
     splitThreshold?: number;
 
     /**
      * The maximum number of cells per batch when splitting.
-     * @default 6000
+     * @default 3000
      */
     batchSize?: number;
 }

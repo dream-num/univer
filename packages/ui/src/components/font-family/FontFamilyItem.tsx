@@ -59,6 +59,9 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `}
+                        style={{
+                            fontFamily: font.value,
+                        }}
                         type="button"
                         onClick={() => handleSelectFont(font.value)}
                     >

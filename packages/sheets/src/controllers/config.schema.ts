@@ -67,8 +67,8 @@ export interface IUniverSheetsConfig {
 }
 
 export const defaultCopySheetSplitConfig: Required<ICopySheetSplitConfig> = {
-    splitThreshold: 20000,
-    batchSize: 6000,
+    splitThreshold: 6_000,
+    batchSize: 3_000,
 };
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

@@ -30,6 +30,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { defaultCopySheetSplitConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { CopySheetScheduleService } from '../../services/copy-sheet-schedule.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
@@ -52,18 +53,24 @@ function countCells(cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>): 
 
 /**
  * Split cellData into batches for SetRangeValuesMutation
+ * Returns the first chunk separately (to be included in InsertSheetMutation)
+ * and remaining chunks (to be scheduled for idle execution)
  * @param unitId - The unit ID
  * @param subUnitId - The sub unit ID (sheet ID)
  * @param cellData - The cell data to split
  * @param batchSize - The maximum number of cells per batch
+ * @returns Object containing firstChunkCellData and remainingMutations
  */
 function splitCellDataIntoBatches(
     unitId: string,
     subUnitId: string,
     cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
     batchSize: number
-): IMutationInfo<ISetRangeValuesMutationParams>[] {
-    const mutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
+): {
+    firstChunkCellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
+    remainingMutations: IMutationInfo<ISetRangeValuesMutationParams>[];
+} {
+    const batches: IObjectMatrixPrimitiveType<Nullable<ICellData>>[] = [];
     let currentBatch: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let cellCount = 0;
 
@@ -76,15 +83,7 @@ function splitCellDataIntoBatches(
 
         // If adding this row would exceed the batch size, push current batch first
         if (cellCount > 0 && cellCount + rowCellCount > batchSize) {
-            mutations.push({
-                id: SetRangeValuesMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    cellValue: currentBatch,
-                    __splitChunk__: true,
-                },
-            });
+            batches.push(currentBatch);
             currentBatch = {};
             cellCount = 0;
         }
@@ -95,15 +94,7 @@ function splitCellDataIntoBatches(
 
         // If batch is full, push it
         if (cellCount >= batchSize) {
-            mutations.push({
-                id: SetRangeValuesMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    cellValue: currentBatch,
-                    __splitChunk__: true,
-                },
-            });
+            batches.push(currentBatch);
             currentBatch = {};
             cellCount = 0;
         }
@@ -111,43 +102,24 @@ function splitCellDataIntoBatches(
 
     // Push remaining cells
     if (cellCount > 0) {
-        mutations.push({
-            id: SetRangeValuesMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                cellValue: currentBatch,
-                __splitChunk__: true,
-            },
-        });
+        batches.push(currentBatch);
     }
 
-    return mutations;
-}
+    // First chunk goes into InsertSheetMutation
+    const firstChunkCellData = batches.length > 0 ? batches[0] : {};
 
-/**
- * Create a clear cell matrix for undo operations (set all cells to null)
- */
-function createClearCellMatrix(
-    cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>> | undefined
-): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
-    const clearMatrix: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
+    // Remaining chunks become SetRangeValuesMutation (for idle scheduling)
+    const remainingMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = batches.slice(1).map((batch) => ({
+        id: SetRangeValuesMutation.id,
+        params: {
+            unitId,
+            subUnitId,
+            cellValue: batch,
+            __splitChunk__: true,
+        },
+    }));
 
-    if (!cellValue) return clearMatrix;
-
-    for (const rowKey of Object.keys(cellValue)) {
-        const row = Number(rowKey);
-        const rowData = cellValue[row];
-        if (!rowData) continue;
-
-        clearMatrix[row] = {};
-        for (const colKey of Object.keys(rowData)) {
-            const col = Number(colKey);
-            clearMatrix[row]![col] = null;
-        }
-    }
-
-    return clearMatrix;
+    return { firstChunkCellData, remainingMutations };
 }
 
 export interface ICopySheetCommandParams {
@@ -157,10 +129,16 @@ export interface ICopySheetCommandParams {
 
 const COPY_SHEET_COMMAND_ID = 'sheet.command.copy-sheet';
 
-interface ICopySheetMutationParams {
+interface IBuildCopySheetResult {
+    /** Remaining mutations to be scheduled for idle execution (local only, not serialized) */
+    scheduledMutations: IMutationInfo<ISetRangeValuesMutationParams>[];
     redos: IMutationInfo[];
     undos: IMutationInfo[];
     unitId: string;
+    /** New sheet ID for scheduling remaining mutations */
+    newSheetId: string;
+    /** Whether the sheet was split into chunks */
+    isSplit: boolean;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -172,7 +150,7 @@ function buildCopySheetMutations(
     subUnitId: string,
     localeService: LocaleService,
     sheetInterceptorService: SheetInterceptorService
-): ICopySheetMutationParams {
+): IBuildCopySheetResult {
     const configService = accessor.get(IConfigService);
     const pluginConfig = configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
     const splitConfig = {
@@ -191,35 +169,28 @@ function buildCopySheetMutations(
 
     // Only split if the cell count exceeds the threshold
     const shouldSplit = cellCount >= splitConfig.splitThreshold;
-
     let insertSheetMutationParams: IInsertSheetMutationParams;
-    let setRangeValuesMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
-    let setRangeValuesUndoMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
+    let scheduledMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
 
     if (shouldSplit) {
-        // Split mode: create empty sheet first, then set cell values in batches
-        const sheetConfigWithoutCellData = { ...config, cellData: {} };
-        insertSheetMutationParams = {
-            index: sheetIndex + 1,
-            sheet: sheetConfigWithoutCellData,
-            unitId,
-        };
-
-        setRangeValuesMutations = splitCellDataIntoBatches(
+        // Split mode: include first chunk in InsertSheetMutation, schedule the rest
+        const { firstChunkCellData, remainingMutations } = splitCellDataIntoBatches(
             unitId,
             newSheetId,
             cellData,
             splitConfig.batchSize
         );
 
-        setRangeValuesUndoMutations = setRangeValuesMutations.map((mutation) => ({
-            id: SetRangeValuesMutation.id,
-            params: {
-                unitId,
-                subUnitId: newSheetId,
-                cellValue: createClearCellMatrix(mutation.params.cellValue),
-            } as ISetRangeValuesMutationParams,
-        }));
+        // Insert sheet with first chunk of cell data
+        const sheetConfigWithFirstChunk = { ...config, cellData: firstChunkCellData as IObjectMatrixPrimitiveType<ICellData> };
+        insertSheetMutationParams = {
+            index: sheetIndex + 1,
+            sheet: sheetConfigWithFirstChunk,
+            unitId,
+        };
+
+        // Remaining mutations will be scheduled for idle execution
+        scheduledMutations = remainingMutations;
     } else {
         // No split: insert sheet with all cell data at once
         insertSheetMutationParams = {
@@ -239,21 +210,37 @@ function buildCopySheetMutations(
         params: { unitId, subUnitId, targetSubUnitId: config.id },
     });
 
+    // Redos only include InsertSheetMutation (with first chunk), remaining mutations are scheduled
     const redos: IMutationInfo[] = [
         ...(intercepted.preRedos ?? []),
         { id: InsertSheetMutation.id, params: insertSheetMutationParams },
-        ...setRangeValuesMutations,
         ...intercepted.redos,
     ];
 
+    // Undo just removes the sheet - all scheduled mutations become irrelevant
     const undos: IMutationInfo[] = [
         ...(intercepted.preUndos ?? []),
         { id: RemoveSheetMutation.id, params: removeSheetMutationParams },
-        ...setRangeValuesUndoMutations,
         ...intercepted.undos,
     ];
 
-    return { redos, undos, unitId };
+    console.log('===redos', {
+         redos,
+        undos,
+        unitId,
+        newSheetId,
+        isSplit: shouldSplit,
+        scheduledMutations,
+    })
+
+    return {
+        redos,
+        undos,
+        unitId,
+        newSheetId,
+        isSplit: shouldSplit,
+        scheduledMutations,
+    };
 }
 
 export const CopySheetCommand: ICommand = {
@@ -265,6 +252,7 @@ export const CopySheetCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const localeService = accessor.get(LocaleService);
+        const copySheetScheduleService = accessor.get(CopySheetScheduleService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) {
@@ -272,7 +260,7 @@ export const CopySheetCommand: ICommand = {
         }
 
         const { workbook, worksheet, unitId, subUnitId } = target;
-        const { redos, undos } = buildCopySheetMutations(
+        const { redos, undos, newSheetId, isSplit, scheduledMutations } = buildCopySheetMutations(
             accessor,
             workbook,
             worksheet,
@@ -285,11 +273,34 @@ export const CopySheetCommand: ICommand = {
         const insertResult = sequenceExecute(redos, commandService).result;
 
         if (insertResult) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
-            });
+            // For split case:
+            // - Undo: just remove the sheet (scheduled mutations become irrelevant)
+            // - Redo: empty (don't support redo for large sheets to avoid performance issues)
+            if (isSplit) {
+                undoRedoService.pushUndoRedo({
+                    unitID: unitId,
+                    undoMutations: undos,
+                    redoMutations: [], // No redo for split case
+                });
+
+                // Schedule remaining mutations for idle execution
+                if (scheduledMutations.length > 0) {
+                    // Immediately sync all mutations to changeset (syncOnly: true means sync but don't execute)
+                    // The actual execution will happen in copySheetScheduleService with onlyLocal
+                    for (const mutation of scheduledMutations) {
+                        commandService.syncExecuteCommand(mutation.id, mutation.params, { syncOnly: true });
+                    }
+
+                    // Schedule local execution during idle time
+                    copySheetScheduleService.scheduleMutations(unitId, newSheetId, scheduledMutations);
+                }
+            } else {
+                undoRedoService.pushUndoRedo({
+                    unitID: unitId,
+                    undoMutations: undos,
+                    redoMutations: redos,
+                });
+            }
             return true;
         }
         return false;

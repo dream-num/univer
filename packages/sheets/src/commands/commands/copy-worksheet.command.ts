@@ -32,6 +32,7 @@ import {
 import { defaultCopySheetSplitConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { CopySheetScheduleService } from '../../services/copy-sheet-schedule.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { CopyWorksheetEndMutation } from '../mutations/copy-worksheet-end.mutation';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
@@ -281,6 +282,10 @@ export const CopySheetCommand: ICommand = {
                     for (const mutation of scheduledMutations) {
                         commandService.syncExecuteCommand(mutation.id, mutation.params, { syncOnly: true });
                     }
+
+                    // Sync the end mutation to mark the copy worksheet operation is complete
+                    // This will trigger a snapshot save on the server
+                    commandService.syncExecuteCommand(CopyWorksheetEndMutation.id, { unitId, subUnitId: newSheetId }, { syncOnly: true });
 
                     // Schedule local execution during idle time
                     copySheetScheduleService.scheduleMutations(unitId, newSheetId, scheduledMutations);

@@ -106,3 +106,11 @@ export function getSuitableRangesInView(ranges: IRange[], skeleton: Nullable<She
 
     return { suitableRanges, remainingRanges };
 }
+
+export function countCells(cellMatrix: ObjectMatrix<unknown>): number {
+    let count = 0;
+    cellMatrix.forEach(() => {
+        count++;
+    });
+    return count;
+}

@@ -251,7 +251,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RemoveRowCommand,
                 RemoveSheetCommand,
                 ReorderRangeCommand,
-
                 RemoveWorksheetMergeCommand,
                 ResetBackgroundColorCommand,
                 ResetTextColorCommand,

@@ -29,7 +29,7 @@ import {
     LocaleService,
     sequenceExecute,
 } from '@univerjs/core';
-import { defaultCopySheetSplitConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { defaultLargeSheetOperationConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SheetLazyExecuteScheduleService } from '../../services/lazy-execute-schedule.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { CopyWorksheetEndMutation } from '../mutations/copy-worksheet-end.mutation';
@@ -154,9 +154,9 @@ function buildCopySheetMutations(
 ): IBuildCopySheetResult {
     const configService = accessor.get(IConfigService);
     const pluginConfig = configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
-    const splitConfig = {
-        ...defaultCopySheetSplitConfig,
-        ...pluginConfig?.copySheetSplit,
+    const largeSheetConfig = {
+        ...defaultLargeSheetOperationConfig,
+        ...pluginConfig?.largeSheetOperation,
     };
 
     const config = cloneWorksheetData(worksheet!.getConfig());
@@ -169,7 +169,7 @@ function buildCopySheetMutations(
     const cellCount = countCells(cellData);
 
     // Only split if the cell count exceeds the threshold
-    const shouldSplit = cellCount >= splitConfig.splitThreshold;
+    const shouldSplit = cellCount >= largeSheetConfig.largeSheetCellCountThreshold;
     let insertSheetMutationParams: IInsertSheetMutationParams;
     let scheduledMutations: IMutationInfo<ISetRangeValuesMutationParams>[] = [];
 
@@ -179,7 +179,7 @@ function buildCopySheetMutations(
             unitId,
             newSheetId,
             cellData,
-            splitConfig.batchSize
+            largeSheetConfig.batchSize
         );
 
         // Insert sheet with first chunk of cell data

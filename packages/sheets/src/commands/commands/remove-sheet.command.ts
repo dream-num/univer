@@ -19,17 +19,21 @@ import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import type { IUniverSheetsConfig } from '../../controllers/config.schema';
 
 import {
     CommandType,
     ICommandService,
+    IConfigService,
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
+import { defaultLargeSheetOperationConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';
+import { countCells } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveSheetCommandParams {
@@ -48,6 +52,7 @@ export const RemoveSheetCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const configService = accessor.get(IConfigService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
@@ -56,30 +61,46 @@ export const RemoveSheetCommand: ICommand = {
 
         if (workbook.getSheets().length <= 1) return false;
 
+        // Check if this is a large sheet that shouldn't support undo/redo
+        const pluginConfig = configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+        const largeSheetConfig = {
+            ...defaultLargeSheetOperationConfig,
+            ...pluginConfig?.largeSheetOperation,
+        };
+        const cellCount = countCells(worksheet.getCellMatrix());
+        const isLargeSheet = cellCount >= largeSheetConfig.largeSheetCellCountThreshold;
+
         // prepare do mutations
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
             subUnitId,
             unitId,
             subUnitName: worksheet.getName(),
         };
-        const InsertSheetMutationParams: IInsertSheetMutationParams = RemoveSheetUndoMutationFactory(
-            accessor,
-            RemoveSheetMutationParams
-        );
+        // For large sheets, we don't need to prepare undo mutation since undo/redo won't be supported
+        const InsertSheetMutationParams: IInsertSheetMutationParams | null = isLargeSheet
+            ? null
+            : RemoveSheetUndoMutationFactory(accessor, RemoveSheetMutationParams);
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveSheetCommand.id,
             params: { unitId, subUnitId },
         });
         const redos = [...(intercepted.preRedos ?? []), { id: RemoveSheetMutation.id, params: RemoveSheetMutationParams }, ...intercepted.redos];
-        const undos = [...(intercepted.preUndos ?? []), { id: InsertSheetMutation.id, params: InsertSheetMutationParams }, ...intercepted.undos];
+        const undos = isLargeSheet
+            ? []
+            : [...(intercepted.preUndos ?? []), { id: InsertSheetMutation.id, params: InsertSheetMutationParams! }, ...intercepted.undos];
         const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
-            });
+            if (isLargeSheet) {
+                // For large sheets, push empty undo/redo to disable undo/redo functionality
+                undoRedoService.pushUndoRedo({
+                    unitID: unitId,
+                    undoMutations: undos,
+                    redoMutations: redos,
+                });
+            } else {
+                undoRedoService.clearUndoRedo(unitId);
+            }
 
             return true;
         }

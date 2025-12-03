@@ -132,13 +132,13 @@ const locale: typeof enUS = {
             cancel: '取消合併',
             confirm: '繼續合併',
             warning: '警告',
-            dismantleMergeCellWarning: '此操作會導致一些合併單元格被拆散，是否繼續?',
+            dismantleMergeCellWarning: '此操作會導致一些合併儲存格被拆散，是否繼續?',
         },
     },
     filter: {
         confirm: {
             error: '出現了一個問題',
-            notAllowedToInsertRange: '要移動這些單元格，請清除該區域的篩選器',
+            notAllowedToInsertRange: '要移動這些儲存格，請清除該區域的篩選器',
         },
     },
     textWrap: {
@@ -417,7 +417,7 @@ const locale: typeof enUS = {
             Comment: '註解',
             Copy: '複製',
             SetCellStyle: '設定儲存格樣式',
-            SetCellValue: '設定單元格值',
+            SetCellValue: '設定儲存格值',
             SetHyperLink: '設定超連結',
             Sort: '排序',
             Filter: '篩選',
@@ -447,7 +447,7 @@ const locale: typeof enUS = {
         dialog: {
             allowUserToEdit: '允許使用者編輯',
             allowedPermissionType: '允許權限類型',
-            setCellValue: '設定單元格值',
+            setCellValue: '設定儲存格值',
             setCellStyle: '設定儲存格樣式',
             copy: '複製',
             alert: '提示',

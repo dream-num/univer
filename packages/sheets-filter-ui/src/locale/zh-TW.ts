@@ -24,7 +24,7 @@ const locale: typeof enUS = {
             're-calc-filter-conditions': '重新計算',
         },
         command: {
-            'not-valid-filter-range': '選取的區域只有一行，無法進行篩選',
+            'not-valid-filter-range': '選取的區域只有一列，無法進行篩選',
         },
         shortcut: {
             'smart-toggle-filter': '切換篩選',
@@ -35,9 +35,9 @@ const locale: typeof enUS = {
             confirm: '確認',
             'by-values': '按值',
             'by-colors': '按顏色',
-            'filter-by-cell-fill-color': '按單元格填充顏色篩選',
-            'filter-by-cell-text-color': '按單元格文本顏色篩選',
-            'filter-by-color-none': '該列僅包含一種顏色',
+            'filter-by-cell-fill-color': '按儲存格填充顏色篩選',
+            'filter-by-cell-text-color': '按儲存格文字顏色篩選',
+            'filter-by-color-none': '該欄僅包含一種顏色',
             'by-conditions': '按條件',
             'filter-only': '僅篩選',
             'search-placeholder': '使用空格分隔關鍵字',
@@ -54,9 +54,9 @@ const locale: typeof enUS = {
             empty: '為空',
             'not-empty': '不為空',
             'text-contains': '文字包含',
-            'does-not-contain': '文本不包含',
+            'does-not-contain': '文字不包含',
             'starts-with': '文字開頭',
-            'ends-with': '文本結尾',
+            'ends-with': '文字結尾',
             equals: '文字相符',
             'greater-than': '大於',
             'greater-than-or-equal': '大於等於',
@@ -69,7 +69,7 @@ const locale: typeof enUS = {
             custom: '自訂',
         },
         msg: {
-            'filter-header-forbidden': '無法移動篩選行頭',
+            'filter-header-forbidden': '無法移動篩選列頭',
         },
         date: {
             1: '1月',

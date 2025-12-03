@@ -106,8 +106,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            text1: { name: '文字 1', detail: '要聯結的文字項目。 字串或字串數組，如單元格區域。 ' },
-            text2: { name: '文字 2', detail: '要聯結的其他文字項目。 文本項最多可以有 253 個文字參數。 每個參數可以是一個字串或字串數組，如單元格區域。 ' },
+            text1: { name: '文字 1', detail: '要聯結的文字項目。 字串或字串陣列，如儲存格範圍。 ' },
+            text2: { name: '文字 2', detail: '要聯結的其他文字項目。 文本項最多可以有 253 個文字參數。 每個參數可以是一個字串或字串陣列，如儲存格範圍。 ' },
         },
     },
     CONCATENATE: {
@@ -606,8 +606,8 @@ const locale: typeof enUS = {
         },
     },
     TEXTSPLIT: {
-        description: '使用列分隔符號和行分隔符號拆分文字字串',
-        abstract: '使用列分隔符號和行分隔符號拆分文字字串',
+        description: '使用欄分隔符號和列分隔符號拆分文字字串',
+        abstract: '使用欄分隔符號和列分隔符號拆分文字字串',
         links: [
             {
                 title: '教導',
@@ -616,9 +616,9 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             text: { name: '文字', detail: '要拆分的文字。' },
-            colDelimiter: { name: '列分隔符', detail: '若要拆分列依據的字元或字串。' },
-            rowDelimiter: { name: '行分隔符', detail: '若要拆分行依據的字元或字串。' },
-            ignoreEmpty: { name: '忽略空單元格', detail: '是否忽略空單元格。預設為 FALSE。' },
+            colDelimiter: { name: '欄分隔符', detail: '若要拆分欄依據的字元或字串。' },
+            rowDelimiter: { name: '列分隔符', detail: '若要拆分列依據的字元或字串。' },
+            ignoreEmpty: { name: '忽略空白儲存格', detail: '是否忽略空白儲存格。預設為 FALSE。' },
             matchMode: { name: '匹配模式', detail: '搜尋文字中的分隔符號匹配。預設情況下，會進行區分大小寫的匹配。' },
             padWith: { name: '填充值', detail: '用於填充的值。預設情況下，使用 #N/A。' },
         },

@@ -29,6 +29,9 @@ import type { IDiscreteRange } from '../utils/range-tools';
 import {
     cellToRange,
     CellValueType,
+    cloneCellData,
+    cloneCellDataMatrix,
+    cloneValue,
     CustomRangeType,
     DEFAULT_STYLES,
     generateRandomId,
@@ -165,13 +168,13 @@ export function getMoveRangeMutations(
             const toCellMatrix = toWorksheet.getCellMatrix();
 
             Range.foreach(fromRange, (row, col) => {
-                fromCellValue.setValue(row, col, Tools.deepClone(fromCellMatrix.getValue(row, col)));
+                fromCellValue.setValue(row, col, cloneCellData(fromCellMatrix.getValue(row, col)));
                 newFromCellValue.setValue(row, col, null);
             });
             const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
 
             Range.foreach(toRange, (row, col) => {
-                toCellValue.setValue(row, col, Tools.deepClone(toCellMatrix.getValue(row, col)));
+                toCellValue.setValue(row, col, cloneCellData(toCellMatrix.getValue(row, col)));
             });
 
             const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
@@ -376,17 +379,17 @@ export function getSetCellValueMutations(
         }
 
         if (value.p?.body && isRichText(value.p.body)) {
-            const newValue = Tools.deepClone({ p: value.p, v: value.v });
+            const newValue = { p: cloneValue(value.p), v: value.v };
             valueMatrix.setValue(realRow, realCol, newValue);
         } else {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone(cellValue));
+            valueMatrix.setValue(realRow, realCol, cellValue && cloneCellData(cellValue)!);
         }
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
+        cellValue: cloneCellDataMatrix(valueMatrix.getMatrix()),
     };
 
     redoMutationsInfo.push({
@@ -492,7 +495,7 @@ export function getSetCellStyleMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
+        cellValue: cloneCellDataMatrix(valueMatrix.getMatrix()),
     };
 
     redoMutationsInfo.push({
@@ -545,7 +548,7 @@ export function getClearCellStyleMutations(
         const clearMutation: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: Tools.deepClone(clearStyleMatrix.getMatrix()),
+            cellValue: cloneCellDataMatrix(clearStyleMatrix.getMatrix()),
         };
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,
@@ -592,7 +595,7 @@ export function getClearCellValueMutations(
         const clearMutation: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: Tools.deepClone(clearValueMatrix.getMatrix()),
+            cellValue: cloneCellDataMatrix(clearValueMatrix.getMatrix()),
         };
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,

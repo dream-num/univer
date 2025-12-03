@@ -256,6 +256,7 @@ export function spilitLargeSetRangeValuesMutations(
                 params: {
                     ...mutation.params,
                     cellValue: chunkMatrix.getMatrix(),
+                    __splitChunk__: true,
                 },
             });
         }

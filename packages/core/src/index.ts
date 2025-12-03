@@ -79,6 +79,7 @@ export { EventState, EventSubject, fromEventSubject, type IEventObserver } from 
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export {
+    COMMAND_LOG_EXECUTION_CONFIG_KEY,
     type CommandListener,
     CommandService,
     CommandType,
@@ -148,6 +149,7 @@ export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, from
 export { textDiff } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
+export * from './sheets/clone';
 export { Range } from './sheets/range';
 export { getCellCoordByIndexSimple, getCellPositionByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
@@ -167,8 +169,8 @@ export {
     DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY,
     mergeWorksheetSnapshotWithDefault,
 } from './sheets/sheet-snapshot-utils';
-
 export { Styles } from './sheets/styles';
+
 export * from './sheets/typedef';
 export type { IPosition } from './sheets/typedef';
 export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';

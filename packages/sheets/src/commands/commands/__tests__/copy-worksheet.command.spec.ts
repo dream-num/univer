@@ -21,6 +21,7 @@ import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../../mutations/remove-sheet.mutation';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { CopySheetCommand, getCopyUniqueSheetName } from '../copy-worksheet.command';
 import { RemoveSheetCommand } from '../remove-sheet.command';
@@ -40,6 +41,7 @@ describe('Test copy worksheet commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(CopySheetCommand);
         commandService.registerCommand(InsertSheetMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetWorksheetActiveOperation);
         commandService.registerCommand(SetWorksheetActivateCommand);
         commandService.registerCommand(RemoveSheetCommand);
@@ -59,8 +61,20 @@ describe('Test copy worksheet commands', () => {
                 if (!workbook) throw new Error('This is an error');
                 function getSheetCopyPart(sheet: Worksheet) {
                     const config = sheet.getConfig();
-                    const { id, name, ...rest } = config;
+                    const { id, name, cellData, ...rest } = config;
                     return rest;
+                }
+
+                function getCellDataWithoutType(sheet: Worksheet) {
+                    const config = sheet.getConfig();
+                    const result: Record<number, Record<number, { v: unknown }>> = {};
+                    for (const [rowKey, row] of Object.entries(config.cellData)) {
+                        result[Number(rowKey)] = {};
+                        for (const [colKey, cell] of Object.entries(row as Record<string, { v?: unknown }>)) {
+                            result[Number(rowKey)][Number(colKey)] = { v: cell?.v };
+                        }
+                    }
+                    return result;
                 }
 
                 expect(
@@ -76,6 +90,7 @@ describe('Test copy worksheet commands', () => {
                 const [oldSheet, newSheet] = workbook.getSheets();
 
                 expect(getSheetCopyPart(newSheet)).toEqual(getSheetCopyPart(oldSheet));
+                expect(getCellDataWithoutType(newSheet)).toEqual(getCellDataWithoutType(oldSheet));
 
                 // undo;
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -86,6 +101,7 @@ describe('Test copy worksheet commands', () => {
                 const [oldSheet2, newSheet2] = workbook.getSheets();
 
                 expect(getSheetCopyPart(newSheet2)).toEqual(getSheetCopyPart(oldSheet2));
+                expect(getCellDataWithoutType(newSheet2)).toEqual(getCellDataWithoutType(oldSheet2));
             });
 
             it('Function getCopyUniqueSheetName', async () => {

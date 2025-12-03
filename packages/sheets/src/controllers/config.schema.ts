@@ -20,6 +20,23 @@ export const SHEETS_PLUGIN_CONFIG_KEY = 'sheets.config';
 
 export const configSymbol = Symbol(SHEETS_PLUGIN_CONFIG_KEY);
 
+export interface ILargeSheetOperationConfig {
+    /**
+     * The minimum number of cells that defines a "large sheet".
+     * When a sheet has more cells than this threshold:
+     * - Copy sheet: the mutation will be split into multiple batches
+     * - Remove sheet: undo/redo will not be supported
+     * @default 6000
+     */
+    largeSheetCellCountThreshold?: number;
+
+    /**
+     * The maximum number of cells per batch when splitting mutations for large sheets.
+     * @default 3000
+     */
+    batchSize?: number;
+}
+
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
     override?: DependencyOverride;
@@ -43,6 +60,19 @@ export interface IUniverSheetsConfig {
      * @default true
      */
     freezeSync?: boolean;
+
+    /**
+     * Configuration for large sheet operations.
+     * When a sheet has more cells than the threshold:
+     * - Copy sheet: the mutation will be split into multiple batches
+     * - Remove sheet: undo/redo will not be supported
+     */
+    largeSheetOperation?: ILargeSheetOperationConfig;
 }
+
+export const defaultLargeSheetOperationConfig: Required<ILargeSheetOperationConfig> = {
+    largeSheetCellCountThreshold: 6_000,
+    batchSize: 3_000,
+};
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

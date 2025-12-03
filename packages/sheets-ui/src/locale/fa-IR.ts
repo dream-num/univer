@@ -178,7 +178,8 @@ const locale: typeof enUS = {
         sheetNameCannotIsEmptyError: 'نام برگه نمی‌تواند خالی باشد.',
         sheetNameAlreadyExistsError: 'نام برگه قبلاً وجود دارد. لطفا نام دیگری وارد کنید.',
         deleteSheet: 'حذف برگه',
-        deleteSheetContent:
+        deleteSheetContent: 'تایید حذف این برگه؟',
+        deleteLargeSheetContent:
             'تایید حذف این برگه. پس از حذف، بازیابی نخواهد شد. آیا مطمئن هستید که می‌خواهید آن را حذف کنید؟',
         addProtectSheet: 'محافظت از برگه',
         removeProtectSheet: 'لغو محافظت از برگه',

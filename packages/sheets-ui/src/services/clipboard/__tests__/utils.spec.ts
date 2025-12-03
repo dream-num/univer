@@ -263,6 +263,8 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
             expect(chunk.id).toBe(SetRangeValuesMutation.id);
             expect(chunk.params.unitId).toBe('1');
             expect(chunk.params.subUnitId).toBe('1');
+            // Verify __splitChunk__ flag is set for split chunks
+            expect(chunk.params.__splitChunk__).toBe(true);
         });
     });
 

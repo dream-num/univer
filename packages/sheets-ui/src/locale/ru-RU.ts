@@ -178,7 +178,8 @@ const locale: typeof enUS = {
         sheetNameCannotIsEmptyError: 'Имя листа не может быть пустым.',
         sheetNameAlreadyExistsError: 'Имя листа уже существует. Пожалуйста, введите другое имя.',
         deleteSheet: 'Удалить лист',
-        deleteSheetContent:
+        deleteSheetContent: 'Подтвердите удаление этого листа?',
+        deleteLargeSheetContent:
             'Подтвердите удаление этого листа. После удаления его нельзя будет восстановить. Вы уверены, что хотите удалить его?',
         addProtectSheet: 'Защитить лист',
         removeProtectSheet: 'Снять защиту листа',

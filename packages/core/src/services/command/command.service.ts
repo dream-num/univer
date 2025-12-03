@@ -22,8 +22,16 @@ import { createIdentifier, Inject, Injector } from '../../common/di';
 import { CustomCommandExecutionError } from '../../common/error';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
+import { IConfigService } from '../config/config.service';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
+
+/**
+ * The config key for enabling command execution logging.
+ * Set via `logCommandExecution` in `IUniverConfig` when calling `new Univer()`.
+ * @default true
+ */
+export const COMMAND_LOG_EXECUTION_CONFIG_KEY = 'command.logExecution';
 
 /**
  * The type of a command.
@@ -103,6 +111,16 @@ export interface IMutationCommonParams {
      * It is used to indicate which {@link CommandType.COMMAND} triggers the mutation.
      */
     trigger?: string;
+
+    /**
+     * Mark this mutation as a split chunk from a large mutation.
+     * When collaboration layer encounters this flag, it will send this mutation
+     * in a separate changeset to avoid oversized payloads.
+     *
+     * This is typically set by operations that split large data (e.g., copy worksheet,
+     * paste large ranges) into smaller chunks for better network transmission.
+     */
+    __splitChunk__?: boolean;
 }
 
 /**
@@ -174,6 +192,11 @@ export interface IExecutionOptions {
     fromCollab?: boolean;
     /** @deprecated */
     fromChangeset?: boolean;
+    /**
+     * This mutation should be synced to changeset but not executed locally.
+     * The actual execution will be handled asynchronously via onlyLocal.
+     */
+    syncOnly?: boolean;
     [key: PropertyKey]: string | number | boolean | undefined;
 }
 
@@ -230,6 +253,7 @@ export interface ICommandService {
     syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): R;
     /**
      * Register a callback function that will be executed after a command is executed.
+     * Note: This will NOT be called for commands with syncOnly option.
      * @param listener
      */
     onCommandExecuted(listener: CommandListener): IDisposable;
@@ -238,6 +262,13 @@ export interface ICommandService {
      * @param listener
      */
     beforeCommandExecuted(listener: CommandListener): IDisposable;
+    /**
+     * Register a callback function specifically for collaboration sync.
+     * This will only be called for mutations (not commands/operations) that need to be synced,
+     * including syncOnly mutations.
+     * @param listener
+     */
+    onMutationExecutedForCollab(listener: CommandListener): IDisposable;
 }
 
 class CommandRegistry {
@@ -292,6 +323,7 @@ export class CommandService extends Disposable implements ICommandService {
 
     private readonly _beforeCommandExecutionListeners: CommandListener[] = [];
     private readonly _commandExecutedListeners: CommandListener[] = [];
+    private readonly _collabMutationListeners: CommandListener[] = [];
 
     private _multiCommandDisposables = new Map<string, IDisposable>();
 
@@ -301,7 +333,8 @@ export class CommandService extends Disposable implements ICommandService {
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
@@ -314,6 +347,7 @@ export class CommandService extends Disposable implements ICommandService {
 
         this._commandExecutedListeners.length = 0;
         this._beforeCommandExecutionListeners.length = 0;
+        this._collabMutationListeners.length = 0;
     }
 
     hasCommand(commandId: string): boolean {
@@ -359,6 +393,19 @@ export class CommandService extends Disposable implements ICommandService {
         throw new Error('[CommandService]: could not add a listener twice.');
     }
 
+    onMutationExecutedForCollab(listener: CommandListener): IDisposable {
+        if (this._collabMutationListeners.indexOf(listener) === -1) {
+            this._collabMutationListeners.push(listener);
+
+            return toDisposable(() => {
+                const index = this._collabMutationListeners.indexOf(listener);
+                this._collabMutationListeners.splice(index, 1);
+            });
+        }
+
+        throw new Error('[CommandService]: could not add a collab mutation listener twice.');
+    }
+
     async executeCommand<P extends object = object, R = boolean>(
         id: string,
         params?: P,
@@ -379,7 +426,17 @@ export class CommandService extends Disposable implements ICommandService {
 
                 this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
                 const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
-                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
+                // For syncOnly mutations, only call collab listeners, not regular listeners
+                if (_options.syncOnly) {
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                } else {
+                    this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                }
 
                 stackItemDisposable.dispose();
 
@@ -430,7 +487,17 @@ export class CommandService extends Disposable implements ICommandService {
 
                 this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
                 const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
-                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
+                // For syncOnly mutations, only call collab listeners, not regular listeners
+                if (_options.syncOnly) {
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                } else {
+                    this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
+                    if (command.type === CommandType.MUTATION) {
+                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
+                    }
+                }
 
                 stackItemDisposable.dispose();
 
@@ -487,10 +554,17 @@ export class CommandService extends Disposable implements ICommandService {
     }
 
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {
-        this._logService.debug(
-            '[CommandService]',
-            `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
-        );
+        // If syncOnly is true, skip execution but return true to indicate success for sync purposes
+        if (options?.syncOnly) {
+            return true as R;
+        }
+
+        if (this._configService.getConfig<boolean>(COMMAND_LOG_EXECUTION_CONFIG_KEY) !== false) {
+            this._logService.debug(
+                '[CommandService]',
+                `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
+            );
+        }
 
         this._commandExecutingLevel++;
         let result: R | boolean;
@@ -507,10 +581,17 @@ export class CommandService extends Disposable implements ICommandService {
     }
 
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): R {
-        this._logService.debug(
-            '[CommandService]',
-            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
-        );
+         // If syncOnly is true, skip execution but return true to indicate success for sync purposes
+        if (options?.syncOnly) {
+            return true as R;
+        }
+
+        if (this._configService.getConfig<boolean>(COMMAND_LOG_EXECUTION_CONFIG_KEY) !== false) {
+            this._logService.debug(
+                '[CommandService]',
+                `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
+            );
+        }
 
         this._commandExecutingLevel++;
         let result: R | boolean;

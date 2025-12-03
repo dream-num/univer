@@ -178,7 +178,8 @@ const locale: typeof enUS = {
         sheetNameCannotIsEmptyError: '시트 이름은 비어 있을 수 없습니다.',
         sheetNameAlreadyExistsError: '시트 이름이 이미 존재합니다. 다른 이름을 입력해주세요.',
         deleteSheet: '시트 삭제',
-        deleteSheetContent:
+        deleteSheetContent: '이 시트를 삭제하시겠습니까?',
+        deleteLargeSheetContent:
             '이 시트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다. 삭제하시겠습니까?',
         addProtectSheet: '시트 보호',
         removeProtectSheet: '시트 보호 해제',

@@ -36,6 +36,7 @@ import { SpanModel } from './span-model';
 import { CellModeEnum } from './typedef';
 import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
 import { SheetViewModel } from './view-model';
+import { cloneWorksheetData } from './clone';
 
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
@@ -430,7 +431,7 @@ export class Worksheet {
      */
     clone(): Worksheet {
         const { _snapshot: _config } = this;
-        const copy = Tools.deepClone(_config);
+        const copy = cloneWorksheetData(_config);
 
         return new Worksheet(this.unitId, copy, this._styles);
     }

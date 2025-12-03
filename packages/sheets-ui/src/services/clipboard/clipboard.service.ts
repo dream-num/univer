@@ -40,6 +40,7 @@ import type {
 } from './type';
 import {
     CellModeEnum,
+    cloneCellDataWithSpanAndDisplay,
     createIdentifier,
     Disposable,
     ErrorService,
@@ -56,7 +57,6 @@ import {
     sequenceExecute,
     ThemeService,
     toDisposable,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
@@ -77,6 +77,7 @@ import { IMarkSelectionService } from '../mark-selection/mark-selection.service'
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 
+import { cloneCellDataWithSpanInfo } from './clone';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
@@ -439,7 +440,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             for (let c = startColumn; c <= endColumn; c++) {
                 const cellData = matrix.getValue(r, c);
                 if (cellData) {
-                    const newCellData = Tools.deepClone(cellData);
+                    const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
                     plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
                         ...getEmptyCell(),
                         ...newCellData,
@@ -626,27 +627,24 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return res;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     private async _pasteInternal(copyId: string, pasteType: IPasteHookValueType): Promise<boolean> {
         // const target = this._getPastingTarget();
         // const { selection, unitId, subUnitId } = target;
-        const cachedData = Tools.deepClone(this._copyContentCache.get(copyId));
-        const { range, matrix: cellMatrix, unitId: copyUnitId, subUnitId: copySubUnitId } = cachedData || {};
-        if (!cellMatrix || !cachedData || !range || !copyUnitId || !copySubUnitId) {
-            return false;
-        }
-
-        if (!cellMatrix || !cachedData) {
+        const cachedData = this._copyContentCache.get(copyId);
+        const { range, matrix: cachedMatrix, unitId: copyUnitId, subUnitId: copySubUnitId } = cachedData || {};
+        if (!cachedMatrix || !cachedData || !range || !copyUnitId || !copySubUnitId) {
             return false;
         }
 
         const { mapFunc } = virtualizeDiscreteRanges([range]);
         const worksheet = this._univerInstanceService.getUniverSheetInstance(copyUnitId)?.getSheetBySheetId(copySubUnitId);
 
-        cellMatrix.forValue((row, col, value) => {
+        const cellMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
+        cachedMatrix.forValue((row, col, value) => {
             const { row: actualRow, col: actualColumn } = mapFunc(row, col);
             const style = worksheet?.getComposedCellStyle(actualRow, actualColumn);
-            const newValue = Tools.deepClone(value);
+            const newValue = cloneCellDataWithSpanInfo(value)!;
             newValue.s = style;
             cellMatrix.setValue(row, col, newValue);
 

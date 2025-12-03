@@ -167,8 +167,7 @@ const locale: typeof enUS = {
         chooseText: '색상 선택',
 
         tipNameRepeat: '탭 페이지의 이름은 중복될 수 없습니다! 다시 작성해주세요',
-        noMoreSheet:
-            '통합 문서에는 최소한 하나의 시트가 있습니다. 선택한 시트를 삭제하려면 새 시트를 삽입하거나 숨겨진 시트를 표시해주세요.',
+        noMoreSheet: '통합 문서에는 최소한 하나의 시트가 있습니다. 선택한 시트를 삭제하려면 새 시트를 삽입하거나 숨겨진 시트를 표시해주세요.',
         confirmDelete: '삭제하시겠습니까',
         redoDelete: 'Ctrl+Z로 실행 취소할 수 있습니다',
         noHide: '최소한 하나의 시트 태그를 유지해야 합니다',
@@ -179,8 +178,7 @@ const locale: typeof enUS = {
         sheetNameAlreadyExistsError: '시트 이름이 이미 존재합니다. 다른 이름을 입력해주세요.',
         deleteSheet: '시트 삭제',
         deleteSheetContent: '이 시트를 삭제하시겠습니까?',
-        deleteLargeSheetContent:
-            '이 시트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다. 삭제하시겠습니까?',
+        deleteLargeSheetContent: '이 시트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다. 삭제하시겠습니까?',
         addProtectSheet: '시트 보호',
         removeProtectSheet: '시트 보호 해제',
         changeSheetPermission: '시트 권한 변경',

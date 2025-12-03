@@ -167,8 +167,7 @@ const locale: typeof enUS = {
         chooseText: 'Confirmar color',
 
         tipNameRepeat: '¡El nombre de la pestaña no se puede repetir! Por favor, revisa',
-        noMoreSheet:
-            'El libro de trabajo debe contener al menos una hoja de cálculo visible. Para eliminar la hoja de cálculo seleccionada, inserte una nueva o muestre una hoja oculta.',
+        noMoreSheet: 'El libro de trabajo debe contener al menos una hoja de cálculo visible. Para eliminar la hoja de cálculo seleccionada, inserte una nueva o muestre una hoja oculta.',
         confirmDelete: '¿Seguro que quieres eliminar?',
         redoDelete: 'Se puede deshacer con Ctrl+Z',
         noHide: 'No se puede ocultar, mantén al menos una pestaña de hoja',
@@ -179,8 +178,7 @@ const locale: typeof enUS = {
         sheetNameAlreadyExistsError: 'El nombre de la hoja ya existe. Por favor, introduce otro nombre.',
         deleteSheet: 'Eliminar hoja de cálculo',
         deleteSheetContent: '¿Confirmar para eliminar esta hoja de cálculo?',
-        deleteLargeSheetContent:
-            'Confirma para eliminar esta hoja de cálculo. No se podrá recuperar después de la eliminación. ¿Estás seguro de que quieres eliminarla?',
+        deleteLargeSheetContent: 'Confirma para eliminar esta hoja de cálculo. No se podrá recuperar después de la eliminación. ¿Estás seguro de que quieres eliminarla?',
         addProtectSheet: 'Proteger hoja de cálculo',
         removeProtectSheet: 'Desproteger hoja de cálculo',
         changeSheetPermission: 'Cambiar permisos de la hoja de cálculo',

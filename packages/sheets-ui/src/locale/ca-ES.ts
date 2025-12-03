@@ -167,8 +167,7 @@ const locale: typeof enUS = {
         chooseText: 'Confirmar el color',
 
         tipNameRepeat: 'El nom de la pestanya no es pot repetir! Si us plau, reviseu-lo',
-        noMoreSheet:
-            'El llibre de treball ha de contenir almenys un full de càlcul visible. Per suprimir el full de càlcul seleccionat, inseriu-ne un de nou o mostreu un full de càlcul amagat.',
+        noMoreSheet: 'El llibre de treball ha de contenir almenys un full de càlcul visible. Per suprimir el full de càlcul seleccionat, inseriu-ne un de nou o mostreu un full de càlcul amagat.',
         confirmDelete: 'Esteu segur que el voleu suprimir?',
         redoDelete: 'Es pot desfer amb Ctrl+Z',
         noHide: 'No es pot amagar, manteniu almenys una pestanya de full',
@@ -179,8 +178,7 @@ const locale: typeof enUS = {
         sheetNameAlreadyExistsError: 'El nom del full ja existeix. Si us plau, introduïu un altre nom.',
         deleteSheet: 'Suprimir el full de càlcul',
         deleteSheetContent: 'Confirmeu per suprimir aquest full de càlcul?',
-        deleteLargeSheetContent:
-            'Confirmeu per suprimir aquest full de càlcul. No es podrà recuperar després de la supressió. Esteu segur que el voleu suprimir?',
+        deleteLargeSheetContent: 'Confirmeu per suprimir aquest full de càlcul. No es podrà recuperar després de la supressió. Esteu segur que el voleu suprimir?',
         addProtectSheet: 'Protegir el full de càlcul',
         removeProtectSheet: 'Desprotegir el full de càlcul',
         changeSheetPermission: 'Canviar els permisos del full de càlcul',

@@ -176,7 +176,8 @@ const locale = {
         sheetNameCannotIsEmptyError: 'The sheet name cannot be empty.',
         sheetNameAlreadyExistsError: 'The sheet name already exists. Please enter another name.',
         deleteSheet: 'Delete worksheet',
-        deleteSheetContent:
+        deleteSheetContent: 'Confirm to delete this worksheet?',
+        deleteLargeSheetContent:
             'Confirm to delete this worksheet. It will not be retrieved after deletion. Are you sure you want to delete it?',
         addProtectSheet: 'Protect Worksheet',
         removeProtectSheet: 'Unprotect Worksheet',

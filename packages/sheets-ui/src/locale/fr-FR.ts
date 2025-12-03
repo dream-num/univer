@@ -178,7 +178,8 @@ const locale: typeof enUS = {
         sheetNameCannotIsEmptyError: 'Le nom de la feuille ne peut pas être vide.',
         sheetNameAlreadyExistsError: 'Le nom de la feuille existe déjà. Veuillez entrer un autre nom.',
         deleteSheet: 'Supprimer la feuille de calcul',
-        deleteSheetContent:
+        deleteSheetContent: 'Confirmer la suppression de cette feuille de calcul ?',
+        deleteLargeSheetContent:
             'Confirmer la suppression de cette feuille de calcul. Elle ne pourra pas être récupérée après suppression. Êtes-vous sûr de vouloir la supprimer ?',
         addProtectSheet: 'Protéger la feuille de calcul',
         removeProtectSheet: 'Déprotéger la feuille de calcul',

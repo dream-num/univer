@@ -178,7 +178,8 @@ const locale: typeof enUS = {
         sheetNameCannotIsEmptyError: 'El nom del full no pot estar buit.',
         sheetNameAlreadyExistsError: 'El nom del full ja existeix. Si us plau, introduïu un altre nom.',
         deleteSheet: 'Suprimir el full de càlcul',
-        deleteSheetContent:
+        deleteSheetContent: 'Confirmeu per suprimir aquest full de càlcul?',
+        deleteLargeSheetContent:
             'Confirmeu per suprimir aquest full de càlcul. No es podrà recuperar després de la supressió. Esteu segur que el voleu suprimir?',
         addProtectSheet: 'Protegir el full de càlcul',
         removeProtectSheet: 'Desprotegir el full de càlcul',

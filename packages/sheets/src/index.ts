@@ -195,6 +195,7 @@ export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
 export { UnregisterWorksheetRangeThemeStyleCommand } from './commands/commands/unregister-range-theme.command';
 export type { IUnregisterWorksheetRangeThemeStyleCommandParams } from './commands/commands/unregister-range-theme.command';
+export { countCells } from './commands/commands/util';
 export { alignToMergedCellsBorders, getCellAtRowCol, isSingleCellSelection, setEndForRange } from './commands/commands/utils/selection-utils';
 export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export { copyRangeStyles } from './commands/commands/utils/selection-utils';
@@ -280,8 +281,8 @@ export {
     SetRowVisibleMutation,
 } from './commands/mutations/set-row-visible.mutation';
 export { type ISetTabColorMutationParams, SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
-export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 
+export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 export {
     type ISetWorksheetColWidthMutationParams,
     SetWorksheetColWidthMutation,
@@ -319,7 +320,7 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getSelectionsService } from './commands/utils/selection-command-util';
-export { type IUniverSheetsConfig } from './controllers/config.schema';
+export { defaultLargeSheetOperationConfig, type ILargeSheetOperationConfig, type IUniverSheetsConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';

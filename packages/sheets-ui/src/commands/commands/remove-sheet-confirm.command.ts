@@ -15,8 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, LocaleService } from '@univerjs/core';
-import { RemoveSheetCommand } from '@univerjs/sheets';
+import type { IUniverSheetsConfig } from '@univerjs/sheets';
+import { CommandType, ICommandService, IConfigService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { countCells, defaultLargeSheetOperationConfig, getSheetCommandTarget, RemoveSheetCommand, SHEETS_PLUGIN_CONFIG_KEY } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
 interface IRemoveSheetConfirmCommandParams {
@@ -31,21 +32,38 @@ export const RemoveSheetConfirmCommand: ICommand = {
         const confirmService = accessor.get(IConfirmService);
         const commandService = accessor.get(ICommandService);
         const localeService = accessor.get(LocaleService);
+        const configService = accessor.get(IConfigService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        // Check if this is a large sheet that needs confirmation
+        const target = getSheetCommandTarget(univerInstanceService, { subUnitId });
+        if (!target) return false;
+        const { worksheet } = target;
+
+        const pluginConfig = configService.getConfig<IUniverSheetsConfig>(SHEETS_PLUGIN_CONFIG_KEY);
+        const largeSheetConfig = {
+            ...defaultLargeSheetOperationConfig,
+            ...pluginConfig?.largeSheetOperation,
+        };
+        const cellCount = countCells(worksheet.getCellMatrix());
+        const isLargeSheet = cellCount >= largeSheetConfig.largeSheetCellCountThreshold;
+
+        // Only show confirmation dialog for large sheets
         const result = await confirmService.confirm({
             id: 'sheet.confirm.remove-sheet',
             title: {
                 title: localeService.t('sheetConfig.deleteSheet'),
             },
-            children: { title: localeService.t('sheetConfig.deleteSheetContent') },
+            children: { title: isLargeSheet ? localeService.t('sheetConfig.deleteLargeSheetContent') : localeService.t('sheetConfig.deleteSheetContent') },
             cancelText: localeService.t('button.cancel'),
             confirmText: localeService.t('button.confirm'),
         });
 
-        if (result) {
-            await commandService.executeCommand(RemoveSheetCommand.id, { subUnitId });
-            return true;
+        if (!result) {
+            return false;
         }
 
-        return false;
+        await commandService.executeCommand(RemoveSheetCommand.id, { subUnitId });
+        return true;
     },
 };

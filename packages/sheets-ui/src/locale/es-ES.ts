@@ -178,7 +178,8 @@ const locale: typeof enUS = {
         sheetNameCannotIsEmptyError: 'El nombre de la hoja no puede estar vacío.',
         sheetNameAlreadyExistsError: 'El nombre de la hoja ya existe. Por favor, introduce otro nombre.',
         deleteSheet: 'Eliminar hoja de cálculo',
-        deleteSheetContent:
+        deleteSheetContent: '¿Confirmar para eliminar esta hoja de cálculo?',
+        deleteLargeSheetContent:
             'Confirma para eliminar esta hoja de cálculo. No se podrá recuperar después de la eliminación. ¿Estás seguro de que quieres eliminarla?',
         addProtectSheet: 'Proteger hoja de cálculo',
         removeProtectSheet: 'Desproteger hoja de cálculo',

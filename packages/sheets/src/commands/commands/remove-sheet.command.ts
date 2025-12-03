@@ -92,14 +92,14 @@ export const RemoveSheetCommand: ICommand = {
 
         if (result.result) {
             if (isLargeSheet) {
-                // For large sheets, push empty undo/redo to disable undo/redo functionality
+                // For large sheets, clear undo/redo to disable undo/redo functionality
+                undoRedoService.clearUndoRedo(unitId);
+            } else {
                 undoRedoService.pushUndoRedo({
                     unitID: unitId,
                     undoMutations: undos,
                     redoMutations: redos,
                 });
-            } else {
-                undoRedoService.clearUndoRedo(unitId);
             }
 
             return true;

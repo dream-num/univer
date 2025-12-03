@@ -169,8 +169,8 @@ const locale: typeof enUS = {
         },
     },
     MAKEARRAY: {
-        description: '透過應用 LAMBDA 傳回指定行和列大小的計算數組',
-        abstract: '透過應用 LAMBDA 傳回指定行和列大小的計算數組',
+        description: '透過應用 LAMBDA 傳回指定列和欄大小的計算陣列',
+        abstract: '透過應用 LAMBDA 傳回指定列和欄大小的計算陣列',
         links: [
             {
                 title: '教導',
@@ -178,11 +178,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: '行數', detail: '陣列中的行數。 必須大於零' },
-            number2: { name: '列數', detail: '陣列中的列數。 必須大於零' },
+            number1: { name: '列數', detail: '陣列中的列數。 必須大於零' },
+            number2: { name: '欄數', detail: '陣列中的欄數。 必須大於零' },
             value3: {
                 name: 'lambda',
-                detail: '呼叫 LAMBDA 來建立陣列。 LAMBDA 接受兩個參數:row數組的行索引, col數組的列索引',
+                detail: '呼叫 LAMBDA 來建立陣列。 LAMBDA 接受兩個參數:row陣列的列索引, col陣列的欄索引',
             },
         },
     },
@@ -244,8 +244,8 @@ const locale: typeof enUS = {
         },
     },
     SCAN: {
-        description: '透過將 LAMBDA 應用於每個值來掃描數組，並傳回具有每個中間值的數組',
-        abstract: '透過將 LAMBDA 套用至每個值來掃描數組，並傳回具有每個中間值的陣列',
+        description: '透過將 LAMBDA 應用於每個值來掃描陣列，並傳回具有每個中間值的陣列',
+        abstract: '透過將 LAMBDA 套用至每個值來掃描陣列，並傳回具有每個中間值的陣列',
         links: [
             {
                 title: '教導',

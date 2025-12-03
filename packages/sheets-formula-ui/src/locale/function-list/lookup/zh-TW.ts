@@ -18,7 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ADDRESS: {
-        description: '根據指定行號和列號獲得工作表中的某個儲存格的位址。 例如，ADDRESS(2,3) 傳回 $C$2。 再例如，ADDRESS(77,300) 回傳 $KN$77。 可以使用其他函數（如 ROW 和 COLUMN 函數）為 ADDRESS 函數提供行號和列號參數。 ',
+        description: '根據指定列號和欄號獲得工作表中的某個儲存格的位址。 例如，ADDRESS(2,3) 傳回 $C$2。 再例如，ADDRESS(77,300) 回傳 $KN$77。 可以使用其他函數（如 ROW 和 COLUMN 函數）為 ADDRESS 函數提供列號和欄號參數。 ',
         abstract: '以文字形式將參考值傳回工作表的單一儲存格',
         links: [
             {
@@ -27,12 +27,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            row_num: { name: '行號', detail: '一個數值，指定要使用儲存格的行號。 ' },
-            column_num: { name: '列號', detail: '一個數值，指定要在儲存格參考中使用的列號。 ' },
+            row_num: { name: '列號', detail: '一個數值，指定要使用儲存格的列號。 ' },
+            column_num: { name: '欄號', detail: '一個數值，指定要在儲存格參考中使用的欄號。 ' },
             abs_num: { name: '引用型別', detail: '一個數值，指定要傳回的參考型別。 ' },
             a1: {
                 name: '引用樣式',
-                detail: '一個邏輯值，指定 A1 或 R1C1 引用樣式。 在 A1 樣式中，列和行將分別按字母和數字順序新增標籤。 在 R1C1 引用樣式中，列和行均會依數字順序新增標籤。 如果參數 A1 為 TRUE 或省略，則 ADDRESS 函數傳回 A1 樣式參考；如果為 FALSE，則 ADDRESS 函數傳回 R1C1 樣式參考。 ',
+                detail: '一個邏輯值，指定 A1 或 R1C1 引用樣式。 在 A1 樣式中，欄和列將分別按字母和數字順序新增標籤。 在 R1C1 引用樣式中，欄和列均會依數字順序新增標籤。 如果參數 A1 為 TRUE 或省略，則 ADDRESS 函數傳回 A1 樣式參考；如果為 FALSE，則 ADDRESS 函數傳回 R1C1 樣式參考。 ',
             },
             sheet_text: {
                 name: '工作表名稱',
@@ -99,8 +99,8 @@ const locale: typeof enUS = {
         },
     },
     COLUMN: {
-        description: '傳回給定單元格引用的列號。 ',
-        abstract: '傳回引用的列號',
+        description: '傳回給定儲存格引用的欄號。 ',
+        abstract: '傳回引用的欄號',
         links: [
             {
                 title: '教導',
@@ -108,12 +108,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            reference: { name: '引用', detail: '要傳回其列號的儲存格或儲存格範圍。 ' },
+            reference: { name: '引用', detail: '要傳回其欄號的儲存格或儲存格範圍。 ' },
         },
     },
     COLUMNS: {
-        description: '傳回數組或引用的列數。 ',
-        abstract: '傳回引用中包含的列數',
+        description: '傳回陣列或引用的欄數。 ',
+        abstract: '傳回引用中包含的欄數',
         links: [
             {
                 title: '教導',
@@ -121,7 +121,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            array: { name: '陣列', detail: '要計算列數的陣列、陣列公式或是對儲存格區域的參考。 ' },
+            array: { name: '陣列', detail: '要計算欄數的陣列、陣列公式或是對儲存格區域的參考。 ' },
         },
     },
     DROP: {
@@ -198,8 +198,8 @@ const locale: typeof enUS = {
         },
     },
     HLOOKUP: {
-        description: '在表格的首行或數值數組中搜尋值，然後傳回表格或陣列中指定行的所在列中的值。 ',
-        abstract: '找出陣列的首行，並傳回指定儲存格的值',
+        description: '在表格的首列或數值陣列中搜尋值，然後傳回表格或陣列中指定列的所在欄中的值。 ',
+        abstract: '找出陣列的首列，並傳回指定儲存格的值',
         links: [
             {
                 title: '教導',
@@ -209,15 +209,15 @@ const locale: typeof enUS = {
         functionParameter: {
             lookupValue: {
                 name: '查找值',
-                detail: '要尋找的值。 要尋找的值必須位於 table_array 參數中指定的儲存格區域的第一行中。 ',
+                detail: '要尋找的值。 要尋找的值必須位於 table_array 參數中指定的儲存格區域的第一列中。 ',
             },
             tableArray: {
                 name: '範圍',
                 detail: 'VLOOKUP 在其中搜尋 lookup_value 和傳回值的儲存格區域。在其中尋找資料的資訊表。 使用區域或區域名稱的引用。 ',
             },
             rowIndexNum: {
-                name: '行號',
-                detail: '行號table_array符合值將傳回的行號（row_index_num為 1，則傳回 table_array 中的第一行值，row_index_num 2 傳回 table_array 中的第二行值）。 ',
+                name: '列號',
+                detail: '列號table_array符合值將傳回的列號（row_index_num為 1，則傳回 table_array 中的第一列值，row_index_num 2 傳回 table_array 中的第二列值）。 ',
             },
             rangeLookup: {
                 name: '查詢類型',
@@ -271,7 +271,7 @@ const locale: typeof enUS = {
         },
     },
     INDEX: {
-        description: '傳回指定的行與列交叉處的儲存格參考。 如果引用由不連續的選取區域組成，可以選擇某一選取區域。 ',
+        description: '傳回指定的列與欄交叉處的儲存格參考。 如果引用由不連續的選取區域組成，可以選擇某一選取區域。 ',
         abstract: '使用索引從引用或陣列中選擇值',
         links: [
             {
@@ -281,9 +281,9 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             reference: { name: '引用', detail: '對一個或多個儲存格區域的引用。' },
-            rowNum: { name: '行號', detail: '引用中某行的行號，函數從該行傳回一個引用。 ' },
-            columnNum: { name: '列號', detail: '引用中某列的列標，函數從該列傳回一個引用。 ' },
-            areaNum: { name: '區域編號', detail: '選擇要傳回行號和列號的交叉點的參考區域。' },
+            rowNum: { name: '列號', detail: '引用中某列的列號，函數從該列傳回一個引用。 ' },
+            columnNum: { name: '欄號', detail: '引用中某欄的欄標，函數從該欄傳回一個引用。 ' },
+            areaNum: { name: '區域編號', detail: '選擇要傳回列號和欄號的交叉點的參考區域。' },
         },
     },
     INDIRECT: {
@@ -296,8 +296,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            refText: { name: '引用文本', detail: '對包含 A1 樣式引用、R1C1 樣式引用、定義為引用的名稱或作為文本字符串引用的單元格的引用的引用。' },
-            a1: { name: '引用類型', detail: '一個邏輯值，用於指定包含在單元格引用文本中的引用的類型。' },
+            refText: { name: '引用文字', detail: '對包含 A1 樣式引用、R1C1 樣式引用、定義為引用的名稱或作為文字字串引用的儲存格的引用的引用。' },
+            a1: { name: '引用類型', detail: '一個邏輯值，用於指定包含在儲存格引用文字中的引用的類型。' },
         },
     },
     LOOKUP: {
@@ -347,15 +347,15 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             reference: { name: '引用', detail: '要基於偏移量的參考。' },
-            rows: { name: '行數', detail: '需要左上角單元格引用的向上或向下行數。' },
-            cols: { name: '列數', detail: '需要結果的左上角單元格引用的從左到右的列數。' },
-            height: { name: '行高', detail: '需要傳回的引用的行高。行高必須為正數。' },
-            width: { name: '列寬', detail: '需要傳回的引用的列寬。列寬必須為正數。' },
+            rows: { name: '列數', detail: '需要左上角儲存格引用的向上或向下列數。' },
+            cols: { name: '欄數', detail: '需要結果的左上角儲存格引用的從左到右的欄數。' },
+            height: { name: '列高', detail: '需要傳回的引用的列高。列高必須為正數。' },
+            width: { name: '欄寬', detail: '需要傳回的引用的欄寬。欄寬必須為正數。' },
         },
     },
     ROW: {
-        description: '傳回給定單元格引用的行號。 ',
-        abstract: '傳回引用的行號',
+        description: '傳回給定儲存格引用的列號。 ',
+        abstract: '傳回引用的列號',
         links: [
             {
                 title: '教導',
@@ -363,12 +363,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            reference: { name: '引用', detail: '需要取得其行號的儲存格或儲存格區域。 ' },
+            reference: { name: '引用', detail: '需要取得其列號的儲存格或儲存格區域。 ' },
         },
     },
     ROWS: {
-        description: '傳回數組或引用的行數。 ',
-        abstract: '傳回引用中的行數',
+        description: '傳回陣列或引用的列數。 ',
+        abstract: '傳回引用中的列數',
         links: [
             {
                 title: '教導',
@@ -376,7 +376,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            array: { name: '陣列', detail: '需要取得其行數的陣列、陣列公式或對儲存格區域的參考。 ' },
+            array: { name: '陣列', detail: '需要取得其列數的陣列、陣列公式或對儲存格區域的參考。 ' },
         },
     },
     RTD: {
@@ -404,9 +404,9 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             array: { name: '陣列', detail: '要排序的範圍或陣列。' },
-            sortIndex: { name: '排序索引', detail: '表示排序依據(按行或按列)的數字。' },
+            sortIndex: { name: '排序索引', detail: '表示排序依據(按列或按欄)的數字。' },
             sortOrder: { name: '排序順序', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
-            byCol: { name: '排序方向', detail: '表示所需排序方向的邏輯值；FALSE指依行排序(預設)，TRUE指依列排序。' },
+            byCol: { name: '排序方向', detail: '表示所需排序方向的邏輯值；FALSE指依列排序(預設)，TRUE指依欄排序。' },
         },
     },
     SORTBY: {
@@ -501,8 +501,8 @@ const locale: typeof enUS = {
     },
     VLOOKUP: {
         description:
-            '需要在表格或區域中按行查找內容時，請使用 VLOOKUP。 例如，按零件號碼找出汽車零件的價格，或根據員工 ID 尋找員工姓名。 ',
-        abstract: '在數組第一列中查找，然後在行之間移動以返回單元格的值',
+            '需要在表格或區域中按列查找內容時，請使用 VLOOKUP。 例如，按零件號碼找出汽車零件的價格，或根據員工 ID 尋找員工姓名。 ',
+        abstract: '在陣列第一欄中查找，然後在列之間移動以返回儲存格的值',
         links: [
             {
                 title: '教導',
@@ -512,14 +512,14 @@ const locale: typeof enUS = {
         functionParameter: {
             lookupValue: {
                 name: '查找值',
-                detail: '要尋找的值。 要尋找的值必須位於 table_array 參數中指定的儲存格區域的第一列。 ',
+                detail: '要尋找的值。 要尋找的值必須位於 table_array 參數中指定的儲存格區域的第一欄。 ',
             },
             tableArray: {
                 name: '範圍',
-                detail: 'VLOOKUP 在其中搜尋 lookup_value 和傳回值的儲存格區域。 可以使用命名區域或表，並且可以在參數中使用名稱，而不是單元格參考。 ',
+                detail: 'VLOOKUP 在其中搜尋 lookup_value 和傳回值的儲存格區域。 可以使用命名區域或表，並且可以在參數中使用名稱，而不是儲存格參考。 ',
             },
             colIndexNum: {
-                name: '行號',
+                name: '欄號',
                 detail: '其中包含傳回值的儲存格的編號（table_array 最左側儲存格為 1 開始編號）。 ',
             },
             rangeLookup: {
@@ -595,7 +595,7 @@ const locale: typeof enUS = {
             },
             matchMode: {
                 name: '符合類型',
-                detail: '指定符合類型： 0 - 完全符合。 如果未找到，則傳回 #N/A。預設選項。 -1 - 完全匹配。 如果沒有找到，則傳回下一個較小的項。 1 - 完全匹配。 如果沒有找到，則傳回下一個較大的項。 2 - 通配符匹配，其中 *, ? 和 ~ 有特殊意義。 ',
+                detail: '指定符合類型： 0 - 完全符合。 如果未找到，則傳回 #N/A。預設選項。 -1 - 完全匹配。 如果沒有找到，則傳回下一個較小的項。 1 - 完全匹配。 如果沒有找到，則傳回下一個較大的項。 2 - 萬用字元匹配，其中 *, ? 和 ~ 有特殊意義。 ',
             },
             searchMode: {
                 name: '搜尋模式',
@@ -615,7 +615,7 @@ const locale: typeof enUS = {
         functionParameter: {
             lookupValue: { name: '找值', detail: '找值' },
             lookupArray: { name: '搜尋區域', detail: '要搜尋的陣列或區域' },
-            matchMode: { name: '匹配類型', detail: '指定匹配類型：\n0 - 完全匹配（預設值）\n-1 - 完全匹配或下一個最小項\n1 - 完全匹配或下一個最大項\n2 - 通配符匹配，其中*, ? 和~ 有特殊意義。 ' },
+            matchMode: { name: '匹配類型', detail: '指定匹配類型：\n0 - 完全匹配（預設值）\n-1 - 完全匹配或下一個最小項\n1 - 完全匹配或下一個最大項\n2 - 萬用字元匹配，其中*, ? 和~ 有特殊意義。 ' },
             searchMode: { name: '搜尋類型', detail: '指定搜尋類型：\n1 - 搜尋從第一到最後一個（預設值）\n-1 - 搜尋從最後到第一個（反向搜尋）。 \n2 - 執行依賴 lookup_array 按升序排序的二進位搜尋。 如果未排序，將傳回無效結果。 \n2 - 執行依賴 lookup_array 按降序排序的二進位搜尋。 如果未排序，將傳回無效結果。 ' },
         },
     },

@@ -575,7 +575,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
-        description: '傳回數組的矩陣行列式的值',
+        description: '傳回陣列的矩陣行列式的值',
         abstract: '傳回陣列的矩陣行列式的值',
         links: [
             {
@@ -588,8 +588,8 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
-        description: '傳回數組的逆矩陣',
-        abstract: '傳回數組的逆矩陣',
+        description: '傳回陣列的逆矩陣',
+        abstract: '傳回陣列的逆矩陣',
         links: [
             {
                 title: '教導',
@@ -760,8 +760,8 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
-        description: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字數組。但是，你可以指定要填滿的行數和列數、最小值和最大值，以及是否會傳回整個數字或小數值。',
-        abstract: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字數組。',
+        description: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字陣列。但是，你可以指定要填滿的列數和欄數、最小值和最大值，以及是否會傳回整個數字或小數值。',
+        abstract: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字陣列。',
         links: [
             {
                 title: '教導',
@@ -993,7 +993,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            functionNum: { name: '函數編號', detail: '數字 1-11 或 101-111，用於指定要為分類總和所使用的函數。 如果使用 1-11，將包括手動隱藏的行，如果使用 101-111，則排除手動隱藏的行；始終排除已篩選掉的儲存格。 ' },
+            functionNum: { name: '函數編號', detail: '數字 1-11 或 101-111，用於指定要為分類總和所使用的函數。 如果使用 1-11，將包括手動隱藏的列，如果使用 101-111，則排除手動隱藏的列；始終排除已篩選掉的儲存格。 ' },
             ref1: { name: '引用1', detail: '要對其進行分類總和計算的第一個命名區域或引用。 ' },
             ref2: { name: '引用2', detail: '要對其進行分類匯總計算的第 2 個至第 254 個命名區域或引用。 ' },
         },
@@ -1020,7 +1020,7 @@ const locale: typeof enUS = {
     },
     SUMIF: {
         description: '範圍中符合指定條件的值求和。 ',
-        abstract: '按給定條件對指定單元格求和',
+        abstract: '按給定條件對指定儲存格求和',
         links: [
             {
                 title: '教導',
@@ -1034,7 +1034,7 @@ const locale: typeof enUS = {
             },
             criteria: {
                 name: '條件',
-                detail: '以數字、表達式、單元格引用、文字或函數的形式來定義將要新增哪些單元格。可包含的通配符字符 - 問號（？）以匹配任意單個字符，星號（*）以匹配任意字符序列。 如果要尋找實際的問號或星號，請在該字元前鍵入波形符號（~）。 ',
+                detail: '以數字、表達式、儲存格引用、文字或函數的形式來定義將要新增哪些儲存格。可包含的萬用字元 - 問號（？）以匹配任意單個字符，星號（*）以匹配任意字符序列。 如果要尋找實際的問號或星號，請在該字元前鍵入波形符號（~）。 ',
             },
             sumRange: {
                 name: '求和範圍',
@@ -1052,9 +1052,9 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            sumRange: { name: '求和範圍', detail: '要求和的單元格區域。 ' },
+            sumRange: { name: '求和範圍', detail: '要求和的儲存格區域。 ' },
             criteriaRange1: { name: '條件範圍 1', detail: '使用條件 1 測試的區域。條件範圍 1 和條件 1 設定用於搜尋某個區域是否符合特定條件的搜尋對。 一旦在該區域中找到了項，將計算求和範圍中的相應值的總和。 ' },
-            criteria1: { name: '條件 1', detail: '定義將計算條件範圍 1 中的哪些單元格的和的條件。 例如，條件可以輸入為 32、">32"、B4、"蘋果" 或 "32"。 ' },
+            criteria1: { name: '條件 1', detail: '定義將計算條件範圍 1 中的哪些儲存格的和的條件。 例如，條件可以輸入為 32、">32"、B4、"蘋果" 或 "32"。 ' },
             criteriaRange2: { name: '條件範圍 2', detail: '附加的區域，最多可以輸入 127 個區域。 ' },
             criteria2: { name: '條件 2', detail: '附加的關聯條件，最多可以輸入 127 個條件。 ' },
         },
@@ -1088,8 +1088,8 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
-        description: '傳回兩數組中對應值平方差之和',
-        abstract: '傳回兩數組中對應值平方差之和',
+        description: '傳回兩陣列中對應值平方差之和',
+        abstract: '傳回兩陣列中對應值平方差之和',
         links: [
             {
                 title: '教導',
@@ -1102,8 +1102,8 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
-        description: '傳回兩數組中對應值的平方和總和',
-        abstract: '傳回兩數組中對應值的平方和總和',
+        description: '傳回兩陣列中對應值的平方和總和',
+        abstract: '傳回兩陣列中對應值的平方和總和',
         links: [
             {
                 title: '教導',

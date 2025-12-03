@@ -88,8 +88,8 @@ const locale: typeof enUS = {
         },
     },
     AVERAGEIF: {
-        description: '返回區域中滿足給定條件的所有單元格的平均值（算術平均值）。 ',
-        abstract: '返回區域中滿足給定條件的所有單元格的平均值（算術平均值）',
+        description: '返回區域中滿足給定條件的所有儲存格的平均值（算術平均值）。 ',
+        abstract: '返回區域中滿足給定條件的所有儲存格的平均值（算術平均值）',
         links: [
             {
                 title: '教導',
@@ -99,12 +99,12 @@ const locale: typeof enUS = {
         functionParameter: {
             range: { name: '範圍', detail: '要計算平均值的一個或多個儲存格，其中包含數字或包含數字的名稱、陣列或參考。 ' },
             criteria: { name: '條件', detail: '形式為數字、表達式、儲存格引用或文字的條件，用來定義將計算平均值的儲存格。 例如，條件可以表示為 32、"32"、">32"、"蘋果" 或 B4。 ' },
-            averageRange: { name: '平均範圍', detail: '計算平均值的實際單元格組。 如果省略，則使用 range。 ' },
+            averageRange: { name: '平均範圍', detail: '計算平均值的實際儲存格組。 如果省略，則使用 range。 ' },
         },
     },
     AVERAGEIFS: {
         description: '傳回滿足多個條件的所有儲存格的平均值（算術平均值）。 ',
-        abstract: '返回所有滿足多個條件的單元格的平均值（算術平均值）',
+        abstract: '返回所有滿足多個條件的儲存格的平均值（算術平均值）',
         links: [
             {
                 title: '教導',
@@ -112,8 +112,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            averageRange: { name: '平均值範圍', detail: '要計算平均值的一個或多個單元格，其中包含數字或包含數字的名稱、數組或引用。 ' },
-            criteriaRange1: { name: '條件範圍 1', detail: '是一組用於條件計算的單元格。 ' },
+            averageRange: { name: '平均值範圍', detail: '要計算平均值的一個或多個儲存格，其中包含數字或包含數字的名稱、陣列或引用。 ' },
+            criteriaRange1: { name: '條件範圍 1', detail: '是一組用於條件計算的儲存格。 ' },
             criteria1: { name: '條件 1', detail: '用來定義將計算平均值的儲存格。 例如，條件可以表示為 32、"32"、">32"、"蘋果" 或 B4' },
             criteriaRange2: { name: '條件範圍 2', detail: '附加區域。 最多可輸入 127 個區域。 ' },
             criteria2: { name: '條件 2', detail: '附加關聯條件。 最多可以輸入 127 個條件。 ' },
@@ -317,7 +317,7 @@ const locale: typeof enUS = {
         },
     },
     COUNT: {
-        description: '計算包含數字的單元格數以及參數列表中數字的個數。 ',
+        description: '計算包含數字的儲存格數以及參數列表中數字的個數。 ',
         abstract: '計算參數清單中數字的個數',
         links: [
             {
@@ -328,7 +328,7 @@ const locale: typeof enUS = {
         functionParameter: {
             value1: {
                 name: '值 1',
-                detail: '要計算其中數字的數量的第一項、單元格引用或區域。 ',
+                detail: '要計算其中數字的數量的第一項、儲存格引用或區域。 ',
             },
             value2: {
                 name: '值 2',
@@ -358,7 +358,7 @@ const locale: typeof enUS = {
         },
     },
     COUNTBLANK: {
-        description: '計算區域內空白單元格的數量。 ',
+        description: '計算區域內空白儲存格的數量。 ',
         abstract: '計算區域內空白儲存格的數量',
         links: [
             {
@@ -367,12 +367,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            range: { name: '範圍', detail: '需要計算其中空白單元格數的區域。 ' },
+            range: { name: '範圍', detail: '需要計算其中空白儲存格數的區域。 ' },
         },
     },
     COUNTIF: {
-        description: '計算區域內符合給定條件的單元格的數量。 ',
-        abstract: '計算區域內符合給定條件的單元格的數量',
+        description: '計算區域內符合給定條件的儲存格的數量。 ',
+        abstract: '計算區域內符合給定條件的儲存格的數量',
         links: [
             {
                 title: '教導',
@@ -380,13 +380,13 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            range: { name: '範圍', detail: '要進行計數的單元格組。 區域可以包括數字、陣列、命名區域或包含數字的引用。 空白和文字值將被忽略。 ' },
-            criteria: { name: '條件', detail: '用來決定要統計哪些儲存格的數量的數字、表達式、儲存格參考或文字字串。 \n例如，可以使用 32 之類數字，「>32」之類比較，B4 之類單元格，或「蘋果」之類單字。 \nCOUNTIF 只使用一個條件。 如果要使用多個條件，請使用 COUNTIFS。 ' },
+            range: { name: '範圍', detail: '要進行計數的儲存格組。 區域可以包括數字、陣列、命名區域或包含數字的引用。 空白和文字值將被忽略。 ' },
+            criteria: { name: '條件', detail: '用來決定要統計哪些儲存格的數量的數字、表達式、儲存格參考或文字字串。 \n例如，可以使用 32 之類數字，「>32」之類比較，B4 之類儲存格，或「蘋果」之類單字。 \nCOUNTIF 只使用一個條件。 如果要使用多個條件，請使用 COUNTIFS。 ' },
         },
     },
     COUNTIFS: {
-        description: '計算區域內符合多個條件的單元格的數量。 ',
-        abstract: '計算區域內符合多個條件的單元格的數量',
+        description: '計算區域內符合多個條件的儲存格的數量。 ',
+        abstract: '計算區域內符合多個條件的儲存格的數量',
         links: [
             {
                 title: '教導',
@@ -395,7 +395,7 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             criteriaRange1: { name: '條件範圍 1', detail: '在其中計算關聯條件的第一個區域。 ' },
-            criteria1: { name: '條件 1', detail: '條件的形式為數字、表達式、單元格引用或文本，它定義了要計數的單元格範圍。 例如，條件可以表示為 32、">32"、B4、"apples"或 "32"。 ' },
+            criteria1: { name: '條件 1', detail: '條件的形式為數字、表達式、儲存格引用或文本，它定義了要計數的儲存格範圍。 例如，條件可以表示為 32、">32"、B4、"apples"或 "32"。 ' },
             criteriaRange2: { name: '條件範圍 2', detail: '附加區域。 最多可輸入 127 個區域。 ' },
             criteria2: { name: '條件 2', detail: '附加關聯條件。 最多可以輸入 127 個條件。 ' },
         },
@@ -957,8 +957,8 @@ const locale: typeof enUS = {
         },
     },
     MAXIFS: {
-        description: '傳回一組給定條件或標準指定的單元格之間的最大值',
-        abstract: '傳回一組給定條件或標準指定的單元格之間的最大值',
+        description: '傳回一組給定條件或標準指定的儲存格之間的最大值',
+        abstract: '傳回一組給定條件或標準指定的儲存格之間的最大值',
         links: [
             {
                 title: '教導',
@@ -967,7 +967,7 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             maxRange: { name: '最大值範圍', detail: '確定最大值的實際儲存格區域。 ' },
-            criteriaRange1: { name: '條件範圍 1', detail: '是一組用於條件計算的單元格。 ' },
+            criteriaRange1: { name: '條件範圍 1', detail: '是一組用於條件計算的儲存格。 ' },
             criteria1: { name: '條件 1', detail: '用來決定哪些儲存格是最大值的條件，格式為數字、表達式或文字。 一組相同的條件適用於 MINIFS、SUMIFS 和 AVERAGEIFS 函數。 ' },
             criteriaRange2: { name: '條件範圍 2', detail: '附加區域。 最多可輸入 127 個區域。 ' },
             criteria2: { name: '條件 2', detail: '附加關聯條件。 最多可以輸入 127 個條件。 ' },
@@ -1022,8 +1022,8 @@ const locale: typeof enUS = {
         },
     },
     MINIFS: {
-        description: '傳回一組給定條件或標準指定的單元格之間的最小值。 ',
-        abstract: '傳回一組給定條件或標準指定的單元格之間的最小值',
+        description: '傳回一組給定條件或標準指定的儲存格之間的最小值。 ',
+        abstract: '傳回一組給定條件或標準指定的儲存格之間的最小值',
         links: [
             {
                 title: '教導',
@@ -1031,8 +1031,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            minRange: { name: '最小值範圍', detail: '確定最小值的實際單元格區域。 ' },
-            criteriaRange1: { name: '條件範圍 1', detail: '是一組用於條件計算的單元格。 ' },
+            minRange: { name: '最小值範圍', detail: '確定最小值的實際儲存格區域。 ' },
+            criteriaRange1: { name: '條件範圍 1', detail: '是一組用於條件計算的儲存格。 ' },
             criteria1: { name: '條件 1', detail: '用來決定哪些儲存格是最小值的條件，格式為數字、表達式或文字。 一組相同的條件適用於 MAXIFS、SUMIFS 和 AVERAGEIFS 函數。 ' },
             criteriaRange2: { name: '條件範圍 2', detail: '附加區域。 最多可輸入 127 個區域。 ' },
             criteria2: { name: '條件 2', detail: '附加關聯條件。 最多可以輸入 127 個條件。 ' },

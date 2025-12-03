@@ -33,8 +33,8 @@ const locale: typeof enUS = {
         },
     },
     DCOUNT: {
-        description: '計算資料庫中包含數字的單元格的數量',
-        abstract: '計算資料庫中包含數字的單元格的數量',
+        description: '計算資料庫中包含數字的儲存格的數量',
+        abstract: '計算資料庫中包含數字的儲存格的數量',
         links: [
             {
                 title: '教導',
@@ -48,8 +48,8 @@ const locale: typeof enUS = {
         },
     },
     DCOUNTA: {
-        description: '計算資料庫中非空單元格的數量',
-        abstract: '計算資料庫中非空單元格的數量',
+        description: '計算資料庫中非空儲存格的數量',
+        abstract: '計算資料庫中非空儲存格的數量',
         links: [
             {
                 title: '教導',

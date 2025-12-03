@@ -142,11 +142,11 @@ const locale: typeof enUS = {
                 today: '今日',
             },
             ruleType: {
-                highlightCell: '突出顯示單元格',
+                highlightCell: '突出顯示儲存格',
                 dataBar: '資料條',
                 colorScale: '色階',
                 formula: '自訂公式',
-                iconSet: '圖標集',
+                iconSet: '圖示集',
                 duplicateValues: '重複值',
                 uniqueValues: '唯一值',
 

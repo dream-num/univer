@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.12.3",
     "private": true,
-    "packageManager": "pnpm@10.23.0",
+    "packageManager": "pnpm@10.24.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -45,10 +45,10 @@
         "release": "release-it"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "^6.2.0",
+        "@antfu/eslint-config": "^6.3.0",
         "@commitlint/cli": "^20.1.0",
         "@commitlint/config-conventional": "^20.0.0",
-        "@eslint-react/eslint-plugin": "^2.3.9",
+        "@eslint-react/eslint-plugin": "^2.3.12",
         "@playwright/test": "^1.57.0",
         "@release-it-plugins/workspaces": "^5.0.3",
         "@release-it/conventional-changelog": "^10.0.2",
@@ -67,16 +67,16 @@
         "fs-extra": "^11.3.2",
         "husky": "^9.1.7",
         "lint-staged": "^16.2.7",
-        "posthog-node": "^5.14.0",
+        "posthog-node": "^5.15.0",
         "react": "19.2.0",
         "react-dom": "19.2.0",
         "release-it": "^19.0.6",
         "serve": "^14.2.5",
         "tailwindcss": "3.4.18",
-        "tsx": "^4.20.6",
+        "tsx": "^4.21.0",
         "turbo": "^2.6.1",
         "typescript": "^5.9.3",
-        "vitest": "^4.0.14"
+        "vitest": "^4.0.15"
     },
     "pnpm": {
         "onlyBuiltDependencies": [

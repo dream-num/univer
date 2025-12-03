@@ -91,7 +91,11 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
         icon: 'InsertRowAboveDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission],
+            worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getInsertBeforeMenuHidden$(accessor, 'row'),
     };
 }
@@ -106,6 +110,13 @@ export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuBu
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
+
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission],
+        worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+
     return {
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
@@ -117,6 +128,7 @@ export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuBu
                 min: 1,
                 max: 1000,
                 suffix: 'rightClick.insertRowsAboveSuffix',
+                disabled$,
             },
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
@@ -140,7 +152,7 @@ export function InsertRowBeforeCellMenuItemFactory(accessor: IAccessor): IMenuBu
             update();
             return disposable.dispose;
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$,
         hidden$: getInsertBeforeMenuHidden$(accessor, 'row'),
     };
 }
@@ -151,7 +163,11 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRow',
         icon: 'InsertRowBelowDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission],
+            worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
     };
 }
@@ -165,6 +181,13 @@ export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButt
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
+
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+        worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+
     return {
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
@@ -176,6 +199,7 @@ export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButt
                 min: 1,
                 max: 1000,
                 suffix: 'rightClick.insertColsLeftSuffix',
+                disabled$,
             },
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
@@ -199,7 +223,7 @@ export function InsertColLeftCellMenuItemFactory(accessor: IAccessor): IMenuButt
             update();
             return disposable.dispose;
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$,
         hidden$: getInsertBeforeMenuHidden$(accessor, 'col'),
     };
 }
@@ -210,7 +234,11 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertColumnBefore',
         icon: 'LeftInsertColumnDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+            worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getInsertBeforeMenuHidden$(accessor, 'col'),
     };
 }
@@ -221,7 +249,11 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertColumn',
         icon: 'RightInsertColumnDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+            worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
     };
 }
@@ -232,7 +264,11 @@ export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuB
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveRight',
         icon: 'InsertCellShiftRightDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getCellMenuHidden$(accessor, 'col'),
     };
 }
@@ -247,7 +283,11 @@ export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuBu
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveDown',
         icon: 'InsertCellDownDoubleIcon',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getCellMenuHidden$(accessor, 'row'),
     };
 }
@@ -261,6 +301,13 @@ export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
+
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission],
+        worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+
     return {
         id: InsertMultiRowsAfterCommand.id,
         type: MenuItemType.BUTTON,
@@ -272,6 +319,7 @@ export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): 
                 min: 1,
                 max: 1000,
                 suffix: 'rightClick.insertRowsAfterSuffix',
+                disabled$,
             },
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
@@ -296,7 +344,7 @@ export function InsertMultiRowsAfterHeaderMenuItemFactory(accessor: IAccessor): 
             return disposable.dispose;
         })),
 
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$,
         hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }
@@ -310,6 +358,13 @@ export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
+
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission],
+        worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+
     return {
         id: InsertMultiRowsAboveCommand.id,
         type: MenuItemType.BUTTON,
@@ -321,6 +376,7 @@ export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): 
                 min: 1,
                 max: 1000,
                 suffix: 'rightClick.insertRowsAboveSuffix',
+                disabled$,
             },
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
@@ -344,7 +400,7 @@ export function InsertMultiRowsAboveHeaderMenuItemFactory(accessor: IAccessor): 
             update();
             return disposable.dispose;
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertRowPermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$,
         hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }
@@ -358,6 +414,13 @@ export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): I
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
+
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+        worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+
     return {
         id: InsertMultiColsLeftCommand.id,
         type: MenuItemType.BUTTON,
@@ -369,6 +432,7 @@ export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): I
                 min: 1,
                 max: 1000,
                 suffix: 'rightClick.insertColsLeftSuffix',
+                disabled$,
             },
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
@@ -392,7 +456,7 @@ export function InsertMultiColsLeftHeaderMenuItemFactory(accessor: IAccessor): I
             update();
             return disposable.dispose;
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$,
         hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }
@@ -406,6 +470,13 @@ export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const defaultValue = 1;
+
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission],
+        worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+
     return {
         id: InsertMultiColsRightCommand.id,
         type: MenuItemType.BUTTON,
@@ -417,6 +488,7 @@ export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): 
                 min: 1,
                 max: 1000,
                 suffix: 'rightClick.insertColsRightSuffix',
+                disabled$,
             },
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, () => new Observable((subscriber) => {
@@ -440,7 +512,7 @@ export function InsertMultiColsRightHeaderMenuItemFactory(accessor: IAccessor): 
             update();
             return disposable.dispose;
         })),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission, WorkbookInsertColumnPermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$,
         hidden$: getBaseRangeMenuHidden$(accessor),
     };
 }

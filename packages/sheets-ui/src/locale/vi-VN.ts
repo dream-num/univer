@@ -167,8 +167,7 @@ const locale: typeof enUS = {
         chooseText: 'Chọn màu',
 
         tipNameRepeat: 'Tên tab không được trùng! Vui lòng đổi lại',
-        noMoreSheet:
-            'Tài liệu phải có ít nhất một trang bảng hiển thị. Nếu bạn muốn xóa trang bảng đã chọn, vui lòng thêm một trang bảng mới hoặc hiển thị trang bảng đã ẩn.',
+        noMoreSheet: 'Tài liệu phải có ít nhất một trang bảng hiển thị. Nếu bạn muốn xóa trang bảng đã chọn, vui lòng thêm một trang bảng mới hoặc hiển thị trang bảng đã ẩn.',
         confirmDelete: 'Xác nhận xóa',
         redoDelete: 'Bạn có thể hoàn tác xóa bằng Ctrl+Z',
         noHide: 'Không thể ẩn, phải giữ lại ít nhất một tab trang',

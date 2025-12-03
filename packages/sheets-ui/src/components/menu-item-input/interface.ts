@@ -15,7 +15,7 @@
  */
 
 import type { ICustomComponentProps } from '@univerjs/ui';
-
+import type { Observable } from 'rxjs';
 import { COMPONENT_PREFIX } from '../const';
 
 export const MENU_ITEM_INPUT_COMPONENT = `${COMPONENT_PREFIX}_MENU_ITEM_INPUT_COMPONENT`;
@@ -25,4 +25,5 @@ export interface IMenuItemInputProps extends ICustomComponentProps<string> {
     suffix: string;
     min?: number;
     max?: number;
+    disabled$?: Observable<boolean>;
 }

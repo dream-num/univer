@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: '画像を保存',
             menuLabel: '画像を保存',
-            selectionRange: '選択範囲',
             imageCount: '画像数',
             fileNameConfig: 'ファイル名',
             useRowCol: 'セルアドレスを使用 (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: 'キャンセル',
             confirm: '保存',
             saving: '保存中...',
-            success: '画像を保存しました',
             error: '画像の保存に失敗しました',
-            noImages: '選択範囲に画像がありません',
         },
     },
     'image-popup': {

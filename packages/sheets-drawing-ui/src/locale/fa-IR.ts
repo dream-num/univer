@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: 'ذخیره تصاویر',
             menuLabel: 'ذخیره تصاویر',
-            selectionRange: 'محدوده انتخاب',
             imageCount: 'تعداد تصاویر',
             fileNameConfig: 'نام فایل',
             useRowCol: 'استفاده از آدرس سلول (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: 'لغو',
             confirm: 'ذخیره',
             saving: 'در حال ذخیره...',
-            success: 'تصاویر با موفقیت ذخیره شدند',
             error: 'ذخیره تصاویر ناموفق بود',
-            noImages: 'تصویری در انتخاب وجود ندارد',
         },
     },
     'image-popup': {

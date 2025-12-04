@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: 'Desa les imatges',
             menuLabel: 'Desa les imatges',
-            selectionRange: 'Rang de selecció',
             imageCount: 'Nombre d\'imatges',
             fileNameConfig: 'Nom del fitxer',
             useRowCol: 'Utilitza l\'adreça de la cel·la (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Cancel·la',
             confirm: 'Desa',
             saving: 'Desant...',
-            success: 'Imatges desades correctament',
             error: 'No s\'han pogut desar les imatges',
-            noImages: 'No hi ha imatges a la selecció',
         },
     },
     'image-popup': {

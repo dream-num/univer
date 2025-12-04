@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: 'Сохранить изображения',
             menuLabel: 'Сохранить изображения',
-            selectionRange: 'Диапазон выбора',
             imageCount: 'Количество изображений',
             fileNameConfig: 'Имя файла',
             useRowCol: 'Использовать адрес ячейки (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Отмена',
             confirm: 'Сохранить',
             saving: 'Сохранение...',
-            success: 'Изображения успешно сохранены',
             error: 'Не удалось сохранить изображения',
-            noImages: 'В выделении нет изображений',
         },
     },
     'image-popup': {

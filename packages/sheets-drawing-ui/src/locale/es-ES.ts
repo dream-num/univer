@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: 'Guardar imágenes',
             menuLabel: 'Guardar imágenes',
-            selectionRange: 'Rango de selección',
             imageCount: 'Cantidad de imágenes',
             fileNameConfig: 'Nombre del archivo',
             useRowCol: 'Usar dirección de celda (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Cancelar',
             confirm: 'Guardar',
             saving: 'Guardando...',
-            success: 'Imágenes guardadas correctamente',
             error: 'Error al guardar las imágenes',
-            noImages: 'No hay imágenes en la selección',
         },
     },
     'image-popup': {

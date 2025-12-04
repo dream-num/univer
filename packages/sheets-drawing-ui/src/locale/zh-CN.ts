@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: '保存图片',
             menuLabel: '保存图片',
-            selectionRange: '选区范围',
             imageCount: '图片数量',
             fileNameConfig: '文件名',
             useRowCol: '使用单元格地址 (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: '取消',
             confirm: '保存',
             saving: '保存中...',
-            success: '图片保存成功',
             error: '保存图片失败',
-            noImages: '选区内没有图片',
         },
     },
     'image-popup': {

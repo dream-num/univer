@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: 'Lưu hình ảnh',
             menuLabel: 'Lưu hình ảnh',
-            selectionRange: 'Phạm vi chọn',
             imageCount: 'Số lượng hình ảnh',
             fileNameConfig: 'Tên tệp',
             useRowCol: 'Sử dụng địa chỉ ô (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Hủy',
             confirm: 'Lưu',
             saving: 'Đang lưu...',
-            success: 'Hình ảnh đã được lưu thành công',
             error: 'Lưu hình ảnh thất bại',
-            noImages: 'Không có hình ảnh trong vùng chọn',
         },
     },
     'image-popup': {

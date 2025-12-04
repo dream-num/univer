@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         save: {
             title: '이미지 저장',
             menuLabel: '이미지 저장',
-            selectionRange: '선택 범위',
             imageCount: '이미지 수',
             fileNameConfig: '파일 이름',
             useRowCol: '셀 주소 사용 (A1, B2...)',
@@ -41,9 +40,7 @@ const locale: typeof enUS = {
             cancel: '취소',
             confirm: '저장',
             saving: '저장 중...',
-            success: '이미지가 저장되었습니다',
             error: '이미지 저장 실패',
-            noImages: '선택 범위에 이미지가 없습니다',
         },
     },
     'image-popup': {

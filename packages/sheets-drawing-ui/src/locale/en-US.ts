@@ -30,7 +30,6 @@ const locale = {
         save: {
             title: 'Save Images',
             menuLabel: 'Save Images',
-            selectionRange: 'Selection Range',
             imageCount: 'Image Count',
             fileNameConfig: 'File Name',
             useRowCol: 'Use Cell Address (A1, B2...)',
@@ -39,9 +38,7 @@ const locale = {
             cancel: 'Cancel',
             confirm: 'Save',
             saving: 'Saving...',
-            success: 'Images saved successfully',
             error: 'Failed to save images',
-            noImages: 'No images in selection',
         },
     },
     'image-popup': {

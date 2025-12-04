@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, CheckboxGroup, FormLayout, Select } from '@univerjs/design';
+import { useHighlightRange } from '@univerjs/sheets-ui';
 import { IDialogService, useDependency } from '@univerjs/ui';
 import { useCallback, useMemo, useState } from 'react';
 import { FileNamePart, IBatchSaveImagesService } from '../../services/batch-save-images.service';
@@ -32,6 +34,7 @@ export function BatchSaveImagesDialog() {
 
     const images = useMemo(() => batchSaveService.getCellImagesInSelection(), [batchSaveService]);
     const dataColumns = useMemo(() => batchSaveService.getDataColumns(), [batchSaveService]);
+    const rowRange = useMemo(() => batchSaveService.getSelectionRowRange(), [batchSaveService]);
 
     const columnOptions = useMemo(() => {
         return dataColumns.map((col) => ({
@@ -43,6 +46,25 @@ export function BatchSaveImagesDialog() {
     const [selectedColumn, setSelectedColumn] = useState<string>(
         () => columnOptions.length > 0 ? columnOptions[0].value : '0'
     );
+
+    // Calculate highlight range based on selected column and original selection row range
+    const highlightRanges = useMemo<IRange[]>(() => {
+        const showColumnSelect = fileNameParts.includes(FileNamePart.COLUMN_VALUE);
+        if (!showColumnSelect || !rowRange) {
+            return [];
+        }
+
+        const colIndex = Number(selectedColumn);
+        return [{
+            startRow: rowRange.startRow,
+            endRow: rowRange.endRow,
+            startColumn: colIndex,
+            endColumn: colIndex,
+        }];
+    }, [fileNameParts, selectedColumn, rowRange]);
+
+    // Highlight the selected column range
+    useHighlightRange(highlightRanges);
 
     const handleFileNamePartsChange = useCallback((value: Array<string | number | boolean>) => {
         // Ensure at least one option is selected

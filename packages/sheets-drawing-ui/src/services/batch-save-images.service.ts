@@ -88,6 +88,12 @@ export interface IBatchSaveImagesService {
      * @param imageInfo The cell image info
      */
     downloadSingleImage(imageInfo: ICellImageInfo): Promise<void>;
+
+    /**
+     * Get the row range of current selection
+     * Returns the min and max row indices
+     */
+    getSelectionRowRange(): { startRow: number; endRow: number } | null;
 }
 
 export const IBatchSaveImagesService = createIdentifier<IBatchSaveImagesService>('sheets-drawing-ui.batch-save-images.service');
@@ -294,6 +300,21 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
         if (!selections || selections.length === 0) return '';
 
         return selections.map((s) => rangeToA1Notation(s.range)).join(', ');
+    }
+
+    getSelectionRowRange(): { startRow: number; endRow: number } | null {
+        const selections = this._selectionService.getCurrentSelections();
+        if (!selections || selections.length === 0) return null;
+
+        let minRow = Infinity;
+        let maxRow = -Infinity;
+
+        for (const selection of selections) {
+            minRow = Math.min(minRow, selection.range.startRow);
+            maxRow = Math.max(maxRow, selection.range.endRow);
+        }
+
+        return { startRow: minRow, endRow: maxRow };
     }
 
     generateFileName(imageInfo: ICellImageInfo, config: IBatchSaveImagesConfig): string {

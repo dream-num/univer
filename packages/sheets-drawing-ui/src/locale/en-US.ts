@@ -28,7 +28,7 @@ const locale = {
         },
 
         save: {
-            title: 'Batch Save Images',
+            title: 'Save Images',
             menuLabel: 'Save Images',
             selectionRange: 'Selection Range',
             imageCount: 'Image Count',

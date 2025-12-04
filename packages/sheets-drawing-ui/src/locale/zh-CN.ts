@@ -30,7 +30,7 @@ const locale: typeof enUS = {
         },
 
         save: {
-            title: '批量保存图片',
+            title: '保存图片',
             menuLabel: '保存图片',
             selectionRange: '选区范围',
             imageCount: '图片数量',

@@ -15,9 +15,11 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonInsertGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
+import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.command';
 import { ImageMenuFactory, SHEETS_IMAGE_MENU_ID, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { SaveCellImagesMenuFactory } from '../views/menu/save-images.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
@@ -31,6 +33,14 @@ export const menuSchema: MenuSchemaType = {
             [InsertCellImageCommand.id]: {
                 order: 1,
                 menuItemFactory: UploadCellImageMenuFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.MAIN_AREA]: {
+        [ContextMenuGroup.OTHERS]: {
+            [SaveCellImagesCommand.id]: {
+                order: 10,
+                menuItemFactory: SaveCellImagesMenuFactory,
             },
         },
     },

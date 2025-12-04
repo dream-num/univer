@@ -28,6 +28,23 @@ const locale: typeof enUS = {
         panel: {
             title: '画像の編集',
         },
+
+        save: {
+            title: 'Batch Save Images',
+            menuLabel: 'Save Images',
+            selectionRange: 'Selection Range',
+            imageCount: 'Image Count',
+            fileNameConfig: 'File Name',
+            useRowCol: 'Use Cell Address (A1, B2...)',
+            useColumnValue: 'Use Column Value',
+            selectColumn: 'Select Column',
+            cancel: 'Cancel',
+            confirm: 'Save',
+            saving: 'Saving...',
+            success: 'Images saved successfully',
+            error: 'Failed to save images',
+            noImages: 'No images in selection',
+        },
     },
     'image-popup': {
         replace: '画像の変更',

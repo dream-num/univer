@@ -22,6 +22,8 @@ export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_FORMULA_BAR`;
 
 export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = `${PREFIX}ZEN_EDITOR`;
 
+export const DOCS_COMMENT_EDITOR_UNIT_ID_KEY = `${PREFIX}COMMENT_EDITOR`;
+
 export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
 
 export const IS_ROW_STYLE_PRECEDE_COLUMN_STYLE = 'isRowStylePrecedeColumnStyle';
@@ -34,4 +36,8 @@ export function createInternalEditorID(id: string) {
 
 export function isInternalEditorID(id: string) {
     return id.startsWith(PREFIX);
+}
+
+export function isCommentEditorID(id: string) {
+    return id === DOCS_COMMENT_EDITOR_UNIT_ID_KEY;
 }

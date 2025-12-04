@@ -16,6 +16,7 @@
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { DownloadImageIcon } from '@univerjs/icons';
 
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
@@ -57,6 +58,7 @@ export class SheetDrawingUIController extends Disposable {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
         this.disposeWithMe(componentManager.register(BATCH_SAVE_IMAGES_DIALOG_ID, BatchSaveImagesDialog));
+        this.disposeWithMe(componentManager.register('DownloadImageIcon', DownloadImageIcon));
     }
 
     private _initMenus(): void {

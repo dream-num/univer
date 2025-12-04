@@ -105,7 +105,7 @@ export function SaveCellImagesMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SaveCellImagesCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'DirectExportIcon',
+        icon: 'DownloadImageIcon',
         title: 'sheetImage.save.menuLabel',
         hidden$,
     };

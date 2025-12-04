@@ -94,6 +94,11 @@ export interface IBatchSaveImagesService {
      * Returns the min and max row indices
      */
     getSelectionRowRange(): { startRow: number; endRow: number } | null;
+
+    /**
+     * Get all column indices that are within the current selection
+     */
+    getSelectionColumnIndices(): Set<number>;
 }
 
 export const IBatchSaveImagesService = createIdentifier<IBatchSaveImagesService>('sheets-drawing-ui.batch-save-images.service');
@@ -257,18 +262,30 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
         const cellMatrix = worksheet.getCellMatrix();
         const dataRange = cellMatrix.getDataRange();
 
-        // Get row range from selection
+        // Get row range and column indices from selection
         let minRow = Infinity;
         let maxRow = -Infinity;
+        const selectionColumnIndices = new Set<number>();
+
         for (const selection of selections) {
             minRow = Math.min(minRow, selection.range.startRow);
             maxRow = Math.max(maxRow, selection.range.endRow);
+
+            // Collect all column indices within selection
+            for (let col = selection.range.startColumn; col <= selection.range.endColumn; col++) {
+                selectionColumnIndices.add(col);
+            }
         }
 
-        // Find columns that have values in the selection row range
+        // Find columns that have values in the selection row range, excluding selection columns
         const columnsWithData = new Set<number>();
 
         for (let col = dataRange.startColumn; col <= dataRange.endColumn; col++) {
+            // Skip columns that are within the selection
+            if (selectionColumnIndices.has(col)) {
+                continue;
+            }
+
             for (let row = minRow; row <= maxRow; row++) {
                 const cell = cellMatrix.getValue(row, col);
                 if (cell) {
@@ -315,6 +332,20 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
         }
 
         return { startRow: minRow, endRow: maxRow };
+    }
+
+    getSelectionColumnIndices(): Set<number> {
+        const selections = this._selectionService.getCurrentSelections();
+        if (!selections || selections.length === 0) return new Set();
+
+        const columnIndices = new Set<number>();
+        for (const selection of selections) {
+            for (let col = selection.range.startColumn; col <= selection.range.endColumn; col++) {
+                columnIndices.add(col);
+            }
+        }
+
+        return columnIndices;
     }
 
     generateFileName(imageInfo: ICellImageInfo, config: IBatchSaveImagesConfig): string {

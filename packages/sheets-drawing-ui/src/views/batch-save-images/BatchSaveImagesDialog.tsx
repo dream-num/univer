@@ -36,6 +36,9 @@ export function BatchSaveImagesDialog() {
     const dataColumns = useMemo(() => batchSaveService.getDataColumns(), [batchSaveService]);
     const rowRange = useMemo(() => batchSaveService.getSelectionRowRange(), [batchSaveService]);
 
+    // Check if there are available columns to select (columns outside the selection range)
+    const hasAvailableColumns = dataColumns.length > 0;
+
     const columnOptions = useMemo(() => {
         return dataColumns.map((col) => ({
             label: col.label,
@@ -115,12 +118,14 @@ export function BatchSaveImagesDialog() {
 
             <FormLayout label={localeService.t('sheetImage.save.fileNameConfig')}>
                 <CheckboxGroup value={fileNameParts} onChange={handleFileNamePartsChange} direction="vertical">
-                    <Checkbox value={FileNamePart.CELL_ADDRESS}>
+                    <Checkbox value={FileNamePart.CELL_ADDRESS} disabled={!hasAvailableColumns}>
                         {localeService.t('sheetImage.save.useRowCol')}
                     </Checkbox>
-                    <Checkbox value={FileNamePart.COLUMN_VALUE}>
-                        {localeService.t('sheetImage.save.useColumnValue')}
-                    </Checkbox>
+                    {hasAvailableColumns && (
+                        <Checkbox value={FileNamePart.COLUMN_VALUE}>
+                            {localeService.t('sheetImage.save.useColumnValue')}
+                        </Checkbox>
+                    )}
                 </CheckboxGroup>
             </FormLayout>
 

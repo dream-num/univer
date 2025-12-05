@@ -616,7 +616,7 @@ export interface IFWorksheetLegacy {
      * });
      * ```
      */
-    saveCellImagesAsync(ranges: FRange[], options?: ISaveCellImagesOptions): Promise<boolean>;
+    saveCellImagesAsync(options?: ISaveCellImagesOptions, ranges?: FRange[]): Promise<boolean>;
 }
 
 export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
@@ -1041,13 +1041,13 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return this._injector.createInstance(FOverGridImageBuilder, unitId, subUnitId);
     }
 
-    override async saveCellImagesAsync(ranges: FRange[], options?: ISaveCellImagesOptions): Promise<boolean> {
+    override async saveCellImagesAsync(options?: ISaveCellImagesOptions, ranges?: FRange[]): Promise<boolean> {
         const batchSaveService = this._injector.get(IBatchSaveImagesService);
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
 
         // Get all ranges as IRange array
-        const iRanges = ranges.map((r) => r.getRange());
+        const iRanges = ranges ? ranges.map((r) => r.getRange()) : [this._worksheet.getCellMatrix().getDataRange()];
 
         // Get images from all ranges
         const images = batchSaveService.getCellImagesFromRanges(unitId, subUnitId, iRanges);

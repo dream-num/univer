@@ -30,8 +30,8 @@ const locale: typeof enUS = {
         },
 
         save: {
-            title: 'Guardar imágenes',
-            menuLabel: 'Guardar imágenes',
+            title: 'Guardar imágenes de celda',
+            menuLabel: 'Guardar imágenes de celda',
             imageCount: 'Cantidad de imágenes',
             fileNameConfig: 'Nombre del archivo',
             useRowCol: 'Usar dirección de celda (A1, B2...)',
@@ -40,7 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Cancelar',
             confirm: 'Guardar',
             saving: 'Guardando...',
-            error: 'Error al guardar las imágenes',
+            error: 'Error al guardar las imágenes de celda',
         },
     },
     'image-popup': {

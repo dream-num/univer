@@ -28,8 +28,8 @@ const locale = {
         },
 
         save: {
-            title: 'Save Images',
-            menuLabel: 'Save Images',
+            title: 'Save Cell Images',
+            menuLabel: 'Save Cell Images',
             imageCount: 'Image Count',
             fileNameConfig: 'File Name',
             useRowCol: 'Use Cell Address (A1, B2...)',
@@ -38,7 +38,7 @@ const locale = {
             cancel: 'Cancel',
             confirm: 'Save',
             saving: 'Saving...',
-            error: 'Failed to save images',
+            error: 'Failed to save cell images',
         },
     },
     'image-popup': {

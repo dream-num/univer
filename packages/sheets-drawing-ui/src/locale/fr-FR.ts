@@ -30,8 +30,8 @@ const locale: typeof enUS = {
         },
 
         save: {
-            title: 'Enregistrer les images',
-            menuLabel: 'Enregistrer les images',
+            title: 'Enregistrer les images de cellule',
+            menuLabel: 'Enregistrer les images de cellule',
             imageCount: 'Nombre d\'images',
             fileNameConfig: 'Nom du fichier',
             useRowCol: 'Utiliser l\'adresse de cellule (A1, B2...)',
@@ -40,7 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Annuler',
             confirm: 'Enregistrer',
             saving: 'Enregistrement...',
-            error: 'Échec de l\'enregistrement des images',
+            error: 'Échec de l\'enregistrement des images de cellule',
         },
     },
     'image-popup': {

@@ -30,8 +30,8 @@ const locale: typeof enUS = {
         },
 
         save: {
-            title: '儲存圖片',
-            menuLabel: '儲存圖片',
+            title: '儲存儲存格圖片',
+            menuLabel: '儲存儲存格圖片',
             imageCount: '圖片數量',
             fileNameConfig: '檔案名稱',
             useRowCol: '使用儲存格地址 (A1, B2...)',
@@ -40,7 +40,7 @@ const locale: typeof enUS = {
             cancel: '取消',
             confirm: '儲存',
             saving: '儲存中...',
-            error: '儲存圖片失敗',
+            error: '儲存儲存格圖片失敗',
         },
     },
     'image-popup': {

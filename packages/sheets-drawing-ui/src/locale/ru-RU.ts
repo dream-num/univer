@@ -30,8 +30,8 @@ const locale: typeof enUS = {
         },
 
         save: {
-            title: 'Сохранить изображения',
-            menuLabel: 'Сохранить изображения',
+            title: 'Сохранить изображения ячеек',
+            menuLabel: 'Сохранить изображения ячеек',
             imageCount: 'Количество изображений',
             fileNameConfig: 'Имя файла',
             useRowCol: 'Использовать адрес ячейки (A1, B2...)',
@@ -40,7 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Отмена',
             confirm: 'Сохранить',
             saving: 'Сохранение...',
-            error: 'Не удалось сохранить изображения',
+            error: 'Не удалось сохранить изображения ячеек',
         },
     },
     'image-popup': {

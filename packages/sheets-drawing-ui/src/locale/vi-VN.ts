@@ -30,8 +30,8 @@ const locale: typeof enUS = {
         },
 
         save: {
-            title: 'Lưu hình ảnh',
-            menuLabel: 'Lưu hình ảnh',
+            title: 'Lưu hình ảnh ô',
+            menuLabel: 'Lưu hình ảnh ô',
             imageCount: 'Số lượng hình ảnh',
             fileNameConfig: 'Tên tệp',
             useRowCol: 'Sử dụng địa chỉ ô (A1, B2...)',
@@ -40,7 +40,7 @@ const locale: typeof enUS = {
             cancel: 'Hủy',
             confirm: 'Lưu',
             saving: 'Đang lưu...',
-            error: 'Lưu hình ảnh thất bại',
+            error: 'Lưu hình ảnh ô thất bại',
         },
     },
     'image-popup': {

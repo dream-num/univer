@@ -44,4 +44,20 @@ export const menuSchema: MenuSchemaType = {
             },
         },
     },
+    [ContextMenuPosition.COL_HEADER]: {
+        [ContextMenuGroup.OTHERS]: {
+            [SaveCellImagesCommand.id]: {
+                order: 10,
+                menuItemFactory: SaveCellImagesMenuFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.ROW_HEADER]: {
+        [ContextMenuGroup.OTHERS]: {
+            [SaveCellImagesCommand.id]: {
+                order: 10,
+                menuItemFactory: SaveCellImagesMenuFactory,
+            },
+        },
+    },
 };

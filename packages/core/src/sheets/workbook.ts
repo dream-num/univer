@@ -113,6 +113,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     override dispose(): void {
         super.dispose();
 
+        this._worksheets.clear();
         this._sheetCreated$.complete();
         this._sheetDisposed$.complete();
         this._activeSheet$.complete();

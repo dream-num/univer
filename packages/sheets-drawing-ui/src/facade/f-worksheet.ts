@@ -594,8 +594,8 @@ export interface IFWorksheetLegacy {
      * Save all cell images from specified ranges to the file system.
      * This method will open a directory picker dialog and save all images to the selected directory.
      *
-     * @param {FRange[]} ranges - The ranges to get cell images from
      * @param {ISaveCellImagesOptions} [options] - Options for saving images
+     * @param {FRange[]} [ranges] - The ranges to get cell images from. If not provided, all images in the worksheet will be saved.
      * @returns {Promise<boolean>} True if images are saved successfully, otherwise false
      * @example
      * ```ts
@@ -607,13 +607,13 @@ export interface IFWorksheetLegacy {
      * const range2 = fWorksheet.getRange('D1:E10');
      *
      * // Save with default options (using cell address as file name)
-     * await fWorksheet.saveCellImagesAsync([range1, range2]);
+     * await fWorksheet.saveCellImagesAsync(undefined, [range1, range2]);
      *
      * // Save with custom options
-     * await fWorksheet.saveCellImagesAsync([range1, range2], {
+     * await fWorksheet.saveCellImagesAsync({
      *   useCellAddress: true,
      *   useColumnIndex: 2, // Use values from column C for file names
-     * });
+     * }, [range1, range2]);
      * ```
      */
     saveCellImagesAsync(options?: ISaveCellImagesOptions, ranges?: FRange[]): Promise<boolean>;

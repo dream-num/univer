@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: 'Editar imagen',
         },
+
+        save: {
+            title: 'Guardar imágenes de celda',
+            menuLabel: 'Guardar imágenes de celda',
+            imageCount: 'Cantidad de imágenes',
+            fileNameConfig: 'Nombre del archivo',
+            useRowCol: 'Usar dirección de celda (A1, B2...)',
+            useColumnValue: 'Usar valor de columna',
+            selectColumn: 'Seleccionar columna',
+            cancel: 'Cancelar',
+            confirm: 'Guardar',
+            saving: 'Guardando...',
+            error: 'Error al guardar las imágenes de celda',
+        },
     },
     'image-popup': {
         replace: 'Reemplazar',

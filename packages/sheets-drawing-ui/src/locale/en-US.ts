@@ -26,6 +26,20 @@ const locale = {
         panel: {
             title: 'Edit Image',
         },
+
+        save: {
+            title: 'Save Cell Images',
+            menuLabel: 'Save Cell Images',
+            imageCount: 'Image Count',
+            fileNameConfig: 'File Name',
+            useRowCol: 'Use Cell Address (A1, B2...)',
+            useColumnValue: 'Use Column Value',
+            selectColumn: 'Select Column',
+            cancel: 'Cancel',
+            confirm: 'Save',
+            saving: 'Saving...',
+            error: 'Failed to save cell images',
+        },
     },
     'image-popup': {
         replace: 'Replace',

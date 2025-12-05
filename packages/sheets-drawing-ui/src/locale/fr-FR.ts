@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: 'Modifier l\'image',
         },
+
+        save: {
+            title: 'Enregistrer les images de cellule',
+            menuLabel: 'Enregistrer les images de cellule',
+            imageCount: 'Nombre d\'images',
+            fileNameConfig: 'Nom du fichier',
+            useRowCol: 'Utiliser l\'adresse de cellule (A1, B2...)',
+            useColumnValue: 'Utiliser la valeur de la colonne',
+            selectColumn: 'Sélectionner la colonne',
+            cancel: 'Annuler',
+            confirm: 'Enregistrer',
+            saving: 'Enregistrement...',
+            error: 'Échec de l\'enregistrement des images de cellule',
+        },
     },
     'image-popup': {
         replace: 'Remplacer',

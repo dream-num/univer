@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: 'Edita la imatge',
         },
+
+        save: {
+            title: 'Desa les imatges de cel·la',
+            menuLabel: 'Desa les imatges de cel·la',
+            imageCount: 'Nombre d\'imatges',
+            fileNameConfig: 'Nom del fitxer',
+            useRowCol: 'Utilitza l\'adreça de la cel·la (A1, B2...)',
+            useColumnValue: 'Utilitza el valor de la columna',
+            selectColumn: 'Selecciona la columna',
+            cancel: 'Cancel·la',
+            confirm: 'Desa',
+            saving: 'Desant...',
+            error: 'No s\'han pogut desar les imatges de cel·la',
+        },
     },
     'image-popup': {
         replace: 'Reemplaça',

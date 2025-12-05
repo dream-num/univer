@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: '编辑图片',
         },
+
+        save: {
+            title: '保存单元格图片',
+            menuLabel: '保存单元格图片',
+            imageCount: '图片数量',
+            fileNameConfig: '文件名',
+            useRowCol: '使用单元格地址 (A1, B2...)',
+            useColumnValue: '使用某列的值',
+            selectColumn: '选择列',
+            cancel: '取消',
+            confirm: '保存',
+            saving: '保存中...',
+            error: '保存单元格图片失败',
+        },
     },
     'image-popup': {
         replace: '替换',

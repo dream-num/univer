@@ -19,6 +19,13 @@ import type { IImageData } from '@univerjs/drawing';
 import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
+declare global {
+    // eslint-disable-next-line ts/naming-convention
+    interface Window {
+        showDirectoryPicker(options?: { mode?: 'read' | 'readwrite' }): Promise<FileSystemDirectoryHandle>;
+    }
+}
+
 /**
  * File name part type for multi-select
  */
@@ -562,9 +569,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
 
     async saveImages(images: ICellImageInfo[], config: IBatchSaveImagesConfig): Promise<void> {
         // Request directory access using File System Access API
-        // eslint-disable-next-line ts/no-explicit-any
-        const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
-
+        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
         // Track file names to handle duplicates
         const fileNameCounts = new Map<string, number>();
 
@@ -599,8 +604,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
 
     async saveImagesWithContext(images: ICellImageInfo[], config: IBatchSaveImagesConfig, unitId: string, subUnitId: string): Promise<void> {
         // Request directory access using File System Access API
-        // eslint-disable-next-line ts/no-explicit-any
-        const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
+        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
 
         // Track file names to handle duplicates
         const fileNameCounts = new Map<string, number>();

@@ -20,10 +20,11 @@ import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import type { ICanvasFloatDom, ICanvasFloatDomInfo, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
 import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
+import type { ISaveCellImagesOptions } from './f-range';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
+import { FileNamePart, IBatchSaveImagesService, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
@@ -588,6 +589,34 @@ export interface IFWorksheetLegacy {
      * ```
      */
     newOverGridImage(): FOverGridImageBuilder;
+
+    /**
+     * Save all cell images from specified ranges to the file system.
+     * This method will open a directory picker dialog and save all images to the selected directory.
+     *
+     * @param {FRange[]} ranges - The ranges to get cell images from
+     * @param {ISaveCellImagesOptions} [options] - Options for saving images
+     * @returns {Promise<boolean>} True if images are saved successfully, otherwise false
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     *
+     * // Save cell images from multiple ranges
+     * const range1 = fWorksheet.getRange('A1:B10');
+     * const range2 = fWorksheet.getRange('D1:E10');
+     *
+     * // Save with default options (using cell address as file name)
+     * await fWorksheet.saveCellImagesAsync([range1, range2]);
+     *
+     * // Save with custom options
+     * await fWorksheet.saveCellImagesAsync([range1, range2], {
+     *   useCellAddress: true,
+     *   useColumnIndex: 2, // Use values from column C for file names
+     * });
+     * ```
+     */
+    saveCellImagesAsync(ranges: FRange[], options?: ISaveCellImagesOptions): Promise<boolean>;
 }
 
 export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
@@ -1010,6 +1039,61 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
         return this._injector.createInstance(FOverGridImageBuilder, unitId, subUnitId);
+    }
+
+    override async saveCellImagesAsync(ranges: FRange[], options?: ISaveCellImagesOptions): Promise<boolean> {
+        const batchSaveService = this._injector.get(IBatchSaveImagesService);
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+
+        // Get all ranges as IRange array
+        const iRanges = ranges.map((r) => r.getRange());
+
+        // Get images from all ranges
+        const images = batchSaveService.getCellImagesFromRanges(unitId, subUnitId, iRanges);
+
+        if (images.length === 0) {
+            return false;
+        }
+
+        // If only one image, download directly
+        if (images.length === 1) {
+            try {
+                await batchSaveService.downloadSingleImage(images[0]);
+                return true;
+            } catch (error) {
+                console.error('Failed to download image:', error);
+                return false;
+            }
+        }
+
+        // Build config from options
+        const fileNameParts: FileNamePart[] = [];
+        const useCellAddress = options?.useCellAddress ?? true;
+        const useColumnIndex = options?.useColumnIndex;
+
+        if (useCellAddress) {
+            fileNameParts.push(FileNamePart.CELL_ADDRESS);
+        }
+        if (useColumnIndex !== undefined) {
+            fileNameParts.push(FileNamePart.COLUMN_VALUE);
+        }
+
+        // Ensure at least one naming option
+        if (fileNameParts.length === 0) {
+            fileNameParts.push(FileNamePart.CELL_ADDRESS);
+        }
+
+        try {
+            await batchSaveService.saveImagesWithContext(images, {
+                fileNameParts,
+                columnIndex: useColumnIndex,
+            }, unitId, subUnitId);
+            return true;
+        } catch (error) {
+            console.error('Failed to save images:', error);
+            return false;
+        }
     }
 }
 

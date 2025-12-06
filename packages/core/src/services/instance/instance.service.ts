@@ -303,7 +303,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     disposeUnit(unitId: string): boolean {
         this._logService.debug(`[UniverInstanceService]: Disposing unit with id ${unitId}`);
         const result = this._getUnitById(unitId);
-        if (!result) return false;
+        if (!result) {
+            this._logService.debug(`[UniverInstanceService]: No unit found with id ${unitId}`);
+            return false;
+        }
 
         const [unit, type] = result;
         const units = this._unitsByType.get(type)!;

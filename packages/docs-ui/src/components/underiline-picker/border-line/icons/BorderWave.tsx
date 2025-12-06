@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import { COMPONENT_PREFIX } from '../const';
-
-export { BulletListTypePicker, OrderListTypePicker } from './picker';
-export const ORDER_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_ORDER_LIST_TYPE_COMPONENT`;
-export const BULLET_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_BULLET_LIST_TYPE_COMPONENT`;
-export const UNDERLINE_TYPE_COMPONENT = `${COMPONENT_PREFIX}_UNDERLINE_TYPE_COMPONENT`;
+export const BorderWave = ({ className }: { className: string }) => (
+    <svg className={className} width="120" height="8" viewBox="0 0 120 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+            d="M0 4 C7.5 0, 15 8, 22.5 4 C30 0, 37.5 8, 45 4 C52.5 0, 60 8, 67.5 4 C75 0, 82.5 8, 90 4 C97.5 0, 105 8, 112.5 4 C120 0, 127.5 8, 135 4"
+            stroke="currentColor"
+            strokeWidth="0.8"
+            fill="none"
+        />
+    </svg>
+);

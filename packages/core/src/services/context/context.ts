@@ -42,6 +42,9 @@ export const FOCUSING_UNIVER_EDITOR = 'FOCUSING_UNIVER_EDITOR';
 
 export const FOCUSING_EDITOR_STANDALONE = 'FOCUSING_EDITOR_INPUT_FORMULA';
 
+/** The focusing state of the comment editor. */
+export const FOCUSING_COMMENT_EDITOR = 'FOCUSING_COMMENT_EDITOR';
+
 /** The focusing state of the editor in side panel, such as Chart Editor Panel. */
 export const FOCUSING_PANEL_EDITOR = 'FOCUSING_PANEL_EDITOR';
 

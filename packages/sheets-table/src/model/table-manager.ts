@@ -51,7 +51,6 @@ export class TableManager extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ILogService private readonly _logService: ILogService
     ) {
         super();
         this._tableMap = new Map();

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ILocales } from '@univerjs/core';
+import type { IDisposable, ILocales, IUnitRange } from '@univerjs/core';
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
+import type { CalculationMode, IFormulaCellAndFeatureItem, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
-import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { IRegisterFunctionService, IRemoteFormulaDependencyGenerator, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 /**
  * @ignore
@@ -38,6 +38,20 @@ export interface IFFormulaSheetsMixin {
      * ```
      */
     setInitialFormulaComputing(calculationMode: CalculationMode): void;
+
+    /**
+     * Get the list of formula cells and feature IDs from the dependency tree.
+     * @param {IUnitRange} [range] - Optional range to filter the results.
+     * @returns {Promise<Array<IFormulaCellAndFeatureItem>>} An array of objects containing unitId, subUnitId, and either cell coordinates or featureId.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * const cellsAndFeatures = await formulaEngine.getFormulaCellsAndFeatures();
+     * console.log(cellsAndFeatures);
+     * ```
+     */
+    getFormulaCellsAndFeatures(range?: IUnitRange): Promise<Array<IFormulaCellAndFeatureItem>>;
 
     /**
      * Register a custom synchronous formula function.
@@ -317,6 +331,11 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         }
 
         config.initialFormulaComputing = calculationMode;
+    }
+
+    override async getFormulaCellsAndFeatures(range?: IUnitRange): Promise<Array<IFormulaCellAndFeatureItem>> {
+        const dependencyGenerator = this._injector.get(IRemoteFormulaDependencyGenerator);
+        return dependencyGenerator.generate(range);
     }
 
     override registerFunction(name: string, func: IRegisterFunction): IDisposable;

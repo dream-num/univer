@@ -17,8 +17,8 @@
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import { Disposable, ICommandService, Inject, SHEET_EDITOR_UNITS } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { Disposable, ICommandService, Inject, IPermissionService, SHEET_EDITOR_UNITS } from '@univerjs/core';
+import { DocSkeletonManagerService, DocumentEditablePermission } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { InsertCommand } from '../../commands/commands/core-editing.command';
@@ -33,7 +33,8 @@ export class DocInputController extends Disposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocMenuStyleService) private readonly _docMenuStyleService: DocMenuStyleService
+        @Inject(DocMenuStyleService) private readonly _docMenuStyleService: DocMenuStyleService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
 
@@ -71,6 +72,13 @@ export class DocInputController extends Disposable implements IRenderModule {
             const { segmentId } = activeRange;
 
             const docDataModel = this._context.unit;
+
+            // Check if document is editable (using permission system)
+            const editablePermission = this._permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+            if (editablePermission && !editablePermission.value) {
+                return;
+            }
+
             const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!;
 
             // Insert content's style should follow the text style of the current position.

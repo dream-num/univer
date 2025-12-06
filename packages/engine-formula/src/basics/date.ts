@@ -160,10 +160,6 @@ export function parseFormattedDate(value: string) {
     return numfmt.parseDate(value);
 }
 
-export function parseFormattedValue(value: string) {
-    return numfmt.parseValue(value);
-}
-
 export function parseFormattedTime(value: string) {
     return numfmt.parseTime(value);
 }

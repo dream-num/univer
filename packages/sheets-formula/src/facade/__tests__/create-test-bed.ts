@@ -48,8 +48,10 @@ import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 
 import '@univerjs/sheets/facade';
+import '@univerjs/engine-formula/facade';
 import '../f-workbook';
 import '../f-range';
+import '../f-formula';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {

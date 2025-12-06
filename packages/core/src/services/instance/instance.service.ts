@@ -304,12 +304,15 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const [unit, type] = result;
         const units = this._unitsByType.get(type)!;
         const index = units.indexOf(unit);
+
         units.splice(index, 1);
 
         this._tryResetCurrentOnRemoval(unitId, type);
         this._tryResetFocusOnRemoval(unitId);
 
         this._unitDisposed$.next(unit);
+
+        unit.dispose()
 
         return true;
     }

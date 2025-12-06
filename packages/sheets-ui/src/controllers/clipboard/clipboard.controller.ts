@@ -42,9 +42,7 @@ import type {
     ISheetDiscreteRangeLocation,
 } from '../../services/clipboard/type';
 import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
-
 import type { IUniverSheetsUIConfig } from '../config.schema';
-
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -52,6 +50,7 @@ import {
     DEFAULT_WORKSHEET_ROW_HEIGHT,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
+    getNumfmtParseValueFilter,
     handleStyleToString,
     ICommandService,
     IConfigService,
@@ -61,16 +60,13 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
-    numfmt,
     ObjectMatrix,
     RxDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { MessageType } from '@univerjs/design';
 import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
-
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
     InsertColMutation,
@@ -635,7 +631,7 @@ export class SheetClipboardController extends RxDisposable {
                     },
                 };
             } else {
-                const pattern = numfmt.parseNumber(text);
+                const pattern = getNumfmtParseValueFilter(text);
                 if (pattern?.z) {
                     cellValue = {
                         [range.rows[0]]: {

@@ -146,6 +146,19 @@ export interface IFormulaIdMap {
     c: number;
 }
 
+export interface IFormulaStringMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<string[]> }>;
+}
+
+export interface IFormulaExecuteResultItem {
+    value: Nullable<number | string | boolean | Array<Array<number | string | boolean | null>>>;
+    formula: string;
+}
+
+export interface IFormulaExecuteResultMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaExecuteResultItem[]> }>;
+}
+
 export interface IFormulaIdMapData {
     [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaIdMap }> }>;
 }

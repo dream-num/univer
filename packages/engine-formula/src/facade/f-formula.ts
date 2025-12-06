@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams, ISequenceNode, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation, ISetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
@@ -247,5 +247,90 @@ export class FFormula extends FBase {
      */
     setMaxIteration(maxIteration: number): void {
         this._configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, maxIteration);
+    }
+
+    /**
+     * Execute a batch of formulas asynchronously and receive computed results.
+     *
+     * Each formula cell is represented as a string array:
+     *   [fullFormula, ...subFormulas]
+     *
+     * Where:
+     *   - fullFormula (index 0) is the complete formula expression written in the cell.
+     *     Example: "=SUM(A1:A10) + SQRT(D7)".
+     *
+     *   - subFormulas (index 1+) are **optional decomposed expressions** extracted from
+     *     the full formula. Each of them can be independently computed by the formula engine.
+     *
+     *     These sub-expressions can include:
+     *       - Single-cell references:  "A2", "B2", "C5"
+     *       - Range references:        "A1:A10"
+     *       - Function calls:          "SQRT(D7)", "ABS(A2-B2)"
+     *       - Any sub-formula that was parsed out of the original formula and can be
+     *         evaluated on its own.
+     *
+     *     The batch execution engine may use these sub-formulas for dependency resolution,
+     *     incremental computation, or performance optimizations.
+     *
+     * @param {IFormulaStringMap} formulas
+     *        Nested structure (unit → sheet → row → column) describing formulas and
+     *        their decomposed sub-expressions.
+     *
+     * @param {(result: IFormulaExecuteResultMap) => void} callback
+     *        Receives the computed value map mirroring the input structure.
+     *
+     * @returns {IDisposable}
+     *          A disposer to stop listening for batch results.
+     *
+     * @example
+     * ```ts
+     * const formulas = {
+     *   Book1: {
+     *     Sheet1: {
+     *       2: {
+     *         3: [
+     *           // Full formula:
+     *           "=SUM(A1:A10) + SQRT(D7)",
+     *
+     *           // Decomposed sub-formulas (each one can be evaluated independently):
+     *           "SUM(A1:A10)",   // sub-formula 1
+     *           "SQRT(D7)",      // sub-formula 2
+     *           "A1:A10",        // range reference
+     *           "D7",            // single-cell reference
+     *         ],
+     *       },
+     *       4: {
+     *         5: [
+     *           "=A2 + B2 + SQRT(C5)",
+     *           "A2",
+     *           "B2",
+     *           "SQRT(C5)",
+     *         ],
+     *       }
+     *     },
+     *   },
+     * };
+     *
+     * const disposer = formulaEngine.executeFormulas(formulas, (result) => {
+     *   console.log(result);
+     * });
+     *
+     * // Stop listening when done.
+     * disposer.dispose();
+     * ```
+     */
+    executeFormulas(formulas: IFormulaStringMap, callback: (result: IFormulaExecuteResultMap) => void): IDisposable {
+        this._commandService.executeCommand(SetFormulaStringBatchCalculationMutation.id, { formulas }, { onlyLocal: true });
+        return this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== SetFormulaStringBatchCalculationResultMutation.id) {
+                return;
+            }
+
+            const params = command.params as ISetFormulaStringBatchCalculationResultMutation;
+
+            if (params.result != null) {
+                callback(params.result);
+            }
+        });
     }
 }

@@ -17,6 +17,7 @@
 import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
+    IArrayFormulaUnitCellType,
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetDefinedNameMap,
@@ -113,6 +114,8 @@ export interface IFormulaCurrentConfigService {
     getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
+
+    loadDataLite(formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData?: IUnitRowData): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -343,6 +346,25 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._excludedCell = config.excludedCell;
 
         this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
+    }
+
+    loadDataLite(formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData?: IUnitRowData) {
+        const { allUnitData, unitSheetNameMap, unitStylesData } = this._loadSheetData();
+
+        this._unitData = allUnitData;
+
+        this._unitStylesData = unitStylesData;
+
+        this._sheetNameMap = unitSheetNameMap;
+
+        this._formulaData = formulaData;
+
+        this._arrayFormulaCellData = convertUnitDataToRuntime(arrayFormulaCellData);
+
+        this._arrayFormulaRange = arrayFormulaRange;
+
+        // apply row data, including rows hidden by filters
+        rowData && this._applyUnitRowData(rowData);
     }
 
     getDirtyData(): IFormulaDirtyData {

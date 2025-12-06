@@ -16,7 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaCalculationStartMutation, ISetFormulaStringBatchCalculationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
@@ -27,6 +27,8 @@ import {
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetFormulaStringBatchCalculationMutation,
+    SetFormulaStringBatchCalculationResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
@@ -67,6 +69,8 @@ export class CalculateController extends Disposable {
                     // TODO@Dushusir: Merge the array formula data into the formulaDataModel
                     this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
                     this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
+                } else if (command.id === SetFormulaStringBatchCalculationMutation.id) {
+                    this._calculateFormulaString(command.params as ISetFormulaStringBatchCalculationMutation);
                 }
             })
         );
@@ -96,6 +100,33 @@ export class CalculateController extends Disposable {
             maxIteration,
             rowData,
         });
+    }
+
+    private async _calculateFormulaString(params: ISetFormulaStringBatchCalculationMutation) {
+        const formulaData = this._formulaDataModel.getFormulaData();
+        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+        // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+
+        const rowData = this._formulaDataModel.getHiddenRowsFiltered();
+
+        const result = await this._calculateFormulaService.executeFormulas(
+            params.formulas,
+            formulaData,
+            arrayFormulaCellData,
+            arrayFormulaRange,
+            rowData
+        );
+
+        this._commandService.executeCommand(
+            SetFormulaStringBatchCalculationResultMutation.id,
+            {
+                result,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
     }
 
     // Notification

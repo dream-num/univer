@@ -16,6 +16,8 @@
 
 import type { IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
 import type {
+    IFormulaExecuteResultMap,
+    IFormulaStringMap,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
@@ -27,12 +29,33 @@ import { CommandType } from '@univerjs/core';
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;
 }
+
+export interface ISetFormulaStringBatchCalculationMutation {
+    formulas: IFormulaStringMap;
+}
+
+export interface ISetFormulaStringBatchCalculationResultMutation {
+    result: IFormulaExecuteResultMap;
+}
+
 /**
  * TODO: @DR-Univer
  * Trigger the calculation of the formula and stop the formula
  */
 export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
     id: 'formula.mutation.set-formula-calculation-start',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
+export const SetFormulaStringBatchCalculationMutation: IMutation<ISetFormulaStringBatchCalculationMutation> = {
+    id: 'formula.mutation.set-formula-string-batch-calculation',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
+export const SetFormulaStringBatchCalculationResultMutation: IMutation<ISetFormulaStringBatchCalculationResultMutation> = {
+    id: 'formula.mutation.set-formula-string-batch-calculation-result',
     type: CommandType.MUTATION,
     handler: () => true,
 };

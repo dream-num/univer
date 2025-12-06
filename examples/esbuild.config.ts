@@ -139,6 +139,9 @@ const entryPoints = [
     // mobile sheet
     './src/mobile-s/main.ts',
     './src/mobile-s/worker.ts',
+
+    // sheets-embed-in-page
+    './src/sheets-embed-in-page/main.ts',
 ];
 
 const config: SameShape<BuildOptions, BuildOptions> = {

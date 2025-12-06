@@ -55,13 +55,6 @@ export class TableManager extends Disposable {
     ) {
         super();
         this._tableMap = new Map();
-
-        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit) => {
-            const unitId = unit.getUnitId();
-
-            this._logService.log(`TableManager: unit disposed, unitId: ${unitId}`);
-            this.deleteUnitId(unitId);
-        }));
     }
 
     private _ensureUnit(unitId: string) {

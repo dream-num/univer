@@ -325,7 +325,9 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
             case ResponseType.SUBSCRIBE_NEXT:
             case ResponseType.SUBSCRIBE_COMPLETE:
             case ResponseType.SUBSCRIBE_ERROR:
-                this._pendingRequests.get(response.seq)?.handle(response);
+                const { _pendingRequests } = this;
+                _pendingRequests.get(response.seq)?.handle(response);
+                _pendingRequests.delete(response.seq)
                 break;
         }
     }

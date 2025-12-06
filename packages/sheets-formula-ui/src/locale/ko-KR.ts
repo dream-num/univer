@@ -17,6 +17,7 @@
 import type enUS from './en-US';
 import array from './function-list/array/ko-KR';
 import compatibility from './function-list/compatibility/ko-KR';
+import crypto from './function-list/crypto/ko-KR';
 import cube from './function-list/cube/ko-KR';
 import database from './function-list/database/ko-KR';
 import date from './function-list/date/ko-KR';
@@ -63,6 +64,7 @@ const locale: typeof enUS = {
             ...web,
             ...array,
             ...univer,
+            ...crypto,
         },
         prompt: {
             helpExample: '예제',

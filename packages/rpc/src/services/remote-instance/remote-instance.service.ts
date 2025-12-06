@@ -85,6 +85,7 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
         type: UniverInstanceType;
         snapshot: IWorkbookData;
     }): Promise<boolean> {
+        this._logService.debug(`[WebWorkerRemoteInstanceService]: Creating instance with id ${params.unitID}`);
         const { type, snapshot } = params;
         try {
             switch (type) {
@@ -106,6 +107,7 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     }
 
     async disposeInstance(params: { unitID: string }): Promise<boolean> {
+        this._logService.debug(`[WebWorkerRemoteInstanceService]: Disposing instance with id ${params.unitID}`);
         return this._univerInstanceService.disposeUnit(params.unitID);
     }
 

@@ -465,6 +465,15 @@ export class TableManager extends Disposable {
 
     override dispose() {
         super.dispose();
+
+        this._tableAdd$.complete();
+        this._tableDelete$.complete();
+        this._tableNameChanged$.complete();
+        this._tableRangeChanged$.complete();
+        this._tableThemeChanged$.complete();
+        this._tableFilterChanged$.complete();
+        this._tableInitStatus.complete();
+
         this._tableMap.forEach((unitMap) => {
             unitMap.forEach((table) => table.dispose());
             unitMap.clear();

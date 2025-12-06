@@ -83,8 +83,7 @@ export class UniverRPCNodeMainPlugin extends Plugin {
         if (this._child) {
             try {
                 this._child.kill();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to kill child process:', e);
             }
             this._child = null;
@@ -127,7 +126,9 @@ export class UniverRPCNodeWorkerPlugin extends Plugin {
 function createNodeMessagePortOnMain(injector: Injector, path: string): [IMessageProtocol, ChildProcess] {
     const logService = injector.get(ILogService);
 
-    const child = fork(path);
+    const child = fork(path, {
+        execArgv: ['--inspect=9230'],
+    });
     child.on('spawn', () => logService.log('Child computing process spawned!'));
     child.on('error', (error) => logService.error(error));
 

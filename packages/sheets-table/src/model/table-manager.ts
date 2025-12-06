@@ -16,7 +16,7 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { ITableAddedEvent, ITableDeletedEvent, ITableFilterChangedEvent, ITableFilterItem, ITableInfoWithUnitId, ITableJson, ITableNameChangedEvent, ITableOptions, ITableRange, ITableRangeChangedEvent, ITableRangeRowColOperation, ITableRangeUpdate, ITableRangeWithState, ITableResource, ITableSetConfig, ITableThemeChangedEvent } from '../types/type';
-import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { Disposable, generateRandomId, ILogService, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IRangeOperationTypeEnum } from '../types/type';
@@ -50,7 +50,7 @@ export class TableManager extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
     ) {
         super();
         this._tableMap = new Map();
@@ -460,11 +460,24 @@ export class TableManager extends Disposable {
     }
 
     deleteUnitId(unitId: string) {
+        const unitMap = this._tableMap.get(unitId);
+        if (unitMap) {
+            unitMap.forEach((table) => table.dispose());
+        }
         this._tableMap.delete(unitId);
     }
 
     override dispose() {
         super.dispose();
+
+        this._tableAdd$.complete();
+        this._tableDelete$.complete();
+        this._tableNameChanged$.complete();
+        this._tableRangeChanged$.complete();
+        this._tableThemeChanged$.complete();
+        this._tableFilterChanged$.complete();
+        this._tableInitStatus.complete();
+
         this._tableMap.forEach((unitMap) => {
             unitMap.forEach((table) => table.dispose());
             unitMap.clear();

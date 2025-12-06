@@ -27,6 +27,7 @@ import { Workbook } from '../../sheets/workbook';
 import { SlideDataModel } from '../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
+import { ILogService } from '../log/log.service';
 
 // eslint-disable-next-line ts/no-explicit-any
 export type UnitCtor = new (...args: any[]) => UnitModel;
@@ -107,7 +108,8 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @Inject(ILogService) private readonly _logService: ILogService
     ) {
         super();
     }
@@ -118,6 +120,8 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._focused$.complete();
         this._currentUnits$.complete();
         this._unitAdded$.complete();
+
+        this._currentUnits.forEach((unit) => unit?.dispose());
         this._currentUnits.clear();
         this._unitsByType.clear();
     }
@@ -186,6 +190,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
      * @param unit The unit to be added.
      */
     __addUnit(unit: UnitModel, options?: ICreateUnitOptions): void {
+        this._logService.debug(`[UniverInstanceService]: Adding unit with id ${unit.getUnitId()}`);
         const type = unit.type;
 
         if (!this._unitsByType.has(type)) {
@@ -296,18 +301,25 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     disposeUnit(unitId: string): boolean {
+        this._logService.debug(`[UniverInstanceService]: Disposing unit with id ${unitId}`);
         const result = this._getUnitById(unitId);
-        if (!result) return false;
+        if (!result) {
+            this._logService.debug(`[UniverInstanceService]: No unit found with id ${unitId}`);
+            return false;
+        }
 
         const [unit, type] = result;
         const units = this._unitsByType.get(type)!;
         const index = units.indexOf(unit);
+
         units.splice(index, 1);
 
         this._tryResetCurrentOnRemoval(unitId, type);
         this._tryResetFocusOnRemoval(unitId);
 
         this._unitDisposed$.next(unit);
+
+        unit.dispose();
 
         return true;
     }

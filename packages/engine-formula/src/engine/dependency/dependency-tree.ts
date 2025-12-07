@@ -512,9 +512,7 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
     // }
 }
 
-export interface IFormulaDependencyTreeJson {
-    children: IFormulaDependencyTreeJson[];
-    parents: IFormulaDependencyTreeJson[];
+interface IFormulaDependencyTreeJsonBase {
     treeId: number;
     formula: string;
     row: number;
@@ -524,6 +522,17 @@ export interface IFormulaDependencyTreeJson {
     refOffsetX: number;
     refOffsetY: number;
     rangeList: IUnitRange[];
+    refTreeId: number | undefined;
+}
+
+export interface IFormulaDependencyTreeJson extends IFormulaDependencyTreeJsonBase {
+    children: number[];
+    parents: number[];
+}
+
+export interface IFormulaDependencyTreeFullJson extends IFormulaDependencyTreeJsonBase {
+    children: IFormulaDependencyTreeJson[];
+    parents: IFormulaDependencyTreeJson[];
 }
 
 export class FormulaDependencyTreeModel {
@@ -531,7 +540,7 @@ export class FormulaDependencyTreeModel {
 
     parents: Set<FormulaDependencyTreeModel> = new Set();
 
-    treeId: number = 0;
+    treeId: number = -1;
 
     formula: string = '';
 
@@ -549,9 +558,10 @@ export class FormulaDependencyTreeModel {
 
     rangeList: IUnitRange[] = [];
 
+    refTreeId: number | undefined;
+
     constructor(tree: IFormulaDependencyTree) {
         this.treeId = tree.treeId;
-        this.formula = tree.formula;
         this.row = tree.row;
         this.column = tree.column;
         this.unitId = tree.unitId;
@@ -559,9 +569,32 @@ export class FormulaDependencyTreeModel {
         this.refOffsetX = tree.refOffsetX;
         this.refOffsetY = tree.refOffsetY;
         this.rangeList = tree.rangeList;
+
+        if (tree.isVirtual) {
+            this.refTreeId = (tree as FormulaDependencyTreeVirtual).refTree?.treeId ?? -1;
+        } else {
+            this.formula = tree.formula;
+        }
     }
 
     toJson(): IFormulaDependencyTreeJson {
+        return {
+            children: Array.from(this.children).map((child) => child.treeId),
+            parents: Array.from(this.parents).map((parent) => parent.treeId),
+            treeId: this.treeId,
+            formula: this.formula,
+            row: this.row,
+            column: this.column,
+            unitId: this.unitId,
+            subUnitId: this.subUnitId,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+            rangeList: this.rangeList,
+            refTreeId: this.refTreeId,
+        };
+    }
+
+    toFullJson(): IFormulaDependencyTreeFullJson {
         return {
             children: Array.from(this.children).map((child) => child.toJson()),
             parents: Array.from(this.parents).map((parent) => parent.toJson()),
@@ -574,6 +607,7 @@ export class FormulaDependencyTreeModel {
             refOffsetX: this.refOffsetX,
             refOffsetY: this.refOffsetY,
             rangeList: this.rangeList,
+            refTreeId: this.refTreeId,
         };
     }
 

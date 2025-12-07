@@ -32,6 +32,7 @@ import type {
 
 import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
 import type { LexerNode } from '../engine/analysis/lexer-node';
+import type { IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
@@ -74,6 +75,8 @@ export interface ICalculateFormulaService {
     stopFormulaExecution(): void;
     calculate(formulaString: string, transformSuffix?: boolean): void;
     executeFormulas(formulas: IFormulaStringMap, formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData: IUnitRowData): Promise<IFormulaExecuteResultMap>;
+    getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
+    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeJson | undefined>;
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
@@ -396,11 +399,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             result[unitId] = {};
 
             for (const sheetId of Object.keys(sheetFormulas)) {
-                const cellFormulas = sheetFormulas[sheetId];
-                if (cellFormulas == null) continue;
-
-                const rows = Object.keys(cellFormulas).map((r) => Number.parseInt(r, 10));
-                const columns = Object.keys(cellFormulas).map((c) => Number.parseInt(c, 10));
+                const rowFormulas = sheetFormulas[sheetId];
+                if (rowFormulas == null) continue;
 
                 const sheetItem = unitData[unitId]?.[sheetId];
 
@@ -408,15 +408,17 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
                 result[unitId]![sheetId] = {};
 
-                for (const row of rows) {
+                for (const rowString of Object.keys(rowFormulas)) {
+                    const row = Number.parseInt(rowString);
                     result[unitId]![sheetId]![row] = {};
 
-                    for (const column of columns) {
-                        const rowData = cellFormulas[row];
-                        if (!rowData) continue;
+                    const cellData = rowFormulas[row];
+                    if (!cellData) continue;
 
-                        const formulaStrings = rowData[column];
-                        if (formulaStrings == null) continue;
+                    for (const columnString of Object.keys(cellData)) {
+                        const column = Number.parseInt(columnString);
+                        const formulaStrings = cellData[column];
+                        if (!formulaStrings) continue;
 
                         const rowCount = sheetItem.rowCount || 0;
                         const columnCount = sheetItem.columnCount || 0;
@@ -450,8 +452,17 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                             const resultRefObject = resultCell as BaseValueObject;
 
                             if (resultRefObject.isArray()) {
+                                const resultRefArrayObject = resultRefObject as ArrayValueObject;
+                                if (resultRefArrayObject.getRowCount() === 1 && resultRefArrayObject.getColumnCount() === 1) {
+                                    item.push({
+                                        value: resultRefArrayObject.getFirstCell().getValue(),
+                                        formula: formulaString,
+                                    });
+                                    continue;
+                                }
+
                                 item.push({
-                                    value: (resultRefObject as ArrayValueObject).toValue(),
+                                    value: resultRefArrayObject.toValue(),
                                     formula: formulaString,
                                 });
 
@@ -501,5 +512,13 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         } else {
             return interpreter.execute(nodeData);
         }
+    }
+
+    async getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]> {
+        return this._formulaDependencyGenerator.getAllDependencyJson();
+    }
+
+    async getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeJson | undefined> {
+        return this._formulaDependencyGenerator.getCellDependencyJson(unitId, sheetId, row, column);
     }
 }

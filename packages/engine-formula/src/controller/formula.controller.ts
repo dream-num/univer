@@ -25,10 +25,14 @@ import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-for
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
 import {
+    SetCellFormulaDependencyCalculationMutation,
+    SetCellFormulaDependencyCalculationResultMutation,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetFormulaDependencyCalculationMutation,
+    SetFormulaDependencyCalculationResultMutation,
     SetFormulaStringBatchCalculationMutation,
     SetFormulaStringBatchCalculationResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
@@ -83,6 +87,11 @@ export class FormulaController extends Disposable {
             SetFormulaCalculationStopMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
+
+            SetFormulaDependencyCalculationMutation,
+            SetFormulaDependencyCalculationResultMutation,
+            SetCellFormulaDependencyCalculationMutation,
+            SetCellFormulaDependencyCalculationResultMutation,
 
             SetDefinedNameMutation,
             RemoveDefinedNameMutation,

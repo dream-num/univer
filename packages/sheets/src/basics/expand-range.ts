@@ -193,6 +193,15 @@ function getExpandedRangeLeft(range: IRange, allMatrixWithSpan: ObjectMatrix<IMa
             range,
         };
     }
+
+    if (spanAnchor) {
+        return {
+            spanAnchor: Rectangle.simpleRangesIntersect(range, spanAnchor) ? spanAnchor : null,
+            hasValue: false,
+            range,
+        };
+    }
+
     return {
         spanAnchor: null,
         hasValue: false,
@@ -235,6 +244,14 @@ function getExpandedRangeRight(range: IRange, allMatrixWithSpan: ObjectMatrix<IM
         return {
             spanAnchor,
             hasValue: true,
+            range,
+        };
+    }
+
+    if (spanAnchor) {
+        return {
+            spanAnchor: Rectangle.simpleRangesIntersect(range, spanAnchor) ? spanAnchor : null,
+            hasValue: false,
             range,
         };
     }
@@ -283,6 +300,15 @@ function getExpandedRangeUp(range: IRange, allMatrixWithSpan: ObjectMatrix<IMatr
             range,
         };
     }
+
+    if (spanAnchor) {
+        return {
+            spanAnchor: Rectangle.simpleRangesIntersect(range, spanAnchor) ? spanAnchor : null,
+            hasValue: false,
+            range,
+        };
+    }
+
     return {
         spanAnchor: null,
         hasValue: false,
@@ -327,6 +353,15 @@ function getExpandedRangeDown(range: IRange, allMatrixWithSpan: ObjectMatrix<IMa
             range,
         };
     }
+
+    if (spanAnchor) {
+        return {
+            spanAnchor: Rectangle.simpleRangesIntersect(range, spanAnchor) ? spanAnchor : null,
+            hasValue: false,
+            range,
+        };
+    }
+
     return {
         spanAnchor: null,
         hasValue: false,

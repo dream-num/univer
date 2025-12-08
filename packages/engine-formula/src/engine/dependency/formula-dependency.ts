@@ -58,7 +58,7 @@ export function generateRandomDependencyTreeId(dependencyManagerService: IDepend
 export interface IFormulaDependencyGenerator {
     generate(): Promise<IFormulaDependencyTree[]>;
     getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
-    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeJson | undefined>;
+    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
 }
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');

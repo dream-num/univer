@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: '編圖',
         },
+
+        save: {
+            title: '儲存儲存格圖片',
+            menuLabel: '儲存儲存格圖片',
+            imageCount: '圖片數量',
+            fileNameConfig: '檔案名稱',
+            useRowCol: '使用儲存格地址 (A1, B2...)',
+            useColumnValue: '使用某欄的值',
+            selectColumn: '選擇欄',
+            cancel: '取消',
+            confirm: '儲存',
+            saving: '儲存中...',
+            error: '儲存儲存格圖片失敗',
+        },
     },
     'image-popup': {
         replace: '替換',

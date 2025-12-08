@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: 'Редактировать изображение',
         },
+
+        save: {
+            title: 'Сохранить изображения ячеек',
+            menuLabel: 'Сохранить изображения ячеек',
+            imageCount: 'Количество изображений',
+            fileNameConfig: 'Имя файла',
+            useRowCol: 'Использовать адрес ячейки (A1, B2...)',
+            useColumnValue: 'Использовать значение столбца',
+            selectColumn: 'Выбрать столбец',
+            cancel: 'Отмена',
+            confirm: 'Сохранить',
+            saving: 'Сохранение...',
+            error: 'Не удалось сохранить изображения ячеек',
+        },
     },
     'image-popup': {
         replace: 'Заменить',

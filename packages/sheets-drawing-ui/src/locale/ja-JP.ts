@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: '画像の編集',
         },
+
+        save: {
+            title: 'セル画像を保存',
+            menuLabel: 'セル画像を保存',
+            imageCount: '画像数',
+            fileNameConfig: 'ファイル名',
+            useRowCol: 'セルアドレスを使用 (A1, B2...)',
+            useColumnValue: '列の値を使用',
+            selectColumn: '列を選択',
+            cancel: 'キャンセル',
+            confirm: '保存',
+            saving: '保存中...',
+            error: 'セル画像の保存に失敗しました',
+        },
     },
     'image-popup': {
         replace: '画像の変更',

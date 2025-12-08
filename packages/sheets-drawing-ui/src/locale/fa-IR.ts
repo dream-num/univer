@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: 'ویرایش تصویر',
         },
+
+        save: {
+            title: 'ذخیره تصاویر سلول',
+            menuLabel: 'ذخیره تصاویر سلول',
+            imageCount: 'تعداد تصاویر',
+            fileNameConfig: 'نام فایل',
+            useRowCol: 'استفاده از آدرس سلول (A1, B2...)',
+            useColumnValue: 'استفاده از مقدار ستون',
+            selectColumn: 'انتخاب ستون',
+            cancel: 'لغو',
+            confirm: 'ذخیره',
+            saving: 'در حال ذخیره...',
+            error: 'ذخیره تصاویر سلول ناموفق بود',
+        },
     },
     'image-popup': {
         replace: 'تعویض',

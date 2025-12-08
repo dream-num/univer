@@ -35,9 +35,9 @@ import {
     CustomRangeType,
     DEFAULT_STYLES,
     generateRandomId,
+    getNumfmtParseValueFilter,
     isTextFormat,
     IUniverInstanceService,
-    numfmt,
     ObjectMatrix,
     Range,
     Rectangle,
@@ -364,7 +364,7 @@ export function getSetCellValueMutations(
                 cellValue.t = CellValueType.STRING;
             } else {
                 const content = String(value.v);
-                const numfmtValue = numfmt.parseValue(content);
+                const numfmtValue = getNumfmtParseValueFilter(content);
                 if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
                     // If the numeric string will lose precision when converted to a number, set the cell type to force string
                     // e.g. 123456789123456789
@@ -474,7 +474,7 @@ export function getSetCellStyleMutations(
             (newValue.s as IStyleData).n = style?.n;
         } else {
             const content = String(value.v);
-            const numfmtValue = numfmt.parseValue(content);
+            const numfmtValue = getNumfmtParseValueFilter(content);
             if (numfmtValue?.z) {
                 if (!newValue.s) {
                     newValue.s = {};

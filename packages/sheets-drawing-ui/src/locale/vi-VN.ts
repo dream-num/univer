@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: 'Chỉnh sửa hình ảnh',
         },
+
+        save: {
+            title: 'Lưu hình ảnh ô',
+            menuLabel: 'Lưu hình ảnh ô',
+            imageCount: 'Số lượng hình ảnh',
+            fileNameConfig: 'Tên tệp',
+            useRowCol: 'Sử dụng địa chỉ ô (A1, B2...)',
+            useColumnValue: 'Sử dụng giá trị cột',
+            selectColumn: 'Chọn cột',
+            cancel: 'Hủy',
+            confirm: 'Lưu',
+            saving: 'Đang lưu...',
+            error: 'Lưu hình ảnh ô thất bại',
+        },
     },
     'image-popup': {
         replace: 'Thay thế',

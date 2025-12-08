@@ -18,7 +18,7 @@ import type { ICellData, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IImageFormulaInfo, IRuntimeImageFormulaDataType, ISetImageFormulaDataMutationParams, IUnitImageFormulaDataType } from '@univerjs/engine-formula';
 import { BooleanNumber, BuildTextUtils, CellValueType, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject, InterceptorEffectEnum, ObjectMatrix, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { ErrorType, FormulaDataModel, SetImageFormulaDataMutation } from '@univerjs/engine-formula';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
 export class ImageFormulaCellInterceptorController extends Disposable {
     private _errorValueCell: ICellData = {
@@ -87,8 +87,8 @@ export class ImageFormulaCellInterceptorController extends Disposable {
     private _initInterceptorCellContent() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                priority: 100,
-                effect: InterceptorEffectEnum.Value,
+                priority: InterceptCellContentPriority.CELL_IMAGE,
+                effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                 // eslint-disable-next-line max-lines-per-function
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
@@ -172,6 +172,7 @@ export class ImageFormulaCellInterceptorController extends Disposable {
                     if (jsonXActions) {
                         docDataModel.apply(jsonXActions);
                         return next({
+                            ...cell,
                             p: docDataModel.getSnapshot(),
                         });
                     }

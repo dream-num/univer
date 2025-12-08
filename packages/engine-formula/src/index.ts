@@ -26,6 +26,8 @@ export type {
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
+    IFormulaExecuteResultMap,
+    IFormulaStringMap,
     IRuntimeImageFormulaDataType,
     IRuntimeUnitDataType,
     ISheetData,
@@ -53,13 +55,23 @@ export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchPa
 export { SetDefinedNameMutationFactory } from './commands/mutations/set-defined-name.mutation';
 export { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from './commands/mutations/set-feature-calculation.mutation';
 export {
+    type ISetCellFormulaDependencyCalculationResultMutation,
     type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
     type ISetFormulaCalculationStartMutation,
+    type ISetFormulaDependencyCalculationMutation,
+    type ISetFormulaDependencyCalculationResultMutation,
+    type ISetFormulaStringBatchCalculationResultMutation,
+    SetCellFormulaDependencyCalculationMutation,
+    SetCellFormulaDependencyCalculationResultMutation,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetFormulaDependencyCalculationMutation,
+    SetFormulaDependencyCalculationResultMutation,
+    SetFormulaStringBatchCalculationMutation,
+    SetFormulaStringBatchCalculationResultMutation,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
 export { type ISetImageFormulaDataMutationParams, SetImageFormulaDataMutation } from './commands/mutations/set-image-formula-data.mutation';
@@ -83,7 +95,7 @@ export { ReferenceNodeFactory } from './engine/ast-node/reference-node';
 export { SuffixNodeFactory } from './engine/ast-node/suffix-node';
 export { UnionNodeFactory } from './engine/ast-node/union-node';
 export { ValueNodeFactory } from './engine/ast-node/value-node';
-export { FormulaDependencyTree, type IFormulaDependencyTree } from './engine/dependency/dependency-tree';
+export { FormulaDependencyTree, FormulaDependencyTreeModel, type IFormulaDependencyTree, type IFormulaDependencyTreeFullJson, type IFormulaDependencyTreeJson } from './engine/dependency/dependency-tree';
 export { FormulaDependencyTreeType } from './engine/dependency/dependency-tree';
 export { FormulaDependencyTreeVirtual } from './engine/dependency/dependency-tree';
 export { FormulaDependencyGenerator, IFormulaDependencyGenerator } from './engine/dependency/formula-dependency';

@@ -511,3 +511,111 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
     //     this.parents.add(tree.treeId);
     // }
 }
+
+interface IFormulaDependencyTreeJsonBase {
+    treeId: number;
+    formula: string;
+    row: number;
+    column: number;
+    unitId: string;
+    subUnitId: string;
+    refOffsetX: number;
+    refOffsetY: number;
+    rangeList: IUnitRange[];
+    refTreeId: number | undefined;
+}
+
+export interface IFormulaDependencyTreeJson extends IFormulaDependencyTreeJsonBase {
+    children: number[];
+    parents: number[];
+}
+
+export interface IFormulaDependencyTreeFullJson extends IFormulaDependencyTreeJsonBase {
+    children: IFormulaDependencyTreeJson[];
+    parents: IFormulaDependencyTreeJson[];
+}
+
+export class FormulaDependencyTreeModel {
+    children: Set<FormulaDependencyTreeModel> = new Set();
+
+    parents: Set<FormulaDependencyTreeModel> = new Set();
+
+    treeId: number = -1;
+
+    formula: string = '';
+
+    refOffsetX: number = 0;
+
+    refOffsetY: number = 0;
+
+    row: number = -1;
+
+    column: number = -1;
+
+    unitId: string = '';
+
+    subUnitId: string = '';
+
+    rangeList: IUnitRange[] = [];
+
+    refTreeId: number | undefined;
+
+    constructor(tree: IFormulaDependencyTree) {
+        this.treeId = tree.treeId;
+        this.row = tree.row;
+        this.column = tree.column;
+        this.unitId = tree.unitId;
+        this.subUnitId = tree.subUnitId;
+        this.refOffsetX = tree.refOffsetX;
+        this.refOffsetY = tree.refOffsetY;
+        this.rangeList = tree.rangeList;
+
+        if (tree.isVirtual) {
+            this.refTreeId = (tree as FormulaDependencyTreeVirtual).refTree?.treeId ?? -1;
+        } else {
+            this.formula = tree.formula;
+        }
+    }
+
+    toJson(): IFormulaDependencyTreeJson {
+        return {
+            children: Array.from(this.children).map((child) => child.treeId),
+            parents: Array.from(this.parents).map((parent) => parent.treeId),
+            treeId: this.treeId,
+            formula: this.formula,
+            row: this.row,
+            column: this.column,
+            unitId: this.unitId,
+            subUnitId: this.subUnitId,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+            rangeList: this.rangeList,
+            refTreeId: this.refTreeId,
+        };
+    }
+
+    toFullJson(): IFormulaDependencyTreeFullJson {
+        return {
+            children: Array.from(this.children).map((child) => child.toJson()),
+            parents: Array.from(this.parents).map((parent) => parent.toJson()),
+            treeId: this.treeId,
+            formula: this.formula,
+            row: this.row,
+            column: this.column,
+            unitId: this.unitId,
+            subUnitId: this.subUnitId,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+            rangeList: this.rangeList,
+            refTreeId: this.refTreeId,
+        };
+    }
+
+    addParent(parent: FormulaDependencyTreeModel) {
+        this.parents.add(parent);
+    }
+
+    addChild(child: FormulaDependencyTreeModel) {
+        this.children.add(child);
+    }
+}

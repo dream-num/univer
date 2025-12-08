@@ -18,15 +18,24 @@ import type { IUnitRange } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
+    IArrayFormulaUnitCellType,
     IFeatureDirtyRangeType,
+    IFormulaData,
     IFormulaDatasetConfig,
+    IFormulaExecuteResultItem,
+    IFormulaExecuteResultMap,
+    IFormulaStringMap,
     IRuntimeUnitDataType,
     IUnitExcludedCell,
+    IUnitRowData,
 } from '../basics/common';
 
 import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
 import type { LexerNode } from '../engine/analysis/lexer-node';
-import type { FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
+import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
     AsyncLock,
@@ -43,7 +52,6 @@ import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
-import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
@@ -66,6 +74,9 @@ export interface ICalculateFormulaService {
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
     stopFormulaExecution(): void;
     calculate(formulaString: string, transformSuffix?: boolean): void;
+    executeFormulas(formulas: IFormulaStringMap, formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData: IUnitRowData): Promise<IFormulaExecuteResultMap>;
+    getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
+    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
@@ -367,42 +378,147 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return this._runtimeService.getAllRuntimeData();
     }
 
-    calculate(formulaString: string, transformSuffix: boolean = true) {
-        // TODO how to observe @alex
-        // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this._lexer.treeBuilder(formulaString, transformSuffix);
+    async executeFormulas(formulas: IFormulaStringMap, formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData?: IUnitRowData) {
+        this._currentConfigService.loadDataLite(
+            formulaData,
+            arrayFormulaCellData,
+            arrayFormulaRange,
+            rowData
+        );
 
-        if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
-            return ErrorNode.create(lexerNode as ErrorType);
+        const unitData = this._currentConfigService.getUnitData();
+
+        this._runtimeService.reset();
+
+        const result: IFormulaExecuteResultMap = {};
+
+        for (const unitId of Object.keys(formulas)) {
+            const sheetFormulas = formulas[unitId];
+            if (sheetFormulas == null) continue;
+
+            result[unitId] = {};
+
+            for (const sheetId of Object.keys(sheetFormulas)) {
+                const rowFormulas = sheetFormulas[sheetId];
+                if (rowFormulas == null) continue;
+
+                const sheetItem = unitData[unitId]?.[sheetId];
+
+                if (sheetItem == null) continue;
+
+                result[unitId]![sheetId] = {};
+
+                for (const rowString of Object.keys(rowFormulas)) {
+                    const row = Number.parseInt(rowString);
+                    result[unitId]![sheetId]![row] = {};
+
+                    const cellData = rowFormulas[row];
+                    if (!cellData) continue;
+
+                    for (const columnString of Object.keys(cellData)) {
+                        const column = Number.parseInt(columnString);
+                        const formulaStrings = cellData[column];
+                        if (!formulaStrings) continue;
+
+                        const rowCount = sheetItem.rowCount || 0;
+                        const columnCount = sheetItem.columnCount || 0;
+
+                        this._runtimeService.setCurrent(
+                            row,
+                            column,
+                            rowCount,
+                            columnCount,
+                            sheetId,
+                            unitId
+                        );
+
+                        const item: IFormulaExecuteResultItem[] = [];
+
+                        for (const formulaString of formulaStrings) {
+                            let resultCell = await this.calculate(formulaString);
+                            if (!resultCell) {
+                                item.push({
+                                    value: null,
+                                    formula: formulaString,
+                                });
+
+                                continue;
+                            }
+
+                            if (resultCell.isReferenceObject()) {
+                                resultCell = (resultCell as BaseReferenceObject).toArrayValueObject();
+                            }
+
+                            const resultRefObject = resultCell as BaseValueObject;
+
+                            if (resultRefObject.isArray()) {
+                                const resultRefArrayObject = resultRefObject as ArrayValueObject;
+                                if (resultRefArrayObject.getRowCount() === 1 && resultRefArrayObject.getColumnCount() === 1) {
+                                    item.push({
+                                        value: resultRefArrayObject.getFirstCell().getValue(),
+                                        formula: formulaString,
+                                    });
+                                    continue;
+                                }
+
+                                item.push({
+                                    value: resultRefArrayObject.toValue(),
+                                    formula: formulaString,
+                                });
+
+                                continue;
+                            }
+
+                            item.push({
+                                value: resultRefObject.getValue(),
+                                formula: formulaString,
+                            });
+                        }
+
+                        result[unitId]![sheetId]![row]![column] = item;
+                    }
+                }
+            }
         }
 
-        // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
+        return result;
+    }
 
-        // console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
+    async calculate(formulaString: string) {
+        // TODO how to observe @alex
+        // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
+        const lexerNode = this._lexer.treeBuilder(formulaString);
 
-        // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
-
-        // const astTreeBuilder = new AstTreeBuilder();
+        if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
+            return;
+        }
 
         const astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
 
-        // console.log('astNode', astNode?.serialize());
-        astNode?.serialize();
+        const interpreter = this._interpreter;
 
-        // const interpreter = Interpreter.create();
+        if (astNode == null) {
+            return;
+        }
 
-        // if (astNode == null) {
-        //     return;
-        // }
+        const nodeData = {
+            node: astNode,
+            refOffsetX: 0,
+            refOffsetY: 0,
+        };
 
-        // if (interpreter.checkAsyncNode(astNode)) {
-        //     const resultPromise = interpreter.executeAsync(astNode);
+        if (interpreter.checkAsyncNode(astNode)) {
+            return await interpreter.executeAsync(nodeData);
+        } else {
+            return interpreter.execute(nodeData);
+        }
+    }
 
-        //     resultPromise.then((value) => {
-        //         console.log('formulaResult', value);
-        //     });
-        // } else {
-        //     console.log(interpreter.execute(astNode));
-        // }
+    async getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]> {
+        return this._formulaDependencyGenerator.getAllDependencyJson();
+    }
+
+    async getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined> {
+        return this._formulaDependencyGenerator.getCellDependencyJson(unitId, sheetId, row, column);
     }
 }

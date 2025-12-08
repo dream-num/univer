@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams, ISequenceNode, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
@@ -247,5 +247,174 @@ export class FFormula extends FBase {
      */
     setMaxIteration(maxIteration: number): void {
         this._configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, maxIteration);
+    }
+
+    /**
+     * Execute a batch of formulas asynchronously and receive computed results.
+     *
+     * Each formula cell is represented as a string array:
+     *   [fullFormula, ...subFormulas]
+     *
+     * Where:
+     *   - fullFormula (index 0) is the complete formula expression written in the cell.
+     *     Example: "=SUM(A1:A10) + SQRT(D7)".
+     *
+     *   - subFormulas (index 1+) are **optional decomposed expressions** extracted from
+     *     the full formula. Each of them can be independently computed by the formula engine.
+     *
+     *     These sub-expressions can include:
+     *       - Single-cell references:  "A2", "B2", "C5"
+     *       - Range references:        "A1:A10"
+     *       - Function calls:          "SQRT(D7)", "ABS(A2-B2)"
+     *       - Any sub-formula that was parsed out of the original formula and can be
+     *         evaluated on its own.
+     *
+     *     The batch execution engine may use these sub-formulas for dependency resolution,
+     *     incremental computation, or performance optimizations.
+     *
+     * @param {IFormulaStringMap} formulas
+     *        Nested structure (unit → sheet → row → column) describing formulas and
+     *        their decomposed sub-expressions.
+     *
+     * @param {(result: IFormulaExecuteResultMap) => void} callback
+     *        Receives the computed value map mirroring the input structure.
+     *
+     * @returns {IDisposable}
+     *          A disposer to stop listening for batch results.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     * const formulas = {
+     *   Book1: {
+     *     Sheet1: {
+     *       2: {
+     *         3: [
+     *           // Full formula:
+     *           "=SUM(A1:A10) + SQRT(D7)",
+     *
+     *           // Decomposed sub-formulas (each one can be evaluated independently):
+     *           "SUM(A1:A10)",   // sub-formula 1
+     *           "SQRT(D7)",      // sub-formula 2
+     *           "A1:A10",        // range reference
+     *           "D7",            // single-cell reference
+     *         ],
+     *       },
+     *       4: {
+     *         5: [
+     *           "=A2 + B2 + SQRT(C5)",
+     *           "A2",
+     *           "B2",
+     *           "SQRT(C5)",
+     *         ],
+     *       }
+     *     },
+     *   },
+     * };
+     *
+     * const disposer = formulaEngine.executeFormulas(formulas, (result) => {
+     *   console.log(result);
+     * });
+     *
+     * ```
+     */
+    executeFormulas(formulas: IFormulaStringMap, callback: (result: IFormulaExecuteResultMap) => void): void {
+        this._commandService.executeCommand(SetFormulaStringBatchCalculationMutation.id, { formulas }, { onlyLocal: true });
+        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== SetFormulaStringBatchCalculationResultMutation.id) {
+                return;
+            }
+
+            const params = command.params as ISetFormulaStringBatchCalculationResultMutation;
+
+            if (params.result != null) {
+                callback(params.result);
+            }
+            disposable.dispose();
+        });
+    }
+
+    /**
+     * Retrieve all formula dependency trees that were produced during the latest
+     * dependency-analysis run. This triggers a local dependency-calculation command
+     * and returns the complete set of dependency trees once the calculation finishes.
+     *
+     * @param callback A function invoked with the resulting array of dependency trees.
+     *
+     * @returns {IDisposable} An object that disposes the internal event listener.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     *
+     * // Fetch all dependency trees generated for the current workbook.
+     * const disposable = formulaEngine.getAllDependencyTrees((trees) => {
+     *     console.log('All dependency trees:', trees);
+     * });
+     *
+     * ```
+     */
+    getAllDependencyTrees(callback: (result: IFormulaDependencyTreeJson[]) => void): void {
+        this._commandService.executeCommand(SetFormulaDependencyCalculationMutation.id, undefined, { onlyLocal: true });
+        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== SetFormulaDependencyCalculationResultMutation.id) {
+                return;
+            }
+
+            const params = command.params as ISetFormulaDependencyCalculationResultMutation;
+
+            if (params.result != null) {
+                callback(params.result);
+            }
+
+            disposable.dispose();
+        });
+    }
+
+    /**
+     * Retrieve the dependency tree of a specific cell. This triggers a local
+     * dependency-calculation command for the given unit, sheet, and cell location,
+     * and returns the computed dependency tree when the calculation is completed.
+     *
+     * @param param The target cell location:
+     *   - `unitId`  The workbook ID.
+     *   - `sheetId` The sheet ID.
+     *   - `row`     The zero-based row index.
+     *   - `column`  The zero-based column index.
+     *
+     * @param callback A function invoked with the resulting dependency tree or
+     * `undefined` if no dependency tree exists for that cell.
+     *
+     * @returns {IDisposable} An object that disposes the internal event listener.
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     *
+     * // Query the dependency tree for cell B2 in a specific sheet.
+     * const disposable = formulaEngine.getCellDependencyTree(
+     *     { unitId: 'workbook1', sheetId: 'sheet1', row: 1, column: 1 },
+     *     (tree) => {
+     *         console.log('Cell dependency tree:', tree);
+     *     }
+     * );
+     *
+     * ```
+     */
+    getCellDependencyTree(param: { unitId: string; sheetId: string; row: number; column: number }, callback: (result: IFormulaDependencyTreeFullJson | undefined) => void): void {
+        this._commandService.executeCommand(SetCellFormulaDependencyCalculationMutation.id, param, { onlyLocal: true });
+        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== SetCellFormulaDependencyCalculationResultMutation.id) {
+                return;
+            }
+
+            const params = command.params as ISetCellFormulaDependencyCalculationResultMutation;
+
+            if (params.result !== undefined) {
+                callback(params.result);
+            }
+
+            disposable.dispose();
+        });
     }
 }

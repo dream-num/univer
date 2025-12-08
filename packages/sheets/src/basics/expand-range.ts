@@ -199,6 +199,7 @@ function getExpandedRangeLeft(range: IRange, allMatrixWithSpan: ObjectMatrix<IMa
         range,
     };
 }
+
 function getExpandedRangeRight(range: IRange, allMatrixWithSpan: ObjectMatrix<IMatrixWithSpanInfo>, rightOffset: number, isWorksheetHasSpan: boolean): IExpandedRangeResult {
     const { startRow, endColumn, endRow } = range;
     let spanAnchor: IRange | null = null;
@@ -332,16 +333,113 @@ function getExpandedRangeDown(range: IRange, allMatrixWithSpan: ObjectMatrix<IMa
         range,
     };
 }
-// the demo unit=YSvbxFMCTxugbku-IWNyxQ&type=2&subunit=U_wr1DEF84N_mbesFNmxR in pro
-// The excel behavior rules:
-// 1. If the range has a span, the range should expand to whole span range.
-// 2. If range left, right, up, down has value, the range should expand to the cell which has value.
-// 3. If the range has no value, the range should not expand.
-// 4. If the merge has span, the every cell value in span should be the anchor of the span range.
-// 5. The span range should be not part in the result range.
 
 /**
- *  Expand the range to a continuous range, it uses when Ctrl + A , or only one cell selected to add a pivot table adn so on.
+ * A fast path to expand range by checking the four corner cells.
+ */
+// eslint-disable-next-line max-lines-per-function,complexity
+function getExpandedRangeByFastPath({
+    range,
+    allMatrixWithSpan,
+    directions,
+    isWorksheetHasSpan,
+    maxRow,
+    maxColumn,
+}: {
+    range: IRange;
+    allMatrixWithSpan: ObjectMatrix<IMatrixWithSpanInfo>;
+    directions: IExpandParams;
+    isWorksheetHasSpan: boolean;
+    maxRow: number;
+    maxColumn: number;
+}): {
+    hasValue: boolean;
+    range: IRange;
+} {
+    const { left, right, up, down } = directions;
+    const { startRow, startColumn, endRow, endColumn } = range;
+
+    let hasValue = false;
+
+    // top-left
+    if (left && up && startRow > 0 && startColumn > 0) {
+        const cell = allMatrixWithSpan.getValue(startRow - 1, startColumn - 1)!;
+        if (hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan)) {
+            if (isWorksheetHasSpan && cell.spanAnchor) {
+                range.startRow = cell.spanAnchor.startRow;
+                range.startColumn = cell.spanAnchor.startColumn;
+            } else {
+                range.startRow = startRow - 1;
+                range.startColumn = startColumn - 1;
+            }
+
+            hasValue = true;
+        }
+    }
+
+    // top-right
+    if (right && up && startRow > 0 && endColumn < maxColumn - 1) {
+        const cell = allMatrixWithSpan.getValue(startRow - 1, endColumn + 1)!;
+        if (hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan)) {
+            if (isWorksheetHasSpan && cell.spanAnchor) {
+                range.startRow = cell.spanAnchor.startRow;
+                range.endColumn = cell.spanAnchor.endColumn;
+            } else {
+                range.startRow = startRow - 1;
+                range.endColumn = endColumn + 1;
+            }
+
+            hasValue = true;
+        }
+    }
+
+    // bottom-left
+    if (left && down && endRow < maxRow - 1 && startColumn > 0) {
+        const cell = allMatrixWithSpan.getValue(endRow + 1, startColumn - 1)!;
+        if (hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan)) {
+            if (isWorksheetHasSpan && cell.spanAnchor) {
+                range.endRow = cell.spanAnchor.endRow;
+                range.startColumn = cell.spanAnchor.startColumn;
+            } else {
+                range.endRow = endRow + 1;
+                range.startColumn = startColumn - 1;
+            }
+
+            hasValue = true;
+        }
+    }
+
+    // bottom-right
+    if (right && down && endRow < maxRow - 1 && endColumn < maxColumn - 1) {
+        const cell = allMatrixWithSpan.getValue(endRow + 1, endColumn + 1)!;
+        if (hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan)) {
+            if (isWorksheetHasSpan && cell.spanAnchor) {
+                range.endRow = cell.spanAnchor.endRow;
+                range.endColumn = cell.spanAnchor.endColumn;
+            } else {
+                range.endRow = endRow + 1;
+                range.endColumn = endColumn + 1;
+            }
+
+            hasValue = true;
+        }
+    }
+
+    return {
+        hasValue,
+        range,
+    };
+}
+
+/**
+ * Expand the range to a continuous range, it uses when Ctrl + A , or only one cell selected to add a pivot table adn so on.
+ * The demo unit=YSvbxFMCTxugbku-IWNyxQ&type=2&subunit=U_wr1DEF84N_mbesFNmxR in pro.
+ * The excel behavior rules:
+ * 1. If the range has a span, the range should expand to whole span range.
+ * 2. If range left, right, up, down has value, the range should expand to the cell which has value.
+ * 3. If the range has no value, the range should not expand.
+ * 4. If the merge has span, the every cell value in span should be the anchor of the span range.
+ * 5. The span range should be not part in the result range.
  * @param {IRange} startRange The start range.
  * @param {IExpandParams} directions The directions to expand.
  * @param {Worksheet} worksheet The worksheet working on.
@@ -360,6 +458,16 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
 
     while (changed) {
         changed = false;
+
+        // try fast path first
+        const fastPathResult = getExpandedRangeByFastPath({ range: destRange, allMatrixWithSpan, directions, isWorksheetHasSpan: worksheetHasSpan, maxRow, maxColumn });
+        if (fastPathResult.hasValue) {
+            destRange = fastPathResult.range;
+            changed = true;
+            continue;
+        }
+
+        // then try normal path
         if (up && destRange.startRow !== 0) {
             const { hasValue, range, spanAnchor } = getExpandedRangeUp(destRange, allMatrixWithSpan, 1, worksheetHasSpan);
             if (spanAnchor) {
@@ -406,6 +514,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             }
         }
     }
+
     if (spanAnchors.length > 0) {
         destRange = Rectangle.union(destRange, ...spanAnchors);
     }

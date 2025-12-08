@@ -32,7 +32,7 @@ import type {
 
 import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
 import type { LexerNode } from '../engine/analysis/lexer-node';
-import type { IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
+import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
@@ -76,7 +76,7 @@ export interface ICalculateFormulaService {
     calculate(formulaString: string, transformSuffix?: boolean): void;
     executeFormulas(formulas: IFormulaStringMap, formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData: IUnitRowData): Promise<IFormulaExecuteResultMap>;
     getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
-    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeJson | undefined>;
+    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
@@ -518,7 +518,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return this._formulaDependencyGenerator.getAllDependencyJson();
     }
 
-    async getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeJson | undefined> {
+    async getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined> {
         return this._formulaDependencyGenerator.getCellDependencyJson(unitId, sheetId, row, column);
     }
 }

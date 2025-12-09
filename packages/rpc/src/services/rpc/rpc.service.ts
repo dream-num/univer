@@ -316,7 +316,8 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     }
 
     private _onMessage(response: IRPCResponse): void {
-        switch (response.type) {
+        const { type: responseType, seq } = response;
+        switch (responseType) {
             case ResponseType.INITIALIZE:
                 this._initialized.next(true);
                 break;
@@ -324,9 +325,12 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
             case ResponseType.CALL_FAILURE:
             case ResponseType.SUBSCRIBE_NEXT:
             case ResponseType.SUBSCRIBE_COMPLETE:
-            case ResponseType.SUBSCRIBE_ERROR:
-                this._pendingRequests.get(response.seq)?.handle(response);
+            case ResponseType.SUBSCRIBE_ERROR: {
+                const { _pendingRequests } = this;
+                _pendingRequests.get(seq)?.handle(response);
+                responseType !== ResponseType.SUBSCRIBE_NEXT && _pendingRequests.delete(seq);
                 break;
+            }
         }
     }
 }

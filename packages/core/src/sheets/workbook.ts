@@ -117,6 +117,10 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._sheetDisposed$.complete();
         this._activeSheet$.complete();
         this._name$.complete();
+
+        Promise.resolve().then(() => {
+            this._worksheets.clear();
+        });
     }
 
     /**

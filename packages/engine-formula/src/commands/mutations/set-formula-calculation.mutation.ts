@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
+import type { IExecutionOptions, IMutation, IUnitRange, Nullable } from '@univerjs/core';
 import type {
     IFormulaExecuteResultMap,
     IFormulaStringMap,
@@ -56,6 +56,15 @@ export interface ISetFormulaDependencyCalculationResultMutation {
 
 export interface ISetCellFormulaDependencyCalculationResultMutation {
     result: IFormulaDependencyTreeFullJson | undefined;
+}
+
+export interface ISetQueryFormulaDependencyMutation {
+    unitRanges: IUnitRange[];
+    isInRange?: boolean;
+}
+
+export interface ISetQueryFormulaDependencyResultMutation {
+    result: IFormulaDependencyTreeJson[];
 }
 
 /**
@@ -131,6 +140,18 @@ export const SetCellFormulaDependencyCalculationMutation: IMutation<ISetFormulaD
 
 export const SetCellFormulaDependencyCalculationResultMutation: IMutation<ISetCellFormulaDependencyCalculationResultMutation> = {
     id: 'formula.mutation.set-cell-formula-dependency-calculation-result',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
+export const SetQueryFormulaDependencyMutation: IMutation<ISetQueryFormulaDependencyMutation> = {
+    id: 'formula.mutation.set-query-formula-dependency',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
+export const SetQueryFormulaDependencyResultMutation: IMutation<ISetQueryFormulaDependencyResultMutation> = {
+    id: 'formula.mutation.set-query-formula-dependency-result',
     type: CommandType.MUTATION,
     handler: () => true,
 };

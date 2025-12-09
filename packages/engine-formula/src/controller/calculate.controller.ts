@@ -16,7 +16,8 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import type { ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationMutation, ISetFormulaStringBatchCalculationMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationMutation, ISetFormulaStringBatchCalculationMutation, ISetQueryFormulaDependencyMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
@@ -33,6 +34,8 @@ import {
     SetFormulaDependencyCalculationResultMutation,
     SetFormulaStringBatchCalculationMutation,
     SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyMutation,
+    SetQueryFormulaDependencyResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
@@ -79,6 +82,9 @@ export class CalculateController extends Disposable {
                     this._generateAllDependencyTreeJson();
                 } else if (command.id === SetCellFormulaDependencyCalculationMutation.id) {
                     this._generateCellDependencyTreeJson(command.params as ISetFormulaDependencyCalculationMutation);
+                } else if (command.id === SetQueryFormulaDependencyMutation.id) {
+                    const params = command.params as ISetQueryFormulaDependencyMutation;
+                    this._queryFormulaDependencyJson(params);
                 }
             })
         );
@@ -110,6 +116,26 @@ export class CalculateController extends Disposable {
         });
     }
 
+    private async _queryFormulaDependencyJson(param: ISetQueryFormulaDependencyMutation) {
+        const { unitRanges, isInRange } = param;
+        let result: IFormulaDependencyTreeJson[] = [];
+        if (isInRange) {
+            result = await this._calculateFormulaService.getInRangeFormulas(unitRanges);
+        } else {
+            result = await this._calculateFormulaService.getRangeDependents(unitRanges);
+        }
+
+        this._commandService.executeCommand(
+            SetQueryFormulaDependencyResultMutation.id,
+            {
+                result,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
+    }
+
     private async _generateAllDependencyTreeJson() {
         const result = await this._calculateFormulaService.getAllDependencyJson();
 
@@ -139,20 +165,10 @@ export class CalculateController extends Disposable {
         );
     }
 
-    private async _calculateFormulaString(params: ISetFormulaStringBatchCalculationMutation) {
-        const formulaData = this._formulaDataModel.getFormulaData();
-        const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-        // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
-        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
-
-        const rowData = this._formulaDataModel.getHiddenRowsFiltered();
-
+    private async _calculateFormulaString(param: ISetFormulaStringBatchCalculationMutation) {
+        const { formulas } = param;
         const result = await this._calculateFormulaService.executeFormulas(
-            params.formulas,
-            formulaData,
-            arrayFormulaCellData,
-            arrayFormulaRange,
-            rowData
+            formulas
         );
 
         this._commandService.executeCommand(

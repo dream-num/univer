@@ -2249,9 +2249,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^1.0.2
-        version: 1.0.2(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

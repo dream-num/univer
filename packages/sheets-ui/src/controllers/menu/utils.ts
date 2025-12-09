@@ -28,9 +28,11 @@ export function getFontStyleAtCursor(accessor: IAccessor) {
     if (editorDataModel == null || activeTextRange == null) return null;
 
     const textRuns = editorDataModel.getBody()?.textRuns;
+
     if (textRuns == null) return;
 
-    const { startOffset } = activeTextRange;
-    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset <= ed);
+    const { startOffset, endOffset } = activeTextRange;
+    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && endOffset <= ed);
+
     return textRun;
 }

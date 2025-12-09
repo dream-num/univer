@@ -37,7 +37,7 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { RectPopup, useDependency } from '@univerjs/ui';
+import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 
@@ -191,7 +191,7 @@ export interface IListDropdownProps {
 }
 
 export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDropdownProps> }) {
-    const { popup: { extraProps } } = props;
+    const { popup: { extraProps, anchorRect } } = props;
     const { location, hideFn, onChange, onEdit, options, defaultValue, multiple, showEdit } = extraProps!;
     const { worksheet } = location;
     const [editingText, setEditingText] = useState('');
@@ -200,8 +200,7 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
     const [localValue, setLocalValue] = useState(defaultValue);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const instanceService = useDependency(IUniverInstanceService);
-    const anchorRect = RectPopup.useContext();
-    const cellWidth = (anchorRect.current?.right ?? 0) - (anchorRect.current?.left ?? 0);
+    const cellWidth = (anchorRect?.right ?? 0) - (anchorRect?.left ?? 0);
 
     useEffect(() => {
         const dispose = commandService.onCommandExecuted((command) => {

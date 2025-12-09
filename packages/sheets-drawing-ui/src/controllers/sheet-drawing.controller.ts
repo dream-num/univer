@@ -16,8 +16,6 @@
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { DownloadImageIcon } from '@univerjs/icons';
-
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
@@ -25,7 +23,6 @@ import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawi
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
-
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
@@ -58,7 +55,6 @@ export class SheetDrawingUIController extends Disposable {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
         this.disposeWithMe(componentManager.register(BATCH_SAVE_IMAGES_DIALOG_ID, BatchSaveImagesDialog));
-        this.disposeWithMe(componentManager.register('DownloadImageIcon', DownloadImageIcon));
     }
 
     private _initMenus(): void {

@@ -1399,6 +1399,23 @@ export class FormulaDependencyGenerator extends Disposable {
         return resultsJson;
     }
 
+    protected _setRealFormulaString(treeModel: FormulaDependencyTreeModel) {
+        if (!treeModel.refTreeId) {
+            return;
+        }
+
+        const mainTree = this._getTreeById(treeModel.refTreeId);
+        if (!mainTree) {
+            return;
+        }
+        const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
+            mainTree.formula,
+            treeModel.refOffsetX,
+            treeModel.refOffsetY
+        );
+        treeModel.formula = formula;
+    }
+
     async getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined> {
         await this._initializeGenerateTreeList();
         const treeId = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column);
@@ -1413,29 +1430,17 @@ export class FormulaDependencyGenerator extends Disposable {
         this._startFormulaDependencyTreeModel();
 
         const treeModel = this._getFormulaDependencyTreeModel(tree);
-        if (tree.isVirtual) {
-            const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
-                tree.formula,
-                tree.refOffsetX,
-                tree.refOffsetY
-            );
-            treeModel.formula = formula;
-        }
+        this._setRealFormulaString(treeModel);
 
         const childIds = this._getDependencyTreeChildrenIds(tree);
         for (const childId of childIds) {
             const childTreeModel = this._getTreeModel(childId);
-            const tree = this._getTreeById(childId);
-            if (tree && tree.isVirtual) {
-                const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
-                    tree.formula,
-                    tree.refOffsetX,
-                    tree.refOffsetY
-                );
-                childTreeModel.formula = formula;
-            }
-
+            this._setRealFormulaString(childTreeModel);
             treeModel.addChild(childTreeModel);
+        }
+
+        for (const parentTreeModel of treeModel.parents) {
+            this._setRealFormulaString(parentTreeModel);
         }
 
         this._endFormulaDependencyTreeModel();
@@ -1456,14 +1461,7 @@ export class FormulaDependencyGenerator extends Disposable {
                 continue;
             }
             const treeModel = this._getFormulaDependencyTreeModel(tree);
-            if (tree.isVirtual) {
-                const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
-                    tree.formula,
-                    tree.refOffsetX,
-                    tree.refOffsetY
-                );
-                treeModel.formula = formula;
-            }
+            this._setRealFormulaString(treeModel);
             treeList.push(treeModel);
         }
 
@@ -1504,14 +1502,7 @@ export class FormulaDependencyGenerator extends Disposable {
         const results: FormulaDependencyTreeModel[] = [];
         for (const tree of matchTreeList) {
             const treeModel = this._getFormulaDependencyTreeModel(tree);
-            if (tree.isVirtual) {
-                const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
-                    tree.formula,
-                    tree.refOffsetX,
-                    tree.refOffsetY
-                );
-                treeModel.formula = formula;
-            }
+            this._setRealFormulaString(treeModel);
             results[tree.treeId] = treeModel;
         }
 

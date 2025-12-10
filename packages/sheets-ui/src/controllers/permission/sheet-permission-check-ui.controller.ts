@@ -22,7 +22,7 @@ import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandP
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs-ui';
 import { UnitAction } from '@univerjs/protocol';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SheetPermissionCheckController, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
@@ -99,7 +99,7 @@ export class SheetPermissionCheckUIController extends Disposable {
         switch (id) {
             case InsertCommand.id:
             case IMEInputCommand.id:
-                if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true) {
+                if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true || this._contextService.getContextValue(FOCUSING_COMMENT_EDITOR) === true) {
                     break;
                 }
                 permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({

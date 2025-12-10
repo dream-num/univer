@@ -390,11 +390,13 @@ export class FFormula extends FBase {
      *        Nested structure (unit → sheet → row → column) describing formulas and
      *        their decomposed sub-expressions.
      *
-     * @param {(result: IFormulaExecuteResultMap) => void} callback
-     *        Receives the computed value map mirroring the input structure.
+     * @param {number} [timeout]
+     *        Optional timeout in milliseconds. If no result is received within this
+     *        period, the promise will be rejected.
      *
-     * @returns {IDisposable}
-     *          A disposer to stop listening for batch results.
+     * @returns {Promise<IFormulaExecuteResultMap>}
+     *          A promise that resolves with the computed value map mirroring
+     *          the input structure.
      *
      * @example
      * ```ts
@@ -426,25 +428,42 @@ export class FFormula extends FBase {
      *   },
      * };
      *
-     * const disposer = formulaEngine.executeFormulas(formulas, (result) => {
-     *   console.log(result);
-     * });
-     *
+     * const result = await formulaEngine.executeFormulas(formulas);
+     * console.log(result);
      * ```
      */
-    executeFormulas(formulas: IFormulaStringMap, callback: (result: IFormulaExecuteResultMap) => void): void {
-        this._commandService.executeCommand(SetFormulaStringBatchCalculationMutation.id, { formulas }, { onlyLocal: true });
-        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetFormulaStringBatchCalculationResultMutation.id) {
-                return;
-            }
+    executeFormulas(
+        formulas: IFormulaStringMap,
+        timeout = 30_000
+    ): Promise<IFormulaExecuteResultMap> {
+        return new Promise((resolve, reject) => {
+            const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetFormulaStringBatchCalculationResultMutation.id) {
+                    return;
+                }
 
-            const params = command.params as ISetFormulaStringBatchCalculationResultMutation;
+                const params = command.params as ISetFormulaStringBatchCalculationResultMutation;
 
-            if (params.result != null) {
-                callback(params.result);
-            }
-            disposable.dispose();
+                clearTimeout(timer);
+                disposable.dispose();
+
+                if (params.result != null) {
+                    resolve(params.result);
+                } else {
+                    reject(new Error('Formula batch calculation returned no result'));
+                }
+            });
+
+            const timer = setTimeout(() => {
+                disposable.dispose();
+                reject(new Error('Formula batch calculation timeout'));
+            }, timeout);
+
+            this._commandService.executeCommand(
+                SetFormulaStringBatchCalculationMutation.id,
+                { formulas },
+                { onlyLocal: true }
+            );
         });
     }
 
@@ -453,35 +472,51 @@ export class FFormula extends FBase {
      * dependency-analysis run. This triggers a local dependency-calculation command
      * and returns the complete set of dependency trees once the calculation finishes.
      *
-     * @param callback A function invoked with the resulting array of dependency trees.
+     * @param {number} [timeout]
+     *        Optional timeout in milliseconds. If no result is received within this
+     *        period, the promise will be rejected.
      *
-     * @returns {IDisposable} An object that disposes the internal event listener.
+     * @returns {Promise<IFormulaDependencyTreeJson[]>}
+     *          A promise that resolves with the array of dependency trees.
      *
      * @example
      * ```ts
      * const formulaEngine = univerAPI.getFormula();
      *
      * // Fetch all dependency trees generated for the current workbook.
-     * const disposable = formulaEngine.getAllDependencyTrees((trees) => {
-     *     console.log('All dependency trees:', trees);
-     * });
-     *
+     * const trees = await formulaEngine.getAllDependencyTrees();
+     * console.log('All dependency trees:', trees);
      * ```
      */
-    getAllDependencyTrees(callback: (result: IFormulaDependencyTreeJson[]) => void): void {
-        this._commandService.executeCommand(SetFormulaDependencyCalculationMutation.id, undefined, { onlyLocal: true });
-        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetFormulaDependencyCalculationResultMutation.id) {
-                return;
-            }
+    getAllDependencyTrees(timeout = 30_000): Promise<IFormulaDependencyTreeJson[]> {
+        return new Promise((resolve, reject) => {
+            const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetFormulaDependencyCalculationResultMutation.id) {
+                    return;
+                }
 
-            const params = command.params as ISetFormulaDependencyCalculationResultMutation;
+                const params = command.params as ISetFormulaDependencyCalculationResultMutation;
 
-            if (params.result != null) {
-                callback(params.result);
-            }
+                clearTimeout(timer);
+                disposable.dispose();
 
-            disposable.dispose();
+                if (params.result != null) {
+                    resolve(params.result);
+                } else {
+                    resolve([]); // No trees found; return an empty array instead of failing
+                }
+            });
+
+            const timer = setTimeout(() => {
+                disposable.dispose();
+                reject(new Error('Formula dependency calculation timeout'));
+            }, timeout);
+
+            this._commandService.executeCommand(
+                SetFormulaDependencyCalculationMutation.id,
+                undefined,
+                { onlyLocal: true }
+            );
         });
     }
 
@@ -496,46 +531,65 @@ export class FFormula extends FBase {
      *   - `row`     The zero-based row index.
      *   - `column`  The zero-based column index.
      *
-     * @param callback A function invoked with the resulting dependency tree or
-     * `undefined` if no dependency tree exists for that cell.
+     * @param {number} [timeout]
+     *        Optional timeout in milliseconds. If no result is received within this
+     *        period, the promise will be rejected.
      *
-     * @returns {IDisposable} An object that disposes the internal event listener.
+     * @returns {Promise<IFormulaDependencyTreeFullJson | undefined>}
+     *          A promise that resolves with the dependency tree or `undefined`
+     *          if no tree exists for that cell.
      *
      * @example
      * ```ts
      * const formulaEngine = univerAPI.getFormula();
      *
      * // Query the dependency tree for cell B2 in a specific sheet.
-     * const disposable = formulaEngine.getCellDependencyTree(
-     *     { unitId: 'workbook1', sheetId: 'sheet1', row: 1, column: 1 },
-     *     (tree) => {
-     *         console.log('Cell dependency tree:', tree);
-     *     }
-     * );
+     * const tree = await formulaEngine.getCellDependencyTree({
+     *   unitId: 'workbook1',
+     *   sheetId: 'sheet1',
+     *   row: 1,
+     *   column: 1,
+     * });
      *
+     * console.log('Cell dependency tree:', tree);
      * ```
      */
-    getCellDependencyTree(param: { unitId: string; sheetId: string; row: number; column: number }, callback: (result: IFormulaDependencyTreeFullJson | undefined) => void): void {
-        this._commandService.executeCommand(SetCellFormulaDependencyCalculationMutation.id, param, { onlyLocal: true });
-        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetCellFormulaDependencyCalculationResultMutation.id) {
-                return;
-            }
+    getCellDependencyTree(
+        param: { unitId: string; sheetId: string; row: number; column: number },
+        timeout = 30_000
+    ): Promise<IFormulaDependencyTreeFullJson | undefined> {
+        return new Promise((resolve, reject) => {
+            const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetCellFormulaDependencyCalculationResultMutation.id) {
+                    return;
+                }
 
-            const params = command.params as ISetCellFormulaDependencyCalculationResultMutation;
+                const params = command.params as ISetCellFormulaDependencyCalculationResultMutation;
 
-            if (params.result !== undefined) {
-                callback(params.result);
-            }
+                clearTimeout(timer);
+                disposable.dispose();
 
-            disposable.dispose();
+                // `result` may be undefined if the cell has no dependency tree
+                resolve(params.result);
+            });
+
+            const timer = setTimeout(() => {
+                disposable.dispose();
+                reject(new Error('Cell dependency calculation timeout'));
+            }, timeout);
+
+            this._commandService.executeCommand(
+                SetCellFormulaDependencyCalculationMutation.id,
+                param,
+                { onlyLocal: true }
+            );
         });
     }
 
     /**
      * Retrieve the full dependency trees for all formulas that *depend on* the
      * specified ranges. This triggers a local dependency-calculation command and
-     * invokes the callback once the calculation completes.
+     * resolves once the calculation completes.
      *
      * @param unitRanges An array of workbook/sheet ranges to query. Each range
      *   includes:
@@ -543,38 +597,58 @@ export class FFormula extends FBase {
      *   - `sheetId` The sheet ID.
      *   - `range`   The row/column boundaries.
      *
-     * @param callback A function invoked with an array of `IFormulaDependencyTreeJson`
-     * results. Each entry represents a formula node and its parent/child
-     * relationships within the dependency graph.
+     * @param {number} [timeout]
+     *        Optional timeout in milliseconds. If no result is received within this
+     *        period, the promise will be rejected.
+     *
+     * @returns {Promise<IFormulaDependencyTreeJson[]>}
+     *          A promise that resolves with an array of `IFormulaDependencyTreeJson`
+     *          representing formulas and their relationships within the dependency graph.
      *
      * @example
      * ```ts
      * const formulaEngine = univerAPI.getFormula();
      *
      * // Query all formulas that depend on A1:B10 in Sheet1.
-     * formulaEngine.getRangeDependents(
-     *     [{ unitId: 'workbook1', sheetId: 'sheet1', range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 1 } }],
-     *     (result) => {
-     *         console.log('Dependent formulas:', result);
-     *     }
-     * );
+     * const dependents = await formulaEngine.getRangeDependents([
+     *   { unitId: 'workbook1', sheetId: 'sheet1', range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 1 } }
+     * ]);
+     *
+     * console.log('Dependent formulas:', dependents);
      * ```
      */
-    getRangeDependents(unitRanges: IUnitRange[], callback: (result: IFormulaDependencyTreeJson[]) => void): void {
-        this._commandService.executeCommand(SetQueryFormulaDependencyMutation.id, { unitRanges }, { onlyLocal: true });
+    getRangeDependents(
+        unitRanges: IUnitRange[],
+        timeout = 30_000
+    ): Promise<IFormulaDependencyTreeJson[]> {
+        return new Promise((resolve, reject) => {
+            const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetQueryFormulaDependencyResultMutation.id) {
+                    return;
+                }
 
-        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetQueryFormulaDependencyResultMutation.id) {
-                return;
-            }
+                const params = command.params as ISetFormulaDependencyCalculationResultMutation;
 
-            const params = command.params as ISetFormulaDependencyCalculationResultMutation;
+                clearTimeout(timer);
+                disposable.dispose();
 
-            if (params.result != null) {
-                callback(params.result);
-            }
+                if (params.result != null) {
+                    resolve(params.result);
+                } else {
+                    resolve([]);
+                }
+            });
 
-            disposable.dispose();
+            const timer = setTimeout(() => {
+                disposable.dispose();
+                reject(new Error('Range dependents calculation timeout'));
+            }, timeout);
+
+            this._commandService.executeCommand(
+                SetQueryFormulaDependencyMutation.id,
+                { unitRanges },
+                { onlyLocal: true }
+            );
         });
     }
 
@@ -584,7 +658,7 @@ export class FFormula extends FBase {
      * physically reside within the queried ranges.
      *
      * Internally this triggers the same dependency-calculation command but with
-     * `isInRange = true`, and the callback is invoked when the results are ready.
+     * `isInRange = true`, and the promise resolves when the results are ready.
      *
      * @param unitRanges An array of workbook/sheet ranges defining the lookup
      *   boundaries:
@@ -592,38 +666,59 @@ export class FFormula extends FBase {
      *   - `sheetId` The sheet ID.
      *   - `range`   The zero-based grid range.
      *
-     * @param callback Receives an array of `IFormulaDependencyTreeJson` describing
-     * every formula found in the provided ranges along with their parent/child
-     * relationships.
+     * @param {number} [timeout]
+     *        Optional timeout in milliseconds. If no result is received within this
+     *        period, the promise will be rejected.
+     *
+     * @returns {Promise<IFormulaDependencyTreeJson[]>}
+     *          A promise that resolves with an array of `IFormulaDependencyTreeJson`
+     *          describing every formula found in the provided ranges along with
+     *          their parent/child relationships.
      *
      * @example
      * ```ts
      * const formulaEngine = univerAPI.getFormula();
      *
      * // Query all formulas that lie within A1:D20 in Sheet1.
-     * formulaEngine.getInRangeFormulas(
-     *     [{ unitId: 'workbook1', sheetId: 'sheet1', range: { startRow: 0, endRow: 19, startColumn: 0, endColumn: 3 } }],
-     *     (result) => {
-     *         console.log('Formulas inside range:', result);
-     *     }
-     * );
+     * const formulasInRange = await formulaEngine.getInRangeFormulas([
+     *   { unitId: 'workbook1', sheetId: 'sheet1', range: { startRow: 0, endRow: 19, startColumn: 0, endColumn: 3 } }
+     * ]);
+     *
+     * console.log('Formulas inside range:', formulasInRange);
      * ```
      */
-    getInRangeFormulas(unitRanges: IUnitRange[], callback: (result: IFormulaDependencyTreeJson[]) => void): void {
-        this._commandService.executeCommand(SetQueryFormulaDependencyMutation.id, { unitRanges, isInRange: true }, { onlyLocal: true });
+    getInRangeFormulas(
+        unitRanges: IUnitRange[],
+        timeout = 30_000
+    ): Promise<IFormulaDependencyTreeJson[]> {
+        return new Promise((resolve, reject) => {
+            const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetQueryFormulaDependencyResultMutation.id) {
+                    return;
+                }
 
-        const disposable = this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetQueryFormulaDependencyResultMutation.id) {
-                return;
-            }
+                const params = command.params as ISetFormulaDependencyCalculationResultMutation;
 
-            const params = command.params as ISetFormulaDependencyCalculationResultMutation;
+                clearTimeout(timer);
+                disposable.dispose();
 
-            if (params.result != null) {
-                callback(params.result);
-            }
+                if (params.result != null) {
+                    resolve(params.result);
+                } else {
+                    resolve([]);
+                }
+            });
 
-            disposable.dispose();
+            const timer = setTimeout(() => {
+                disposable.dispose();
+                reject(new Error('In-range formulas calculation timeout'));
+            }, timeout);
+
+            this._commandService.executeCommand(
+                SetQueryFormulaDependencyMutation.id,
+                { unitRanges, isInRange: true },
+                { onlyLocal: true }
+            );
         });
     }
 }

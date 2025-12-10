@@ -269,8 +269,13 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
                 });
             }
 
-            // the start range is from the primary selection range
-            const next = findNextRange(startRange, direction, worksheet);
+            /**
+             * The start range is from the primary selection range.
+             * If the edited cell is the last row/column of the worksheet, and the submitted operation is Enter/Tab to move down/right, the next selected cell should still be the current cell (not move to the first row/column of the worksheet).
+             */
+            const isLastRowCell = keycode === KeyCode.ENTER && direction === Direction.DOWN && startRange.endRow === worksheet.getMaxRows() - 1;
+            const isLastColumnCell = keycode === KeyCode.TAB && direction === Direction.RIGHT && startRange.endColumn === worksheet.getMaxColumns() - 1;
+            const next = (isLastRowCell || isLastColumnCell) ? startRange : findNextRange(startRange, direction, worksheet);
             const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
             if (Rectangle.equals(destRange, startRange)) {

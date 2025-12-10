@@ -91,7 +91,7 @@ export const useSheetSelectionChange = (
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     // eslint-disable-next-line complexity
-    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean) => {
+    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
         if (!ctx) return;
         const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
@@ -147,7 +147,8 @@ export const useSheetSelectionChange = (
             }
         } else {
             const orderedSelections = [...selections];
-            if (updatingRefIndex !== -1) {
+            // 当 isCtrlAddMode 为 true 时，跳过 updatingRefIndex 的逻辑，不调整选区顺序
+            if (!isCtrlAddMode && updatingRefIndex !== -1) {
                 const last = orderedSelections.pop();
                 last && orderedSelections.splice(updatingRefIndex, 0, last);
             }
@@ -224,13 +225,23 @@ export const useSheetSelectionChange = (
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
+            let prevSelectionsCount = 0;
 
             const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
                 if (isFirst) {
                     isFirst = false;
+                    prevSelectionsCount = selections.length;
                     return;
                 }
-                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd);
+
+                // 通过比较选区数量判断是否是 ctrl 添加模式
+                const isCtrlAddMode = selections.length > prevSelectionsCount;
+
+                if (isEnd) {
+                    prevSelectionsCount = selections.length;
+                }
+
+                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
             };
 
             const disposableCollection = new DisposableCollection();

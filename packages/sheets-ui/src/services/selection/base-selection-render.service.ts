@@ -732,8 +732,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         };
 
         if (this._shouldDetectMergedCells) {
-            newSelectionRange = skeleton.expandRangeByMerge(newSelectionRange);
+            newSelectionRange = skeleton.expandRangeByMerge(newSelectionRange, this.inRefSelectionMode());
         }
+
         const newSelection: ISelectionWithStyle = { range: newSelectionRange, primary: undefined, style: null };
         const newSelectionRangeWithCoord = attachSelectionWithCoord(newSelection, skeleton);
         newSelectionRangeWithCoord.rangeWithCoord.unitId = unitId;

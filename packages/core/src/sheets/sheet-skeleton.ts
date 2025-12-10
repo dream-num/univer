@@ -40,7 +40,7 @@ import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { IConfigService } from '../services/config/config.service';
 import { IContextService } from '../services/context/context.service';
 import { LocaleService } from '../services/locale/locale.service';
-import { isCellCoverable, ObjectMatrix, searchArray, Tools } from '../shared';
+import { isCellCoverable, ObjectMatrix, Rectangle, searchArray, Tools } from '../shared';
 import { ImageCacheMap } from '../shared/cache/image-cache';
 import { getIntersectRange } from '../shared/range';
 import { Skeleton } from '../skeleton';
@@ -489,7 +489,8 @@ export class SheetSkeleton extends Skeleton {
      * @param range
      * @returns {IRange} expanded range because merge info.
      */
-    expandRangeByMerge(range: IRange): IRange {
+    // eslint-disable-next-line max-lines-per-function
+    expandRangeByMerge(range: IRange, inRefSelectionMode?: boolean): IRange {
         let { startRow, startColumn, endRow, endColumn } = range;
         const mergeData = this._worksheetData.mergeData;
         if (!mergeData) {
@@ -502,7 +503,10 @@ export class SheetSkeleton extends Skeleton {
         }
 
         let isSearching = true;
-        const searchedMarge = new ObjectMatrix<boolean>();
+        const searchedMerge = new ObjectMatrix<boolean>();
+
+        let searchedMergeSize = 0;
+        let lastSearchedMergeCell: Nullable<IRange> = null;
 
         // the loop breaks when there are not merged cells intersect with the current range
         // NOTE: what about the performance issue?
@@ -517,7 +521,7 @@ export class SheetSkeleton extends Skeleton {
                     endColumn: mainEndColumn,
                 } = mergeData[i];
 
-                if (searchedMarge.getValue(mainStartRow, mainStartColumn)) {
+                if (searchedMerge.getValue(mainStartRow, mainStartColumn)) {
                     continue;
                 }
 
@@ -540,10 +544,25 @@ export class SheetSkeleton extends Skeleton {
                     startColumn = Math.min(startColumn, mainStartColumn);
                     endRow = Math.max(endRow, mainEndRow);
                     endColumn = Math.max(endColumn, mainEndColumn);
-                    searchedMarge.setValue(mainStartRow, mainStartColumn, true);
+                    searchedMerge.setValue(mainStartRow, mainStartColumn, true);
                     isSearching = true;
+                    searchedMergeSize++;
+                    lastSearchedMergeCell = rect2;
                 }
             }
+        }
+
+        /**
+         * If the selected cell is merged cell, we need to adjust the selection range to the merged main cell in the formula reference selection scenario.
+         * Must ensure that only one merged cell is involved in the selection and that the merged cell fully contains the selection range.
+         */
+        if (inRefSelectionMode && searchedMergeSize === 1 && Rectangle.contains(lastSearchedMergeCell!, range)) {
+            return {
+                startRow: lastSearchedMergeCell!.startRow,
+                startColumn: lastSearchedMergeCell!.startColumn,
+                endRow: lastSearchedMergeCell!.startRow,
+                endColumn: lastSearchedMergeCell!.startColumn,
+            };
         }
 
         return {

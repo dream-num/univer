@@ -325,9 +325,31 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
                 selectCell.endColumn = this._skeleton.getColumnCount() - 1;
         }
 
-        const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
+        let selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
+        // If the selected cell is merged cell, we need to adjust the selection range to the merged main cell in the formula reference selection scenario.
+        if (selectCell.isMerged || selectCell.isMergedMainCell) {
+            selectionWithStyle = {
+                range: {
+                    ...selectCell,
+                    startRow: selectCell.startRow,
+                    endRow: selectCell.startRow,
+                    startColumn: selectCell.startColumn,
+                    endColumn: selectCell.startColumn,
+                },
+                primary: {
+                    ...selectCell,
+                    actualRow: selectCell.startRow,
+                    actualColumn: selectCell.startColumn,
+                    startRow: selectCell.startRow,
+                    endRow: selectCell.startRow,
+                    startColumn: selectCell.startColumn,
+                    endColumn: selectCell.startColumn,
+                },
+                style: null,
+            };
+        }
         selectionWithStyle.range.rangeType = rangeType;
-        // const selectionCellWithCoord = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+
         const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
 

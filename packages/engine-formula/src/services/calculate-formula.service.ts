@@ -18,9 +18,7 @@ import type { IUnitRange } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
-    IArrayFormulaUnitCellType,
     IFeatureDirtyRangeType,
-    IFormulaData,
     IFormulaDatasetConfig,
     IFormulaExecuteResultItem,
     IFormulaExecuteResultMap,
@@ -74,9 +72,11 @@ export interface ICalculateFormulaService {
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
     stopFormulaExecution(): void;
     calculate(formulaString: string, transformSuffix?: boolean): void;
-    executeFormulas(formulas: IFormulaStringMap, formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData: IUnitRowData): Promise<IFormulaExecuteResultMap>;
-    getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
-    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
+    executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData): Promise<IFormulaExecuteResultMap>;
+    getAllDependencyJson(rowData?: IUnitRowData): Promise<IFormulaDependencyTreeJson[]>;
+    getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number, rowData?: IUnitRowData): Promise<IFormulaDependencyTreeFullJson | undefined>;
+    getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
+    getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
@@ -378,11 +378,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return this._runtimeService.getAllRuntimeData();
     }
 
-    async executeFormulas(formulas: IFormulaStringMap, formulaData: IFormulaData, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaRange: IArrayFormulaRangeType, rowData?: IUnitRowData) {
+    async executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData) {
         this._currentConfigService.loadDataLite(
-            formulaData,
-            arrayFormulaCellData,
-            arrayFormulaRange,
             rowData
         );
 
@@ -515,10 +512,22 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     }
 
     async getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]> {
+        this._currentConfigService.loadDataLite();
         return this._formulaDependencyGenerator.getAllDependencyJson();
     }
 
     async getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined> {
+        this._currentConfigService.loadDataLite();
         return this._formulaDependencyGenerator.getCellDependencyJson(unitId, sheetId, row, column);
+    }
+
+    async getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
+        this._currentConfigService.loadDataLite();
+        return this._formulaDependencyGenerator.getRangeDependents(unitRanges);
+    }
+
+    async getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
+        this._currentConfigService.loadDataLite();
+        return this._formulaDependencyGenerator.getInRangeFormulas(unitRanges);
     }
 }

@@ -59,6 +59,8 @@ export interface IFormulaDependencyGenerator {
     generate(): Promise<IFormulaDependencyTree[]>;
     getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
+    getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
+    getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
 }
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
@@ -1411,31 +1413,117 @@ export class FormulaDependencyGenerator extends Disposable {
         this._startFormulaDependencyTreeModel();
 
         const treeModel = this._getFormulaDependencyTreeModel(tree);
-        const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
-            tree.formula,
-            tree.refOffsetX,
-            tree.refOffsetY
-        );
-        treeModel.formula = formula;
-
-        const childIds = this._getDependencyTreeChildrenIds(tree);
-        for (const childId of childIds) {
-            const childTreeModel = this._getTreeModel(childId);
-            const tree = this._getTreeById(treeId);
-            if (!tree) {
-                continue;
-            }
+        if (tree.isVirtual) {
             const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
                 tree.formula,
                 tree.refOffsetX,
                 tree.refOffsetY
             );
-            childTreeModel.formula = formula;
+            treeModel.formula = formula;
+        }
+
+        const childIds = this._getDependencyTreeChildrenIds(tree);
+        for (const childId of childIds) {
+            const childTreeModel = this._getTreeModel(childId);
+            const tree = this._getTreeById(childId);
+            if (tree && tree.isVirtual) {
+                const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
+                    tree.formula,
+                    tree.refOffsetX,
+                    tree.refOffsetY
+                );
+                childTreeModel.formula = formula;
+            }
+
             treeModel.addChild(childTreeModel);
         }
 
         this._endFormulaDependencyTreeModel();
 
         return treeModel.toFullJson();
+    }
+
+    async getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
+        await this._initializeGenerateTreeList();
+
+        this._startFormulaDependencyTreeModel();
+
+        const treeIds = this._dependencyManagerService.searchDependency(unitRanges);
+        const treeList: FormulaDependencyTreeModel[] = [];
+        for (const treeId of treeIds) {
+            const tree = this._getTreeById(treeId);
+            if (!tree) {
+                continue;
+            }
+            const treeModel = this._getFormulaDependencyTreeModel(tree);
+            if (tree.isVirtual) {
+                const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
+                    tree.formula,
+                    tree.refOffsetX,
+                    tree.refOffsetY
+                );
+                treeModel.formula = formula;
+            }
+            treeList.push(treeModel);
+        }
+
+        const resultsJson: IFormulaDependencyTreeJson[] = [];
+        for (const result of treeList) {
+            if (result) {
+                resultsJson.push(result.toJson());
+            }
+        }
+
+        this._endFormulaDependencyTreeModel();
+
+        return resultsJson;
+    }
+
+    async getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
+        const treeList = await this._getAllTreeList();
+        const matchTreeList: IFormulaDependencyTree[] = [];
+        for (const dependencyTree of treeList) {
+            for (const unitRange of unitRanges) {
+                const unitId = unitRange.unitId;
+                const sheetId = unitRange.sheetId;
+                if (dependencyTree.unitId !== unitId || dependencyTree.subUnitId !== sheetId) {
+                    continue;
+                }
+
+                const range = unitRange.range;
+
+                if (dependencyTree.inRangeData(unitRange.range)) {
+                    matchTreeList.push(dependencyTree);
+                    break;
+                }
+            }
+        }
+
+        this._startFormulaDependencyTreeModel();
+
+        const results: FormulaDependencyTreeModel[] = [];
+        for (const tree of matchTreeList) {
+            const treeModel = this._getFormulaDependencyTreeModel(tree);
+            if (tree.isVirtual) {
+                const formula = this._lexerTreeBuilder.moveFormulaRefOffset(
+                    tree.formula,
+                    tree.refOffsetX,
+                    tree.refOffsetY
+                );
+                treeModel.formula = formula;
+            }
+            results[tree.treeId] = treeModel;
+        }
+
+        const resultsJson: IFormulaDependencyTreeJson[] = [];
+        for (const result of results) {
+            if (result) {
+                resultsJson.push(result.toJson());
+            }
+        }
+
+        this._endFormulaDependencyTreeModel();
+
+        return resultsJson;
     }
 }

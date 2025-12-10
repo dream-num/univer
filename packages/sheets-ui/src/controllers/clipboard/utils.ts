@@ -49,6 +49,7 @@ import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
+    getPrimaryForRange,
     MoveRangeCommand,
     MoveRangeMutation,
     RemoveMergeUndoMutationFactory,
@@ -222,72 +223,76 @@ export function getMoveRangeMutations(
             const toMergeData = toWorksheet.getMergeData();
             const fromMergeRanges = fromMergeData.filter((item) => Rectangle.intersects(item, fromRange));
             const toMergeRanges = toMergeData.filter((item) => Rectangle.intersects(item, toRange));
-
-            const willMoveToMergeRanges = fromMergeRanges
-                .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, fromRange))
-                .map((relativeRange) => Rectangle.getPositionRange(relativeRange, toRange));
-
-            const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges);
-
             const mergeRedos: Array<{
                 id: string;
                 params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
-            }> = [
-                {
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        ranges: fromMergeRanges,
-                    },
-                },
-                {
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        ranges: toMergeRanges,
-                    },
-                },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: addMergeCellRanges,
-                    },
-                },
-            ];
+            }> = [];
             const mergeUndos: Array<{
                 id: string;
                 params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
-            }> = [
-                {
+            }> = [];
+
+            if (fromMergeRanges.length > 0 || toMergeRanges.length > 0) {
+                const willMoveToMergeRanges = fromMergeRanges
+                    .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, fromRange))
+                    .map((relativeRange) => Rectangle.getPositionRange(relativeRange, toRange));
+                const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges);
+
+                if (fromMergeRanges.length > 0) {
+                    mergeRedos.push({
+                        id: RemoveWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: fromSubUnitId,
+                            ranges: fromMergeRanges,
+                        },
+                    });
+                    mergeUndos.push({
+                        id: AddWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: fromSubUnitId,
+                            ranges: fromMergeRanges,
+                        },
+                    });
+                }
+
+                if (toMergeRanges.length > 0) {
+                    mergeRedos.push({
+                        id: RemoveWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: fromSubUnitId,
+                            ranges: toMergeRanges,
+                        },
+                    });
+                    mergeUndos.push({
+                        id: AddWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: toSubUnitId,
+                            ranges: toMergeRanges,
+                        },
+                    });
+                }
+
+                mergeRedos.push({
+                    id: AddWorksheetMergeMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId: toSubUnitId,
+                        ranges: addMergeCellRanges,
+                    },
+                });
+                mergeUndos.unshift({
                     id: RemoveWorksheetMergeMutation.id,
                     params: {
                         unitId,
                         subUnitId: toSubUnitId,
                         ranges: addMergeCellRanges,
                     },
-                },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: toMergeRanges,
-                    },
-                },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        ranges: fromMergeRanges,
-                    },
-                },
-            ];
-            // +++++++++++++++++++++
+                });
+            }
 
             redos = [
                 { id: MoveRangeMutation.id, params: doMoveRangeMutation },
@@ -298,7 +303,7 @@ export function getMoveRangeMutations(
                     params: {
                         unitId,
                         subUnitId: toSubUnitId,
-                        selections: [{ range: toRange }],
+                        selections: [{ range: toRange, primary: getPrimaryForRange(toRange, toWorksheet) }],
                         type: SelectionMoveType.MOVE_END,
                     } as ISetSelectionsOperationParams,
                 },
@@ -313,7 +318,7 @@ export function getMoveRangeMutations(
                         unitId,
                         subUnitId: fromSubUnitId,
                         type: SelectionMoveType.MOVE_END,
-                        selections: [{ range: fromRange }],
+                        selections: [{ range: fromRange, primary: getPrimaryForRange(fromRange, fromWorksheet) }],
                     },
                 },
             ];

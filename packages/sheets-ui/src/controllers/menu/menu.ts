@@ -911,11 +911,12 @@ export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SheetCutCommand.name,
         commandId: CutCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'contextMenu.cut',
+        title: 'rightClick.cut',
+        icon: 'CutIcon',
         disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            workbookTypes: [WorkbookCopyPermission, WorkbookEditablePermission],
             worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint],
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

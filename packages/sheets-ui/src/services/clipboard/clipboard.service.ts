@@ -810,9 +810,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
 
         // setting the selection should be done separately, regardless of the pasting type.
-        const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix, pasteType);
-        if (setSelectionOperation) {
-            redoMutationsInfo.push(setSelectionOperation);
+        if (payload.copyType === COPY_TYPE.COPY) {
+            const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix, pasteType);
+            if (setSelectionOperation) {
+                redoMutationsInfo.push(setSelectionOperation);
+            }
         }
 
         redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);

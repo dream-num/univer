@@ -52,7 +52,7 @@ import {
 import { ContextMenuGroup, ContextMenuPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     SheetCopyCommand,
-    // SheetCutCommand,
+    SheetCutCommand,
     SheetPasteBesidesBorderCommand,
     SheetPasteColWidthCommand,
     SheetPasteCommand,
@@ -118,7 +118,7 @@ import {
     CancelFrozenMenuItemFactory,
     ColAutoWidthMenuItemFactory,
     CopyMenuItemFactory,
-    // CutMenuItemFactory,
+    CutMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FormatPainterMenuItemFactory,
@@ -294,10 +294,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
             },
-            // [SheetCutCommand.name]: {
-            //     order: 1,
-            //     menuItemFactory: CutMenuItemFactory,
-            // },
+            [SheetCutCommand.name]: {
+                order: 1,
+                menuItemFactory: CutMenuItemFactory,
+            },
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
@@ -435,10 +435,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
             },
-            // [SheetCutCommand.name]: {
-            //     order: 1,
-            //     menuItemFactory: CutMenuItemFactory,
-            // },
+            [SheetCutCommand.name]: {
+                order: 1,
+                menuItemFactory: CutMenuItemFactory,
+            },
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
@@ -556,10 +556,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
             },
-            // [SheetCutCommand.name]: {
-            //     order: 1,
-            //     menuItemFactory: CutMenuItemFactory,
-            // },
+            [SheetCutCommand.name]: {
+                order: 1,
+                menuItemFactory: CutMenuItemFactory,
+            },
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,

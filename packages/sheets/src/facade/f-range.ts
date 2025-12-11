@@ -59,6 +59,17 @@ export class FRange extends FBaseInitialable {
     ) {
         super(_injector);
 
+        const maxRows = this._worksheet.getRowCount();
+        const maxColumns = this._worksheet.getColumnCount();
+        if (
+            this._range.startRow < 0 ||
+            this._range.startColumn < 0 ||
+            this._range.endRow >= maxRows ||
+            this._range.endColumn >= maxColumns
+        ) {
+            throw new Error(`Range is out of bounds. Max rows: ${maxRows}, Max columns: ${maxColumns}, Given range: ${JSON.stringify(this._range)}`);
+        }
+
         this._runInitializers(
             this._injector,
             this._workbook,

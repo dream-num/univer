@@ -118,8 +118,9 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._activeSheet$.complete();
         this._name$.complete();
 
-        Promise.resolve().then(() => {
-            this._worksheets.clear();
+        const sheetIds = Array.from(this._worksheets.keys());
+        sheetIds.forEach((id) => {
+            this.removeSheet(id);
         });
     }
 

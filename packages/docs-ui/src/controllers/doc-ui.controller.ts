@@ -24,7 +24,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CutIcon, DeleteIcon, DocSettingIcon, TodoListDoubleIcon } from '@univerjs/icons';
+import { DeleteIcon, DocSettingIcon, TodoListDoubleIcon } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
@@ -74,7 +74,6 @@ export class DocUIController extends Disposable {
             [ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker],
             ['TodoListDoubleIcon', TodoListDoubleIcon],
             ['doc.paragraph.menu', ParagraphMenu],
-            ['CutIcon', CutIcon],
             ['DeleteIcon', DeleteIcon],
             [PAGE_SETTING_COMPONENT_ID, PageSettings],
             ['DocumentSettingIcon', DocSettingIcon],

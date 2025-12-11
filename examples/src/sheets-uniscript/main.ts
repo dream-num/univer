@@ -32,6 +32,9 @@ import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 import '../global.css';
 
+/* eslint-disable-next-line node/prefer-global/process */
+const IS_E2E: boolean = !!process.env.IS_E2E;
+
 // univer
 const univer = new Univer({
     locale: LocaleType.ZH_CN,
@@ -42,7 +45,6 @@ const univer = new Univer({
 });
 
 // core plugins
-
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
@@ -57,7 +59,6 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 // sheet feature plugins
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
-univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverUniscriptPlugin, {
@@ -70,10 +71,21 @@ univer.registerPlugin(UniverUniscriptPlugin, {
     },
 });
 
+// If we are running in e2e platform, we should immediately register the debugger plugin.
+if (IS_E2E) {
+    univer.registerPlugin(UniverDebuggerPlugin, {
+        fab: false,
+        performanceMonitor: {
+            enabled: false,
+        },
+    });
+}
+
 // create univer sheet instance
 univer.createUnit(UniverInstanceType.UNIVER_SHEET, UNISCRIT_WORKBOOK_DATA_DEMO);
 
 declare global {
+    // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
     }

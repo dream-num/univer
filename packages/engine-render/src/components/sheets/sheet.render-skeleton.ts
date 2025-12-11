@@ -1457,11 +1457,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        const rowStyle = this.worksheet.getRowStyle(row);
-        const colStyle = this.worksheet.getColumnStyle(col);
-        if (!cell && !rowStyle && !colStyle) return;
-
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
+        if (!cell && !style) return;
+
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);

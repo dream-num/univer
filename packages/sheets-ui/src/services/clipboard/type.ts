@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, ICellDataWithSpanAndDisplay, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
-import type { PREDEFINED_HOOK_NAME } from './clipboard.service';
+import type { PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from './clipboard.service';
 
 export enum COPY_TYPE {
     COPY = 'COPY',
@@ -255,8 +255,28 @@ export interface ISheetClipboardHook {
      * The callback would be called before the clipboard service decides what region need to be copied from or pasted to.
      * It would jump over these filtered rows when copying or pasting.
      */
-    getFilteredOutRows?(range: IRange): number[];
+    getFilteredOutRows?(unitId: string, subUnitId: string, range: IRange): number[];
+
+    /**
+     * Handle matrix on each cell of copy operation.
+     */
+    handleMatrixOnCell?(
+        row: number,
+        column: number,
+        rowIndexInMatrix: number,
+        columnIndexInMatrix: number,
+        matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
+        matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>,
+        plainMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
+    ): void;
 }
+
+export interface ICopyOptions {
+    copyType?: COPY_TYPE;
+    copyHookType?: ICopyHookValueType;
+}
+export type ICopyHookKeyType = keyof typeof PREDEFINED_HOOK_NAME_COPY;
+export type ICopyHookValueType = typeof PREDEFINED_HOOK_NAME_COPY[ICopyHookKeyType];
 
 export interface IPasteOptionCache {
     target: IPasteTarget;
@@ -266,8 +286,6 @@ export interface IPasteOptionCache {
     colProperties?: IClipboardPropertyItem[];
     pasteType: IPasteHookValueType;
 }
-
 export type IPasteSource = ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE };
-export type IPasteHookKeyType = Exclude<keyof typeof PREDEFINED_HOOK_NAME, 'default-copy'>;
-export type IPasteHookValueTypeWithoutDefaultCopy = typeof PREDEFINED_HOOK_NAME[IPasteHookKeyType];
-export type IPasteHookValueType = Exclude<IPasteHookValueTypeWithoutDefaultCopy, 'default-copy'>;
+export type IPasteHookKeyType = keyof typeof PREDEFINED_HOOK_NAME_PASTE;
+export type IPasteHookValueType = typeof PREDEFINED_HOOK_NAME_PASTE[IPasteHookKeyType];

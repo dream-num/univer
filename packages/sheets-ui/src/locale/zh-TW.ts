@@ -189,6 +189,7 @@ const locale: typeof enUS = {
         copy: '複製',
         cut: '剪下',
         paste: '貼上',
+        copySpecial: '選擇性複製',
         pasteSpecial: '選擇性貼上',
         pasteValue: '僅貼上值',
         pasteFormat: '僅貼上格式',

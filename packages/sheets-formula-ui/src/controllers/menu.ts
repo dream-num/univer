@@ -17,11 +17,11 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, IClipboardInterfaceService, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
-import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
+import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
@@ -207,6 +207,22 @@ function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolea
     );
 }
 
+// Right click menu - Copy Formula Only
+export function CopyFormulaOnlyMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: SheetCopyFormulaOnlyCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'formula.operation.copyFormulaOnly',
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookCopyPermission],
+            worksheetTypes: [WorksheetCopyPermission],
+            rangeTypes: [RangeProtectionPermissionViewPoint],
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+// Right click menu - Paste Formula
 export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SheetOnlyPasteFormulaCommand.id,
@@ -220,5 +236,6 @@ export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
             })),
             map(([d1, d2]) => d1 || d2)
         ),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

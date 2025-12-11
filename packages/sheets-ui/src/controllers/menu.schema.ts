@@ -117,7 +117,9 @@ import {
     BoldMenuItemFactory,
     CancelFrozenMenuItemFactory,
     ColAutoWidthMenuItemFactory,
+    COPY_SPECIAL_MENU_ID,
     CopyMenuItemFactory,
+    CopySpacialMenuItemFactory,
     CutMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
@@ -132,7 +134,6 @@ import {
     PASTE_SPECIAL_MENU_ID,
     PasteBesidesBorderMenuItemFactory,
     PasteColWidthMenuItemFactory,
-    // PasteColWidthMenuItemFactory,
     PasteFormatMenuItemFactory,
     PasteMenuItemFactory,
     PasteSpacialMenuItemFactory,
@@ -302,6 +303,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
             },
+            [COPY_SPECIAL_MENU_ID]: {
+                order: 2.5,
+                menuItemFactory: CopySpacialMenuItemFactory,
+            },
             [PASTE_SPECIAL_MENU_ID]: {
                 order: 3,
                 menuItemFactory: PasteSpacialMenuItemFactory,
@@ -443,6 +448,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
             },
+            [COPY_SPECIAL_MENU_ID]: {
+                order: 2.5,
+                menuItemFactory: CopySpacialMenuItemFactory,
+            },
             [PASTE_SPECIAL_MENU_ID]: {
                 order: 3,
                 menuItemFactory: PasteSpacialMenuItemFactory,
@@ -563,6 +572,10 @@ export const menuSchema: MenuSchemaType = {
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
+            },
+            [COPY_SPECIAL_MENU_ID]: {
+                order: 2.5,
+                menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
                 order: 3,

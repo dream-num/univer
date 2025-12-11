@@ -16,6 +16,7 @@
 
 import type {
     ICellData,
+    ICellDataWithSpanAndDisplay,
     ICommandInfo,
     IDocumentData,
     IMutationInfo,
@@ -45,11 +46,13 @@ import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.
 import type { IUniverSheetsUIConfig } from '../config.schema';
 import {
     BooleanNumber,
+    cloneCellDataWithSpanAndDisplay,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
+    getEmptyCell,
     getNumfmtParseValueFilter,
     handleStyleToString,
     ICommandService,
@@ -97,7 +100,7 @@ import {
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
@@ -239,7 +242,7 @@ export class SheetClipboardController extends RxDisposable {
         const self = this;
         let currentSheet: Worksheet | null = null;
         return {
-            id: PREDEFINED_HOOK_NAME.DEFAULT_COPY,
+            id: PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY,
             isDefaultHook: true,
             onBeforeCopy(unitId, subUnitId) {
                 currentSheet = self._getWorksheet(unitId, subUnitId);
@@ -308,19 +311,47 @@ export class SheetClipboardController extends RxDisposable {
             onAfterCopy() {
                 currentSheet = null;
             },
-            getFilteredOutRows(range: IRange) {
+            getFilteredOutRows(unitId: string, subUnitId: string, range: IRange) {
+                const worksheet = self._getWorksheet(unitId, subUnitId);
+                if (!worksheet) return [];
+
                 const { startRow, endRow } = range;
-                const worksheet = self._instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
                 const res: number[] = [];
-                if (!worksheet) {
-                    return res;
-                }
+
                 for (let r = startRow; r <= endRow; r++) {
                     if (worksheet.getRowFiltered(r)) {
                         res.push(r);
                     }
                 }
                 return res;
+            },
+            handleMatrixOnCell(
+                row: number,
+                column: number,
+                rowIndexInMatrix: number,
+                columnIndexInMatrix: number,
+                matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
+                matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>,
+                plainMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
+            ) {
+                const cellData = matrix.getValue(row, column);
+                if (cellData) {
+                    const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
+                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, {
+                        ...getEmptyCell(),
+                        ...newCellData,
+                    });
+
+                    delete newCellData.displayV;
+                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, {
+                        ...getEmptyCell(),
+                        ...newCellData,
+                    });
+                } else {
+                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());
+                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());
+                    matrix.setValue(row, column, getEmptyCell());
+                }
             },
         };
     }
@@ -334,7 +365,7 @@ export class SheetClipboardController extends RxDisposable {
         let currentSheet: Worksheet | null = null;
 
         return {
-            id: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+            id: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
             isDefaultHook: true,
             onBeforePaste({ unitId: unitId_, subUnitId: subUnitId_, range }) {
                 currentSheet = self._getWorksheet(unitId_, subUnitId_);
@@ -700,7 +731,7 @@ export class SheetClipboardController extends RxDisposable {
         const self = this;
 
         const specialPasteValueHook: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE,
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
@@ -711,7 +742,7 @@ export class SheetClipboardController extends RxDisposable {
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
@@ -757,7 +788,7 @@ export class SheetClipboardController extends RxDisposable {
         };
 
         const specialPasteColWidthHook: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH,
             specialPasteInfo: {
                 label: 'specialPaste.colWidth',
             },
@@ -841,7 +872,7 @@ export class SheetClipboardController extends RxDisposable {
         };
 
         const specialPasteBesidesBorder: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER,
             specialPasteInfo: {
                 label: 'specialPaste.besidesBorder',
             },

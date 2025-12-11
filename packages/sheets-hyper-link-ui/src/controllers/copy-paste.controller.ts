@@ -19,7 +19,7 @@ import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation }
 import { Disposable, generateRandomId, Inject, Injector, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { rangeToDiscreteRange } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { isLegalLink } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
@@ -154,10 +154,10 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
         }
 
         const specialPastes: IPasteHookValueType[] = [
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA,
         ];
 
         if (specialPastes.includes(copyInfo.pasteType)) {

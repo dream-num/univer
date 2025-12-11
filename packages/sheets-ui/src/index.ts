@@ -106,7 +106,7 @@ export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controller
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/is-range-selector';
 export { HoverRenderController } from './controllers/hover-render.controller';
 export { menuSchema as SheetsUIMenuSchema } from './controllers/menu.schema';
-export { PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './controllers/menu/menu';
+export { COPY_SPECIAL_MENU_ID, PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './controllers/menu/menu';
 export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './controllers/menu/menu-util';
 export { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
@@ -132,9 +132,9 @@ export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canv
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { type IDropdownParam, ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
 export { CellPopupManagerService } from './services/cell-popup-manager.service';
-export { getMatrixPlainText, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetClipboardService } from './services/clipboard/clipboard.service';
+export { getMatrixPlainText, ISheetClipboardService, PREDEFINED_HOOK_NAME, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardService } from './services/clipboard/clipboard.service';
 export { COPY_TYPE } from './services/clipboard/type';
-export type { ICellDataWithSpanInfo, ICopyPastePayload, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ICopyHookKeyType, ICopyHookValueType, ICopyPastePayload, IPasteHookKeyType, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
 export { getRepeatRange, mergeSetRangeValues } from './services/clipboard/utils';
 export { DragManagerService, type IDragCellPosition } from './services/drag-manager.service';
 export { EditorBridgeService, IEditorBridgeService, type IEditorBridgeServiceVisibleParam } from './services/editor-bridge.service';

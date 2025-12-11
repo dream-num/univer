@@ -188,6 +188,7 @@ const locale: typeof enUS = {
         copy: 'Sao chép',
         cut: 'Cắt',
         paste: 'Dán',
+        copySpecial: 'Sao chép đặc biệt',
         pasteSpecial: 'Dán đặc biệt',
         pasteValue: 'Chỉ dán giá trị',
         pasteFormat: 'Chỉ dán định dạng',

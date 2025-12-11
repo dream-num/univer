@@ -941,6 +941,19 @@ export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
+// Right click menu - Copy Special
+export const COPY_SPECIAL_MENU_ID = 'sheet.menu.copy-special';
+export function CopySpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: COPY_SPECIAL_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'CopyDoubleIcon',
+        title: 'rightClick.copySpecial',
+        hidden$: getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),
+    };
+}
+
+// Right click menu - Paste Special
 export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
 export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {

@@ -20,7 +20,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentManager, connectInjector, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
+import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -71,6 +71,7 @@ export class FormulaUIController extends Disposable {
 
     private _registerCommands(): void {
         [
+            SheetCopyFormulaOnlyCommand,
             SheetOnlyPasteFormulaCommand,
             InsertFunctionOperation,
             MoreFunctionsOperation,

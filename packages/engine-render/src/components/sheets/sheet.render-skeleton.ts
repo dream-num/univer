@@ -1460,7 +1460,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
         if (!cell && !style) return;
 
-
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
         this._setFontStylesCache(row, col, { ...cell, ...{ s: style } }, style);

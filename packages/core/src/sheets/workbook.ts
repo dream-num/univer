@@ -120,7 +120,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
         const sheetIds = Array.from(this._worksheets.keys());
         sheetIds.forEach((id) => {
-            this.removeSheet(id);
+            this._removeSheet(id);
         });
     }
 
@@ -274,7 +274,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._activeSheet$.next(worksheet);
     }
 
-    removeSheet(sheetId: string): boolean {
+    private _removeSheet(sheetId: string): boolean {
         const sheetToRemove = this._worksheets.get(sheetId);
         if (!sheetToRemove) {
             return false;
@@ -282,10 +282,18 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
         this._worksheets.delete(sheetId);
         this._snapshot.sheetOrder.splice(this._snapshot.sheetOrder.indexOf(sheetId), 1);
-        delete this._snapshot.sheets[sheetId];
         this._sheetDisposed$.next(sheetToRemove);
 
         return true;
+    }
+
+    removeSheet(sheetId: string): boolean {
+        const success = this._removeSheet(sheetId);
+        if (success) {
+            delete this._snapshot.sheets[sheetId];
+        }
+
+        return success;
     }
 
     getActiveSheetIndex(): number {

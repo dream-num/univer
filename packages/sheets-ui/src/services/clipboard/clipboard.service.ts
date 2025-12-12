@@ -220,7 +220,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._copyContentCache;
     }
 
-    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY }): Nullable<ICopyContent> {
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = {}): Nullable<ICopyContent> {
         let hooks = this._clipboardHooks;
         if (copyHookType !== PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY) {
             hooks = hooks.filter((h) => h.id === copyHookType);

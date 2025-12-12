@@ -16,7 +16,6 @@
 
 import type {
     ICellData,
-    ICellDataWithSpanAndDisplay,
     ICommandInfo,
     IDocumentData,
     IMutationInfo,
@@ -46,13 +45,11 @@ import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.
 import type { IUniverSheetsUIConfig } from '../config.schema';
 import {
     BooleanNumber,
-    cloneCellDataWithSpanAndDisplay,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
-    getEmptyCell,
     getNumfmtParseValueFilter,
     handleStyleToString,
     ICommandService,
@@ -324,34 +321,6 @@ export class SheetClipboardController extends RxDisposable {
                     }
                 }
                 return res;
-            },
-            handleMatrixOnCell(
-                row: number,
-                column: number,
-                rowIndexInMatrix: number,
-                columnIndexInMatrix: number,
-                matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
-                matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>,
-                plainMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
-            ) {
-                const cellData = matrix.getValue(row, column);
-                if (cellData) {
-                    const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
-                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, {
-                        ...getEmptyCell(),
-                        ...newCellData,
-                    });
-
-                    delete newCellData.displayV;
-                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, {
-                        ...getEmptyCell(),
-                        ...newCellData,
-                    });
-                } else {
-                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());
-                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());
-                    matrix.setValue(row, column, getEmptyCell());
-                }
             },
         };
     }

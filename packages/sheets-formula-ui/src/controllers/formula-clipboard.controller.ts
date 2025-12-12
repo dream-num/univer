@@ -114,14 +114,16 @@ export class FormulaClipboardController extends Disposable {
                 if (currentSheet && cellData && (isFormulaString(cellData.f) || isFormulaId(cellData.si))) {
                     const formulaString = isFormulaString(cellData.f)
                         ? (cellData.f as string)
-                        : self._formulaDataModel.getFormulaStringByCell(row, column, currentSheet.getSheetId(), currentSheet.getUnitId());
-                    const newCellData = {
+                        : self._formulaDataModel.getFormulaStringByCell(row, column, currentSheet.getSheetId(), currentSheet.getUnitId()) as string;
+                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, {
                         ...getEmptyCell(),
                         f: formulaString,
-                    };
-
-                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, newCellData);
-                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, newCellData);
+                    });
+                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, {
+                        ...getEmptyCell(),
+                        f: formulaString,
+                        displayV: formulaString,
+                    });
                 } else {
                     matrix.setValue(row, column, getEmptyCell());
                     matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());

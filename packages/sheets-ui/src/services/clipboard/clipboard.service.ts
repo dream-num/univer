@@ -40,10 +40,12 @@ import type {
 } from './type';
 import {
     CellModeEnum,
+    cloneCellDataWithSpanAndDisplay,
     createIdentifier,
     Disposable,
     ErrorService,
     extractPureTextFromCell,
+    getEmptyCell,
     ICommandService,
     ILogService,
     Inject,
@@ -221,15 +223,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     generateCopyContent(workbookId: string, worksheetId: string, range: IRange, { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = {}): Nullable<ICopyContent> {
-        let hooks = this._clipboardHooks;
-        if (copyHookType !== PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY) {
-            hooks = hooks.filter((h) => h.id === copyHookType);
-        }
-
+        const hooks = this._clipboardHooks.filter((h) => h.id === copyHookType);
         hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));
-        const copyContent = this._generateCopyContent(workbookId, worksheetId, range, hooks);
+        const copyContent = this._generateCopyContent(workbookId, worksheetId, range, hooks, copyHookType);
         hooks.forEach((h) => h.onAfterCopy?.());
-
         return copyContent;
     }
 
@@ -420,7 +417,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._clipboardHooks;
     }
 
-    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[]): Nullable<ICopyContent> {
+    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[], copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY): Nullable<ICopyContent> {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
@@ -451,7 +448,28 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
             discreteRange.rows.push(r);
             for (let c = startColumn; c <= endColumn; c++) {
-                hooks.forEach((h) => h.handleMatrixOnCell?.(r, c, rowIndex - startRow, c - startColumn, matrix, matrixFragment, plainMatrix));
+                if (copyHookType !== PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY) {
+                    hooks.forEach((h) => h.handleMatrixOnCell?.(r, c, rowIndex - startRow, c - startColumn, matrix, matrixFragment, plainMatrix));
+                } else {
+                    const cellData = matrix.getValue(r, c);
+                    if (cellData) {
+                        const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
+                        plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
+                            ...getEmptyCell(),
+                            ...newCellData,
+                        });
+
+                        delete newCellData.displayV;
+                        matrixFragment.setValue(rowIndex - startRow, c - startColumn, {
+                            ...getEmptyCell(),
+                            ...newCellData,
+                        });
+                    } else {
+                        plainMatrix.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
+                        matrixFragment.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
+                        matrix.setValue(r, c, getEmptyCell());
+                    }
+                }
             }
             rowIndex += 1;
         }

@@ -85,15 +85,15 @@
         "@univerjs/watermark": "workspace:*",
         "lit": "^3.3.1",
         "monaco-editor": "0.55.1",
-        "react": "19.2.0",
-        "react-dom": "19.2.0",
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
         "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "detect-port": "^2.1.0",
-        "esbuild": "^0.27.0",
+        "esbuild": "^0.27.1",
         "esbuild-plugin-alias": "^0.2.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",

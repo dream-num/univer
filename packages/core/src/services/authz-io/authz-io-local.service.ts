@@ -96,7 +96,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
         const { objectType, selectRangeObject, worksheetObject } = config;
         const rangeObject = selectRangeObject || worksheetObject;
 
-        // 存储权限数据
         const permissionData: IPermissionData = {
             objectType,
             unitID: rangeObject?.unitID || '',
@@ -129,7 +128,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
         const permissionData = this._permissionMap.get(objectID);
 
         if (!permissionData) {
-            // 如果没有权限数据，默认所有操作都允许（Owner/Editor）
             const result = actions.map((action) => ({
                 action,
                 allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor),
@@ -137,16 +135,12 @@ export class AuthzIoLocalService implements IAuthzIoService {
             return result;
         }
 
-        // 根据存储的策略判断权限
         const result = actions.map((action) => {
             const strategy = permissionData.strategies.find((s) => s.action === action);
-            // 默认允许 Owner 和 Editor
             const defaultAllowed = this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor);
             if (!strategy) {
-                // 如果没有找到对应的 strategy，默认允许
                 return { action, allowed: defaultAllowed };
             }
-            // 检查当前用户是否有对应角色的权限
             return {
                 action,
                 allowed: this._getRole(strategy.role) || defaultAllowed,
@@ -168,7 +162,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
     async list(config: IListPermPointRequest): Promise<IPermissionPoint[]> {
         const result: IPermissionPoint[] = [];
 
-        // 默认策略
         const defaultStrategies = [
             { action: 6, role: UnitRole.Owner },
             { action: 16, role: UnitRole.Owner },
@@ -189,7 +182,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
             const rule = this._permissionMap.get(objectID);
             const strategies = rule?.strategies || defaultStrategies;
 
-            // 无论是否有 rule，都返回权限对象
             const item = {
                 objectID,
                 unitID: config.unitID,
@@ -206,7 +198,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
                 strategies: strategies.map((s) => ({ action: s.action, role: s.role })),
                 actions: config.actions.map((a) => {
                     const strategy = strategies.find((s) => s.action === a);
-                    // 默认允许 Owner 和 Editor
                     const allowed = this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor);
                     if (!strategy) {
                         return { action: a, allowed };
@@ -242,7 +233,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
         const permissionData = this._permissionMap.get(objectID);
 
         if (permissionData && strategies) {
-            // 更新策略
             permissionData.strategies = strategies.map((s) => ({
                 action: s.action,
                 role: s.role,

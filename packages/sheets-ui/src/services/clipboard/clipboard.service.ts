@@ -228,7 +228,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         let hooks = this._clipboardHooks;
         if (copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY) {
-            hooks = this._clipboardHooks.filter((h) => h.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
+            hooks = this._clipboardHooks.filter((h) => h.id === copyHookType);
         }
 
         hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));

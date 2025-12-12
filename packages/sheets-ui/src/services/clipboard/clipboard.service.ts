@@ -29,6 +29,7 @@ import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
+    ICopyHookValueType,
     ICopyOptions,
     IPasteHookKeyType,
     IPasteHookValueType,
@@ -222,18 +223,21 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._copyContentCache;
     }
 
-    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = {}): Nullable<ICopyContent> {
-        const hooks = this._clipboardHooks.filter((h) => h.id === copyHookType);
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange, options?: ICopyOptions): Nullable<ICopyContent> {
+        const { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = options || {};
+
+        let hooks = this._clipboardHooks;
+        if (copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY) {
+            hooks = this._clipboardHooks.filter((h) => h.id === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY);
+        }
+
         hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));
         const copyContent = this._generateCopyContent(workbookId, worksheetId, range, hooks, copyHookType);
         hooks.forEach((h) => h.onAfterCopy?.());
         return copyContent;
     }
 
-    async copy({
-        copyType = COPY_TYPE.COPY,
-        copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY,
-    } = {}): Promise<boolean> {
+    async copy(options?: ICopyOptions): Promise<boolean> {
         const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return false; // maybe we should notify user that there is no selection
@@ -247,6 +251,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
+        const { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = options || {};
 
         const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range, { copyType, copyHookType });
 
@@ -417,7 +422,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._clipboardHooks;
     }
 
-    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[], copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY): Nullable<ICopyContent> {
+    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[], copyHookType: ICopyHookValueType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY): Nullable<ICopyContent> {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
@@ -434,45 +439,48 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
         const { startColumn, startRow, endColumn, endRow } = range;
+        let rowIndex = startRow;
 
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Both);
         const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
-        let rowIndex = startRow;
-
         const plainMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
-
         const discreteRange: IDiscreteRange = { rows: [], cols: [] };
+
+        const handleMatrixOnCellHook = copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY ? hooks.find((h) => h.handleMatrixOnCell) : undefined;
+
         for (let r = startRow; r <= endRow; r++) {
             if (filteredRows.has(r)) {
                 continue;
             }
             discreteRange.rows.push(r);
             for (let c = startColumn; c <= endColumn; c++) {
-                if (copyHookType !== PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY) {
-                    hooks.forEach((h) => h.handleMatrixOnCell?.(r, c, rowIndex - startRow, c - startColumn, matrix, matrixFragment, plainMatrix));
-                } else {
-                    const cellData = matrix.getValue(r, c);
-                    if (cellData) {
-                        const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
-                        plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
-                            ...getEmptyCell(),
-                            ...newCellData,
-                        });
+                if (handleMatrixOnCellHook) {
+                    handleMatrixOnCellHook.handleMatrixOnCell?.(r, c, rowIndex - startRow, c - startColumn, matrix, matrixFragment, plainMatrix);
+                    continue;
+                }
 
-                        delete newCellData.displayV;
-                        matrixFragment.setValue(rowIndex - startRow, c - startColumn, {
-                            ...getEmptyCell(),
-                            ...newCellData,
-                        });
-                    } else {
-                        plainMatrix.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
-                        matrixFragment.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
-                        matrix.setValue(r, c, getEmptyCell());
-                    }
+                const cellData = matrix.getValue(r, c);
+                if (cellData) {
+                    const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
+                    plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
+                        ...getEmptyCell(),
+                        ...newCellData,
+                    });
+
+                    delete newCellData.displayV;
+                    matrixFragment.setValue(rowIndex - startRow, c - startColumn, {
+                        ...getEmptyCell(),
+                        ...newCellData,
+                    });
+                } else {
+                    plainMatrix.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
+                    matrixFragment.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
+                    matrix.setValue(r, c, getEmptyCell());
                 }
             }
             rowIndex += 1;
         }
+
         for (let c = startColumn; c <= endColumn; c++) {
             discreteRange.cols.push(c);
         }

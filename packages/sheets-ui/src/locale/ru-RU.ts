@@ -188,6 +188,7 @@ const locale: typeof enUS = {
         copy: 'Копировать',
         cut: 'Вырезать',
         paste: 'Вставить',
+        copySpecial: 'Выборочная копия',
         pasteSpecial: 'Специальная вставка',
         pasteValue: 'Вставить значение',
         pasteFormat: 'Вставить формат',

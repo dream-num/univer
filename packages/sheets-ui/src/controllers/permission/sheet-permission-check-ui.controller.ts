@@ -33,7 +33,7 @@ import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughComman
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
-import { PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import { PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
@@ -202,13 +202,13 @@ export class SheetPermissionCheckUIController extends Disposable {
     }
 
     private _permissionCheckByPaste(params: ISheetPasteParams) {
-        if (params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
+        if (params.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE || params.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA) {
             return this._sheetPermissionCheckController.permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],
                 worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             });
-        } else if (params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT) {
+        } else if (params.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT) {
             return this._sheetPermissionCheckController.permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],

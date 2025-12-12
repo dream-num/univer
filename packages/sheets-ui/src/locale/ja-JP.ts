@@ -188,6 +188,7 @@ const locale: typeof enUS = {
         copy: 'コピー',
         cut: '切り取り',
         paste: '貼り付け',
+        copySpecial: '選択的にコピー',
         pasteSpecial: '形式を選択して貼り付け',
         pasteValue: '値を貼り付け',
         pasteFormat: '書式を貼り付け',

@@ -188,6 +188,7 @@ const locale: typeof enUS = {
         copy: 'کپی',
         cut: 'برش',
         paste: 'چسباندن',
+        copySpecial: 'کپی ویژه',
         pasteSpecial: 'چسباندن ویژه',
         pasteValue: 'چسباندن مقدار',
         pasteFormat: 'چسباندن قالب',

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IMutationInfo, Workbook } from '@univerjs/core';
+import type { IAccessor, ICellData, ICellDataWithSpanAndDisplay, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
     generateRandomId,
+    getEmptyCell,
     Inject,
     Injector,
     isFormulaId,
@@ -31,13 +32,13 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
+import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 
 export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 
 export class FormulaClipboardController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @Inject(Injector) private readonly _injector: Injector,
@@ -53,13 +54,88 @@ export class FormulaClipboardController extends Disposable {
     }
 
     private _registerClipboardHook() {
+        this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._copyFormulaOnlyHook()));
         this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._pasteFormulaHook()));
         this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._pasteWithFormulaHook()));
     }
 
+    private _copyFormulaOnlyHook(): ISheetClipboardHook {
+        const self = this;
+        let currentSheet: Nullable<Worksheet> = null;
+
+        return {
+            id: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY,
+            priority: 10,
+            onBeforeCopy(unitId, subUnitId) {
+                currentSheet = self._getWorksheet(unitId, subUnitId);
+            },
+            onCopyCellContent(row: number, col: number): string {
+                if (!currentSheet) return '';
+
+                const cell = currentSheet.getCellRaw(row, col);
+                if (!cell) return '';
+
+                if (isFormulaString(cell.f)) return cell.f as string;
+                if (isFormulaId(cell.si)) {
+                    const formulaDataModel = self._formulaDataModel;
+                    const formulaString = formulaDataModel.getFormulaStringByCell(row, col, currentSheet.getSheetId(), currentSheet.getUnitId());
+                    return formulaString || '';
+                }
+
+                return '';
+            },
+            onAfterCopy() {
+                currentSheet = null;
+            },
+            getFilteredOutRows(unitId: string, subUnitId: string, range: IRange) {
+                const worksheet = self._getWorksheet(unitId, subUnitId);
+                if (!worksheet) return [];
+
+                const { startRow, endRow } = range;
+                const res: number[] = [];
+
+                for (let r = startRow; r <= endRow; r++) {
+                    if (worksheet.getRowFiltered(r)) {
+                        res.push(r);
+                    }
+                }
+                return res;
+            },
+            handleMatrixOnCell(
+                row: number,
+                column: number,
+                rowIndexInMatrix: number,
+                columnIndexInMatrix: number,
+                matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
+                matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>,
+                plainMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
+            ) {
+                const cellData = matrix.getValue(row, column);
+                if (currentSheet && cellData && (isFormulaString(cellData.f) || isFormulaId(cellData.si))) {
+                    const formulaString = isFormulaString(cellData.f)
+                        ? (cellData.f as string)
+                        : self._formulaDataModel.getFormulaStringByCell(row, column, currentSheet.getSheetId(), currentSheet.getUnitId()) as string;
+                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, {
+                        ...getEmptyCell(),
+                        f: formulaString,
+                    });
+                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, {
+                        ...getEmptyCell(),
+                        f: formulaString,
+                        displayV: formulaString,
+                    });
+                } else {
+                    matrix.setValue(row, column, getEmptyCell());
+                    matrixFragment.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());
+                    plainMatrix.setValue(rowIndexInMatrix, columnIndexInMatrix, getEmptyCell());
+                }
+            },
+        };
+    }
+
     private _pasteFormulaHook(): ISheetClipboardHook {
         return {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA,
             priority: 10,
             specialPasteInfo: { label: 'specialPaste.formula' },
             onPasteCells: (pasteFrom, pasteTo, data, payload) => this._onPasteCells(pasteFrom, pasteTo, data, payload, true),
@@ -74,6 +150,24 @@ export class FormulaClipboardController extends Disposable {
         };
     }
 
+    private _getWorkbook(unitId?: string): Nullable<Workbook> {
+        if (unitId) {
+            return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        }
+
+        return this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    }
+
+    private _getWorksheet(unitId?: string, subUnitId?: string): Nullable<Worksheet> {
+        const workbook = this._getWorkbook(unitId);
+
+        if (subUnitId) {
+            return workbook?.getSheetBySheetId(subUnitId);
+        }
+
+        return workbook?.getActiveSheet();
+    }
+
     private _onPasteCells(
         pasteFrom: ISheetDiscreteRangeLocation | null,
         pasteTo: ISheetDiscreteRangeLocation,
@@ -83,8 +177,8 @@ export class FormulaClipboardController extends Disposable {
     ) {
         // Intercept scenarios where formulas do not need to be processed, and only process default paste and paste formulas only
         const specialPastes: IPasteHookValueType[] = [
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH,
         ];
         if (specialPastes.includes(payload.pasteType)) {
             return {
@@ -93,9 +187,9 @@ export class FormulaClipboardController extends Disposable {
             };
         }
 
-        const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = pasteTo.unitId || workbook.getUnitId();
-        const subUnitId = pasteTo.subUnitId || workbook.getActiveSheet()?.getSheetId();
+        const workbook = this._getWorkbook();
+        const unitId = pasteTo.unitId || workbook?.getUnitId();
+        const subUnitId = pasteTo.subUnitId || workbook?.getActiveSheet()?.getSheetId();
 
         if (!unitId || !subUnitId) {
             return {
@@ -201,11 +295,11 @@ function getValueMatrix(
         return getValueMatrixOfPasteFromIsNull(unitId, subUnitId, range, matrix, formulaDataModel);
     }
 
-    if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE) {
+    if (copyInfo.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE) {
         return getSpecialPasteValueValueMatrix(unitId, subUnitId, range, matrix, formulaDataModel, pasteFrom);
     }
 
-    if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
+    if (copyInfo.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA) {
         return getSpecialPasteFormulaValueMatrix(unitId, subUnitId, range, matrix, lexerTreeBuilder, formulaDataModel, pasteFrom);
     }
 

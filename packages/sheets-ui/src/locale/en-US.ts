@@ -186,6 +186,7 @@ const locale = {
         copy: 'Copy',
         cut: 'Cut',
         paste: 'Paste',
+        copySpecial: 'Copy Special',
         pasteSpecial: 'Paste Special',
         pasteValue: 'Paste Value',
         pasteFormat: 'Paste Format',

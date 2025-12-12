@@ -173,7 +173,7 @@ export { Styles } from './sheets/styles';
 
 export * from './sheets/typedef';
 export type { IPosition } from './sheets/typedef';
-export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export { addLinkToDocumentModel, getEmptyCell, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';

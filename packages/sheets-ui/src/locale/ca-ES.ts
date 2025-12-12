@@ -188,6 +188,7 @@ const locale: typeof enUS = {
         copy: 'Copiar',
         cut: 'Retallar',
         paste: 'Enganxar',
+        copySpecial: 'Còpia especial',
         pasteSpecial: 'Enganxat especial',
         pasteValue: 'Enganxar només els valors',
         pasteFormat: 'Enganxar només el format',

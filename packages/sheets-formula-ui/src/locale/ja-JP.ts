@@ -114,6 +114,7 @@ const locale: typeof enUS = {
             syntax: '構文',
         },
         operation: {
+            copyFormulaOnly: '数式のみをコピー',
             pasteFormula: '数式を貼り付け',
         },
     },

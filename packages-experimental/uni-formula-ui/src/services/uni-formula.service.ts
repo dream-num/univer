@@ -43,7 +43,7 @@ import {
 import { replaceSelectionFactory } from '@univerjs/docs';
 import { RichText } from '@univerjs/engine-render';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { CanvasView } from '@univerjs/slides-ui';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
@@ -237,7 +237,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, OtherFormulaBizType.DOC, rangeId);
             this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -267,7 +267,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, 'slide', `${pageId}_${elementId}_${rangeId}`);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, OtherFormulaBizType.SLIDE, `${pageId}_${elementId}_${rangeId}`);
             this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -322,7 +322,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
                 const pseudoId = getPseudoUnitKey(unitId);
                 this._checkSyncingUnit(pseudoId);
 
-                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, 'doc', rangeId);
+                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, OtherFormulaBizType.DOC, rangeId);
                 value.formulaId = id;
                 this._formulaIdToKey.set(id, key);
             }

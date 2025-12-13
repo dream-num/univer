@@ -27,16 +27,19 @@ import {
     DocumentFlavor,
     HorizontalAlign,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     NAMED_STYLE_MAP,
     NamedStyleType,
     ThemeService,
     Tools,
     UniverInstanceType,
+    UserManagerService,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    DocumentEditablePermission,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
@@ -54,7 +57,7 @@ import {
     MenuItemType,
 } from '@univerjs/ui';
 
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, combineLatestWith, map, merge, Observable, of, switchMap } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-line.command';
 import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
@@ -239,6 +242,90 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
     });
 }
 
+/**
+ * Check document permission with dynamic registration support
+ */
+function checkDocPermission$(
+    permissionService: IPermissionService,
+    permissionId: string
+): Observable<boolean> {
+    const permissionUpdate$ = merge(
+        of(null), // Initial emission
+        permissionService.permissionPointUpdate$
+    );
+
+    return permissionUpdate$.pipe(
+        switchMap(() => {
+            const permissionPoint = permissionService.getPermissionPoint(permissionId);
+            if (!permissionPoint) {
+                return of(false); // No permission point means editable
+            }
+
+            return permissionService.composePermission$([permissionId]).pipe(
+                map((permissions) => permissions.some((permission) => permission.value === false))
+            );
+        })
+    );
+}
+
+/**
+ * Get current document range disable state based on selection and edit permission
+ * Similar to sheets' getCurrentRangeDisable$
+ * @param accessor Dependency injection accessor
+ * @param requireSelection Whether to check for selection (default true)
+ * @returns Observable<boolean> - true if should disable menu, false if should enable
+ */
+export function getCurrentDocRangeDisable$(accessor: IAccessor, requireSelection = true): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const permissionService = accessor.get(IPermissionService);
+    const userManagerService = accessor.get(UserManagerService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const document$ = univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+
+    return combineLatest([userManagerService.currentUser$, document$]).pipe(
+        switchMap(([_, document]) => {
+            if (!document) {
+                return of(true);
+            }
+
+            const unitId = document.getUnitId();
+            const permissionId = new DocumentEditablePermission(unitId).id;
+
+            if (requireSelection) {
+                // Get initial selection state immediately
+                const currentTextRanges = docSelectionManagerService.getTextRanges() ?? [];
+                const currentRectRanges = docSelectionManagerService.getRectRanges() ?? [];
+
+                // Create an observable that emits current state immediately, then follows textSelection$
+                const selectionWithInitial$ = merge(
+                    of({ textRanges: currentTextRanges, rectRanges: currentRectRanges }),
+                    docSelectionManagerService.textSelection$.pipe(
+                        map((selection) => ({
+                            textRanges: selection?.textRanges ?? [],
+                            rectRanges: selection?.rectRanges ?? [],
+                        }))
+                    )
+                );
+
+                const permissionUpdate$ = merge(of(null), permissionService.permissionPointUpdate$);
+
+                return combineLatest([selectionWithInitial$, permissionUpdate$]).pipe(
+                    switchMap(([{ textRanges, rectRanges }, _]) => {
+                        const hasNoSelection = textRanges.length === 0 && rectRanges.length === 0;
+                        if (hasNoSelection) {
+                            return of(true);
+                        }
+
+                        return checkDocPermission$(permissionService, permissionId);
+                    })
+                );
+            } else {
+                return checkDocPermission$(permissionService, permissionId);
+            }
+        })
+    );
+}
+
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -273,7 +360,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -312,7 +399,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -351,7 +438,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -390,7 +477,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -428,7 +515,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -466,7 +553,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -516,7 +603,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             calc();
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -562,7 +649,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -615,7 +702,7 @@ export function HeadingSelectorMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -675,7 +762,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         // disabled$: getCurrentSheetDisabled$(accessor),
     };
@@ -702,7 +789,10 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         type: MenuItemType.SUBITEMS,
         icon: TableIcon,
         tooltip: 'toolbar.table.main',
-        disabled$: getTableDisabledObservable(accessor),
+        disabled$: getTableDisabledObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([tableDisabled, permissionDisabled]) => tableDisabled || permissionDisabled)
+        ),
         // Do not show header footer menu and insert table at zen mode.
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY), getInsertTableHiddenObservable(accessor), (one, two) => {
             return one || two;
@@ -727,7 +817,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'LeftJustifyingIcon',
         tooltip: 'toolbar.alignLeft',
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -782,7 +872,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
@@ -816,7 +906,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
@@ -850,7 +940,7 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
@@ -861,7 +951,7 @@ export function HorizontalLineFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'ReduceIcon',
         tooltip: 'toolbar.horizontalLine',
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
@@ -931,7 +1021,7 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         icon: 'OrderIcon',
         tooltip: 'toolbar.order',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
         activated$: listValueFactory$(accessor).pipe(map((v) => Boolean(v && v.indexOf('ORDER_LIST') === 0))),
     };
 }
@@ -953,7 +1043,7 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         ],
         icon: 'UnorderIcon',
         tooltip: 'toolbar.unorder',
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => Boolean(v && v.indexOf('BULLET_LIST') === 0))),
     };
@@ -965,7 +1055,7 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'TodoListDoubleIcon',
         tooltip: 'toolbar.checklist',
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => Boolean(v && v.indexOf('CHECK_LIST') === 0))),
     };
@@ -999,7 +1089,7 @@ export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetBackgroundColorMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
         id: ResetInlineFormatTextBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -1063,7 +1153,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

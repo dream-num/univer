@@ -27,7 +27,7 @@ import { InsertHorizontalLineBellowCommand } from '../../commands/commands/doc-h
 import { SetInlineFormatFontSizeCommand } from '../../commands/commands/inline-format.command';
 import { InsertBulletListBellowCommand, InsertCheckListBellowCommand, InsertOrderListBellowCommand } from '../../commands/commands/list.command';
 import { H1HeadingCommand, H2HeadingCommand, H3HeadingCommand, H4HeadingCommand, H5HeadingCommand, NormalTextHeadingCommand, SubtitleHeadingCommand, TitleHeadingCommand } from '../../commands/commands/set-heading.command';
-import { disableMenuWhenNoDocRange, getParagraphStyleAtCursor } from './menu';
+import { getCurrentDocRangeDisable$, getParagraphStyleAtCursor } from './menu';
 
 const HEADING_MAP: Record<NamedStyleType, ICommand> = {
     [NamedStyleType.HEADING_1]: H1HeadingCommand,
@@ -66,7 +66,7 @@ const createHeadingSelectorMenuItemFactory = (headingType: NamedStyleType) => (a
         type: MenuItemType.BUTTON,
         icon: icon.key,
         tooltip: 'toolbar.heading.tooltip',
-        disabled$: disableMenuWhenNoDocRange(accessor),
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: new Observable((subscriber) => {
             const DEFAULT_TYPE = NamedStyleType.NORMAL_TEXT;
@@ -110,6 +110,7 @@ export const CopyCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuI
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'rightClick.copy',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -119,6 +120,7 @@ export const CutCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMenuIt
         type: MenuItemType.BUTTON,
         icon: 'CutIcon',
         title: 'rightClick.cut',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -128,6 +130,7 @@ export const DeleteCurrentParagraphMenuItemFactory = (accessor: IAccessor): IMen
         type: MenuItemType.BUTTON,
         icon: 'DeleteIcon',
         title: 'rightClick.delete',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -137,6 +140,7 @@ export const InsertBulletListBellowMenuItemFactory = (accessor: IAccessor): IMen
         type: MenuItemType.BUTTON,
         icon: 'UnorderIcon',
         title: 'rightClick.bulletList',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -146,6 +150,7 @@ export const InsertOrderListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         type: MenuItemType.BUTTON,
         icon: 'OrderIcon',
         title: 'rightClick.orderList',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -155,6 +160,7 @@ export const InsertCheckListBellowMenuItemFactory = (accessor: IAccessor): IMenu
         type: MenuItemType.BUTTON,
         icon: 'TodoListDoubleIcon',
         title: 'rightClick.checkList',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -164,6 +170,7 @@ export const InsertHorizontalLineBellowMenuItemFactory = (accessor: IAccessor): 
         type: MenuItemType.BUTTON,
         icon: 'ReduceIcon',
         title: 'toolbar.horizontalLine',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 };
 
@@ -174,5 +181,6 @@ export function DocInsertBellowMenuItemFactory(accessor: IAccessor): IMenuSelect
         id: INSERT_BELLOW_MENU_ID,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insertBellow',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
     };
 }

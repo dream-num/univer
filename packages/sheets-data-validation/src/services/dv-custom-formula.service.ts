@@ -17,7 +17,7 @@
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { getFormulaCellData, shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
@@ -111,7 +111,7 @@ export class DataValidationCustomFormulaService extends Disposable {
     };
 
     private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string, ranges: IRange[]) {
-        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaString, ranges, { ruleId });
+        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaString, ranges, { ruleId }, OtherFormulaBizType.DATA_VALIDATION_CUSTOM, ruleId);
     };
 
     private _handleDirtyRanges(unitId: string, subUnitId: string, ranges: IRange[]) {

@@ -32,6 +32,6 @@ export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegister
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
-export { RegisterOtherFormulaService } from './services/register-other-formula.service';
+export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';

@@ -29,6 +29,7 @@ import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
+    ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -36,6 +37,7 @@ import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetFormulaStringBatchCalculationMutation,
 } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
@@ -170,9 +172,14 @@ export class TriggerCalculationController extends Disposable {
         // The filtering information is not synchronized to the worker and must be passed in from the main thread each time
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetFormulaCalculationStartMutation.id) {
+                if (command.id === SetFormulaCalculationStartMutation.id || command.id === SetFormulaStringBatchCalculationMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
+                    if (command.id === SetFormulaCalculationStartMutation.id) {
+                        const isCalculateTreeModel = this._configService.getConfig<boolean>(ENGINE_FORMULA_RETURN_DEPENDENCY_TREE) || false;
+                        params.isCalculateTreeModel = isCalculateTreeModel;
+                    }
 
+                    params.maxIteration = this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT) as number | undefined;
                     params.rowData = this._formulaDataModel.getHiddenRowsFiltered();
                 }
             })
@@ -272,7 +279,6 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: false,
             clearDependencyTreeCache: allClearDependencyTreeCache,
-            maxIteration: (this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT)) as number | undefined,
             // numfmtItemMap,
         };
     }
@@ -291,8 +297,6 @@ export class TriggerCalculationController extends Disposable {
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
         this._mergeDirtyNameMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
 
-        const maxIteration = dirtyData1.maxIteration || dirtyData2.maxIteration;
-
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
@@ -301,7 +305,6 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: !!this._forceCalculating,
             clearDependencyTreeCache: allClearDependencyTreeCache,
-            maxIteration,
         };
     }
 
@@ -552,7 +555,6 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
-            maxIteration: this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT) as number | undefined,
         };
     }
 }

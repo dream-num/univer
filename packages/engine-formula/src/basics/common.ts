@@ -223,6 +223,7 @@ export interface IFormulaDatasetConfig {
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
     maxIteration?: number;
+    isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters
 }
 

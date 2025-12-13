@@ -90,6 +90,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
     private _executeLock = new AsyncLock();
 
+    protected _isCalculateTreeModel: boolean = false;
+
     constructor(
         @IConfigService protected readonly _configService: IConfigService,
         @Inject(Lexer) protected readonly _lexer: Lexer,
@@ -144,6 +146,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         this._runtimeService.reset();
 
         const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
+
+        this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
 
         this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
             for (let i = 0; i < cycleReferenceCount; i++) {
@@ -265,7 +269,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
-        const treeList = (await this._formulaDependencyGenerator.generate()).reverse();
+        const treeList = (await this._formulaDependencyGenerator.generate(this._isCalculateTreeModel)).reverse();
 
         const interpreter = this._interpreter;
 

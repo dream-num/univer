@@ -93,7 +93,7 @@ export class CalculateController extends Disposable {
     private async _calculate(
         formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
-        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT, rowData } = formulaDirtyData;
+        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT, rowData, isCalculateTreeModel = false } = formulaDirtyData;
 
         const formulaData = this._formulaDataModel.getFormulaData();
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
@@ -112,6 +112,7 @@ export class CalculateController extends Disposable {
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
             maxIteration,
+            isCalculateTreeModel,
             rowData,
         });
     }
@@ -229,7 +230,7 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyResult(data: IAllRuntimeData) {
-        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, arrayFormulaEmbedded, imageFormulaData } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, arrayFormulaEmbedded, imageFormulaData, dependencyTreeModelData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
@@ -260,6 +261,18 @@ export class CalculateController extends Disposable {
                 SetImageFormulaDataMutation.id,
                 {
                     imageFormulaData,
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }
+
+        if (dependencyTreeModelData.length > 0) {
+            this._commandService.executeCommand(
+                SetFormulaDependencyCalculationResultMutation.id,
+                {
+                    result: dependencyTreeModelData,
                 },
                 {
                     onlyLocal: true,

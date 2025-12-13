@@ -18,7 +18,7 @@ import type { ICommandInfo, IDisposable, IUnitRange } from '@univerjs/core';
 import type { FormulaExecutedStateType, IExecutionInProgressParams, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, GlobalComputingStatusService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation } from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
@@ -720,5 +720,9 @@ export class FFormula extends FBase {
                 { onlyLocal: true }
             );
         });
+    }
+
+    setFormulaReturnDependencyTree(value: boolean): void {
+        this._configService.setConfig(ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, value);
     }
 }

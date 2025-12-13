@@ -24,6 +24,8 @@ export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
 
 export const ENGINE_FORMULA_CYCLE_REFERENCE_COUNT = 'CYCLE_REFERENCE_COUNT';
 
+export const ENGINE_FORMULA_RETURN_DEPENDENCY_TREE = 'RETURN_DEPENDENCY_TREE';
+
 export const configSymbol = Symbol(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
 export interface IUniverEngineFormulaConfig {

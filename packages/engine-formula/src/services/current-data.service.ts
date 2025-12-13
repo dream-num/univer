@@ -46,6 +46,7 @@ export interface IFormulaDirtyData {
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
     maxIteration?: number;
+    isCalculateTreeModel?: boolean; // whether to calculate the dependency tree model
     rowData?: IUnitRowData; // Include rows hidden by filters
 }
 

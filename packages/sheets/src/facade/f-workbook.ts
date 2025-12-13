@@ -21,7 +21,7 @@ import type { FontLine as _FontLine } from './f-range';
 import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorkbookNameCommand, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
+import { AddWorkbookStylesCommand, CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, RemoveWorkbookStylesCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorkbookNameCommand, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
@@ -1117,7 +1117,10 @@ export class FWorkbook extends FBaseInitialable {
      * ```
      */
     addStyles(styles: Record<string, IStyleData>): void {
-        this._workbook.addStyles(styles);
+        this._commandService.syncExecuteCommand(AddWorkbookStylesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            styles,
+        });
     }
 
     /**
@@ -1159,7 +1162,10 @@ export class FWorkbook extends FBaseInitialable {
      * ```
      */
     removeStyles(styleKeys: string[]): void {
-        this._workbook.removeStyles(styleKeys);
+        this._commandService.syncExecuteCommand(RemoveWorkbookStylesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            styleKeys,
+        });
     }
 }
 

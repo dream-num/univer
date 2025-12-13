@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitSheetDefinedNameMap } from '../../basics/common';
+import type { IDirtyUnitSheetDefinedNameMap, IExprTreeNode } from '../../basics/common';
 
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
@@ -1949,6 +1949,10 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean): string | null {
+        return null;
+    }
+
+    getFormulaExprTree(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean): IExprTreeNode | null {
         return null;
     }
 }

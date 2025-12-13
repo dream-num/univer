@@ -89,7 +89,7 @@ export class DataValidationFormulaService extends Disposable {
 
     private _registerSingleFormula(unitId: string, subUnitId: string, formula: string, ruleId: string) {
         const ranges = [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }];
-        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula, ranges, { ruleId });
+        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula, ranges, { ruleId }, 'dv', ruleId);
     }
 
     addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {

@@ -179,7 +179,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
         if (formulaMap.getValue(cfFormulaId, ['id'])) {
             return;
         }
-        const formulaId = this._createFormulaId(unitId, subUnitId);
+        const formulaId = this._createFormulaId(unitId, subUnitId, 'cf', cfId);
         formulaMap.addValue({
             formulaText,
             unitId,
@@ -282,8 +282,8 @@ export class ConditionalFormattingFormulaService extends Disposable {
     /**
      * The external environment is not aware of`formulaId`;it communicates internally with the formula engine.
      */
-    private _createFormulaId(unitId: string, subUnitId: string) {
-        return `sheet.cf_${unitId}_${subUnitId}_${generateRandomId(8)}`;
+    private _createFormulaId(unitId: string, subUnitId: string, bizId: string) {
+        return `sheet.cf_${unitId}_${subUnitId}_${bizId}_${generateRandomId(8)}`;
     }
 
     /**

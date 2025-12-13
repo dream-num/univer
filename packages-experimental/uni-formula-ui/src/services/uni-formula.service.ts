@@ -267,7 +267,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, 'slide', `${pageId}_${elementId}_${rangeId}`);
             this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -318,11 +318,11 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         // are registered formulas but not added to the formula system.
         this._docFormulas.forEach((value, key) => {
             if (!value.formulaId) {
-                const { unitId, f } = value;
+                const { unitId, f, rangeId } = value;
                 const pseudoId = getPseudoUnitKey(unitId);
                 this._checkSyncingUnit(pseudoId);
 
-                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
+                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, undefined, undefined, 'doc', rangeId);
                 value.formulaId = id;
                 this._formulaIdToKey.set(id, key);
             }

@@ -72,8 +72,8 @@ export class RegisterOtherFormulaService extends Disposable {
         return subUnitMap;
     }
 
-    private _createFormulaId(unitId: string, subUnitId: string) {
-        return `formula.${unitId}_${subUnitId}_${generateRandomId(8)}`;
+    private _createFormulaId(unitId: string, subUnitId: string, bizType: string, bizId: string) {
+        return `formula.${unitId}_${subUnitId}_${bizType}_${bizId}_${generateRandomId(8)}`;
     }
 
     private _initFormulaRegister() {
@@ -182,8 +182,8 @@ export class RegisterOtherFormulaService extends Disposable {
         }));
     }
 
-    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>) {
-        const formulaId = this._createFormulaId(unitId, subUnitId);
+    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>, bizType: string = 'default', bizId: string = '') {
+        const formulaId = this._createFormulaId(unitId, subUnitId, bizType, bizId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 
         cacheMap.set(formulaId, {

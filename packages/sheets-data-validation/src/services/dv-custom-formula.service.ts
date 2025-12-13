@@ -111,7 +111,7 @@ export class DataValidationCustomFormulaService extends Disposable {
     };
 
     private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string, ranges: IRange[]) {
-        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaString, ranges, { ruleId });
+        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaString, ranges, { ruleId }, 'dv-custom', ruleId);
     };
 
     private _handleDirtyRanges(unitId: string, subUnitId: string, ranges: IRange[]) {

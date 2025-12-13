@@ -1,5 +1,40 @@
 # Changelog
 
+# [0.13.0](/compare/v0.12.4...v0.13.0) (2025-12-13)
+
+
+### Bug Fixes
+
+* **authz:** refactor permission data structure and update logic for permissions (#6293) 37a6b83, closes #6293
+* **clipboard:** fix pasted data with number format error case (#6257) 300e60b, closes #6257
+* **dataValidation:** fix get validator status api in merge cell (#6266) 710faf9, closes #6266
+* ensure sheet order unique (#6295) 59f32ce, closes #6295
+* **filter:** optimize the data range expand logic when creating filters (#6264) 8ffeac5, closes #6264
+* fix comment editor behavior (#6251) 098dbf6, closes #6251
+* fix copy default (#6290) b6f3f97, closes #6290
+* fix drop down list max width (#6268) fc254b9, closes #6268
+* fix the cut menu item in the context menu (#6280) 40d5d24, closes #6280
+* **formula:** api to promise (#6279) fcabac9, closes #6279
+* **formula:** optimize the behavior when selecting merged cells during formula editing (#6270) fa5bb4a, closes #6270
+* increase/decrease font size with cell.P (#6274) 4cd65e6, closes #6274
+* **instance:** ensure proper disposal of current unit (#6254) c407cdf, closes #6254
+* optimize the behavior of editing cells in the last row/column of the worksheet (#6278) b446ecd, closes #6278
+* revive sheet uniscript (#6288) c82698e, closes #6288
+* **selection:** support ctrl key for adding selections without altering order (#6272) cfdd740, closes #6272
+* **sheet:** fix code error, the style always is a object (#6289) 979d638, closes #6289
+* **sheet:** fix row、col style not effect when the cell is null (#6286) 44c935f, closes #6286
+* **workbook:** sheet removal process (#6284) 9583542, closes #6284
+
+
+### Features
+
+* add a `Copy Formula Only`  menu item to the right-click menu (#6287) e9fc086, closes #6287
+* export PLUGIN_CONFIG_KEY_MAIN_THREAD from rpc package (#6283) c3f59cf, closes #6283
+* export PLUGIN_CONFIG_KEY_WORKER_THREAD from rpc package (#6281) 1e4954d, closes #6281
+* **formula:** add formula dependency api 2 (#6277) 128f2ff, closes #6277
+* **formula:** dependency tree and calculation api (#6258) e67908f, closes #6258
+* set active selections by defined name input (#6138) 972097c, closes #6138
+
 ## [0.12.4](/compare/v0.12.3...v0.12.4) (2025-12-06)
 
 

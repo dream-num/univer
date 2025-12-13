@@ -205,6 +205,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         }
 
         this._snapshot.sheetOrder = result;
+        seen.clear();
     }
 
     getWorksheets(): Map<string, Worksheet> {
@@ -462,6 +463,8 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
                 sheetOrder.push(sheetId);
             }
         }
+
+        this.ensureSheetOrderUnique();
 
         // Active the first sheet.
         this.ensureActiveSheet();

@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import { COMPONENT_PREFIX } from '../const';
-
-export { BulletListTypePicker, OrderListTypePicker } from './picker';
-export const ORDER_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_ORDER_LIST_TYPE_COMPONENT`;
-export const BULLET_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_BULLET_LIST_TYPE_COMPONENT`;
-export const UNDERLINE_TYPE_COMPONENT = `${COMPONENT_PREFIX}_UNDERLINE_TYPE_COMPONENT`;
+export const BorderDashedHeavy = ({ className }: { className: string }) => (
+    <svg className={className} width="118" height="3" viewBox="0 0 118 3" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line
+            x1="0"
+            y1="1.5"
+            x2="118"
+            y2="1.5"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeDasharray="8 4"
+            shapeRendering="crispEdges"
+        />
+    </svg>
+);

@@ -176,6 +176,7 @@ export class SuperTableController extends Disposable {
         this._preUnitId = unitId;
 
         superTables.forEach((table, tableName) => {
+            if (!table || !tableName) return;
             const sheetName = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(table.sheetId)?.getName() || '';
             const refString = serializeRangeWithSheet(sheetName, table.range);
             if (!this._descriptionService.hasDescription(tableName)) {

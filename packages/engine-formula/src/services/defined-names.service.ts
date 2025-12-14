@@ -223,6 +223,16 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         return this._definedNameMap;
     }
 
+    getDefinedNameByRefString(unitId: string, formulaOrRefString: string) {
+        if (!this._definedNameMap[unitId]) return;
+
+        for (const [_, item] of Object.entries(this._definedNameMap[unitId])) {
+            if (item.formulaOrRefString === formulaOrRefString) {
+                return item;
+            }
+        }
+    }
+
     private _update() {
         this._update$.next(null);
     }

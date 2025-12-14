@@ -28,6 +28,7 @@ import { createRowColIter } from '../shared/row-col-iter';
 import { generateRandomId } from '../shared/tools';
 import { DEFAULT_STYLES } from '../types/const';
 import { CellValueType } from '../types/enum';
+import { cloneWorksheetData } from './clone';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -36,7 +37,6 @@ import { SpanModel } from './span-model';
 import { CellModeEnum } from './typedef';
 import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
 import { SheetViewModel } from './view-model';
-import { cloneWorksheetData } from './clone';
 
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
@@ -263,6 +263,26 @@ export class Worksheet {
         const rowStyle = this.getRowStyle(row);
         const colStyle = this.getColumnStyle(col);
         const cell = this.getCell(row, col);
+        const cellStyle = this._styles.getStyleByCell(cell);
+        return (rowPriority ?? this._isRowStylePrecedeColumnStyle)
+            ? composeStyles(defaultStyle, colStyle, rowStyle, cell?.themeStyle, cellStyle)
+            : composeStyles(defaultStyle, rowStyle, colStyle, cell?.themeStyle, cellStyle);
+    }
+
+    /**
+     * Get the composed style of the cell with filtered interceptors.
+     * @param {number} row The row index of the cell
+     * @param {number} col The column index of the cell
+     * @param {string} key The key of the interceptor
+     * @param {function} filter The filter function to filter the interceptors
+     * @param {boolean} [rowPriority] If true, row style will precede column style, otherwise use this._isRowStylePrecedeColumnStyle
+     * @returns {IStyleData} The composed style of the cell
+     */
+    getComposedCellStyleWithFilteredInterceptors(row: number, col: number, key: string, filter: (interceptor: IInterceptor<any, any>) => boolean, rowPriority?: boolean): IStyleData {
+        const defaultStyle = this.getDefaultCellStyleInternal();
+        const rowStyle = this.getRowStyle(row);
+        const colStyle = this.getColumnStyle(col);
+        const cell = this.getCellWithFilteredInterceptors(row, col, key, filter);
         const cellStyle = this._styles.getStyleByCell(cell);
         return (rowPriority ?? this._isRowStylePrecedeColumnStyle)
             ? composeStyles(defaultStyle, colStyle, rowStyle, cell?.themeStyle, cellStyle)

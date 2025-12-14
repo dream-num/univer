@@ -36,3 +36,5 @@ export enum InterceptCellContentPriority {
 export const RangeThemeInterceptorId = 'sheet.interceptor.range-theme-id';
 
 export const IgnoreRangeThemeInterceptorKey = 'sheet.interceptor.ignore-range-theme';
+
+export const IgnoreAllInterceptorsKey = 'sheet.interceptor.ignore-all-interceptors';

@@ -77,6 +77,7 @@ import { IMarkSelectionService } from '../mark-selection/mark-selection.service'
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 import { cloneCellDataWithSpanInfo } from './clone';
+import { IgnoreAllInterceptorsKey } from './const';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
@@ -665,7 +666,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const cellMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         cachedMatrix.forValue((row, col, value) => {
             const { row: actualRow, col: actualColumn } = mapFunc(row, col);
-            const style = worksheet?.getComposedCellStyle(actualRow, actualColumn);
+            const style = worksheet?.getComposedCellStyleWithFilteredInterceptors(actualRow, actualColumn, IgnoreAllInterceptorsKey, () => false);
             const newValue = cloneCellDataWithSpanInfo(value)!;
             newValue.s = style;
             cellMatrix.setValue(row, col, newValue);

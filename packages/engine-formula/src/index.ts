@@ -37,7 +37,7 @@ export type {
 } from './basics/common';
 export { BooleanValue } from './basics/common';
 export { type IOtherFormulaData } from './basics/common';
-export type {  IUnitRowData, IExprTreeNode, ISuperTable } from './basics/common';
+export type { IExprTreeNode, ISuperTable, IUnitRowData } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { type ISheetFormulaError } from './basics/error-type';
@@ -128,8 +128,8 @@ export {
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
     singleReferenceToGrid,
-    unquoteSheetName,
     splitTableStructuredRef,
+    unquoteSheetName,
 } from './engine/utils/reference';
 export { handleRefStringInfo } from './engine/utils/reference';
 export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';

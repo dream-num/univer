@@ -292,7 +292,7 @@ export function Dialog(props: IDialogProps) {
     }, [draggable, setElementRef]);
 
     const handleOpenChange = useCallback((isOpen: boolean) => {
-        if (!mask) {
+        if (!mask && !isOpen) {
             return;
         }
 

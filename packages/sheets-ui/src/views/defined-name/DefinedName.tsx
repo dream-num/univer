@@ -17,11 +17,11 @@
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
-import { ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { AbsoluteRefType, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, LexerTreeBuilder, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
-import { getPrimaryForRange, SetSelectionsOperation } from '@univerjs/sheets';
+import { getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
@@ -34,6 +34,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
     const definedNamesService = useDependency(IDefinedNamesService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+
     const worksheet = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
     const unitId = worksheet?.getUnitId();
     const subUnitId = worksheet?.getSheetId();
@@ -41,9 +44,21 @@ export function DefinedName({ disable }: { disable: boolean }) {
 
     useEffect(() => {
         const subscription = definedNamesService.currentRange$.subscribe(() => {
-            const range = definedNamesService.getCurrentRangeForString();
-            setRangeString(range);
-            setInputValue(range);
+            const selections = selectionManagerService.getCurrentSelections();
+            const formulaOrRefs = selections?.map((selection) => {
+                return serializeRangeWithSheet(worksheet.getName(), selection.range);
+            })?.join(',');
+            const absoluteRef = lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefs, AbsoluteRefType.ALL, AbsoluteRefType.ALL, worksheet.getName());
+            const definedName = definedNamesService.getDefinedNameByRefString(unitId, absoluteRef);
+
+            if (definedName) {
+                setRangeString(definedName.name);
+                setInputValue(definedName.name);
+            } else {
+                const range = definedNamesService.getCurrentRangeForString();
+                setRangeString(range);
+                setInputValue(range);
+            }
         });
 
         return () => {

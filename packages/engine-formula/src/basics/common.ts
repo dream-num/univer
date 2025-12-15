@@ -26,8 +26,8 @@ import type {
     ObjectMatrix,
     Styles,
 } from '@univerjs/core';
+import type { sequenceNodeType } from '../engine/utils/sequence';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
-import { sequenceNodeType } from '../engine/utils/sequence';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 

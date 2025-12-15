@@ -1957,7 +1957,7 @@ export class LexerTreeBuilder extends Disposable {
         unitId: string,
         hasFunction: (functionToken: IFunctionNames) => boolean,
         getDefinedNameName: (unitId: string, name: string) => Nullable<IDefinedNamesServiceParam>,
-        getTable: (unitId: string, tableName: string) => Nullable<ISuperTable>,
+        getTable: (unitId: string, tableName: string) => Nullable<ISuperTable>
     ): IExprTreeNode | null {
         return null;
     }

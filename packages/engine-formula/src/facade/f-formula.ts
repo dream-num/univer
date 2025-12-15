@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo, IDisposable, IUnitRange } from '@univerjs/core';
-import { FormulaExecutedStateType, IDefinedNamesService, IExecutionInProgressParams, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaExecuteResultMap, IFormulaStringMap, IFunctionService, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation, ISuperTableService } from '@univerjs/engine-formula';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, IExprTreeNode, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, GlobalComputingStatusService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, GlobalComputingStatusService, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation } from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
@@ -841,11 +841,7 @@ export class FFormula extends FBase {
      * @param formulaString The formula string to parse (with or without leading `=`)
      * @returns A formula expression tree describing the hierarchical structure of the formula
      */
-    getFormulaExpressTree(formulaString: string, unitId: string) {
-        return this._lexerTreeBuilder.getFormulaExprTree(formulaString,unitId,
-            this._functionService.hasExecutor.bind(this._functionService),
-            this._definedNamesService.getValueByName.bind(this._definedNamesService),
-            this._superTableService.getTable.bind(this._superTableService)
-        )
+    getFormulaExpressTree(formulaString: string, unitId: string): IExprTreeNode | null {
+        return this._lexerTreeBuilder.getFormulaExprTree(formulaString, unitId, this._functionService.hasExecutor.bind(this._functionService), this._definedNamesService.getValueByName.bind(this._definedNamesService), this._superTableService.getTable.bind(this._superTableService));
     }
 }

@@ -130,7 +130,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
         >
             <input
                 className={clsx(`
-                  univer-box-border univer-h-full univer-w-full univer-appearance-none univer-px-1.5
+                  univer-box-border univer-h-full univer-w-full univer-appearance-none univer-pl-1.5 univer-pr-5
                   univer-text-gray-900
                   focus:univer-outline-none
                   dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white

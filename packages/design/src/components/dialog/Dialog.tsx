@@ -60,6 +60,7 @@ export interface IDialogProps {
 
     /**
      * Whether the dialog should be destroyed on close.
+     * @deprecated
      * @default false
      */
     destroyOnClose?: boolean;
@@ -250,7 +251,6 @@ export function Dialog(props: IDialogProps) {
         width,
         draggable = false,
         defaultPosition,
-        destroyOnClose = false,
         footer: propFooter,
         mask = true,
         keyboard = true,
@@ -292,7 +292,7 @@ export function Dialog(props: IDialogProps) {
     }, [draggable, setElementRef]);
 
     const handleOpenChange = useCallback((isOpen: boolean) => {
-        if (!maskClosable && !isOpen) {
+        if (!mask) {
             return;
         }
 
@@ -337,6 +337,18 @@ export function Dialog(props: IDialogProps) {
                 }}
                 closable={closable}
                 onClickClose={handleClickClose}
+                onEscapeKeyDown={(e) => {
+                    if (keyboard) {
+                        handleClickClose();
+                    }
+                    e.preventDefault();
+                }}
+                onPointerDownOutside={(e) => {
+                    if (maskClosable) {
+                        handleClickClose();
+                    }
+                    e.preventDefault();
+                }}
             >
                 <DialogHeader
                     className={clsx({

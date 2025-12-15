@@ -181,7 +181,13 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         // Check cache first
         const cachedMap = this._nameCacheMap[unitId];
         if (cachedMap) {
-            return cachedMap[name] || null;
+            for (const key of Object.keys(cachedMap)) {
+                if (key.toLowerCase() === name.toLowerCase()) {
+                    return cachedMap[key];
+                }
+            }
+
+            return null;
         }
 
         // If not in cache, traverse the nameMap
@@ -192,7 +198,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
         let result = null;
         for (const item of Object.values(nameMap)) {
-            if (item.name === name) {
+            if (item.name.toLowerCase() === name.toLowerCase()) {
                 result = item;
                 break;
             }

@@ -26,6 +26,7 @@ import type {
     ObjectMatrix,
     Styles,
 } from '@univerjs/core';
+import type { sequenceNodeType } from '../engine/utils/sequence';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
@@ -134,7 +135,7 @@ export interface IUnitImageFormulaDataType {
     [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<Nullable<IImageFormulaInfo>> }>;
 }
 
-export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType {}
+export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType { }
 
 export interface IFormulaData {
     [unitId: string]: Nullable<{ [sheetId: string]: Nullable<IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> }>;
@@ -223,10 +224,17 @@ export interface IFormulaDatasetConfig {
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
     maxIteration?: number;
+    isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters
 }
 
 export enum ConcatenateType {
     FRONT,
     BACK,
+}
+
+export interface IExprTreeNode {
+    value: string;
+    children: IExprTreeNode[];
+    type?: sequenceNodeType;
 }

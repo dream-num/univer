@@ -56,7 +56,7 @@ export function generateRandomDependencyTreeId(dependencyManagerService: IDepend
 }
 
 export interface IFormulaDependencyGenerator {
-    generate(): Promise<IFormulaDependencyTree[]>;
+    generate(isCalculateTreeModel?: boolean): Promise<IFormulaDependencyTree[]>;
     getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
     getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
@@ -91,7 +91,7 @@ export class FormulaDependencyGenerator extends Disposable {
         FORMULA_AST_CACHE.clear();
     }
 
-    async generate() {
+    async generate(isCalculateTreeModel = false) {
         this._updateRangeFlatten();
         // const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
@@ -121,6 +121,12 @@ export class FormulaDependencyGenerator extends Disposable {
         const unitData = this._currentConfigService.getUnitData();
 
         const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
+
+        if (isCalculateTreeModel) {
+            this._runtimeService.setDependencyTreeModelData(
+                this._getAllDependencyJson(treeList)
+            );
+        }
 
         const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
 
@@ -1376,9 +1382,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
     }
 
-    async getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]> {
-        const treeList = await this._getAllTreeList();
-
+    protected _getAllDependencyJson(treeList: IFormulaDependencyTree[]): IFormulaDependencyTreeJson[] {
         this._startFormulaDependencyTreeModel();
 
         const results: FormulaDependencyTreeModel[] = [];
@@ -1395,6 +1399,14 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         this._endFormulaDependencyTreeModel();
+
+        return resultsJson;
+    }
+
+    async getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]> {
+        const treeList = await this._getAllTreeList();
+
+        const resultsJson = this._getAllDependencyJson(treeList);
 
         return resultsJson;
     }

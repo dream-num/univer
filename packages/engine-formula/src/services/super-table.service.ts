@@ -39,6 +39,8 @@ export interface ISuperTableService {
     remove(unitId: string, tableName: string): void;
 
     update$: Observable<unknown>;
+
+    getTable(unitId: string, tableName: string): Nullable<ISuperTable>;
 }
 
 export class SuperTableService extends Disposable implements ISuperTableService {
@@ -90,6 +92,10 @@ export class SuperTableService extends Disposable implements ISuperTableService 
 
     registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType) {
         this._tableOptionMap.set(tableOption, tableOptionType);
+    }
+
+    getTable(unitId: string, tableName: string): Nullable<ISuperTable> {
+        return this._tableMap.get(unitId)?.get(tableName);
     }
 
     private _update() {

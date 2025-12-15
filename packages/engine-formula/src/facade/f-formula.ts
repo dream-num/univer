@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo, IDisposable, IUnitRange } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, IExprTreeNode, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation } from '@univerjs/engine-formula';
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, GlobalComputingStatusService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, GlobalComputingStatusService, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation } from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
@@ -30,7 +30,11 @@ export class FFormula extends FBase {
         @Inject(ICommandService) protected readonly _commandService: ICommandService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
-        @IConfigService protected readonly _configService: IConfigService
+        @IConfigService protected readonly _configService: IConfigService,
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @ISuperTableService private readonly _superTableService: ISuperTableService
+
     ) {
         super();
         this._initialize();
@@ -720,5 +724,124 @@ export class FFormula extends FBase {
                 { onlyLocal: true }
             );
         });
+    }
+
+    /**
+     * Enable or disable emitting formula dependency trees after each formula calculation.
+     *
+     * When enabled, the formula engine will emit the dependency trees produced by
+     * each completed formula calculation through the internal command system.
+     * Consumers can obtain the result by listening for the corresponding
+     * calculation-result command.
+     *
+     * When disabled, dependency trees will not be emitted.
+     *
+     * This option only controls whether dependency trees are exposed.
+     * It does not affect formula calculation behavior.
+     *
+     * @param {boolean} value
+     *        Whether to emit formula dependency trees after calculation.
+     *        - `true`: Emit dependency trees after each calculation.
+     *        - `false`: Do not emit dependency trees (default behavior).
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     *
+     * // Enable dependency tree emission
+     * formulaEngine.setFormulaReturnDependencyTree(true);
+     *
+     * // Listen for dependency trees produced by formula calculation
+     * const trees = await new Promise<IFormulaDependencyTreeJson[]>((resolve, reject) => {
+     *   const timer = setTimeout(() => {
+     *     disposable.dispose();
+     *     reject(new Error('Timeout waiting for formula dependency trees'));
+     *   }, 30_000);
+     *
+     *   const disposable = commandService.onCommandExecuted((command) => {
+     *     if (command.id !== SetFormulaDependencyCalculationResultMutation.id) {
+     *       return;
+     *     }
+     *
+     *     clearTimeout(timer);
+     *     disposable.dispose();
+     *
+     *     const params = command.params as ISetFormulaDependencyCalculationResultMutation;
+     *     resolve(params.result ?? []);
+     *   });
+     * });
+     *
+     * console.log('Dependency trees:', trees);
+     * ```
+     */
+    setFormulaReturnDependencyTree(value: boolean): void {
+        this._configService.setConfig(ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, value);
+    }
+
+    /**
+     * Parse a formula string and return its **formula expression tree**.
+     *
+     * This API analyzes the syntactic structure of a formula and builds an
+     * expression tree that reflects how the formula is composed (functions,
+     * operators, ranges, and nested expressions), without performing calculation
+     * or dependency evaluation.
+     *
+     * The returned tree is suitable for:
+     * - Formula structure visualization
+     * - Explaining complex formulas (e.g. LET / LAMBDA)
+     * - Debugging or inspecting formula composition
+     * - Building advanced formula tooling
+     *
+     * ---
+     *
+     * @example
+     * ```ts
+     * const formulaEngine = univerAPI.getFormula();
+     *
+     * const formula = '=LET(x,SUM(A1,B1,A1:B10),y,OFFSET(A1:B10,0,1),SUM(x,y)+x)+1';
+     *
+     * const exprTree = formulaEngine.getFormulaExpressTree(formula);
+     *
+     * console.log(exprTree);
+     * ```
+     *
+     * Example output (simplified):
+     *
+     * ```json
+     * {
+     *   "value": "let(x,sum(A1,B1,A1:B10),y,offset(A1:B10,0,1),sum(x,y)+x)+1",
+     *   "children": [
+     *     {
+     *       "value": "let(x,sum(A1,B1,A1:B10),y,offset(A1:B10,0,1),sum(x,y)+x)",
+     *       "children": [
+     *         {
+     *           "value": "sum(A1,B1,A1:B10)",
+     *           "children": [
+     *             {
+     *               "value": "A1:B10",
+     *               "children": []
+     *             }
+     *           ]
+     *         },
+     *         {
+     *           "value": "offset(A1:B10,0,1)",
+     *           "children": [
+     *             {
+     *               "value": "A1:B10",
+     *               "children": []
+     *             }
+     *           ]
+     *         }
+     *       ]
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * @param formulaString The formula string to parse (with or without leading `=`)
+     * @returns A formula expression tree describing the hierarchical structure of the formula
+     */
+    getFormulaExpressTree(formulaString: string, unitId: string): IExprTreeNode | null {
+        return this._lexerTreeBuilder.getFormulaExprTree(formulaString, unitId, this._functionService.hasExecutor.bind(this._functionService), this._definedNamesService.getValueByName.bind(this._definedNamesService), this._superTableService.getTable.bind(this._superTableService));
     }
 }

@@ -523,6 +523,9 @@ interface IFormulaDependencyTreeJsonBase {
     refOffsetY: number;
     rangeList: IUnitRange[];
     refTreeId: number | undefined;
+    formulaId: Nullable<string>;
+    featureId: Nullable<string>;
+    type: Nullable<FormulaDependencyTreeType>;
 }
 
 export interface IFormulaDependencyTreeJson extends IFormulaDependencyTreeJsonBase {
@@ -560,6 +563,12 @@ export class FormulaDependencyTreeModel {
 
     refTreeId: number | undefined;
 
+    formulaId: Nullable<string>;
+
+    featureId: Nullable<string>;
+
+    type: Nullable<FormulaDependencyTreeType>;
+
     constructor(tree: IFormulaDependencyTree) {
         this.treeId = tree.treeId;
         this.row = tree.row;
@@ -574,6 +583,9 @@ export class FormulaDependencyTreeModel {
             this.refTreeId = (tree as FormulaDependencyTreeVirtual).refTree?.treeId ?? -1;
         } else {
             this.formula = tree.formula;
+            this.formulaId = (tree as FormulaDependencyTree).formulaId ?? undefined;
+            this.featureId = (tree as FormulaDependencyTree).featureId ?? undefined;
+            this.type = (tree as FormulaDependencyTree).type;
         }
     }
 
@@ -591,6 +603,9 @@ export class FormulaDependencyTreeModel {
             refOffsetY: this.refOffsetY,
             rangeList: this.rangeList,
             refTreeId: this.refTreeId,
+            formulaId: this.formulaId,
+            featureId: this.featureId,
+            type: this.type,
         };
     }
 
@@ -608,6 +623,9 @@ export class FormulaDependencyTreeModel {
             refOffsetY: this.refOffsetY,
             rangeList: this.rangeList,
             refTreeId: this.refTreeId,
+            formulaId: this.formulaId,
+            featureId: this.featureId,
+            type: this.type,
         };
     }
 

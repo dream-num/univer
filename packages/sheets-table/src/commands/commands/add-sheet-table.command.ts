@@ -16,8 +16,10 @@
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type { ITableOptions } from '../../types/type';
-import { CommandType, generateRandomId, ICommandService, IUndoRedoService, LocaleService, sequenceExecute } from '@univerjs/core';
+import { CommandType, customNameCharacterCheck, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute } from '@univerjs/core';
+import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { TableManager } from '../../model/table-manager';
+import { getExistingNamesSet } from '../../util';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';
 
@@ -37,21 +39,38 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
         if (!params) {
             return false;
         }
+
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const localeService = accessor.get(LocaleService);
+        const tableManager = accessor.get(TableManager);
         const tableId = params.id ?? generateRandomId();
+        const existingNamesSet = getExistingNamesSet(params.unitId, {
+            univerInstanceService: accessor.get(IUniverInstanceService),
+            tableManager,
+            definedNamesService: accessor.get(IDefinedNamesService),
+        });
+
         let tableName = params.name;
-        if (!tableName) {
-            const tableManager = accessor.get(TableManager);
-            const tableCount = tableManager.getTableList(params.unitId).length;
-            tableName = `${localeService.t('sheets-table.tablePrefix')}${tableCount + 1}`;
+        if (!tableName || !customNameCharacterCheck(tableName, existingNamesSet)) {
+            const prefix = localeService.t('sheets-table.tablePrefix');
+            let index = tableManager.getTableList(params.unitId).length + 1;
+
+            for (const name of existingNamesSet) {
+                if (name.startsWith(prefix)) {
+                    const n = Number(name.slice(prefix.length));
+                    if (Number.isInteger(n) && n >= index) {
+                        index = n + 1;
+                    }
+                }
+            }
+
+            tableName = `${prefix}${index}`;
         }
 
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
-        const tableManager = accessor.get(TableManager);
         const { unitId, subUnitId, range } = params;
         const header = tableManager.getColumnHeader(unitId, subUnitId, range, localeService.t('sheets-table.columnPrefix'));
 

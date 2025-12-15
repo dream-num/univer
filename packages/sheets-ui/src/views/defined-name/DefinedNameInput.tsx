@@ -20,7 +20,7 @@ import type { ComponentType } from 'react';
 import type { IRangeSelectorProps } from '../../basics/editor/range';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { IDefinedNamesService, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, ISuperTableService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorIcon } from '@univerjs/icons';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
@@ -50,12 +50,12 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
         hidden = false, // 是否对用户隐藏，与excel兼容，暂时用不上。
         id,
-
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
+    const superTableService = useDependency(ISuperTableService);
     const functionService = useDependency(IFunctionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const componentManager = useDependency(ComponentManager);
@@ -135,7 +135,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
-        if (definedNamesService.getValueByName(unitId, nameValue) != null && (id == null || id.length === 0)) {
+        // The defined name can't be duplicate with existing defined names and table names.
+        if (
+            (definedNamesService.getValueByName(unitId, nameValue) || superTableService.getTableMap(unitId)?.has(nameValue)) &&
+            (id === null || id === undefined || id.length === 0)
+        ) {
             setValidString(localeService.t('definedName.nameDuplicate'));
             return;
         }

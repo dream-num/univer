@@ -14018,7 +14018,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 1,
                     },
                     10: {
-                        v: 12313,
+                        v: 10,
                     },
                     11: {
                         v: 123,
@@ -14033,6 +14033,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                     11: {
                         v: 235,
+                    },
+                },
+                3: {
+                    10: {
+                        v: 0,
                     },
                 },
                 4: {
@@ -14063,8 +14068,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     9: {
                         s: 'uJSelZ22',
                     },
+                    10: {
+                        v: 123,
+                    },
                     11: {
-                        v: 126,
+                        v: 235,
                     },
                 },
                 6: {
@@ -14081,11 +14089,16 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     8: {
                         s: 'uJSelZ22',
                     },
+                    11: {
+                        v: 632,
+                    },
+                },
+                7: {
                     10: {
                         v: 'ewe',
                     },
                     11: {
-                        v: 893,
+                        v: 235,
                     },
                 },
                 10: {
@@ -24480,7 +24493,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         },
         {
             name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
-            data: '{"sheet-0011":[{"cfId":"mdFMCQle","ranges":[{"startRow":0,"startColumn":10,"endRow":7,"endColumn":11,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":"123"},"stopIfTrue":false}]}',
+            data: '{"sheet-0011":[{"cfId":"N3J3L50D","ranges":[{"startRow":4,"startColumn":11,"endRow":6,"endColumn":11,"startAbsoluteRefType":0,"endAbsoluteRefType":0}],"rule":{"style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":"=L7=L5","type":"highlightCell","subType":"formula"},"stopIfTrue":false},{"cfId":"mdFMCQle","ranges":[{"startRow":0,"startColumn":10,"endRow":7,"endColumn":11,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":"123"},"stopIfTrue":false}]}',
         },
         {
             name: 'SHEET_RANGE_PROTECTION_PLUGIN',

@@ -19,8 +19,8 @@ import type { CFNumberOperator } from '../../base/const';
 import type { IIconSet } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
+import { FormulaResultStatus } from '@univerjs/sheets-formula';
 import { CFValueType } from '../../base/const';
-import { FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { compareWithNumber, filterRange, getOppositeOperator, getValueByType, isNullable } from './utils';
 

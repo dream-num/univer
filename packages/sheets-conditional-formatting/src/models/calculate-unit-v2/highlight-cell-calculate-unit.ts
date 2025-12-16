@@ -19,8 +19,9 @@ import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INum
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, dayjs, Range, Tools } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
+import { FormulaResultStatus } from '@univerjs/sheets-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
+import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 

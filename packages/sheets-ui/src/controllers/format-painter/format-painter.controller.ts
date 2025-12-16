@@ -34,6 +34,7 @@ import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
+    getClearContentMutationParamsForRanges,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
     SelectionMoveType,
@@ -44,7 +45,7 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
+import { checkCellContentInRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
 export class FormatPainterController extends Disposable {

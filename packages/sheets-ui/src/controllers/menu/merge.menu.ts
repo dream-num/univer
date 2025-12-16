@@ -17,16 +17,20 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, RemoveWorksheetMergeCommand, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-
-import { combineLatestWith, map } from 'rxjs';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
-} from '../../commands/commands/add-worksheet-merge.command';
+    RangeProtectionPermissionEditPoint,
+    RemoveWorksheetMergeCommand,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+    WorksheetSetCellValuePermission,
+} from '@univerjs/sheets';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { combineLatestWith, map } from 'rxjs';
 import { getSheetSelectionsDisabled$ } from '../utils/selections-tools';
 import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 

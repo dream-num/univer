@@ -18,7 +18,7 @@ import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
-import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
+import { ICommandService, IConfirmService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
 import { LockIcon } from '@univerjs/icons';
 
@@ -37,7 +37,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';

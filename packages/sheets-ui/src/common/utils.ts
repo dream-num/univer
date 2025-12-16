@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IMutationInfo, IPosition, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IPosition, IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICollaborator } from '@univerjs/protocol';
-import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocation } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { CellModeEnum, ObjectMatrix } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 
 export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {
     if (userList1.length !== userList2.length) return false;
@@ -50,60 +48,6 @@ export function checkCellContentInRange(worksheet: Worksheet, range: IRange): bo
         }
     });
     return someCellGoingToBeRemoved;
-}
-
-export function getClearContentMutationParamsForRanges(
-    accessor: IAccessor,
-    unitId: string,
-    worksheet: Worksheet,
-    ranges: IRange[]
-): { undos: IMutationInfo[]; redos: IMutationInfo[] } {
-    const undos: IMutationInfo[] = [];
-    const redos: IMutationInfo[] = [];
-
-    const subUnitId = worksheet.getSheetId();
-
-    // Use the following file as a reference.
-    // packages/sheets/src/commands/commands/clear-selection-all.command.ts
-    // packages/sheets/src/commands/mutations/set-range-values.mutation.ts
-    ranges.forEach((range) => {
-        const redoMatrix = getClearContentMutationParamForRange(worksheet, range);
-        const redoMutationParams: ISetRangeValuesMutationParams = {
-            unitId,
-            subUnitId,
-            cellValue: redoMatrix.getData(),
-        };
-        const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            redoMutationParams
-        );
-
-        undos.push({ id: SetRangeValuesMutation.id, params: undoMutationParams });
-        redos.push({ id: SetRangeValuesMutation.id, params: redoMutationParams });
-    });
-
-    return {
-        undos,
-        redos,
-    };
-}
-
-export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
-    const { startRow, startColumn, endColumn, endRow } = range;
-    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Raw);
-    const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
-    let leftTopCellValue: Nullable<ICellData> = null;
-    cellMatrix.forValue((row, col, cellData) => {
-        if (cellData && row >= startRow && col >= startColumn) {
-            if (!leftTopCellValue && worksheet.cellHasValue(cellData) && (cellData.v !== '' || (cellData.p?.body?.dataStream?.length ?? 0) > 2)) {
-                leftTopCellValue = cellData;
-            }
-            redoMatrix.setValue(row, col, null);
-        }
-    });
-    redoMatrix.setValue(startRow, startColumn, leftTopCellValue);
-
-    return redoMatrix;
 }
 
 export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {

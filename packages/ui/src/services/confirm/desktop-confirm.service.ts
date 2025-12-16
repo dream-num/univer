@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { IConfirmService, IDisposable } from '@univerjs/core';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
-import type { IConfirmService } from './confirm.service';
-
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { connectInjector } from '../../utils/di';
 import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
-export class DesktopConfirmService extends Disposable implements IConfirmService {
+export class DesktopConfirmService extends Disposable implements IConfirmService<IConfirmPartMethodOptions> {
     private _confirmOptions: IConfirmPartMethodOptions[] = [];
     readonly confirmOptions$ = new BehaviorSubject<IConfirmPartMethodOptions[]>([]);
 

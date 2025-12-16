@@ -15,9 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget, SetColHiddenCommand, SetRowHiddenCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
 
 import { isAllColumnsCovered, isAllRowsCovered } from './utils/selection-utils';
 

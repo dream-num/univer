@@ -35,12 +35,6 @@ import {
     IShortcutService,
     IUIPartsService,
 } from '@univerjs/ui';
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../../commands/commands/add-worksheet-merge.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
@@ -203,10 +197,6 @@ export class SheetUIMobileController extends Disposable {
 
     private _initCommands(): void {
         [
-            AddWorksheetMergeAllCommand,
-            AddWorksheetMergeCommand,
-            AddWorksheetMergeHorizontalCommand,
-            AddWorksheetMergeVerticalCommand,
             ChangeZoomRatioCommand,
             ExpandSelectionCommand,
             MoveSelectionCommand,

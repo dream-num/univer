@@ -419,7 +419,7 @@ describe('Test AGGREGATE formula', () => {
             ...functions
         );
 
-        formulaEngine.executeCalculation();
+        commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: false }, { onlyLocal: true });
         await formulaEngine.onCalculationEnd();
 
         getCellValue = (row: number, column: number) => {

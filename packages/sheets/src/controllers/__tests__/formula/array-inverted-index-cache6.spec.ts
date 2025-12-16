@@ -380,7 +380,7 @@ describe('Test inverted index cache 6', () => {
             ...functions
         );
 
-        formulaEngine.executeCalculation();
+        commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: false }, { onlyLocal: true });
         await formulaEngine.onCalculationEnd();
 
         getArrayFormulaResult = (row: number, column: number) => {

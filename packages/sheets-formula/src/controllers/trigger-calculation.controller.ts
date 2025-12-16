@@ -38,7 +38,7 @@ import {
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
     SetFormulaStringBatchCalculationMutation,
-    SetInitialFormulaCalculationStartMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
@@ -524,7 +524,7 @@ export class TriggerCalculationController extends Disposable {
     private _initialExecuteFormula() {
         const calculationMode = this._getCalculationMode();
         const params = this._getDirtyDataByCalculationMode(calculationMode);
-        this._commandService.executeCommand(SetInitialFormulaCalculationStartMutation.id, params, lo);
+        this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, lo);
 
         this._registerOtherFormulaService.calculateStarted$.next(true);
     }

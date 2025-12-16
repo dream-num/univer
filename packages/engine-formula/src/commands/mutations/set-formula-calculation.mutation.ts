@@ -77,8 +77,8 @@ export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculatio
     handler: () => true,
 };
 
-export const SetInitialFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
-    id: 'formula.mutation.set-initial-formula-calculation-start',
+export const SetTriggerFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
+    id: 'formula.mutation.set-trigger-formula-calculation-start',
     type: CommandType.MUTATION,
     handler: () => true,
 };

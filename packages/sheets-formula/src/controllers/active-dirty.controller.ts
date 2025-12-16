@@ -37,7 +37,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetInitialFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -255,8 +255,8 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialSheet() {
-        this._activeDirtyManagerService.register(SetInitialFormulaCalculationStartMutation.id, {
-            commandId: SetInitialFormulaCalculationStartMutation.id,
+        this._activeDirtyManagerService.register(SetTriggerFormulaCalculationStartMutation.id, {
+            commandId: SetTriggerFormulaCalculationStartMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IFormulaDirtyData;
                 return {

@@ -18,7 +18,7 @@ import type { CellValue, Ctor, Injector, IWorkbookData, Nullable, Worksheet } fr
 import type { BaseFunction, IFunctionNames } from '@univerjs/engine-formula';
 import type { FFormula } from '@univerjs/engine-formula/facade';
 import { ICommandService, LocaleType } from '@univerjs/core';
-import { functionLogical, functionLookup, functionMath, functionMeta, functionStatistical, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { functionLogical, functionLookup, functionMath, functionMeta, functionStatistical, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
 import { createFunctionTestBed } from './create-function-test-bed';
@@ -199,6 +199,7 @@ describe('Test AGGREGATE formula 3', () => {
         commandService = get(ICommandService);
 
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationStopMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);

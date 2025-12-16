@@ -19,10 +19,6 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { HideGridlinesDoubleIcon } from '@univerjs/icons';
 import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -201,10 +197,6 @@ export class SheetUIMobileController extends Disposable {
 
     private _initCommands(): void {
         [
-            AddWorksheetMergeAllCommand,
-            AddWorksheetMergeCommand,
-            AddWorksheetMergeHorizontalCommand,
-            AddWorksheetMergeVerticalCommand,
             ChangeZoomRatioCommand,
             ExpandSelectionCommand,
             MoveSelectionCommand,

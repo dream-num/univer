@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import { DependentOn, ICommandService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfirmService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import {
     BrowserClipboardService,
@@ -41,7 +41,6 @@ import {
     IBeforeCloseService,
     ICanvasPopupService,
     IClipboardInterfaceService,
-    IConfirmService,
     IContextMenuService,
     IDialogService,
     IGalleryService,

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IConfirmService, IDialogService, useDependency } from '@univerjs/ui';
+import { IConfirmService } from '@univerjs/core';
+import { IDialogService, useDependency } from '@univerjs/ui';
 
 const menu = [
     {

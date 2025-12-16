@@ -24,6 +24,7 @@ import type {
     IRuntimeUnitDataType,
 } from '../basics/common';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
+import type { IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
@@ -77,6 +78,8 @@ export interface IAllRuntimeData {
 
     runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType };
     runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType };
+
+    dependencyTreeModelData: IFormulaDependencyTreeJson[];
 }
 
 export interface IExecutionInProgressParams {
@@ -190,6 +193,10 @@ export interface IFormulaRuntimeService {
     clearArrayObjectCache(): void;
 
     getRuntimeImageFormulaData(): IRuntimeImageFormulaDataType[];
+
+    setDependencyTreeModelData(data: IFormulaDependencyTreeJson[]): void;
+
+    getDependencyTreeModelData(): IFormulaDependencyTreeJson[];
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -240,6 +247,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _formulaCycleIndex: number = 0;
 
     private _isCycleDependency: boolean = false;
+
+    private _dependencyTreeModelData: IFormulaDependencyTreeJson[] = [];
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -752,6 +761,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._runtimeFeatureCellData[featureId] = featureData;
     }
 
+    setDependencyTreeModelData(data: IFormulaDependencyTreeJson[]) {
+        this._dependencyTreeModelData = data;
+    }
+
+    getDependencyTreeModelData() {
+        return this._dependencyTreeModelData;
+    }
+
     getRuntimeImageFormulaData() {
         return this._runtimeImageFormulaData;
     }
@@ -769,6 +786,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             runtimeFeatureRange: this.getRuntimeFeatureRange(),
             runtimeFeatureCellData: this.getRuntimeFeatureCellData(),
+
+            dependencyTreeModelData: this.getDependencyTreeModelData(),
         };
     }
 

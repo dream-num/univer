@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import type { ITableSetConfig } from '../../types/type';
 import type { ISetSheetTableMutationParams } from '../mutations/set-sheet-table.mutation';
-import { CommandType, customNameCharacterCheck, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, customNameCharacterCheck, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { TableManager } from '../../model/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
+import { getExistingNamesSet } from '../../util';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 
 export interface ISetSheetTableCommandParams extends ITableSetConfig {
@@ -37,7 +39,6 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         }
 
         const { unitId, tableId, name, updateRange, rowColOperation, theme } = params;
-
         const tableManager = accessor.get(TableManager);
         const table = tableManager.getTableById(unitId, tableId);
 
@@ -45,26 +46,15 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
 
         const oldTableConfig: ITableSetConfig = {};
         const newTableConfig: ITableSetConfig = {};
-
         const localeService = accessor.get(LocaleService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-
-        const sheetNameSet = new Set<string>();
-        if (workbook) {
-            workbook.getSheets().forEach((sheet) => {
-                sheetNameSet.add(sheet.getName());
-            });
-
-            // Add existing table names to the set to ensure uniqueness
-            const tableList = tableManager.getTableList(unitId);
-            tableList.forEach((tableItem) => {
-                sheetNameSet.add(tableItem.name);
-            });
-        }
+        const existingNamesSet = getExistingNamesSet(unitId, {
+            univerInstanceService: accessor.get(IUniverInstanceService),
+            tableManager,
+            definedNamesService: accessor.get(IDefinedNamesService),
+        });
 
         if (name) {
-            const isValidName = customNameCharacterCheck(name, sheetNameSet);
+            const isValidName = customNameCharacterCheck(name, existingNamesSet);
             if (!isValidName) {
                 const logService = accessor.get(ILogService);
                 logService.warn(localeService.t('sheets-table.tableNameError'));

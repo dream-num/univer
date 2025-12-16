@@ -26,7 +26,7 @@ export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, para
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const selectionsBeforeMutation = selectionManagerService.getCurrentSelections();
     const { value, selections, unitId, subUnitId } = params;
-    if (selectionsBeforeMutation) {
+    if (selectionsBeforeMutation && selectionsBeforeMutation.length > 0) {
         const lastSelectionBeforeMutation = selectionsBeforeMutation[selectionsBeforeMutation?.length - 1];
         const primaryBeforeMutation = lastSelectionBeforeMutation.primary;
         if (primaryBeforeMutation) {
@@ -84,7 +84,7 @@ export const AddMergeUndoSelectionsOperationFactory = (accessor: IAccessor, para
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const selectionsBeforeMutation = selectionManagerService.getCurrentSelections();
     const { unitId, subUnitId } = params;
-    if (selectionsBeforeMutation) {
+    if (selectionsBeforeMutation && selectionsBeforeMutation.length > 0) {
         const lastSelectionBeforeMutation = selectionsBeforeMutation[selectionsBeforeMutation?.length - 1];
         const primaryBeforeMutation = lastSelectionBeforeMutation.primary;
         if (primaryBeforeMutation) {

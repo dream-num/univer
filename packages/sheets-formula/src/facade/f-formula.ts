@@ -19,7 +19,7 @@ import type { IDisposable, ILocales } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
@@ -286,7 +286,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
     override _initialize(): void {
         this._debouncedFormulaCalculation = debounce(() => {
             this._commandService.executeCommand(
-                SetFormulaCalculationStartMutation.id,
+                SetTriggerFormulaCalculationStartMutation.id,
                 {
                     commands: [],
                     forceCalculation: true,

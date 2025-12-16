@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Nullable } from '@univerjs/core';
+import type { ICellData, IDocumentData, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
+import type { IDefinedNamesService } from '@univerjs/engine-formula';
+import type { TableManager } from './model/table-manager';
 import type { ITableConditionFilterItem, ITableFilterItem, ITableManualFilterItem } from './types/type';
-import { CellValueType } from '@univerjs/core';
+import { CellValueType, UniverInstanceType } from '@univerjs/core';
 import { SheetsTableButtonStateEnum, SheetsTableSortStateEnum, TableColumnFilterTypeEnum } from './types/enum';
 
 export function getColumnName(columnIndex: number, columnText: string): string {
@@ -96,4 +98,42 @@ export function isManualFilter(filter: ITableFilterItem | undefined): filter is 
         return false;
     }
     return filter.filterType === TableColumnFilterTypeEnum.manual;
+}
+
+/**
+ * Get existing names including sheet names, table names and defined names to check for duplicates table name.
+ */
+export function getExistingNamesSet(unitId: string, options: {
+    univerInstanceService?: IUniverInstanceService;
+    tableManager?: TableManager;
+    definedNamesService?: IDefinedNamesService;
+}): Set<string> {
+    const { univerInstanceService, tableManager, definedNamesService } = options;
+    const existingNamesSet = new Set<string>();
+
+    // The table names can't be duplicate with existing sheet names.
+    const workbook = univerInstanceService?.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+    if (workbook) {
+        workbook.getSheets().forEach((sheet) => {
+            existingNamesSet.add(sheet.getName());
+        });
+    }
+
+    // The table names can't be duplicate with existing table names.
+    const tableList = tableManager?.getTableList(unitId);
+    if (tableList && tableList.length > 0) {
+        tableList.forEach((tableItem) => {
+            existingNamesSet.add(tableItem.name);
+        });
+    }
+
+    // The table names can't be duplicate with existing defined names.
+    const definedNames = definedNamesService?.getDefinedNameMap(unitId);
+    if (definedNames) {
+        Object.values(definedNames).forEach((definedName) => {
+            existingNamesSet.add(definedName.name);
+        });
+    }
+
+    return existingNamesSet;
 }

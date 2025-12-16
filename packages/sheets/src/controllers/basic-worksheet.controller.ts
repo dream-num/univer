@@ -18,6 +18,7 @@ import type { IDisposable, IMutation, IStyleData } from '@univerjs/core';
 import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
+import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from '../commands/commands/add-worksheet-merge.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
 import { AppendRowCommand } from '../commands/commands/append-row.command';
@@ -218,6 +219,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
         if (!onlyRegisterFormulaRelatedMutations) {
             [
+                AddWorksheetMergeCommand,
+                AddWorksheetMergeAllCommand,
+                AddWorksheetMergeVerticalCommand,
+                AddWorksheetMergeHorizontalCommand,
                 AppendRowCommand,
                 ClearSelectionAllCommand,
                 ClearSelectionContentCommand,

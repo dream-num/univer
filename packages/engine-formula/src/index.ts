@@ -37,7 +37,7 @@ export type {
 } from './basics/common';
 export { BooleanValue } from './basics/common';
 export { type IOtherFormulaData } from './basics/common';
-export { type IUnitRowData } from './basics/common';
+export type { IExprTreeNode, ISuperTable, IUnitRowData } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { type ISheetFormulaError } from './basics/error-type';
@@ -75,6 +75,7 @@ export {
     SetFormulaStringBatchCalculationResultMutation,
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
 export { type ISetImageFormulaDataMutationParams, SetImageFormulaDataMutation } from './commands/mutations/set-image-formula-data.mutation';
@@ -82,7 +83,7 @@ export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationPa
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from './commands/mutations/set-super-table.mutation';
 export { CalculateController } from './controller/calculate.controller';
-export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, type IUniverEngineFormulaConfig } from './controller/config.schema';
+export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, type IUniverEngineFormulaConfig } from './controller/config.schema';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
@@ -128,6 +129,7 @@ export {
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
     singleReferenceToGrid,
+    splitTableStructuredRef,
     unquoteSheetName,
 } from './engine/utils/reference';
 export { handleRefStringInfo } from './engine/utils/reference';

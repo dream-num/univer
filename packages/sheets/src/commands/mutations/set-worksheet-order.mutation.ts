@@ -44,6 +44,7 @@ export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationPara
         const config = workbook.getConfig();
         config.sheetOrder.splice(params.fromOrder, 1);
         config.sheetOrder.splice(params.toOrder, 0, params.subUnitId);
+        workbook.ensureSheetOrderUnique();
         return true;
     },
 };

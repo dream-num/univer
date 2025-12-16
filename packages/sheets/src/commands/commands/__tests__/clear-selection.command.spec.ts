@@ -19,9 +19,11 @@ import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import {
     CellValueType,
     ICommandService,
+    IConfirmService,
     IUniverInstanceService,
     RANGE_TYPE,
     RedoCommand,
+    TestConfirmService,
     UndoCommand,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -44,7 +46,11 @@ describe('Test clear selection content commands', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(undefined, [[MergeCellController], [RefRangeService]]);
+        const testBed = createCommandTestBed(undefined, [
+            [MergeCellController],
+            [RefRangeService],
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]);
         univer = testBed.univer;
         get = testBed.get;
         get(MergeCellController);

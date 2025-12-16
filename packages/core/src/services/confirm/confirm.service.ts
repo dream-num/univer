@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
-import { createIdentifier } from '@univerjs/core';
+import type { IDisposable } from '../../common/di';
 import { Subject } from 'rxjs';
+import { createIdentifier } from '../../common/di';
 
 export const IConfirmService = createIdentifier<IConfirmService>('univer.confirm-service');
-export interface IConfirmService {
-    readonly confirmOptions$: Subject<IConfirmPartMethodOptions[]>;
+export interface IConfirmService<T = unknown> {
+    readonly confirmOptions$: Subject<T[]>;
 
-    open(params: IConfirmPartMethodOptions): IDisposable;
-    confirm(params: IConfirmPartMethodOptions): Promise<boolean>;
+    open(params: T): IDisposable;
+    confirm(params: T): Promise<boolean>;
     close(id: string): void;
 }
 
 /**
  * This is a mock service for testing purposes.
  */
-export class TestConfirmService implements IConfirmService, IDisposable {
-    readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
+export class TestConfirmService<T> implements IConfirmService<T>, IDisposable {
+    readonly confirmOptions$ = new Subject<T[]>();
 
     dispose(): void {
         this.confirmOptions$.complete();
     }
 
-    open(_params: IConfirmPartMethodOptions): IDisposable {
+    open(_params: T): IDisposable {
         throw new Error('This is not implemented in the test service!');
     }
 
-    confirm(_params: IConfirmPartMethodOptions): Promise<boolean> {
+    confirm(_params: T): Promise<boolean> {
         return Promise.resolve(true);
     }
 

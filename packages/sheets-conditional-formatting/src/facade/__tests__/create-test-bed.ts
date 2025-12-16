@@ -42,6 +42,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
+import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 
@@ -150,6 +151,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [ConditionalFormattingFormulaService],
                 [ConditionalFormattingRuleModel],
                 [ConditionalFormattingViewModel],
+                [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => {

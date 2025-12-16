@@ -77,6 +77,12 @@ export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculatio
     handler: () => true,
 };
 
+export const SetTriggerFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
+    id: 'formula.mutation.set-trigger-formula-calculation-start',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
 export const SetFormulaStringBatchCalculationMutation: IMutation<ISetFormulaStringBatchCalculationMutation> = {
     id: 'formula.mutation.set-formula-string-batch-calculation',
     type: CommandType.MUTATION,

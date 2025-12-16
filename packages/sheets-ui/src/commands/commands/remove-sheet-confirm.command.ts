@@ -16,9 +16,8 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IUniverSheetsConfig } from '@univerjs/sheets';
-import { CommandType, ICommandService, IConfigService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { CommandType, ICommandService, IConfigService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { countCells, defaultLargeSheetOperationConfig, getSheetCommandTarget, RemoveSheetCommand, SHEETS_PLUGIN_CONFIG_KEY } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
 
 interface IRemoveSheetConfirmCommandParams {
     subUnitId: string;

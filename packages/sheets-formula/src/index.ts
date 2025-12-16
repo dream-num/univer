@@ -27,6 +27,7 @@ export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './pl
 export { DescriptionService, IDescriptionService } from './services/description.service';
 export type { ISearchItem, ISearchItemWithType } from './services/description.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
+export { FormulaResultStatus } from './services/formula-common';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from './services/register-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';

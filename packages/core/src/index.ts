@@ -99,6 +99,7 @@ export {
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
 export { ConfigService } from './services/config/config.service';
+export { IConfirmService, TestConfirmService } from './services/confirm/confirm.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';

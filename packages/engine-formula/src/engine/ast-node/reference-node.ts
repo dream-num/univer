@@ -34,6 +34,7 @@ import { ISuperTableService } from '../../services/super-table.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
 import { prefixHandler } from '../utils/prefix-handler';
+import { splitTableStructuredRef } from '../utils/reference';
 import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
@@ -187,6 +188,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         const makeRef = (type: ReferenceObjectType) =>
             new ReferenceNode(currentConfigService, runtimeService, tokenTrim, type, isPrepareMerge);
 
+        const tableMap = this._getTableMap();
+        const isSuperTableDirect = tableMap?.has(tokenTrim) ?? false;
+        if (isSuperTableDirect) {
+            return this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, true);
+        }
+
         const isCellRange = regexTestSingeRange(tokenTrim);
         if (isCellRange) {
             return makeRef(ReferenceObjectType.CELL);
@@ -203,12 +210,6 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
             return makeRef(ReferenceObjectType.COLUMN);
         }
 
-        const tableMap = this._getTableMap();
-        const isSuperTableDirect = tableMap?.has(tokenTrim) ?? false;
-        if (isSuperTableDirect) {
-            return this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, true);
-        }
-
         return this._getTableReferenceNode(tokenTrim, isLexerNode, isPrepareMerge, false);
     }
 
@@ -216,7 +217,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         if (!this._checkTokenIsTableReference(tokenTrim) && !isSuperTableDirectly) {
             return;
         }
-        const { tableName, columnStruct } = this._splitTableStructuredRef(tokenTrim);
+        const { tableName, columnStruct } = splitTableStructuredRef(tokenTrim);
         const tableMap = this._getTableMap();
         if (!isLexerNode && tableMap?.has(tableName)) {
             const columnDataString = columnStruct;
@@ -231,17 +232,6 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
                 new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
             );
         }
-    }
-
-    private _splitTableStructuredRef(ref: string) {
-        const idx = ref.indexOf('[');
-        if (idx === -1) {
-            return { tableName: ref, struct: '' };
-        }
-        return {
-            tableName: ref.slice(0, idx),
-            columnStruct: ref.slice(idx), // 包含外层 [[...]]
-        };
     }
 
     private _checkTokenIsTableReference(token: string): boolean {

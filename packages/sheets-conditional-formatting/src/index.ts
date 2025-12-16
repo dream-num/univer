@@ -31,7 +31,6 @@ export {
     DeleteConditionalRuleMutationUndoFactory,
     type IDeleteConditionalRuleMutationParams,
 } from './commands/mutations/delete-conditional-rule.mutation';
-export { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 export {
     type IMoveConditionalRuleMutationParams,
     MoveConditionalRuleMutation,

@@ -17,7 +17,7 @@
 import type { Ctor, Injector, IWorkbookData } from '@univerjs/core';
 import type { BaseAstNode, BaseFunction, IFunctionNames, LexerNode } from '@univerjs/engine-formula';
 import { ICommandService, LocaleType } from '@univerjs/core';
-import { AstTreeBuilder, ErrorType, functionLookup, functionMath, functionMeta, functionStatistical, generateExecuteAstNodeData, getObjectValue, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, Interpreter, Lexer, SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { AstTreeBuilder, ErrorType, functionLookup, functionMath, functionMeta, functionStatistical, generateExecuteAstNodeData, getObjectValue, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, Interpreter, Lexer, SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
 import { createFunctionTestBed } from './create-function-test-bed';
@@ -1015,6 +1015,7 @@ describe('Test SUBTOTAL formula', () => {
         commandService = get(ICommandService);
 
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationStopMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);

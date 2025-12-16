@@ -42,7 +42,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaCalculationStartMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -271,7 +271,7 @@ export class UpdateFormulaController extends Disposable {
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
         const params = this._getDirtyDataByCalculationMode(calculationMode);
 
-        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
+        this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, { onlyLocal: true });
     }
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {

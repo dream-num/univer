@@ -18,7 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { debounce } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 /**
@@ -50,7 +50,7 @@ export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheets
     override _initialize(): void {
         this._debouncedFormulaCalculation = debounce(() => {
             this._commandService.executeCommand(
-                SetFormulaCalculationStartMutation.id,
+                SetTriggerFormulaCalculationStartMutation.id,
                 {
                     commands: [],
                     forceCalculation: true,

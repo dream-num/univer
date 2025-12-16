@@ -75,6 +75,7 @@ export {
     SetFormulaStringBatchCalculationResultMutation,
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
 export { type ISetImageFormulaDataMutationParams, SetImageFormulaDataMutation } from './commands/mutations/set-image-formula-data.mutation';

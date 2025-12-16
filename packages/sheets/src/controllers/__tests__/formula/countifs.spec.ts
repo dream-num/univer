@@ -203,7 +203,7 @@ describe('Test inverted index cache', () => {
             ...functions
         );
 
-        commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: false }, { onlyLocal: true });
+        commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
         await formulaEngine.onCalculationEnd();
 
         getCellValue = (row: number, column: number) => {

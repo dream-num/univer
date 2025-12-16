@@ -69,6 +69,7 @@ import { MessageType } from '@univerjs/design';
 import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
+    AddWorksheetMergeCommand,
     InsertColMutation,
     InsertRowMutation,
     MAX_CELL_PER_SHEET_KEY,
@@ -84,7 +85,6 @@ import {
 } from '@univerjs/sheets';
 import { BuiltInUIPart, connectInjector, IMessageService, IUIPartsService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
-import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {
     SheetCopyCommand,
     SheetCutCommand,

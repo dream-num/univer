@@ -27,12 +27,6 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../commands/commands/add-worksheet-merge.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
@@ -194,13 +188,8 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCommands(): void {
         [
-            AddWorksheetMergeAllCommand,
-            AddWorksheetMergeCommand,
-            AddWorksheetMergeHorizontalCommand,
-            AddWorksheetMergeVerticalCommand,
             ChangeZoomRatioCommand,
             ExpandSelectionCommand,
             MoveSelectionCommand,

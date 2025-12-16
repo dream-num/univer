@@ -15,7 +15,7 @@
  */
 
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
+import { DependentOn, generateRandomId, IConfigService, IConfirmService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
@@ -27,7 +27,6 @@ import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
-import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';

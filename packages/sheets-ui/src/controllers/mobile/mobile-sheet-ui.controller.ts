@@ -19,6 +19,10 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
 import { HideGridlinesDoubleIcon } from '@univerjs/icons';
 import {
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -35,12 +39,6 @@ import {
     IShortcutService,
     IUIPartsService,
 } from '@univerjs/ui';
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../../commands/commands/add-worksheet-merge.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';

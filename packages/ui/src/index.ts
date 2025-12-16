@@ -65,7 +65,6 @@ export {
 } from './services/clipboard/clipboard-interface.service';
 export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
-export { IConfirmService, TestConfirmService } from './services/confirm/confirm.service';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export { ContextMenuService, type IContextMenuHandler, IContextMenuService } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';

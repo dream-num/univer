@@ -15,7 +15,7 @@
  */
 
 import type { IBorderData, Injector, IRange, Univer } from '@univerjs/core';
-import { BorderStyleTypes, BorderType, ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import { BorderStyleTypes, BorderType, ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
@@ -38,7 +38,9 @@ describe('Test style commands', () => {
     let commandService: ICommandService;
     let getBorder: ({ startRow, startColumn }: IRange) => IBorderData | undefined;
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(undefined, [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]);
         univer = testBed.univer;
         get = testBed.get;
         getBorder = ({ startRow, startColumn }: IRange): IBorderData | undefined => {

@@ -15,10 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { IRemoveRowColCommandParams } from '@univerjs/sheets';
+import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget, RemoveColCommand, RemoveRowCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
 
 import { isAllColumnsCovered, isAllRowsCovered } from './utils/selection-utils';
 

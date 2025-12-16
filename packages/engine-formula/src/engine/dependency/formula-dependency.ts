@@ -531,6 +531,7 @@ export class FormulaDependencyGenerator extends Disposable {
                                 virtual.refOffsetX = x;
                                 virtual.refOffsetY = y;
                                 virtual.isCache = isCache;
+                                virtual.type = FormulaDependencyTreeType.OTHER_FORMULA;
                                 this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, virtual);
                                 this._dependencyManagerService.addFormulaDependencyByDefinedName(virtual);
                                 treeList.push(virtual);
@@ -1387,15 +1388,17 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const results: FormulaDependencyTreeModel[] = [];
         for (const tree of treeList) {
+            const treeType = tree.type;
+            if (tree.isVirtual && (treeType === FormulaDependencyTreeType.FEATURE_FORMULA || treeType === FormulaDependencyTreeType.OTHER_FORMULA)) {
+                continue;
+            }
             const treeModel = this._getFormulaDependencyTreeModel(tree);
-            results[tree.treeId] = treeModel;
+            results.push(treeModel);
         }
 
         const resultsJson: IFormulaDependencyTreeJson[] = [];
         for (const result of results) {
-            if (result) {
-                resultsJson.push(result.toJson());
-            }
+            resultsJson.push(result.toJson());
         }
 
         this._endFormulaDependencyTreeModel();

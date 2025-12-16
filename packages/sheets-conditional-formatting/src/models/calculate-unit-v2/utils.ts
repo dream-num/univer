@@ -19,8 +19,9 @@ import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
 import type { IContext } from './base-calculate-unit';
 import { BooleanNumber, CellValueType, ColorKit, dayjs, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
+import { FormulaResultStatus } from '@univerjs/sheets-formula';
 import { CFNumberOperator, CFValueType } from '../../base/const';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
+import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { ConditionalFormattingViewModel } from '../conditional-formatting-view-model';
 
 export function isFloatsEqual(a: number, b: number) {

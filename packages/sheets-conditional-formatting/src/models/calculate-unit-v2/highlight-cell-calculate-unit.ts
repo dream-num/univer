@@ -19,8 +19,9 @@ import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INum
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, dayjs, Range, Tools } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
+import { FormulaResultStatus } from '@univerjs/sheets-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
+import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 
@@ -376,7 +377,12 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     // const _ruleConfig = ruleConfig as IFormulaHighlightCell;
                     const cache = preComputingResult?.value;
                     if (cache) {
-                        const value = cache.getValue(row, col);
+                        // The formula result matrix starts from (0,0), but we need to use relative coordinates
+                        // based on the first range's start position
+                        const firstRange = context.rule.ranges[0];
+                        const relativeRow = row - firstRange.startRow;
+                        const relativeCol = col - firstRange.startColumn;
+                        const value = cache.getValue(relativeRow, relativeCol);
                         return value === true;
                     }
                     return false;

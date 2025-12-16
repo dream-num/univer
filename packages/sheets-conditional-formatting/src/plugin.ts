@@ -26,7 +26,6 @@ import { MoveCfCommand } from './commands/commands/move-cf.command';
 import { SetCfCommand } from './commands/commands/set-cf.command';
 import { AddConditionalRuleMutation } from './commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
-import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 import { MoveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from './commands/mutations/set-conditional-rule.mutation';
 import {
@@ -78,7 +77,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
             DeleteConditionalRuleMutation,
             SetConditionalRuleMutation,
             MoveConditionalRuleMutation,
-            ConditionalFormattingFormulaMarkDirty,
         ].forEach((m) => {
             this._commandService.registerCommand(m);
         });

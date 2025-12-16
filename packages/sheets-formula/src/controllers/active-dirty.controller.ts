@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -37,7 +37,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetInitialFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -255,6 +255,16 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialSheet() {
+        this._activeDirtyManagerService.register(SetInitialFormulaCalculationStartMutation.id, {
+            commandId: SetInitialFormulaCalculationStartMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as IFormulaDirtyData;
+                return {
+                    ...params,
+                };
+            },
+        });
+
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {

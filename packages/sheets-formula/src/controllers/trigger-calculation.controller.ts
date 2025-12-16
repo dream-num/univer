@@ -38,6 +38,7 @@ import {
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
     SetFormulaStringBatchCalculationMutation,
+    SetInitialFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
@@ -89,11 +90,6 @@ export class TriggerCalculationController extends Disposable {
     private _executionInProgressParams: Nullable<IExecutionInProgressParams> = null;
 
     private _restartCalculation = false;
-
-    /**
-     * The mark of forced calculation. If a new mutation triggers dirty area calculation during the forced calculation process, forced calculation is still required.
-     */
-    private _forceCalculating = false;
 
     private readonly _progress$ = new BehaviorSubject<ICalculationProgress>(NilProgress);
 
@@ -232,6 +228,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
         const allClearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
+        let allForceCalculation = false;
 
         // const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
 
@@ -244,7 +241,7 @@ export class TriggerCalculationController extends Disposable {
 
             const params = conversion.getDirtyData(command);
 
-            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache } = params;
+            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache, forceCalculation = false } = params;
 
             if (dirtyRanges != null) {
                 this._mergeDirtyRanges(allDirtyRanges, dirtyRanges);
@@ -269,6 +266,8 @@ export class TriggerCalculationController extends Disposable {
             if (clearDependencyTreeCache != null) {
                 this._mergeDirtyNameMap(allClearDependencyTreeCache, clearDependencyTreeCache);
             }
+
+            allForceCalculation = allForceCalculation || forceCalculation;
         }
 
         return {
@@ -277,7 +276,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
-            forceCalculation: false,
+            forceCalculation: allForceCalculation,
             clearDependencyTreeCache: allClearDependencyTreeCache,
             // numfmtItemMap,
         };
@@ -297,13 +296,15 @@ export class TriggerCalculationController extends Disposable {
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
         this._mergeDirtyNameMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
 
+        const allForceCalculating = dirtyData1.forceCalculation || dirtyData2.forceCalculation;
+
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
-            forceCalculation: !!this._forceCalculating,
+            forceCalculation: allForceCalculating,
             clearDependencyTreeCache: allClearDependencyTreeCache,
         };
     }
@@ -383,13 +384,7 @@ export class TriggerCalculationController extends Disposable {
 
             // eslint-disable-next-line max-lines-per-function, complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetFormulaCalculationStartMutation.id) {
-                    const { forceCalculation = false } = command.params as ISetFormulaCalculationStartMutation;
-
-                    if (forceCalculation) {
-                        this._forceCalculating = true;
-                    }
-                } else if (command.id === SetFormulaCalculationStopMutation.id) {
+                if (command.id === SetFormulaCalculationStopMutation.id) {
                     this.clearProgress();
                 }
 
@@ -493,7 +488,6 @@ export class TriggerCalculationController extends Disposable {
                         calculationProcessCount = 0;
                         this._doneCalculationTaskCount = 0;
                         this._totalCalculationTaskCount = 0;
-                        this._forceCalculating = false;
                     }
 
                     if (state === FormulaExecutedStateType.STOP_EXECUTION && this._restartCalculation) {
@@ -530,7 +524,7 @@ export class TriggerCalculationController extends Disposable {
     private _initialExecuteFormula() {
         const calculationMode = this._getCalculationMode();
         const params = this._getDirtyDataByCalculationMode(calculationMode);
-        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
+        this._commandService.executeCommand(SetInitialFormulaCalculationStartMutation.id, params, lo);
 
         this._registerOtherFormulaService.calculateStarted$.next(true);
     }

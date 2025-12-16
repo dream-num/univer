@@ -73,6 +73,7 @@ export {
     SetFormulaDependencyCalculationResultMutation,
     SetFormulaStringBatchCalculationMutation,
     SetFormulaStringBatchCalculationResultMutation,
+    SetInitialFormulaCalculationStartMutation,
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
 } from './commands/mutations/set-formula-calculation.mutation';

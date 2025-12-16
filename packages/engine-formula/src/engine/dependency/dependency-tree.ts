@@ -47,6 +47,8 @@ export enum FormulaDependencyTreeType {
 class FormulaDependencyTreeCalculator {
     private _state = FDtreeStateType.DEFAULT;
 
+    type: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA;
+
     resetState() {
         this._state = FDtreeStateType.DEFAULT;
     }
@@ -291,8 +293,6 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     refOffsetX: number = 0;
     refOffsetY: number = 0;
-
-    type: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA;
 
     formulaId: Nullable<string>;
 

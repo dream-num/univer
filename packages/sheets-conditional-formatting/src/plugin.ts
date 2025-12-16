@@ -84,6 +84,9 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
 
     override onStarting(): void {
         this._injector.get(ConditionalFormattingService);
-        touchDependencies(this._injector, [[ConditionalFormattingService], [ConditionalFormattingViewModel]]);
+        touchDependencies(this._injector, [
+            [ConditionalFormattingService],
+            [ConditionalFormattingViewModel],
+        ]);
     }
 }

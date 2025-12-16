@@ -34,12 +34,12 @@ import { ISuperTableService } from '../../services/super-table.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
 import { prefixHandler } from '../utils/prefix-handler';
+import { splitTableStructuredRef } from '../utils/reference';
 import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
-import { splitTableStructuredRef } from '../utils/reference';
 
 export class ReferenceNode extends BaseAstNode {
     private _refOffsetX = 0;

@@ -24,6 +24,15 @@ import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { FormulaResultStatus } from './formula-common';
 
+export enum OtherFormulaBizType {
+    DEFAULT = 'default',
+    DATA_VALIDATION = 'dv',
+    DATA_VALIDATION_CUSTOM = 'dv-custom',
+    CONDITIONAL_FORMATTING = 'cf',
+    DOC = 'doc',
+    SLIDE = 'slide',
+}
+
 export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();
 
@@ -72,8 +81,8 @@ export class RegisterOtherFormulaService extends Disposable {
         return subUnitMap;
     }
 
-    private _createFormulaId(unitId: string, subUnitId: string) {
-        return `formula.${unitId}_${subUnitId}_${generateRandomId(8)}`;
+    private _createFormulaId(unitId: string, subUnitId: string, bizType: OtherFormulaBizType, bizId: string) {
+        return `formula.${unitId}_${subUnitId}_${bizType}_${bizId}_${generateRandomId(8)}`;
     }
 
     private _initFormulaRegister() {
@@ -182,8 +191,8 @@ export class RegisterOtherFormulaService extends Disposable {
         }));
     }
 
-    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>) {
-        const formulaId = this._createFormulaId(unitId, subUnitId);
+    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>, bizType: OtherFormulaBizType = OtherFormulaBizType.DEFAULT, bizId: string = '') {
+        const formulaId = this._createFormulaId(unitId, subUnitId, bizType, bizId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 
         cacheMap.set(formulaId, {

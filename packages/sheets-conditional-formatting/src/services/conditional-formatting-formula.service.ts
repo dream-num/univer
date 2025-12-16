@@ -16,12 +16,12 @@
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IOtherFormulaResult } from '@univerjs/sheets-formula';
-import type { IConditionalFormattingRuleConfig } from '../models/type';
+import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '../models/type';
 import { BooleanNumber, CellValueType, Disposable, Inject, ObjectMatrix, RefAlias } from '@univerjs/core';
-import { FormulaResultStatus, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { FormulaResultStatus, OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { Subject } from 'rxjs';
 
-import { CFRuleType, CFValueType } from '../base/const';
+import { CFRuleType, CFSubRuleType, CFValueType } from '../base/const';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 
 // eslint-disable-next-line ts/consistent-type-definitions
@@ -75,7 +75,34 @@ export class ConditionalFormattingFormulaService extends Disposable {
                     this._removeFormulaByCfId(unitId, subUnitId, rule.cfId);
                 }
             }
+            if (option.type === 'add') {
+                this._registerRuleFormulas(unitId, subUnitId, rule);
+            }
         }));
+    }
+
+    /**
+     * Register formulas for a specific rule based on its type
+     */
+    private _registerRuleFormulas(unitId: string, subUnitId: string, rule: IConditionFormattingRule): void {
+        switch (rule.rule.type) {
+            case CFRuleType.highlightCell: {
+                // For highlight cell with formula subtype
+                if (rule.rule.subType === CFSubRuleType.formula) {
+                    const formulaText = rule.rule.value;
+                    if (formulaText) {
+                        this.registerFormulaWithRange(
+                            unitId,
+                            subUnitId,
+                            rule.cfId,
+                            formulaText,
+                            rule.ranges
+                        );
+                    }
+                }
+                break;
+            }
+        }
     }
 
     private _initFormulaResultChange() {
@@ -126,7 +153,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
         if (formulaMap.getValue(cfFormulaId, ['id'])) {
             return;
         }
-        const formulaId = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaText, ranges);
+        const formulaId = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaText, ranges, undefined, OtherFormulaBizType.CONDITIONAL_FORMATTING, cfId);
         formulaMap.addValue({
             formulaText,
             unitId,

@@ -34,4 +34,3 @@ export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';
-export { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula/services/register-other-formula.service.js';

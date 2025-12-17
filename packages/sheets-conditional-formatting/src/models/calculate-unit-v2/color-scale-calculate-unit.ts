@@ -17,11 +17,13 @@
 import type { IColorScale, IConditionFormattingRule } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
+import { FormulaResultStatus } from '@univerjs/engine-formula';
 import { isObject } from '@univerjs/engine-render';
-import { FormulaResultStatus } from '@univerjs/sheets-formula';
 import { CFValueType } from '../../base/const';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { filterRange, getColorScaleFromValue, getValueByType, isNullable } from './utils';
+
+;
 
 interface IConfigItem {
     value: number;

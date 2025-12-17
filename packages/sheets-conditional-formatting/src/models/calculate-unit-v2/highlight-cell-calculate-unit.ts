@@ -18,12 +18,13 @@ import type { IStyleData, Nullable } from '@univerjs/core';
 import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, dayjs, Range, Tools } from '@univerjs/core';
-import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
-import { FormulaResultStatus } from '@univerjs/sheets-formula';
+import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+
+;
 
 interface IConfig {
     value: any;

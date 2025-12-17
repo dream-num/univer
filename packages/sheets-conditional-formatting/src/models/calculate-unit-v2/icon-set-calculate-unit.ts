@@ -19,10 +19,12 @@ import type { CFNumberOperator } from '../../base/const';
 import type { IIconSet } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
-import { FormulaResultStatus } from '@univerjs/sheets-formula';
+import { FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFValueType } from '../../base/const';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { compareWithNumber, filterRange, getOppositeOperator, getValueByType, isNullable } from './utils';
+
+;
 
 const getValue = (row: number, col: number, getCell: (row: number, col: number) => ICellData) => {
     const cell = getCell(row, col);

@@ -665,7 +665,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const cellMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         cachedMatrix.forValue((row, col, value) => {
             const { row: actualRow, col: actualColumn } = mapFunc(row, col);
-            const style = worksheet?.getComposedCellStyle(actualRow, actualColumn);
+            /**
+             * This only needs to include a combination of default styles, row and column styles, and cell styles.
+             * Conditional formatting, data validation, and number format are not included here because they will be applied automatically after pasting.
+             * So here we use `getComposedCellStyleByCellData` to get the final style of the cell raw data.
+             */
+            const style = worksheet?.getComposedCellStyleByCellData(actualRow, actualColumn, value);
             const newValue = cloneCellDataWithSpanInfo(value)!;
             newValue.s = style;
             cellMatrix.setValue(row, col, newValue);

@@ -23,8 +23,6 @@ import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { deserializeListOptions } from '../validators/util';
 import { DataValidationFormulaService } from './dv-formula.service';
 
-;
-
 export interface IListCacheItem {
     list: string[];
     listWithColor: Array<{ label: string; color: string }>;

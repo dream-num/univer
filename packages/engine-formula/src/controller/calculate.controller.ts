@@ -16,8 +16,8 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import type { ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationMutation, ISetFormulaStringBatchCalculationMutation, ISetQueryFormulaDependencyMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import type { IFormulaDependencyTreeJson } from '../engine/dependency/dependency-tree';
+import type { ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationMutation, ISetFormulaStringBatchCalculationMutation, ISetQueryFormulaDependencyAllMutation, ISetQueryFormulaDependencyMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
@@ -34,6 +34,8 @@ import {
     SetFormulaDependencyCalculationResultMutation,
     SetFormulaStringBatchCalculationMutation,
     SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyAllMutation,
+    SetQueryFormulaDependencyAllResultMutation,
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
@@ -85,6 +87,9 @@ export class CalculateController extends Disposable {
                 } else if (command.id === SetQueryFormulaDependencyMutation.id) {
                     const params = command.params as ISetQueryFormulaDependencyMutation;
                     this._queryFormulaDependencyJson(params);
+                } else if (command.id === SetQueryFormulaDependencyAllMutation.id) {
+                    const params = command.params as ISetQueryFormulaDependencyAllMutation;
+                    this._queryFormulaDependencyAllJson(params);
                 }
             })
         );
@@ -128,6 +133,20 @@ export class CalculateController extends Disposable {
 
         this._commandService.executeCommand(
             SetQueryFormulaDependencyResultMutation.id,
+            {
+                result,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
+    }
+
+    private async _queryFormulaDependencyAllJson(param: ISetQueryFormulaDependencyAllMutation) {
+        const { unitRanges } = param;
+        const result: IFormulaDependentsAndInRangeResults = await this._calculateFormulaService.getDependentsAndInRangeFormulas(unitRanges);
+        this._commandService.executeCommand(
+            SetQueryFormulaDependencyAllResultMutation.id,
             {
                 result,
             },

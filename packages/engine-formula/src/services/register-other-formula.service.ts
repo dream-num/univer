@@ -15,13 +15,17 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
+
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
+import type { ISetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import type { IOtherFormulaResult } from './formula-common';
 import { Disposable, generateRandomId, ICommandService, Inject, LifecycleService, ObjectMatrix } from '@univerjs/core';
-import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
+import { SetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import { IActiveDirtyManagerService } from './active-dirty-manager.service';
 import { FormulaResultStatus } from './formula-common';
 
 export enum OtherFormulaBizType {

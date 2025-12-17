@@ -1752,6 +1752,7 @@ export class LexerTreeBuilder extends Disposable {
                     if (lastString === prefixToken.MINUS) {
                         subLexerNode_minus = new LexerNode();
                         subLexerNode_minus.setToken(prefixToken.MINUS);
+                        subLexerNode_minus.setIndex(cur - this._segment.length, cur - this._segment.length);
                         sliceLength++;
                     }
 
@@ -1759,6 +1760,8 @@ export class LexerTreeBuilder extends Disposable {
                     if (lastString === prefixToken.AT || twoLastString === prefixToken.AT) {
                         subLexerNode_at = new LexerNode();
                         subLexerNode_at.setToken(prefixToken.AT);
+                        const startIndex = cur - this._segment.length + sliceLength;
+                        subLexerNode_at.setIndex(startIndex, startIndex);
 
                         if (subLexerNode_minus) {
                             subLexerNode_minus.addChildren(subLexerNode_at);
@@ -1823,6 +1826,7 @@ export class LexerTreeBuilder extends Disposable {
 
                 const subLexerNode = new LexerNode();
                 subLexerNode.setToken(currentString);
+                subLexerNode.setIndex(cur - 1, cur - 1);
 
                 const lastChildNode = this._getLastChildCurrent();
                 if (lastChildNode instanceof LexerNode) {

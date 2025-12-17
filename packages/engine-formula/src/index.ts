@@ -197,7 +197,7 @@ export { IFunctionService } from './services/function.service';
 export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-export { RegisterOtherFormulaService } from './services/register-other-formula.service';
+export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
 
 export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, type IAllRuntimeData, type IExecutionInProgressParams, IFormulaRuntimeService } from './services/runtime.service';
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';

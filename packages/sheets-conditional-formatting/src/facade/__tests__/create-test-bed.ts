@@ -33,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, SheetRowFilteredService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, RegisterOtherFormulaService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RefRangeService,
@@ -42,7 +42,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 

@@ -236,5 +236,6 @@ export enum ConcatenateType {
 export interface IExprTreeNode {
     value: string;
     children: IExprTreeNode[];
+    startIndex: number;
     type?: sequenceNodeType;
 }

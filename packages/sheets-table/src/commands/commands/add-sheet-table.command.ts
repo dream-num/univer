@@ -52,12 +52,12 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
         });
 
         let tableName = params.name;
-        if (!tableName || !customNameCharacterCheck(tableName, existingNamesSet)) {
+        if (!tableName || !customNameCharacterCheck(tableName.toLowerCase(), existingNamesSet)) {
             const prefix = localeService.t('sheets-table.tablePrefix');
             let index = tableManager.getTableList(params.unitId).length + 1;
 
             for (const name of existingNamesSet) {
-                if (name.startsWith(prefix)) {
+                if (name.startsWith(prefix.toLowerCase())) {
                     const n = Number(name.slice(prefix.length));
                     if (Number.isInteger(n) && n >= index) {
                         index = n + 1;

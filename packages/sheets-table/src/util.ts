@@ -109,13 +109,14 @@ export function getExistingNamesSet(unitId: string, options: {
     definedNamesService?: IDefinedNamesService;
 }): Set<string> {
     const { univerInstanceService, tableManager, definedNamesService } = options;
+    // The set to store existing names, case insensitive
     const existingNamesSet = new Set<string>();
 
     // The table names can't be duplicate with existing sheet names.
     const workbook = univerInstanceService?.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     if (workbook) {
         workbook.getSheets().forEach((sheet) => {
-            existingNamesSet.add(sheet.getName());
+            existingNamesSet.add(sheet.getName().toLowerCase());
         });
     }
 
@@ -123,7 +124,7 @@ export function getExistingNamesSet(unitId: string, options: {
     const tableList = tableManager?.getTableList(unitId);
     if (tableList && tableList.length > 0) {
         tableList.forEach((tableItem) => {
-            existingNamesSet.add(tableItem.name);
+            existingNamesSet.add(tableItem.name.toLowerCase());
         });
     }
 
@@ -131,7 +132,7 @@ export function getExistingNamesSet(unitId: string, options: {
     const definedNames = definedNamesService?.getDefinedNameMap(unitId);
     if (definedNames) {
         Object.values(definedNames).forEach((definedName) => {
-            existingNamesSet.add(definedName.name);
+            existingNamesSet.add(definedName.name.toLowerCase());
         });
     }
 

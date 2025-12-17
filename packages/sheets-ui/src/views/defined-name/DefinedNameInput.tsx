@@ -137,7 +137,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
         // The defined name can't be duplicate with existing defined names and table names.
         if (
-            (definedNamesService.getValueByName(unitId, nameValue) || superTableService.getTableMap(unitId)?.has(nameValue)) &&
+            (definedNamesService.getValueByName(unitId, nameValue) || superTableService.hasTable(unitId, nameValue)) &&
             (id === null || id === undefined || id.length === 0)
         ) {
             setValidString(localeService.t('definedName.nameDuplicate'));

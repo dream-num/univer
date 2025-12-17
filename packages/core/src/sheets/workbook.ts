@@ -394,13 +394,13 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     }
 
     /**
-     * Check if sheet name is unique
+     * Check if sheet name is unique, ignore case sensitivity
      * @param name sheet name
      * @returns True if sheet name is unique
      */
     checkSheetName(name: string): boolean {
         const sheetsName = this.getSheetsName();
-        return sheetsName.includes(name);
+        return sheetsName.some((sheetName) => sheetName.toLowerCase() === name.toLowerCase());
     }
 
     /**

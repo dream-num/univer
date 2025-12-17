@@ -41,6 +41,8 @@ export interface ISuperTableService {
     update$: Observable<unknown>;
 
     getTable(unitId: string, tableName: string): Nullable<ISuperTable>;
+
+    hasTable(unitId: string, tableName: string): boolean;
 }
 
 export class SuperTableService extends Disposable implements ISuperTableService {
@@ -96,6 +98,24 @@ export class SuperTableService extends Disposable implements ISuperTableService 
 
     getTable(unitId: string, tableName: string): Nullable<ISuperTable> {
         return this._tableMap.get(unitId)?.get(tableName);
+    }
+
+    hasTable(unitId: string, tableName: string): boolean {
+        let result = false;
+
+        const unitIdMap = this._tableMap.get(unitId);
+        if (unitIdMap) {
+            const names = Array.from(unitIdMap.keys());
+
+            for (let i = 0; i < names.length; i++) {
+                if (names[i].toLowerCase() === tableName.toLowerCase()) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 
     private _update() {

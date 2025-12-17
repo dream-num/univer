@@ -81,7 +81,8 @@ export interface IDefinedNamesService {
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
     private _definedNameMap: IDefinedNameMap = {};
-    private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = {}; // Cache for name-to-definition mapping
+    // Cache for name-to-definition mapping, here name key is ignored case sensitivity
+    private _nameCacheMap: { [unitId: string]: { [name: string]: IDefinedNamesServiceParam } } = {};
 
     private readonly _update$ = new Subject();
     readonly update$ = this._update$.asObservable();
@@ -181,7 +182,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         // Check cache first
         const cachedMap = this._nameCacheMap[unitId];
         if (cachedMap) {
-            return cachedMap[name] || null;
+            return cachedMap[name.toLowerCase()] || null;
         }
 
         // If not in cache, traverse the nameMap
@@ -201,7 +202,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         // Cache the result if found
         if (result) {
             this._nameCacheMap[unitId] = this._nameCacheMap[unitId] || {};
-            this._nameCacheMap[unitId][name] = result;
+            this._nameCacheMap[unitId][name.toLowerCase()] = result;
         }
 
         return result;
@@ -248,7 +249,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
         // Cache all name mappings for this unitId
         for (const item of Object.values(nameMap)) {
-            this._nameCacheMap[unitId][item.name] = item;
+            this._nameCacheMap[unitId][item.name.toLowerCase()] = item;
         }
     }
 }

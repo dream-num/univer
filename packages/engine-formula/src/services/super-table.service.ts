@@ -101,21 +101,12 @@ export class SuperTableService extends Disposable implements ISuperTableService 
     }
 
     hasTable(unitId: string, tableName: string): boolean {
-        let result = false;
-
         const unitIdMap = this._tableMap.get(unitId);
         if (unitIdMap) {
-            const names = Array.from(unitIdMap.keys());
-
-            for (let i = 0; i < names.length; i++) {
-                if (names[i].toLowerCase() === tableName.toLowerCase()) {
-                    result = true;
-                    break;
-                }
-            }
+            return unitIdMap.keys().some((name) => name.toLowerCase() === tableName.toLowerCase());
         }
 
-        return result;
+        return false;
     }
 
     private _update() {

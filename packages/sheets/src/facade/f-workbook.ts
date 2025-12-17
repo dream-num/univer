@@ -16,7 +16,7 @@
 
 import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IStyleData, IWorkbookData, IWorksheetData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IInsertSheetCommandParams, IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
 import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
@@ -223,9 +223,9 @@ export class FWorkbook extends FBaseInitialable {
      * console.log(newSheetWithData);
      * ```
      */
-    create(name: string, rows: number, columns: number, options?: Pick<IInsertSheetCommandParams, 'index' | 'sheet'>): FWorksheet {
+    create(name: string, rows: number, columns: number, options?: { index?: number; sheet?: Partial<IWorksheetData> }): FWorksheet {
         const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
-        newSheet.name = name;
+        newSheet.name = this._workbook.uniqueSheetName(name);
         newSheet.rowCount = rows;
         newSheet.columnCount = columns;
         newSheet.id = options?.sheet?.id;
@@ -353,9 +353,9 @@ export class FWorkbook extends FBaseInitialable {
      * console.log(newSheetWithData);
      * ```
      */
-    insertSheet(sheetName?: string, options?: Pick<IInsertSheetCommandParams, 'index' | 'sheet'>): FWorksheet {
+    insertSheet(sheetName?: string, options?: { index?: number; sheet?: Partial<IWorksheetData> }): FWorksheet {
         const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
-        newSheet.name = sheetName;
+        newSheet.name = this._workbook.uniqueSheetName(sheetName);
         newSheet.id = options?.sheet?.id;
 
         const newSheetIndex = options?.index ?? this._workbook.getSheets().length;

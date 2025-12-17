@@ -822,6 +822,9 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../packages/docs-ui
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../../packages/engine-formula
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
@@ -831,9 +834,6 @@ importers:
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../../packages/sheets-formula
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-formula-ui

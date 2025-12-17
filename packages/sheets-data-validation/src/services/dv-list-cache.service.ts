@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDataValidationRule, Nullable } from '@univerjs/core';
-import type { IOtherFormulaResult } from '@univerjs/sheets-formula';
+import type { IOtherFormulaResult } from '@univerjs/engine-formula';
 import { Disposable, Inject, Injector, isFormulaString, numfmt } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { isLegalFormulaResult } from '../utils/formula';

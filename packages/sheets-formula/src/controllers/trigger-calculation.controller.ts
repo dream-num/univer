@@ -34,6 +34,7 @@ import {
     FormulaExecutedStateType,
     FormulaExecuteStageType,
     IActiveDirtyManagerService,
+    RegisterOtherFormulaService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
@@ -47,7 +48,6 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
-import { RegisterOtherFormulaService } from '../services/register-other-formula.service';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
 /**

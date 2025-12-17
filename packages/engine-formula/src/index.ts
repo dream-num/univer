@@ -49,6 +49,7 @@ export { isReferenceString } from './basics/regex';
 export { convertUnitDataToRuntime } from './basics/runtime';
 export { compareToken, matchToken, OPERATOR_TOKEN_SET, operatorToken, prefixToken, SUFFIX_TOKEN_SET } from './basics/token';
 export { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME, DEFAULT_TOKEN_LET_FUNCTION_NAME, DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from './basics/token-type';
+export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export { type ISetArrayFormulaDataMutationParams, SetArrayFormulaDataMutation } from './commands/mutations/set-array-formula-data.mutation';
 export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from './commands/mutations/set-defined-name.mutation';
@@ -189,12 +190,17 @@ export { DependencyManagerService } from './services/dependency-manager.service'
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
 export { FeatureCalculationManagerService, IFeatureCalculationManagerService } from './services/feature-calculation-manager.service';
 export type { IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
+export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
+export { FormulaResultStatus } from './services/formula-common';
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
 export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
+export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
+
 export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, type IAllRuntimeData, type IExecutionInProgressParams, IFormulaRuntimeService } from './services/runtime.service';
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { ISuperTableService } from './services/super-table.service';
+
 export { SuperTableService } from './services/super-table.service';

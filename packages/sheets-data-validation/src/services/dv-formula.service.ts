@@ -15,10 +15,10 @@
  */
 
 import type { ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
+import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/engine-formula';
 import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 import { DataValidationListCacheService } from './dv-list-cache.service';

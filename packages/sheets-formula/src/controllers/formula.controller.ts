@@ -15,9 +15,9 @@
  */
 
 import { Disposable, ICommandService } from '@univerjs/core';
+import { OtherFormulaMarkDirty } from '@univerjs/engine-formula';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { QuickSumCommand } from '../commands/commands/quick-sum.command';
-import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 
 export class FormulaController extends Disposable {
     constructor(

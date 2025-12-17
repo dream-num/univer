@@ -41,9 +41,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs';
+import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { RichText } from '@univerjs/engine-render';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
-import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { CanvasView } from '@univerjs/slides-ui';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';

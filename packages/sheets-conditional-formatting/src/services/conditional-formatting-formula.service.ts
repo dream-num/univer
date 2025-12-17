@@ -15,10 +15,10 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import type { IOtherFormulaResult } from '@univerjs/sheets-formula';
+import type { IOtherFormulaResult } from '@univerjs/engine-formula';
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '../models/type';
 import { BooleanNumber, CellValueType, Disposable, Inject, ObjectMatrix, RefAlias } from '@univerjs/core';
-import { FormulaResultStatus, OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { FormulaResultStatus, OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 
 import { CFRuleType, CFSubRuleType, CFValueType } from '../base/const';

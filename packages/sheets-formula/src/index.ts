@@ -16,7 +16,7 @@
 
 export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
 export { QuickSumCommand } from './commands/commands/quick-sum.command';
-export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
+
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './controllers/config.schema';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
 export { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
@@ -26,13 +26,11 @@ export { UpdateFormulaController } from './controllers/update-formula.controller
 export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
 export { DescriptionService, IDescriptionService } from './services/description.service';
 export type { ISearchItem, ISearchItemWithType } from './services/description.service';
-export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
-export { FormulaResultStatus } from './services/formula-common';
+
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from './services/register-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
-export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';

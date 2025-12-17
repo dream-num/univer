@@ -17,7 +17,7 @@
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { getFormulaCellData, shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 

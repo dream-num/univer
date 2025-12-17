@@ -1794,6 +1794,7 @@ export class LexerTreeBuilder extends Disposable {
                     const subLexerNode_ref = new LexerNode();
                     subLexerNode_ref.setToken(this._segment);
                     subLexerNode_ref.setParent(subLexerNode_left);
+                    subLexerNode_ref.setIndex(cur - this._segment.length, cur - 1);
 
                     subLexerNode_left.getChildren().push(subLexerNode_ref);
                     this._resetSegment();

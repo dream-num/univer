@@ -16,7 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { AddCfCommand } from './commands/commands/add-cf.command';
 import { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
@@ -37,6 +38,7 @@ import { ConditionalFormattingViewModel } from './models/conditional-formatting-
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
 
+@DependentOn(UniverSheetsFormulaPlugin)
 export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;

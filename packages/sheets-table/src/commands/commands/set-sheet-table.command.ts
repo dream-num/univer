@@ -54,7 +54,7 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         });
 
         if (name) {
-            const isValidName = customNameCharacterCheck(name, existingNamesSet);
+            const isValidName = customNameCharacterCheck(name.toLowerCase(), existingNamesSet);
             if (!isValidName) {
                 const logService = accessor.get(ILogService);
                 logService.warn(localeService.t('sheets-table.tableNameError'));

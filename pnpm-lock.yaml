@@ -834,9 +834,6 @@ importers:
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../../packages/sheets-formula
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-formula-ui

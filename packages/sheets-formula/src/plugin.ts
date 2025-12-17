@@ -71,7 +71,7 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     }
 }
 
-@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

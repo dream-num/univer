@@ -45,7 +45,7 @@ import { GlobalRangeSelector } from './views/range-selector/global';
 /**
  * The configuration of the formula UI plugin.
  */
-@DependentOn(UniverFormulaEnginePlugin, UniverSheetsFormulaPlugin)
+@DependentOn(UniverSheetsFormulaPlugin)
 export class UniverSheetsFormulaUIPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

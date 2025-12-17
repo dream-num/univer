@@ -124,8 +124,8 @@ describe('lexer test', () => {
                                 children: [
                                     {
                                         token: '$A$10',
-                                        st: -1,
-                                        ed: -1,
+                                        st: 0,
+                                        ed: 4,
                                         children: [],
                                     },
                                 ],
@@ -203,8 +203,8 @@ describe('lexer test', () => {
                                                                             [
                                                                                 {
                                                                                     token: 'A1',
-                                                                                    st: -1,
-                                                                                    ed: -1,
+                                                                                    st: 27,
+                                                                                    ed: 28,
                                                                                     children:
                                                                                         [],
                                                                                 },
@@ -286,8 +286,8 @@ describe('lexer test', () => {
                                 children: [
                                     {
                                         children: [],
-                                        ed: -1,
-                                        st: -1,
+                                        ed: 4,
+                                        st: 0,
                                         token: '$A$10',
                                     },
                                 ],

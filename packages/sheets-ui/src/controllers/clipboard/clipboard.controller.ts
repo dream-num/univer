@@ -261,7 +261,10 @@ export class SheetClipboardController extends RxDisposable {
                 }
 
                 const mergedCellByRowCol = currentSheet!.getMergedCell(row, col);
-
+                /**
+                 * This is for generating the copied HTML, which requires all the styles applied to the cell, including conditional formatting, data validation, number format, etc.
+                 * So here we use `getComposedCellStyle` to get the final style of the cell.
+                 */
                 const textStyle = currentSheet!.getComposedCellStyle(row, col);
 
                 let style = '';

@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IMutationInfo } from '@univerjs/core';
-import type { IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet } from '../models/type';
+import type { IDisposable, IMutationInfo, IRange } from '@univerjs/core';
+import type { IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, Inject, Injector, toDisposable, Tools } from '@univerjs/core';
+import {
+    AddConditionalRuleMutation,
+    AddConditionalRuleMutationUndoFactory,
+    CFRuleType,
+    CFSubRuleType,
+    CFValueType,
+    ConditionalFormattingRuleModel,
+    createCfId,
+    DeleteConditionalRuleMutation,
+    SetConditionalRuleMutation,
+    setConditionalRuleMutationUndoFactory,
+} from '@univerjs/sheets-conditional-formatting';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import { CFRuleType, CFSubRuleType, CFValueType } from '../base/const';
-import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../commands/mutations/add-conditional-rule.mutation';
-import { DeleteConditionalRuleMutation } from '../commands/mutations/delete-conditional-rule.mutation';
-import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/set-conditional-rule.mutation';
-import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
-import { createCfId } from '../utils/create-cf-id';
 
 export class ConditionalFormattingFormulaRefRangeController extends Disposable {
     private _disposableMap: Map<string, IDisposable> = new Map();
@@ -128,7 +134,7 @@ export class ConditionalFormattingFormulaRefRangeController extends Disposable {
         const oldRanges = rule.ranges;
         const oldFormulas = this._getRuleFormulas(rule);
 
-        const disposable = this._formulaRefRangeService.registerRangeFormula(unitId, subUnitId, oldRanges, oldFormulas, (res) => {
+        const disposable = this._formulaRefRangeService.registerRangeFormula(unitId, subUnitId, oldRanges, oldFormulas, (res: { formulas: string[]; ranges: IRange[] }[]) => {
             if (res.length === 0) {
                 return {
                     undos: [{

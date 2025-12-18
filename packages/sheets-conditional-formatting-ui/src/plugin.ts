@@ -39,6 +39,7 @@ import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.c
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
+import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
@@ -92,6 +93,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingClearController],
             [ConditionalFormattingPainterController],
             [ConditionalFormattingViewportController],
+            [ConditionalFormattingFormulaRefRangeController],
         ]);
 
         touchDependencies(this._injector, [
@@ -115,7 +117,6 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingI18nController],
             [ConditionalFormattingPainterController],
             [ConditionalFormattingPermissionController],
-            [SheetsCfRefRangeController],
             [ConditionalFormattingViewportController],
         ]);
     }

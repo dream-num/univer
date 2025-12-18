@@ -29,7 +29,6 @@ import { AddConditionalRuleMutation } from './commands/mutations/add-conditional
 import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
 import { MoveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from './commands/mutations/set-conditional-rule.mutation';
-import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import {
     defaultPluginConfig,
     SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY,
@@ -65,7 +64,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
             [ConditionalFormattingFormulaService],
             [ConditionalFormattingRuleModel],
             [ConditionalFormattingViewModel],
-            [ConditionalFormattingFormulaRefRangeController],
         ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
         });
@@ -91,7 +89,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         touchDependencies(this._injector, [
             [ConditionalFormattingService],
             [ConditionalFormattingViewModel],
-            [ConditionalFormattingFormulaRefRangeController],
         ]);
     }
 }

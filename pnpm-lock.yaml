@@ -1970,9 +1970,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../sheets-formula
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2016,6 +2013,9 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../sheets-formula
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../sheets-formula-ui

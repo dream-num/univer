@@ -36,7 +36,7 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { Direction, IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -117,7 +117,7 @@ interface ILine {
 /**
  * see docs/tldr/ref-range/move-rows-cols.tldr
  */
-// eslint-disable-next-line max-lines-per-function, complexity
+// eslint-disable-next-line max-lines-per-function
 export const handleBaseMoveRowsCols = (
     fromRange: ILine,
     toRange: ILine,
@@ -982,48 +982,74 @@ export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams
     const param = info.params!;
     const insertRow = param.range.startRow;
     const insertCount = param.range.endRow - param.range.startRow + 1;
+    const direction = param.direction;
 
-    if (targetRange.startRow >= insertRow) {
-        return [{
-            startRow: targetRange.startRow + insertCount,
-            endRow: targetRange.endRow + insertCount,
-            startColumn: targetRange.startColumn,
-            endColumn: targetRange.endColumn,
-        }];
-    } else if (targetRange.endRow < insertRow) {
-        return [targetRange];
+    if (direction === Direction.UP) {
+        if (insertRow < targetRange.startRow) {
+            return [{
+                ...targetRange,
+                startRow: targetRange.startRow + insertCount,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        } else if (insertRow <= targetRange.endRow) {
+            return [{
+                ...targetRange,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        }
     } else {
-        return [{
-            startRow: targetRange.startRow,
-            endRow: targetRange.endRow + insertCount,
-            startColumn: targetRange.startColumn,
-            endColumn: targetRange.endColumn,
-        }];
+        if (insertRow <= targetRange.startRow) {
+            return [{
+                ...targetRange,
+                startRow: targetRange.startRow + insertCount,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        } else if (insertRow <= targetRange.endRow + 1) {
+            return [{
+                ...targetRange,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        }
     }
+
+    return [targetRange];
 };
 
 export const handleInsertColCommon = (info: ICommandInfo<IInsertColCommandParams>, targetRange: IRange) => {
     const param = info.params!;
     const insertColumn = param.range.startColumn;
     const insertCount = param.range.endColumn - param.range.startColumn + 1;
+    const direction = param.direction;
 
-    if (targetRange.startColumn >= insertColumn) {
-        return [{
-            startRow: targetRange.startRow,
-            endRow: targetRange.endRow,
-            startColumn: targetRange.startColumn + insertCount,
-            endColumn: targetRange.endColumn + insertCount,
-        }];
-    } else if (targetRange.endColumn < insertColumn) {
-        return [targetRange];
+    if (direction === Direction.LEFT) {
+        if (insertColumn < targetRange.startColumn) {
+            return [{
+                ...targetRange,
+                startColumn: targetRange.startColumn + insertCount,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        } else if (insertColumn <= targetRange.endColumn) {
+            return [{
+                ...targetRange,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        }
     } else {
-        return [{
-            startRow: targetRange.startRow,
-            endRow: targetRange.endRow,
-            startColumn: targetRange.startColumn,
-            endColumn: targetRange.endColumn + insertCount,
-        }];
+        if (insertColumn <= targetRange.startColumn) {
+            return [{
+                ...targetRange,
+                startColumn: targetRange.startColumn + insertCount,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        } else if (insertColumn <= targetRange.endColumn + 1) {
+            return [{
+                ...targetRange,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        }
     }
+
+    return [targetRange];
 };
 
 export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {

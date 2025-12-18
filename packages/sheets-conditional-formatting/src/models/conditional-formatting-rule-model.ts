@@ -62,6 +62,10 @@ export class ConditionalFormattingRuleModel {
         return list || null;
     }
 
+    getAll() {
+        return this._model;
+    }
+
     deleteRule(unitId: string, subUnitId: string, cfId: string) {
         const list = this.getSubunitRules(unitId, subUnitId);
         if (list) {

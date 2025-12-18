@@ -182,7 +182,7 @@ export class RefRangeService extends Disposable {
                             const params = command.params!;
                             const startColumn = Math.min(params.fromRange.startColumn, params.toRange.startColumn);
                             return this._checkRange(
-                                [{ ...params.fromRange, startColumn, endColumn: worksheet.getColumnCount() - 1 }],
+                                [{ ...params.fromRange, startColumn, endColumn: MAX_ROW_COL }],
                                 unitId,
                                 subUnitId
                             );
@@ -192,7 +192,7 @@ export class RefRangeService extends Disposable {
                             const startRow = Math.min(params.fromRange.startRow, params.toRange.startRow);
 
                             return this._checkRange(
-                                [{ ...params.fromRange, startRow, endRow: worksheet.getRowCount() - 1 }],
+                                [{ ...params.fromRange, startRow, endRow: MAX_ROW_COL }],
                                 unitId,
                                 subUnitId
                             );
@@ -209,10 +209,10 @@ export class RefRangeService extends Disposable {
                             const params = command;
                             const rowStart = params.params!.range.startRow;
                             const range: IRange = {
-                                startRow: rowStart,
-                                endRow: worksheet.getRowCount() - 1,
+                                startRow: Math.max(0, rowStart - 1),
+                                endRow: MAX_ROW_COL,
                                 startColumn: 0,
-                                endColumn: worksheet.getColumnCount() - 1,
+                                endColumn: MAX_ROW_COL,
                                 rangeType: RANGE_TYPE.ROW,
                             };
                             return this._checkRange([range], unitId, subUnitId);
@@ -222,9 +222,9 @@ export class RefRangeService extends Disposable {
                             const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
-                                endRow: worksheet.getRowCount() - 1,
-                                startColumn: colStart,
-                                endColumn: worksheet.getColumnCount() - 1,
+                                endRow: MAX_ROW_COL,
+                                startColumn: Math.max(0, colStart - 1),
+                                endColumn: MAX_ROW_COL,
                                 rangeType: RANGE_TYPE.COLUMN,
                             };
                             return this._checkRange([range], unitId, subUnitId);
@@ -235,9 +235,9 @@ export class RefRangeService extends Disposable {
                             const rowStart = params.params!.range.startRow;
                             const range: IRange = {
                                 startRow: rowStart,
-                                endRow: worksheet.getRowCount() - 1,
+                                endRow: MAX_ROW_COL,
                                 startColumn: 0,
-                                endColumn: worksheet.getColumnCount() - 1,
+                                endColumn: MAX_ROW_COL,
                                 rangeType: RANGE_TYPE.ROW,
                             };
                             return this._checkRange([range], unitId, subUnitId);
@@ -247,9 +247,9 @@ export class RefRangeService extends Disposable {
                             const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
-                                endRow: worksheet.getRowCount() - 1,
+                                endRow: MAX_ROW_COL,
                                 startColumn: colStart,
-                                endColumn: worksheet.getColumnCount() - 1,
+                                endColumn: MAX_ROW_COL,
                                 rangeType: RANGE_TYPE.COLUMN,
                             };
                             return this._checkRange([range], unitId, subUnitId);
@@ -364,6 +364,7 @@ export class RefRangeService extends Disposable {
                     endColumn: +range.endColumn,
                     rangeType: range.rangeType && +range.rangeType,
                 };
+
                 // Todo@Gggpound : How to reduce this calculation
                 if (
                     effectRanges.some((item) => Rectangle.intersects(item, realRange))

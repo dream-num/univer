@@ -37,10 +37,10 @@ import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.c
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
+import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
-import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
@@ -71,10 +71,10 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
         this._initCommand();
 
         this._injector.add([SheetsCfRenderController]);
-        this._injector.add([SheetsCfRefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
         this._injector.add([ConditionalFormattingPermissionController]);
         this._injector.add([ConditionalFormattingI18nController]);
+        this._injector.add([ConditionalFormattingFormulaRefRangeController]);
     }
 
     private _initCommand() {

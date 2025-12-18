@@ -136,7 +136,6 @@ export class FormulaRefRangeService extends Disposable {
         const rangeMap = new Map<string, { unitId: string; subUnitId: string; range: IRange; sheetName: string }>();
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
-
         const handleChange = (params: EffectRefRangeParams) => {
             const currentUnit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const currentSheet = currentUnit.getActiveSheet();
@@ -251,7 +250,6 @@ export class FormulaRefRangeService extends Disposable {
     registerRangeFormula(unitId: string, subUnitId: string, oldRanges: IRange[], formulas: string[], callback: RangeFormulaChangeCallback): IDisposable {
         const disposableCollection = new DisposableCollection();
         const formulaDeps = formulas.map((formula) => this._getFormulaDependcy(unitId, subUnitId, formula, oldRanges));
-
         // eslint-disable-next-line max-lines-per-function
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const orginStartRow = oldRanges[0].startRow;

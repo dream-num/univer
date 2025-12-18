@@ -40,7 +40,6 @@ import { OpenConditionalFormattingOperator } from './commands/operations/open-co
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
-import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
@@ -71,7 +70,6 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
         this._initCommand();
 
         this._injector.add([SheetsCfRenderController]);
-        this._injector.add([SheetsCfRefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
         this._injector.add([ConditionalFormattingPermissionController]);
         this._injector.add([ConditionalFormattingI18nController]);

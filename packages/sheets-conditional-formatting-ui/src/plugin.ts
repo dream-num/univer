@@ -48,7 +48,6 @@ import { ConditionalFormattingMenuController } from './controllers/cf.menu.contr
 import { ConditionalFormattingPainterController } from './controllers/cf.painter.controller';
 import { ConditionalFormattingPanelController } from './controllers/cf.panel.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
-import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
 import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -83,7 +82,6 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     override onStarting(): void {
         registerDependencies(this._injector, [
             [SheetsCfRenderController],
-            [SheetsCfRefRangeController],
             [ConditionalFormattingCopyPasteController],
             [ConditionalFormattingAutoFillController],
             [ConditionalFormattingPermissionController],

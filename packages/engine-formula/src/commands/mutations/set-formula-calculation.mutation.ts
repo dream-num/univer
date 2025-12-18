@@ -22,7 +22,7 @@ import type {
     IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
 
-import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson } from '../../engine/dependency/dependency-tree';
+import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from '../../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 import { CommandType } from '@univerjs/core';
@@ -65,6 +65,14 @@ export interface ISetQueryFormulaDependencyMutation {
 
 export interface ISetQueryFormulaDependencyResultMutation {
     result: IFormulaDependencyTreeJson[];
+}
+
+export interface ISetQueryFormulaDependencyAllMutation {
+    unitRanges: IUnitRange[];
+}
+
+export interface ISetQueryFormulaDependencyAllResultMutation {
+    result: IFormulaDependentsAndInRangeResults;
 }
 
 /**
@@ -158,6 +166,18 @@ export const SetQueryFormulaDependencyMutation: IMutation<ISetQueryFormulaDepend
 
 export const SetQueryFormulaDependencyResultMutation: IMutation<ISetQueryFormulaDependencyResultMutation> = {
     id: 'formula.mutation.set-query-formula-dependency-result',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
+export const SetQueryFormulaDependencyAllMutation: IMutation<ISetQueryFormulaDependencyAllMutation> = {
+    id: 'formula.mutation.set-query-formula-dependency-all',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
+export const SetQueryFormulaDependencyAllResultMutation: IMutation<ISetQueryFormulaDependencyAllResultMutation> = {
+    id: 'formula.mutation.set-query-formula-dependency-all-result',
     type: CommandType.MUTATION,
     handler: () => true,
 };

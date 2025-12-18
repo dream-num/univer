@@ -63,6 +63,7 @@ export {
     type ISetFormulaDependencyCalculationMutation,
     type ISetFormulaDependencyCalculationResultMutation,
     type ISetFormulaStringBatchCalculationResultMutation,
+    type ISetQueryFormulaDependencyAllResultMutation,
     type ISetQueryFormulaDependencyResultMutation,
     SetCellFormulaDependencyCalculationMutation,
     SetCellFormulaDependencyCalculationResultMutation,
@@ -74,6 +75,8 @@ export {
     SetFormulaDependencyCalculationResultMutation,
     SetFormulaStringBatchCalculationMutation,
     SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyAllMutation,
+    SetQueryFormulaDependencyAllResultMutation,
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
     SetTriggerFormulaCalculationStartMutation,
@@ -100,7 +103,7 @@ export { ReferenceNodeFactory } from './engine/ast-node/reference-node';
 export { SuffixNodeFactory } from './engine/ast-node/suffix-node';
 export { UnionNodeFactory } from './engine/ast-node/union-node';
 export { ValueNodeFactory } from './engine/ast-node/value-node';
-export { FormulaDependencyTree, FormulaDependencyTreeModel, type IFormulaDependencyTree, type IFormulaDependencyTreeFullJson, type IFormulaDependencyTreeJson } from './engine/dependency/dependency-tree';
+export { FormulaDependencyTree, FormulaDependencyTreeModel, type IFormulaDependencyTree, type IFormulaDependencyTreeFullJson, type IFormulaDependencyTreeJson, type IFormulaDependentsAndInRangeResults } from './engine/dependency/dependency-tree';
 export { FormulaDependencyTreeType } from './engine/dependency/dependency-tree';
 export { FormulaDependencyTreeVirtual } from './engine/dependency/dependency-tree';
 export { FormulaDependencyGenerator, IFormulaDependencyGenerator } from './engine/dependency/formula-dependency';

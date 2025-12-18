@@ -25,7 +25,7 @@ import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
-import type { IFormulaDependencyTree, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson } from './dependency-tree';
+import type { IFormulaDependencyTree, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from './dependency-tree';
 import { createIdentifier, Disposable, Inject, ObjectMatrix, RTree } from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
 
@@ -61,6 +61,7 @@ export interface IFormulaDependencyGenerator {
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
     getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
     getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
+    getRangeDependentsAndInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependentsAndInRangeResults>;
 }
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
@@ -1415,7 +1416,7 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     protected _setRealFormulaString(treeModel: FormulaDependencyTreeModel) {
-        if (!treeModel.refTreeId) {
+        if (treeModel.refTreeId == null) {
             return;
         }
 
@@ -1463,11 +1464,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return treeModel.toFullJson();
     }
 
-    async getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
-        await this._initializeGenerateTreeList();
-
-        this._startFormulaDependencyTreeModel();
-
+    protected _getRangeDependents(unitRanges: IUnitRange[]): IFormulaDependencyTreeJson[] {
         const treeIds = this._dependencyManagerService.searchDependency(unitRanges);
         const treeList: FormulaDependencyTreeModel[] = [];
         for (const treeId of treeIds) {
@@ -1487,13 +1484,22 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        return resultsJson;
+    }
+
+    async getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
+        await this._initializeGenerateTreeList();
+
+        this._startFormulaDependencyTreeModel();
+
+        const resultsJson = this._getRangeDependents(unitRanges);
+
         this._endFormulaDependencyTreeModel();
 
         return resultsJson;
     }
 
-    async getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
-        const treeList = await this._getAllTreeList();
+    protected _getInRangeFormulas(unitRanges: IUnitRange[], treeList: IFormulaDependencyTree[]): IFormulaDependencyTreeJson[] {
         const matchTreeList: IFormulaDependencyTree[] = [];
         for (const dependencyTree of treeList) {
             for (const unitRange of unitRanges) {
@@ -1512,8 +1518,6 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        this._startFormulaDependencyTreeModel();
-
         const results: FormulaDependencyTreeModel[] = [];
         for (const tree of matchTreeList) {
             const treeModel = this._getFormulaDependencyTreeModel(tree);
@@ -1528,8 +1532,35 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        return resultsJson;
+    }
+
+    async getInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]> {
+        const treeList = await this._getAllTreeList();
+
+        this._startFormulaDependencyTreeModel();
+
+        const resultsJson = this._getInRangeFormulas(unitRanges, treeList);
+
         this._endFormulaDependencyTreeModel();
 
         return resultsJson;
+    }
+
+    async getRangeDependentsAndInRangeFormulas(unitRanges: IUnitRange[]): Promise<IFormulaDependentsAndInRangeResults> {
+        const treeList = await this._getAllTreeList();
+
+        this._startFormulaDependencyTreeModel();
+
+        const dependentsJson = this._getRangeDependents(unitRanges);
+
+        const inRangeFormulasJson = this._getInRangeFormulas(unitRanges, treeList);
+
+        this._endFormulaDependencyTreeModel();
+
+        return {
+            dependents: dependentsJson,
+            inRanges: inRangeFormulasJson,
+        };
     }
 }

@@ -35,6 +35,8 @@ import {
     SetFormulaDependencyCalculationResultMutation,
     SetFormulaStringBatchCalculationMutation,
     SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyAllMutation,
+    SetQueryFormulaDependencyAllResultMutation,
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
     SetTriggerFormulaCalculationStartMutation,
@@ -93,6 +95,8 @@ export class FormulaController extends Disposable {
             SetFormulaCalculationStopMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
+            SetQueryFormulaDependencyAllMutation,
+            SetQueryFormulaDependencyAllResultMutation,
 
             SetFormulaDependencyCalculationMutation,
             SetFormulaDependencyCalculationResultMutation,

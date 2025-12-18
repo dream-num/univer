@@ -538,6 +538,11 @@ export interface IFormulaDependencyTreeFullJson extends IFormulaDependencyTreeJs
     parents: IFormulaDependencyTreeJson[];
 }
 
+export interface IFormulaDependentsAndInRangeResults {
+    dependents: IFormulaDependencyTreeJson[];
+    inRanges: IFormulaDependencyTreeJson[];
+}
+
 export class FormulaDependencyTreeModel {
     children: Set<FormulaDependencyTreeModel> = new Set();
 

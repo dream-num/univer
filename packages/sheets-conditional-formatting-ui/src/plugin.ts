@@ -99,6 +99,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetsCfRenderController],
+            [ConditionalFormattingFormulaRefRangeController],
         ]);
     }
 

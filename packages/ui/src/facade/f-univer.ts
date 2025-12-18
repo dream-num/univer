@@ -439,6 +439,16 @@ export interface IFUniverUIMixin {
      * ```
      */
     addFonts(fonts: IFontConfig[]): void;
+
+    /**
+     * Remove fonts to the font list.
+     * @param fonts The array of font to remove.
+     * @example
+     * ```ts
+     * univerAPI.removeFonts(["Arial"]);
+     * ```
+     */
+    removeFonts(fonts: string[]): void;
 }
 
 /**
@@ -537,6 +547,13 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
                 ...font,
                 isCustom: true,
             });
+        });
+    }
+
+    override removeFonts(fonts: string[]): void {
+        const fontService = this._injector.get(IFontService);
+        fonts.forEach((font) => {
+            fontService.removeFont(font);
         });
     }
 }

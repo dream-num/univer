@@ -238,12 +238,6 @@ export class FontService implements IFontService, IDisposable {
             return false;
         }
 
-        const fontToRemove = fonts[fontIndex];
-        if (!fontToRemove.isCustom) {
-            // Prevent removal of built-in fonts
-            return false;
-        }
-
         const updatedFonts = fonts.filter((font) => font.value !== value);
         this.fonts$.next(updatedFonts);
         return true;

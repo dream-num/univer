@@ -200,6 +200,8 @@ function createNewInstance() {
     //     { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
     // ]);
 
+    // window.univerAPI.removeFonts(['SimSun']);
+
     customRegisterEvent(univer, window.univerAPI!);
     // customRangePopups(univer, window.univerAPI!);
 }

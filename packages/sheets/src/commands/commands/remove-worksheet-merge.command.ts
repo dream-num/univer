@@ -15,20 +15,14 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
+import { SelectionMoveType } from '../../services/selections';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
+import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -71,22 +65,23 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         );
 
         const nowSelections = selectionManagerService.getCurrentSelections();
-        if (!nowSelections?.length) return false;
-
         const undoSelections = Tools.deepClone(nowSelections);
         const redoSelections = Tools.deepClone(nowSelections);
-        const redoLastSelection = redoSelections[redoSelections.length - 1];
-        const { startRow, startColumn } = redoLastSelection.range;
-        redoLastSelection.primary = {
-            startRow,
-            startColumn,
-            endRow: startRow,
-            endColumn: startColumn,
-            actualRow: startRow,
-            actualColumn: startColumn,
-            isMerged: false,
-            isMergedMainCell: false,
-        };
+
+        if (nowSelections.length) {
+            const redoLastSelection = redoSelections[redoSelections.length - 1];
+            const { startRow, startColumn } = redoLastSelection.range;
+            redoLastSelection.primary = {
+                startRow,
+                startColumn,
+                endRow: startRow,
+                endColumn: startColumn,
+                actualRow: startRow,
+                actualColumn: startColumn,
+                isMerged: false,
+                isMergedMainCell: false,
+            };
+        }
 
         const getSetRangeValuesParams = getSetRangeStyleParamsForRemoveMerge(worksheet, intersectsMerges);
         const redoSetRangeValueParams: ISetRangeValuesMutationParams = {
@@ -103,13 +98,29 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         const redoMutations: IMutationInfo[] = [
             { id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams },
             { id: SetRangeValuesMutation.id, params: redoSetRangeValueParams },
-            { id: SetSelectionsOperation.id, params: { selections: redoSelections } },
+            {
+                id: SetSelectionsOperation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    selections: redoSelections,
+                    type: SelectionMoveType.ONLY_SET,
+                },
+            },
         ];
 
         const undoMutations: IMutationInfo[] = [
             { id: AddWorksheetMergeMutation.id, params: undoredoMutationParams },
             { id: SetRangeValuesMutation.id, params: undoSetRangeValueParams },
-            { id: SetSelectionsOperation.id, params: { selections: undoSelections } },
+            {
+                id: SetSelectionsOperation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    selections: undoSelections,
+                    type: SelectionMoveType.ONLY_SET,
+                },
+            },
         ];
 
         const result = sequenceExecute(redoMutations, commandService);

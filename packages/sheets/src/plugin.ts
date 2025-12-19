@@ -108,7 +108,6 @@ export class UniverSheetsPlugin extends Plugin {
             [DefinedNameDataController],
             [ZebraCrossingCacheController],
             [SheetsFreezeSyncController],
-            [ActiveWorksheetController],
 
             // permission
             [WorksheetPermissionService],
@@ -157,6 +156,10 @@ export class UniverSheetsPlugin extends Plugin {
             [SheetPermissionViewModelController],
             [SheetSkeletonService],
         ]);
+
+        if (!this._config?.onlyRegisterFormulaRelatedMutations) {
+            this._injector.add([ActiveWorksheetController]);
+        }
     }
 
     override onRendered(): void {

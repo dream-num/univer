@@ -116,9 +116,9 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         const { left: startX, top: startY, right: endX, bottom: endY } = position;
         const verticalStyle = (direction === 'vertical' && endY > maxTop) || direction.indexOf('top') > -1
             // top
-            ? { top: Math.max(startY - height, minTop) }
+            ? { top: Math.max(Math.min(startY - height, maxTop), minTop) }
             // bottom
-            : { top: Math.min(endY, maxTop) };
+            : { top: Math.max(Math.min(endY, maxTop), minTop) };
 
         let horizontalStyle;
 
@@ -130,16 +130,16 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
                 ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
                 : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
         } else if (direction.includes('right')) {
-            horizontalStyle = { left: Math.max(endX - width, minLeft) };
+            horizontalStyle = { left: Math.max(Math.min(endX - width, maxLeft), minLeft) };
         } else if (direction.includes('left')) {
-            horizontalStyle = { left: Math.min(startX, maxLeft) };
+            horizontalStyle = { left: Math.max(Math.min(startX, maxLeft), minLeft) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
             horizontalStyle = (startX + width) > containerWidth
                 ? Math.max(endX - width, minLeft) < PUSHING_MINIMUM_GAP
-                    ? { left: Math.min(startX, maxLeft) }
-                    : { left: Math.max(endX - width, minLeft) } // on left
-                : { left: Math.min(startX, maxLeft) }; // on right
+                    ? { left: Math.max(Math.min(startX, maxLeft), minLeft) }
+                    : { left: Math.max(Math.min(endX - width, maxLeft), minLeft) } // on left
+                : { left: Math.max(Math.min(startX, maxLeft), minLeft) }; // on right
         }
 
         return { ...verticalStyle, ...horizontalStyle };
@@ -149,8 +149,8 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
     // const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
     const horizontalStyle = direction.includes('left')
-        ? { left: Math.max(startX - width, minLeft) } // on left
-        : { left: Math.min(endX, maxLeft) }; // on right
+        ? { left: Math.max(Math.min(startX - width, maxLeft), minLeft) } // on left
+        : { left: Math.max(Math.min(endX, maxLeft), minLeft) }; // on right
 
     let verticalStyle;
 
@@ -163,19 +163,19 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             : { top: Math.max(minTop, Math.min(startY + offsetY, maxTop)) };
     } else if (direction.includes('top')) {
         verticalStyle = {
-            top: Math.min(startY, maxTop),
+            top: Math.max(Math.min(startY, maxTop), minTop),
         };
     } else if (direction.includes('bottom')) {
         verticalStyle = {
-            top: Math.max(endY - height, minTop),
+            top: Math.max(Math.min(endY - height, maxTop), minTop),
         };
     } else {
         // If the popup element exceed the visible area. We should "push" it back.
         verticalStyle = ((startY + height) > containerHeight)
             ? Math.max(endY - height, minTop) < PUSHING_MINIMUM_GAP
-                ? { top: Math.min(startY, maxTop) }
-                : { top: Math.max(endY - height, minTop) } // on top
-            : { top: Math.min(startY, maxTop) }; // on bottom
+                ? { top: Math.max(Math.min(startY, maxTop), minTop) }
+                : { top: Math.max(Math.min(endY - height, maxTop), minTop) } // on top
+            : { top: Math.max(Math.min(startY, maxTop), minTop) }; // on bottom
     }
 
     return { ...verticalStyle, ...horizontalStyle };

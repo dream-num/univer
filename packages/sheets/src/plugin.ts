@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { ActiveWorksheetController } from './controllers/active-worksheet.controller';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
@@ -155,6 +156,10 @@ export class UniverSheetsPlugin extends Plugin {
             [SheetPermissionViewModelController],
             [SheetSkeletonService],
         ]);
+
+        if (!this._config?.onlyRegisterFormulaRelatedMutations) {
+            this._injector.add([ActiveWorksheetController]);
+        }
     }
 
     override onRendered(): void {
@@ -165,6 +170,7 @@ export class UniverSheetsPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
+            [ActiveWorksheetController],
             [CalculateResultApplyController],
             [DefinedNameDataController],
             [ZebraCrossingCacheController],

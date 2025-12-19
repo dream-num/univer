@@ -65,7 +65,7 @@ export class AutoWidthController extends Disposable {
         const defaultValue = { redos: [], undos: [] };
         const { _univerInstanceService: univerInstanceService } = this;
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return defaultValue;
 
         const { unitId, subUnitId, worksheet } = target;

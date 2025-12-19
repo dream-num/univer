@@ -230,7 +230,7 @@ export class SheetPermissionCheckUIController extends Disposable {
 
         const { targetRange } = params;
 
-        const target = getSheetCommandTarget(this._univerInstanceService);
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
         if (!target) {
             return false;
         }

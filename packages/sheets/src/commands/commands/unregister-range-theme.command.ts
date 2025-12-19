@@ -16,7 +16,6 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-
 import { SheetRangeThemeModel } from '../../model/range-theme-model';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 import { RegisterWorksheetRangeThemeStyleMutation } from '../mutations/register-range-theme.mutation';
@@ -31,16 +30,15 @@ export const UnregisterWorksheetRangeThemeStyleCommand: ICommand<IUnregisterWork
     id: 'sheet.command.unregister-worksheet-range-theme-style',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-        const { unitId, themeName } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+        if (!params) return false;
+
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
+        const { unitId, themeName } = params;
 
         const redoParam = {
             unitId,
@@ -51,6 +49,7 @@ export const UnregisterWorksheetRangeThemeStyleCommand: ICommand<IUnregisterWork
             themeName,
             rangeThemeStyleJson: sheetRangeThemeModel.getRangeThemeStyle(unitId, themeName)?.toJson(),
         };
+
         const result = commandService.syncExecuteCommand(RegisterWorksheetRangeThemeStyleMutation.id, params);
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -58,7 +57,9 @@ export const UnregisterWorksheetRangeThemeStyleCommand: ICommand<IUnregisterWork
                 undoMutations: [{ id: RegisterWorksheetRangeThemeStyleMutation.id, params: undoParam }],
                 redoMutations: [{ id: UnregisterWorksheetRangeThemeStyleMutation.id, params: redoParam }],
             });
+            return true;
         }
-        return true;
+
+        return false;
     },
 };

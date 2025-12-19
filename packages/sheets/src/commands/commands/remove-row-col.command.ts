@@ -209,17 +209,17 @@ export const RemoveColCommandId = 'sheet.command.remove-col';
 export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-col-by-range',
-    handler: (accessor, parmas) => {
-        if (!parmas) {
+    handler: (accessor, params) => {
+        if (!params) {
             return false;
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService, parmas);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { workbook, worksheet } = target;
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const { range, unitId, subUnitId } = parmas;
+        const { range, unitId, subUnitId } = params;
         // col count
         const removeColParams: IRemoveColMutationParams = {
             unitId,

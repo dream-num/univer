@@ -71,7 +71,7 @@ export class SheetTableRefRangeController extends Disposable {
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
 
-        const target = getSheetCommandTarget(this._univerInstanceService);
+        const target = getSheetCommandTarget(this._univerInstanceService, insertParams);
         if (!target) {
             return { undos, redos };
         }
@@ -129,7 +129,7 @@ export class SheetTableRefRangeController extends Disposable {
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
 
-        const target = getSheetCommandTarget(this._univerInstanceService);
+        const target = getSheetCommandTarget(this._univerInstanceService, insertParams);
         if (!target) {
             return { undos, redos };
         }

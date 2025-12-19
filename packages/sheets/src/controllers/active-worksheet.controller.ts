@@ -15,21 +15,16 @@
  */
 
 import type { IMutationInfo, IOperationInfo, Workbook } from '@univerjs/core';
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-    ISetSelectionsOperationParams,
-    ISetWorksheetActiveOperationParams,
-    ISetWorksheetHideMutationParams,
-} from '@univerjs/sheets';
+import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../basics';
+import type { ISetWorksheetHideMutationParams } from '../commands/mutations/set-worksheet-hide.mutation';
+import type { ISetSelectionsOperationParams } from '../commands/operations/selection.operation';
+import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
 import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import {
-    InsertSheetMutation,
-    RemoveSheetMutation,
-    SetSelectionsOperation,
-    SetWorksheetActiveOperation,
-    SetWorksheetHideMutation,
-} from '@univerjs/sheets';
+import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
+import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
+import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
+import { SetSelectionsOperation } from '../commands/operations/selection.operation';
+import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 
 /**
  * This controller is responsible for changing the active worksheet when

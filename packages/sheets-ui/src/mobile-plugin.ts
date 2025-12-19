@@ -23,7 +23,6 @@ import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from 
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
-import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
@@ -162,7 +161,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SheetCellEditorResizeService],
 
             // controllers
-            [ActiveWorksheetController],
             [AutoHeightController],
             [AutoWidthController],
             [FormulaEditorController],
@@ -200,7 +198,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetUIMobileController],
             [SheetsRenderService],
-            [ActiveWorksheetController],
             [SheetPermissionCheckUIController],
             [SheetPermissionInitUIController],
         ]);

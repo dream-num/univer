@@ -194,6 +194,10 @@ export const COLORS: { [key: string]: number[] } = {
     yellow: [255, 255, 0],
     yellowGreen: [154, 205, 5],
 };
+export const COLORS_LOWERCASE: { [key: string]: number[] } = {};
+for (const key in COLORS) {
+    COLORS_LOWERCASE[key.toLowerCase()] = COLORS[key];
+}
 
 export class ColorKit {
     private _color!: Color;
@@ -461,10 +465,10 @@ const toColor: (color: string | Color) => Color | undefined = (color) => {
         return hsv;
     }
 
-    const parsedColor = color.trim();
+    const parsedColor = color.trim().toLowerCase();
 
-    if (COLORS[parsedColor]) {
-        const colorArray = COLORS[parsedColor];
+    if (COLORS_LOWERCASE[parsedColor]) {
+        const colorArray = COLORS_LOWERCASE[parsedColor];
         const rgb: IRgbColor = {
             r: Math.round(colorArray[0]),
 

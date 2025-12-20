@@ -40,6 +40,8 @@ interface IPermissionData {
  */
 export class AuthzIoLocalService implements IAuthzIoService {
     private _permissionMap: Map<string, IPermissionData> = new Map([]);
+    // Store explicit permission overrides: key is "objectID:action", value is the allowed state
+    private _permissionOverrides: Map<string, boolean> = new Map();
 
     constructor(
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
@@ -136,14 +138,23 @@ export class AuthzIoLocalService implements IAuthzIoService {
         }
 
         const result = actions.map((action) => {
-            const strategy = permissionData.strategies.find((s) => s.action === action);
-            const defaultAllowed = this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor);
-            if (!strategy) {
-                return { action, allowed: defaultAllowed };
+            // Check if there's an explicit override first
+            const overrideKey = `${objectID}:${action}`;
+            if (this._permissionOverrides.has(overrideKey)) {
+                return { action, allowed: this._permissionOverrides.get(overrideKey)! };
             }
+
+            // Otherwise, check strategies
+            const strategy = permissionData.strategies.find((s) => s.action === action);
+            if (!strategy) {
+                // No strategy, use default: Owner and Editor are allowed
+                return { action, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor) };
+            }
+
+            // Has strategy, only check the specified role (no fallback)
             return {
                 action,
-                allowed: this._getRole(strategy.role) || defaultAllowed,
+                allowed: this._getRole(strategy.role),
             };
         });
         return result;
@@ -181,7 +192,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
         config.objectIDs.forEach((objectID) => {
             const rule = this._permissionMap.get(objectID);
             const strategies = rule?.strategies || defaultStrategies;
-
             const item = {
                 objectID,
                 unitID: config.unitID,
@@ -197,12 +207,20 @@ export class AuthzIoLocalService implements IAuthzIoService {
                 creator: createDefaultUser(UnitRole.Owner),
                 strategies: strategies.map((s) => ({ action: s.action, role: s.role })),
                 actions: config.actions.map((a) => {
+                    // Check for override first
+                    const overrideKey = `${objectID}:${a}`;
+                    if (this._permissionOverrides.has(overrideKey)) {
+                        return { action: a, allowed: this._permissionOverrides.get(overrideKey)! };
+                    }
+
                     const strategy = strategies.find((s) => s.action === a);
-                    const allowed = this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor);
                     if (!strategy) {
+                        // No strategy, default is Owner/Editor allowed
+                        const allowed = this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor);
                         return { action: a, allowed };
                     }
-                    return { action: a, allowed: this._getRole(strategy.role) || allowed };
+                    // Has strategy, only check specified role
+                    return { action: a, allowed: this._getRole(strategy.role) };
                 }),
             };
             result.push(item);
@@ -238,7 +256,54 @@ export class AuthzIoLocalService implements IAuthzIoService {
                 role: s.role,
             }));
             this._permissionMap.set(objectID, permissionData);
+
+            // Automatically set overrides: when strategy role is Reader, it means "deny" for Owner/Editor
+            strategies.forEach((s) => {
+                if (s.role === UnitRole.Reader) {
+                    // Reader role means deny for Owner/Editor users
+                    this.setPermissionOverride(objectID, s.action, false);
+                } else if (s.role === UnitRole.Owner || s.role === UnitRole.Editor) {
+                    // Clear override, let strategy handle it
+                    this.clearPermissionOverride(objectID, s.action);
+                }
+            });
         }
+    }
+
+    /**
+     * Set an explicit permission override for a specific action on an object.
+     * This override takes precedence over strategies.
+     * @param objectID - The permission object ID
+     * @param action - The action number
+     * @param allowed - Whether the action is allowed
+     */
+    setPermissionOverride(objectID: string, action: number, allowed: boolean): void {
+        const key = `${objectID}:${action}`;
+        this._permissionOverrides.set(key, allowed);
+    }
+
+    /**
+     * Clear a specific permission override.
+     * @param objectID - The permission object ID
+     * @param action - The action number
+     */
+    clearPermissionOverride(objectID: string, action: number): void {
+        const key = `${objectID}:${action}`;
+        this._permissionOverrides.delete(key);
+    }
+
+    /**
+     * Clear all permission overrides for an object.
+     * @param objectID - The permission object ID
+     */
+    clearAllOverrides(objectID: string): void {
+        const keysToDelete: string[] = [];
+        this._permissionOverrides.forEach((_, key) => {
+            if (key.startsWith(`${objectID}:`)) {
+                keysToDelete.push(key);
+            }
+        });
+        keysToDelete.forEach((key) => this._permissionOverrides.delete(key));
     }
 
     async updateCollaborator(): Promise<void> {

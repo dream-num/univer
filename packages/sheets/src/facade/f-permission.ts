@@ -302,6 +302,21 @@ export class FPermission extends FBase {
         if (!permissionPoint) {
             this._permissionService.addPermissionPoint(instance);
         }
+
+        // IMPORTANT: Update authzIoService FIRST to set override before triggering pointChange$
+        if (permissionId) {
+            const actionNumber = instance.subType;
+            // Set strategy: Reader role = deny, Owner role = allow
+            await this._authzIoService.update({
+                objectID: permissionId,
+                strategies: [{
+                    action: actionNumber,
+                    role: value ? UnitRole.Owner : UnitRole.Reader,
+                }],
+            } as any);
+        }
+        // Now update permissionPoint, which triggers pointChange$ and _initWorksheetPermissionPointsChange()
+        // At this point, authzIoService.allowed() will find the override and return the correct value
         this._permissionService.updatePermissionPoint(instance.id, value);
 
         return permissionId;

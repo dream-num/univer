@@ -1,5 +1,38 @@
 # Changelog
 
+# [0.14.0](/compare/v0.13.0...v0.14.0) (2025-12-20)
+
+
+### Bug Fixes
+
+* add UniverSheetsFormulaPlugin for SheetsConditionalFormatting & SheetsDataValidation (#6329) 21b2d38, closes #6329
+* **api:** fix new sheet params ts type (#6323) 120263f, closes #6323
+* defined name input style (#6306) a0825f0, closes #6306
+* **design:** fix the mask, maskClosable, and keyboard properties in IDialogProps (#6311) ebae000, closes #6311
+* fix case sensitivity was not ignored when checking for duplicate defined names, table names and sheet names (#6330) d044bd9, closes #6330
+* fix colors keyword case ignorin (#6359) 6286b6c, closes #6359
+* fix defined name can't be duplicate with table name (#6312) dd79f5f, closes #6312
+* fix remove merge cells on node (#6337) 3237b07, closes #6337
+* **formula:** add api and fix ref formula (#6336) 32f8d45, closes #6336
+* **formula:** add graph api (#6313) b2a757b, closes #6313
+* **formula:** add type to tree model (#6314) 6a1d638, closes #6314
+* **formula:** lexer add index for ref (#6331) 64d075b, closes #6331
+* **formula:** start calculation trigger (#6321) e52201a, closes #6321
+* **formula:** update (#6318) f257194, closes #6318
+* **paste:** fix the style error when copying cells with conditional formatting, data validation, number formatting, etc. (#6326) 1545674, closes #6326
+* **sheets:** ensure the sheet param of InsertSheetMutation are not modified by subsequent operations (#6338) 1f77bf4, closes #6338
+* **sheets:** fix some APIs, such as setGridLinesColor, were ineffective when setting for inactive worksheets (#6348) a6cc5b5, closes #6348
+
+
+### Features
+
+* add page setup precision (#6294) 24107e0, closes #6294
+* **engine-formula:** move register-other-formula-service to engine-formula (#6328) 6fd9e36, closes #6328
+* formula bar defined name input focus if has defined name (#6315) 5eef953, closes #6315
+* set defined name in formula bar (#6304) b485708, closes #6304
+* **sheets-conditional-formatting:** use other-formula-service on conditional-formatting (#6322) a1b7d95, closes #6322
+* **sheets:** add biz info on other formula (#6296) 23f6ae2, closes #6296
+
 # [0.13.0](/compare/v0.12.4...v0.13.0) (2025-12-13)
 
 

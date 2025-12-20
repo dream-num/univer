@@ -54,7 +54,8 @@ export interface ISheetImage extends IImageData, ISheetDrawingBase {
  * test type
  */
 export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
-
+    componentKey: string;
+    data?: Serializable;
 }
 
 export interface IFloatDomData extends IDrawingParam {
@@ -64,15 +65,15 @@ export interface IFloatDomData extends IDrawingParam {
 }
 
 // TODO@wzhudev: this shouldn't be here. It should be in the sheets package
-export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase {}
+export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase { }
 
 export type ISheetDrawing = ISheetImage | ISheetShape | ISheetFloatDom;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type ISheetUpdateDrawing = OptionalField<ISheetImage | ISheetShape, 'sheetTransform'>;
 
-export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> {}
+export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> { }
 
-export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> {}
+export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> { }
 
 export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('sheets-drawing.sheet-drawing.service');

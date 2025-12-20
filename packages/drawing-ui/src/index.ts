@@ -27,3 +27,4 @@ export { ImageCropperObject } from './views/crop/image-cropper-object';
 export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
 export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
 export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';
+export { getCurrentUnitInfo, insertGroupObject } from './controllers/utils';

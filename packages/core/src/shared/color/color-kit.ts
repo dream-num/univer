@@ -194,7 +194,8 @@ export const COLORS: { [key: string]: number[] } = {
     yellow: [255, 255, 0],
     yellowGreen: [154, 205, 5],
 };
-export const COLORS_LOWERCASE: { [key: string]: number[] } = {};
+
+const COLORS_LOWERCASE: { [key: string]: number[] } = {};
 for (const key in COLORS) {
     COLORS_LOWERCASE[key.toLowerCase()] = COLORS[key];
 }

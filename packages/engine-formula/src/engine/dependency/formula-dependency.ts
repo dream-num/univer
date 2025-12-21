@@ -1281,7 +1281,8 @@ export class FormulaDependencyGenerator extends Disposable {
             for (const parentTreeId of tree.parents) {
                 const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parentTree) {
-                    throw new Error('ParentDependencyTree object is null');
+                    console.error('Dependency tree not found for treeId:', parentTreeId);
+                    continue;
                 }
                 if (parentTree.isAdded() || tree.isSkip()) {
                     continue;
@@ -1293,7 +1294,8 @@ export class FormulaDependencyGenerator extends Disposable {
             for (const parentTreeId of addressSearchResults) {
                 const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parentTree) {
-                    throw new Error('ParentDependencyTree object is null');
+                    console.error('Dependency tree not found for treeId:', parentTreeId);
+                    continue;
                 }
                 if (parentTree.isAdded() || tree.isSkip()) {
                     continue;

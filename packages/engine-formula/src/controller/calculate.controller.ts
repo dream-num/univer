@@ -211,6 +211,7 @@ export class CalculateController extends Disposable {
             const functionsExecutedState = data.functionsExecutedState;
             switch (functionsExecutedState) {
                 case FormulaExecutedStateType.NOT_EXECUTED:
+                    this._applyTreeResult(data);
                     break;
                 case FormulaExecutedStateType.STOP_EXECUTION:
                     break;
@@ -248,10 +249,26 @@ export class CalculateController extends Disposable {
         });
     }
 
+    private async _applyTreeResult(data: IAllRuntimeData) {
+        const { dependencyTreeModelData } = data;
+        if (dependencyTreeModelData.length > 0) {
+            this._commandService.executeCommand(
+                SetFormulaDependencyCalculationResultMutation.id,
+                {
+                    result: dependencyTreeModelData,
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }
+    }
+
     private async _applyResult(data: IAllRuntimeData) {
         const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, arrayFormulaEmbedded, imageFormulaData, dependencyTreeModelData } = data;
 
         if (!unitData) {
+            this._applyTreeResult(data);
             console.error('No sheetData from Formula Engine!');
             return;
         }
@@ -287,17 +304,7 @@ export class CalculateController extends Disposable {
             );
         }
 
-        if (dependencyTreeModelData.length > 0) {
-            this._commandService.executeCommand(
-                SetFormulaDependencyCalculationResultMutation.id,
-                {
-                    result: dependencyTreeModelData,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }
+        this._applyTreeResult(data);
 
         this._commandService.executeCommand(
             SetFormulaCalculationResultMutation.id,

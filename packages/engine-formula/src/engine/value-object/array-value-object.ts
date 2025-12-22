@@ -283,7 +283,8 @@ export class ArrayValueObject extends BaseValueObject {
 
     set(row: number, column: number, value: Nullable<BaseValueObject>) {
         if (row >= this._rowCount || column >= this._columnCount) {
-            throw new Error('Exceeding array bounds.');
+            console.error('Exceeding array bounds.');
+            return;
         }
 
         this._clearCache();

@@ -54,6 +54,8 @@ export interface IDependencyManagerService {
     getAllTree(): IFormulaDependencyTree[];
 
     buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees?: IFormulaDependencyTree[]): IFormulaDependencyTree[];
+
+    updateDependencyTreeDirtyState(treeId: number, isDirty: boolean): void;
 }
 
 export class DependencyManagerBaseService extends Disposable implements IDependencyManagerService {
@@ -212,6 +214,10 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
         for (const definedName of definedNames) {
             this._addDefinedName(tree.unitId, definedName, treeId);
         }
+    }
+
+    updateDependencyTreeDirtyState(treeId: number, isDirty: boolean): void {
+        throw new Error('Method not implemented.');
     }
 }
 
@@ -651,6 +657,13 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
 
     protected override _addAllTreeMap(tree: IFormulaDependencyTree) {
         this._allTreeMap.set(tree.treeId, tree);
+    }
+
+    override updateDependencyTreeDirtyState(treeId: number, isDirty: boolean): void {
+        const tree = this._allTreeMap.get(treeId);
+        if (tree) {
+            tree.isDirty = isDirty;
+        }
     }
 }
 

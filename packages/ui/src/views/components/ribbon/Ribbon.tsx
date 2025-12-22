@@ -354,6 +354,7 @@ export function Ribbon(props: IRibbonProps) {
                         >
                             <Dropdown
                                 collisionPadding={{ right: 12, left: 12 }}
+                                onOpenAutoFocus={(e) => e.preventDefault()}
                                 overlay={(
                                     <div
                                         className={`

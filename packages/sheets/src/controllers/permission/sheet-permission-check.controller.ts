@@ -16,10 +16,10 @@
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
-import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
+import type { IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
-import type { IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams, IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
+import type { IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams } from '../../commands/commands/remove-row-col.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
@@ -34,7 +34,7 @@ import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../../commands/commands/insert-range-move-right.command';
-import { InsertColAfterCommand, InsertColBeforeCommand, InsertColByRangeCommand, InsertColCommand, InsertRowAfterCommand, InsertRowBeforeCommand, InsertRowByRangeCommand, InsertRowCommand } from '../../commands/commands/insert-row-col.command';
+import { InsertRowAfterCommand, InsertRowBeforeCommand, InsertRowByRangeCommand, InsertRowCommand } from '../../commands/commands/insert-row-col.command';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../../commands/commands/remove-row-col.command';
@@ -49,7 +49,7 @@ import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-s
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
 import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission, WorksheetInsertColumnPermission, WorksheetInsertRowPermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '../../services/permission/permission-point';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission, WorksheetInsertRowPermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '../../services/permission/permission-point';
 import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
 import { SheetsSelectionsService } from '../../services/selections';
 
@@ -57,8 +57,7 @@ import { SheetsSelectionsService } from '../../services/selections';
 /* eslint-disable max-lines-per-function */
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams | IInsertColCommandParams | IInsertRowCommandParams | IRemoveRowColCommandParams | IRemoveRowByRangeCommandParams | IRemoveColByRangeCommandParams;
-
+type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams;
 export class SheetPermissionCheckController extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -229,21 +228,6 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t('permission.dialog.insertOrDeleteMoveRangeErr');
                 break;
 
-            case InsertColCommand.id:
-            case InsertColByRangeCommand.id:
-            case InsertColBeforeCommand.id:
-            case InsertColAfterCommand.id:
-                permission = this.permissionCheckWithRanges(
-                    {
-                        workbookTypes: [WorkbookEditablePermission],
-                        worksheetTypes: [WorksheetInsertColumnPermission],
-                    },
-                    (params as IInsertColCommandParams)?.range ? [(params as IInsertColCommandParams).range] : undefined,
-                    (params as IInsertColCommandParams)?.unitId,
-                    (params as IInsertColCommandParams)?.subUnitId
-                );
-                errorMsg = this._localeService.t('permission.dialog.commonErr');
-                break;
             case InsertRowCommand.id:
             case InsertRowByRangeCommand.id:
             case InsertRowBeforeCommand.id:

@@ -54,8 +54,7 @@ export interface ISheetImage extends IImageData, ISheetDrawingBase {
  * test type
  */
 export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
-    componentKey: string;
-    data?: Serializable;
+
 }
 
 export interface IFloatDomData extends IDrawingParam {

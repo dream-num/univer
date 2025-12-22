@@ -93,9 +93,10 @@ export class Styles {
     }
 
     remove(id: string): void {
-        if (this._styles[id]) {
+        const s = this._styles[id];
+        if (s) {
             delete this._styles[id];
-            this._cacheMap.delete(JSON.stringify(this._styles[id]));
+            this._cacheMap.delete(JSON.stringify(s));
         }
     }
 

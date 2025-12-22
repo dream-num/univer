@@ -1337,12 +1337,13 @@ export class FormulaDependencyGenerator extends Disposable {
 
     protected _formulaDependencyTreeModel = new Map<number, FormulaDependencyTreeModel>();
 
-    protected _getTreeModel(treeId: number): FormulaDependencyTreeModel {
+    protected _getTreeModel(treeId: number): FormulaDependencyTreeModel | undefined {
         let treeModel = this._formulaDependencyTreeModel.get(treeId);
         if (!treeModel) {
             const tree = this._getTreeById(treeId);
             if (!tree) {
-                throw new Error('FormulaDependencyTree is null');
+                console.error('FormulaDependencyTree is null for treeId:', treeId);
+                return;
             }
 
             treeModel = new FormulaDependencyTreeModel(tree);
@@ -1370,8 +1371,16 @@ export class FormulaDependencyGenerator extends Disposable {
     protected _getFormulaDependencyTreeModel(tree: IFormulaDependencyTree): FormulaDependencyTreeModel {
         const treeModel = this._getTreeModel(tree.treeId);
         const parentIds = this._getDependencyTreeParenIds(tree);
+
+        if (!treeModel) {
+            return new FormulaDependencyTreeModel(tree);
+        }
+
         for (const parentId of parentIds) {
             const parentTreeModel = this._getTreeModel(parentId);
+            if (!parentTreeModel) {
+                continue;
+            }
             treeModel.addParent(parentTreeModel);
             parentTreeModel.addChild(treeModel);
         }
@@ -1453,6 +1462,9 @@ export class FormulaDependencyGenerator extends Disposable {
         const childIds = this._getDependencyTreeChildrenIds(tree);
         for (const childId of childIds) {
             const childTreeModel = this._getTreeModel(childId);
+            if (!childTreeModel) {
+                continue;
+            }
             this._setRealFormulaString(childTreeModel);
             treeModel.addChild(childTreeModel);
         }

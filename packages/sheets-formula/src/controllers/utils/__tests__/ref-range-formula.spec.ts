@@ -130,7 +130,10 @@ describe('Ref range formula test', () => {
                         f: null,
                         si: 'id2',
                     },
-                    3: null,
+                    3: {
+                        f: null,
+                        si: null,
+                    },
                 },
             };
             expect(formulaDataToCellData(formulaData)).toStrictEqual(cellData);

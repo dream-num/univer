@@ -298,7 +298,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const range = this.getRangeByViewport(vpInfo, true);
             this._visibleRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, range);
 
-            const cacheRange = this.getCacheRangeByViewport(vpInfo, true);
+            const cacheRange = this.getCacheRangeByViewport(vpInfo);
             this._drawingRange = cacheRange;
             this._cacheRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, cacheRange);
         }

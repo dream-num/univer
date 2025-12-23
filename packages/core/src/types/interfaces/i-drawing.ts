@@ -105,7 +105,15 @@ export interface IRotationSkewFlipTransform {
     flipY?: boolean;
 }
 
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
+// used to disable some transform features like rotate, resize, border for line shapes
+// chart should not allow rotate in excel
+export interface ITransformStateDisableOption {
+    rotateEnabled?: boolean;
+    resizeEnabled?: boolean;
+    borderEnabled?: boolean;
+}
+
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform,ITransformStateDisableOption {}
 
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;

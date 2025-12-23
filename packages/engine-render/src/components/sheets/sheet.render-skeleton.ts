@@ -295,7 +295,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         if (vpInfo) {
-            const range = this.getRangeByViewport(vpInfo, true);
+            const range = this.getRangeByViewport(vpInfo);
             this._visibleRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, range);
 
             const cacheRange = this.getCacheRangeByViewport(vpInfo);
@@ -798,12 +798,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, bounds?.cacheBound);
     }
 
-    getRangeByViewport(vpInfo?: IViewportInfo, isGetVisibleRange?: boolean): IRange {
-        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.viewBound, isGetVisibleRange);
+    getRangeByViewport(vpInfo?: IViewportInfo): IRange {
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.viewBound);
     }
 
-    getCacheRangeByViewport(vpInfo?: IViewportInfo, isGetVisibleRange?: boolean): IRange {
-        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.cacheBound, isGetVisibleRange);
+    getCacheRangeByViewport(vpInfo?: IViewportInfo, isPrinting?: boolean): IRange {
+        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.cacheBound, isPrinting);
     }
 
     getRangeByViewBound(bound?: IBoundRectNoAngle): IRange {
@@ -1199,7 +1199,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
         viewBound?: IBoundRectNoAngle,
-        isGetVisibleRange?: boolean
+        isPrinting?: boolean
     ): IRange {
         const lenOfRowData = rowHeightAccumulation.length;
         const lenOfColData = columnWidthAccumulation.length;
@@ -1215,12 +1215,25 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         // viewBound contains header, so need to subtract the header height and margin
         const startRow = searchArray(rowHeightAccumulation, Math.round(viewBound.top) - this.columnHeaderHeightAndMarginTop);
-        const endRow = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
+
+        const endY = Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop;
+        let endRow = searchArray(rowHeightAccumulation, endY);
+        // If the endY is exactly on the boundary, need to minus 1 to get the correct endRow.
+        if (endRow < lenOfRowData && rowHeightAccumulation[endRow - 1] === endY) {
+            endRow -= 1;
+        }
+
         const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
-        const endColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
+
+        const endX = Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft;
+        let endColumn = searchArray(columnWidthAccumulation, endX);
+        // If the endX is exactly on the boundary, need to minus 1 to get the correct endColumn.
+        if (endColumn < lenOfColData && columnWidthAccumulation[endColumn - 1] === endX) {
+            endColumn -= 1;
+        }
 
         // If the get range is used for visible range, the endRow and endColumn need to minus 1.
-        if (isGetVisibleRange) {
+        if (isPrinting) {
             return {
                 startRow,
                 endRow: endRow === lenOfRowData - 1 ? endRow : endRow - 1,

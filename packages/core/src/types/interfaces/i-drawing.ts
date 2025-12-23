@@ -113,7 +113,7 @@ export interface ITransformStateDisableOption {
     borderEnabled?: boolean;
 }
 
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform,ITransformStateDisableOption {}
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform, ITransformStateDisableOption {}
 
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;

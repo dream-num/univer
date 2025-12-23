@@ -54,7 +54,6 @@ import { SheetsSelectionsService } from '../../services/selections';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams;
-
 export class SheetPermissionCheckController extends Disposable {
     disposableCollection = new DisposableCollection();
 

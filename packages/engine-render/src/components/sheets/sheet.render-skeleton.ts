@@ -1215,11 +1215,24 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         // viewBound contains header, so need to subtract the header height and margin
         const startRow = searchArray(rowHeightAccumulation, Math.round(viewBound.top) - this.columnHeaderHeightAndMarginTop);
-        const endRow = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
-        const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
-        const endColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
 
-        // If the get range is used for printing, the endRow and endColumn do not need to minus 1.
+        const endY = Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop;
+        let endRow = searchArray(rowHeightAccumulation, endY);
+        // If the endY is exactly on the boundary, need to minus 1 to get the correct endRow.
+        if (endRow < lenOfRowData && rowHeightAccumulation[endRow - 1] === endY) {
+            endRow -= 1;
+        }
+
+        const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
+
+        const endX = Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft;
+        let endColumn = searchArray(columnWidthAccumulation, endX);
+        // If the endX is exactly on the boundary, need to minus 1 to get the correct endColumn.
+        if (endColumn < lenOfColData && columnWidthAccumulation[endColumn - 1] === endX) {
+            endColumn -= 1;
+        }
+
+        // If the get range is used for visible range, the endRow and endColumn need to minus 1.
         if (isPrinting) {
             return {
                 startRow,

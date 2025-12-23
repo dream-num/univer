@@ -1182,8 +1182,6 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
 
-        if (startRow === -1 && startColumn === -1) return;
-
         this._refreshFreeze(startRow, startColumn, ySplit, xSplit, ResetScrollType.NONE);
     }
 

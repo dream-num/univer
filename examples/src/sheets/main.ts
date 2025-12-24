@@ -54,6 +54,7 @@ import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-compon
 import { customRegisterEvent } from './custom/custom-register-event';
 import { UniverSheetsCustomShortcutPlugin } from './custom/custom-shortcut';
 import ImportCSVButtonPlugin from './custom/import-csv-button';
+import { simpleRangePopupDemo } from './custom/simple-range-popup';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -202,6 +203,7 @@ function createNewInstance() {
 
     customRegisterEvent(univer, window.univerAPI!);
     // customRangePopups(univer, window.univerAPI!);
+    simpleRangePopupDemo(univer, window.univerAPI!);
 }
 
 createNewInstance();

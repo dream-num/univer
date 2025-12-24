@@ -211,7 +211,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
 
                         </section>
 
-                        <aside data-u-comp="right-sidebar" className="univer-h-full">
+                        <aside data-u-comp="right-sidebar" className="univer-z-[100] univer-h-full">
                             <Sidebar />
                         </aside>
                     </div>

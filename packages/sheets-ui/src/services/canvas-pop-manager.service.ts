@@ -680,12 +680,14 @@ export class SheetCanvasPopManagerService extends Disposable {
         const { top, left, width } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;
 
-        return {
+        const result = {
             left: ((cellInfo.startX - scrollXY.x) * scaleAdjust * scaleX) + left,
             right: (cellInfo.endX - scrollXY.x) * scaleAdjust * scaleX + left,
             top: ((cellInfo.startY - scrollXY.y) * scaleAdjust * scaleY) + top,
             bottom: ((cellInfo.endY - scrollXY.y) * scaleAdjust * scaleY) + top,
         };
+
+        return result;
     }
     // #endregion
 
@@ -760,6 +762,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             right: rightBottomCoord.right,
             bottom: rightBottomCoord.bottom,
         };
+
         return {
             position$,
             position,

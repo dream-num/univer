@@ -591,7 +591,10 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
 export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaDataItem>): Nullable<ICellData> {
     if (formulaDataItem == null) {
         // null presents clearing cell content
-        return null;
+        return {
+            f: null,
+            si: null,
+        };
     }
     const { f, si, x = 0, y = 0 } = formulaDataItem;
     const checkFormulaString = isFormulaString(f);

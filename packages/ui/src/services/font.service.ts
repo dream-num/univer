@@ -42,12 +42,6 @@ export interface IFontConfig {
      * Font category for UI grouping (optional)
      */
     category?: 'sans-serif' | 'serif' | 'monospace' | 'display' | 'handwriting';
-
-    /**
-     * Mark whether the font is user-added
-     * (Used to distinguish built-in fonts to prevent accidental deletion of core fonts)
-     */
-    isCustom?: boolean;
 }
 
 const DEFAULT_FONT_LIST: IFontConfig[] = [{
@@ -159,17 +153,28 @@ export interface IFontService {
 }
 
 export class FontService implements IFontService, IDisposable {
-    readonly fonts$: BehaviorSubject<IFontConfig[]> = new BehaviorSubject<IFontConfig[]>([...DEFAULT_FONT_LIST]);
+    readonly fonts$: BehaviorSubject<IFontConfig[]> = new BehaviorSubject<IFontConfig[]>([]);
 
     constructor(@IConfigService protected readonly _configService: IConfigService) {
+        // Initialize font list from configuration
         const config = this._configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
-        const { customFontFamily = [] } = config ?? {};
-        if (customFontFamily.length) {
-            customFontFamily.forEach((font) => this.addFont({
-                ...font,
-                isCustom: true,
-            }));
+        const { customFontFamily } = config ?? {};
+
+        let fonts: IFontConfig[] = [];
+
+        if (customFontFamily) {
+            if (Array.isArray(customFontFamily)) {
+                fonts = [...DEFAULT_FONT_LIST, ...customFontFamily];
+            } else if (customFontFamily.override) {
+                fonts = [...customFontFamily.list];
+            } else {
+                fonts = [...DEFAULT_FONT_LIST, ...customFontFamily.list];
+            }
+        } else {
+            fonts = [...DEFAULT_FONT_LIST];
         }
+
+        this.fonts$.next(fonts);
     }
 
     dispose() {
@@ -235,12 +240,6 @@ export class FontService implements IFontService, IDisposable {
         const fonts = this.getFonts();
         const fontIndex = fonts.findIndex((font) => font.value === value);
         if (fontIndex === -1) {
-            return false;
-        }
-
-        const fontToRemove = fonts[fontIndex];
-        if (!fontToRemove.isCustom) {
-            // Prevent removal of built-in fonts
             return false;
         }
 

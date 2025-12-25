@@ -40,7 +40,10 @@ export interface IWorkbenchOptions {
     /**
      * Custom font family list to be added to the font service.
      */
-    customFontFamily?: IFontConfig[];
+    customFontFamily?: IFontConfig[] | {
+        override?: boolean;
+        list: IFontConfig[];
+    };
 
     /**
      * If Univer should make the footer bar visible.

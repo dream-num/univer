@@ -332,12 +332,18 @@ export class FPermission extends FBase {
             const actionNumber = instance.subType;
             // Set strategy: Reader role = deny, Owner role = allow
             await this._authzIoService.update({
+                objectType: UnitObject.Worksheet,
                 objectID: permissionId,
                 strategies: [{
                     action: actionNumber,
                     role: value ? UnitRole.Owner : UnitRole.Reader,
                 }],
-            } as any);
+                unitID: unitId,
+                share: undefined,
+                name: '',
+                scope: undefined,
+                collaborators: undefined,
+            });
         }
         // Now update permissionPoint, which triggers pointChange$ and _initWorksheetPermissionPointsChange()
         // At this point, authzIoService.allowed() will find the override and return the correct value

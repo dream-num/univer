@@ -22,11 +22,11 @@ import { borderBottomClassName, clsx, scrollbarClassName } from '@univerjs/desig
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
 import { ISidebarService, useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
 
-export function DefinedNameOverlay() {
+export function DefinedNameOverlay({ search, isInputEvent }: { search: string; isInputEvent: boolean }) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
@@ -72,6 +72,12 @@ export function DefinedNameOverlay() {
         };
     }, []);
 
+    const filteredDefinedNames = useMemo(() => {
+        return search && isInputEvent
+            ? definedNames.filter((i) => i.name.toLowerCase().includes(search.toLowerCase()))
+            : definedNames;
+    }, [search, isInputEvent, definedNames]);
+
     const openSlider = () => {
         commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
     };
@@ -97,7 +103,7 @@ export function DefinedNameOverlay() {
             <ul
                 className={clsx('univer-m-0 univer-max-h-[360px] univer-list-none univer-overflow-y-auto univer-p-0', scrollbarClassName)}
             >
-                {definedNames.map((definedName, index) => {
+                {filteredDefinedNames.map((definedName, index) => {
                     return (
                         <li
                             key={index}

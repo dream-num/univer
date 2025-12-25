@@ -18,7 +18,7 @@ import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
-import { AbsoluteRefType, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { AbsoluteRefType, debounce, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, LexerTreeBuilder, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
@@ -41,6 +41,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook?.getUnitId();
     const themeService = useDependency(ThemeService);
+
+    const [open, setOpen] = useState(false);
+    const [isInputEvent, setIsInputEvent] = useState(false);
 
     const getDefinedNameMap = () => {
         const definedNameMap = definedNamesService.getDefinedNameMap(unitId);
@@ -124,8 +127,27 @@ export function DefinedName({ disable }: { disable: boolean }) {
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
+    const handleDefinedNamesList = debounce((value: string) => {
+        const hasMatch = definedNames.find((i) => i.name.toLowerCase().includes(value.toLowerCase()));
+
+        if (hasMatch && !open) {
+            setOpen(true);
+        } else if (!hasMatch && open) {
+            setOpen(false);
+        }
+    }, 100);
+
     function handleChangeSelection(e: ChangeEvent<HTMLInputElement>) {
-        setInputValue(e.target.value.trim());
+        const value = e.target.value.trim();
+        setInputValue(value);
+        setIsInputEvent(true);
+
+        if (!value) {
+            if (open) setOpen(false);
+            return;
+        }
+
+        handleDefinedNamesList(value);
     }
 
     // TODO: need implemented set defined name if value not referenceString
@@ -149,8 +171,11 @@ export function DefinedName({ disable }: { disable: boolean }) {
 
         if (e.key === 'Enter') {
             confirm();
+            setIsInputEvent(false);
+            setOpen(false);
         } else if (e.key === 'Escape') {
             e.preventDefault();
+            setIsInputEvent(false);
             resetValue();
         }
     }
@@ -204,15 +229,19 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 value={inputValue}
                 onChange={handleChangeSelection}
                 onKeyDown={handleKeyDown}
+                onBlur={() => setIsInputEvent(false)}
             />
 
             <Dropdown
                 overlay={(
                     <div className="univer-z-[1001]">
-                        <DefinedNameOverlay />
+                        <DefinedNameOverlay search={inputValue} isInputEvent={isInputEvent} />
                     </div>
                 )}
                 disabled={disable}
+                open={open}
+                onOpenChange={setOpen}
+                onOpenAutoFocus={(e) => e.preventDefault()}
             >
                 <a
                     className={clsx(`

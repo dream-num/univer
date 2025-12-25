@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICollaborator } from '@univerjs/protocol';
 import type {
     IRangeProtectionRule,
 } from '@univerjs/sheets';
@@ -739,6 +740,7 @@ export class FWorksheetPermission {
      * console.log(rules);
      * ```
      */
+    // eslint-disable-next-line max-lines-per-function
     async protectRanges(
         configs: Array<{
             ranges: FRange[];
@@ -749,19 +751,52 @@ export class FWorksheetPermission {
             throw new Error('Configs cannot be empty');
         }
 
+        // Fetch existing collaborators once if any config has allowedUsers
+        let existingCollaborators: ICollaborator[] = [];
+        const hasAllowedUsers = configs.some((c) => c.options?.allowedUsers?.length);
+        if (hasAllowedUsers) {
+            existingCollaborators = await this._authzIoService.listCollaborators({
+                objectID: this._unitId,
+                unitID: this._unitId,
+            });
+        }
+
         // 1. Create permissionId in parallel
         const permissionIds = await Promise.all(
-            configs.map((c) =>
-                this._authzIoService.create({
+            configs.map((c) => {
+                let collaborators: ICollaborator[] = [];
+                if (c.options?.allowedUsers) {
+                    // Create a map of allowed user IDs for easy lookup
+                    const allowedUserIds = new Set(c.options.allowedUsers);
+
+                    // Filter and include only the allowed users with complete information
+                    collaborators = existingCollaborators
+                        .filter((collab) => allowedUserIds.has(collab.subject?.userID || collab.id))
+                        .map((collab) => ({
+                            id: collab.id,
+                            role: UnitRole.Editor,
+                            subject: collab.subject,
+                        }));
+
+                    // Check for any user IDs that weren't found in existing collaborators
+                    const foundUserIds = new Set(collaborators.map((collab) => collab.subject?.userID || collab.id));
+                    c.options.allowedUsers.forEach((userId) => {
+                        if (!foundUserIds.has(userId)) {
+                            console.error(`User ${userId} not found in collaborators list`);
+                        }
+                    });
+                }
+
+                return this._authzIoService.create({
                     objectType: UnitObject.SelectRange,
                     selectRangeObject: {
-                        collaborators: c.options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
+                        collaborators,
                         unitID: this._unitId,
                         name: c.options?.name || '',
                         scope: undefined,
                     },
-                })
-            )
+                });
+            })
         );
 
         // 2. Build rule parameters with proper viewState and editState

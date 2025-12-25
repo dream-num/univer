@@ -113,6 +113,7 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
                 className={`
                   univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6
                   focus:univer-outline-none
+                  dark:!univer-text-white
                   [&_input:focus]:!univer-ring-0
                   [&_input]:univer-h-6 [&_input]:univer-w-7 [&_input]:univer-border-none
                   [&_input]:!univer-bg-transparent [&_input]:univer-p-0 [&_input]:univer-text-sm

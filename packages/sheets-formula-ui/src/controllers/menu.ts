@@ -17,7 +17,15 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    RangeProtectionPermissionViewPoint,
+    WorkbookCopyPermission,
+    WorkbookEditablePermission,
+    WorksheetCopyPermission,
+    WorksheetEditPermission,
+    WorksheetSetCellValuePermission,
+} from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, IClipboardInterfaceService, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';

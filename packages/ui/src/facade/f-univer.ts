@@ -533,10 +533,7 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override addFonts(fonts: IFontConfig[]): void {
         const fontService = this._injector.get(IFontService);
         fonts.forEach((font) => {
-            fontService.addFont({
-                ...font,
-                isCustom: true,
-            });
+            fontService.addFont(font);
         });
     }
 }

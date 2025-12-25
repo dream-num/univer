@@ -15,7 +15,6 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import type { IFontConfig } from '../services/font.service';
 import type { MenuConfig } from '../services/menu/menu';
 import type { IWorkbenchOptions } from './ui/ui.controller';
 
@@ -30,11 +29,6 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
     override?: DependencyOverride;
 
     menu?: MenuConfig;
-
-    /**
-     * Custom font family list to be added to the font service.
-     */
-    customFontFamily?: IFontConfig[];
 
     popupRootId?: string;
 

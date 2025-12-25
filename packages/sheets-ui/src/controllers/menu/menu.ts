@@ -393,12 +393,23 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = DEFAULT_STYLES.ff;
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    }, true);
 
     return {
         id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
-        label: FONT_FAMILY_COMPONENT,
+        label: {
+            name: FONT_FAMILY_COMPONENT,
+            props: {
+                id: SetRangeFontFamilyCommand.id,
+                disabled$,
+            },
+        },
         selections: [{
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
@@ -409,11 +420,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 },
             },
         }],
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        disabled$,
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             const updateSheet = () => {
                 let ff = defaultValue;

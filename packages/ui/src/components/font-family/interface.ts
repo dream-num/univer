@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { ICustomComponentProps } from '../../services/menu/menu';
 
 export interface IFontFamilyProps extends ICustomComponentProps<string> {
+    id: string;
+
     value: string;
+
+    disabled$?: Observable<boolean>;
 }
 
 export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';

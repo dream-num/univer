@@ -17,12 +17,12 @@
 import type { ICommandInfo, IDrawingParam, IMutationInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
+import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
@@ -66,6 +66,8 @@ const REFRESH_MUTATIONS = [
     SetColVisibleMutation.id,
     SetColHiddenMutation.id,
     SetWorksheetRowHeightMutation.id,
+    SetWorksheetRowAutoHeightMutation.id,
+    SetWorksheetRowIsAutoHeightMutation.id,
     SetWorksheetColWidthMutation.id,
 ];
 
@@ -1208,8 +1210,32 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 }
 
                 requestIdleCallback(() => {
-                    const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams;
-                    const { unitId, subUnitId, ranges } = params;
+                    const params = command.params as
+                        | ISetRowVisibleMutationParams
+                        | ISetRowHiddenMutationParams
+                        | ISetColVisibleMutationParams
+                        | ISetColHiddenMutationParams
+                        | ISetWorksheetRowHeightMutationParams
+                        | ISetWorksheetRowAutoHeightMutationParams
+                        | ISetWorksheetRowIsAutoHeightMutationParams
+                        | ISetWorksheetColWidthMutationParams;
+                    const target = getSheetCommandTarget(this._univerInstanceService, params);
+                    if (!target) return;
+
+                    const { unitId, subUnitId, worksheet } = target;
+
+                    let ranges: IRange[] = [];
+                    if ('range' in params) {
+                        ranges = params.range as IRange[];
+                    } else if ('rowsAutoHeightInfo' in params) {
+                        ranges = params.rowsAutoHeightInfo.map((info) => ({
+                            startRow: info.row,
+                            endRow: info.row,
+                            startColumn: 0,
+                            endColumn: worksheet.getColumnCount() - 1,
+                        }));
+                    }
+
                     this._refreshDrawingTransform(unitId, subUnitId, ranges);
                 });
             })

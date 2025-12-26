@@ -62,7 +62,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             `, {
                 'dark:!univer-text-white': !color || (color && !getTextColor(color)),
                 'univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700 univer-shadow': currentSelected,
-                'dark:!univer-bg-gray-900': currentSelected && !color,
+                'dark:!univer-bg-gray-700': currentSelected && !color,
                 'univer-font-medium univer-text-gray-900 hover:univer-bg-gray-100': !currentSelected,
                 'dark:hover:!univer-bg-gray-700': !currentSelected && !color,
             })}

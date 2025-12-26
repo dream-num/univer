@@ -39,4 +39,3 @@ export { BatchSaveImagesService, FileNamePart, type IBatchSaveImagesConfig, IBat
 export { calcSheetFloatDomPosition, type ICanvasFloatDom, type ICanvasFloatDomInfo, type IDOMAnchor, SHEET_FLOAT_DOM_PREFIX, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';
 export { SheetDrawingAnchor } from './views/sheet-image-panel/SheetDrawingAnchor';
-export type { ISheetDrawingAnchorProps } from './views/sheet-image-panel/SheetDrawingAnchor';

@@ -76,6 +76,7 @@ export interface IMoveSelectionEnterAndTabCommandParams {
 export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
     id: 'sheet.command.move-selection',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -91,7 +92,29 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         }
 
         const { direction, jumpOver, extra } = params;
-        const { range, primary } = selection;
+        let { range, primary } = selection;
+
+        if (extra === 'formula-editor') {
+            // When in formula editor, if the current cell is a merged cell, expand the selection to the merged cell range for calculation.
+            if (range.startRow === range.endRow && range.startColumn === range.endColumn) {
+                const mergedCell = worksheet.getMergedCell(range.startRow, range.startColumn);
+                if (mergedCell) {
+                    range = {
+                        ...range,
+                        ...mergedCell,
+                    };
+                }
+            }
+
+            // When in formula editor, try to use the last primary cell in ref selections as the primary cell for calculation.
+            if (!primary) {
+                const lastSelectionPrimary = getSelectionsService(accessor, params.fromCurrentSelection).getCurrentLastSelectionPrimaryCell();
+                if (lastSelectionPrimary && Rectangle.contains(range, lastSelectionPrimary)) {
+                    primary = lastSelectionPrimary;
+                }
+            }
+        }
+
         const startRange = getStartRange(range, primary, direction);
 
         // the start range is from the primary selection range
@@ -344,10 +367,31 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) return false;
 
-        const { range: startRange, primary } = selection;
         const { jumpOver, direction, extra } = params;
+        let { range: startRange, primary } = selection;
 
-        const isShrink = checkIfShrink(selection, direction, worksheet);
+        if (extra === 'formula-editor') {
+            // When in formula editor, if the current cell is a merged cell, expand the selection to the merged cell range for calculation.
+            if (startRange.startRow === startRange.endRow && startRange.startColumn === startRange.endColumn) {
+                const mergedCell = worksheet.getMergedCell(startRange.startRow, startRange.startColumn);
+                if (mergedCell) {
+                    startRange = {
+                        ...startRange,
+                        ...mergedCell,
+                    };
+                }
+            }
+
+            // When in formula editor, try to use the last primary cell in ref selections as the primary cell for calculation.
+            if (!primary) {
+                const lastSelectionPrimary = getSelectionsService(accessor).getCurrentLastSelectionPrimaryCell();
+                if (lastSelectionPrimary && Rectangle.contains(startRange, lastSelectionPrimary)) {
+                    primary = lastSelectionPrimary;
+                }
+            }
+        }
+
+        const isShrink = checkIfShrink({ range: startRange, primary }, direction, worksheet);
         const destRange = !isShrink
             ? jumpOver === JumpOver.moveGap
                 ? expandToNextGapRange(startRange, direction, worksheet)

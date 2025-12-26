@@ -21,7 +21,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
-import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -324,12 +324,21 @@ export const useSheetSelectionChange = (
                 if (params.selections.length) {
                     const last = params.selections[params.selections.length - 1];
                     if (last) {
+                        const { range, primary } = last;
+                        // When in formula editor, if the current cell is a merged cell, only set the main cell of the merged cell as the selection.
+                        if ((primary?.isMergedMainCell || primary?.isMerged) && Rectangle.contains(primary, range)) {
+                            range.startRow = primary.startRow;
+                            range.endRow = primary.startRow;
+                            range.startColumn = primary.startColumn;
+                            range.endColumn = primary.startColumn;
+                        }
+
                         const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
                         const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
                         if (isAdd) {
-                            selections.push(last.range);
+                            selections.push(range);
                         } else {
-                            selections[selections.length - 1] = last.range;
+                            selections[selections.length - 1] = range;
                         }
                         onSelectionsChange(selections, true);
                     }

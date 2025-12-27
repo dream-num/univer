@@ -59,6 +59,8 @@ import {
 } from '../commands/commands/set-format-painter.command';
 import {
     SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../commands/commands/set-frozen.command';
@@ -89,6 +91,7 @@ import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
+import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../components/menu-item-frozen';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { CellPopup } from '../views/cell-popup';
 import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
@@ -180,6 +183,7 @@ export class SheetUIController extends Disposable {
 
         // init custom components
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
+        this.disposeWithMe(componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
@@ -233,6 +237,8 @@ export class SheetUIController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
+            SetFirstRowFrozenCommand,
+            SetFirstColumnFrozenCommand,
             ScrollToRangeOperation,
             SetUnderlineCommand,
             SetZoomRatioCommand,

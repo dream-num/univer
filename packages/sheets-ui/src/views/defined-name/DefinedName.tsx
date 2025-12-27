@@ -20,7 +20,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
 import { AbsoluteRefType, debounce, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, LexerTreeBuilder, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
 import { getPrimaryForRange, SetSelectionsOperation, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
@@ -158,7 +158,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
         if (definedName) {
             setRangeString(inputValue);
             focusDefinedName(definedName);
-        } else if (isReferenceString(inputValue)) {
+        } else if (isReferenceStringWithEffectiveColumn(inputValue)) {
             setRangeString(inputValue);
             focusSelection(inputValue);
         } else {

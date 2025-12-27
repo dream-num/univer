@@ -73,7 +73,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.47",
+        "@univerjs/protocol": "0.1.48",
         "@univerjs/themes": "workspace:*",
         "@wendellhu/redi": "1.0.1",
         "async-lock": "^1.4.1",

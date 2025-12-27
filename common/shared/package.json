@@ -51,6 +51,6 @@
         "@types/fs-extra": "^11.0.4",
         "@univerjs/icons": "^1.1.0",
         "@univerjs/icons-svg": "^1.1.0",
-        "@univerjs/protocol": "0.1.47"
+        "@univerjs/protocol": "0.1.48"
     }
 }

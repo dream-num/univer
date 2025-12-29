@@ -1095,8 +1095,8 @@ importers:
         specifier: workspace:*
         version: link:../themes
       '@wendellhu/redi':
-        specifier: 1.0.1
-        version: 1.0.1(react@19.2.3)
+        specifier: 1.1.0
+        version: 1.1.0(react@19.2.3)
       async-lock:
         specifier: ^1.4.1
         version: 1.4.1
@@ -3359,8 +3359,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@wendellhu/redi':
-        specifier: 1.0.1
-        version: 1.0.1(react@19.2.3)
+        specifier: 1.1.0
+        version: 1.1.0(react@19.2.3)
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -6091,8 +6091,8 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
-  '@wendellhu/redi@1.0.1':
-    resolution: {integrity: sha512-vKJFlaPjXsyqcJFNKJGmdLRup5uUZGQuZUA41e67at5y93kEYJo5FpJebAfs8LStJjItHWv21t0Aq+0UCSYSsw==}
+  '@wendellhu/redi@1.1.0':
+    resolution: {integrity: sha512-LKgJfzE9TxBi6Y63aDHcNGo0ALe0TOEb1gP1z6lOvnrVRcLylfVtq86ISxv1VHbx7LuF2Fc1oHEzIrJ44Kbufw==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       react: 19.2.3
@@ -10907,6 +10907,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
@@ -13876,7 +13877,7 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@wendellhu/redi@1.0.1(react@19.2.3)':
+  '@wendellhu/redi@1.1.0(react@19.2.3)':
     optionalDependencies:
       react: 19.2.3
 

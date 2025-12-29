@@ -17,13 +17,14 @@
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import type { IMoveDrawingsCommandParams } from '../../commands/commands/move-drawings.command';
-import { Direction, EDITOR_ACTIVATED, FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, FOCUSING_PANEL_EDITOR } from '@univerjs/core';
+import { Direction, EDITOR_ACTIVATED, FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, FOCUSING_PANEL_EDITOR, FOCUSING_SHEET } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../../commands/commands/delete-drawings.command';
 import { MoveDrawingsCommand } from '../../commands/commands/move-drawings.command';
 
 export function whenSheetDrawingFocused(contextService: IContextService): boolean {
     return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
         !contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) &&
         !contextService.getContextValue(EDITOR_ACTIVATED) &&
         !contextService.getContextValue(FOCUSING_PANEL_EDITOR) &&

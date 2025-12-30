@@ -101,6 +101,7 @@ import {
 import { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
+import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 import { getFontStyleAtCursor } from './utils';
@@ -890,9 +891,20 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 // #region - copy cut paste
 // TODO@wzhudev: maybe we should move these menu factory to @univerjs/ui
 
-function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
-    const clipboardDisabled$: Observable<boolean> = new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard));
-    return clipboardDisabled$;
+export function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
+    return new Observable((subscriber) => {
+        const clipboardInterfaceService = injector.get(IClipboardInterfaceService);
+        const supportClipboard = clipboardInterfaceService.supportClipboard;
+
+        const sheetClipboardService = injector.get(ISheetClipboardService);
+        const subscription = sheetClipboardService.copyContentCache().lastCopyId$.subscribe((lastCopyId) => {
+            subscriber.next(!supportClipboard && !lastCopyId);
+        });
+
+        subscriber.next(!supportClipboard);
+
+        return () => subscription.unsubscribe();
+    });
 }
 
 export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -1042,6 +1054,8 @@ export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuBut
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
+
+//#endregion
 
 export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {

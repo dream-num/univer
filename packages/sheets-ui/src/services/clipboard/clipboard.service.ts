@@ -138,6 +138,7 @@ export interface ISheetClipboardService {
     copy(options?: ICopyOptions): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>; // get content from a ClipboardItem and paste it.
+    pasteByCopyId(copyId: string, pasteType?: string): Promise<boolean>; // paste content by internal copyId.
     legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean>; // paste a HTML string or plain text directly.
 
     rePasteWithPasteType(type: IPasteHookKeyType): boolean;
@@ -342,6 +343,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._logService.error('[SheetClipboardService]', 'No valid data on clipboard');
 
         return false;
+    }
+
+    async pasteByCopyId(copyId: string, pasteType = PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE): Promise<boolean> {
+        return this._pasteInternal(copyId, pasteType);
     }
 
     async legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {

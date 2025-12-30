@@ -72,12 +72,20 @@ export const SheetPasteCommand: IMultiCommand = {
         // TODO: @yuhongz: check if there is excel content in the clipboard, if so
         // ask users to use shortcuts instead.
 
-        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
-        const clipboardItems = await clipboardInterfaceService.read();
         const sheetClipboardService = accessor.get(ISheetClipboardService);
 
-        if (clipboardItems.length !== 0) {
-            return sheetClipboardService.paste(clipboardItems[0], params?.value);
+        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
+        if (clipboardInterfaceService.supportClipboard) {
+            const clipboardItems = await clipboardInterfaceService.read();
+            if (clipboardItems.length !== 0) {
+                return sheetClipboardService.paste(clipboardItems[0], params?.value);
+            }
+        }
+
+        const lastCopyId = sheetClipboardService.copyContentCache().getLastCopyId();
+        if (lastCopyId) {
+            console.warn('Since the current environment does not support the Clipboard API, we will use the internal copyId to paste the content.');
+            return sheetClipboardService.pasteByCopyId(lastCopyId, params?.value);
         }
 
         return false;

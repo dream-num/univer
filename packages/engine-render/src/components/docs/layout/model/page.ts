@@ -15,19 +15,23 @@
  */
 
 import type { ITable, Nullable } from '@univerjs/core';
+
+import { BooleanNumber, PageOrientType } from '@univerjs/core';
+
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
-} from '../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
-import type { ILayoutContext } from '../tools';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
-import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
-import { dealWithSection } from '../block/section';
-import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
+} from '@/basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '@/basics/interfaces';
+import type { ILayoutContext } from '@/components/docs/layout/tools';
+import type { DataStreamTreeNode } from '@/components/docs/view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import { BreakType, DocumentSkeletonPageType } from '@/basics/i-document-skeleton-cached';
+import { dealWithSection } from '@/components/docs/layout/block/section';
+import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '@/components/docs/layout/tools';
+
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {

@@ -15,6 +15,7 @@
  */
 
 import type { ITextRangeParam, Nullable } from '@univerjs/core';
+
 import type { INodePosition } from './interfaces';
 
 export interface ITextSelectionStyle {

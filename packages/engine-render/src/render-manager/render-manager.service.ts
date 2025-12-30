@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { BaseObject } from '../base-object';
-import type { DocComponent } from '../components/docs/doc-component';
-import type { SheetComponent } from '../components/sheets/sheet-component';
-import type { Slide } from '../components/slides/slide';
-import type { IRender } from './render-unit';
-import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
+
 import { Subject } from 'rxjs';
-import { Engine } from '../engine';
-import { Scene } from '../scene';
+
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+
+import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
+
+import type { BaseObject } from '@/base-object';
+import type { DocComponent } from '@/components/docs/doc-component';
+import type { SheetComponent } from '@/components/sheets/sheet-component';
+import type { Slide } from '@/components/slides/slide';
+
+import { Engine } from '@/engine';
+import { Scene } from '@/scene';
+
+import type { IRender } from './render-unit';
+
 import { RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;

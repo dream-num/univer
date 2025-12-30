@@ -16,11 +16,12 @@
 
 import type { IKeyValue, IOffset, IScale, ISize, Nullable } from '@univerjs/core';
 
-import type { IObjectFullState } from '../basics/interfaces';
-import type { IViewportInfo, Vector2 } from '../basics/vector2';
-import type { UniverRenderingContext } from '../context';
-import { BASE_OBJECT_ARRAY, BaseObject, ObjectType } from '../base-object';
-import { SHAPE_TYPE } from '../basics/const';
+import type { IObjectFullState } from '@/basics/interfaces';
+import type { IViewportInfo, Vector2 } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+
+import { BASE_OBJECT_ARRAY, BaseObject, ObjectType } from '@/base-object';
+import { SHAPE_TYPE } from '@/basics/const';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';

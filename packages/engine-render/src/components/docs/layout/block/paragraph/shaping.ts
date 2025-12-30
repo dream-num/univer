@@ -15,27 +15,31 @@
  */
 
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
-import type { ILayoutContext } from '../../tools';
+
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
-import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
-import { Lang } from '../../hyphenation/lang';
-import { LineBreaker } from '../../line-breaker';
-import { BreakPointType } from '../../line-breaker/break';
-import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
-import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
-import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
-import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
-import { createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
-import { getBoundingBox } from '../../model/line';
-import { fontLibrary } from '../../shaping-engine/font-library';
-import { textShape } from '../../shaping-engine/text-shaping';
-import { prepareParagraphBody } from '../../shaping-engine/utils';
-import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
+
+import type { IDocumentSkeletonGlyph } from '@/basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '@/basics/interfaces';
+import type { IOpenTypeGlyphInfo } from '@/components/docs/layout/shaping-engine/text-shaping';
+import type { ILayoutContext } from '@/components/docs/layout/tools';
+import type { DataStreamTreeNode } from '@/components/docs/view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '@/basics/tools';
+import { Lang } from '@/components/docs/layout/hyphenation/lang';
+import { LineBreaker } from '@/components/docs/layout/line-breaker';
+import { BreakPointType } from '@/components/docs/layout/line-breaker/break';
+import { LineBreakerHyphenEnhancer } from '@/components/docs/layout/line-breaker/enhancers/hyphen-enhancer';
+import { LineBreakerLinkEnhancer } from '@/components/docs/layout/line-breaker/enhancers/link-enhancer';
+import { customBlockLineBreakExtension } from '@/components/docs/layout/line-breaker/extensions/custom-block-linebreak-extension';
+import { tabLineBreakExtension } from '@/components/docs/layout/line-breaker/extensions/tab-linebreak-extension';
+import { createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '@/components/docs/layout/model/glyph';
+import { getBoundingBox } from '@/components/docs/layout/model/line';
+import { fontLibrary } from '@/components/docs/layout/shaping-engine/font-library';
+import { textShape } from '@/components/docs/layout/shaping-engine/text-shaping';
+import { prepareParagraphBody } from '@/components/docs/layout/shaping-engine/utils';
+import { getCharSpaceApply, getFontCreateConfig } from '@/components/docs/layout/tools';
+
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout

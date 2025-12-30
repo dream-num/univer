@@ -1,13 +1,15 @@
 /* eslint-disable header/header */
 import type { Rules } from '@antfu/eslint-config';
 import type { Linter } from 'eslint';
-import os from 'node:os';
-import path from 'node:path';
+
 import typescriptParser from '@typescript-eslint/parser';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import header from 'eslint-plugin-header';
 import barrel from 'eslint-plugin-no-barrel-import';
 import penetrating from 'eslint-plugin-no-penetrating-import';
+import os from 'node:os';
+import path from 'node:path';
+
 import noExternalImportsInFacade from './plugins/no-external-imports-in-facade';
 import noFacadeImportsOutsideFacade from './plugins/no-facade-imports-outside-facade';
 import noSelfPackageImports from './plugins/no-self-package-imports';
@@ -112,7 +114,38 @@ export const baseRules: Partial<Rules> = {
             memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
         },
     ],
-    'perfectionist/sort-imports': 'warn',
+    'perfectionist/sort-imports': [
+        'warn',
+        {
+            type: 'natural',
+            order: 'asc',
+            groups: [
+                'type',
+                ['builtin', 'external'],
+                'univerjs-type',
+                'univerjs',
+                'localAlias-type',
+                'localAlias',
+                ['parent-type', 'sibling-type', 'index-type'],
+                ['parent', 'sibling', 'index'],
+                'object',
+                'unknown',
+            ],
+            customGroups: {
+                value: {
+                    univerjs: '@univerjs/.*',
+                    localAlias: '^@/.*',
+                },
+                type: {
+                    'univerjs-type': '@univerjs/.*',
+                    'localAlias-type': '^@/.*',
+                },
+            },
+            newlinesBetween: 'always',
+            internalPattern: ['^@univerjs/.*', '^@/.*'],
+            sortSideEffects: true,
+        },
+    ],
     'perfectionist/sort-named-exports': 'warn',
 
     // Code quality rules

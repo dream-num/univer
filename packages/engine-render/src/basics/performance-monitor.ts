@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
+
+import { Disposable } from '@univerjs/core';
 
 export const DEFAULT_FRAME_SAMPLE_SIZE = 60;
 

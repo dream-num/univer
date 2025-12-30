@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IStyleBase, Nullable } from '@univerjs/core';
 import type Opentype from 'opentype.js';
-import { BooleanNumber } from '@univerjs/core';
+
 // @ts-ignore
 import { parse } from 'opentype.js/dist/opentype.module';
-import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
-import { EMOJI_REG } from '../../../../basics/tools';
+
+import type { IDocumentBody, IStyleBase, Nullable } from '@univerjs/core';
+
+import { BooleanNumber } from '@univerjs/core';
+
+import { DEFAULT_FONTFACE_PLANE } from '@/basics/const';
+import { EMOJI_REG } from '@/basics/tools';
+
 import { fontLibrary } from './font-library';
 import { prepareTextChunks } from './utils';
 

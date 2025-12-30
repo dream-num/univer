@@ -29,7 +29,8 @@ import type {
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
-import type { BreakPointType } from '../components/docs/layout/line-breaker/break';
+
+import type { BreakPointType } from '@/components/docs/layout/line-breaker/break';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];

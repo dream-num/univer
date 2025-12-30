@@ -27,10 +27,10 @@ import type {
     WrapStrategy,
 } from '@univerjs/core';
 
-import type { BORDER_TYPE as BORDER_LTRB } from '../../basics/const';
-import type { Canvas } from '../../canvas';
-import type { UniverRenderingContext } from '../../context';
-import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
+import type { BORDER_TYPE as BORDER_LTRB } from '@/basics/const';
+import type { Canvas } from '@/canvas';
+import type { DocumentSkeleton } from '@/components/docs/layout/doc-skeleton';
+import type { UniverRenderingContext } from '@/context';
 
 export interface BorderCache {
     [key: string]: BorderCacheItem | {};

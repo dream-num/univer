@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseObject } from '../base-object';
+import type { BaseObject } from '@/base-object';
+
 import type { IBoundRect } from './vector2';
 
 export function getOffsetRectForDom(ele: HTMLElement) {

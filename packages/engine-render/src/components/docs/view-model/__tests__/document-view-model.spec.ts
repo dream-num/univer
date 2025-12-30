@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeNodeType, DataStreamTreeTokenType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { parseDataStreamToTree } from '../document-view-model';
+
+import { DataStreamTreeNodeType, DataStreamTreeTokenType } from '@univerjs/core';
+
+import { parseDataStreamToTree } from '@/components/docs/view-model/document-view-model';
 
 describe('DocumentViewModel', () => {
     describe('parseDataStreamToTree', () => {

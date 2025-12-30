@@ -15,6 +15,7 @@
  */
 
 import type { ITransformState } from '@univerjs/core';
+
 import { offsetRotationAxis } from './offset-rotation-axis';
 import { Vector2 } from './vector2';
 

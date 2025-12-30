@@ -15,8 +15,11 @@
  */
 
 import type { IUser, Nullable } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
+
+import type { UniverRenderingContext } from '@/context';
+
 import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig, IWatermarkConfigWithType } from './type';
+
 import { IWatermarkTypeEnum } from './type';
 
 export function renderWatermark(ctx: UniverRenderingContext, config: IWatermarkConfigWithType, image: Nullable<HTMLImageElement>, userInfo: Nullable<IUser>) {

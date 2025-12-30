@@ -15,7 +15,9 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+
 import type { IHyphenPattern, RawHyphenPattern } from './tools';
+
 import { Lang } from './lang';
 import { EnUs } from './patterns/en-us';
 import { createCharIterator, createStringSlicer, parsePattern, snackToPascal } from './tools';

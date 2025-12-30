@@ -15,10 +15,13 @@
  */
 
 import type { IPosition } from '@univerjs/core';
-import type { UniverRenderingContext } from '../context';
+
+import { BorderStyleTypes } from '@univerjs/core';
+
+import type { UniverRenderingContext } from '@/context';
 
 import type { IDocumentSkeletonLine } from './i-document-skeleton-cached';
-import { BorderStyleTypes } from '@univerjs/core';
+
 import { BORDER_TYPE as BORDER_LTRB, ORIENTATION_TYPE } from './const';
 import { createCanvasElement } from './tools';
 import { Vector2 } from './vector2';

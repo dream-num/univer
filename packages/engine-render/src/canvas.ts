@@ -15,7 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+
 import type { ICanvasColorService } from './services/canvas-color.service';
+
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
 import { UniverPrintingContext, UniverRenderingContext } from './context';

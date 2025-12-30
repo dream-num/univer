@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Canvas } from '../canvas';
-import type { SHEET_VIEWPORT_KEY } from '../components/sheets/interfaces';
+import type { Canvas } from '@/canvas';
+import type { SHEET_VIEWPORT_KEY } from '@/components/sheets/interfaces';
+
 import type { DeepImmutable, FloatArray } from './i-events';
 import type { Transform } from './transform';
 

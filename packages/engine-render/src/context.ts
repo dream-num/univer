@@ -15,9 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+
+import { Tools } from '@univerjs/core';
+
 import type { ICanvasColorService } from './services/canvas-color.service';
 import type { IRenderConfig } from './services/render-config';
-import { Tools } from '@univerjs/core';
+
 import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export interface IUniverRenderingContextOptions {

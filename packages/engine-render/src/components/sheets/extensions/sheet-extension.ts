@@ -15,10 +15,12 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 
 import { Rectangle } from '@univerjs/core';
-import { ComponentExtension } from '../../extension';
+
+import type { SpreadsheetSkeleton } from '@/components/sheets/sheet.render-skeleton';
+
+import { ComponentExtension } from '@/components/extension';
 
 export enum SHEET_EXTENSION_TYPE {
     GRID,

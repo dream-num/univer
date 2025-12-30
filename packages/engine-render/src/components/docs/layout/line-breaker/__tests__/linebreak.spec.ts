@@ -18,8 +18,9 @@
 import fs from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
-import { LineBreaker } from '../line-breaker';
+
+import { tabLineBreakExtension } from '@/components/docs/layout/line-breaker/extensions/tab-linebreak-extension';
+import { LineBreaker } from '@/components/docs/layout/line-breaker/line-breaker';
 
 describe('unicode line break tests', () => {
     // these tests are weird, possibly incorrect or just tailored differently. we skip them.

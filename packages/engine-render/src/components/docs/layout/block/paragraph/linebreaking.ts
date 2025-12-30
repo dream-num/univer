@@ -15,17 +15,22 @@
  */
 
 import type { IBullet, IDocDrawingBase, IDrawings, IParagraph, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { ILayoutContext } from '../../tools';
-import type { IShapedText } from './shaping';
+
 import { DataStreamTreeTokenType, PositionedObjectLayoutType, Tools } from '@univerjs/core';
-import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
-import { createSkeletonPage } from '../../model/page';
-import { setColumnFullState } from '../../model/section';
-import { getLastNotFullColumnInfo } from '../../tools';
+
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '@/basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '@/basics/interfaces';
+import type { ILayoutContext } from '@/components/docs/layout/tools';
+import type { DataStreamTreeNode } from '@/components/docs/view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import { BreakType } from '@/basics/i-document-skeleton-cached';
+import { createSkeletonPage } from '@/components/docs/layout/model/page';
+import { setColumnFullState } from '@/components/docs/layout/model/section';
+import { getLastNotFullColumnInfo } from '@/components/docs/layout/tools';
+
+import type { IShapedText } from './shaping';
+
 import { dealWithBullet } from './bullet';
 import { layoutParagraph } from './layout-ruler';
 

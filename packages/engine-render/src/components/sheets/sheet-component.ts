@@ -16,12 +16,14 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 
-import type { IViewportInfo, Vector2 } from '../../basics/vector2';
-import type { UniverRenderingContext } from '../../context';
+import type { IViewportInfo, Vector2 } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+
+import { RENDER_CLASS_TYPE } from '@/basics/const';
+import { RenderComponent } from '@/components/component';
+
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
-import { RENDER_CLASS_TYPE } from '../../basics/const';
-import { RenderComponent } from '../component';
 
 export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     constructor(

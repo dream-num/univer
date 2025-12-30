@@ -15,11 +15,15 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IViewportInfo } from '../basics/vector2';
-import type { UniverRenderingContext } from '../context';
-import type { ComponentExtension } from './extension';
+
 import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
-import { BaseObject } from '../base-object';
+
+import type { IViewportInfo } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+
+import { BaseObject } from '@/base-object';
+
+import type { ComponentExtension } from './extension';
 
 export class RenderComponent<T, U, V> extends BaseObject {
     private _extensions = new Map<string, ComponentExtension<T, U, V>>();

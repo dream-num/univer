@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { Engine } from '../engine';
-import type { Scene } from '../scene';
-import type { RenderComponentType } from './render-manager.service';
-import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
+
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
+
+import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
+
+import type { Engine } from '@/engine';
+import type { Scene } from '@/scene';
+
+import type { RenderComponentType } from './render-manager.service';
 
 /**
  * Public interface of a {@link RenderUnit}.

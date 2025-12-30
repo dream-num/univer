@@ -27,23 +27,7 @@ import type {
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
-import type {
-    IDocumentSkeletonCached,
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonFontStyle,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonSection,
-    ISkeletonResourceReference,
-} from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 
-import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../view-model/document-view-model';
-import type { Hyphen } from './hyphenation/hyphen';
-import type { LanguageDetector } from './hyphenation/language-detector';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -65,9 +49,29 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
-import { GlyphType } from '../../../basics/i-document-skeleton-cached';
-import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
+
+import type {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonFontStyle,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    ISkeletonResourceReference,
+} from '@/basics/i-document-skeleton-cached';
+import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '@/basics/interfaces';
+import type { DataStreamTreeNode } from '@/components/docs/view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import { DEFAULT_DOCUMENT_FONTSIZE } from '@/basics/const';
+import { GlyphType } from '@/basics/i-document-skeleton-cached';
+import { getFontStyleString, isFunction, ptToPixel } from '@/basics/tools';
+
+import type { Hyphen } from './hyphenation/hyphen';
+import type { LanguageDetector } from './hyphenation/language-detector';
+
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';

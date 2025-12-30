@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
+import { Subject } from 'rxjs';
+
 import type { IDocumentRenderConfig, IScale, ITableCellBorder, Nullable } from '@univerjs/core';
 
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
-import type { Transform } from '../../basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { UniverRenderingContext } from '../../context';
-import type { Scene } from '../../scene';
-import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
+import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@/basics/i-document-skeleton-cached';
+import type { Transform } from '@/basics/transform';
+import type { IBoundRectNoAngle, IViewportInfo } from '@/basics/vector2';
+import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '@/components/extension';
+import type { UniverRenderingContext } from '@/context';
+import type { Scene } from '@/scene';
+
+import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '@/basics';
+import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '@/basics/draw';
+import { LineType } from '@/basics/i-document-skeleton-cached';
+import { VERTICAL_ROTATE_ANGLE } from '@/basics/text-rotation';
+import { degToRad } from '@/basics/tools';
+import { Vector2 } from '@/basics/vector2';
+import { DocumentsSpanAndLineExtensionRegistry } from '@/components/extension';
+
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { Subject } from 'rxjs';
-import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
-import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import { LineType } from '../../basics/i-document-skeleton-cached';
-import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
-import { degToRad } from '../../basics/tools';
-import { Vector2 } from '../../basics/vector2';
-import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
+
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
-import { Liquid } from './liquid';
 import './extensions';
+import { Liquid } from './liquid';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
     color: {

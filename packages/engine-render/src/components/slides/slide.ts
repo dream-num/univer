@@ -15,16 +15,18 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 
-import type { UniverRenderingContext } from '../../context';
-import type { Scene } from '../../scene';
 import { COLORS, EventSubject } from '@univerjs/core';
-import { CURSOR_TYPE } from '../../basics/const';
-import { attachObjectHover } from '../../basics/quick-event';
-import { getColor } from '../../basics/tools';
-import { SceneViewer } from '../../scene-viewer';
-import { Path } from '../../shape/path';
+
+import type { IMouseEvent, IPointerEvent } from '@/basics/i-events';
+import type { UniverRenderingContext } from '@/context';
+import type { Scene } from '@/scene';
+
+import { CURSOR_TYPE } from '@/basics/const';
+import { attachObjectHover } from '@/basics/quick-event';
+import { getColor } from '@/basics/tools';
+import { SceneViewer } from '@/scene-viewer';
+import { Path } from '@/shape/path';
 
 export enum SLIDE_NAVIGATION_KEY {
     LEFT = '__slideNavigationLeft__',

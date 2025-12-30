@@ -15,6 +15,7 @@
  */
 
 import type { RGBColorType } from '@univerjs/core';
+
 import { ColorKit, createIdentifier, Disposable, Inject, invertColorByMatrix, ThemeService } from '@univerjs/core';
 
 export const ICanvasColorService = createIdentifier<ICanvasColorService>('univer.engine-render.canvas-color.service');

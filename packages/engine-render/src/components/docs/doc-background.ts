@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { IViewportInfo } from '../../basics/vector2';
-import type { UniverRenderingContext } from '../../context';
-import type { IPathProps } from '../../shape';
+import { DocumentFlavor } from '@univerjs/core';
+
+import type { IViewportInfo } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+import type { IPathProps } from '@/shape';
+
+import { Path, Rect } from '@/shape';
+
 import type { IDocumentsConfig } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-import { DocumentFlavor } from '@univerjs/core';
-import { Path, Rect } from '../../shape';
+
 import { DocComponent } from './doc-component';
 import { Liquid } from './liquid';
 

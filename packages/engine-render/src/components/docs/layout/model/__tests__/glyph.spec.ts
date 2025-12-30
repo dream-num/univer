@@ -15,8 +15,10 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { baseAdjustability, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+
+import type { IDocumentSkeletonGlyph } from '@/basics/i-document-skeleton-cached';
+
+import { baseAdjustability, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '@/components/docs/layout/model/glyph';
 
 describe('Glyph utils test cases', () => {
     describe('test baseAdjustability', () => {

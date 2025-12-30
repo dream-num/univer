@@ -15,15 +15,17 @@
  */
 
 import type { BorderStyleTypes, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 
-import type { UniverRenderingContext } from '../../../context';
 import { getColorStyle } from '@univerjs/core';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
-import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
-import { Vector2 } from '../../../basics/vector2';
-import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
-import { docExtension } from '../doc-extension';
+
+import type { IDocumentSkeletonGlyph } from '@/basics/i-document-skeleton-cached';
+import type { UniverRenderingContext } from '@/context';
+
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '@/basics/const';
+import { drawLineByBorderType, getLineWidth, setLineType } from '@/basics/draw';
+import { Vector2 } from '@/basics/vector2';
+import { docExtension } from '@/components/docs/doc-extension';
+import { DocumentsSpanAndLineExtensionRegistry } from '@/components/extension';
 
 const UNIQUE_KEY = 'DefaultDocsBorderExtension';
 

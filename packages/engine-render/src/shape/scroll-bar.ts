@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+import { Subscription } from 'rxjs';
+
 import type { EventState, IKeyValue, Nullable } from '@univerjs/core';
 
-import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
-import type { Vector2 } from '../basics/vector2';
-import type { UniverRenderingContext } from '../context';
-import type { Scene } from '../scene';
-import type { Viewport } from '../viewport';
 import { Disposable, Tools } from '@univerjs/core';
-import { Subscription } from 'rxjs';
-import { Transform } from '../basics/transform';
+
+import type { IMouseEvent, IPointerEvent } from '@/basics/i-events';
+import type { Vector2 } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+import type { Scene } from '@/scene';
+import type { Viewport } from '@/viewport';
+
+import { Transform } from '@/basics/transform';
+
 import { Rect } from './rect';
 
 export interface IScrollBarProps {

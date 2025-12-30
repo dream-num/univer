@@ -15,6 +15,7 @@
  */
 
 import type { ICustomDecorationForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
+
 import { BooleanNumber, CustomDecorationType } from '@univerjs/core';
 
 export function getCustomDecorationStyle(customDecoration: ICustomDecorationForInterceptor): Nullable<ITextStyle> {

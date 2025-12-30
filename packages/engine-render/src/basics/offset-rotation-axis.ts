@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { degToRad } from './tools';
 import type { Vector2 } from './vector2';
+
+import { degToRad } from './tools';
 
 export function offsetRotationAxis(referenceCoords: Vector2, angleDegree: number, vertexCoords: Vector2, centerCoords: Vector2): Vector2 {
     const angleRad = degToRad(angleDegree);

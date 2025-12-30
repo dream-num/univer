@@ -15,10 +15,14 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
+
 import { Range, sortRules } from '@univerjs/core';
-import { SpreadsheetExtensionRegistry } from '../../extension';
+
+import type { SpreadsheetSkeleton } from '@/components/sheets/sheet.render-skeleton';
+import type { UniverRenderingContext } from '@/context';
+
+import { SpreadsheetExtensionRegistry } from '@/components/extension';
+
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultCustomExtension';

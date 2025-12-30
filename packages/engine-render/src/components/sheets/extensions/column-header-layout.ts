@@ -15,13 +15,17 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
-import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '../interfaces';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
+
 import { numberToABC } from '@univerjs/core';
-import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
-import { getColor } from '../../../basics/tools';
-import { SheetColumnHeaderExtensionRegistry } from '../../extension';
+
+import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '@/components/sheets/interfaces';
+import type { SpreadsheetSkeleton } from '@/components/sheets/sheet.render-skeleton';
+import type { UniverRenderingContext } from '@/context';
+
+import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '@/basics/const';
+import { getColor } from '@/basics/tools';
+import { SheetColumnHeaderExtensionRegistry } from '@/components/extension';
+
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultColumnHeaderLayoutExtension';

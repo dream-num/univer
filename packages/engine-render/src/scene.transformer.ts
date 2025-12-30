@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
+
+import { Subject } from 'rxjs';
+
+import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
+
+import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
@@ -24,11 +29,9 @@ import type { IPoint } from './basics/vector2';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import type { IRegularPolygonProps } from './shape/regular-polygon';
-import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
+
 import { ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
-
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { degToRad, precisionTo, radToDeg } from './basics/tools';

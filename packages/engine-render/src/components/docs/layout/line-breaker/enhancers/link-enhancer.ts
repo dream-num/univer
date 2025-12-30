@@ -15,8 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IBreakPoints, LineBreaker } from '../line-breaker';
-import { Break, BreakPointType } from '../break';
+
+import type { IBreakPoints, LineBreaker } from '@/components/docs/layout/line-breaker/line-breaker';
+
+import { Break, BreakPointType } from '@/components/docs/layout/line-breaker/break';
+
 import { getSlicePosition } from './utils';
 
 enum LinkCharType {

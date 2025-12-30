@@ -407,7 +407,13 @@ export class FormulaDataModel extends Disposable {
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
         cellMatrix.forValue((r, c, cell) => {
-            updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
+            /**
+             * Only these properties require determining whether the formula needs to be updated.
+             * The style and custom data do not affect the formula calculation.
+             */
+            if (cell?.f || cell?.si || cell?.v || cell?.p) {
+                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
+            }
         });
 
         // Convert the formula ID to formula string

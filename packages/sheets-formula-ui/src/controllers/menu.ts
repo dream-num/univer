@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -26,9 +26,9 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, IClipboardInterfaceService, MenuItemType } from '@univerjs/ui';
-import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
+import { getCurrentRangeDisable$, menuClipboardDisabledObservable } from '@univerjs/sheets-ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { combineLatestWith, map } from 'rxjs';
 import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
@@ -196,23 +196,6 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
     };
-}
-
-function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
-    const univerInstanceService = injector.get(IUniverInstanceService);
-    const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    return workbook$.pipe(
-        switchMap((workbook) => {
-            if (!workbook) {
-                return of(true);
-            }
-            const clipboardInterfaceService = injector.get(IClipboardInterfaceService);
-            if (clipboardInterfaceService) {
-                return new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard)) as Observable<boolean>;
-            }
-            return of(true);
-        })
-    );
 }
 
 // Right click menu - Copy Formula Only

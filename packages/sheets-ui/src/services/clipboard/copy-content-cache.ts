@@ -16,9 +16,9 @@
 
 import type { Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
-
 import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
 import { generateRandomId, LRUMap } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
 const ID_LENGTH = 6;
@@ -47,9 +47,12 @@ export function extractId(html: string) {
 
 export class CopyContentCache {
     private _cache = new LRUMap<string, ICopyContentCacheData>(COPY_CONTENT_CACHE_LIMIT);
+    private readonly _lastCopyId$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+    readonly lastCopyId$ = this._lastCopyId$.asObservable();
 
     set(id: string, clipboardData: ICopyContentCacheData) {
         this._cache.set(id, clipboardData);
+        this._lastCopyId$.next(id);
     }
 
     get(id: string) {
@@ -58,10 +61,14 @@ export class CopyContentCache {
 
     del(id: string) {
         this._cache.delete(id);
+        if (this._lastCopyId$.getValue() === id) {
+            this._lastCopyId$.next(null);
+        }
     }
 
     clear() {
         this._cache.clear();
+        this._lastCopyId$.next(null);
     }
 
     clearWithUnitId(unitId: string) {
@@ -70,6 +77,10 @@ export class CopyContentCache {
                 this._cache.delete(key);
             }
         });
+    }
+
+    getLastCopyId(): string | null {
+        return this._lastCopyId$.getValue();
     }
 }
 

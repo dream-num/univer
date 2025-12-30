@@ -332,6 +332,8 @@ export const useSheetSelectionChange = (
                             range.startColumn = primary.startColumn;
                             range.endColumn = primary.startColumn;
                         }
+                        range.unitId = params.unitId;
+                        range.sheetId = params.subUnitId;
 
                         const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
                         const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);

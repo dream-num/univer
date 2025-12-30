@@ -408,10 +408,11 @@ export class FormulaDataModel extends Disposable {
 
         cellMatrix.forValue((r, c, cell) => {
             /**
+             * If the cell is null, it means the cell is cleared, so we need to update the formula data.
              * Only these properties require determining whether the formula needs to be updated.
              * The style and custom data do not affect the formula calculation.
              */
-            if (cell?.f || cell?.si || cell?.v || cell?.p) {
+            if (!cell || cell.hasOwnProperty('f') || cell.hasOwnProperty('si') || cell.hasOwnProperty('v') || cell.hasOwnProperty('p')) {
                 updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
             }
         });

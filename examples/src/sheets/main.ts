@@ -21,7 +21,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import caES from '@univerjs/mockdata/locales/ca-ES';
 import enUS from '@univerjs/mockdata/locales/en-US';
 import esES from '@univerjs/mockdata/locales/es-ES';
@@ -174,7 +173,7 @@ function createNewInstance() {
 
     // create univer sheet instance
     if (!IS_E2E) {
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {});
     }
 
     setTimeout(() => {

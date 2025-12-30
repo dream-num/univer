@@ -363,6 +363,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                         defaultValue: cellStr,
                         multiple,
                         showEdit: this._configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true,
+                        showSearch: this._configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showSearchOnDropdown ?? true,
                     },
                 };
                 break;

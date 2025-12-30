@@ -15,18 +15,21 @@
  */
 
 import type { InlineConfig } from 'vite';
-import path from 'node:path';
-import process from 'node:process';
+
 import react from '@vitejs/plugin-react';
 import vue from '@vitejs/plugin-vue';
 import fs from 'fs-extra';
+import path from 'node:path';
+import process from 'node:process';
 import { mergeConfig, build as viteBuild } from 'vite';
 import dts from 'vite-plugin-dts';
 import vitePluginExternal from 'vite-plugin-external';
+
 import { autoDetectedExternalPlugin } from './auto-detected-external-plugin';
 import { cleanupPkgPlugin } from './cleanup-pkg-plugin';
 import { trimClassNamePlugin } from './plugin-trim-classname-plugin';
 import { convertLibNameFromPackageName, obfuscator } from './utils';
+import { workspaceAliasResolverPlugin } from './workspace-alias-resolver-plugin';
 
 interface IBuildExecuterOptions {
     pkg: {
@@ -203,6 +206,20 @@ export async function build(options?: IBuildOptions) {
         }
     }
 
+    // Load local vite.config.ts if it exists
+    let localConfig: InlineConfig = {};
+    const localConfigPath = path.resolve(__dirname, 'vite.config.ts');
+    if (fs.existsSync(localConfigPath)) {
+        try {
+            const configModule = await import(localConfigPath);
+            localConfig = typeof configModule.default === 'function'
+                ? configModule.default({ mode: 'production', command: 'build' })
+                : configModule.default;
+        } catch (e) {
+            console.warn('Failed to load local vite.config.ts:', e);
+        }
+    }
+
     const sharedConfig: InlineConfig = {
         configFile: false,
         build: {
@@ -210,6 +227,7 @@ export async function build(options?: IBuildOptions) {
         },
         resolve: {
             conditions: nodeFirst ? ['node', 'default'] : undefined,
+            ...localConfig.resolve,
         },
         define: {
             'process.env.NODE_ENV': JSON.stringify('production'),
@@ -218,6 +236,7 @@ export async function build(options?: IBuildOptions) {
             'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
         },
         plugins: [
+            workspaceAliasResolverPlugin(),
             trimClassNamePlugin(),
             react(),
             vue(),

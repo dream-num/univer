@@ -129,6 +129,9 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+        const cellHeights = getRangesHeight(suitableRanges, worksheet);
+
         const setRangeValuesResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,
             setRangeValuesMutationParams
@@ -138,8 +141,6 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         let autoHeightUndos: IMutationInfo<object>[] = [];
         let autoHeightRedos: IMutationInfo<object>[] = [];
         if (AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
-            const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
-            const cellHeights = getRangesHeight(suitableRanges, worksheet);
             const { undos, redos } = interceptor.generateMutationsOfAutoHeight({
                 unitId,
                 subUnitId,

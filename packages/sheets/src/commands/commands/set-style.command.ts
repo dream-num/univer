@@ -74,7 +74,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     id: 'sheet.command.set-style',
 
     // eslint-disable-next-line max-lines-per-function
-    handler: <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
+    handler: <T>(accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
@@ -129,8 +129,16 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
-        const cellHeights = getRangesHeight(suitableRanges, worksheet);
+        let autoHeightContext = null;
+        if (AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
+            const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+            const cellHeights = getRangesHeight(suitableRanges, worksheet);
+            autoHeightContext = {
+                suitableRanges,
+                remainingRanges,
+                cellHeights,
+            };
+        }
 
         const setRangeValuesResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,
@@ -140,7 +148,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const interceptor = accessor.get(SheetInterceptorService);
         let autoHeightUndos: IMutationInfo<object>[] = [];
         let autoHeightRedos: IMutationInfo<object>[] = [];
-        if (AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
+        if (autoHeightContext) {
+            const { suitableRanges, remainingRanges, cellHeights } = autoHeightContext;
             const { undos, redos } = interceptor.generateMutationsOfAutoHeight({
                 unitId,
                 subUnitId,

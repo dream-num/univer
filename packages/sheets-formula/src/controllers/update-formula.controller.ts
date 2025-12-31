@@ -48,6 +48,7 @@ import {
     InsertSheetMutation,
     RemoveSheetMutation,
     SetBorderCommand,
+    SetRangeCustomMetadataCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
     SheetInterceptorService,
@@ -115,7 +116,8 @@ export class UpdateFormulaController extends Disposable {
                         (options && options.syncOnly === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id ||
-                        params.trigger === ClearSelectionFormatCommand.id
+                        params.trigger === ClearSelectionFormatCommand.id ||
+                        params.trigger === SetRangeCustomMetadataCommand.id
                     ) {
                         return;
                     }

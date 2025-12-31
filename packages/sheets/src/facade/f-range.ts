@@ -15,13 +15,50 @@
  */
 
 import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetStyleCommandParams, ISetTextRotationCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
+import type {
+    ISetBorderBasicCommandParams,
+    ISetHorizontalTextAlignCommandParams,
+    ISetRangeCustomMetadataCommandParams,
+    ISetRangeValuesCommandParams,
+    ISetSelectionsOperationParams,
+    ISetStyleCommandParams,
+    ISetTextRotationCommandParams,
+    ISetTextWrapCommandParams,
+    ISetVerticalTextAlignCommandParams,
+    IStyleTypeValue,
+    SplitDelimiterEnum,
+} from '@univerjs/sheets';
 import type { IFacadeClearOptions } from './f-worksheet';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, covertCellValue, covertCellValues, DEFAULT_STYLES, Dimension, ICommandService, Inject, Injector, isNullCell, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, getPrimaryForRange, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, RemoveWorksheetMergeCommand, SetBorderBasicCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetSelectionsOperation, SetStyleCommand, SetTextRotationCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import {
+    addMergeCellsUtil,
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
+    DeleteWorksheetRangeThemeStyleCommand,
+    getAddMergeMutationRangeByType,
+    getPrimaryForRange,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
+    RemoveWorksheetMergeCommand,
+    SetBorderBasicCommand,
+    SetHorizontalTextAlignCommand,
+    SetRangeCustomMetadataCommand,
+    SetRangeValuesCommand,
+    SetSelectionsOperation,
+    SetStyleCommand,
+    SetTextRotationCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+    SetWorksheetRangeThemeStyleCommand,
+    SheetRangeThemeService,
+    SplitTextToColumnsCommand,
+} from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';
 import { FRangePermission } from './permission/f-range-permission';
@@ -946,9 +983,18 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     setCustomMetaData(data: CustomData): FRange {
-        return this.setValue({
-            custom: data,
-        });
+        const params: ISetRangeCustomMetadataCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            customMetadata: {
+                custom: data,
+            },
+        };
+
+        this._commandService.syncExecuteCommand(SetRangeCustomMetadataCommand.id, params);
+
+        return this;
     }
 
     /**
@@ -967,7 +1013,16 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     setCustomMetaDatas(datas: CustomData[][]): FRange {
-        return this.setValues(datas.map((row) => row.map((data) => ({ custom: data }))));
+        const params: ISetRangeCustomMetadataCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            customMetadata: datas.map((row) => row.map((data) => ({ custom: data }))),
+        };
+
+        this._commandService.syncExecuteCommand(SetRangeCustomMetadataCommand.id, params);
+
+        return this;
     }
 
     /**

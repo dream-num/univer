@@ -74,6 +74,7 @@ import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.com
 import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetGridlinesColorCommand } from '../commands/commands/set-gridlines-color.command';
 import { SetProtectionCommand } from '../commands/commands/set-protection.command';
+import { SetRangeCustomMetadataCommand } from '../commands/commands/set-range-custom-metadata.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
 import {
@@ -275,6 +276,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetFrozenMutation,
                 CancelFrozenCommand,
                 SetHorizontalTextAlignCommand,
+                SetRangeCustomMetadataCommand,
                 SetRangeValuesCommand,
                 SetRowHeightCommand,
                 SetRowHiddenCommand,

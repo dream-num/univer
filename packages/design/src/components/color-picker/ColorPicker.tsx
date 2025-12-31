@@ -19,7 +19,8 @@ import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
-import { hexToHsv, hsvToHex, hsvToRgb, rgbToHex } from './color-conversion';
+import { AlphaSlider } from './AlphaSlider';
+import { hexToHsv, hsvToHex, hsvToRgb, hsvToRgba, parseRgba, rgbToHex, rgbToHsv } from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
@@ -27,21 +28,23 @@ import { HueSlider } from './HueSlider';
 
 const MemoizedColorSpectrum = memo(ColorSpectrum);
 const MemoizedHueSlider = memo(HueSlider);
+const MemoizedAlphaSlider = memo(AlphaSlider);
 const MemoizedColorInput = memo(ColorInput);
 const MemoizedColorPresets = memo(ColorPresets);
 
 export interface IColorPickerProps {
-    format?: 'hex';
+    format?: 'hex' | 'rgba';
     value?: string;
     onChange?: (value: string) => void;
 }
 
-export function ColorPicker({ format = 'hex', value = '#000000', onChange }: IColorPickerProps) {
+export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
     if (!isBrowser) return null;
 
     const { locale } = useContext(ConfigContext);
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
+    const [alpha, setAlpha] = useState(1);
     const [visible, setVisible] = useState(false);
 
     const getRgb = useCallback((h: number, s: number, v: number) => {
@@ -50,31 +53,50 @@ export function ColorPicker({ format = 'hex', value = '#000000', onChange }: ICo
 
     useEffect(() => {
         try {
+            const actualValue = value || (format === 'hex' ? '#000000' : 'rgba(0, 0, 0, 1)');
             if (format === 'hex') {
-                const [h, s, v] = value ? hexToHsv(value) : hsv;
+                const [h, s, v] = hexToHsv(actualValue);
                 setHsv([h, s, v]);
+                setAlpha(1);
+            } else if (format === 'rgba') {
+                const [r, g, b, a] = parseRgba(actualValue);
+                const [h, s, v] = rgbToHsv(r, g, b);
+                setHsv([h, s, v]);
+                setAlpha(a);
             }
         } catch (error) {
             console.error('Invalid value:', error);
         }
-    }, [value]);
+    }, [value, format]);
 
     function handleColorChange(h: number, s: number, v: number) {
         setHsv([h, s, v]);
     }
 
-    function handleColorChanged(h: number, s: number, v: number) {
-        const [r, g, b] = getRgb(h, s, v);
+    function handleAlphaChange(a: number) {
+        setAlpha(a);
+    }
+
+    function handleColorChanged(h: number, s: number, v: number, a: number = alpha) {
         if (format === 'hex') {
+            const [r, g, b] = getRgb(h, s, v);
             const hex = rgbToHex(r, g, b);
             onChange?.(hex);
+        } else if (format === 'rgba') {
+            const [r, g, b] = getRgb(h, s, v);
+            onChange?.(`rgba(${r}, ${g}, ${b}, ${a})`);
         }
     }
 
     function handleConfirmCustomColor() {
         const [h, s, v] = hsv;
-        const hex = hsvToHex(h, s, v);
-        onChange?.(hex);
+        if (format === 'hex') {
+            const hex = hsvToHex(h, s, v);
+            onChange?.(hex);
+        } else if (format === 'rgba') {
+            const [r, g, b] = getRgb(h, s, v);
+            onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+        }
         setVisible(false);
     }
 
@@ -91,7 +113,8 @@ export function ColorPicker({ format = 'hex', value = '#000000', onChange }: ICo
                 hsv={hsv}
                 onChange={(h, s, v) => {
                     handleColorChange(h, s, v);
-                    handleColorChanged(h, s, v);
+                    handleAlphaChange(1);
+                    handleColorChanged(h, s, v, 1);
                 }}
             />
 
@@ -125,18 +148,32 @@ export function ColorPicker({ format = 'hex', value = '#000000', onChange }: ICo
                         <div
                             className="univer-size-6 univer-flex-shrink-0 univer-rounded-sm"
                             style={{
-                                backgroundColor: hsvToHex(...hsv),
+                                backgroundColor: format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha),
                             }}
                         />
-                        <MemoizedHueSlider
-                            hsv={hsv}
-                            onChange={handleColorChange}
-                        />
+                        <div className="univer-flex-1 univer-space-y-2">
+                            <MemoizedHueSlider
+                                hsv={hsv}
+                                onChange={handleColorChange}
+                            />
+                            {format === 'rgba' && (
+                                <MemoizedAlphaSlider
+                                    hsv={hsv}
+                                    alpha={alpha}
+                                    onChange={handleAlphaChange}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     <MemoizedColorInput
                         hsv={hsv}
-                        onChange={handleColorChange}
+                        alpha={alpha}
+                        format={format}
+                        onChange={(h, s, v, a) => {
+                            handleColorChange(h, s, v);
+                            if (a !== undefined) handleAlphaChange(a);
+                        }}
                     />
 
                     <footer className="univer-flex univer-items-center univer-justify-end univer-gap-2">

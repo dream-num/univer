@@ -36,10 +36,33 @@ export const Playground = {
         const [value, setValue] = useState('#FF0000');
 
         return (
-            <>
-                {value}
-                <ColorPicker value={value} onChange={setValue} />
-            </>
+            <div className="univer-flex univer-flex-col univer-gap-4">
+                <div>
+                    <div>
+                        HEX Format:
+                        {value}
+                    </div>
+                    <ColorPicker format="hex" value={value} onChange={setValue} />
+                </div>
+            </div>
+        );
+    },
+};
+
+export const RgbaFormat = {
+    render() {
+        const [value, setValue] = useState('rgba(255, 0, 0, 0.5)');
+
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-4">
+                <div>
+                    <div>
+                        RGBA Format:
+                        {value}
+                    </div>
+                    <ColorPicker format="rgba" value={value} onChange={setValue} />
+                </div>
+            </div>
         );
     },
 };

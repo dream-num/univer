@@ -22,12 +22,16 @@ import { hexToHsv, hsvToHex, hsvToRgb, rgbToHsv } from './color-conversion';
 
 interface IColorInputProps {
     hsv: [number, number, number];
-    onChange: (h: number, s: number, v: number) => void;
+    alpha: number;
+    format: 'hex' | 'rgba';
+    onChange: (h: number, s: number, v: number, a?: number) => void;
 }
 
 interface IInputProps {
     hsv: [number, number, number];
-    onChange?: (h: number, s: number, v: number) => void;
+    alpha?: number;
+    format?: 'hex' | 'rgba';
+    onChange?: (h: number, s: number, v: number, a?: number) => void;
 }
 
 function HexInput({ hsv, onChange }: IInputProps) {
@@ -91,8 +95,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
     );
 }
 
-function RgbInput({ hsv, onChange }: IInputProps) {
-    const [localValues, setLocalValues] = useState({ r: 0, g: 0, b: 0 });
+function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
+    const [localValues, setLocalValues] = useState({ r: 0, g: 0, b: 0, a: 1 });
 
     useEffect(() => {
         const [r, g, b] = hsvToRgb(hsv[0], hsv[1], hsv[2]);
@@ -100,10 +104,23 @@ function RgbInput({ hsv, onChange }: IInputProps) {
             r: Math.round(r),
             g: Math.round(g),
             b: Math.round(b),
+            a: alpha ?? 1,
         });
-    }, [hsv]);
+    }, [hsv, alpha]);
 
-    const handleChange = (color: 'r' | 'g' | 'b', value: string) => {
+    const handleChange = (color: 'r' | 'g' | 'b' | 'a', value: string) => {
+        if (color === 'a') {
+            if (value !== '' && !/^\d*\.?\d*$/.test(value)) return;
+            const numValue = value === '' ? 0 : Number.parseFloat(value);
+            if (numValue > 1) return;
+            const newValues = { ...localValues, a: numValue };
+            setLocalValues(newValues);
+            if (onChange) {
+                onChange(hsv[0], hsv[1], hsv[2], numValue);
+            }
+            return;
+        }
+
         if (value !== '' && !/^\d*$/.test(value)) return;
 
         const numValue = value === '' ? 0 : Number.parseInt(value, 10);
@@ -115,7 +132,7 @@ function RgbInput({ hsv, onChange }: IInputProps) {
 
         if (onChange) {
             const hsv = rgbToHsv(newValues.r, newValues.g, newValues.b);
-            onChange(...hsv);
+            onChange(...hsv, localValues.a);
         }
     };
 
@@ -125,6 +142,7 @@ function RgbInput({ hsv, onChange }: IInputProps) {
             r: Math.round(r),
             g: Math.round(g),
             b: Math.round(b),
+            a: alpha ?? 1,
         });
     };
 
@@ -154,11 +172,19 @@ function RgbInput({ hsv, onChange }: IInputProps) {
                 onBlur={handleBlur}
                 maxLength={3}
             />
+            {format === 'rgba' && (
+                <input
+                    value={localValues.a}
+                    onChange={(e) => handleChange('a', e.target.value)}
+                    onBlur={handleBlur}
+                    maxLength={4}
+                />
+            )}
         </div>
     );
 }
 
-export function ColorInput({ hsv, onChange }: IColorInputProps) {
+export function ColorInput({ hsv, alpha, format, onChange }: IColorInputProps) {
     return (
         <div
             className={`
@@ -172,7 +198,7 @@ export function ColorInput({ hsv, onChange }: IColorInputProps) {
         >
             <div className="univer-relative univer-flex univer-flex-1 univer-gap-2">
                 <HexInput hsv={hsv} onChange={onChange} />
-                <RgbInput hsv={hsv} onChange={onChange} />
+                <RgbInput hsv={hsv} alpha={alpha} format={format} onChange={onChange} />
             </div>
         </div>
     );

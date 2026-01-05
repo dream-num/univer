@@ -60,6 +60,38 @@ const indexTemplate = `<!doctype html>
 </html>
 `;
 
+const sheetsEmbedInPageTemplate = `
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <title>Univer</title>
+
+        <link rel="icon" type="image/x-icon" href="../favicon.svg" />
+        <link rel="stylesheet" href="./main.css" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: Arial;
+            }
+        </style>${ESBUILD_SCRIPT}
+    </head>
+    <body>
+        <section style="margin: 100px 0;">
+            <div style="height: 600px; width: 1000px; margin: 0 auto; overflow: auto; background-color: #f0f0f0;">
+                <div style="width: 2000px; margin: 400px auto;">
+                    <div id="app" style="height: 400px; width: 800px; border: 1px solid #000; margin: 0 auto;"></div>
+                </div>
+            </div>
+        </section>
+        <script type="module" src="./main.js"></script>
+    </body>
+</html>
+`;
+
 /**
  * Generate html files
  */
@@ -70,7 +102,11 @@ async function generateHtml() {
         if (fs.statSync(__example).isDirectory()) {
             const __target = path.resolve(__dirname, `../public/${dir}`);
             fs.ensureDirSync(__target);
-            fs.writeFileSync(path.resolve(__target, 'index.html'), indexTemplate);
+            if (dir === 'sheets-embed-in-page') {
+                fs.writeFileSync(path.resolve(__target, 'index.html'), sheetsEmbedInPageTemplate);
+            } else {
+                fs.writeFileSync(path.resolve(__target, 'index.html'), indexTemplate);
+            }
         }
     });
 }

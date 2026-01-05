@@ -675,7 +675,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        return skeleton.getCellWithCoordByOffset(x, y, scaleX, scaleY, scrollXY);
+        return skeleton.getCellWithCoordByOffset(x - scrollXY.x, y - scrollXY.y, scaleX, scaleY, scrollXY);
     }
 
     /**

@@ -20,6 +20,7 @@ import type { IObjectFullState } from './basics/interfaces';
 import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
+
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 

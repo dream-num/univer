@@ -15,8 +15,10 @@
  */
 
 import type { IDistFromText, Nullable } from '@univerjs/core';
-import type { IParagraphConfig } from '../../../../basics';
 
+import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
+
+import type { IParagraphConfig } from '@/basics';
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
@@ -25,12 +27,12 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonTable,
     LineType,
-} from '../../../../basics/i-document-skeleton-cached';
-import type { IFloatObject } from '../tools';
-import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
-import { Path2 } from '../../../../basics/path2';
-import { Transform } from '../../../../basics/transform';
-import { Vector2 } from '../../../../basics/vector2';
+} from '@/basics/i-document-skeleton-cached';
+import type { IFloatObject } from '@/components/docs/layout/tools';
+
+import { Path2 } from '@/basics/path2';
+import { Transform } from '@/basics/transform';
+import { Vector2 } from '@/basics/vector2';
 
 interface IDrawingsSplit {
     left: number;

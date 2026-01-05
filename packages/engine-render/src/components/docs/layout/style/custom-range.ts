@@ -15,6 +15,7 @@
  */
 
 import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
+
 import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {

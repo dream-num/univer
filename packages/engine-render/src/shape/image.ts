@@ -16,13 +16,16 @@
 
 import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 
-import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
-import type { UniverRenderingContext } from '../context';
-import type { Scene } from '../scene';
+import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '@/basics';
+import type { UniverRenderingContext } from '@/context';
+import type { Scene } from '@/scene';
+
+import { ObjectType } from '@/base-object';
+import { RENDER_CLASS_TYPE, Vector2 } from '@/basics';
+import { offsetRotationAxis } from '@/basics/offset-rotation-axis';
+
 import type { IShapeProps } from './shape';
-import { ObjectType } from '../base-object';
-import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
-import { offsetRotationAxis } from '../basics/offset-rotation-axis';
+
 import { Shape } from './shape';
 
 export interface IImageProps extends IShapeProps {

@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
+import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
+
 import type {
     IAdjustability,
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
-} from '../../../../basics/i-document-skeleton-cached';
+} from '@/basics/i-document-skeleton-cached';
+import type { IFontCreateConfig } from '@/basics/interfaces';
+import type { IOpenTypeGlyphInfo } from '@/components/docs/layout/shaping-engine/text-shaping';
 
-import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
-import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
-import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
-import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
-import { FontCache } from '../shaping-engine/font-cache';
-import { validationGrid } from '../tools';
+import { GlyphType } from '@/basics/i-document-skeleton-cached';
+import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '@/basics/tools';
+import { FontCache } from '@/components/docs/layout/shaping-engine/font-cache';
+import { validationGrid } from '@/components/docs/layout/tools';
 
 export function isSpace(char: string) {
     const SPACE_CHARS = [' ', '\u{00A0}', '　'];

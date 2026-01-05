@@ -18,6 +18,7 @@ import type { IPaddingData, Nullable } from '@univerjs/core';
 
 import type { Scene } from './scene';
 import type { Viewport } from './viewport';
+
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';
 import { Vector2 } from './basics/vector2';
 

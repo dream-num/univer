@@ -15,13 +15,15 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 
-import type { UniverRenderingContext } from '../../../context';
 import { getColorStyle } from '@univerjs/core';
-import { Vector2 } from '../../../basics/vector2';
-import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
-import { docExtension } from '../doc-extension';
+
+import type { IDocumentSkeletonGlyph } from '@/basics/i-document-skeleton-cached';
+import type { UniverRenderingContext } from '@/context';
+
+import { Vector2 } from '@/basics/vector2';
+import { docExtension } from '@/components/docs/doc-extension';
+import { DocumentsSpanAndLineExtensionRegistry } from '@/components/extension';
 
 const UNIQUE_KEY = 'DefaultDocsBackgroundExtension';
 

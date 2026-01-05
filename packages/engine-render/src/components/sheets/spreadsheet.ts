@@ -15,23 +15,28 @@
  */
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
-import type { Canvas } from '../../canvas';
-import type { UniverRenderingContext2D } from '../../context';
-import type { Engine } from '../../engine';
-import type { Scene } from '../../scene';
-import type { SceneViewer } from '../../scene-viewer';
-import type { IDrawInfo } from '../extension';
+
+import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
+
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '@/basics/vector2';
+import type { Canvas } from '@/canvas';
+import type { IDrawInfo } from '@/components/extension';
+import type { UniverRenderingContext2D } from '@/context';
+import type { Engine } from '@/engine';
+import type { Scene } from '@/scene';
+import type { SceneViewer } from '@/scene-viewer';
+
+import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '@/basics/const';
+import { getColor } from '@/basics/tools';
+import { Documents } from '@/components/docs/document';
+import { SpreadsheetExtensionRegistry } from '@/components/extension';
+
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
 import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { getColor } from '../../basics/tools';
-import { Documents } from '../docs/document';
-import { SpreadsheetExtensionRegistry } from '../extension';
+
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
 import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
 import { SheetComponent } from './sheet-component';

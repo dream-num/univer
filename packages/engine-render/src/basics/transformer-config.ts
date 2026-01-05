@@ -15,7 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { BaseObject } from '../base-object';
+
+import type { BaseObject } from '@/base-object';
+
 import type { IMouseEvent, IPointerEvent } from './i-events';
 
 export interface ITransformerConfig {

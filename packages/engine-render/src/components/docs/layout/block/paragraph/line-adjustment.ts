@@ -15,16 +15,19 @@
  */
 
 import type { IParagraphStyle } from '@univerjs/core';
-import type { ISectionBreakConfig } from '../../../../../basics';
-import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
+
 import { HorizontalAlign } from '@univerjs/core';
-import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
-import { BreakPointType } from '../../line-breaker/break';
-import { isLetter } from '../../line-breaker/enhancers/utils';
-import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
-import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
+
+import type { ISectionBreakConfig } from '@/basics';
+import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '@/basics/i-document-skeleton-cached';
+import type { DataStreamTreeNode } from '@/components/docs/view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '@/basics/tools';
+import { BreakPointType } from '@/components/docs/layout/line-breaker/break';
+import { isLetter } from '@/components/docs/layout/line-breaker/enhancers/utils';
+import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '@/components/docs/layout/model/glyph';
+import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '@/components/docs/layout/tools';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:

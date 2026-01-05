@@ -15,6 +15,9 @@
  */
 
 import type { INumberUnit, IParagraphProperties, IParagraphStyle, Nullable } from '@univerjs/core';
+
+import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
@@ -24,16 +27,17 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
     IDocumentSkeletonTable,
-} from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
+} from '@/basics/i-document-skeleton-cached';
+import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '@/basics/interfaces';
 import type {
     IFloatObject,
     ILayoutContext,
-} from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, NAMED_STYLE_SPACE_MAP, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
-import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
-import { BreakPointType } from '../../line-breaker/break';
-import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
+} from '@/components/docs/layout/tools';
+
+import { GlyphType, LineType } from '@/basics/i-document-skeleton-cached';
+import { createTableSkeletons, rollbackListCache } from '@/components/docs/layout/block/table';
+import { BreakPointType } from '@/components/docs/layout/line-breaker/break';
+import { addGlyphToDivide, createSkeletonBulletGlyph } from '@/components/docs/layout/model/glyph';
 import {
     calculateLineTopByDrawings,
     collisionDetection,
@@ -41,9 +45,9 @@ import {
     createSkeletonLine,
     setLineMarginBottom,
     updateDivideInfo,
-} from '../../model/line';
-import { createSkeletonPage } from '../../model/page';
-import { setColumnFullState } from '../../model/section';
+} from '@/components/docs/layout/model/line';
+import { createSkeletonPage } from '@/components/docs/layout/model/page';
+import { setColumnFullState } from '@/components/docs/layout/model/section';
 import {
     FloatObjectType,
     getCharSpaceApply,
@@ -60,8 +64,7 @@ import {
     isColumnFull,
     lineIterator,
     mergeByV,
-} from '../../tools';
-import { createTableSkeletons, rollbackListCache } from '../table';
+} from '@/components/docs/layout/tools';
 
 export function layoutParagraph(
     ctx: ILayoutContext,

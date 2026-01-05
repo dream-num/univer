@@ -1,7 +1,11 @@
 {
     "extends": "@univerjs-infra/shared/tsconfigs/base",
     "compilerOptions": {
+        "baseUrl": ".",
         "rootDir": "src",
+        "paths": {
+            "@/*": ["src/*"]
+        },
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],

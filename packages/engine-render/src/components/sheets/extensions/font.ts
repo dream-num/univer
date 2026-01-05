@@ -18,21 +18,25 @@
 /* eslint-disable complexity */
 
 import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
-import type { UniverRenderingContext } from '../../../context';
-import type { Documents } from '../../docs/document';
-import type { IDrawInfo } from '../../extension';
-import type { IFontCacheItem } from '../interfaces';
-import type { SheetComponent } from '../sheet-component';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
+
 import { CellValueType, extractPureTextFromCell, HorizontalAlign, Range, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
-import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
-import { clampRange, inViewRanges } from '../../../basics/tools';
-import { Text } from '../../../shape/text';
-import { SpreadsheetExtensionRegistry } from '../../extension';
-import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
-import { DEFAULT_PADDING_DATA, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
+
+import type { IBoundRectNoAngle, IViewportInfo } from '@/basics';
+import type { Documents } from '@/components/docs/document';
+import type { IDrawInfo } from '@/components/extension';
+import type { IFontCacheItem } from '@/components/sheets/interfaces';
+import type { SheetComponent } from '@/components/sheets/sheet-component';
+import type { SpreadsheetSkeleton } from '@/components/sheets/sheet.render-skeleton';
+import type { UniverRenderingContext } from '@/context';
+
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@/basics';
+import { VERTICAL_ROTATE_ANGLE } from '@/basics/text-rotation';
+import { clampRange, inViewRanges } from '@/basics/tools';
+import { SpreadsheetExtensionRegistry } from '@/components/extension';
+import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '@/components/sheets/constants';
+import { DEFAULT_PADDING_DATA, getDocsSkeletonPageSize } from '@/components/sheets/sheet.render-skeleton';
+import { Text } from '@/shape/text';
+
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';

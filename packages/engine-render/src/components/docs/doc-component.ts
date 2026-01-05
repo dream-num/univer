@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { UniverRenderingContext } from '../../context';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '@/basics/i-document-skeleton-cached';
+import type { IBoundRectNoAngle, IViewportInfo } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+
+import { RENDER_CLASS_TYPE } from '@/basics/const';
+import { PageLayoutType } from '@/basics/i-document-skeleton-cached';
+import { RenderComponent } from '@/components/component';
+
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-import { RENDER_CLASS_TYPE } from '../../basics/const';
-import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import { RenderComponent } from '../component';
 
 export interface IPageMarginLayout {
     pageMarginLeft: number;

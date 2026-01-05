@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as cjk from 'cjk-regex';
+
 import type {
     ICellInfo,
     ICellWithCoord,
@@ -24,12 +26,14 @@ import type {
     IStyleBase,
     Nullable,
 } from '@univerjs/core';
+
+import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, getCellInfoInMergeData, Rectangle, Tools } from '@univerjs/core';
+
+import { FontCache } from '@/components/docs/layout/shaping-engine/font-cache';
+
 import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
 import type { IBoundRectNoAngle } from './vector2';
 
-import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, getCellInfoInMergeData, Rectangle, Tools } from '@univerjs/core';
-import * as cjk from 'cjk-regex';
-import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 
 const DEG180 = 180;

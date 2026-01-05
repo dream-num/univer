@@ -15,15 +15,18 @@
  */
 
 import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
 
-import type { IDrawInfo } from '../../extension';
-import type { BorderCache, BorderCacheItem } from '../interfaces';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { BorderStyleTypes, Range } from '@univerjs/core';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
-import { drawDiagonalineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
-import { SpreadsheetExtensionRegistry } from '../../extension';
+
+import type { IDrawInfo } from '@/components/extension';
+import type { BorderCache, BorderCacheItem } from '@/components/sheets/interfaces';
+import type { SpreadsheetSkeleton } from '@/components/sheets/sheet.render-skeleton';
+import type { UniverRenderingContext } from '@/context';
+
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '@/basics/const';
+import { drawDiagonalineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '@/basics/draw';
+import { SpreadsheetExtensionRegistry } from '@/components/extension';
+
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';

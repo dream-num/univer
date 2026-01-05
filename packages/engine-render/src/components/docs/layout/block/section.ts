@@ -15,13 +15,17 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
-import type { ILayoutContext } from '../tools';
+
 import { DataStreamTreeNodeType } from '@univerjs/core';
-import { createSkeletonPage } from '../model/page';
+
+import type { IDocumentSkeletonPage } from '@/basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '@/basics/interfaces';
+import type { ILayoutContext } from '@/components/docs/layout/tools';
+import type { DataStreamTreeNode } from '@/components/docs/view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import { createSkeletonPage } from '@/components/docs/layout/model/page';
+
 import { dealWithBlockError } from './block-error';
 import { dealWidthParagraph } from './paragraph/paragraph-layout';
 

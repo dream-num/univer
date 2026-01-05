@@ -15,16 +15,18 @@
  */
 
 import type { IScale, ITextDecoration } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 
-import type { UniverRenderingContext } from '../../../context';
 import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
-import { calculateRectRotate } from '../../../basics/draw';
-import { degToRad, getScale } from '../../../basics/tools';
-import { Vector2 } from '../../../basics/vector2';
-import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
-import { docExtension } from '../doc-extension';
+
+import type { IDocumentSkeletonGlyph } from '@/basics/i-document-skeleton-cached';
+import type { UniverRenderingContext } from '@/context';
+
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '@/basics/const';
+import { calculateRectRotate } from '@/basics/draw';
+import { degToRad, getScale } from '@/basics/tools';
+import { Vector2 } from '@/basics/vector2';
+import { docExtension } from '@/components/docs/doc-extension';
+import { DocumentsSpanAndLineExtensionRegistry } from '@/components/extension';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 

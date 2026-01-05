@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-const { defineConfig, mergeConfig } = require('vitest/config');
+import { defineConfig, mergeConfig } from 'vitest/config';
 
-function createConfig(options) {
+import { workspaceAliasResolverPlugin } from '../vite/workspace-alias-resolver-plugin.ts';
+
+export default function createConfig(options?: any) {
     return defineConfig(mergeConfig({
+        plugins: [
+            workspaceAliasResolverPlugin(),
+        ],
         test: {
             css: {
                 modules: {
@@ -28,7 +33,7 @@ function createConfig(options) {
             coverage: {
                 reporter: ['html', 'json'],
                 provider: 'custom',
-                customProviderModule: require.resolve('@vitest/coverage-istanbul'),
+                customProviderModule: '@vitest/coverage-istanbul',
                 exclude: [
                     'coverage/**',
                     'dist/**',
@@ -57,5 +62,3 @@ function createConfig(options) {
         },
     }, options));
 }
-
-module.exports = createConfig;

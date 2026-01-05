@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ScrollTimer } from '../scroll-timer';
+import type { ScrollTimer } from '@/scroll-timer';
+
 import { Vector2 } from './vector2';
 
 export function getCurrentScrollXY(scrollTimer: ScrollTimer) {

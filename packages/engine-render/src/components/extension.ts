@@ -15,12 +15,14 @@
  */
 
 import type { IDocumentRenderConfig, IRange, IScale, Nullable } from '@univerjs/core';
-import type { BaseObject } from '../base-object';
 
-import type { IBoundRectNoAngle, Vector2 } from '../basics/vector2';
-import type { UniverRenderingContext } from '../context';
 import { Registry } from '@univerjs/core';
-import { getScale } from '../basics/tools';
+
+import type { BaseObject } from '@/base-object';
+import type { IBoundRectNoAngle, Vector2 } from '@/basics/vector2';
+import type { UniverRenderingContext } from '@/context';
+
+import { getScale } from '@/basics/tools';
 
 export interface IExtensionConfig {
     originTranslate?: Vector2; // docs

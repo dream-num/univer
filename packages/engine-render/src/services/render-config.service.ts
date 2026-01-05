@@ -16,8 +16,9 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { IRenderConfig } from './render-config';
 import { debounceTime, Subject } from 'rxjs';
+
+import type { IRenderConfig } from './render-config';
 
 /**
  * This service carries managers render config that would be passed

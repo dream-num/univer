@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { UniverRenderingContext } from '../context';
+import type { UniverRenderingContext } from '@/context';
+
 import type { IShapeProps } from './shape';
+
 import { Shape } from './shape';
 
 export interface IListItemProps extends IShapeProps {

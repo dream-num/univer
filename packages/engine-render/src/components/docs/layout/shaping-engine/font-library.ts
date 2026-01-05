@@ -15,6 +15,7 @@
  */
 
 import type { IStyleBase, Nullable } from '@univerjs/core';
+
 import { BooleanNumber } from '@univerjs/core';
 
 interface IFontData {

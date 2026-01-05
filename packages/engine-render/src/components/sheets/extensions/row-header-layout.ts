@@ -15,12 +15,15 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
-import type { IARowCfg, IARowCfgObj, IHeaderStyleCfg, IRowStyleCfg } from '../interfaces';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
-import { getColor } from '../../../basics/tools';
-import { SheetRowHeaderExtensionRegistry } from '../../extension';
+
+import type { IARowCfg, IARowCfgObj, IHeaderStyleCfg, IRowStyleCfg } from '@/components/sheets/interfaces';
+import type { SpreadsheetSkeleton } from '@/components/sheets/sheet.render-skeleton';
+import type { UniverRenderingContext } from '@/context';
+
+import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '@/basics/const';
+import { getColor } from '@/basics/tools';
+import { SheetRowHeaderExtensionRegistry } from '@/components/extension';
+
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';

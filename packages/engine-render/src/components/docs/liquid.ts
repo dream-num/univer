@@ -21,8 +21,9 @@ import type {
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
-} from '../../basics/i-document-skeleton-cached';
-import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+} from '@/basics/i-document-skeleton-cached';
+
+import { PageLayoutType } from '@/basics/i-document-skeleton-cached';
 
 export class Liquid {
     private _translateX: number = 0;

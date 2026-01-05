@@ -40,6 +40,7 @@
         "serve:e2e": "serve ./examples/local",
         "test:e2e": "playwright test",
         "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "storybook:dev": "pnpm --filter @univerjs/storybook dev:storybook",
         "storybook:build": "pnpm --filter @univerjs/storybook build:storybook",
         "release": "release-it"

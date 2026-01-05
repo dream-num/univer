@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export * from '../components/docs/layout/shaping-engine/font-cache';
 export * from './cell-data';
 export * from './const';
 export * from './document-node-tools';
@@ -31,3 +30,4 @@ export * from './text-rotation';
 export * from './tools';
 export * from './transform';
 export * from './vector2';
+export * from '@/components/docs/layout/shaping-engine/font-cache';

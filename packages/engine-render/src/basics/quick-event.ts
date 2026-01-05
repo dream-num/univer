@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseObject } from '../base-object';
+import type { BaseObject } from '@/base-object';
+
 import type { IMouseEvent, IPointerEvent } from './i-events';
 
 export function attachObjectHover(

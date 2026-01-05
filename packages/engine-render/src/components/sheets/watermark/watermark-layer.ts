@@ -15,9 +15,13 @@
  */
 
 import type { IUser, Nullable } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
+
+import type { UniverRenderingContext } from '@/context';
+
+import { Layer } from '@/layer';
+
 import type { IWatermarkConfigWithType } from './type';
-import { Layer } from '../../../layer';
+
 import { IWatermarkTypeEnum } from './type';
 import { renderWatermark } from './util';
 

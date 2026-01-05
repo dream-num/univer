@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import type { Injector } from '@univerjs/core';
+
 import { ThemeService } from '@univerjs/core';
 import { ICanvasColorService } from '@univerjs/engine-render';
-import { beforeEach, describe, expect, it } from 'vitest';
+
 import { createCanvasColorTestBed } from './create-canvas-color-test-bed';
 
 describe('Test Canvas Color', () => {

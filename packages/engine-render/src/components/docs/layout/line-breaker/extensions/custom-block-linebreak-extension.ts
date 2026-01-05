@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { LineBreaker } from '../line-breaker';
+import type { LineBreaker } from '@/components/docs/layout/line-breaker/line-breaker';
 
 const SLASH_B_CODE_POINT = 8;
 

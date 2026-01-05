@@ -15,9 +15,13 @@
  */
 
 import type { IKeyValue } from '@univerjs/core';
-import type { UniverRenderingContext } from '../context';
-import type { IShapeProps } from './shape';
+
 import { Tools } from '@univerjs/core';
+
+import type { UniverRenderingContext } from '@/context';
+
+import type { IShapeProps } from './shape';
+
 import { Shape } from './shape';
 
 export interface ICheckboxShapeProps extends IShapeProps {

@@ -15,17 +15,20 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import type { IBoundRectNoAngle } from '../../../basics';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import type { UniverRenderingContext } from '../../../context';
-import type { IDrawInfo } from '../../extension';
+
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
-import { GlyphType, hasCJK } from '../../../basics';
-import { COLOR_BLACK_RGB } from '../../../basics/const';
-import { Vector2 } from '../../../basics/vector2';
-import { CheckboxShape } from '../../../shape';
-import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
-import { docExtension } from '../doc-extension';
+
+import type { IBoundRectNoAngle } from '@/basics';
+import type { IDocumentSkeletonGlyph } from '@/basics/i-document-skeleton-cached';
+import type { IDrawInfo } from '@/components/extension';
+import type { UniverRenderingContext } from '@/context';
+
+import { GlyphType, hasCJK } from '@/basics';
+import { COLOR_BLACK_RGB } from '@/basics/const';
+import { Vector2 } from '@/basics/vector2';
+import { docExtension } from '@/components/docs/doc-extension';
+import { DocumentsSpanAndLineExtensionRegistry } from '@/components/extension';
+import { CheckboxShape } from '@/shape';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 

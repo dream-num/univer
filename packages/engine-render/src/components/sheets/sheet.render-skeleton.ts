@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { distinctUntilChanged, startWith } from 'rxjs';
+
 import type {
     BorderStyleTypes,
     DocumentDataModel,
@@ -36,11 +38,7 @@ import type {
     Styles,
     Worksheet,
 } from '@univerjs/core';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
-import type { Scene } from '../../scene';
-import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+
 import {
     addLinkToDocumentModel,
     BooleanNumber,
@@ -64,19 +62,27 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { distinctUntilChanged, startWith } from 'rxjs';
-import { FontCache } from '../../basics';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
-import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
+
+import type { IDocumentSkeletonColumn } from '@/basics/i-document-skeleton-cached';
+import type { ITransformChangeState } from '@/basics/interfaces';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '@/basics/vector2';
+import type { Scene } from '@/scene';
+
+import { FontCache } from '@/basics';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '@/basics/const';
+import { getRotateOffsetAndFarthestHypotenuse } from '@/basics/draw';
+import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '@/basics/text-rotation';
 import {
     degToRad,
     getFontStyleString,
-} from '../../basics/tools';
-import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
-import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
-import { columnIterator } from '../docs/layout/tools';
-import { DocumentViewModel } from '../docs/view-model/document-view-model';
+} from '@/basics/tools';
+import { DocSimpleSkeleton } from '@/components/docs/layout/doc-simple-skeleton';
+import { DocumentSkeleton } from '@/components/docs/layout/doc-skeleton';
+import { columnIterator } from '@/components/docs/layout/tools';
+import { DocumentViewModel } from '@/components/docs/view-model/document-view-model';
+
+import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';

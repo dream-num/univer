@@ -1710,6 +1710,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Merge cells in a range into one merged cell
      * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @param {boolean} [isForceMerge] - If true, will break existing merged cells in the range before merging.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1719,12 +1720,20 @@ export class FRange extends FBaseInitialable {
      * fRange.merge();
      * console.log(fRange.isMerged());
      * ```
+     *
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:C2');
+     * // Assume A1:B2 is already merged.
+     * fRange.merge(true, true);
+     * ```
      */
-    merge(defaultMerge: boolean = true): FRange {
+    merge(defaultMerge: boolean = true, isForceMerge: boolean = false): FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge, isForceMerge);
 
         return this;
     }
@@ -1732,6 +1741,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Merges cells in a range horizontally.
      * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @param {boolean} [isForceMerge] - If true, will break existing merged cells in the range before merging.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1746,13 +1756,21 @@ export class FRange extends FBaseInitialable {
      *   console.log(item.getA1Notation());
      * });
      * ```
+     *
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:C2');
+     * // Assume A1:B2 is already merged.
+     * fRange.merge(true, true);
+     * ```
      */
-    mergeAcross(defaultMerge: boolean = true): FRange {
+    mergeAcross(defaultMerge: boolean = true, isForceMerge: boolean = false): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge, isForceMerge);
 
         return this;
     }
@@ -1760,6 +1778,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Merges cells in a range vertically.
      * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @param {boolean} [isForceMerge] - If true, will break existing merged cells in the range before merging.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1774,13 +1793,21 @@ export class FRange extends FBaseInitialable {
      *   console.log(item.getA1Notation());
      * });
      * ```
+     *
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:C2');
+     * // Assume A1:B2 is already merged.
+     * fRange.merge(true, true);
+     * ```
      */
-    mergeVertically(defaultMerge: boolean = true): FRange {
+    mergeVertically(defaultMerge: boolean = true, isForceMerge: boolean = false): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge, isForceMerge);
 
         return this;
     }
@@ -1819,7 +1846,11 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     breakApart(): FRange {
-        this._commandService.syncExecuteCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });
+        this._commandService.syncExecuteCommand(RemoveWorksheetMergeCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
+        });
         return this;
     }
 

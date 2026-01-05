@@ -17,6 +17,7 @@
 import type { IAccessor, ICellData, ICommand, IMutationInfo, Injector, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CellModeEnum,
     CommandType,
@@ -38,13 +39,12 @@ import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutat
 import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from '../utils/handle-merge-operation';
+import { RemoveWorksheetMergeCommand } from './remove-worksheet-merge.command';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface IAddMergeCommandParams {
+export interface IAddMergeCommandParams extends ISheetCommandSharedParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
     selections: IRange[];
-    unitId: string;
-    subUnitId: string;
     defaultMerge?: boolean;
 }
 
@@ -313,10 +313,11 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     },
 };
 
-export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean) {
-    const univerInstanceService = injector.get(IUniverInstanceService);
-    const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
+export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean, isForceMerge: boolean = false) {
+    const target = getSheetCommandTarget(injector.get(IUniverInstanceService), { unitId, subUnitId });
     if (!target) return;
+
+    const commandService = injector.get(ICommandService);
     const { worksheet } = target;
     const mergeData = worksheet.getMergeData();
     const overlap = mergeData.some((mergeRange) => {
@@ -324,10 +325,19 @@ export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId:
             return Rectangle.intersects(range, mergeRange);
         });
     });
+
     if (overlap) {
-        throw new Error('The ranges to be merged overlap with the existing merged cells');
+        if (!isForceMerge) {
+            throw new Error('The ranges to be merged overlap with the existing merged cells');
+        }
+
+        commandService.syncExecuteCommand(RemoveWorksheetMergeCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+        });
     }
-    const commandService = injector.get(ICommandService);
+
     commandService.executeCommand(AddWorksheetMergeCommand.id, {
         unitId,
         subUnitId,

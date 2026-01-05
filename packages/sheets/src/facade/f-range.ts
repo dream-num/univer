@@ -16,6 +16,7 @@
 
 import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type {
+    IMergeCellsUtilOptions,
     ISetBorderBasicCommandParams,
     ISetHorizontalTextAlignCommandParams,
     ISetRangeCustomMetadataCommandParams,
@@ -1709,7 +1710,9 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merge cells in a range into one merged cell
-     * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @param {IMergeCellsUtilOptions} [options] - The options for merging cells.
+     * @param {boolean} [options.defaultMerge] - If true, only the value in the upper left cell is retained. If false, a confirm dialog will be shown to the user. Default is true.
+     * @param {boolean} [options.isForceMerge] - If true, the overlapping merged cells will be removed before performing the new merge. Default is false.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1719,19 +1722,29 @@ export class FRange extends FBaseInitialable {
      * fRange.merge();
      * console.log(fRange.isMerged());
      * ```
+     *
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:C2');
+     * // Assume A1:B2 is already merged.
+     * fRange.merge({ isForceMerge: true });
+     * ```
      */
-    merge(defaultMerge: boolean = true): FRange {
+    merge(options?: IMergeCellsUtilOptions): FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], options);
 
         return this;
     }
 
     /**
      * Merges cells in a range horizontally.
-     * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @param {IMergeCellsUtilOptions} [options] - The options for merging cells.
+     * @param {boolean} [options.defaultMerge] - If true, only the value in the upper left cell is retained. If false, a confirm dialog will be shown to the user. Default is true.
+     * @param {boolean} [options.isForceMerge] - If true, the overlapping merged cells will be removed before performing the new merge. Default is false.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1746,20 +1759,30 @@ export class FRange extends FBaseInitialable {
      *   console.log(item.getA1Notation());
      * });
      * ```
+     *
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:C2');
+     * // Assume A1:B2 is already merged.
+     * fRange.mergeAcross({ isForceMerge: true });
+     * ```
      */
-    mergeAcross(defaultMerge: boolean = true): FRange {
+    mergeAcross(options?: IMergeCellsUtilOptions): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, options);
 
         return this;
     }
 
     /**
      * Merges cells in a range vertically.
-     * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @param {IMergeCellsUtilOptions} [options] - The options for merging cells.
+     * @param {boolean} [options.defaultMerge] - If true, only the value in the upper left cell is retained. If false, a confirm dialog will be shown to the user. Default is true.
+     * @param {boolean} [options.isForceMerge] - If true, the overlapping merged cells will be removed before performing the new merge. Default is false.
      * @returns {FRange} This range, for chaining
      * @example
      * ```ts
@@ -1774,13 +1797,21 @@ export class FRange extends FBaseInitialable {
      *   console.log(item.getA1Notation());
      * });
      * ```
+     *
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('B1:C2');
+     * // Assume A1:B2 is already merged.
+     * fRange.mergeVertically({ isForceMerge: true });
+     * ```
      */
-    mergeVertically(defaultMerge: boolean = true): FRange {
+    mergeVertically(options?: IMergeCellsUtilOptions): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, options);
 
         return this;
     }
@@ -1819,7 +1850,11 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     breakApart(): FRange {
-        this._commandService.syncExecuteCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });
+        this._commandService.syncExecuteCommand(RemoveWorksheetMergeCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [this._range],
+        });
         return this;
     }
 

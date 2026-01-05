@@ -17,6 +17,7 @@
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { SelectionMoveType } from '../../services/selections';
@@ -26,7 +27,7 @@ import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '..
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-interface IRemoveWorksheetMergeCommandParams {
+interface IRemoveWorksheetMergeCommandParams extends ISheetCommandSharedParams {
     ranges?: IRange[];
 }
 
@@ -38,12 +39,11 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { subUnitId, unitId, worksheet } = target;

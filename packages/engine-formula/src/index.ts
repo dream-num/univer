@@ -38,6 +38,7 @@ export type {
 export { BooleanValue } from './basics/common';
 export { type IOtherFormulaData } from './basics/common';
 export type { IExprTreeNode, ISuperTable, IUnitRowData } from './basics/common';
+export { excelDateSerial } from './basics/date';
 export { isInDirtyRange } from './basics/dirty';
 export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { type ISheetFormulaError } from './basics/error-type';
@@ -200,10 +201,11 @@ export { IFunctionService } from './services/function.service';
 export { GlobalComputingStatusService } from './services/global-computing-status.service';
 export { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
 
+export { OtherFormulaBizType, RegisterOtherFormulaService } from './services/register-other-formula.service';
 export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, type IAllRuntimeData, type IExecutionInProgressParams, IFormulaRuntimeService } from './services/runtime.service';
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
+
 export { ISuperTableService } from './services/super-table.service';
 
 export { SuperTableService } from './services/super-table.service';

@@ -54,6 +54,22 @@ export enum MergeType {
     MergeHorizontal = 'mergeHorizontal',
 }
 
+export interface IMergeCellsUtilOptions {
+    /**
+     * Whether to use the default merge behavior when there are existing cell contents in the merge ranges.
+     * If true, only the value in the upper left cell is retained.
+     * If false, a confirm dialog will be shown to the user.
+     * @default true
+     */
+    defaultMerge?: boolean;
+    /**
+     * Whether to force merge even if there are existing merged cells that overlap with the new merge ranges.
+     * If true, the overlapping merged cells will be removed before performing the new merge.
+     * @default false
+     */
+    isForceMerge?: boolean;
+}
+
 function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
     return ranges.some((range) => checkCellContentInRange(worksheet, range));
 }
@@ -313,11 +329,12 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     },
 };
 
-export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean, isForceMerge: boolean = false) {
+export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], options: IMergeCellsUtilOptions = {}) {
     const target = getSheetCommandTarget(injector.get(IUniverInstanceService), { unitId, subUnitId });
     if (!target) return;
 
     const commandService = injector.get(ICommandService);
+    const { defaultMerge = true, isForceMerge = false } = options;
     const { worksheet } = target;
     const mergeData = worksheet.getMergeData();
     const overlap = mergeData.some((mergeRange) => {

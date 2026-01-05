@@ -64,6 +64,7 @@ export {
     AddWorksheetMergeVerticalCommand,
     getClearContentMutationParamForRange,
     getClearContentMutationParamsForRanges,
+    type IMergeCellsUtilOptions,
 } from './commands/commands/add-worksheet-merge.command';
 export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';

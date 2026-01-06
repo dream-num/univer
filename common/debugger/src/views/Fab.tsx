@@ -68,6 +68,7 @@ export function Fab() {
 
     return (
         <div
+            data-u-comp="debugger-fab"
             className={`
               univer-fixed univer-bottom-12 univer-right-8 univer-z-[9999] univer-flex univer-select-none
               univer-flex-col univer-items-center univer-gap-1

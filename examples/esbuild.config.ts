@@ -131,11 +131,6 @@ const entryPoints = [
     // slides
     './src/slides/main.ts',
 
-    // uni
-    './src/uni/main.ts',
-    './src/uni/worker.ts',
-    './src/uni/lazy.ts',
-
     // mobile sheet
     './src/mobile-s/main.ts',
     './src/mobile-s/worker.ts',

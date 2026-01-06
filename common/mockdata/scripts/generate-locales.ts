@@ -42,15 +42,11 @@ async function generateLocales() {
 
     const pkgJsonFile = fs.readJsonSync(path.resolve(__dirname, '../package.json'));
 
-    const packages = fs.readdirSync(path.resolve(__dirname, '../../packages'))
-        .filter((dir) => fs.statSync(path.join(__dirname, '../../packages', dir)).isDirectory())
-        .map((dir) => path.join(__dirname, '../../packages', dir));
+    const packages = fs.readdirSync(path.resolve(__dirname, '../../../packages'))
+        .filter((dir) => fs.statSync(path.join(__dirname, '../../../packages', dir)).isDirectory())
+        .map((dir) => path.join(__dirname, '../../../packages', dir));
 
-    const experimentalPackages = fs.readdirSync(path.resolve(__dirname, '../../packages-experimental'))
-        .filter((dir) => fs.statSync(path.join(__dirname, '../../packages-experimental', dir)).isDirectory())
-        .map((dir) => path.join(__dirname, '../../packages-experimental', dir));
-
-    const allPackages = [...packages, ...experimentalPackages];
+    const allPackages = [...packages];
     for (const pkg of allPackages) {
         const localePath = path.join(pkg, 'src/locale');
         if (fs.existsSync(localePath)) {

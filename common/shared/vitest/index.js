@@ -50,7 +50,6 @@ function createConfig(options) {
                     'src/locale/**',
                     '**/*.stories.tsx',
                     '**/__testing__/**',
-                    'packages-experimental/**/*',
                     '**/*/tailwind.config.ts',
                 ],
             },

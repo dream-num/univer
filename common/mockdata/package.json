@@ -69,7 +69,6 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@univerjs/uni-formula-ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*"
     },
     "devDependencies": {

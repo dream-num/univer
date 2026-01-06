@@ -42,6 +42,7 @@ export { requestImmediateMacroTask } from './common/request-immediate-macro-task
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export { mergeSets } from './common/set';
 export { UnitModel, type UnitType, UniverInstanceType } from './common/unit';
+export { resolveWithBasePath } from './common/url';
 export * from './docs/data-model';
 export { JSON1, JSONX } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';

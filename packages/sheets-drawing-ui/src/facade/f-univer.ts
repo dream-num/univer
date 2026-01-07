@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, Injector } from '@univerjs/core';
+import type { IDisposable, IDrawingSearch, Injector } from '@univerjs/core';
 import type { IEventBase } from '@univerjs/core/facade';
 import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
@@ -26,11 +26,9 @@ import type {
     IBeforeOverGridImageChangeParamObject,
 } from './f-event';
 import { CanceledError, DrawingTypeEnum, ICommandService } from '@univerjs/core';
-import type { IDisposable } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
-import { IBatchSaveImagesService } from '../services/batch-save-images.service';
+import { IBatchSaveImagesService, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { FOverGridImage } from './f-over-grid-image';
 
 interface IBeforeOverGridImageInsertParam extends IEventBase {

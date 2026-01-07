@@ -124,31 +124,25 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getRangePosition() {
         const { x, y } = this.getRefOffset();
-        const rangeData = this.getRangeData();
-        let { startRow, startColumn, endRow, endColumn } = moveRangeByOffset(rangeData, x, y);
+        const newRange = moveRangeByOffset(this.getRangeData(), x, y);
 
-        if (Number.isNaN(startRow)) {
-            startRow = 0;
+        if (Number.isNaN(newRange.startRow)) {
+            newRange.startRow = 0;
         }
 
-        if (Number.isNaN(startColumn)) {
-            startColumn = 0;
+        if (Number.isNaN(newRange.startColumn)) {
+            newRange.startColumn = 0;
         }
 
-        if (Number.isNaN(endRow)) {
-            endRow = this.getActiveSheetRowCount() - 1;
+        if (Number.isNaN(newRange.endRow)) {
+            newRange.endRow = this.getActiveSheetRowCount() - 1;
         }
 
-        if (Number.isNaN(endColumn)) {
-            endColumn = this.getActiveSheetColumnCount() - 1;
+        if (Number.isNaN(newRange.endColumn)) {
+            newRange.endColumn = this.getActiveSheetColumnCount() - 1;
         }
 
-        return {
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
-        };
+        return newRange;
     }
 
     override isReferenceObject() {

@@ -140,7 +140,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             className={clsx(`
               univer-flex univer-w-64 univer-flex-col univer-gap-4 univer-rounded-lg univer-bg-white univer-p-4
               univer-shadow-lg
-              dark:univer-bg-gray-800
+              dark:!univer-bg-gray-800
             `, className)}
         >
             <Segmented
@@ -157,7 +157,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             <div
                 className={`
                   univer-h-32 univer-w-full univer-rounded-md univer-border univer-border-gray-200
-                  dark:univer-border-gray-600
+                  dark:!univer-border-gray-600
                 `}
                 style={{ background: mainPreview }}
             />
@@ -166,7 +166,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 <div
                     ref={barRef}
                     className={`
-                      univer-absolute univer-inset-x-0 univer-top-1/2 univer-h-2 univer--translate-y-1/2
+                      univer-absolute univer-inset-x-0 univer-top-1/2 univer-h-2 -univer-translate-y-1/2
                       univer-cursor-crosshair univer-rounded-full
                     `}
                     style={{ background: gradientPreview }}
@@ -177,8 +177,8 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         key={index}
                         className={clsx(
                             `
-                              univer-absolute univer-top-1/2 univer-h-4 univer-w-4 univer--translate-x-1/2
-                              univer--translate-y-1/2 univer-cursor-pointer univer-rounded-full univer-border-2
+                              univer-absolute univer-top-1/2 univer-h-4 univer-w-4 -univer-translate-x-1/2
+                              -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full univer-border-2
                               univer-border-white univer-shadow-md
                             `,
                             selectedIndex === index ? 'univer-z-10 univer-ring-2 univer-ring-primary-500' : 'univer-z-0'
@@ -256,7 +256,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             <div
                 className={`
                   univer-border-t univer-border-gray-100 univer-pt-4
-                  dark:univer-border-gray-700
+                  dark:!univer-border-gray-700
                 `}
             >
                 <ColorPicker

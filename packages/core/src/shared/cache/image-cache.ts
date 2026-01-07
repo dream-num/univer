@@ -24,7 +24,7 @@ export class ImageCacheMap {
 
     constructor(
         private _injector: Injector,
-        maxSize = 100
+        maxSize = 1000
     ) {
         this._imageCacheMap = new LRUMap(maxSize);
     }

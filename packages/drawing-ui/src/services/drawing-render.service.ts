@@ -17,7 +17,7 @@
 import type { IDrawingSearch } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, IURLImageService } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
@@ -29,7 +29,8 @@ export class DrawingRenderService {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IGalleryService private readonly _galleryService: IGalleryService
+        @IGalleryService private readonly _galleryService: IGalleryService,
+        @IURLImageService private readonly _urlImageService: IURLImageService
     ) { }
 
     // eslint-disable-next-line max-lines-per-function
@@ -90,10 +91,18 @@ export class DrawingRenderService {
                         console.error(error);
                         continue;
                     }
+                } else if (imageSourceType === ImageSourceType.URL) {
+                    try {
+                        imageConfig.url = await this._urlImageService.getImage(source);
+                    } catch (error) {
+                        console.error(error);
+                        imageConfig.url = source;
+                    }
+                    shouldBeCache = true;
                 } else {
                     imageConfig.url = source;
+                    shouldBeCache = true;
                 }
-                shouldBeCache = true;
             }
 
             if (scene.getObject(imageShapeKey)) {

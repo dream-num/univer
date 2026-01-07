@@ -104,7 +104,9 @@ export { IConfirmService, TestConfirmService } from './services/confirm/confirm.
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
+export { IImageIoService, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
+export type { IImageIoServiceParam } from './services/image-io/image-io.service';
+export { IURLImageService } from './services/image-io/url-image.service';
 export { type ICreateUnitOptions, IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService, LifecycleUnreachableError } from './services/lifecycle/lifecycle.service';

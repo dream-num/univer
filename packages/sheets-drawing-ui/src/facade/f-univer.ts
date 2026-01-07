@@ -25,10 +25,10 @@ import type {
     IBeforeFloatDomUpdateParam,
     IBeforeOverGridImageChangeParamObject,
 } from './f-event';
-import { CanceledError, DrawingTypeEnum, ICommandService } from '@univerjs/core';
+import { CanceledError, DrawingTypeEnum, ICommandService, IURLImageService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { IBatchSaveImagesService, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
+import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { FOverGridImage } from './f-over-grid-image';
 
 interface IBeforeOverGridImageInsertParam extends IEventBase {
@@ -496,8 +496,8 @@ export class FUniverDrawingMixin extends FUniver {
      * ```
      */
     registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
-        const batchSaveImagesService = this._injector.get(IBatchSaveImagesService);
-        return batchSaveImagesService.registerURLImageDownloader(downloader);
+        const urlImageService = this._injector.get(IURLImageService);
+        return urlImageService.registerURLImageDownloader(downloader);
     }
 }
 

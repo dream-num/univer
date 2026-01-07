@@ -21,7 +21,7 @@ import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheet
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, generateRandomId, ICommandService, IContextService, ImageSourceType, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, generateRandomId, ICommandService, IContextService, ImageSourceType, Inject, Injector, IURLImageService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
@@ -108,7 +108,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IURLImageService private readonly _urlImageService: IURLImageService
     ) {
         super();
 
@@ -353,7 +354,13 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
     // eslint-disable-next-line max-lines-per-function
     async insertCellImageByUrl(url: string, location?: ISheetLocationBase) {
-        const { width, height, image } = await getImageSize(url || '');
+        let src = url;
+        try {
+            src = await this._urlImageService.getImage(url);
+        } catch (error) {
+            console.error(`Failed to get image from URLImageService: ${url}`, error);
+        }
+        const { width, height, image } = await getImageSize(src || '');
         this._imageIoService.addImageSourceCache(url, ImageSourceType.URL, image);
         const selection = this._workbookSelections.getCurrentLastSelection();
         if (!selection) {

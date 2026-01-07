@@ -675,7 +675,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
              * Conditional formatting, data validation, and number format are not included here because they will be applied automatically after pasting.
              * So here we use `getComposedCellStyleByCellData` to get the final style of the cell raw data.
              */
-            const style = worksheet?.getComposedCellStyleByCellData(actualRow, actualColumn, value);
+            const cellData = worksheet?.getCellRaw(actualRow, actualColumn);
+            const style = worksheet?.getComposedCellStyleByCellData(actualRow, actualColumn, cellData);
             const newValue = cloneCellDataWithSpanInfo(value)!;
             newValue.s = style;
             cellMatrix.setValue(row, col, newValue);

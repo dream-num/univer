@@ -26,9 +26,11 @@ import type {
     IBeforeOverGridImageChangeParamObject,
 } from './f-event';
 import { CanceledError, DrawingTypeEnum, ICommandService } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
+import { IBatchSaveImagesService } from '../services/batch-save-images.service';
 import { FOverGridImage } from './f-over-grid-image';
 
 interface IBeforeOverGridImageInsertParam extends IEventBase {
@@ -475,6 +477,29 @@ export class FUniverDrawingMixin extends FUniver {
         return drawings.map((drawing) => {
             return this._injector.createInstance(FOverGridImage, drawing);
         });
+    }
+
+    /**
+     * Register a custom image downloader for URL images
+     * @param downloader The downloader function that takes a URL and returns a base64 string
+     * @returns A disposable object to unregister the downloader
+     * @example
+     * ```ts
+     * const disposable = univerAPI.registerURLImageDownloader(async (url) => {
+     *   const response = await fetch(url);
+     *   const blob = await response.blob();
+     *   const base64 = await new Promise<string>((resolve) => {
+     *     const reader = new FileReader();
+     *     reader.onloadend = () => resolve(reader.result as string);
+     *     reader.readAsDataURL(blob);
+     *   });
+     *   return base64;
+     * });
+     * ```
+     */
+    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
+        const batchSaveImagesService = this._injector.get(IBatchSaveImagesService);
+        return batchSaveImagesService.registerURLImageDownloader(downloader);
     }
 }
 

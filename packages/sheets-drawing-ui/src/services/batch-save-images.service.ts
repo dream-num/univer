@@ -16,7 +16,7 @@
 
 import type { ICellData, IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
 declare global {
@@ -252,23 +252,20 @@ async function imageSourceToBlob(source: string, imageSourceType: ImageSourceTyp
 }
 
 export class BatchSaveImagesService extends Disposable implements IBatchSaveImagesService {
-    private _urlImageDownloader: Nullable<(url: string) => Promise<string>> = null;
-
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetsSelectionsService) private readonly _selectionService: SheetsSelectionsService,
-        @IImageIoService private readonly _imageIoService: IImageIoService
+        @IImageIoService private readonly _imageIoService: IImageIoService,
+        @IURLImageService private readonly _urlImageService: IURLImageService
     ) {
         super();
     }
 
+    /**
+     * @deprecated Use IURLImageService directly
+     */
     registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
-        this._urlImageDownloader = downloader;
-        return toDisposable(() => {
-            if (this._urlImageDownloader === downloader) {
-                this._urlImageDownloader = null;
-            }
-        });
+        return this._urlImageService.registerURLImageDownloader(downloader);
     }
 
     getCellImagesInSelection(): ICellImageInfo[] {
@@ -688,14 +685,8 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
             return imageSourceToBlob(imageUrl, ImageSourceType.URL);
         }
 
-        if (imageInfo.imageSourceType === ImageSourceType.URL && this._urlImageDownloader) {
-            try {
-                const base64 = await this._urlImageDownloader(imageInfo.source);
-                return imageSourceToBlob(base64, ImageSourceType.BASE64);
-            } catch (error) {
-                console.error(`Custom downloader failed for ${imageInfo.source}, falling back to default fetch:`, error);
-                // Fallback to default fetch if custom downloader fails
-            }
+        if (imageInfo.imageSourceType === ImageSourceType.URL) {
+            return this._urlImageService.downloadImage(imageInfo.source);
         }
 
         return imageSourceToBlob(imageInfo.source, imageInfo.imageSourceType);

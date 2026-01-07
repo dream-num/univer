@@ -36,5 +36,6 @@ export { IDrawingManagerService } from './services/drawing-manager.service';
 export { ImageIoService } from './services/image-io-impl.service';
 export { IImageIoService, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
 export type { IImageIoServiceParam } from './services/image-io.service';
+export { URLImageService } from './services/url-image.service';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';

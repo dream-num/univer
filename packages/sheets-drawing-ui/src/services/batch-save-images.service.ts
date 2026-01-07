@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { ICellData, IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
+import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
 declare global {
@@ -252,7 +252,6 @@ async function imageSourceToBlob(source: string, imageSourceType: ImageSourceTyp
 }
 
 export class BatchSaveImagesService extends Disposable implements IBatchSaveImagesService {
-
     private _urlImageDownloader: Nullable<(url: string) => Promise<string>> = null;
 
     constructor(

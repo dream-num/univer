@@ -28,6 +28,7 @@ import { createRowColIter } from '../shared/row-col-iter';
 import { generateRandomId } from '../shared/tools';
 import { DEFAULT_STYLES } from '../types/const';
 import { CellValueType } from '../types/enum';
+import { cloneWorksheetData } from './clone';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -36,7 +37,6 @@ import { SpanModel } from './span-model';
 import { CellModeEnum } from './typedef';
 import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
 import { SheetViewModel } from './view-model';
-import { cloneWorksheetData } from './clone';
 
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
@@ -288,6 +288,34 @@ export class Worksheet {
         return (rowPriority ?? this._isRowStylePrecedeColumnStyle)
             ? composeStyles(defaultStyle, colStyle, rowStyle, cellData?.themeStyle, cellStyle)
             : composeStyles(defaultStyle, rowStyle, colStyle, cellData?.themeStyle, cellStyle);
+    }
+
+    /**
+     * Get the composed style of the cell without its own style.
+     * @param {number} row The row index of the cell
+     * @param {number} col The column index of the cell
+     * @param {Nullable<ICellDataForSheetInterceptor>} [cellData] The cell data of the cell.
+     * @param {boolean} [rowPriority] If true, row style will precede column style, otherwise use this._isRowStylePrecedeColumnStyle
+     * @returns {IStyleData} The composed style of the cell without its own style
+     */
+    getComposedCellStyleWithoutSelf(row: number, col: number, cellData?: Nullable<ICellDataForSheetInterceptor>, rowPriority?: boolean): IStyleData {
+        const composedCellStyle = cellData === undefined
+            ? this.getComposedCellStyle(row, col, rowPriority)
+            : this.getComposedCellStyleByCellData(row, col, cellData, rowPriority);
+
+        const cellDataRaw = this.getCellRaw(row, col);
+        if (!cellDataRaw || !cellDataRaw.s) return composedCellStyle;
+
+        const style = typeof cellDataRaw.s === 'string' ? this._styles.get(cellDataRaw.s) : cellDataRaw.s;
+        if (!style) return composedCellStyle;
+
+        for (const key in style) {
+            if (key in composedCellStyle) {
+                delete composedCellStyle[key as keyof IStyleData];
+            }
+        }
+
+        return composedCellStyle;
     }
 
     /**

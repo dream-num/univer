@@ -627,7 +627,7 @@ export class EditingRenderController extends Disposable {
         }
 
         // Remove the same style attributes that have been set by composed style in the cell data.
-        this._removeComposedCellStyleInCellData(cellData, worksheet.getComposedCellStyle(row, column));
+        this._removeComposedCellStyleInCellData(cellData, worksheet.getComposedCellStyleWithoutSelf(row, column));
 
         const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
         if (Tools.diffValue(cleanCellDataObject(finalCell), cleanCellDataObject(worksheet.getCellRaw(row, column)))) {

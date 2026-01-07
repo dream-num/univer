@@ -113,6 +113,7 @@ export { INotificationService } from './services/notification/notification.servi
 export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts/parts.service';
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
+export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';

@@ -15,16 +15,14 @@
  */
 
 import type { ComponentType } from 'react';
-import type { Observable } from 'rxjs';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { IUniverInstanceService, LocaleService, throttle } from '@univerjs/core';
+import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
 import { MoreFunctionIcon } from '@univerjs/icons';
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest } from 'rxjs';
-import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
+import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { RibbonPosition } from '../../../services/menu/types';
+import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ClassicMenu } from './ribbon-menu/ClassicMenu';
@@ -41,23 +39,8 @@ interface IRibbonProps {
 export function Ribbon(props: IRibbonProps) {
     const { ribbonType, headerMenuComponents, headerMenu = true } = props;
 
-    const menuManagerService = useDependency(IMenuManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
+    const ribbonService = useDependency(IRibbonService);
     const localeService = useDependency(LocaleService);
-
-    const [menuChangedTimes, setMenuChangedTimes] = useState(0);
-
-    const focusedUnit = useObservable(univerInstanceService.focused$);
-
-    useEffect(() => {
-        const subscription = menuManagerService.menuChanged$.subscribe(() => {
-            setMenuChangedTimes((prev) => prev + 1);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
 
     const containerRef = useRef<HTMLDivElement>(null!);
     const toolbarItemRefs = useRef<Record<string, {
@@ -68,98 +51,30 @@ export function Ribbon(props: IRibbonProps) {
         itemOrder: number;
     }>>({});
 
-    const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
-    const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
-    const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
-    const [fakeToolbarVisible, setFakeToolbarVisible] = useState(false);
+    const ribbonData = useObservable(ribbonService.ribbon$, []);
+    const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
+    const collapsedIds = useObservable(ribbonService.collapsedIds$, []);
+    const fakeToolbarVisible = useObservable(ribbonService.fakeToolbarVisible$, false);
+
+    const ribbon = useMemo(() => {
+        if (ribbonType === 'simple') {
+            const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
+            ribbonData.forEach((group) => {
+                group.children?.forEach((item) => {
+                    simpleRibbon[0].children?.push(item);
+                });
+            });
+
+            return simpleRibbon;
+        }
+
+        return ribbonData;
+    }, [ribbonType, ribbonData]);
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
-        setActivatedTab(group.key);
+        ribbonService.setActivatedTab(group.key);
     }, []);
-
-    // process menu changes
-    useEffect(() => {
-        const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
-
-        // Collect all hidden$ Observables and their corresponding paths
-        const hiddenObservableMap: Observable<boolean>[] = [];
-        const hiddenKeyMap: string[] = [];
-        for (const group of ribbon) {
-            if (group.children) {
-                for (const item of group.children) {
-                    if (item.children) {
-                        for (const child of item.children) {
-                            if (child.item?.hidden$) {
-                                hiddenObservableMap.push(child.item.hidden$);
-                                hiddenKeyMap.push(`${group.key}/${item.key}/${child.key}`);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Only get the current value once, not continuously subscribe
-        combineLatest(hiddenObservableMap)
-            .subscribe((hiddenMap) => {
-                const newRibbon: IMenuSchema[] = [];
-
-                const hiddenPathMap = hiddenMap.map((hidden, index) => {
-                    if (hidden) {
-                        return hiddenKeyMap[index];
-                    }
-                    return null;
-                }).filter((item) => !!item) as string[];
-
-                for (const group of ribbon) {
-                    const newGroup: IMenuSchema = { ...group, children: [] };
-
-                    if (group.children?.length) {
-                        for (const item of group.children) {
-                            const newItem: IMenuSchema = { ...item, children: [] };
-                            let shouldAddItem = true;
-
-                            if (item.children?.length) {
-                                for (const child of item.children) {
-                                    const path = `${group.key}/${item.key}/${child.key}`;
-
-                                    if (!hiddenPathMap.includes(path)) {
-                                        newItem.children?.push(child);
-                                    }
-                                }
-
-                                if (newItem.children?.every((child) => child.children?.length === 0)) {
-                                    shouldAddItem = false;
-                                }
-                            }
-
-                            if (shouldAddItem) {
-                                newGroup.children?.push(newItem);
-                            }
-                        }
-                    }
-
-                    if (newGroup.children?.length && newGroup.children.every((item) => item.children?.length)) {
-                        newRibbon.push(newGroup);
-                    }
-                }
-
-                if (ribbonType === 'simple') {
-                    const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
-                    newRibbon.forEach((group) => {
-                        group.children?.forEach((item) => {
-                            simpleRibbon[0].children?.push(item);
-                        });
-                    });
-
-                    setRibbon(simpleRibbon);
-                } else {
-                    setRibbon(newRibbon);
-                }
-            })
-            .unsubscribe();
-    }, [menuChangedTimes, focusedUnit]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -196,7 +111,7 @@ export function Ribbon(props: IRibbonProps) {
         let timer: number | null = null;
         const observer = new ResizeObserver(throttle((entries) => {
             for (const entry of entries) {
-                setFakeToolbarVisible(true);
+                ribbonService.setFakeToolbarVisible(true);
 
                 timer = requestAnimationFrame(() => {
                     const { width: avaliableWidth } = entry.contentRect;
@@ -221,9 +136,9 @@ export function Ribbon(props: IRibbonProps) {
                         }
                     }
 
-                    setCollapsedIds(newCollapsedIds);
+                    ribbonService.setCollapsedIds(newCollapsedIds);
 
-                    setFakeToolbarVisible(false);
+                    ribbonService.setFakeToolbarVisible(false);
                 });
             }
         }, 100));

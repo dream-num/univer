@@ -42,6 +42,10 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
                 filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize),
                 throttleTime(0, animationFrameScheduler)
             ).subscribe(() => {
+                if (this._disposed) {
+                    return;
+                }
+
                 this._docPageLayoutService.calculatePagePosition();
                 this._textSelectionManagerService.refreshSelection();
             })

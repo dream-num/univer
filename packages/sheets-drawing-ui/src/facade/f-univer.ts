@@ -52,10 +52,32 @@ interface IBeforeOverGridImageSelectParam extends IEventBase {
     oldSelectedImages: FOverGridImage[];
 }
 
+export interface IFUniverDrawingUIMixin {
+    /**
+     * Register a custom image downloader for URL images
+     * @param downloader The downloader function that takes a URL and returns a base64 string
+     * @returns A disposable object to unregister the downloader
+     * @example
+     * ```ts
+     * const disposable = univerAPI.registerURLImageDownloader(async (url) => {
+     *   const response = await fetch(url);
+     *   const blob = await response.blob();
+     *   const base64 = await new Promise<string>((resolve) => {
+     *     const reader = new FileReader();
+     *     reader.onloadend = () => resolve(reader.result as string);
+     *     reader.readAsDataURL(blob);
+     *   });
+     *   return base64;
+     * });
+     * ```
+     */
+    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable;
+}
+
 /**
  * @ignore
  */
-export class FUniverDrawingMixin extends FUniver {
+export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIMixin {
     /**
      * @ignore
      */
@@ -477,28 +499,14 @@ export class FUniverDrawingMixin extends FUniver {
         });
     }
 
-    /**
-     * Register a custom image downloader for URL images
-     * @param downloader The downloader function that takes a URL and returns a base64 string
-     * @returns A disposable object to unregister the downloader
-     * @example
-     * ```ts
-     * const disposable = univerAPI.registerURLImageDownloader(async (url) => {
-     *   const response = await fetch(url);
-     *   const blob = await response.blob();
-     *   const base64 = await new Promise<string>((resolve) => {
-     *     const reader = new FileReader();
-     *     reader.onloadend = () => resolve(reader.result as string);
-     *     reader.readAsDataURL(blob);
-     *   });
-     *   return base64;
-     * });
-     * ```
-     */
-    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
+    override registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
         const urlImageService = this._injector.get(IURLImageService);
         return urlImageService.registerURLImageDownloader(downloader);
     }
 }
 
-FUniver.extend(FUniverDrawingMixin);
+FUniver.extend(FUniverDrawingUIMixin);
+declare module '@univerjs/core/facade' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FUniver extends IFUniverDrawingUIMixin { }
+}

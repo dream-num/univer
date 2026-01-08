@@ -302,7 +302,7 @@ export class Editor extends Disposable implements IEditor {
 
     // get document data.
     getDocumentData(): IDocumentData {
-        const docDataModel = this._getDocDataModel();
+        const docDataModel = this._getDocDataModel()!;
 
         return docDataModel.getSnapshot();
     }
@@ -359,7 +359,7 @@ export class Editor extends Disposable implements IEditor {
     override dispose(): void {
         const docDataModel = this._getDocDataModel();
 
-        docDataModel.dispose();
+        docDataModel?.dispose();
     }
 
     /**
@@ -413,7 +413,7 @@ export class Editor extends Disposable implements IEditor {
      * @deprecated use getDocumentData.
      */
     getValue() {
-        const docDataModel = this._getDocDataModel();
+        const docDataModel = this._getDocDataModel()!;
         const value = docDataModel.getBody()?.dataStream || '';
         return value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
     }
@@ -422,7 +422,7 @@ export class Editor extends Disposable implements IEditor {
      * @deprecated use getDocumentData.
      */
     getBody() {
-        const docDataModel = this._getDocDataModel();
+        const docDataModel = this._getDocDataModel()!;
         return docDataModel.getBody();
     }
 
@@ -460,7 +460,7 @@ export class Editor extends Disposable implements IEditor {
 
     private _getDocDataModel() {
         const editorUnitId = this._getEditorId();
-        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)!;
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
 
         return docDataModel;
     }

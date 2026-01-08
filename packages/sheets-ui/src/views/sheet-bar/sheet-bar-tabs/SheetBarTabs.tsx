@@ -82,11 +82,11 @@ export function SheetBarTabs() {
                 const name = hasProtect
                     ? (
                         <>
-                            <LockIcon />
-                            <span className="univer-outline-none">{sheet.getName()}</span>
+                            <LockIcon className="univer-shrink-0" />
+                            <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
                         </>
                     )
-                    : <span className="univer-outline-none">{sheet.getName()}</span>;
+                    : <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>;
 
                 return {
                     sheetId: sheet.getSheetId(),

@@ -34,7 +34,7 @@ export interface IBaseSheetBarProps {
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { sheetId, label, color, selected, menuOverlay } = props;
+    const { sheetId, label, color, selected } = props;
 
     const [currentSelected, setCurrentSelected] = useState(selected);
 
@@ -75,8 +75,9 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         >
             <div
                 className={`
-                  univer-box-border univer-flex univer-items-center univer-gap-1 univer-whitespace-nowrap univer-rounded
-                  univer-border-2 univer-border-solid univer-border-transparent univer-px-1.5 univer-py-1
+                  univer-box-border univer-flex univer-max-w-lg univer-items-center univer-gap-1 univer-overflow-hidden
+                  univer-whitespace-nowrap univer-rounded univer-border-2 univer-border-solid univer-border-transparent
+                  univer-px-1.5 univer-py-1
                 `}
             >
                 {label}

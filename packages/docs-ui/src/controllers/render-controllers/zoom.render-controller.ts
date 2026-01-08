@@ -41,6 +41,8 @@ import { IEditorService } from '../../services/editor/editor-manager.service';
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     private _isSheetEditor = false;
+    private _initTimer: number;
+    private _updateTimer: number;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -62,11 +64,16 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
         // TODO: do not use setTimeout.
-        setTimeout(() => this.updateViewZoom(sheetRenderer && this._isSheetEditor ? sheetRenderer.scene.scaleX : 1, true), 20);
+        this._initTimer = window.setTimeout(() => this.updateViewZoom(sheetRenderer && this._isSheetEditor ? sheetRenderer.scene.scaleX : 1, true), 20);
 
         if (!isInternalEditorID(this._context.unitId)) {
             this._initZoomEventListener();
         }
+    }
+
+    override dispose() {
+        window.clearTimeout(this._initTimer);
+        window.clearTimeout(this._updateTimer);
     }
 
     private _initRenderRefresher() {
@@ -128,7 +135,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
             if (!documentModel) return;
 
-            setTimeout(() => {
+            this._updateTimer = window.setTimeout(() => {
                 const currentSheet = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 const sheetRenderer = currentSheet && this._renderManagerService.getRenderById(currentSheet.getUnitId());
                 const zoomRatio = !this._isSheetEditor ? documentModel.zoomRatio : sheetRenderer?.scene.scaleX || 1;

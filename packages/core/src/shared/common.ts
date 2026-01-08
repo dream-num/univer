@@ -570,7 +570,7 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
         if (typeof value === 'string') {
             const parseData = getNumfmtParseValueFilter(value);
 
-            if (parseData) {
+            if (parseData && parseData.z) {
                 return {
                     v: parseData.v as number,
                     p: null,

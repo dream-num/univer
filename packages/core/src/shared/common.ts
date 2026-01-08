@@ -31,6 +31,7 @@ import {
 } from '../types/enum';
 import { ColorBuilder } from './color/color';
 import { ColorKit } from './color/color-kit';
+import { DEFAULT_NUMBER_FORMAT, getNumfmtParseValueFilter } from './numfmt';
 import { ObjectMatrix } from './object-matrix';
 import { Tools } from './tools';
 
@@ -566,6 +567,23 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
         };
     }
     if (isCellV(value)) {
+        if (typeof value === 'string') {
+            const parseData = getNumfmtParseValueFilter(value);
+
+            if (parseData) {
+                return {
+                    v: parseData.v as number,
+                    p: null,
+                    f: null,
+                    s: {
+                        n: {
+                            pattern: parseData.z || DEFAULT_NUMBER_FORMAT,
+                        },
+                    },
+                };
+            }
+        }
+
         return {
             v: value as Nullable<CellValue>,
             p: null,

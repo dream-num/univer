@@ -45,15 +45,19 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
 
     const viewValue = useMemo(() => {
         if (value == null) return '';
-        let fontFamily = localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`);
 
-        // Handle font family from copy paste.
-        if (fontFamily.startsWith('fontFamily.') && typeof value === 'string') {
-            fontFamily = value.split(',')[0];
+        const fixedValue = (`${value ?? ''}`).replace(/\s/g, '');
+
+        const font = fonts.find((font) => {
+            return font.value === fixedValue;
+        });
+
+        if (!font) {
+            return fixedValue;
         }
 
-        return fontFamily;
-    }, [value]);
+        return localeService.t(font.label);
+    }, [value, fonts]);
 
     useMemo(() => {
         setInputValue(viewValue);

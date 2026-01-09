@@ -50,6 +50,7 @@ function factory(id: string) {
         univer.registerPlugin(UniverRenderEnginePlugin);
         univer.registerPlugin(UniverUIPlugin, {
             container: id,
+            ribbonType: 'classic',
         });
         univer.registerPlugin(UniverDocsPlugin);
         univer.registerPlugin(UniverDocsUIPlugin);

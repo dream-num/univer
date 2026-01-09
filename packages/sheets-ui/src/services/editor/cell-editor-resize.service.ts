@@ -76,7 +76,6 @@ export class SheetCellEditorResizeService extends Disposable {
         return this._renderer?.engine;
     }
 
-    // eslint-disable-next-line complexity
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
@@ -103,9 +102,8 @@ export class SheetCellEditorResizeService extends Disposable {
         if (!info || info.actualWidth <= 0) return;
         let { actualWidth, actualHeight } = info;
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
-        actualWidth = actualWidth + (paddingData.l ?? 0) + (paddingData.r ?? 0);
-        actualHeight = actualHeight + (paddingData.t ?? 0) + (paddingData.b ?? 0);
-
+        actualWidth = actualWidth + (paddingData.l ?? 0) * scaleX + (paddingData.r ?? 0) * scaleX;
+        actualHeight = actualHeight + (paddingData.t ?? 0) * scaleY + (paddingData.b ?? 0) * scaleY;
         let editorWidth = endX - startX;
         let editorHeight = endY - startY;
         if (editorWidth < actualWidth) {
@@ -136,9 +134,8 @@ export class SheetCellEditorResizeService extends Disposable {
         } else {
             offsetLeft = paddingData.l || 0;
         }
-
-        offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
-        offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
+        offsetTop = Math.max(offsetTop, paddingData.t || 0);
+        offsetLeft = Math.max(offsetLeft, paddingData.l || 0);
         documentDataModel.updateDocumentDataMargin({
             t: offsetTop,
             l: offsetLeft,
@@ -180,7 +177,7 @@ export class SheetCellEditorResizeService extends Disposable {
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-            documentDataModel?.updateDocumentDataPageSize(endX - startX);
+            documentDataModel?.updateDocumentDataPageSize((endX - startX) / scaleX);
             documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
             documentSkeleton.calculate();
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();

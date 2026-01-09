@@ -286,7 +286,6 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         let offsetX = 0;
         let offsetY = 0;
-        let attachLeft = false;
         const drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
         if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
             const offset = this._popupMenuOffsetMap.get(drawingType)!;

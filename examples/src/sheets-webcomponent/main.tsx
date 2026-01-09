@@ -52,6 +52,7 @@ class MyWebComponent extends LitElement {
         univer.registerPlugin(UniverRenderEnginePlugin);
         univer.registerPlugin(UniverUIPlugin, {
             container,
+            ribbonType: 'classic',
         });
         univer.registerPlugin(UniverDocsPlugin);
         univer.registerPlugin(UniverDocsUIPlugin);

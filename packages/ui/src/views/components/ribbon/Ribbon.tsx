@@ -225,6 +225,7 @@ export function Ribbon(props: IRibbonProps) {
             <div
                 className={clsx(`
                   univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
+                  univer-text-sm
                 `, {
                     'univer-grid-cols-[1fr] univer-justify-center': ribbonType === 'classic',
                     'univer-grid-cols-[auto,1fr]': ribbon.length > 1 && ribbonType !== 'classic',

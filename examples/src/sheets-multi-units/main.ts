@@ -81,7 +81,10 @@ const univer = new Univer({
 
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverUIPlugin, { container: 'app' });
+univer.registerPlugin(UniverUIPlugin, {
+    container: 'app',
+    ribbonType: 'classic',
+});
 univer.registerPlugin(UniverDocsUIPlugin);
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);

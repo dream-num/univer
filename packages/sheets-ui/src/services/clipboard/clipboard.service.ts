@@ -19,11 +19,12 @@ import type {
     IDisposable,
     IMutationInfo,
     IRange,
+    IRowAutoHeightInfo,
     Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type {
@@ -67,7 +68,8 @@ import {
     rangeToDiscreteRange,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
-
+    SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowAutoHeightMutationFactory,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
@@ -92,6 +94,8 @@ export const PREDEFINED_HOOK_NAME_COPY = {
 } as const;
 export const PREDEFINED_HOOK_NAME_PASTE = {
     DEFAULT_PASTE: 'default-paste',
+    DEFAULT_PASTE_ROWS: 'default-paste-rows',
+    DEFAULT_PASTE_COLUMNS: 'default-paste-columns',
     SPECIAL_PASTE_VALUE: 'special-paste-value',
     SPECIAL_PASTE_FORMAT: 'special-paste-format',
     SPECIAL_PASTE_COL_WIDTH: 'special-paste-col-width',
@@ -775,7 +779,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
-        const colCount = pastedRange.cols.length;
         const hooks = this._clipboardHooks;
         const enabledHooks: ISheetClipboardHook[] = [];
         const disableCopying = hooks.some(
@@ -810,19 +813,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             (h) => (!h.specialPasteInfo && h.id !== PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE) || pasteType === h.id
         );
         filteredHooks.forEach((h) => {
-            if (rowProperties) {
-                const rowReturn = h.onPasteRows?.({ range: pastedRange, unitId, subUnitId }, rowProperties, {
-                    pasteType,
-                });
-                if (rowReturn) {
-                    redoMutationsInfo.push(...rowReturn.redos);
-                    undoMutationsInfo.push(...rowReturn.undos);
-                }
+            const rowReturn = h.onPasteRows?.({ range: pastedRange, unitId, subUnitId });
+            if (rowReturn) {
+                redoMutationsInfo.push(...rowReturn.redos);
+                undoMutationsInfo.push(...rowReturn.undos);
             }
 
             const colReturn = h.onPasteColumns?.(
                 { range: pastedRange, unitId, subUnitId },
-                colProperties || new Array(colCount).map(() => ({})),
+                colProperties || [],
                 { pasteType }
             );
             if (colReturn) {
@@ -876,6 +875,18 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const result = redoMutationsInfo.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
         if (result) {
+            // handle auto row height for pasted range
+            const autoHeightMutation = this._getPastedRangeAutoHeightMutation(
+                unitId,
+                subUnitId,
+                pastedRange
+            );
+            if (autoHeightMutation) {
+                this._commandService.syncExecuteCommand(autoHeightMutation.redo.id, autoHeightMutation.redo.params);
+                redoMutationsInfo.push(autoHeightMutation.redo);
+                undoMutationsInfo.unshift(autoHeightMutation.undo);
+            }
+
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -900,6 +911,70 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         filteredHooks.forEach((h) => h.onAfterPaste?.(result));
         return result;
+    }
+
+    private _getPastedRangeAutoHeightMutation(
+        unitId: string,
+        subUnitId: string,
+        pastedRange: IDiscreteRange
+    ): {
+        undo: IMutationInfo;
+        redo: IMutationInfo;
+    } | null {
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return null;
+        }
+
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
+        if (!skeleton) {
+            return null;
+        }
+
+        const rowManager = worksheet.getRowManager();
+        const { rows, cols } = pastedRange;
+        const pasteRangeStartRow = rows[0];
+        const pasteRangeEndRow = rows[rows.length - 1];
+        const pasteRangeStartColumn = cols[0];
+        const pasteRangeEndColumn = cols[cols.length - 1];
+
+        // If there are rows without row height set in the pasted range, we need to set them to auto height
+        const needAutoHeight: IRowAutoHeightInfo[] = [];
+        for (let r = pasteRangeStartRow; r <= pasteRangeEndRow; r++) {
+            const rowData = rowManager.getRow(r);
+            if (!rowData) {
+                const autoHeight = skeleton.calculateAutoHeightInRange([
+                    {
+                        startRow: r,
+                        endRow: r,
+                        startColumn: pasteRangeStartColumn,
+                        endColumn: pasteRangeEndColumn,
+                    },
+                ]);
+                needAutoHeight.push(...autoHeight);
+            }
+        }
+
+        if (needAutoHeight.length > 0) {
+            const setWorksheetRowAutoHeightMutationParams: ISetWorksheetRowAutoHeightMutationParams = {
+                unitId,
+                subUnitId,
+                rowsAutoHeightInfo: needAutoHeight,
+            };
+
+            return {
+                redo: {
+                    id: SetWorksheetRowAutoHeightMutation.id,
+                    params: setWorksheetRowAutoHeightMutationParams,
+                },
+                undo: {
+                    id: SetWorksheetRowAutoHeightMutation.id,
+                    params: SetWorksheetRowAutoHeightMutationFactory(setWorksheetRowAutoHeightMutationParams, worksheet),
+                },
+            };
+        }
+
+        return null;
     }
 
     private _getSetSelectionOperation(

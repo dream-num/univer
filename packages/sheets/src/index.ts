@@ -307,11 +307,12 @@ export {
     type ISetWorksheetRowAutoHeightMutationParams,
     type ISetWorksheetRowHeightMutationParams,
     type ISetWorksheetRowIsAutoHeightMutationParams,
-
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,
+    SetWorksheetRowIsAutoHeightMutationFactory,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type IToggleGridlinesMutationParams, ToggleGridlinesMutation } from './commands/mutations/toggle-gridlines.mutation';
 export { type IUnregisterWorksheetRangeThemeStyleMutationParams, UnregisterWorksheetRangeThemeStyleMutation } from './commands/mutations/unregister-range-theme-style.mutation';

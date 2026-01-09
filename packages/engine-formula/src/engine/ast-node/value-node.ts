@@ -34,7 +34,11 @@ export class ValueNode extends BaseAstNode {
     }
 
     override execute(): void {
-        const isIgnoreNumberPattern = this.getParent()?.nodeType === NodeType.FUNCTION && (this.getParent() as FunctionNode)?.isFunctionExecutorArgumentsIgnoreNumberPattern?.();
+        const parent = this.getParent();
+        let isIgnoreNumberPattern = true;
+        if (parent?.nodeType === NodeType.FUNCTION) {
+            isIgnoreNumberPattern = (parent as FunctionNode).isFunctionExecutorArgumentsIgnoreNumberPattern?.() ?? true;
+        }
         this.setValue(ValueObjectFactory.create(this.getToken(), isIgnoreNumberPattern));
     }
 }

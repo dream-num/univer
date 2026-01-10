@@ -70,6 +70,8 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
     if (fs.existsSync(snapshotFilePath)) {
@@ -119,6 +121,8 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
     // move row 3 to before row 5
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
+
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
@@ -173,6 +177,8 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
         fromRange,
         toRange,
     });
+
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);

@@ -192,11 +192,7 @@ export interface ISheetClipboardHook {
      * @param payload
      * @returns undo and redo mutations
      */
-    onPasteRows?(
-        pasteTo: ISheetDiscreteRangeLocation,
-        rowProperties: IClipboardPropertyItem[],
-        payload: ICopyPastePayload
-    ): {
+    onPasteRows?(pasteTo: ISheetDiscreteRangeLocation): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };

@@ -62,10 +62,6 @@ export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatri
     return maxIndex + 1;
 }
 
-/**
- * This function has bug of undefined value to be inserted.
- * @deprecated
- */
 export function insertMatrixArray<T>(
     index: number,
     value: T,
@@ -76,7 +72,11 @@ export function insertMatrixArray<T>(
 
     // move all items after index in backward order
     for (let i = length - 1; i >= index; i--) {
-        array[i + 1] = array[i];
+        if (array[i] === undefined) {
+            delete array[i + 1];
+        } else {
+            array[i + 1] = array[i];
+        }
     }
 
     array[index] = value;

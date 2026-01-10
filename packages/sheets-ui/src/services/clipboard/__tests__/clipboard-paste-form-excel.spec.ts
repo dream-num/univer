@@ -23,6 +23,7 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -99,6 +100,7 @@ describe('Test clipboard', () => {
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
 
         sheetSkeletonManagerService = get(SheetSkeletonManagerService);
         sheetClipboardService = get(ISheetClipboardService);
@@ -215,7 +217,14 @@ describe('Test clipboard', () => {
             expect(cellStyle?.bg).toStrictEqual({ rgb: 'rgb(15,158,213)' });
             const richTextStyle = getValues(2, 3, 2, 3)?.[0]?.[0]?.p;
             expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
-            expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);
+            expect(richTextStyle?.body?.paragraphs).toStrictEqual([
+                {
+                    paragraphStyle: {
+                        horizontalAlign: 0,
+                    },
+                    startIndex: 6,
+                },
+            ]);
             expect(richTextStyle?.body?.textRuns).toStrictEqual([
                 {
                     st: 1,

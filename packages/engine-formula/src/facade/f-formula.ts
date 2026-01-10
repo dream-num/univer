@@ -166,6 +166,7 @@ export class FFormula extends FBase {
     }
 
     /**
+     * @deprecated Use `onCalculationEnd` instead.
      * Wait for computing in the Univer instance to complete. Please note that this does not only include formula calculation,
      * but also other computing tasks, e.g. pivot table calculation.
      * @param {number} [timeout] The maximum time to wait for the computing to complete, in milliseconds. The default
@@ -192,7 +193,7 @@ export class FFormula extends FBase {
     }
 
     /**
-     * @deprecated Use `whenComputingCompleteAsync` instead.
+     * Waits for the formula calculation to complete.
      * @returns {Promise<void>} This method returns a promise that resolves when the calculation is complete.
      */
     onCalculationEnd(): Promise<void> {

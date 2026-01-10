@@ -143,6 +143,11 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
 const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf']);
 function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles) {
+    // If there is a formula in the new value, delete the old value v key to avoid conflicts
+    if (newValue.f) {
+        delete oldValue.v;
+    }
+
     const type = getCellType(styles, newValue, oldValue);
     Object.keys(newValue).forEach((key) => {
         const cellPropertyKey = key as keyof ICellData;

@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.15.1](https://github.com/dream-num/univer/compare/v0.15.0...v0.15.1) (2026-01-10)
+
+
+### Bug Fixes
+
+* **api:** fix setTabColor API was not working when setting inactive worksheets ([#6395](https://github.com/dream-num/univer/issues/6395)) ([57c51ee](https://github.com/dream-num/univer/commit/57c51eea587321dfd60f1cc073c3ba2495b30edb))
+* **api:** optimize `FRange.setValue` api will parse number format when setting the value is `CellValue` rather than `ICellData` ([#6443](https://github.com/dream-num/univer/issues/6443)) ([a34077f](https://github.com/dream-num/univer/commit/a34077fd81d0e7e7ed3171588ef57b1373eb4014))
+* **border:** optimize double border rendering ([#6414](https://github.com/dream-num/univer/issues/6414)) ([1626efb](https://github.com/dream-num/univer/commit/1626efb959adcc61ff442f0d9e3ad163bbf37d3a))
+* **debugger:** add data attribute to Fab component for debugging ([#6424](https://github.com/dream-num/univer/issues/6424)) ([8020985](https://github.com/dream-num/univer/commit/8020985b8b5ef9461e1648826fd43485e2b3be69))
+* **drawing:** fix drawing position calculation error ([#6420](https://github.com/dream-num/univer/issues/6420)) ([5e88023](https://github.com/dream-num/univer/commit/5e88023600bdeabb72a3995bb4b709235961d69c))
+* **editor:** fix the issue of incorrect cell styles after editing ([#6435](https://github.com/dream-num/univer/issues/6435)) ([84dbabb](https://github.com/dream-num/univer/commit/84dbabbab4c59de95fa90f104afb338fd6ddf5ab))
+* **engine-render:** auto-height calc error ([#6410](https://github.com/dream-num/univer/issues/6410)) ([a915ea3](https://github.com/dream-num/univer/commit/a915ea349ef24730897c0ae677c55ba180365d23))
+* **engine-render:** image render error if too much ([#6432](https://github.com/dream-num/univer/issues/6432)) ([8e4165d](https://github.com/dream-num/univer/commit/8e4165d9989430e41b9960762475486fb3bda01b))
+* fix font selector view value ([#6453](https://github.com/dream-num/univer/issues/6453)) ([7fb8ab1](https://github.com/dream-num/univer/commit/7fb8ab1b3c28dbe339c8d2b8903be850bef043ef))
+* fix the issue with custom formulas in conditional formatting introduced in version 0.12.3 ([#6431](https://github.com/dream-num/univer/issues/6431)) ([239bba0](https://github.com/dream-num/univer/commit/239bba0abfb98a6d2cbefb6b5a87269f2e3aa412))
+* **formula:** fix cell custom properties would trigger formula calculation ([#6408](https://github.com/dream-num/univer/issues/6408)) ([34711d9](https://github.com/dream-num/univer/commit/34711d9dfc013138eb2e65dfa8376fa6116bdae3))
+* **formula:** fix compare calculation error ([#6444](https://github.com/dream-num/univer/issues/6444)) ([eb57767](https://github.com/dream-num/univer/commit/eb57767b59362727a08e371bb07c22df4ec9410f))
+* **formula:** fix where keyboard shortcuts incorrect when selecting formula range across worksheets ([#6404](https://github.com/dream-num/univer/issues/6404)) ([522cb09](https://github.com/dream-num/univer/commit/522cb09e18cb60a9ea13a9dae27671ae40aba5f9))
+* **formula:** fix where the formula calculation could not be recalculated after it was interrupted in certain situations ([#6454](https://github.com/dream-num/univer/issues/6454)) ([a20f30c](https://github.com/dream-num/univer/commit/a20f30c75011f4e116b23f42fc3d94f172df5989))
+* handle disposed state in DocResizeRenderController and improve null checks in Editor ([#6440](https://github.com/dream-num/univer/issues/6440)) ([f294680](https://github.com/dream-num/univer/commit/f29468053978b67e5c30e9b9a97ec0e1263d9e3d))
+* improve layout in IconGroupList ([#6449](https://github.com/dream-num/univer/issues/6449)) ([d875547](https://github.com/dream-num/univer/commit/d8755475be72d1a502ee9e3e21b9d82bad56bd84))
+* **paste:** fix copy-paste issue with merged cell borders introduced in version 0.14.0 ([#6429](https://github.com/dream-num/univer/issues/6429)) ([e6dac10](https://github.com/dream-num/univer/commit/e6dac104f9f809dff986dfb0daa81d5bff5895ad))
+* **paste:** fix some issues with row height and column width during copy and paste ([#6450](https://github.com/dream-num/univer/issues/6450)) ([c5d22f3](https://github.com/dream-num/univer/commit/c5d22f34d116d47fc5f9af6db5ab175dd573b25b))
+* **paste:** optimize the paste menu to support copy and paste within Univer in environments that do not support the Clipboard API ([#6406](https://github.com/dream-num/univer/issues/6406)) ([b6222ce](https://github.com/dream-num/univer/commit/b6222ce051e93d6f7fae4d5b055c9d1e3eb3cd16))
+* **sheets-drawing-ui:** add URL image downloader registration method in IFUniverDrawingMixin ([#6441](https://github.com/dream-num/univer/issues/6441)) ([505252b](https://github.com/dream-num/univer/commit/505252b7a9c6c64ba36a7c42c0757987f3ac225f))
+* **sheets-ui:** editor position calc error on scale ([#6445](https://github.com/dream-num/univer/issues/6445)) ([0ffbe35](https://github.com/dream-num/univer/commit/0ffbe3500fb35b724a9b8452e487e342de72dc08))
+* **sheets-ui:** improve overflow handling and truncate long labels in sheet bar ([#6437](https://github.com/dream-num/univer/issues/6437)) ([d15bc08](https://github.com/dream-num/univer/commit/d15bc083d407d2afa21d9253207bd045c7820751))
+* **sheets:** fix the issue of double-clicking automatically filling boundaries ([#6448](https://github.com/dream-num/univer/issues/6448)) ([21e2e3a](https://github.com/dream-num/univer/commit/21e2e3af2a256e36eda81ce6f5b8bf9719321cc8))
+* **shortcut:** fix delete drawing shortcut ([#6401](https://github.com/dream-num/univer/issues/6401)) ([203f7cb](https://github.com/dream-num/univer/commit/203f7cbc0136cfaf995cd82d6fe512040c0f02e2))
+
+
+### Features
+
+* add resolveWithBasePath function ([#6421](https://github.com/dream-num/univer/issues/6421)) ([df2de99](https://github.com/dream-num/univer/commit/df2de99646b046fce5f74b9649ab72bc919161b7))
+* **api:** add the optional isForceMerge parameter to the merge-related APIs ([#6418](https://github.com/dream-num/univer/issues/6418)) ([883eab6](https://github.com/dream-num/univer/commit/883eab6648ce76c51ee939d03d05615d9ae01774))
+* **design:** add gradient-color-picker ([#6411](https://github.com/dream-num/univer/issues/6411)) ([4d40f9b](https://github.com/dream-num/univer/commit/4d40f9be5f9663dd5a86ffaaa85abe1aad64f637))
+* **design:** add RGBA support to ColorPicker ([#6412](https://github.com/dream-num/univer/issues/6412)) ([d46cd6d](https://github.com/dream-num/univer/commit/d46cd6dd9d15927d01add5a4f266ec726ccd1a65))
+* optimize the data validation dropdown list by adding a search box ([#6403](https://github.com/dream-num/univer/issues/6403)) ([42d62a1](https://github.com/dream-num/univer/commit/42d62a14f29fdb1ebfd53d3404a77b6a3bc79451))
+* **shape:** custom shape popup position ([#6451](https://github.com/dream-num/univer/issues/6451)) ([0b3c40e](https://github.com/dream-num/univer/commit/0b3c40efd9fb42f068ffde24b0cd26fc502b2316))
+* **sheets-drawing-ui:** add API to register custom URL image downloader ([#6430](https://github.com/dream-num/univer/issues/6430)) ([5bc20d9](https://github.com/dream-num/univer/commit/5bc20d9c01bb81bda96c87316cf33cc728ac854c))
+* **sheets-drawing:** introduce URL image service to centralize URL image ([#6434](https://github.com/dream-num/univer/issues/6434)) ([fc5ae91](https://github.com/dream-num/univer/commit/fc5ae911ac76927edc6404c6fe57b603f47f3548))
+* **ui:** add DesktopRibbonService and integrate with Ribbon componenta ([#6428](https://github.com/dream-num/univer/issues/6428)) ([f67b413](https://github.com/dream-num/univer/commit/f67b413cdec55830c43d220b0ffceb70896a439c))
+
 # [0.15.0](https://github.com/dream-num/univer/compare/v0.14.0...v0.15.0) (2025-12-27)
 
 

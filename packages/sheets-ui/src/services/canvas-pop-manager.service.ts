@@ -94,6 +94,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback) {
         this._popupMenuFeatureMap.set(type, getPopupMenuCallBack);
     }
+
     /**
      * Register a feature menu offset for a specific drawing type.
      * @param {DrawingTypeEnum} type the drawing type

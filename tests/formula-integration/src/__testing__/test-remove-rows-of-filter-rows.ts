@@ -85,6 +85,7 @@ export async function expectRemoveRowsOfFilterRowsResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();

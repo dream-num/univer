@@ -86,6 +86,7 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();
@@ -138,6 +139,7 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();
@@ -194,6 +196,7 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();

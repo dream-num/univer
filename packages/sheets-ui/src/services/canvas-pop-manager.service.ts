@@ -15,7 +15,7 @@
  */
 
 import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
@@ -47,6 +47,7 @@ type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: s
 export class SheetCanvasPopManagerService extends Disposable {
     // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
+    private _popupMenuOffsetMap = new Map<DrawingTypeEnum, { offsetX: number; offsetY: number }>();
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -95,6 +96,16 @@ export class SheetCanvasPopManagerService extends Disposable {
     }
 
     /**
+     * Register a feature menu offset for a specific drawing type.
+     * @param {DrawingTypeEnum} type the drawing type
+     * @param offsetX The offset x
+     * @param offsetY The offset y
+     */
+    registerFeatureMenuOffset(type: DrawingTypeEnum, offsetX: number, offsetY: number) {
+        this._popupMenuOffsetMap.set(type, { offsetX, offsetY });
+    }
+
+    /**
      * Get the feature menu by drawing type, the function should be called when a drawing element need trigger popup menu, so the unitId, subUnitId, drawingId should be provided.
      * @param {string} unitId the unit id
      * @param {string} subUnitId the sub unit id
@@ -112,6 +123,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     override dispose(): void {
         super.dispose();
         this._popupMenuFeatureMap.clear();
+        this._popupMenuOffsetMap.clear();
     }
 
     private _createHiddenRectObserver(params: { row: number; column: number; worksheet: Worksheet; skeleton: SpreadsheetSkeleton; currentRender: IRender }) {
@@ -273,10 +285,19 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
         const { left, top, width, height } = targetObject;
 
+        let offsetX = 0;
+        let offsetY = 0;
+        const drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
+        if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
+            const offset = this._popupMenuOffsetMap.get(drawingType)!;
+            offsetX = offset.offsetX;
+            offsetY = offset.offsetY;
+        }
+
         const bound: IBoundRectNoAngle = {
             left,
-            right: left + width,
-            top,
+            right: left + width + offsetX,
+            top: top + offsetY,
             bottom: top + height,
         };
 

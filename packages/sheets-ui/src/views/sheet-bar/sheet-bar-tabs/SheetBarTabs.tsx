@@ -147,6 +147,11 @@ export function SheetBarTabs() {
             slideTabBarContainer: slideTabBarContainerRef.current,
             currentIndex: 0,
             onChangeName: (subUnitId: string, worksheetName: string) => {
+                if (workbook.getSheetBySheetId(subUnitId)?.getName() === worksheetName) {
+                    updateSheetItems();
+                    return;
+                }
+
                 commandService.executeCommand(SetWorksheetNameCommand.id, {
                     subUnitId,
                     name: worksheetName,

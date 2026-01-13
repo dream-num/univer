@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable, ComponentManager } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
@@ -89,11 +89,18 @@ export function RenderSheetHeader() {
  */
 export function RenderSheetContent() {
     const hasWorkbook = useHasWorkbook();
+    const componentManager = useDependency(ComponentManager);
+    
+    // Attempt to retrieve the registered ShapeTextEditorContainer
+    // We use a string key to avoid hard dependency on sheets-shape-ui
+    const ShapeTextEditorContainer = componentManager.get('ShapeTextEditorContainer');
+
     if (!hasWorkbook) return null;
 
     return (
         <>
             <EditorContainer />
+            {ShapeTextEditorContainer && <ShapeTextEditorContainer />}
             <AutoFillPopupMenu />
         </>
     );

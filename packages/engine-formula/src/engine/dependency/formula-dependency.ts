@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type { IFeatureDirtyRangeType, IFormulaData, IFormulaDataItem, IOtherFormulaData, IUnitData } from '../../basics/common';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
-
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
@@ -26,9 +25,8 @@ import type { BaseReferenceObject, FunctionVariantType } from '../reference-obje
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type { IFormulaDependencyTree, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from './dependency-tree';
-import { createIdentifier, Disposable, Inject, ObjectMatrix, RTree } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, ObjectMatrix, RTree, UniverInstanceType } from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
-
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
 import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
@@ -41,8 +39,6 @@ import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import { FORMULA_AST_CACHE, generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
 import { FormulaDependencyTree, FormulaDependencyTreeModel, FormulaDependencyTreeType, FormulaDependencyTreeVirtual } from './dependency-tree';
-
-const FORMULA_CACHE_LRU_COUNT = 5000;
 
 interface IFeatureFormulaParam {
     unitId: string;
@@ -66,7 +62,7 @@ export interface IFormulaDependencyGenerator {
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
-export class FormulaDependencyGenerator extends Disposable {
+export class FormulaDependencyGenerator extends Disposable implements IFormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     protected _dependencyRTreeCacheForAddressFunction: RTree = new RTree();
@@ -77,6 +73,7 @@ export class FormulaDependencyGenerator extends Disposable {
         @IOtherFormulaManagerService protected readonly _otherFormulaManagerService: IOtherFormulaManagerService,
         @IFeatureCalculationManagerService
         private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(Lexer) protected readonly _lexer: Lexer,
@@ -84,12 +81,31 @@ export class FormulaDependencyGenerator extends Disposable {
         @Inject(LexerTreeBuilder) protected readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
+
+        this._initUnitDispose();
     }
 
     override dispose(): void {
+        super.dispose();
         this._updateRangeFlattenCache.clear();
         this._dependencyRTreeCacheForAddressFunction.clear();
         FORMULA_AST_CACHE.clear();
+    }
+
+    private _initUnitDispose() {
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                this._disposeByUnitId(workbook.getUnitId());
+            })
+        );
+    }
+
+    private _disposeByUnitId(unitId: string) {
+        FORMULA_AST_CACHE.forEach((_, key) => {
+            if (key.startsWith(unitId)) {
+                FORMULA_AST_CACHE.delete(key);
+            }
+        });
     }
 
     async generate(isCalculateTreeModel = false) {

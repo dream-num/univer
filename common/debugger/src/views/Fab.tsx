@@ -37,34 +37,49 @@ import { useUser } from './use-user';
 import { useWatermark } from './use-watermark';
 
 export function Fab() {
+    const locale = useLocale();
+    const darkMode = useDarkMode();
+    const theme = useTheme();
+    const watermark = useWatermark();
+    const notification = useNotification();
+    const message = useMessage();
+    const dialog = useDialog();
+    const sidebar = useSidebar();
+    const floatingDom = useFloatingDom();
+    const cellContent = useCellContent();
+    const units = useUnits();
+    const snapshot = useSnapshot();
+    const editable = useEditable();
+    const user = useUser();
+    const dispose = useDispose();
+
     const configService = useDependency(IConfigService);
+    const configs = configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
+    const performanceMonitor = configs?.performanceMonitor;
+
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitType = univerInstanceService.getFocusedUnit()?.type;
-
     if (!unitType) return null;
 
     const items: IDropdownMenuProps['items'] = [
-        useLocale(),
-        useDarkMode(),
-        useTheme(),
-        useWatermark(),
+        locale,
+        darkMode,
+        theme,
+        watermark,
         { type: 'separator' },
-        useNotification(),
-        useMessage(),
-        useDialog(),
-        useSidebar(),
+        notification,
+        message,
+        dialog,
+        sidebar,
         { type: 'separator' },
-        unitType === UniverInstanceType.UNIVER_SHEET && useFloatingDom(),
-        unitType === UniverInstanceType.UNIVER_SHEET && useCellContent(),
-        unitType === UniverInstanceType.UNIVER_SHEET && useUnits(),
-        useSnapshot(),
-        useEditable(),
-        unitType === UniverInstanceType.UNIVER_SHEET && useUser(),
-        useDispose(),
+        unitType === UniverInstanceType.UNIVER_SHEET && floatingDom,
+        unitType === UniverInstanceType.UNIVER_SHEET && cellContent,
+        unitType === UniverInstanceType.UNIVER_SHEET && units,
+        snapshot,
+        editable,
+        unitType === UniverInstanceType.UNIVER_SHEET && user,
+        dispose,
     ].filter((item) => item !== null) as IDropdownMenuProps['items'];
-
-    const configs = configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
-    const performanceMonitor = configs?.performanceMonitor;
 
     return (
         <div

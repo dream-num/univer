@@ -443,17 +443,18 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
-        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        let worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return null;
-        }
+        let workbook = _unitId
+            ? this._univerInstanceService.getUnit<Workbook>(_unitId)
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return null;
+
+        let worksheet = _subUnitId
+            ? workbook.getSheetBySheetId(_subUnitId)
+            : workbook.getActiveSheet();
+        if (!worksheet) return null;
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        if ((_unitId && unitId !== _unitId) || (_subUnitId && subUnitId !== _subUnitId)) {
-            return null;
-        }
         const currentRender = this._renderManagerService.getRenderById(unitId);
         const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);

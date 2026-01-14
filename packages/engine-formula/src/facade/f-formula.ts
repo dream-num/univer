@@ -166,20 +166,7 @@ export class FFormula extends FBase {
     }
 
     /**
-     * Wait for computing in the Univer instance to complete. Please note that this does not only include formula calculation,
-     * but also other computing tasks, e.g. pivot table calculation.
-     * @param {number} [timeout] The maximum time to wait for the computing to complete, in milliseconds. The default
-     * value is 30,000 milliseconds.
-     * @returns {Promise<boolean>} This method returns `true` if the computing is complete. If the timeout is reached, this
-     * method returns `false`.
-     *
-     * @example
-     * ```ts
-     * const formulaEngine = univerAPI.getFormula();
-     * formulaEngine.whenComputingCompleteAsync(3000).then((isComplete) => {
-     *   console.log('Computing complete:', isComplete);
-     * });
-     * ```
+     * @deprecated Use `onCalculationEnd` instead.
      */
     whenComputingCompleteAsync(timeout?: number): Promise<boolean> {
         const gcss = this._injector.get(GlobalComputingStatusService);
@@ -192,7 +179,7 @@ export class FFormula extends FBase {
     }
 
     /**
-     * @deprecated Use `whenComputingCompleteAsync` instead.
+     * Waits for the formula calculation to complete.
      * @returns {Promise<void>} This method returns a promise that resolves when the calculation is complete.
      */
     onCalculationEnd(): Promise<void> {

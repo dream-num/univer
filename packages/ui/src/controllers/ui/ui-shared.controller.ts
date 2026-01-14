@@ -26,7 +26,6 @@ const STEADY_TIMEOUT = 3000;
  */
 export abstract class SingleUnitUIController extends Disposable {
     protected _steadyTimeout: number;
-    protected _renderedTimeout: number;
     protected _renderTimeout: number;
 
     constructor(
@@ -43,7 +42,6 @@ export abstract class SingleUnitUIController extends Disposable {
         super.dispose();
 
         clearTimeout(this._steadyTimeout);
-        clearTimeout(this._renderedTimeout);
         clearTimeout(this._renderTimeout);
         //@ts-ignore
         delete this._instanceService;
@@ -85,16 +83,13 @@ export abstract class SingleUnitUIController extends Disposable {
                         if (this._currentRenderId === renderer) this._currentRenderId = null;
                     }));
 
-                    this._renderedTimeout = window.setTimeout(() => {
-                        this._lifecycleService.stage = LifecycleStages.Rendered;
-                        this._steadyTimeout = window.setTimeout(() => {
-                            this._lifecycleService.stage = LifecycleStages.Steady;
-                        }, STEADY_TIMEOUT);
-                    }, 0);
+                    this._lifecycleService.stage = LifecycleStages.Rendered;
+                    this._steadyTimeout = window.setTimeout(() => {
+                        this._lifecycleService.stage = LifecycleStages.Steady;
+                    }, STEADY_TIMEOUT);
                 }, 300);
             } catch (error) {
                 clearTimeout(this._steadyTimeout);
-                clearTimeout(this._renderedTimeout);
                 clearTimeout(this._renderTimeout);
                 if (error instanceof LifecycleUnreachableError) {
                     return;

@@ -17,8 +17,8 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu } from '@univerjs/design';
-import { IncreaseIcon, ReduceIcon } from '@univerjs/icons';
 import React, { useMemo, useRef, useState } from 'react';
+import { ComponentManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
 export interface ISliderProps {
@@ -63,6 +63,7 @@ const SLIDER_WIDTH = 116;
  */
 export function Slider(props: ISliderProps) {
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
 
     const { value, min = 0, max = 400, disabled = false, resetPoint = 100, shortcuts, onChange } = props;
 
@@ -158,6 +159,9 @@ export function Slider(props: ISliderProps) {
         options: shortcuts.map((item) => ({ value: item.toString(), label: `${item}%` })),
         onSelect: (value: string) => handleSelectZoomLevel(+value),
     }];
+
+    const ReduceIcon = componentManager.get('ReduceIcon');
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
 
     return (
         <div

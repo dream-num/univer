@@ -47,8 +47,8 @@ export async function expectCalculationResultMatchesSnapshot() {
     const testSnapshot = JSON.parse(testSnapshotRaw) as IWorkbookData;
 
     const workbook = testBed.api.createWorkbook(testSnapshot);
-
-    await testBed.api.getFormula().onCalculationResultApplied();
+    const formula = testBed.api.getFormula();
+    await formula.onCalculationEnd();
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);

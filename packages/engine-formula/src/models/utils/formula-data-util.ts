@@ -29,12 +29,14 @@ export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatri
     const currentFormulaInfo = sheetFormulaDataMatrix.getValue(r, c);
     const f = currentFormulaInfo?.f || '';
     const si = currentFormulaInfo?.si || '';
+    const x = currentFormulaInfo?.x || 0;
+    const y = currentFormulaInfo?.y || 0;
 
     // Any data update may destroy the original correspondence between f and si, and the relationship between f and si needs to be re-bound.
     function clearFormulaData() {
         // The id that needs to be offset
         // When the cell containing the formulas f and si is deleted, f and si lose their association, and f needs to be moved to the next cell containing the same si.
-        if (isFormulaString(f) && isFormulaId(si)) {
+        if (isFormulaString(f) && isFormulaId(si) && x === 0 && y === 0) {
             const updatedFormula = formulaIdMap?.[si]?.f;
 
             // The formula may have been updated. For example, when you delete a column referenced by a formula, it will become #REF and cannot take the original value.

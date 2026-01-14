@@ -70,9 +70,6 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
 
-    await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
     if (fs.existsSync(snapshotFilePath)) {
@@ -87,8 +84,6 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
-    await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();
@@ -125,9 +120,6 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
 
-    await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
     if (fs.existsSync(snapshotFilePath)) {
@@ -142,8 +134,6 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
-    await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();
@@ -184,9 +174,6 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
         toRange,
     });
 
-    await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
     if (fs.existsSync(snapshotFilePath)) {
@@ -201,8 +188,6 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
-    await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();

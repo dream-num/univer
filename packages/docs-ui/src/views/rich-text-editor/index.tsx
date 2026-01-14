@@ -26,7 +26,7 @@ import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { useKeyboardEvent, useResize } from './hooks';
+import { useEditorClickOutside, useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/use-editor';
 import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
 import { useOnChange } from './hooks/use-on-change';
@@ -133,26 +133,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         onFocusChange?.(isFocusing, getPlainText(data?.body?.dataStream ?? ''));
     }, [isFocusing, onFocusChange]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (editorService.getFocusId() !== editorId) return;
-
-            const id = (event.target as HTMLDivElement)?.dataset?.editorid;
-            if (id === editorId) return;
-            if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
-                onClickOutside?.();
-            }
-        };
-
-        const timer = setTimeout(() => {
-            document.addEventListener('click', handleClickOutside);
-        }, 100);
-
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-            clearTimeout(timer);
-        };
-    }, [editor, editorId, editorService, onClickOutside]);
+    useEditorClickOutside(editorId, sheetEmbeddingRef, onClickOutside);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);

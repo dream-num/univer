@@ -20,7 +20,7 @@ import { IEditorService } from '../../../services/editor/editor-manager.service'
 
 export const useEditorClickOutside = (
     editorId: string,
-    containerRef: React.RefObject<HTMLElement>,
+    containerRef: React.RefObject<HTMLElement | null>,
     onClickOutside?: () => void
 ) => {
     const editorService = useDependency(IEditorService);

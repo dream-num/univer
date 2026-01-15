@@ -16,13 +16,45 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, IFontConfig, ISidebarMethodOptions } from '@univerjs/ui';
+import type {
+    BuiltInUIPart,
+    ComponentType,
+    IComponentOptions,
+    IDialogPartMethodOptions,
+    IFontConfig,
+    IMenuSchema,
+    ISidebarMethodOptions,
+} from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, connectInjector, CopyCommand, IDialogService, IFontService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
+import {
+    ComponentManager,
+    connectInjector,
+    CopyCommand,
+    IDialogService,
+    IFontService,
+    IMenuManagerService,
+    IMessageService,
+    ISidebarService,
+    IUIPartsService,
+    MenuManagerPosition,
+    PasteCommand,
+} from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
+
+/**
+ * @ignore
+ */
+export interface IFacadeMenuDetails {
+    id: string;
+    title: string;
+    description?: string;
+    icon?: string;
+    tooltip?: string;
+    execute: (params?: any) => Promise<boolean>;
+}
 
 /**
  * @ignore
@@ -439,6 +471,21 @@ export interface IFUniverUIMixin {
      * ```
      */
     addFonts(fonts: IFontConfig[]): void;
+
+    /**
+     * Get the menu items of Univer.
+     *   - Includes both ribbon menus and context menus.
+     *   - You can use the returned menu items to execute commands programmatically.
+     * @beta Please note that this API is in beta and may change in future releases.
+     * @returns {IFacadeMenuDetails[]} the array of menu details
+     * @example
+     * ```ts
+     * const menus = univerAPI.getMenuDetails();
+     * const undoMenu = menus.find(menu => menu.id === UndoCommandId);
+     * undoMenu?.execute();
+     * ```
+     */
+    getMenuDetails(): IFacadeMenuDetails[];
 }
 
 /**
@@ -535,6 +582,43 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         fonts.forEach((font) => {
             fontService.addFont(font);
         });
+    }
+
+    override getMenuDetails(): IFacadeMenuDetails[] {
+        const menuManagerService = this._injector.get(IMenuManagerService);
+        const commandService = this._commandService;
+
+        const convert = (schema: IMenuSchema): IFacadeMenuDetails => {
+            const { item } = schema;
+
+            const details: IFacadeMenuDetails = {
+                id: schema.key,
+                title: schema.title || item?.title || '',
+                execute: async (params: any) => {
+                    if (item && (item.commandId || item.id)) {
+                        return commandService.executeCommand(item.commandId ?? item.id, params ?? item.params);
+                    }
+                    return false;
+                },
+            };
+
+            if (item) {
+                details.id = item.id;
+                details.title = item.title || schema.title || '';
+                details.description = item.description;
+                if (typeof item.icon === 'string') {
+                    details.icon = item.icon;
+                }
+                details.tooltip = item.tooltip;
+            }
+
+            return details;
+        };
+
+        const ribbonMenus = menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.RIBBON);
+        const contextMenus = menuManagerService.getFlatMenuByPositionKey(MenuManagerPosition.CONTEXT_MENU);
+
+        return [...ribbonMenus, ...contextMenus].map(convert);
     }
 }
 

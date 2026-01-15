@@ -36,7 +36,7 @@ export function ZoomSlider() {
         return Math.round(currentZoom);
     }, [documentDataModel]);
 
-    const [zoom, setZoom] = useState(() => getCurrentZoom());
+    const [zoom, setZoom] = useState<number>(100);
 
     useEffect(() => {
         setZoom(getCurrentZoom());

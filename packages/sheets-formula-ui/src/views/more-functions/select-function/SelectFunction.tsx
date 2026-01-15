@@ -30,7 +30,7 @@ import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
 
 export interface ISelectFunctionProps {
-    onChange: (functionInfo: IFunctionInfo) => void;
+    onChange: (functionInfo: IFunctionInfo | null) => void;
 }
 
 export function SelectFunction(props: ISelectFunctionProps) {
@@ -102,6 +102,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const setCurrentFunctionInfo = (selectedIndex: number) => {
         if (selectList.length === 0) {
             setFunctionInfo(null);
+            onChange(null);
             return;
         }
 
@@ -109,6 +110,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
         const functionInfo = descriptionService.getFunctionInfo(selectList[selectedIndex].name);
         if (!functionInfo) {
             setFunctionInfo(null);
+            onChange(null);
             return;
         }
 

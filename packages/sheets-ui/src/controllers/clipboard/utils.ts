@@ -672,24 +672,26 @@ export function getClearAndSetMergeMutations(
             Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
         );
 
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: mergedCellsInRange,
-        };
-        redoMutationsInfo.push({
-            id: RemoveWorksheetMergeMutation.id,
-            params: removeMergeMutationParams,
-        });
+        if (mergedCellsInRange.length > 0) {
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges: mergedCellsInRange,
+            };
+            redoMutationsInfo.push({
+                id: RemoveWorksheetMergeMutation.id,
+                params: removeMergeMutationParams,
+            });
 
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
-            removeMergeMutationParams
-        );
-        undoMutationsInfo.push({
-            id: AddWorksheetMergeMutation.id,
-            params: undoRemoveMergeMutationParams,
-        });
+            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                accessor,
+                removeMergeMutationParams
+            );
+            undoMutationsInfo.push({
+                id: AddWorksheetMergeMutation.id,
+                params: undoRemoveMergeMutationParams,
+            });
+        }
     }
 
     if (mergeRangeData.length > 0) {

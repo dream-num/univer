@@ -495,11 +495,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         // convert matrix to html
-        let html = this._usmToHtml.convert(matrix, discreteRange, hooks);
-
-        const plain = getMatrixPlainText(plainMatrix);
         const copyId = genId();
-        html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
+        const html = this._usmToHtml.convert(matrix, discreteRange, hooks, copyId);
+        const plain = getMatrixPlainText(plainMatrix);
 
         return {
             copyId,

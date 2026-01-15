@@ -930,6 +930,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const rowManager = worksheet.getRowManager();
+        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+
         const { rows, cols } = pastedRange;
         const pasteRangeStartRow = rows[0];
         const pasteRangeEndRow = rows[rows.length - 1];
@@ -948,7 +950,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                         startColumn: pasteRangeStartColumn,
                         endColumn: pasteRangeEndColumn,
                     },
-                ]);
+                ]).filter((info) => info.autoHeight !== defaultRowHeight);
                 needAutoHeight.push(...autoHeight);
             }
         }

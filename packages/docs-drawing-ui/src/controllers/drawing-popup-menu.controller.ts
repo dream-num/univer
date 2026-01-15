@@ -163,8 +163,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disposePopups.length = 0;
                 this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
                 this._drawingManagerService.focusDrawing(null);
-            }
-            )
+            })
         );
         this.disposeWithMe(
             transformer.changing$.subscribe(() => {

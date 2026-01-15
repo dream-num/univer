@@ -172,14 +172,17 @@ export class EditingRenderController extends Disposable {
 
     private _initEditorVisibilityListener(): void {
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe(async (unit) => {
-            if (this._editingUnit && unit?.getUnitId() !== this._editingUnit && !this._editorBridgeService.isForceKeepVisible()) {
+            if (this._editingUnit && !this._editorBridgeService.isForceKeepVisible() && (!unit || unit.getUnitId() !== this._editingUnit)) {
                 this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode: KeyCode.ESC,
                     unitId: this._editingUnit,
                 });
-                const editorBridgeRenderController = this._renderManagerService.getRenderById(unit!.getUnitId())?.with(EditorBridgeRenderController);
+
+                if (!unit) return;
+
+                const editorBridgeRenderController = this._renderManagerService.getRenderById(unit.getUnitId())?.with(EditorBridgeRenderController);
                 if (editorBridgeRenderController) {
                     editorBridgeRenderController.refreshEditorPosition();
                 }

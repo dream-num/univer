@@ -48,7 +48,7 @@ export interface IRichTextEditorProps {
     defaultHeight?: number;
     icon?: ReactNode;
     editorRef?: RefObject<Editor | null> | ((editor: Editor | null) => void);
-    noStyle?: boolean
+    noStyle?: boolean;
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -70,7 +70,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         icon,
         editorRef,
         placeholder,
-        noStyle
+        noStyle,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -142,10 +142,14 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
                 className={clsx(
                     {
                         'univer-border-primary-500': isFocusing && !noStyle,
-                        [`univer-relative univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2 univer-pt-1.5`]: !noStyle,
-                        'univer-w-full univer-h-full': noStyle,
-                        [borderClassName]: !noStyle
-                    },
+                        [`
+                          univer-relative univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
+                          univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2
+                          univer-pt-1.5
+                        `]: !noStyle,
+                        'univer-h-full univer-w-full': noStyle,
+                        [borderClassName]: !noStyle,
+                    }
                 )}
                 style={{ height }}
                 ref={sheetEmbeddingRef}

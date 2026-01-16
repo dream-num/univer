@@ -21,7 +21,6 @@ import {
     composeStyles,
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
-    FOCUSING_COMMON_DRAWINGS,
     FOCUSING_SHAPE_TEXT_EDITOR,
     FOCUSING_SHEET,
     FontItalic,

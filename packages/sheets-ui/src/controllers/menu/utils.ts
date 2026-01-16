@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DocumentDataModel, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IAccessor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/docs-ui';
 

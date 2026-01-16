@@ -70,7 +70,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
         const unitId = documentDataModel.getUnitId();
         if (isInternalEditorID(unitId)) {
-            return
+            return;
         }
         if (this._renderManagerService.has(unitId) && !this._initImagePopupMenu.has(unitId)) {
             this._popupMenuListener(unitId);

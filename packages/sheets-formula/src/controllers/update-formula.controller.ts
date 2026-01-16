@@ -158,7 +158,7 @@ export class UpdateFormulaController extends Disposable {
             {
                 unitId,
                 subUnitId: sheetId,
-                cellValue: formulaDataToCellData(newSheetFormulaData),
+                cellValue: formulaDataToCellData(newSheetFormulaData, cellValue),
             },
             {
                 onlyLocal: true,

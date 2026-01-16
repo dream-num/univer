@@ -756,9 +756,9 @@ describe('Test update formula ', () => {
             expect(values1).toStrictEqual([[{ f: '=A3' }]]);
             const values2 = getValues(1, 1, 3, 1, sheetId);
             expect(values2).toStrictEqual([
-                [{ f: '=A2', si: 'W8Hdfc' }],
+                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
                 [null],
-                [{ si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc', t: 2, v: 4 }],
             ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -766,9 +766,9 @@ describe('Test update formula ', () => {
             expect(valuesUndo1).toStrictEqual([[null]]);
             const valuesUndo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesUndo2).toStrictEqual([
-                [{ f: '=A2', si: 'W8Hdfc' }],
+                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
                 [{ si: 'W8Hdfc' }],
-                [{ si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc', t: 2, v: 4 }],
             ]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -776,9 +776,9 @@ describe('Test update formula ', () => {
             expect(valuesRedo1).toStrictEqual([[{ f: '=A3' }]]);
             const valuesRedo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesRedo2).toStrictEqual([
-                [{ f: '=A2', si: 'W8Hdfc' }],
+                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
                 [null],
-                [{ si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc', t: 2, v: 4 }],
             ]);
         });
 

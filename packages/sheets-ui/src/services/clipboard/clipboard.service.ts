@@ -495,11 +495,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         // convert matrix to html
-        let html = this._usmToHtml.convert(matrix, discreteRange, hooks);
-
-        const plain = getMatrixPlainText(plainMatrix);
         const copyId = genId();
-        html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
+        const html = this._usmToHtml.convert(matrix, discreteRange, hooks, copyId);
+        const plain = getMatrixPlainText(plainMatrix);
 
         return {
             copyId,
@@ -932,6 +930,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const rowManager = worksheet.getRowManager();
+        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+
         const { rows, cols } = pastedRange;
         const pasteRangeStartRow = rows[0];
         const pasteRangeEndRow = rows[rows.length - 1];
@@ -950,7 +950,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                         startColumn: pasteRangeStartColumn,
                         endColumn: pasteRangeEndColumn,
                     },
-                ]);
+                ]).filter((info) => info.autoHeight !== defaultRowHeight);
                 needAutoHeight.push(...autoHeight);
             }
         }

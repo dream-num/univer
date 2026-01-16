@@ -15,14 +15,14 @@
  */
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
-import type { ISearchItem } from '@univerjs/sheets-formula';
+import type { ISearchItem, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
-import { LocaleService } from '@univerjs/core';
+import { IConfigService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkIcon } from '@univerjs/icons';
-import { IDescriptionService } from '@univerjs/sheets-formula';
+import { IDescriptionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
@@ -30,10 +30,13 @@ import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
 
 export interface ISelectFunctionProps {
-    onChange: (functionInfo: IFunctionInfo) => void;
+    onChange: (functionInfo: IFunctionInfo | null) => void;
 }
 
 export function SelectFunction(props: ISelectFunctionProps) {
+    const configService = useDependency(IConfigService);
+    const customFunction = configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.function;
+
     const { onChange } = props;
 
     const allTypeValue = '-1';
@@ -48,7 +51,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
 
-    const options = getFunctionTypeValues(FunctionType, localeService);
+    const options = getFunctionTypeValues(FunctionType, localeService, Boolean(customFunction));
     options.unshift({
         label: localeService.t('formula.moreFunctions.allFunctions'),
         value: allTypeValue,
@@ -99,6 +102,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const setCurrentFunctionInfo = (selectedIndex: number) => {
         if (selectList.length === 0) {
             setFunctionInfo(null);
+            onChange(null);
             return;
         }
 
@@ -106,6 +110,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
         const functionInfo = descriptionService.getFunctionInfo(selectList[selectedIndex].name);
         if (!functionInfo) {
             setFunctionInfo(null);
+            onChange(null);
             return;
         }
 

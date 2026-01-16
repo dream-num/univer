@@ -68,6 +68,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     expandingControlMode: ExpandingControl = ExpandingControl.BOTTOM_RIGHT;
 
+    private _anchorCellForExpanding: Nullable<ICellWithCoord> = null;
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) injector: Injector,
@@ -145,7 +147,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._initSpreadsheetEvent(sheetObject);
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
+            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
@@ -159,7 +161,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         );
 
         this.disposeWithMe(
-            spreadsheetColumnHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
+            spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
@@ -174,7 +176,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // in mobile version, create a selection when pointerup.
         // do not use onPointerDown$, pointerDown would close popup
         // see packages/ui/src/views/components/context-menu/ContextMenu.tsx
-        this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent, state: EventState) => {
+        this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((_evt: IPointerEvent | IMouseEvent, state: EventState) => {
             if (this._normalSelectionDisabled()) return;
 
             this._reset(); // remove all other selections
@@ -494,7 +496,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         if (!activeSelectionControl) return;
 
-        this._changeCurrCellWhenControlPointerDown();
+        const anchorCell = this._changeCurrCellWhenControlPointerDown();
+        this._anchorCellForExpanding = anchorCell;
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
@@ -626,14 +629,27 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
 
         const currCellRange = activeSelectionControl.model.currentCell;
-        const startRowOfActiveCell = currCellRange?.mergeInfo.startRow ?? -1;
-        const endRowOfActiveCell = currCellRange?.mergeInfo.endRow ?? -1;
-        const startColumnOfActiveCell = currCellRange?.mergeInfo.startColumn ?? -1;
-        const endColOfActiveCell = currCellRange?.mergeInfo.endColumn ?? -1;
+
+        const anchorCell = this._anchorCellForExpanding ?? activeSelectionControl.model.currentCell;
+
+        const startRowOfActiveCell = anchorCell?.mergeInfo?.startRow ?? anchorCell?.actualRow ?? -1;
+        const endRowOfActiveCell = anchorCell?.mergeInfo?.endRow ?? anchorCell?.actualRow ?? -1;
+        const startColumnOfActiveCell = anchorCell?.mergeInfo?.startColumn ?? anchorCell?.actualColumn ?? -1;
+        const endColOfActiveCell = anchorCell?.mergeInfo?.endColumn ?? anchorCell?.actualColumn ?? -1;
+
+        let startRow = Math.min(cursorCellRange.startRow, startRowOfActiveCell);
+        if (startRowOfActiveCell === -1) {
+            startRow = cursorCellRange.startRow;
+        }
+
+        let startColumn = Math.min(cursorCellRange.startColumn, startColumnOfActiveCell);
+        if (startColumnOfActiveCell === -1) {
+            startColumn = cursorCellRange.startColumn;
+        }
 
         let newSelectionRange: IRange = {
-            startRow: Math.min(cursorCellRange.startRow, startRowOfActiveCell),
-            startColumn: Math.min(cursorCellRange.startColumn, startColumnOfActiveCell),
+            startRow,
+            startColumn,
             endRow: Math.max(cursorCellRange.endRow, endRowOfActiveCell),
             endColumn: Math.max(cursorCellRange.endColumn, endColOfActiveCell),
         };

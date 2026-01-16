@@ -21,6 +21,8 @@ import {
     composeStyles,
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
+    FOCUSING_COMMON_DRAWINGS,
+    FOCUSING_SHAPE_TEXT_EDITOR,
     FOCUSING_SHEET,
     FontItalic,
     FontWeight,
@@ -173,7 +175,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
                     if (textRun == null) {
@@ -242,7 +244,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
                     if (textRun == null) return;
@@ -295,7 +297,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
                     if (textRun == null) return;
@@ -358,7 +360,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
 
@@ -443,6 +445,18 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     updateSheet();
+                }
+
+                if (
+                    (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
+                    accessor.get(IContextService).getContextValue(EDITOR_ACTIVATED) &&
+                    (accessor.get(IContextService).getContextValue(FOCUSING_SHEET) || accessor.get(IContextService).getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
+                ) {
+                    const textRun = getFontStyleAtCursor(accessor);
+                    if (textRun != null) {
+                        const ff = (textRun.ts?.ff ?? defaultValue);
+                        subscriber.next(ff);
+                    }
                 }
             });
 

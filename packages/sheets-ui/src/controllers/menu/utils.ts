@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService } from '@univerjs/core';
+import { DocumentDataModel, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IAccessor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
 
 export function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
+    const editorService = accessor.get(IEditorService);
 
-    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    const editorUnitId = editorService.getFocusId() ?? DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
     const activeTextRange = textSelectionService.getActiveTextRange();
 
     if (editorDataModel == null || activeTextRange == null) return null;

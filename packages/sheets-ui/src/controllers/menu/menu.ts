@@ -21,6 +21,7 @@ import {
     composeStyles,
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
+    FOCUSING_COMMON_DRAWINGS,
     FOCUSING_SHAPE_TEXT_EDITOR,
     FOCUSING_SHEET,
     FontItalic,
@@ -79,7 +80,7 @@ import {
     IClipboardInterfaceService,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatestWith, map, Observable } from 'rxjs';
+import { combineLatest, combineLatestWith, map, Observable, startWith } from 'rxjs';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -730,7 +731,10 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],

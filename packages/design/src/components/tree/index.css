@@ -79,3 +79,7 @@
     justify-content: center;
     @apply univer-text-base;
 }
+
+.univer-wrap-anywhere {
+    overflow-wrap: anywhere;
+}

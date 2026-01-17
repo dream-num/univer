@@ -518,6 +518,12 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             cellStartY: number;
         } | null = null;
 
+        // Store the initial scroll position when pinch starts
+        // This is more reliable than cell-based calculation for maintaining position
+        let pinchStartScrollPos: { x: number; y: number } | null = null;
+        // Store the sheet position at pinch center (in unscaled sheet coordinates)
+        let pinchSheetPos: { x: number; y: number } | null = null;
+
         // Create zoom indicator overlay
         const zoomIndicator = this._createZoomIndicator(canvasElement);
 
@@ -603,7 +609,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
          * Apply zoom and adjust scroll to keep pinch center in place
          */
         const applyZoomWithFocus = (newZoomRatio: number, oldZoomRatio: number) => {
-            if (!pinchCenterCellInfo || !viewportMain) return;
+            if (!viewportMain) return;
 
             const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (!skeleton) return;
@@ -614,34 +620,42 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             const currentViewportScrollX = viewportMain.viewportScrollX || 0;
             const currentViewportScrollY = viewportMain.viewportScrollY || 0;
 
-            // The position in sheet coordinates where the pinch center was
-            const pinchSheetX = pinchCenterCellInfo.cellStartX + pinchCenterCellInfo.columnOffset;
-            const pinchSheetY = pinchCenterCellInfo.cellStartY + pinchCenterCellInfo.rowOffset;
-
             // The position of pinch center in canvas coordinates (relative to content area)
             const pinchCanvasX = pinchCenter.x - rowHeaderWidthAndMarginLeft;
             const pinchCanvasY = pinchCenter.y - columnHeaderHeightAndMarginTop;
 
-            // Calculate new scroll position to keep the pinch point stationary
-            // At old zoom: canvasPos = (sheetPos - scrollPos) * oldZoom
-            // At new zoom: canvasPos = (sheetPos - newScrollPos) * newZoom
-            // Solving for newScrollPos: newScrollPos = sheetPos - canvasPos / newZoom
-            let newViewportScrollX = pinchSheetX - pinchCanvasX / newZoomRatio;
-            let newViewportScrollY = pinchSheetY - pinchCanvasY / newZoomRatio;
+            let newViewportScrollX: number;
+            let newViewportScrollY: number;
 
-            // Handle zoom out when scroll is at origin - zoom from top-left corner
-            if (newZoomRatio < oldZoomRatio) {
-                if (currentViewportScrollX <= 0 && newViewportScrollX < 0) {
-                    newViewportScrollX = 0;
-                }
-                if (currentViewportScrollY <= 0 && newViewportScrollY < 0) {
-                    newViewportScrollY = 0;
-                }
+            // Use pinchSheetPos (stored at pinch start) for more stable calculation
+            if (pinchSheetPos) {
+                // Calculate new scroll position to keep the pinch point stationary
+                // The pinchSheetPos is the fixed point in sheet coordinates that should stay under the finger
+                // At any zoom: canvasPos = (sheetPos - scrollPos) * zoom
+                // Solving for scrollPos: scrollPos = sheetPos - canvasPos / zoom
+                newViewportScrollX = pinchSheetPos.x - pinchCanvasX / newZoomRatio;
+                newViewportScrollY = pinchSheetPos.y - pinchCanvasY / newZoomRatio;
+            } else if (pinchCenterCellInfo) {
+                // Fallback to cell-based calculation
+                const pinchSheetX = pinchCenterCellInfo.cellStartX + pinchCenterCellInfo.columnOffset;
+                const pinchSheetY = pinchCenterCellInfo.cellStartY + pinchCenterCellInfo.rowOffset;
+                newViewportScrollX = pinchSheetX - pinchCanvasX / newZoomRatio;
+                newViewportScrollY = pinchSheetY - pinchCanvasY / newZoomRatio;
+            } else {
+                // No reference point available, maintain current position ratio
+                const zoomChange = newZoomRatio / oldZoomRatio;
+                newViewportScrollX = currentViewportScrollX / zoomChange;
+                newViewportScrollY = currentViewportScrollY / zoomChange;
             }
 
-            // Clamp to valid scroll range
-            newViewportScrollX = Math.max(0, newViewportScrollX);
-            newViewportScrollY = Math.max(0, newViewportScrollY);
+            // Only clamp negative values - don't force to 0 unnecessarily
+            // This prevents the "snapping to origin" issue
+            if (newViewportScrollX < 0) {
+                newViewportScrollX = 0;
+            }
+            if (newViewportScrollY < 0) {
+                newViewportScrollY = 0;
+            }
 
             // Apply zoom first
             const workbook = this._context.unit;
@@ -702,6 +716,27 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
                 // Store the cell info at pinch center
                 pinchCenterCellInfo = getCellInfoAtPoint(pinchCenter.x, pinchCenter.y, initialZoomRatio);
+
+                // Store initial scroll position and calculate sheet position at pinch center
+                // This is crucial for maintaining correct position during zoom
+                if (viewportMain) {
+                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+                    if (skeleton) {
+                        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
+                        pinchStartScrollPos = {
+                            x: viewportMain.viewportScrollX || 0,
+                            y: viewportMain.viewportScrollY || 0,
+                        };
+                        // Calculate the sheet position at pinch center
+                        // This is the fixed point that should stay under the finger during zoom
+                        const pinchCanvasX = pinchCenter.x - rowHeaderWidthAndMarginLeft;
+                        const pinchCanvasY = pinchCenter.y - columnHeaderHeightAndMarginTop;
+                        pinchSheetPos = {
+                            x: pinchStartScrollPos.x + pinchCanvasX / initialZoomRatio,
+                            y: pinchStartScrollPos.y + pinchCanvasY / initialZoomRatio,
+                        };
+                    }
+                }
 
                 // Show zoom indicator
                 this._showZoomIndicator(zoomIndicator, Math.round(initialZoomRatio * 100));
@@ -848,6 +883,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 if (e.touches.length < 2) {
                     _pinchZooming = false;
                     pinchCenterCellInfo = null;
+                    pinchStartScrollPos = null;
+                    pinchSheetPos = null;
                     // Ensure inertia is fully cancelled after zoom
                     cancelInertiaAnimation();
                     velocityHistory.length = 0;
@@ -903,12 +940,16 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             if (_pinchZooming) {
                 _pinchZooming = false;
                 pinchCenterCellInfo = null;
+                pinchStartScrollPos = null;
+                pinchSheetPos = null;
                 this._hideZoomIndicator(zoomIndicator);
             }
             if (_touchScrolling) {
                 _touchScrolling = false;
                 velocityHistory.length = 0;
             }
+            // Always cancel inertia on touch cancel
+            cancelInertiaAnimation();
         };
 
         // Add native touch event listeners with passive: false to allow preventDefault

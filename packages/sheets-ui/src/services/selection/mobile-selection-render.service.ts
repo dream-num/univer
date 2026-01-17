@@ -41,7 +41,8 @@ import {
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, startWith } from 'rxjs';
+import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
@@ -67,6 +68,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     protected override _selectionControls: MobileSelectionControl[] = []; // sheetID:Controls
 
     expandingControlMode: ExpandingControl = ExpandingControl.BOTTOM_RIGHT;
+
+    private _anchorCellForExpanding: Nullable<ICellWithCoord> = null;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -104,6 +107,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     }
 
     private _initSkeletonChangeListener() {
+        // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
+        // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 this._logService.error('[SelectionRenderService]: should not receive null!');
@@ -114,29 +119,40 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
-            // If there is no initial selection, add one by default in the top left corner.
-            const firstSelection = this._workbookSelections.getCurrentLastSelection();
-            if (!firstSelection) {
+            // Only handle selection when sheet is actually changed
+            if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                // Get current selections for this sheet from model
+                const selections = this._workbookSelections.getCurrentSelections();
+                // If there are existing selections for this sheet, use them; otherwise use default A1
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId,
                     subUnitId: sheetId,
-                    selections: [getTopLeftSelectionOfCurrSheet(skeleton)],
+                    selections: selections.length !== 0 ? selections : [getTopLeftSelectionOfCurrSheet(skeleton)],
                 } as ISetSelectionsOperationParams);
+            }
+
+            // For col width & row height resize, update selection rendering
+            const currentSelections = this._workbookSelections.getCurrentSelections();
+            if (currentSelections != null) {
+                this.resetSelectionsByModelData(currentSelections);
             }
         }));
     }
 
     private _initSelectionChangeListener() {
-        // When selection completes, we need to update the selections' rendering and clear event handlers.
-        // only ref selection need this. now mobile only has normal selection.
-        // this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((ISelectionWithStyleList) => {
-        //     this._reset();
-        //     for (const selectionWithStyle of ISelectionWithStyleList) {
-        //         this._addSelectionControlByModelData(selectionWithStyle);
-        //     }
-        // }));
+        // When selection model changes (e.g. switching sheets, keyboard navigation),
+        // we need to update the selections' rendering.
+        this.disposeWithMe(merge(
+            this._workbookSelections.selectionMoveEnd$,
+            this._workbookSelections.selectionSet$
+        ).subscribe((selectionWithStyleList) => {
+            if (selectionWithStyleList) {
+                this.resetSelectionsByModelData(selectionWithStyleList);
+            }
+        }));
     }
 
     private _initEventListeners(sheetObject: ISheetObjectParam): void {
@@ -145,7 +161,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._initSpreadsheetEvent(sheetObject);
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
+            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
@@ -159,7 +175,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         );
 
         this.disposeWithMe(
-            spreadsheetColumnHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
+            spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 if (this._normalSelectionDisabled()) return;
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
@@ -174,7 +190,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // in mobile version, create a selection when pointerup.
         // do not use onPointerDown$, pointerDown would close popup
         // see packages/ui/src/views/components/context-menu/ContextMenu.tsx
-        this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent, state: EventState) => {
+        this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((_evt: IPointerEvent | IMouseEvent, state: EventState) => {
             if (this._normalSelectionDisabled()) return;
 
             this._reset(); // remove all other selections
@@ -202,6 +218,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         };
 
         const createNewSelection = (evt: IPointerEvent | IMouseEvent, showContextMenu: boolean) => {
+            // Don't create selection during pinch zoom
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
+
             // TODO @lumixraku
             this.createNewSelection(
                 evt,
@@ -224,6 +243,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             }
         });
         const spreadsheetPointerDownSub = spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            // Don't start long press timer during pinch zoom
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
+
             pointerDownPos.x = evt.offsetX;
             pointerDownPos.y = evt.offsetY;
             longPressTimer = setTimeout(() => {
@@ -234,6 +256,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         });
         const spreadsheetPointerUpSub = spreadsheet?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._normalSelectionDisabled()) return;
+            // Don't create selection during pinch zoom
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
 
             clearTimeout(longPressTimer);
             const edge = 10;
@@ -426,6 +450,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         control.fillControlTopLeft!.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._expandingSelection = true;
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, true);
             this.expandingControlMode = expandingModeForTopLeft;
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             this._fillControlPointerDownHandler(
@@ -436,6 +461,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         });
         control.fillControlBottomRight!.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._expandingSelection = true;
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, true);
             this.expandingControlMode = expandingModeForBottomRight;
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             this._fillControlPointerDownHandler(
@@ -494,15 +520,13 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         if (!activeSelectionControl) return;
 
-        this._changeCurrCellWhenControlPointerDown();
+        const anchorCell = this._changeCurrCellWhenControlPointerDown();
+        this._anchorCellForExpanding = anchorCell;
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
         this._clearUpdatingListeners();
         this._addEndingListeners();
-
-        this._scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
-        this._scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);
 
         scene.getTransformer()?.clearSelectedObjects();
 
@@ -517,6 +541,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
             this.endSelection();
             this._expandingSelection = false;
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, false);
             this.expandingControlMode = ExpandingControl.BOTTOM_RIGHT;
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
@@ -574,6 +599,47 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     }
 
     /**
+     * Override base class method to add pinch zoom check.
+     * When pinch zooming, we should not process pointer move events for selection.
+     */
+    protected override _setupPointerMoveListener(
+        viewportMain: Nullable<Viewport>,
+        activeSelectionControl: MobileSelectionControl,
+        rangeType: RANGE_TYPE,
+        scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
+        moveStartPosX: number,
+        moveStartPosY: number
+    ): void {
+        this._scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
+        this._scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);
+
+        const scene = this._scene;
+
+        // #region onPointerMove$
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            // Skip processing if pinch zooming is in progress
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) {
+                return;
+            }
+
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+
+            this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
+
+            const scrollOffsetX = newMoveOffsetX;
+            const scrollOffsetY = newMoveOffsetY;
+
+            // Auto scrolling - simplified for mobile (no freeze handling like PC version)
+            this._scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
+                this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
+            });
+        });
+        // #endregion
+    }
+
+    /**
      * Not same as _moving in PC (base selection render service)
      * The diff is
      * In base version, new selection is determined by the cursor cell and _startRangeWhenPointerDown
@@ -626,14 +692,27 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
 
         const currCellRange = activeSelectionControl.model.currentCell;
-        const startRowOfActiveCell = currCellRange?.mergeInfo.startRow ?? -1;
-        const endRowOfActiveCell = currCellRange?.mergeInfo.endRow ?? -1;
-        const startColumnOfActiveCell = currCellRange?.mergeInfo.startColumn ?? -1;
-        const endColOfActiveCell = currCellRange?.mergeInfo.endColumn ?? -1;
+
+        const anchorCell = this._anchorCellForExpanding ?? activeSelectionControl.model.currentCell;
+
+        const startRowOfActiveCell = anchorCell?.mergeInfo?.startRow ?? anchorCell?.actualRow ?? -1;
+        const endRowOfActiveCell = anchorCell?.mergeInfo?.endRow ?? anchorCell?.actualRow ?? -1;
+        const startColumnOfActiveCell = anchorCell?.mergeInfo?.startColumn ?? anchorCell?.actualColumn ?? -1;
+        const endColOfActiveCell = anchorCell?.mergeInfo?.endColumn ?? anchorCell?.actualColumn ?? -1;
+
+        let startRow = Math.min(cursorCellRange.startRow, startRowOfActiveCell);
+        if (startRowOfActiveCell === -1) {
+            startRow = cursorCellRange.startRow;
+        }
+
+        let startColumn = Math.min(cursorCellRange.startColumn, startColumnOfActiveCell);
+        if (startColumnOfActiveCell === -1) {
+            startColumn = cursorCellRange.startColumn;
+        }
 
         let newSelectionRange: IRange = {
-            startRow: Math.min(cursorCellRange.startRow, startRowOfActiveCell),
-            startColumn: Math.min(cursorCellRange.startColumn, startColumnOfActiveCell),
+            startRow,
+            startColumn,
             endRow: Math.max(cursorCellRange.endRow, endRowOfActiveCell),
             endColumn: Math.max(cursorCellRange.endColumn, endColOfActiveCell),
         };

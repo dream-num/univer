@@ -116,6 +116,7 @@ export class SlideTabItem {
         return this.getTranslateXDirection();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     setEditor(callback?: (event: FocusEvent) => void): void {
         if (!this._slideTabBar.getConfig().onNameChangeCheck()) {
             return;
@@ -123,6 +124,15 @@ export class SlideTabItem {
         let compositionFlag = true;
         if (this._editMode === false) {
             const input = this._slideTabItem.querySelector('span');
+
+            const pasteAction = (e: ClipboardEvent) => {
+                e.preventDefault();
+                const text = e.clipboardData?.getData('text/plain');
+                if (text) {
+                    const savedText = text.replace(/\s/g, '');
+                    document.execCommand('insertText', false, savedText);
+                }
+            };
 
             const blurAction = (focusEvent: FocusEvent) => {
                 if (this.nameCheck()) return;
@@ -136,6 +146,7 @@ export class SlideTabItem {
                     input.removeEventListener('compositionend', compositionendAction);
                     input.removeEventListener('input', inputAction);
                     input.removeEventListener('keydown', keydownAction);
+                    input.removeEventListener('paste', pasteAction);
                 }
 
                 // Event must be removed before updateItems
@@ -152,7 +163,7 @@ export class SlideTabItem {
                 }
             };
 
-            let keydownAction = (e: KeyboardEvent) => {
+            const keydownAction = (e: KeyboardEvent) => {
                 if (!input) return;
                 e.stopPropagation();
 
@@ -161,11 +172,11 @@ export class SlideTabItem {
                 }
             };
 
-            const compositionstartAction = (e: CompositionEvent) => {
+            const compositionstartAction = () => {
                 compositionFlag = false;
             };
 
-            const compositionendAction = (e: CompositionEvent) => {
+            const compositionendAction = () => {
                 compositionFlag = true;
             };
 
@@ -191,6 +202,7 @@ export class SlideTabItem {
                 input.addEventListener('compositionend', compositionendAction);
                 input.addEventListener('input', inputAction);
                 input.addEventListener('keydown', keydownAction);
+                input.addEventListener('paste', pasteAction);
                 this._editMode = true;
                 SlideTabBar.keepSelectAll(input);
             }

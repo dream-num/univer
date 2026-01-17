@@ -25,6 +25,7 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    IContextService,
     Inject,
     IUniverInstanceService,
     RANGE_TYPE,
@@ -35,6 +36,7 @@ import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
+import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../../utils/component-tools';
@@ -52,7 +54,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
-        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -689,6 +692,36 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             state.stopPropagation();
         });
 
+        // Helper function to initialize pinch zoom state
+        const initializePinchZoom = (touch1: Touch, touch2: Touch) => {
+            _pinchZooming = true;
+            this._contextService.setContextValue(MOBILE_PINCH_ZOOMING, true);
+            initialPinchDistance = getTouchDistance(touch1, touch2);
+            initialZoomRatio = getCurrentZoomRatio();
+            pinchCenter = getPinchCenter(touch1, touch2);
+
+            // Store the cell info at pinch center
+            pinchCenterCellInfo = getCellInfoAtPoint(pinchCenter.x, pinchCenter.y, initialZoomRatio);
+
+            // Store initial scroll position and calculate sheet position at pinch center
+            if (viewportMain) {
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+                if (skeleton) {
+                    const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
+                    pinchStartScrollPos = {
+                        x: viewportMain.viewportScrollX || 0,
+                        y: viewportMain.viewportScrollY || 0,
+                    };
+                    const pinchCanvasX = pinchCenter.x - rowHeaderWidthAndMarginLeft;
+                    const pinchCanvasY = pinchCenter.y - columnHeaderHeightAndMarginTop;
+                    pinchSheetPos = {
+                        x: pinchStartScrollPos.x + pinchCanvasX / initialZoomRatio,
+                        y: pinchStartScrollPos.y + pinchCanvasY / initialZoomRatio,
+                    };
+                }
+            }
+        };
+
         // Native touch event handlers for better mobile scrolling experience
         const handleTouchStart = (e: TouchEvent) => {
             // Handle pinch-to-zoom (two fingers)
@@ -709,34 +742,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 _touchScrolling = false;
 
                 // Initialize pinch state
-                _pinchZooming = true;
-                initialPinchDistance = getTouchDistance(touch1, touch2);
-                initialZoomRatio = getCurrentZoomRatio();
-                pinchCenter = getPinchCenter(touch1, touch2);
-
-                // Store the cell info at pinch center
-                pinchCenterCellInfo = getCellInfoAtPoint(pinchCenter.x, pinchCenter.y, initialZoomRatio);
-
-                // Store initial scroll position and calculate sheet position at pinch center
-                // This is crucial for maintaining correct position during zoom
-                if (viewportMain) {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
-                    if (skeleton) {
-                        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
-                        pinchStartScrollPos = {
-                            x: viewportMain.viewportScrollX || 0,
-                            y: viewportMain.viewportScrollY || 0,
-                        };
-                        // Calculate the sheet position at pinch center
-                        // This is the fixed point that should stay under the finger during zoom
-                        const pinchCanvasX = pinchCenter.x - rowHeaderWidthAndMarginLeft;
-                        const pinchCanvasY = pinchCenter.y - columnHeaderHeightAndMarginTop;
-                        pinchSheetPos = {
-                            x: pinchStartScrollPos.x + pinchCanvasX / initialZoomRatio,
-                            y: pinchStartScrollPos.y + pinchCanvasY / initialZoomRatio,
-                        };
-                    }
-                }
+                initializePinchZoom(touch1, touch2);
 
                 // Show zoom indicator
                 this._showZoomIndicator(zoomIndicator, Math.round(initialZoomRatio * 100));
@@ -750,6 +756,9 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
             // If we were pinch zooming and now only one finger, don't start scrolling immediately
             if (_pinchZooming) return;
+
+            // Don't start scrolling if selection is being expanded (dragging fill controls)
+            if (this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) return;
 
             const touch = e.touches[0];
             const { offsetX, offsetY } = getTouchOffset(touch);
@@ -813,6 +822,9 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             if (!_touchScrolling) return;
             if (e.touches.length !== 1) return;
             if (!viewportMain) return;
+
+            // Don't process scroll if selection is being expanded
+            if (this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) return;
 
             const touch = e.touches[0];
             const { offsetX, offsetY } = getTouchOffset(touch);
@@ -882,6 +894,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             if (_pinchZooming) {
                 if (e.touches.length < 2) {
                     _pinchZooming = false;
+                    this._contextService.setContextValue(MOBILE_PINCH_ZOOMING, false);
                     pinchCenterCellInfo = null;
                     pinchStartScrollPos = null;
                     pinchSheetPos = null;
@@ -939,6 +952,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const handleTouchCancel = () => {
             if (_pinchZooming) {
                 _pinchZooming = false;
+                this._contextService.setContextValue(MOBILE_PINCH_ZOOMING, false);
                 pinchCenterCellInfo = null;
                 pinchStartScrollPos = null;
                 pinchSheetPos = null;

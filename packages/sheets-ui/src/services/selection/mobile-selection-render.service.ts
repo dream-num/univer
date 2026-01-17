@@ -42,6 +42,7 @@ import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univ
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
+import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
@@ -204,6 +205,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         };
 
         const createNewSelection = (evt: IPointerEvent | IMouseEvent, showContextMenu: boolean) => {
+            // Don't create selection during pinch zoom
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
+
             // TODO @lumixraku
             this.createNewSelection(
                 evt,
@@ -226,6 +230,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             }
         });
         const spreadsheetPointerDownSub = spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            // Don't start long press timer during pinch zoom
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
+
             pointerDownPos.x = evt.offsetX;
             pointerDownPos.y = evt.offsetY;
             longPressTimer = setTimeout(() => {
@@ -236,6 +243,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         });
         const spreadsheetPointerUpSub = spreadsheet?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._normalSelectionDisabled()) return;
+            // Don't create selection during pinch zoom
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
 
             clearTimeout(longPressTimer);
             const edge = 10;
@@ -428,6 +437,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         control.fillControlTopLeft!.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._expandingSelection = true;
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, true);
             this.expandingControlMode = expandingModeForTopLeft;
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             this._fillControlPointerDownHandler(
@@ -438,6 +448,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         });
         control.fillControlBottomRight!.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._expandingSelection = true;
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, true);
             this.expandingControlMode = expandingModeForBottomRight;
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             this._fillControlPointerDownHandler(
@@ -504,9 +515,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._clearUpdatingListeners();
         this._addEndingListeners();
 
-        this._scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
-        this._scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);
-
         scene.getTransformer()?.clearSelectedObjects();
 
         // #region pointermove
@@ -520,6 +528,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
             this.endSelection();
             this._expandingSelection = false;
+            this._contextService.setContextValue(MOBILE_EXPANDING_SELECTION, false);
             this.expandingControlMode = ExpandingControl.BOTTOM_RIGHT;
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
@@ -574,6 +583,47 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
         activeSelectionControl.updateCurrCell(currCellRange);
         return currCellRange;
+    }
+
+    /**
+     * Override base class method to add pinch zoom check.
+     * When pinch zooming, we should not process pointer move events for selection.
+     */
+    protected override _setupPointerMoveListener(
+        viewportMain: Nullable<Viewport>,
+        activeSelectionControl: MobileSelectionControl,
+        rangeType: RANGE_TYPE,
+        scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
+        moveStartPosX: number,
+        moveStartPosY: number
+    ): void {
+        this._scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
+        this._scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);
+
+        const scene = this._scene;
+
+        // #region onPointerMove$
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            // Skip processing if pinch zooming is in progress
+            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) {
+                return;
+            }
+
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+
+            this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
+
+            const scrollOffsetX = newMoveOffsetX;
+            const scrollOffsetY = newMoveOffsetY;
+
+            // Auto scrolling - simplified for mobile (no freeze handling like PC version)
+            this._scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
+                this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
+            });
+        });
+        // #endregion
     }
 
     /**

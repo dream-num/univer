@@ -361,21 +361,17 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         };
 
         /**
-         * Get zoom-adjusted physics parameters
-         * When zoomed in, we need faster deceleration and lower velocity for precise control
-         * When zoomed out, we need slower deceleration and higher velocity for faster navigation
+         * Get physics parameters for inertia scrolling
+         * These are now zoom-independent since zoom adjustment is applied at the delta level
+         * This ensures consistent scroll behavior at any zoom level
          */
         const getZoomAdjustedParams = () => {
-            // const zoomRatioOrigin = getCurrentZoomRatio();
-            const zoomRatio = 1; // Only adjust for zoom >= 100%
-            // Adjust deceleration: higher zoom = faster deceleration (more precise)
-            const decelerationRate = BASE_DECELERATION_RATE ** (1 / Math.sqrt(zoomRatio));
-            // Adjust velocity threshold based on zoom
-            const minVelocityThreshold = BASE_MIN_VELOCITY_THRESHOLD * zoomRatio;
-            // Adjust max velocity: higher zoom = lower max velocity
-            const maxVelocity = BASE_MAX_VELOCITY / Math.sqrt(zoomRatio);
-
-            return { decelerationRate, minVelocityThreshold, maxVelocity };
+            // Use base values directly - zoom adjustment is handled in touchmove delta calculation
+            return {
+                decelerationRate: BASE_DECELERATION_RATE,
+                minVelocityThreshold: BASE_MIN_VELOCITY_THRESHOLD,
+                maxVelocity: BASE_MAX_VELOCITY,
+            };
         };
 
         /**
@@ -682,6 +678,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         // Native touch event handlers for better mobile scrolling experience
         const handleTouchStart = (e: TouchEvent) => {
             // Handle pinch-to-zoom (two fingers)
+            cancelInertiaAnimation();
             if (e.touches.length === 2) {
                 const touch1 = e.touches[0];
                 const touch2 = e.touches[1];
@@ -696,7 +693,6 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
                 // Cancel any single-touch scrolling
                 _touchScrolling = false;
-                cancelInertiaAnimation();
 
                 // Initialize pinch state
                 _pinchZooming = true;
@@ -725,8 +721,6 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
             // Only start scrolling if touch is on spreadsheet area
             if (!isTouchOnSpreadsheet(offsetX, offsetY)) return;
-
-            cancelInertiaAnimation();
 
             lastTouchPos.x = offsetX;
             lastTouchPos.y = offsetY;
@@ -758,7 +752,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
                 // Calculate new zoom ratio with constraints (mobile: 25% - 200%)
                 let newZoomRatio = initialZoomRatio * scale;
-                const MOBILE_ZOOM_MIN = 0.25;
+                const MOBILE_ZOOM_MIN = 0.2;
                 const MOBILE_ZOOM_MAX = 2;
                 newZoomRatio = Math.max(MOBILE_ZOOM_MIN, Math.min(MOBILE_ZOOM_MAX, newZoomRatio));
                 // Round to one decimal place for smoother updates
@@ -792,12 +786,20 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
             if (deltaTime <= 0) return;
 
-            const deltaX = -(offsetX - lastTouchPos.x);
-            const deltaY = -(offsetY - lastTouchPos.y);
+            const rawDeltaX = -(offsetX - lastTouchPos.x);
+            const rawDeltaY = -(offsetY - lastTouchPos.y);
+
+            // Adjust delta by zoom ratio to maintain consistent scroll feel at any zoom level
+            // When zoomed in, divide by larger ratio = less scroll (less sensitive)
+            // When zoomed out, divide by smaller ratio = more scroll (more responsive)
+            const zoomRatio = getCurrentZoomRatio();
+            const deltaX = rawDeltaX / zoomRatio;
+            const deltaY = rawDeltaY / zoomRatio;
 
             // Track total displacement for flick detection and direction locking (used for inertia only)
-            swipeTotalDisplacement.x += Math.abs(deltaX);
-            swipeTotalDisplacement.y += Math.abs(deltaY);
+            // Use raw values for gesture detection to maintain consistent flick recognition
+            swipeTotalDisplacement.x += Math.abs(rawDeltaX);
+            swipeTotalDisplacement.y += Math.abs(rawDeltaY);
 
             // Direction locking logic - lock to primary axis once threshold is reached
             // Note: This only affects inertia scrolling, not the actual touchmove scroll
@@ -875,13 +877,12 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
             const { maxVelocity, minVelocityThreshold } = getZoomAdjustedParams();
 
-            // Adjust multiplier for zoom level
-            const zoomRatio = getCurrentZoomRatio();
-            const zoomAdjustedMultiplier = dynamicMultiplier / Math.sqrt(Math.max(zoomRatio, 1));
+            // Velocity is already zoom-adjusted since it's calculated from zoom-adjusted deltas
+            // No additional zoom adjustment needed here
 
             // Apply dynamic velocity multiplier and cap
-            const cappedVelX = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.x * zoomAdjustedMultiplier));
-            const cappedVelY = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.y * zoomAdjustedMultiplier));
+            const cappedVelX = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.x * dynamicMultiplier));
+            const cappedVelY = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.y * dynamicMultiplier));
 
             // Apply direction lock for inertia - only scroll in the primary direction
             // This makes inertia feel more controlled while touchmove allows free movement

@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.15.2](https://github.com/dream-num/univer/compare/v0.15.1...v0.15.2) (2026-01-17)
+
+
+### Bug Fixes
+
+* add univer-wrap-anywhere class ([#6482](https://github.com/dream-num/univer/issues/6482)) ([55a7edc](https://github.com/dream-num/univer/commit/55a7edca4421ed9bbfe8e16d29b1f67d702a42e8))
+* **copy:** fix copy id ([#6469](https://github.com/dream-num/univer/issues/6469)) ([bf75a44](https://github.com/dream-num/univer/commit/bf75a44faf68d2e0591af9d76d12d30deb950a8f))
+* **disposeUnit:** fix some issues with disposeUnit ([#6460](https://github.com/dream-num/univer/issues/6460)) ([427aeed](https://github.com/dream-num/univer/commit/427aeed80a3c3968ea6b838813bf66d9c05e526c))
+* **disposeUnit:** fix the component reported an error after disposeUnit ([#6476](https://github.com/dream-num/univer/issues/6476)) ([f4d7d03](https://github.com/dream-num/univer/commit/f4d7d03ec36f222bef1a62c84e59b61b11dd1658))
+* **formula:** fix where the formula calculation could not be recalculated after it was interrupted in certain situations ([#6465](https://github.com/dream-num/univer/issues/6465)) ([03342cf](https://github.com/dream-num/univer/commit/03342cf83fc86d335015891c967bc780cce72098))
+* **mobile:** scroll zoom and selection ([#6483](https://github.com/dream-num/univer/issues/6483)) ([6cf25a2](https://github.com/dream-num/univer/commit/6cf25a25def7b2f691338522b7aacc1094a20559))
+* **paste:** optimize copy and paste mutations ([#6472](https://github.com/dream-num/univer/issues/6472)) ([b463fef](https://github.com/dream-num/univer/commit/b463fef769b44f7a1df96c2e30c8aa84f401a3a6))
+* **sheets-ui:** enhance paste handling and cleanup event listeners for SheetBar ([#6486](https://github.com/dream-num/univer/issues/6486)) ([938a347](https://github.com/dream-num/univer/commit/938a347f2f9f6f9ac402194afac3c7e110780209))
+* **sheets:** fix the worksheet rename event will triggered even if the name unchanged ([#6459](https://github.com/dream-num/univer/issues/6459)) ([ca8866e](https://github.com/dream-num/univer/commit/ca8866eeb9d9342ee2bc22271a0a55f31cee4b3f))
+* **ui:** remove unused renderedTimeout and simplify lifecycle stage handling ([#6463](https://github.com/dream-num/univer/issues/6463)) ([9f8d8ee](https://github.com/dream-num/univer/commit/9f8d8ee63951050ae026e3dd914b019312c0b894))
+
+
+### Features
+
+* disable confirm btn if function info after use search is null ([#6477](https://github.com/dream-num/univer/issues/6477)) ([868ec82](https://github.com/dream-num/univer/commit/868ec826efac21c3effea2fe68b98748ccf93a03))
+* help func content visible UX ([#6485](https://github.com/dream-num/univer/issues/6485)) ([daa9116](https://github.com/dream-num/univer/commit/daa91165169dbdf8d958fa92931eadb658afcff5))
+* remove custom user func list if this empty ([#6475](https://github.com/dream-num/univer/issues/6475)) ([6c54f4b](https://github.com/dream-num/univer/commit/6c54f4b6f70ee359bcb1589a2a80608d624e3f5b))
+* **sheets-ui:** optimize mobile sheetbar ([#6461](https://github.com/dream-num/univer/issues/6461)) ([d30a503](https://github.com/dream-num/univer/commit/d30a503dee704dc71bec9ef658216ed2dbafbf4b))
+
+
+### Reverts
+
+* "fix(formula): fix where the formula calculation could not be recalculated after it was interrupted in certain situations ([#6454](https://github.com/dream-num/univer/issues/6454))" ([#6464](https://github.com/dream-num/univer/issues/6464)) ([fa83993](https://github.com/dream-num/univer/commit/fa83993ec7b2b8af9b2a5ac4a8b0e5a8bb610df4))
+
 ## [0.15.1](https://github.com/dream-num/univer/compare/v0.15.0...v0.15.1) (2026-01-10)
 
 

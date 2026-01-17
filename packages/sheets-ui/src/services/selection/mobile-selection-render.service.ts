@@ -41,7 +41,7 @@ import {
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
@@ -107,6 +107,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     }
 
     private _initSkeletonChangeListener() {
+        // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
+        // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 this._logService.error('[SelectionRenderService]: should not receive null!');
@@ -117,29 +119,40 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
-            // If there is no initial selection, add one by default in the top left corner.
-            const firstSelection = this._workbookSelections.getCurrentLastSelection();
-            if (!firstSelection) {
+            // Only handle selection when sheet is actually changed
+            if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                // Get current selections for this sheet from model
+                const selections = this._workbookSelections.getCurrentSelections();
+                // If there are existing selections for this sheet, use them; otherwise use default A1
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId,
                     subUnitId: sheetId,
-                    selections: [getTopLeftSelectionOfCurrSheet(skeleton)],
+                    selections: selections.length !== 0 ? selections : [getTopLeftSelectionOfCurrSheet(skeleton)],
                 } as ISetSelectionsOperationParams);
+            }
+
+            // For col width & row height resize, update selection rendering
+            const currentSelections = this._workbookSelections.getCurrentSelections();
+            if (currentSelections != null) {
+                this.resetSelectionsByModelData(currentSelections);
             }
         }));
     }
 
     private _initSelectionChangeListener() {
-        // When selection completes, we need to update the selections' rendering and clear event handlers.
-        // only ref selection need this. now mobile only has normal selection.
-        // this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((ISelectionWithStyleList) => {
-        //     this._reset();
-        //     for (const selectionWithStyle of ISelectionWithStyleList) {
-        //         this._addSelectionControlByModelData(selectionWithStyle);
-        //     }
-        // }));
+        // When selection model changes (e.g. switching sheets, keyboard navigation),
+        // we need to update the selections' rendering.
+        this.disposeWithMe(merge(
+            this._workbookSelections.selectionMoveEnd$,
+            this._workbookSelections.selectionSet$
+        ).subscribe((selectionWithStyleList) => {
+            if (selectionWithStyleList) {
+                this.resetSelectionsByModelData(selectionWithStyleList);
+            }
+        }));
     }
 
     private _initEventListeners(sheetObject: ISheetObjectParam): void {

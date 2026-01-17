@@ -342,15 +342,15 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const DIRECTION_LOCK_THRESHOLD = 8; // px - minimum movement to lock direction
 
         // iOS-like physics constants (tuned for smoother feel)
-        const BASE_DECELERATION_RATE = 0.99; // Per millisecond deceleration (lower = stops faster)
-        const BASE_MIN_VELOCITY_THRESHOLD = 0.3; // Minimum velocity to continue animation
-        const BASE_MAX_VELOCITY = 10; // Cap maximum velocity for stability
+        const BASE_DECELERATION_RATE = 0.992; // Per millisecond deceleration (lower = stops faster)
+        const BASE_MIN_VELOCITY_THRESHOLD = 0.22; // Minimum velocity to continue animation
+        const BASE_MAX_VELOCITY = 12; // Cap maximum velocity for stability
 
         // Flick detection thresholds
-        const FLICK_TIME_THRESHOLD = 300; // ms - swipes faster than this are considered "flicks"
+        const FLICK_TIME_THRESHOLD = 240; // ms - swipes faster than this are considered "flicks"
         const FLICK_DISTANCE_THRESHOLD = 30; // px - minimum distance to be considered a flick
-        const MIN_VELOCITY_MULTIPLIER = 0.08; // For slow drags
-        const MAX_VELOCITY_MULTIPLIER = 0.25; // For quick flicks
+        const MIN_VELOCITY_MULTIPLIER = 0.05; // For slow drags
+        const MAX_VELOCITY_MULTIPLIER = 0.26; // For quick flicks
 
         /**
          * Get current zoom ratio for adjusting physics parameters
@@ -366,8 +366,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
          * When zoomed out, we need slower deceleration and higher velocity for faster navigation
          */
         const getZoomAdjustedParams = () => {
-            const zoomRatioOrigin = getCurrentZoomRatio();
-            const zoomRatio = Math.max(zoomRatioOrigin, 1); // Only adjust for zoom >= 100%
+            // const zoomRatioOrigin = getCurrentZoomRatio();
+            const zoomRatio = 1; // Only adjust for zoom >= 100%
             // Adjust deceleration: higher zoom = faster deceleration (more precise)
             const decelerationRate = BASE_DECELERATION_RATE ** (1 / Math.sqrt(zoomRatio));
             // Adjust velocity threshold based on zoom
@@ -792,33 +792,28 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
             if (deltaTime <= 0) return;
 
-            let deltaX = -(offsetX - lastTouchPos.x);
-            let deltaY = -(offsetY - lastTouchPos.y);
+            const deltaX = -(offsetX - lastTouchPos.x);
+            const deltaY = -(offsetY - lastTouchPos.y);
 
-            // Track total displacement for flick detection
+            // Track total displacement for flick detection and direction locking (used for inertia only)
             swipeTotalDisplacement.x += Math.abs(deltaX);
             swipeTotalDisplacement.y += Math.abs(deltaY);
 
             // Direction locking logic - lock to primary axis once threshold is reached
+            // Note: This only affects inertia scrolling, not the actual touchmove scroll
             if (lockedDirection === null) {
                 const totalX = swipeTotalDisplacement.x;
                 const totalY = swipeTotalDisplacement.y;
                 if (totalX > DIRECTION_LOCK_THRESHOLD || totalY > DIRECTION_LOCK_THRESHOLD) {
-                    // Lock to the axis with more displacement
+                    // Lock to the axis with more displacement (for inertia only)
                     lockedDirection = totalX > totalY ? 'x' : 'y';
                 }
             }
 
-            // Apply direction lock - only scroll in locked direction
-            if (lockedDirection === 'x') {
-                deltaY = 0;
-            } else if (lockedDirection === 'y') {
-                deltaX = 0;
-            }
-
             // Calculate instantaneous velocity (pixels per millisecond)
-            const instantVelX = lockedDirection === 'y' ? 0 : deltaX / deltaTime * 16;
-            const instantVelY = lockedDirection === 'x' ? 0 : deltaY / deltaTime * 16;
+            // Track both directions for velocity history
+            const instantVelX = deltaX / deltaTime * 16;
+            const instantVelY = deltaY / deltaTime * 16;
 
             // Add to velocity history
             velocityHistory.push({
@@ -884,9 +879,14 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             const zoomRatio = getCurrentZoomRatio();
             const zoomAdjustedMultiplier = dynamicMultiplier / Math.sqrt(Math.max(zoomRatio, 1));
 
-            // Apply dynamic velocity multiplier and cap, respecting direction lock
-            velocity.x = lockedDirection === 'y' ? 0 : Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.x * zoomAdjustedMultiplier));
-            velocity.y = lockedDirection === 'x' ? 0 : Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.y * zoomAdjustedMultiplier));
+            // Apply dynamic velocity multiplier and cap
+            const cappedVelX = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.x * zoomAdjustedMultiplier));
+            const cappedVelY = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.y * zoomAdjustedMultiplier));
+
+            // Apply direction lock for inertia - only scroll in the primary direction
+            // This makes inertia feel more controlled while touchmove allows free movement
+            velocity.x = lockedDirection === 'y' ? 0 : cappedVelX;
+            velocity.y = lockedDirection === 'x' ? 0 : cappedVelY;
 
             // Only start inertia if velocity is significant
             const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);

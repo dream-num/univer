@@ -15,19 +15,19 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { ISetDrawingCommandParams } from './interfaces';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
-
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { ISetDrawingCommandParams } from './interfaces';
 import { SheetInterceptorService } from '@univerjs/sheets';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 /**
  * The command to update defined name
@@ -52,7 +52,6 @@ export const SetSheetDrawingCommand: ICommand = {
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
-
         const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params });
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
@@ -61,7 +60,7 @@ export const SetSheetDrawingCommand: ICommand = {
             { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
         ];
         const undoMutations = [
-            ... (intercepted.preUndos ?? []),
+            ...(intercepted.preUndos ?? []),
 
             { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } },
             ...intercepted.undos,

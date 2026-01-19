@@ -15,6 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -38,12 +39,13 @@ import {
     WorksheetProtectionRuleModel,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { SheetsUIPart } from '../../consts/ui-name';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
@@ -89,6 +91,8 @@ export function FormulaBar(props: IProps) {
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     const ref = useRef<HTMLDivElement>(null);
     const editorService = useDependency(IEditorService);
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const disableEdit = config?.disableEdit;
 
     useLayoutEffect(() => {
         const subscription = workbook.activeSheet$.pipe(
@@ -227,7 +231,8 @@ export function FormulaBar(props: IProps) {
     }
 
     // TODO Is there a need to disable an editor here?
-    const { viewDisable, editDisable } = disableInfo;
+    const { viewDisable, editDisable: permissionEditDisable } = disableInfo;
+    const editDisable = permissionEditDisable || !!disableEdit;
     const disabled = editDisable || imageDisable;
     const shouldSkipFocus = useRef(false);
 

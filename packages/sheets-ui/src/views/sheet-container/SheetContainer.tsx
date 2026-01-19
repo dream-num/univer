@@ -88,12 +88,13 @@ export function RenderSheetHeader() {
  * @deprecated We should not write into this component anymore.
  */
 export function RenderSheetContent() {
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const hasWorkbook = useHasWorkbook();
     if (!hasWorkbook) return null;
 
     return (
         <>
-            <EditorContainer />
+            {!config?.disableEdit && <EditorContainer />}
             <AutoFillPopupMenu />
         </>
     );

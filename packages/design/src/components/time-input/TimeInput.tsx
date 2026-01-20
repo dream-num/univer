@@ -30,7 +30,11 @@ export function TimeInput(props: ITimeInputProps) {
     const { className, value, onValueChange } = props;
 
     function handleChangeTime(event: ChangeEvent<HTMLInputElement>) {
-        const newValue = dayjs(event.target.value, 'HH:mm:ss').toDate();
+        const timeString = event.target.value;
+        const [hours, minutes, seconds] = timeString.split(':').map(Number);
+        const newValue = new Date(value ?? Date.now());
+        newValue.setHours(hours, minutes, seconds, 0);
+
         onValueChange?.(newValue);
     };
 

@@ -80,8 +80,8 @@ export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams 
 export { DeleteWorksheetProtectionCommand } from './commands/commands/delete-worksheet-protection.command';
 export { DeleteWorksheetRangeThemeStyleCommand } from './commands/commands/delete-worksheet-range-theme.command';
 export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
-export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
-export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
+export { type IInsertRangeMoveDownCommandParams, InsertRangeMoveDownCommand } from './commands/commands/insert-range-move-down.command';
+export { type IInsertRangeMoveRightCommandParams, InsertRangeMoveRightCommand } from './commands/commands/insert-range-move-right.command';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,

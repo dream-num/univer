@@ -97,7 +97,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
-    const [contentVisible, setContentVisible] = useState(true);
+    const [contentVisible, setContentVisible] = useState(false);
     const localeService = useDependency(LocaleService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');

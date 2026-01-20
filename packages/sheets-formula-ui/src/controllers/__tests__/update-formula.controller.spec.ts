@@ -16,7 +16,7 @@
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
+import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRangeMoveDownCommandParams, IInsertRangeMoveRightCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import type { ISetRowHiddenCommandParams } from '@univerjs/sheets/commands/commands/set-row-visible.command.js';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
@@ -1771,7 +1771,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move down, value on the top', async () => {
-            const params: InsertRangeMoveDownCommandParams = {
+            const params: IInsertRangeMoveDownCommandParams = {
                 range: {
                     startRow: 1,
                     startColumn: 2,
@@ -1795,7 +1795,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move down, value on the bottom', async () => {
-            const params: InsertRangeMoveDownCommandParams = {
+            const params: IInsertRangeMoveDownCommandParams = {
                 range: {
                     startRow: 4,
                     startColumn: 2,
@@ -1819,7 +1819,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move down, update reference', async () => {
-            const params: InsertRangeMoveDownCommandParams = {
+            const params: IInsertRangeMoveDownCommandParams = {
                 range: {
                     startRow: 1,
                     startColumn: 0,
@@ -1843,7 +1843,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move right, value on the left', async () => {
-            const params: InsertRangeMoveRightCommandParams = {
+            const params: IInsertRangeMoveRightCommandParams = {
                 range: {
                     startRow: 2,
                     startColumn: 1,
@@ -1867,7 +1867,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move right, value on the right', async () => {
-            const params: InsertRangeMoveRightCommandParams = {
+            const params: IInsertRangeMoveRightCommandParams = {
                 range: {
                     startRow: 5,
                     startColumn: 1,
@@ -1891,7 +1891,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move right, update reference', async () => {
-            const params: InsertRangeMoveRightCommandParams = {
+            const params: IInsertRangeMoveRightCommandParams = {
                 range: {
                     startRow: 0,
                     startColumn: 1,

@@ -36,7 +36,7 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { Direction, IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { Direction, IUniverInstanceService, mergeIntervals, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -961,21 +961,46 @@ export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, 
 
 export const handleRemoveRowCommon = (param: IRemoveRowColCommandInterceptParams, targetRange: IRange) => {
     const ranges = param.ranges ?? [param.range];
-    const matrix = new ObjectMatrix();
+    const removed: [number, number][] = ranges.map((range) => [range.startRow, range.endRow]);
+    const mergedRemoved = mergeIntervals(removed);
 
-    Range.foreach(targetRange, (row, col) => {
-        matrix.setValue(row, col, 1);
-    });
+    let targetStartRow = targetRange.startRow;
+    let targetEndRow = targetRange.endRow;
 
-    ranges.forEach((range) => {
-        const startRow = range.startRow;
-        const endRow = range.endRow;
-        const count = endRow - startRow + 1;
-        matrix.removeRows(startRow, count);
-    });
+    for (let i = mergedRemoved.length - 1; i >= 0; i--) {
+        const [startRow, endRow] = mergedRemoved[i];
 
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (value) => value === 1);
+        if (startRow <= targetRange.startRow && endRow >= targetRange.endRow) {
+            return [];
+        }
+
+        if (endRow < targetStartRow) {
+            const count = endRow - startRow + 1;
+            targetStartRow -= count;
+            targetEndRow -= count;
+        } else if (startRow > targetEndRow) {
+            // do nothing
+        } else {
+            const intersectStart = Math.max(startRow, targetStartRow);
+            const intersectEnd = Math.min(endRow, targetEndRow);
+            const intersectCount = intersectEnd - intersectStart + 1;
+
+            targetEndRow -= intersectCount;
+
+            if (startRow <= targetStartRow) {
+                const beforeCount = intersectStart - targetStartRow;
+                targetStartRow -= beforeCount;
+            }
+        }
+    }
+
+    return [
+        {
+            ...targetRange,
+            startRow: targetStartRow,
+            endRow: targetEndRow,
+        },
+    ];
 };
 
 export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams>, targetRange: IRange) => {

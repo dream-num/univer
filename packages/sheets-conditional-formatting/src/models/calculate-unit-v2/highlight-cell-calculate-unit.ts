@@ -22,7 +22,7 @@ import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
-import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 
 ;
 
@@ -34,7 +34,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
         const ruleConfig = context.rule.rule as IHighlightCell;
-        const ranges = context.rule.ranges;
+        const ranges = filterRange(context.rule.ranges, context.worksheet.getMaxRows() - 1, context.worksheet.getMaxColumns() - 1);
         // eslint-disable-next-line max-lines-per-function, complexity
         const getCache = () => {
             switch (ruleConfig.subType) {

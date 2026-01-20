@@ -28,6 +28,7 @@ export * from './dayjs';
 export * from './doc-tool';
 export * from './generate';
 export * from './hash-algorithm';
+export * from './intervals';
 export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';

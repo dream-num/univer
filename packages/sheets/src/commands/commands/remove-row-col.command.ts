@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
     CommandType,
@@ -29,6 +28,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     sequenceExecute,
+    throttle,
 } from '@univerjs/core';
 import { getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
@@ -64,11 +64,22 @@ export interface IRemoveColByRangeCommandParams {
     subUnitId: string;
 }
 
+/**
+ * Set selection after remove row/col through throttle to avoid frequent set selection operation
+ */
+const setSelection = throttle((range: IRange, workbook: Workbook, worksheet: Worksheet, commandService: ICommandService) => {
+    if (!commandService.disposed) {
+        const command = followSelectionOperation(range, workbook, worksheet);
+        commandService.executeCommand(command.id, command.params);
+    };
+}, 300);
+
 export const RemoveRowCommandId = 'sheet.command.remove-row';
 
 export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row-by-range',
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -125,12 +136,13 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                 ...(intercepted.preRedos ?? []),
                 ...redoMutations,
                 ...intercepted.redos,
-                followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
         );
 
         if (result.result) {
+            setSelection(range, workbook, worksheet, commandService);
+
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveRowCommandId,
                 params: { range } as IRemoveRowColCommandParams,
@@ -245,12 +257,13 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
                 ...(intercepted.preRedos ?? []),
                 { id: RemoveColMutation.id, params: removeColParams },
                 ...intercepted.redos,
-                followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
         );
 
         if (result.result) {
+            setSelection(range, workbook, worksheet, commandService);
+
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveColCommandId,
                 params: { range } as IRemoveRowColCommandParams,

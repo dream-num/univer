@@ -70,7 +70,9 @@ univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
-    univer.registerPlugin(UniverDebuggerPlugin);
+    univer.registerPlugin(UniverDebuggerPlugin, {
+        fab: false,
+    });
 } else {
     univer.registerPlugin(UniverDebuggerPlugin, {
         fab: false,

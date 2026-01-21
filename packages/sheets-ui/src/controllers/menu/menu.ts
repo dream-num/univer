@@ -587,7 +587,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             subscriber.next(defaultValue);
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -659,7 +662,10 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -806,7 +812,10 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -896,7 +905,10 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],

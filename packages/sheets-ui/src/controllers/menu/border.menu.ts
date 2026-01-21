@@ -17,10 +17,11 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { ICommandService, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, UniverInstanceType } from '@univerjs/core';
 import { BorderStyleManagerService, RangeProtectionPermissionEditPoint, SetBorderBasicCommand, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, startWith } from 'rxjs';
+import { map } from 'rxjs';
 
 import { BORDER_LINE_CHILDREN, BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
 import { getCurrentRangeDisable$ } from './menu-util';
@@ -69,7 +70,10 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             },
         ],
         value$: borderStyleManagerService.borderInfo$,
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$,
     };
 }

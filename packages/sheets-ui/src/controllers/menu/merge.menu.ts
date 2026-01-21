@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, UniverInstanceType } from '@univerjs/core';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -30,7 +30,7 @@ import {
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatestWith, map } from 'rxjs';
+import { combineLatest, combineLatestWith, map, startWith } from 'rxjs';
 import { getSheetSelectionsDisabled$ } from '../utils/selections-tools';
 import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
@@ -44,7 +44,10 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         tooltip: 'toolbar.mergeCell.main',
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: editDisabled$.pipe(
             combineLatestWith(selectionsHasCross$),
             map(([disable, hasCross]) => disable || hasCross)

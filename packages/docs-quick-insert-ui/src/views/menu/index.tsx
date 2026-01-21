@@ -20,8 +20,7 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IncreaseIcon } from '@univerjs/icons';
-import { ILayoutService, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { ComponentManager, ILayoutService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
 import { DocQuickInsertMenuController } from '../../controllers/doc-quick-insert-menu.controller';
@@ -41,7 +40,10 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
     const docQuickInsertMenuController = currentUnit?.with(DocQuickInsertMenuController);
     const layoutService = useDependency(ILayoutService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const componentManager = useDependency(ComponentManager);
     const editPopup = useObservable(docQuickInsertPopupService.editPopup$);
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
 
     const onClick: React.MouseEventHandler<HTMLDivElement> = useEvent((event) => {
         const p = docQuickInsertMenuController?.popup;

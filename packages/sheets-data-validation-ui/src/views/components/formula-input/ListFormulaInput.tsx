@@ -20,10 +20,9 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import { DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
-import { DeleteIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
+import { ComponentManager, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
@@ -71,6 +70,9 @@ interface IColorSelectProps {
 const ColorSelect = (props: IColorSelectProps) => {
     const { value, onChange, disabled } = props;
     const [open, setOpen] = useState(false);
+
+    const componentManager = useDependency(ComponentManager);
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     return (
         <Dropdown
@@ -125,6 +127,10 @@ const Template = (props: { item: IDropdownItem; commonProps: any; className?: st
     const { item, commonProps, className } = props;
     const { onItemChange, onItemDelete } = commonProps;
 
+    const componentManager = useDependency(ComponentManager);
+    const SequenceIcon = componentManager.get('SequenceIcon');
+    const DeleteIcon = componentManager.get('DeleteIcon');
+
     return (
         <div className={clsx('univer-flex univer-items-center univer-gap-2', className)}>
             {!item.isRef && (
@@ -171,6 +177,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const dataValidatorRegistryService = useDependency(DataValidatorRegistryService);
     const dataValidationModel = useDependency(DataValidationModel);
     const dataValidationFormulaController = useDependency(DataValidationFormulaController);
+    const componentManager = useDependency(ComponentManager);
     const [refColors, setRefColors] = useState(() => formula2.split(','));
     const listValidator = dataValidatorRegistryService.getValidatorItem(DataValidationType.LIST) as ListValidator;
     const [refOptions, setRefOptions] = useState<string[]>([]);
@@ -178,6 +185,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const formula1Res = showError ? validResult?.formula1 : '';
     const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
     const ruleChange = useObservable(ruleChange$);
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
 
     const onChange = useEvent(_onChange);
 

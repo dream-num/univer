@@ -19,7 +19,6 @@ import type { IConditionFormattingRule, IDeleteCfCommandParams, IMoveCfCommandPa
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { clsx, ReactGridLayout, Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
-import { DeleteIcon, IncreaseIcon, SequenceIcon } from '@univerjs/icons';
 import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     AddConditionalRuleMutation,
@@ -34,7 +33,7 @@ import {
     SetConditionalRuleMutation,
 } from '@univerjs/sheets-conditional-formatting';
 import { useHighlightRange } from '@univerjs/sheets-ui';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime, Observable } from 'rxjs';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
@@ -114,8 +113,13 @@ export const RuleList = (props: IRuleListProps) => {
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);
     const sidebarService = useDependency(ISidebarService);
+    const componentManager = useDependency(ComponentManager);
 
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
+    const DeleteIcon = componentManager.get('DeleteIcon');
+    const SequenceIcon = componentManager.get('SequenceIcon');
 
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
     const unitId = workbook.getUnitId();

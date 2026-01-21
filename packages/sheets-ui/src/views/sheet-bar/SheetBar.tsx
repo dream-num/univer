@@ -16,9 +16,8 @@
 
 import type { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 import { ICommandService, IPermissionService, throttle } from '@univerjs/core';
-import { IncreaseIcon, MoreIcon } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
@@ -35,12 +34,16 @@ export const SheetBar = () => {
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
     const permissionService = useDependency(IPermissionService);
+    const componentManager = useDependency(ComponentManager);
 
     const workbook = useActiveWorkbook()!;
     const unitId = workbook.getUnitId();
 
     const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id));
     const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId)?.id));
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
+    const MoreIcon = componentManager.get('MoreIcon');
 
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;

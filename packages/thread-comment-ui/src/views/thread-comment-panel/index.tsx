@@ -20,9 +20,8 @@ import type { Observable } from 'rxjs';
 import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
-import { IncreaseIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
@@ -76,6 +75,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const activeCommentId = useObservable(panelService.activeCommentId$);
     const update = useObservable(threadCommentModel.commentUpdate$);
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
     const subUnitId = useObservable(subUnitId$);
     const shouldScroll = useRef(true);
     const prefix = 'panel';
@@ -131,6 +131,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const solvedComments = renderComments.filter((comment) => comment.resolved);
 
     const isFiltering = status !== 'all' || unit !== 'all';
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
 
     const onReset = () => {
         setStatus('all');

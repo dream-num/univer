@@ -21,9 +21,8 @@ import type { KeyboardEvent } from 'react';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
-import { CheckMarkIcon } from '@univerjs/icons';
 import { IDescriptionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
@@ -48,6 +47,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
     const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
 
@@ -59,6 +59,8 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
+
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
 
     useEffect(() => {
         handleSelectChange(allTypeValue);

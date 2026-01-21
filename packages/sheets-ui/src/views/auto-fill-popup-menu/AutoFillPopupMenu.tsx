@@ -18,8 +18,7 @@ import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -53,6 +52,7 @@ export function AutoFillPopupMenu() {
     const renderManagerService = useDependency(IRenderManagerService);
     const autoFillService = useDependency(IAutoFillService);
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
     const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
     const [visible, setVisible] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
@@ -70,6 +70,9 @@ export function AutoFillPopupMenu() {
 
         return { sheetSkeletonManagerService: null, selectionRenderService: null };
     }, [workbook, renderManagerService]);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const AutofillDoubleIcon = componentManager.get('AutofillDoubleIcon');
 
     const handleMouseEnter = () => {
         setHovered(true);

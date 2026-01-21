@@ -23,14 +23,13 @@ import {
     LocaleService,
 } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon } from '@univerjs/icons';
 import {
     RangeProtectionPermissionEditPoint,
     SheetPermissionCheckController,
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 function serializeListOptions(options: string[]) {
@@ -57,6 +56,10 @@ interface ISelectListProps {
 function SelectList(props: ISelectListProps) {
     const { value, onChange, multiple, options, title, onEdit, style, location, showEdit: showEditOnDropdown, showSearch: showSearchOnDropdown } = props;
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
+
     const { row, col, unitId, subUnitId } = location;
 
     const searchRef = useRef<HTMLInputElement>(null);

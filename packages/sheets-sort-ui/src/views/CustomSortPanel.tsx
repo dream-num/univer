@@ -19,9 +19,8 @@ import type { IOrderRule } from '@univerjs/sheets-sort';
 import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { Button, Checkbox, clsx, DraggableList, Dropdown, Radio, RadioGroup, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon, DeleteEmptyIcon, IncreaseIcon, MoreDownIcon, SequenceIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
@@ -45,6 +44,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
     const sheetsSortService = useDependency(SheetsSortService);
     const localeService = useDependency(LocaleService);
     const sheetsSortUIService = useDependency(SheetsSortUIService);
+    const componentManager = useDependency(ComponentManager);
 
     const [hasTitle, setHasTitle] = useState(false);
     const [scrollPosition, setScrollPosition] = useState(0);
@@ -57,6 +57,8 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
     const [list, setList] = useState<IOrderRule[]>([
         { type: SortType.ASC, colIndex: range.startColumn },
     ]);
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
 
     const onItemChange = useCallback((index: number, value: Nullable<IOrderRule>) => {
         const newList = [...list];
@@ -205,6 +207,7 @@ interface ISortOptionItemProps {
 export function SortOptionItem(props: ISortOptionItemProps) {
     const { list, item, titles, onChange, scrollPosition } = props;
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
 
     const availableMenu = titles.filter((title) => (!list.some((item) => item.colIndex === title.index)) || title.index === item.colIndex);
     const currentIndex = list.findIndex((listItem) => listItem.colIndex === item.colIndex);
@@ -226,6 +229,11 @@ export function SortOptionItem(props: ISortOptionItemProps) {
 
     const showDelete = list.length > 1;
     const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
+
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
+    const SequenceIcon = componentManager.get('SequenceIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const DeleteEmptyIcon = componentManager.get('DeleteEmptyIcon');
 
     return (
         <div className="univer-grid univer-grid-flow-col univer-grid-cols-2 univer-items-center univer-gap-2">

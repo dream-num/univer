@@ -31,9 +31,9 @@ import {
     MenuItemGroup as DesignMenuItemGroup,
     SubMenu as DesignSubMenu,
 } from '@univerjs/design';
-import { CheckMarkIcon, MoreIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, isObservable, of } from 'rxjs';
+import { ComponentManager } from '../../../common';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -139,6 +139,9 @@ function MenuWrapper(props: IBaseMenuProps) {
 /** @deprecated */
 function MenuOptionsWrapper(props: IBaseMenuProps) {
     const { options, value, onOptionSelect, parentKey } = props;
+
+    const componentManager = useDependency(ComponentManager);
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
 
     return options?.map((option: IValueOption, index: number) => {
         const key = `${parentKey}-${option.label ?? option.id}-${index}`;
@@ -275,6 +278,8 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const renderSelectorType = () => {
         const selections = selectionsFromObservable ?? (item.selections as IValueOption[] | undefined) ?? [];
+        const componentManager = useDependency(ComponentManager);
+        const MoreIcon = componentManager.get('MoreIcon');
 
         if (selections.length > 0) {
             return (
@@ -332,6 +337,8 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const renderSubItemsType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
+        const componentManager = useDependency(ComponentManager);
+        const MoreIcon = componentManager.get('MoreIcon');
 
         return (
             <DesignSubMenu

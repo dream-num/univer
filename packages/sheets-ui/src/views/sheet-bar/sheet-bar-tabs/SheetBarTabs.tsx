@@ -20,7 +20,6 @@ import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
 import { ICommandService, IConfirmService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
-import { LockIcon } from '@univerjs/icons';
 
 import {
     InsertSheetMutation,
@@ -37,7 +36,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ContextMenuPosition, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -62,10 +61,13 @@ export function SheetBarTabs() {
     const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
+    const componentManager = useDependency(ComponentManager);
     const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
 
     const workbook = useActiveWorkbook()!;
     const permissionService = useDependency(IPermissionService);
+
+    const LockIcon = componentManager.get('LockIcon');
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';

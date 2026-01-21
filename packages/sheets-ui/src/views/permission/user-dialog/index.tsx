@@ -17,9 +17,8 @@
 import type { ICollaborator } from '@univerjs/protocol';
 import { LocaleService } from '@univerjs/core';
 import { Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
-import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
@@ -29,6 +28,10 @@ export const SheetPermissionUserDialog = () => {
     const [inputValue, setInputValue] = useState('');
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
+    const componentManager = useDependency(ComponentManager);
+
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
+
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
     const userList = useObservable(sheetPermissionUserManagerService.userList$, sheetPermissionUserManagerService.userList);
     const searchUserList = userList?.filter((item) => {

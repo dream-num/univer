@@ -20,7 +20,6 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
 import {
     CFNumberOperator,
     CFRuleType,
@@ -34,7 +33,7 @@ import {
     iconMap,
 } from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
-import { ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
+import { ComponentManager, ILayoutService, useDependency, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
 const getIcon = (iconType: string, iconId: string | number) => {
@@ -164,6 +163,9 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
 
 const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) => void; iconType?: IIconType; iconId: string }) => {
     const { onClick } = props;
+    const componentManager = useDependency(ComponentManager);
+
+    const SlashDoubleIcon = componentManager.get('SlashDoubleIcon');
 
     const list = useMemo(() => {
         const result: { iconType: IIconType; iconId: string; base64: string }[] = [];
@@ -225,6 +227,10 @@ const IconSetRuleEdit = (props: {
 }) => {
     const { onChange, configList, errorMap = {} } = props;
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const SlashDoubleIcon = componentManager.get('SlashDoubleIcon');
 
     const options = [{ label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan }, { label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
     const valueTypeOptions = [
@@ -397,6 +403,11 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const { interceptorManager } = props;
     const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const SlashDoubleIcon = componentManager.get('SlashDoubleIcon');
+
     const [errorMap, setErrorMap] = useState<Record<string, string>>({});
     const [currentIconType, setCurrentIconType] = useState<IIconType>(() => {
         const defaultV = Object.keys(iconMap)[0] as IIconType;

@@ -19,9 +19,9 @@ import type { ReactNode } from 'react';
 import type { Subscription } from 'rxjs';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
-import { CheckMarkIcon } from '@univerjs/icons';
 import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
+import { ComponentManager } from '../../../common';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../utils/di';
@@ -120,6 +120,9 @@ function Label({ icon, value, option, onOptionSelect }: {
     option: IValueOption;
     onOptionSelect?: (option: IValueOption) => void;
 }) {
+    const componentManager = useDependency(ComponentManager);
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
+
     const onChange = (v: string | number) => {
         onOptionSelect?.({ value: v, label: option?.label, commandId: option?.commandId });
     };

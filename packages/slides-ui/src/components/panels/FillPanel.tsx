@@ -18,8 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { Rect } from '@univerjs/engine-render';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderTopClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
-import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import { CanvasView } from '../../controllers/canvas-view';
@@ -39,6 +38,10 @@ export default function ArrangePanel(props: IProps) {
     const localeService = useDependency(LocaleService);
     const canvasView = useDependency(CanvasView);
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
+
+    const PaintBucketDoubleIcon = componentManager.get('PaintBucketDoubleIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const page = canvasView.getRenderUnitByPageId(pageId, unitId);
     const scene = page?.scene;

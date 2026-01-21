@@ -16,7 +16,8 @@
 
 import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
 import type { IDiscreteRange } from './interfaces';
-import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, mergeIntervals, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { getSheetCommandTarget } from '../commands/commands/utils/target-util';
 
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {
     return arr.reduce(
@@ -169,47 +170,60 @@ export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?
 }
 
 export function getVisibleRanges(ranges: IRange[], accessor: IAccessor, unitId?: string, subUnitId?: string): IRange[] {
-    const allRows: number[] = [];
-    const allCols: number[] = [];
-
-    for (const range of ranges) {
-        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId);
-
-        if (discreteRange) {
-            allRows.push(...discreteRange.rows);
-            allCols.push(...discreteRange.cols);
-        }
+    const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
+    if (!target) {
+        return ranges;
     }
 
-    const uniqueRows = Array.from(new Set(allRows)).sort((a, b) => a - b);
-    const uniqueCols = Array.from(new Set(allCols)).sort((a, b) => a - b);
+    const { worksheet } = target;
+    const intervalsRanges: Array<{
+        startColumn: number;
+        endColumn: number;
+        rowIntervals: [number, number][];
+    }> = [];
+
+    for (const range of ranges) {
+        const { startRow, endRow, startColumn, endColumn } = range;
+
+        const rowIntervals: [number, number][] = [];
+        let intervalStartRow = startRow;
+
+        for (let r = startRow; r <= endRow; r++) {
+            if (worksheet.getRowFiltered(r)) {
+                if (intervalStartRow < r) {
+                    rowIntervals.push([intervalStartRow, r - 1]);
+                }
+                intervalStartRow = r + 1;
+            } else if (r === endRow) {
+                rowIntervals.push([intervalStartRow, endRow]);
+            }
+        }
+
+        const findIndex = intervalsRanges.findIndex((item) => item.startColumn === startColumn && item.endColumn === endColumn);
+
+        if (findIndex > -1) {
+            intervalsRanges[findIndex].rowIntervals = intervalsRanges[findIndex].rowIntervals.concat(rowIntervals);
+        } else {
+            intervalsRanges.push({
+                startColumn,
+                endColumn,
+                rowIntervals,
+            });
+        }
+    }
 
     const visibleRanges: IRange[] = [];
 
-    function findContinuousSegments(arr: number[]): number[][] {
-        const segments: number[][] = [];
-        let start = arr[0];
+    for (const item of intervalsRanges) {
+        const { startColumn, endColumn, rowIntervals } = item;
+        const mergedRowIntervals = mergeIntervals(rowIntervals);
 
-        for (let i = 1; i < arr.length; i++) {
-            if (arr[i] !== arr[i - 1] + 1) {
-                segments.push([start, arr[i - 1]]);
-                start = arr[i];
-            }
-        }
-        segments.push([start, arr[arr.length - 1]]);
-        return segments;
-    }
-
-    const rowSegments = findContinuousSegments(uniqueRows);
-    const colSegments = findContinuousSegments(uniqueCols);
-
-    for (const [startRow, endRow] of rowSegments) {
-        for (const [startCol, endCol] of colSegments) {
+        for (const [startRow, endRow] of mergedRowIntervals) {
             visibleRanges.push({
                 startRow,
                 endRow,
-                startColumn: startCol,
-                endColumn: endCol,
+                startColumn,
+                endColumn,
             });
         }
     }

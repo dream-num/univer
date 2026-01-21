@@ -1225,8 +1225,8 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     const { unitId, subUnitId, worksheet } = target;
 
                     let ranges: IRange[] = [];
-                    if ('range' in params) {
-                        ranges = params.range as IRange[];
+                    if ('ranges' in params) {
+                        ranges = params.ranges;
                     } else if ('rowsAutoHeightInfo' in params) {
                         ranges = params.rowsAutoHeightInfo.map((info) => ({
                             startRow: info.row,

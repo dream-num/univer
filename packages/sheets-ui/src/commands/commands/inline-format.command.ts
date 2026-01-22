@@ -181,8 +181,7 @@ export const SetRangeFontIncreaseCommand: ICommand = {
             const textRun = getFontStyleAtCursor(accessor);
             if (textRun != null) {
                 const value = textRun.ts?.fs ?? defaultValue;
-
-                params.value = value >= 400 ? 400 : value + 1;
+                params.value = value >= 400 ? 400 : +value + 1;
             }
 
             return commandService.executeCommand(SetInlineFormatFontSizeCommand.id, params);
@@ -191,7 +190,7 @@ export const SetRangeFontIncreaseCommand: ICommand = {
         if (primary != null) {
             const style = worksheet.getComposedCellStyle(primary.startRow, primary.startColumn);
             const value = style.fs ?? defaultValue;
-            params.value = value >= 400 ? 400 : value + 1;
+            params.value = value >= 400 ? 400 : +value + 1;
             return commandService.executeCommand(SetFontSizeCommand.id, params);
         }
 

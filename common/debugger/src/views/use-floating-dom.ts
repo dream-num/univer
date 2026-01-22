@@ -19,15 +19,17 @@ import { DocFloatDomController } from '@univerjs/docs-drawing-ui';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { useDependency } from '@univerjs/ui';
 
-export function useFloatingDom() {
+export function useFloatingDom(entryUnitType?: UniverInstanceType) {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const floatDomService = useDependency(SheetCanvasFloatDomManagerService);
-    const floatDomController = useDependency(DocFloatDomController);
+    const floatDomService = entryUnitType === UniverInstanceType.UNIVER_SHEET ? useDependency(SheetCanvasFloatDomManagerService) : null;
+    const floatDomController = entryUnitType === UniverInstanceType.UNIVER_DOC ? useDependency(DocFloatDomController) : null;
 
     const onSelect = () => {
-        const currentSheet = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
-        if (currentSheet) {
-            floatDomService.addFloatDomToPosition({
+        if (entryUnitType === UniverInstanceType.UNIVER_SHEET) {
+            const currentSheet = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
+            if (!currentSheet) return;
+
+            floatDomService?.addFloatDomToPosition({
                 allowTransform: true,
                 initPosition: {
                     startX: 200,
@@ -40,8 +42,11 @@ export function useFloatingDom() {
                     aa: '128',
                 },
             });
-        } else {
-            floatDomController.insertFloatDom({
+        } else if (entryUnitType === UniverInstanceType.UNIVER_DOC) {
+            const currentDoc = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
+            if (!currentDoc) return;
+
+            floatDomController?.insertFloatDom({
                 allowTransform: true,
                 componentKey: 'ImageDemo',
                 data: {

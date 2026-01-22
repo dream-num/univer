@@ -30,6 +30,8 @@ import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverUIPlugin } from '@univerjs/ui';
 
+import '@univerjs/docs-ui/facade';
+
 import '../global.css';
 
 /* eslint-disable node/prefer-global/process */
@@ -70,7 +72,9 @@ univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
-    univer.registerPlugin(UniverDebuggerPlugin);
+    univer.registerPlugin(UniverDebuggerPlugin, {
+        fabEntryUnitType: UniverInstanceType.UNIVER_DOC,
+    });
 } else {
     univer.registerPlugin(UniverDebuggerPlugin, {
         fab: false,

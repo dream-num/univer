@@ -99,8 +99,8 @@ export function Options() {
                     <div
                         key={index}
                         className={`
-                          univer-flex univer-h-7 univer-items-center univer-justify-between univer-gap-6 univer-rounded
-                          univer-px-2 univer-text-sm
+                          univer-flex univer-h-7 univer-cursor-default univer-items-center univer-justify-between
+                          univer-gap-6 univer-rounded univer-px-2 univer-text-sm
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `}

@@ -37,6 +37,11 @@ import { useUser } from './use-user';
 import { useWatermark } from './use-watermark';
 
 export function Fab() {
+    const configService = useDependency(IConfigService);
+    const configs = configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
+    const performanceMonitor = configs?.performanceMonitor;
+    const fabEntryUnitType = configs?.fabEntryUnitType;
+
     const locale = useLocale();
     const darkMode = useDarkMode();
     const theme = useTheme();
@@ -45,17 +50,13 @@ export function Fab() {
     const message = useMessage();
     const dialog = useDialog();
     const sidebar = useSidebar();
-    const floatingDom = useFloatingDom();
-    const cellContent = useCellContent();
+    const floatingDom = useFloatingDom(fabEntryUnitType);
+    const cellContent = useCellContent(fabEntryUnitType);
     const units = useUnits();
     const snapshot = useSnapshot();
     const editable = useEditable();
     const user = useUser();
     const dispose = useDispose();
-
-    const configService = useDependency(IConfigService);
-    const configs = configService.getConfig<IUniverDebuggerConfig>(DEBUGGER_PLUGIN_CONFIG_KEY);
-    const performanceMonitor = configs?.performanceMonitor;
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitType = univerInstanceService.getFocusedUnit()?.type;
@@ -72,12 +73,12 @@ export function Fab() {
         dialog,
         sidebar,
         { type: 'separator' },
-        unitType === UniverInstanceType.UNIVER_SHEET && floatingDom,
-        unitType === UniverInstanceType.UNIVER_SHEET && cellContent,
-        unitType === UniverInstanceType.UNIVER_SHEET && units,
+        (fabEntryUnitType === UniverInstanceType.UNIVER_SHEET || fabEntryUnitType === UniverInstanceType.UNIVER_DOC) && floatingDom,
+        fabEntryUnitType === UniverInstanceType.UNIVER_SHEET && cellContent,
+        fabEntryUnitType === UniverInstanceType.UNIVER_SHEET && units,
         snapshot,
         editable,
-        unitType === UniverInstanceType.UNIVER_SHEET && user,
+        fabEntryUnitType === UniverInstanceType.UNIVER_SHEET && user,
         dispose,
     ].filter((item) => item !== null) as IDropdownMenuProps['items'];
 

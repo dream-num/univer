@@ -33,6 +33,7 @@ import type {
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { IUniverSheetsUIConfig } from '../config.schema';
 import {
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -48,6 +49,7 @@ import {
     FOCUSING_FX_BAR_EDITOR,
     generateRandomId,
     ICommandService,
+    IConfigService,
     IContextService,
     Inject,
     isFormulaString,
@@ -90,6 +92,7 @@ import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-rang
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
@@ -130,7 +133,8 @@ export class EditingRenderController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
@@ -286,6 +290,11 @@ export class EditingRenderController extends Disposable {
         // TODO: After the sheet dispose, recreate the sheet, the first cell edit may be unsuccessful,
         // it should be the editor initialization late, and we need to pay attention to this problem in the future.
         d.add(this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
+            const disableEdit = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.disableEdit;
+            if (disableEdit) {
+                return;
+            }
+
             if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }

@@ -20,8 +20,7 @@ import type { IMenuSelectorItem } from '@univerjs/ui';
 import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, UniverInstanceType } from '@univerjs/core';
 import { BorderStyleManagerService, RangeProtectionPermissionEditPoint, SetBorderBasicCommand, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, Observable, startWith } from 'rxjs';
-import { map } from 'rxjs';
+import { combineLatest, map, Observable, startWith } from 'rxjs';
 
 import { BORDER_LINE_CHILDREN, BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
 import { getCurrentRangeDisable$ } from './menu-util';

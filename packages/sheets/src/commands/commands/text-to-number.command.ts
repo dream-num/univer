@@ -66,6 +66,10 @@ export const TextToNumberCommand: ICommand = {
         for (let i = 0; i < ranges.length; i++) {
             for (let r = ranges[i].startRow; r <= ranges[i].endRow; r++) {
                 for (let c = ranges[i].startColumn; c <= ranges[i].endColumn; c++) {
+                    if (newCellValue.getValue(r, c)) {
+                        continue;
+                    }
+
                     const cell = worksheet.getCellRaw(r, c);
                     const pattern = typeof cell?.s === 'string' ? worksheet.getStyleDataByHash(cell.s)?.n?.pattern : cell?.s?.n?.pattern;
 

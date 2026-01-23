@@ -161,6 +161,7 @@ export function extractOtherStyle(style?: Nullable<IStyleData>): ICellStyle {
 
 /**
  * Pick font style from cell style.
+ * Important note: Do not add attributes to this method arbitrarily.
  * @param format
  * @returns {IStyleBase} style
  */
@@ -168,7 +169,7 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     if (!format) {
         return {};
     }
-    const { ff, fs, it, bl, ul, st, ol, cl, bg } = format;
+    const { ff, fs, it, bl, ul, st, ol, cl } = format;
     const style: IStyleBase = {};
     ff && (style.ff = ff);
     fs && (style.fs = fs);
@@ -178,7 +179,6 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     st && (style.st = st);
     ol && (style.ol = ol);
     cl && (style.cl = cl);
-    bg && (style.bg = bg);
 
     return style;
 }

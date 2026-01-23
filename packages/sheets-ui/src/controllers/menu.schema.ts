@@ -49,7 +49,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
-import { ContextMenuGroup, ContextMenuPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonDataGroup, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -183,6 +183,7 @@ import {
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
 } from './menu/sheet.menu';
+import { Text2NumberContextMenuItemFactory, Text2NumberToolbarMenuItemFactory, TEXT_TO_NUMBER_CONTEXT_MENU_ID, TEXT_TO_NUMBER_TOOLBAR_MENU_ID } from './menu/text-to-number.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonPosition.START]: {
@@ -295,6 +296,14 @@ export const menuSchema: MenuSchemaType = {
             },
         },
     },
+    [RibbonPosition.DATA]: {
+        [RibbonDataGroup.OTHERS]: {
+            [TEXT_TO_NUMBER_TOOLBAR_MENU_ID]: {
+                order: 0,
+                menuItemFactory: Text2NumberToolbarMenuItemFactory,
+            },
+        },
+    },
     [ContextMenuPosition.MAIN_AREA]: {
         [ContextMenuGroup.FORMAT]: {
             [SheetCopyCommand.name]: {
@@ -348,6 +357,10 @@ export const menuSchema: MenuSchemaType = {
                     order: 2,
                     menuItemFactory: ClearSelectionAllMenuItemFactory,
                 },
+            },
+            [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
+                order: 5,
+                menuItemFactory: Text2NumberContextMenuItemFactory,
             },
         },
         [ContextMenuGroup.LAYOUT]: {
@@ -502,6 +515,10 @@ export const menuSchema: MenuSchemaType = {
                     menuItemFactory: ClearSelectionAllMenuItemFactory,
                 },
             },
+            [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
+                order: 5,
+                menuItemFactory: Text2NumberContextMenuItemFactory,
+            },
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
@@ -630,6 +647,10 @@ export const menuSchema: MenuSchemaType = {
                     order: 2,
                     menuItemFactory: ClearSelectionAllMenuItemFactory,
                 },
+            },
+            [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
+                order: 5,
+                menuItemFactory: Text2NumberContextMenuItemFactory,
             },
         },
         [ContextMenuGroup.LAYOUT]: {

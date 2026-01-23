@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'Больше',
         toggleGridlines: 'Переключить сетку',
+        textToNumber: 'Преобразовать текст в число',
     },
     align: {
         left: 'Лево',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: 'Удалить защиту диапазона',
         turnOnProtectRange: 'Включить защиту диапазона',
         viewAllProtectArea: 'Просмотреть все защищенные области',
+        textToNumber: 'Преобразовать текст в число',
     },
     info: {
         tooltip: 'Подсказка',

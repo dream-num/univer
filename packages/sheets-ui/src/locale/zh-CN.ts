@@ -70,6 +70,7 @@ const locale: typeof enUS = {
         },
         more: '更多',
         toggleGridlines: '切换网格线',
+        textToNumber: '文本转数字',
     },
     align: {
         left: '左对齐',
@@ -263,6 +264,7 @@ const locale: typeof enUS = {
         removeProtectRange: '移除保护范围',
         turnOnProtectRange: '新增保护范围',
         viewAllProtectArea: '查看所有保护范围',
+        textToNumber: '文本转数字',
     },
     info: {
         tooltip: '提示',

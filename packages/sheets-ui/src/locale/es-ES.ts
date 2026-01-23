@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'Más',
         toggleGridlines: 'Alternar líneas de cuadrícula',
+        textToNumber: 'Texto a número',
     },
     align: {
         left: 'izquierda',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: 'Eliminar rango de protección',
         turnOnProtectRange: 'Añadir rango de protección',
         viewAllProtectArea: 'Ver todos los rangos de protección',
+        textToNumber: 'Texto a número',
     },
     info: {
         tooltip: 'Información sobre la herramienta',

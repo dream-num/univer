@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'その他',
         toggleGridlines: 'グリッド線の表示/非表示',
+        textToNumber: 'テキストを数値に変換',
     },
     align: {
         left: '左寄せ',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: '保護範囲を削除',
         turnOnProtectRange: '保護範囲を追加',
         viewAllProtectArea: 'すべての保護範囲を表示',
+        textToNumber: 'テキストを数値に変換',
     },
     info: {
         tooltip: 'ツールチップ',

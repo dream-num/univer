@@ -67,6 +67,7 @@ const locale = {
         },
         more: 'More',
         toggleGridlines: 'Toggle Gridlines',
+        textToNumber: 'Text to Number',
     },
     align: {
         left: 'left',
@@ -260,6 +261,7 @@ const locale = {
         removeProtectRange: 'Remove Protection Range',
         turnOnProtectRange: 'Add Protection Range',
         viewAllProtectArea: 'View All Protection Ranges',
+        textToNumber: 'Text to Number',
     },
     info: {
         tooltip: 'Tooltip',

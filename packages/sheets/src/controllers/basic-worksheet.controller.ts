@@ -112,6 +112,7 @@ import {
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { SplitTextToColumnsCommand } from '../commands/commands/split-text-to-columns.command';
+import { TextToNumberCommand } from '../commands/commands/text-to-number.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { UnregisterWorksheetRangeThemeStyleCommand } from '../commands/commands/unregister-range-theme.command';
@@ -327,6 +328,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 ToggleGridlinesMutation,
                 SetGridlinesColorCommand,
                 SetGridlinesColorMutation,
+
+                TextToNumberCommand,
 
                 // permissions range protection
                 SetWorksheetPermissionPointsCommand,

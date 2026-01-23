@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'بیشتر',
         toggleGridlines: 'تغییر وضعیت خطوط شبکه',
+        textToNumber: 'متن به عدد',
     },
     align: {
         left: 'چپ',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: 'حذف محدوده محافظت',
         turnOnProtectRange: 'اضافه کردن محدوده محافظت',
         viewAllProtectArea: 'مشاهده همه محدوده‌های محافظت شده',
+        textToNumber: 'متن به عدد',
     },
     info: {
         tooltip: 'راهنما',

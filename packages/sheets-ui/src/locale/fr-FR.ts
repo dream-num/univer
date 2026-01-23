@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'Plus',
         toggleGridlines: 'Activer/désactiver le quadrillage',
+        textToNumber: 'Texte en nombre',
     },
     align: {
         left: 'gauche',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: 'Supprimer la plage de protection',
         turnOnProtectRange: 'Ajouter une plage de protection',
         viewAllProtectArea: 'Voir toutes les zones de protection',
+        textToNumber: 'Texte en nombre',
     },
     info: {
         tooltip: 'Info-bulle',

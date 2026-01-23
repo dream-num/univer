@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: '더 보기',
         toggleGridlines: '눈금선 표시/숨기기',
+        textToNumber: '텍스트를 숫자로 변환',
     },
     align: {
         left: '왼쪽',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: '보호 범위 제거',
         turnOnProtectRange: '보호 범위 추가',
         viewAllProtectArea: '모든 보호 범위 보기',
+        textToNumber: '텍스트를 숫자로 변환',
     },
     info: {
         tooltip: '툴팁',

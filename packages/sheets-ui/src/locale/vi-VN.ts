@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'Thêm',
         toggleGridlines: 'Chuyển đổi đường lưới',
+        textToNumber: 'Chuyển văn bản thành số',
     },
     align: {
         left: 'Căn trái',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: 'Bỏ phạm vi bảo vệ',
         turnOnProtectRange: 'Thêm phạm vi bảo vệ',
         viewAllProtectArea: 'Xem tất cả khu vực được bảo vệ',
+        textToNumber: 'Chuyển văn bản thành số',
     },
     info: {
         tooltip: 'Gợi ý',

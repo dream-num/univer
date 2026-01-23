@@ -69,6 +69,7 @@ const locale: typeof enUS = {
         },
         more: 'Més',
         toggleGridlines: 'Alternar línies de quadrícula',
+        textToNumber: 'Text a número',
     },
     align: {
         left: 'esquerra',
@@ -262,6 +263,7 @@ const locale: typeof enUS = {
         removeProtectRange: 'Eliminar l\'interval de protecció',
         turnOnProtectRange: 'Afegir un interval de protecció',
         viewAllProtectArea: 'Veure tots els intervals de protecció',
+        textToNumber: 'Text a número',
     },
     info: {
         tooltip: 'Informació sobre l\'eina',

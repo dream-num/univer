@@ -195,6 +195,7 @@ export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { SplitTextToColumnsCommand } from './commands/commands/split-text-to-columns.command';
 export type { ISplitTextToColumnsCommandParams } from './commands/commands/split-text-to-columns.command';
+export { type ITextToNumberCommandParams, TextToNumberCommand } from './commands/commands/text-to-number.command';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
 export { UnregisterWorksheetRangeThemeStyleCommand } from './commands/commands/unregister-range-theme.command';

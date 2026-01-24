@@ -41,7 +41,3 @@ export function isInternalEditorID(id: string) {
 export function isCommentEditorID(id: string) {
     return id === DOCS_COMMENT_EDITOR_UNIT_ID_KEY;
 }
-
-export function isShapeTextEditorID(id: string) {
-    return id.startsWith(`${PREFIX}SHAPE_TEXT`);
-}

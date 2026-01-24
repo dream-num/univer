@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.15.3](https://github.com/dream-num/univer/compare/v0.15.2...v0.15.3) (2026-01-24)
+
+
+### Bug Fixes
+
+* **design:** fix time parsing logic for TimeInput ([#6494](https://github.com/dream-num/univer/issues/6494)) ([044add7](https://github.com/dream-num/univer/commit/044add70ae4d7ac5857b47961c52a06b2d125746))
+* **drawing:** fix the incorrect position of floating images ([#6498](https://github.com/dream-num/univer/issues/6498)) ([af68ca8](https://github.com/dream-num/univer/commit/af68ca8917d7461ed87fd516703d3789d45d1254))
+* **editor:** config ([#6510](https://github.com/dream-num/univer/issues/6510)) ([9263cad](https://github.com/dream-num/univer/commit/9263cad5b6d618aba13760b5f530df9277908665))
+* **editor:** fix the issue where content being edited in a cell would be reset ([#6495](https://github.com/dream-num/univer/issues/6495)) ([dc5cf3c](https://github.com/dream-num/univer/commit/dc5cf3cf1e92906f9cc2ed9154bd459123fe5c51))
+* fix debugger plugin ([#6506](https://github.com/dream-num/univer/issues/6506)) ([1444b46](https://github.com/dream-num/univer/commit/1444b4601493ab7bab42bcacc9027dd069361164))
+* fix the issue of incorrect background color after cell rotation ([#6513](https://github.com/dream-num/univer/issues/6513)) ([5944c7b](https://github.com/dream-num/univer/commit/5944c7beab6a9fd07278c0703fe6515189de8002))
+* optimize the performance of frequent row and column deletion operations ([#6493](https://github.com/dream-num/univer/issues/6493)) ([00fe317](https://github.com/dream-num/univer/commit/00fe317c0bac4f4d7e307961719017feddbc7888))
+* **sheets:** fix a stack overflow issue when deleting a large number of rows ([#6497](https://github.com/dream-num/univer/issues/6497)) ([27d08f5](https://github.com/dream-num/univer/commit/27d08f5a5135a0697697a5a91d45f472b28d7adb))
+* **sheets:** fix performance issues when the worksheet has a large number of merged cells ([#6504](https://github.com/dream-num/univer/issues/6504)) ([075a46c](https://github.com/dream-num/univer/commit/075a46c301d16b094f9015bea7ecd3d05fc5b1d7))
+
+
+### Features
+
+* add a text-to-number function menu ([#6514](https://github.com/dream-num/univer/issues/6514)) ([fe296bc](https://github.com/dream-num/univer/commit/fe296bced89913433937d9348b3992810128d8bc))
+* **drawing:** add interceptor for drawing update ([#6490](https://github.com/dream-num/univer/issues/6490)) ([1d52ebb](https://github.com/dream-num/univer/commit/1d52ebb337fb83a5d52a3909df3cb45639b84ef8))
+* more numfmt type cursor to default ([#6511](https://github.com/dream-num/univer/issues/6511)) ([ea81ae8](https://github.com/dream-num/univer/commit/ea81ae8635fc914a55c76823ef49e0340cabd47d))
+* **sheets-ui:** introduce `disableEdit` configuration ([#6489](https://github.com/dream-num/univer/issues/6489)) ([aa95e93](https://github.com/dream-num/univer/commit/aa95e9321ed6b134476e08e46786bb865244ddda))
+* **sheets-ui:** support shape text editing ([#6479](https://github.com/dream-num/univer/issues/6479)) ([ff5fef2](https://github.com/dream-num/univer/commit/ff5fef22d668241b8f8c275717f887b1894ff862))
+* use component manager in slider component ([#6468](https://github.com/dream-num/univer/issues/6468)) ([3735670](https://github.com/dream-num/univer/commit/3735670176eaff1dc9a7f77c28b6e03dff75f427))
+
 ## [0.15.2](https://github.com/dream-num/univer/compare/v0.15.1...v0.15.2) (2026-01-17)
 
 

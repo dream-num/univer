@@ -168,10 +168,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         this._univerInstanceService.setCurrentUnitForType(editorUnitId);
         const valueCount = editor.getValue().length;
-        
-        if(!isShapeTextEditorID(editorUnitId)){
-            this._contextService.setContextValue(EDITOR_ACTIVATED, true);
-        }
+
+        this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
         if (!isInternalEditorID(editorUnitId)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, true);

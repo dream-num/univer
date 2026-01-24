@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Null
 import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorConfigParams } from './editor';
-import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, isShapeTextEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
@@ -168,7 +168,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         this._univerInstanceService.setCurrentUnitForType(editorUnitId);
         const valueCount = editor.getValue().length;
-        this._contextService.setContextValue(EDITOR_ACTIVATED, true);
+        
+        if(!isShapeTextEditorID(editorUnitId)){
+            this._contextService.setContextValue(EDITOR_ACTIVATED, true);
+        }
 
         if (!isInternalEditorID(editorUnitId)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, true);

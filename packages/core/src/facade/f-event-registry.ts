@@ -67,7 +67,7 @@ export class FEventRegistry {
         const handlers = this._eventHandlerMap.get(event);
         if (!handlers) return;
 
-        if (!current) {
+        if (!current || current.size === 0) {
             current = new Map();
             this._eventHandlerRegisted.set(event, current);
             handlers?.forEach((handler) => {

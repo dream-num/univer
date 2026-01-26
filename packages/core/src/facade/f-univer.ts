@@ -108,14 +108,16 @@ export class FUniver extends Disposable {
     ) {
         super();
 
-        this.registerEventHandler(
-            this.Event.LifeCycleChanged,
-            () =>
-                toDisposable(
-                    this._lifecycleService.lifecycle$.subscribe((stage) => {
-                        this.fireEvent(this.Event.LifeCycleChanged, { stage });
-                    })
-                )
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.LifeCycleChanged,
+                () =>
+                    toDisposable(
+                        this._lifecycleService.lifecycle$.subscribe((stage) => {
+                            this.fireEvent(this.Event.LifeCycleChanged, { stage });
+                        })
+                    )
+            )
         );
 
         this._initUnitEvent(this._injector);
@@ -136,125 +138,142 @@ export class FUniver extends Disposable {
 
     private _initCommandEvent(injector: Injector): void {
         const commandService = injector.get(ICommandService);
-        this.registerEventHandler(
-            this.Event.Redo,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                const { id, type: propType, params } = commandInfo;
-                if (commandInfo.id === RedoCommand.id) {
-                    const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
-                    this.fireEvent(this.Event.Redo, eventParams);
-                }
-            })
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.Redo,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    const { id, type: propType, params } = commandInfo;
+                    if (commandInfo.id === RedoCommand.id) {
+                        const type = propType!;
+                        const eventParams: ICommandEvent = { id, type, params };
+                        this.fireEvent(this.Event.Redo, eventParams);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.Undo,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                const { id, type: propType, params } = commandInfo;
-                if (commandInfo.id === UndoCommand.id) {
-                    const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
-                    this.fireEvent(this.Event.Undo, eventParams);
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.Undo,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    const { id, type: propType, params } = commandInfo;
+                    if (commandInfo.id === UndoCommand.id) {
+                        const type = propType!;
+                        const eventParams: ICommandEvent = { id, type, params };
+                        this.fireEvent(this.Event.Undo, eventParams);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.CommandExecuted,
-            () => commandService.onCommandExecuted((commandInfo, options) => {
-                const { id, type: propType, params } = commandInfo;
-                if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
-                    const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params, options };
-                    this.fireEvent(this.Event.CommandExecuted, eventParams);
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CommandExecuted,
+                () => commandService.onCommandExecuted((commandInfo, options) => {
+                    const { id, type: propType, params } = commandInfo;
+                    if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
+                        const type = propType!;
+                        const eventParams: ICommandEvent = { id, type, params, options };
+                        this.fireEvent(this.Event.CommandExecuted, eventParams);
+                    }
+                })
+            )
         );
     }
 
     private _initBeforeCommandEvent(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.registerEventHandler(
-            this.Event.BeforeRedo,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                const { id, type: propType, params } = commandInfo;
-                if (commandInfo.id === RedoCommand.id) {
-                    const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
-                    this.fireEvent(this.Event.BeforeRedo, eventParams);
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeRedo,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    const { id, type: propType, params } = commandInfo;
+                    if (commandInfo.id === RedoCommand.id) {
+                        const type = propType!;
+                        const eventParams: ICommandEvent = { id, type, params };
+                        this.fireEvent(this.Event.BeforeRedo, eventParams);
 
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeUndo,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                const { id, type: propType, params } = commandInfo;
-                if (commandInfo.id === UndoCommand.id) {
-                    const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params };
-                    this.fireEvent(this.Event.BeforeUndo, eventParams);
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeUndo,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    const { id, type: propType, params } = commandInfo;
+                    if (commandInfo.id === UndoCommand.id) {
+                        const type = propType!;
+                        const eventParams: ICommandEvent = { id, type, params };
+                        this.fireEvent(this.Event.BeforeUndo, eventParams);
 
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeCommandExecute,
-            () => commandService.beforeCommandExecuted((commandInfo, options) => {
-                const { id, type: propType, params } = commandInfo;
-                if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
-                    const type = propType!;
-                    const eventParams: ICommandEvent = { id, type, params, options };
-                    this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeCommandExecute,
+                () => commandService.beforeCommandExecuted((commandInfo, options) => {
+                    const { id, type: propType, params } = commandInfo;
+                    if (commandInfo.id !== RedoCommand.id && commandInfo.id !== UndoCommand.id) {
+                        const type = propType!;
+                        const eventParams: ICommandEvent = { id, type, params, options };
+                        this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
 
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
     }
 
     private _initUnitEvent(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);
 
-        this.registerEventHandler(
-            this.Event.DocDisposed,
-            () => univerInstanceService.unitDisposed$.subscribe((unit) => {
-                if (unit.type === UniverInstanceType.UNIVER_DOC) {
-                    this.fireEvent(this.Event.DocDisposed, {
-                        unitId: unit.getUnitId(),
-                        unitType: unit.type,
-                        snapshot: unit.getSnapshot() as IDocumentData,
-                    });
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.DocDisposed,
+                () => univerInstanceService.unitDisposed$.subscribe((unit) => {
+                    if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                        this.fireEvent(this.Event.DocDisposed, {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IDocumentData,
+                        });
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.DocCreated,
-            () => univerInstanceService.unitAdded$.subscribe((unit) => {
-                if (unit.type === UniverInstanceType.UNIVER_DOC) {
-                    const doc = unit as DocumentDataModel;
-                    const docUnit = injector.createInstance(FDoc, doc);
-                    this.fireEvent(this.Event.DocCreated, {
-                        unitId: unit.getUnitId(),
-                        type: unit.type,
-                        doc: docUnit,
-                        unit: docUnit,
-                    });
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.DocCreated,
+                () => univerInstanceService.unitAdded$.subscribe((unit) => {
+                    if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                        const doc = unit as DocumentDataModel;
+                        const docUnit = injector.createInstance(FDoc, doc);
+                        this.fireEvent(this.Event.DocCreated, {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            doc: docUnit,
+                            unit: docUnit,
+                        });
+                    }
+                })
+            )
         );
     }
 

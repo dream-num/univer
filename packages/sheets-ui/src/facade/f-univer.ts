@@ -177,454 +177,500 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const commandService = injector.get(ICommandService);
 
         // Edit events
-        this.registerEventHandler(
-            this.Event.BeforeSheetEditStart,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetEditStart,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
 
-                const target = this.getActiveSheet();
-                if (!target) return;
+                    const target = this.getActiveSheet();
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                const editorBridgeService = injector.get(IEditorBridgeService);
-                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                const { visible, keycode, eventType } = params;
-                const loc = editorBridgeService.getEditLocation()!;
+                    const { workbook, worksheet } = target;
+                    const editorBridgeService = injector.get(IEditorBridgeService);
+                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                    const { visible, keycode, eventType } = params;
+                    const loc = editorBridgeService.getEditLocation()!;
 
-                if (visible) {
-                    const eventParams: IBeforeSheetEditStartEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: false,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                    if (visible) {
+                        const eventParams: IBeforeSheetEditStartEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: false,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetEditEnd,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetEditEnd,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
 
-                const target = this.getActiveSheet();
-                if (!target) return;
+                    const target = this.getActiveSheet();
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                const editorBridgeService = injector.get(IEditorBridgeService);
-                const univerInstanceService = injector.get(IUniverInstanceService);
-                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                const { visible, keycode, eventType } = params;
-                const loc = editorBridgeService.getEditLocation()!;
+                    const { workbook, worksheet } = target;
+                    const editorBridgeService = injector.get(IEditorBridgeService);
+                    const univerInstanceService = injector.get(IUniverInstanceService);
+                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                    const { visible, keycode, eventType } = params;
+                    const loc = editorBridgeService.getEditLocation()!;
 
-                if (!visible) {
-                    const eventParams: IBeforeSheetEditEndEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: false,
-                        value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
-                        isConfirm: keycode !== KeyCode.ESC,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                    if (!visible) {
+                        const eventParams: IBeforeSheetEditEndEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: false,
+                            value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                            isConfirm: keycode !== KeyCode.ESC,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetEditStarted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetEditStarted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
 
-                const target = this.getCommandSheetTarget(commandInfo);
-                if (!target) return;
+                    const target = this.getCommandSheetTarget(commandInfo);
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                const editorBridgeService = injector.get(IEditorBridgeService);
-                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                const { visible, keycode, eventType } = params;
-                const loc = editorBridgeService.getEditLocation()!;
+                    const { workbook, worksheet } = target;
+                    const editorBridgeService = injector.get(IEditorBridgeService);
+                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                    const { visible, keycode, eventType } = params;
+                    const loc = editorBridgeService.getEditLocation()!;
 
-                if (visible) {
-                    const eventParams: ISheetEditStartedEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: false,
-                    };
-                    this.fireEvent(this.Event.SheetEditStarted, eventParams);
-                }
-            })
+                    if (visible) {
+                        const eventParams: ISheetEditStartedEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: false,
+                        };
+                        this.fireEvent(this.Event.SheetEditStarted, eventParams);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetEditEnded,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetEditEnded,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetCellEditVisibleOperation.id) return;
 
-                const target = this.getCommandSheetTarget(commandInfo);
-                if (!target) return;
+                    const target = this.getCommandSheetTarget(commandInfo);
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                const editorBridgeService = injector.get(IEditorBridgeService);
-                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                const { visible, keycode, eventType } = params;
-                const loc = editorBridgeService.getEditLocation()!;
+                    const { workbook, worksheet } = target;
+                    const editorBridgeService = injector.get(IEditorBridgeService);
+                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                    const { visible, keycode, eventType } = params;
+                    const loc = editorBridgeService.getEditLocation()!;
 
-                if (!visible) {
-                    const eventParams: ISheetEditEndedEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: false,
-                        isConfirm: keycode !== KeyCode.ESC,
-                    };
-                    this.fireEvent(this.Event.SheetEditEnded, eventParams);
-                }
-            })
+                    if (!visible) {
+                        const eventParams: ISheetEditEndedEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: false,
+                            isConfirm: keycode !== KeyCode.ESC,
+                        };
+                        this.fireEvent(this.Event.SheetEditEnded, eventParams);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetEditChanging,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== RichTextEditingMutation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetEditChanging,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== RichTextEditingMutation.id) return;
 
-                const target = this.getActiveSheet();
-                if (!target) return;
+                    const target = this.getActiveSheet();
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                const editorBridgeService = injector.get(IEditorBridgeService);
-                const univerInstanceService = injector.get(IUniverInstanceService);
-                const params = commandInfo.params as IRichTextEditingMutationParams;
-                if (!editorBridgeService.isVisible().visible) return;
+                    const { workbook, worksheet } = target;
+                    const editorBridgeService = injector.get(IEditorBridgeService);
+                    const univerInstanceService = injector.get(IUniverInstanceService);
+                    const params = commandInfo.params as IRichTextEditingMutationParams;
+                    if (!editorBridgeService.isVisible().visible) return;
 
-                const { unitId } = params;
-                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                    const { row, column } = editorBridgeService.getEditLocation()!;
-                    const eventParams: ISheetEditChangingEventParams = {
-                        workbook,
-                        worksheet,
-                        row,
-                        column,
-                        value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
-                        isZenEditor: false,
-                    };
-                    this.fireEvent(this.Event.SheetEditChanging, eventParams);
-                }
-            })
+                    const { unitId } = params;
+                    if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                        const { row, column } = editorBridgeService.getEditLocation()!;
+                        const eventParams: ISheetEditChangingEventParams = {
+                            workbook,
+                            worksheet,
+                            row,
+                            column,
+                            value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                            isZenEditor: false,
+                        };
+                        this.fireEvent(this.Event.SheetEditChanging, eventParams);
+                    }
+                })
+            )
         );
 
         // Zoom events
-        this.registerEventHandler(
-            this.Event.BeforeSheetZoomChange,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetZoomRatioCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetZoomChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetZoomRatioCommand.id) return;
 
-                const target = this.getCommandSheetTarget(commandInfo);
-                if (!target) return;
+                    const target = this.getCommandSheetTarget(commandInfo);
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                const eventParams: ISheetZoomEvent = {
-                    zoom: (commandInfo.params as ISetZoomRatioCommandParams).zoomRatio,
-                    workbook,
-                    worksheet,
-                };
-                this.fireEvent(this.Event.BeforeSheetZoomChange, eventParams);
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
+                    const { workbook, worksheet } = target;
+                    const eventParams: ISheetZoomEvent = {
+                        zoom: (commandInfo.params as ISetZoomRatioCommandParams).zoomRatio,
+                        workbook,
+                        worksheet,
+                    };
+                    this.fireEvent(this.Event.BeforeSheetZoomChange, eventParams);
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetZoomChanged,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetZoomRatioCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetZoomChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetZoomRatioCommand.id) return;
 
-                const target = this.getCommandSheetTarget(commandInfo);
-                if (!target) return;
+                    const target = this.getCommandSheetTarget(commandInfo);
+                    if (!target) return;
 
-                const { workbook, worksheet } = target;
-                this.fireEvent(this.Event.SheetZoomChanged, {
-                    zoom: worksheet.getZoom(),
-                    workbook,
-                    worksheet,
-                });
-            })
+                    const { workbook, worksheet } = target;
+                    this.fireEvent(this.Event.SheetZoomChanged, {
+                        zoom: worksheet.getZoom(),
+                        workbook,
+                        worksheet,
+                    });
+                })
+            )
         );
     }
 
     // eslint-disable-next-line max-lines-per-function
     private _initObserverListener(injector: Injector): void {
         const renderManagerService = injector.get(IRenderManagerService);
-
         const lifeCycleService = injector.get(LifecycleService);
-        const disposable = new DisposableCollection();
 
+        const lifecycle$Disposable = new DisposableCollection();
         // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(lifeCycleService.lifecycle$.subscribe((lifecycle) => {
             if (lifecycle !== LifecycleStages.Rendered) return;
-            disposable.dispose();
             const hoverManagerService = injector.get(HoverManagerService);
             const dragManagerService = injector.get(DragManagerService);
             if (!hoverManagerService) return;
 
+            // Prevent multiple registrations
+            lifecycle$Disposable.dispose();
+
             // Cell events
-            this.registerEventHandler(
-                this.Event.CellClicked,
-                () => hoverManagerService.currentClickedCell$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.CellClicked, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.location.row,
-                            column: cell.location.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.CellClicked,
+                    () => hoverManagerService.currentClickedCell$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.CellClicked, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.location.row,
+                                column: cell.location.col,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.CellHover,
-                () => hoverManagerService.currentRichText$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.CellHover, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.row,
-                            column: cell.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.CellHover,
+                    () => hoverManagerService.currentRichText$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.CellHover, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.CellPointerDown,
-                () => hoverManagerService.currentPointerDownCell$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.CellPointerDown, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.row,
-                            column: cell.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.CellPointerDown,
+                    () => hoverManagerService.currentPointerDownCell$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.CellPointerDown, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.CellPointerUp,
-                () => hoverManagerService.currentPointerUpCell$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.CellPointerUp, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.row,
-                            column: cell.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.CellPointerUp,
+                    () => hoverManagerService.currentPointerUpCell$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.CellPointerUp, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.CellPointerMove,
-                () => hoverManagerService.currentCellPosWithEvent$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.CellPointerMove, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.row,
-                            column: cell.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.CellPointerMove,
+                    () => hoverManagerService.currentCellPosWithEvent$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.CellPointerMove, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                )
             );
 
             // Drag events
-            this.registerEventHandler(
-                this.Event.DragOver,
-                () => dragManagerService.currentCell$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.DragOver, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.location.row,
-                            column: cell.location.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.DragOver,
+                    () => dragManagerService.currentCell$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.DragOver, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.location.row,
+                                column: cell.location.col,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.Drop,
-                () => dragManagerService.endCell$
-                    ?.pipe(filter((cell) => !!cell))
-                    .subscribe((cell) => {
-                        const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.Drop, {
-                            ...baseParams,
-                            ...cell,
-                            row: cell.location.row,
-                            column: cell.location.col,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.Drop,
+                    () => dragManagerService.endCell$
+                        ?.pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.Drop, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.location.row,
+                                column: cell.location.col,
+                            });
+                        })
+                )
             );
 
             // Row Header events
-            this.registerEventHandler(
-                this.Event.RowHeaderClick,
-                () => hoverManagerService.currentRowHeaderClick$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.RowHeaderClick, {
-                            ...baseParams,
-                            row: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.RowHeaderClick,
+                    () => hoverManagerService.currentRowHeaderClick$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderClick, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.RowHeaderPointerDown,
-                () => hoverManagerService.currentRowHeaderPointerDown$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.RowHeaderPointerDown, {
-                            ...baseParams,
-                            row: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.RowHeaderPointerDown,
+                    () => hoverManagerService.currentRowHeaderPointerDown$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderPointerDown, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.RowHeaderPointerUp,
-                () => hoverManagerService.currentRowHeaderPointerUp$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.RowHeaderPointerUp, {
-                            ...baseParams,
-                            row: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.RowHeaderPointerUp,
+                    () => hoverManagerService.currentRowHeaderPointerUp$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderPointerUp, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.RowHeaderHover,
-                () => hoverManagerService.currentHoveredRowHeader$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.RowHeaderHover, {
-                            ...baseParams,
-                            row: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.RowHeaderHover,
+                    () => hoverManagerService.currentHoveredRowHeader$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderHover, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                )
             );
 
             // Column Header events
-            this.registerEventHandler(
-                this.Event.ColumnHeaderClick,
-                () => hoverManagerService.currentColHeaderClick$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.ColumnHeaderClick, {
-                            ...baseParams,
-                            column: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.ColumnHeaderClick,
+                    () => hoverManagerService.currentColHeaderClick$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderClick, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.ColumnHeaderPointerDown,
-                () => hoverManagerService.currentColHeaderPointerDown$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.ColumnHeaderPointerDown, {
-                            ...baseParams,
-                            column: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.ColumnHeaderPointerDown,
+                    () => hoverManagerService.currentColHeaderPointerDown$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderPointerDown, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.ColumnHeaderPointerUp,
-                () => hoverManagerService.currentColHeaderPointerUp$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.ColumnHeaderPointerUp, {
-                            ...baseParams,
-                            column: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.ColumnHeaderPointerUp,
+                    () => hoverManagerService.currentColHeaderPointerUp$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderPointerUp, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                )
             );
 
-            this.registerEventHandler(
-                this.Event.ColumnHeaderHover,
-                () => hoverManagerService.currentHoveredColHeader$
-                    ?.pipe(filter((header) => !!header))
-                    .subscribe((header) => {
-                        const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
-                        if (!baseParams) return;
-                        this.fireEvent(this.Event.ColumnHeaderHover, {
-                            ...baseParams,
-                            column: header.index,
-                        });
-                    })
+            lifecycle$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.ColumnHeaderHover,
+                    () => hoverManagerService.currentHoveredColHeader$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderHover, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                )
             );
+
+            this.disposeWithMe(lifecycle$Disposable);
         }));
-        this.disposeWithMe(disposable);
 
         // UI Events in renderUnit
-        const unitMap = new Map<string, IDisposable>();
         let sheetRenderUnit: Nullable<IRender>;
         const combined$ = combineLatest([
             renderManagerService.created$,
             lifeCycleService.lifecycle$,
         ]);
+        const combined$Disposable = new DisposableCollection();
         // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(combined$.subscribe(([created, lifecycle]) => {
             // univer & univer-pro are not same in life cycle.
@@ -635,180 +681,186 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             // for univer
             // type     2   1   1   1
             // stage    1   1   1   2
-
             if (created.type === UniverInstanceType.UNIVER_SHEET) {
                 sheetRenderUnit = created;
             }
             if (lifecycle <= LifecycleStages.Rendered) return;
             if (!sheetRenderUnit) return;
 
-            const disposable = new DisposableCollection();
             const workbook = this.getWorkbook(sheetRenderUnit.unitId);
             if (!workbook) return;
 
-            if (unitMap.get(sheetRenderUnit.unitId)) {
-                unitMap.get(sheetRenderUnit.unitId)?.dispose();
-            }
-            unitMap.set(sheetRenderUnit.unitId, disposable);
+            // Prevent multiple registrations
+            combined$Disposable.dispose();
+
             const scrollManagerService = sheetRenderUnit.with(SheetScrollManagerService);
             const selectionService = sheetRenderUnit.with(SheetsSelectionsService);
 
             // Register scroll event handler
-            disposable.add(this.registerEventHandler(
-                this.Event.Scroll,
-                () => scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
-                    if (!params) return;
-                    this.fireEvent(this.Event.Scroll, {
-                        workbook,
-                        worksheet: workbook.getActiveSheet(),
-                        ...params,
-                    });
-                })
-            ));
+            combined$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.Scroll,
+                    () => scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                        if (!params) return;
+                        this.fireEvent(this.Event.Scroll, {
+                            workbook,
+                            worksheet: workbook.getActiveSheet(),
+                            ...params,
+                        });
+                    })
+                )
+            );
 
             // Register selection event handlers
-            disposable.add(this.registerEventHandler(
-                this.Event.SelectionMoveStart,
-                () => selectionService.selectionMoveStart$.subscribe((selections) => {
-                    this.fireEvent(this.Event.SelectionMoveStart, {
-                        workbook,
-                        worksheet: workbook.getActiveSheet(),
-                        selections: selections?.map((s) => s.range) ?? [],
-                    });
-                })
-            ));
+            combined$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.SelectionMoveStart,
+                    () => selectionService.selectionMoveStart$.subscribe((selections) => {
+                        this.fireEvent(this.Event.SelectionMoveStart, {
+                            workbook,
+                            worksheet: workbook.getActiveSheet(),
+                            selections: selections?.map((s) => s.range) ?? [],
+                        });
+                    })
+                )
+            );
 
-            disposable.add(this.registerEventHandler(
-                this.Event.SelectionMoving,
-                () => selectionService.selectionMoving$.subscribe((selections) => {
-                    this.fireEvent(this.Event.SelectionMoving, {
-                        workbook,
-                        worksheet: workbook.getActiveSheet(),
-                        selections: selections?.map((s) => s.range) ?? [],
-                    });
-                })
-            ));
+            combined$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.SelectionMoving,
+                    () => selectionService.selectionMoving$.subscribe((selections) => {
+                        this.fireEvent(this.Event.SelectionMoving, {
+                            workbook,
+                            worksheet: workbook.getActiveSheet(),
+                            selections: selections?.map((s) => s.range) ?? [],
+                        });
+                    })
+                )
+            );
 
-            disposable.add(this.registerEventHandler(
-                this.Event.SelectionMoveEnd,
-                () => selectionService.selectionMoveEnd$.subscribe((selections) => {
-                    this.fireEvent(this.Event.SelectionMoveEnd, {
-                        workbook,
-                        worksheet: workbook.getActiveSheet(),
-                        selections: selections?.map((s) => s.range) ?? [],
-                    });
-                })
-            ));
+            combined$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.SelectionMoveEnd,
+                    () => selectionService.selectionMoveEnd$.subscribe((selections) => {
+                        this.fireEvent(this.Event.SelectionMoveEnd, {
+                            workbook,
+                            worksheet: workbook.getActiveSheet(),
+                            selections: selections?.map((s) => s.range) ?? [],
+                        });
+                    })
+                )
+            );
 
-            disposable.add(this.registerEventHandler(
-                this.Event.SelectionChanged,
-                () => selectionService.selectionChanged$.subscribe((selections) => {
-                    this.fireEvent(this.Event.SelectionChanged, {
-                        workbook,
-                        worksheet: workbook.getActiveSheet(),
-                        selections: selections?.map((s) => s.range) ?? [],
-                    });
-                })
-            ));
+            combined$Disposable.add(
+                this.registerEventHandler(
+                    this.Event.SelectionChanged,
+                    () => selectionService.selectionChanged$.subscribe((selections) => {
+                        this.fireEvent(this.Event.SelectionChanged, {
+                            workbook,
+                            worksheet: workbook.getActiveSheet(),
+                            selections: selections?.map((s) => s.range) ?? [],
+                        });
+                    })
+                )
+            );
             // for pro, in pro, life cycle & created$ is not same as univer sdk
             // if not clear sheetRenderUnit, that would cause event bind twice!
             sheetRenderUnit = null;
-            this.disposeWithMe(disposable);
+            this.disposeWithMe(combined$Disposable);
         }));
-
-        this.disposeWithMe(renderManagerService.disposed$.subscribe((unitId) => {
-            unitMap.get(unitId)?.dispose();
-            unitMap.delete(unitId);
-        }));
-
-        this.disposeWithMe(() => {
-            unitMap.forEach((disposable) => {
-                disposable.dispose();
-            });
-        });
     }
 
     /**
      * @ignore
      */
-
+    // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         this._initSheetUIEvent(injector);
         this._initObserverListener(injector);
         const commandService = injector.get(ICommandService);
 
-        this.registerEventHandler(
-            this.Event.BeforeClipboardChange,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                switch (commandInfo.id) {
-                    case CopyCommand.id:
-                    case CutCommand.id:
-                        this._beforeClipboardChange();
-                        break;
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeClipboardChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    switch (commandInfo.id) {
+                        case CopyCommand.id:
+                        case CutCommand.id:
+                            this._beforeClipboardChange();
+                            break;
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.ClipboardChanged,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                switch (commandInfo.id) {
-                    case CopyCommand.id:
-                    case CutCommand.id:
-                        this._clipboardChanged();
-                        break;
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.ClipboardChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    switch (commandInfo.id) {
+                        case CopyCommand.id:
+                        case CutCommand.id:
+                            this._clipboardChanged();
+                            break;
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeClipboardPaste,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                switch (commandInfo.id) {
-                    case SheetPasteShortKeyCommand.id:
-                        this._beforeClipboardPaste(commandInfo.params);
-                        break;
-                    case PasteCommand.id:
-                        this._beforeClipboardPasteAsync();
-                        break;
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeClipboardPaste,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    switch (commandInfo.id) {
+                        case SheetPasteShortKeyCommand.id:
+                            this._beforeClipboardPaste(commandInfo.params);
+                            break;
+                        case PasteCommand.id:
+                            this._beforeClipboardPasteAsync();
+                            break;
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.ClipboardPasted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                switch (commandInfo.id) {
-                    case SheetPasteShortKeyCommand.id:
-                        this._clipboardPaste(commandInfo.params);
-                        break;
-                    case PasteCommand.id:
-                        this._clipboardPasteAsync();
-                        break;
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.ClipboardPasted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    switch (commandInfo.id) {
+                        case SheetPasteShortKeyCommand.id:
+                            this._clipboardPaste(commandInfo.params);
+                            break;
+                        case PasteCommand.id:
+                            this._clipboardPasteAsync();
+                            break;
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetSkeletonChanged,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
-                    const sheet = this.getActiveSheet();
-                    if (!sheet) return;
-                    const ranges = getSkeletonChangedEffectedRange(commandInfo, sheet.worksheet.getMaxColumns())
-                        .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
-                        .filter(Boolean) as FRange[];
-                    if (!ranges.length) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetSkeletonChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
+                        const sheet = this.getActiveSheet();
+                        if (!sheet) return;
+                        const ranges = getSkeletonChangedEffectedRange(commandInfo, sheet.worksheet.getMaxColumns())
+                            .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
+                            .filter(Boolean) as FRange[];
+                        if (!ranges.length) return;
 
-                    this.fireEvent(this.Event.SheetSkeletonChanged, {
-                        workbook: sheet.workbook,
-                        worksheet: sheet.worksheet,
-                        payload: commandInfo as CommandListenerSkeletonChange,
-                        skeleton: sheet.worksheet.getSkeleton()!,
-                        effectedRanges: ranges,
-                    });
-                }
-            })
+                        this.fireEvent(this.Event.SheetSkeletonChanged, {
+                            workbook: sheet.workbook,
+                            worksheet: sheet.worksheet,
+                            payload: commandInfo as CommandListenerSkeletonChange,
+                            skeleton: sheet.worksheet.getSkeleton()!,
+                            effectedRanges: ranges,
+                        });
+                    }
+                })
+            )
         );
     }
 

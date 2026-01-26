@@ -81,7 +81,8 @@
         "monaco-editor": "0.55.1",
         "react": "19.2.3",
         "react-dom": "19.2.3",
-        "react-mosaic-component": "^6.1.1"
+        "react-mosaic-component": "^6.1.1",
+        "rxjs": "^7.8.2"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

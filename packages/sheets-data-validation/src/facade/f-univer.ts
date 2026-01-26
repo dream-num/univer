@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { IDisposable, Injector } from '@univerjs/core';
 import type {
     IAddSheetDataValidationCommandParams,
     IRemoveSheetAllDataValidationCommandParams,
@@ -85,56 +85,64 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
-        const sheetDataValidationModel = injector.get(SheetDataValidationModel);
-        if (!sheetDataValidationModel) return;
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetDataValidationChanged,
-                () => sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
-                    const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
-                    const target = this.getSheetTarget(unitId, subUnitId);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
+                () => {
+                    if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
+                    const sheetDataValidationModel = injector.get(SheetDataValidationModel);
 
-                    const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
-                    this.fireEvent(this.Event.SheetDataValidationChanged, {
-                        origin: ruleChange,
-                        worksheet,
-                        workbook,
-                        changeType: type,
-                        oldRule,
-                        rule: fRule,
+                    return sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
+                        const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
+                        const target = this.getSheetTarget(unitId, subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+
+                        const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
+                        this.fireEvent(this.Event.SheetDataValidationChanged, {
+                            origin: ruleChange,
+                            worksheet,
+                            workbook,
+                            changeType: type,
+                            oldRule,
+                            rule: fRule,
+                        });
                     });
-                })
+                }
             )
         );
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetDataValidatorStatusChanged,
-                () => sheetDataValidationModel.validStatusChange$.subscribe((statusChange) => {
-                    const { unitId, subUnitId, ruleId, status, row, col } = statusChange;
-                    const target = this.getSheetTarget(unitId, subUnitId);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
-                    const rule = worksheet.getDataValidation(ruleId);
-                    if (!rule) {
-                        return;
-                    }
-                    this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
-                        workbook,
-                        worksheet,
-                        row,
-                        column: col,
-                        rule,
-                        status,
+                () => {
+                    if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
+                    const sheetDataValidationModel = injector.get(SheetDataValidationModel);
+
+                    return sheetDataValidationModel.validStatusChange$.subscribe((statusChange) => {
+                        const { unitId, subUnitId, ruleId, status, row, col } = statusChange;
+                        const target = this.getSheetTarget(unitId, subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const rule = worksheet.getDataValidation(ruleId);
+                        if (!rule) {
+                            return;
+                        }
+                        this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
+                            workbook,
+                            worksheet,
+                            row,
+                            column: col,
+                            rule,
+                            status,
+                        });
                     });
-                })
+                }
             )
         );
 

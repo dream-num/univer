@@ -86,6 +86,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         const sheetDataValidationModel = injector.get(SheetDataValidationModel);
+        if (!sheetDataValidationModel) return;
 
         this.disposeWithMe(
             this.registerEventHandler(

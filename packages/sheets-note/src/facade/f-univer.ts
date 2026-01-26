@@ -31,124 +31,138 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
-        const model = injector.get(SheetsNoteModel);
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetNoteAdd,
-                () => model.change$.subscribe((change) => {
-                    if (change.type === 'update' && !change.oldNote && change.note) {
-                        const { unitId, sheetId, row, col, note } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && !change.oldNote && change.note) {
+                            const { unitId, sheetId, row, col, note } = change;
+                            const target = this.getSheetTarget(unitId, sheetId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteAdd, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                            note,
-                        });
-                    }
-                })
+                            this.fireEvent(this.Event.SheetNoteAdd, {
+                                workbook,
+                                worksheet,
+                                row,
+                                col,
+                                note,
+                            });
+                        }
+                    });
+                }
             )
         );
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetNoteDelete,
-                () => model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && !change.note) {
-                        const { unitId, sheetId, row, col, oldNote } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && !change.note) {
+                            const { unitId, sheetId, row, col, oldNote } = change;
+                            const target = this.getSheetTarget(unitId, sheetId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteDelete, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                            oldNote,
-                        });
-                    }
-                })
+                            this.fireEvent(this.Event.SheetNoteDelete, {
+                                workbook,
+                                worksheet,
+                                row,
+                                col,
+                                oldNote,
+                            });
+                        }
+                    });
+                }
             )
         );
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetNoteUpdate,
-                () => model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && change.note) {
-                        const { unitId, sheetId, row, col, note, oldNote } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && change.note) {
+                            const { unitId, sheetId, row, col, note, oldNote } = change;
+                            const target = this.getSheetTarget(unitId, sheetId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteUpdate, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                            note,
-                            oldNote,
-                        });
-                    }
-                })
+                            this.fireEvent(this.Event.SheetNoteUpdate, {
+                                workbook,
+                                worksheet,
+                                row,
+                                col,
+                                note,
+                                oldNote,
+                            });
+                        }
+                    });
+                }
             )
         );
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetNoteShow,
-                () => model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && change.note && !change.oldNote.show && change.note.show) {
-                        const { unitId, sheetId, row, col } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && change.note && !change.oldNote.show && change.note.show) {
+                            const { unitId, sheetId, row, col } = change;
+                            const target = this.getSheetTarget(unitId, sheetId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteShow, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                        });
-                    }
-                })
+                            this.fireEvent(this.Event.SheetNoteShow, {
+                                workbook,
+                                worksheet,
+                                row,
+                                col,
+                            });
+                        }
+                    });
+                }
             )
         );
 
         this.disposeWithMe(
             this.registerEventHandler(
                 this.Event.SheetNoteHide,
-                () => model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && change.note && change.oldNote.show && !change.note.show) {
-                        const { unitId, sheetId, row, col } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && change.note && change.oldNote.show && !change.note.show) {
+                            const { unitId, sheetId, row, col } = change;
+                            const target = this.getSheetTarget(unitId, sheetId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteHide, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                        });
-                    }
-                })
+                            this.fireEvent(this.Event.SheetNoteHide, {
+                                workbook,
+                                worksheet,
+                                row,
+                                col,
+                            });
+                        }
+                    });
+                }
             )
         );
 

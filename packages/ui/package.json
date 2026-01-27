@@ -88,7 +88,7 @@
         "localforage": "^1.10.0"
     },
     "devDependencies": {
-        "@testing-library/react": "^16.3.1",
+        "@testing-library/react": "^16.3.2",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "postcss": "^8.5.6",
@@ -99,6 +99,6 @@
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.9.3",
         "vite": "^7.3.1",
-        "vitest": "^4.0.16"
+        "vitest": "^4.0.18"
     }
 }

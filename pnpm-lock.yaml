@@ -675,6 +675,9 @@ importers:
       react-mosaic-component:
         specifier: ^6.1.1
         version: 6.1.1(@types/node@25.0.3)(@types/react@19.2.7)(dnd-core@16.0.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4

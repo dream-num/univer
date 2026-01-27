@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { Nullable, Univer } from '@univerjs/core';
 import type { FUniver, IEventBase } from '@univerjs/core/facade';
+import type { IRender } from '@univerjs/engine-render';
 import type { IRemoveColByRangeCommandParams } from '@univerjs/sheets';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { CanceledError, ICommandService } from '@univerjs/core';
+import { CanceledError, DisposableCollection, ICommandService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RemoveColByRangeCommand } from '@univerjs/sheets';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { IContextMenuService } from '@univerjs/ui';
+import { combineLatest } from 'rxjs';
 
 interface IMainRightClickEventParams extends IEventBase {
     event: MouseEvent;
@@ -51,9 +53,10 @@ interface ICustomEventParamConfig {
 }
 
 export function customRegisterEvent(univer: Univer, univerAPI: FUniver) {
+    registerMainRightClickEvent(univer, univerAPI);
+
     univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
         if (stage === univerAPI.Enum.LifecycleStages.Steady) {
-            registerMainRightClickEvent(univer, univerAPI);
             registerRemoveColumnEvent(univer, univerAPI);
             registerBeforeRemoveColumnEvent(univer, univerAPI);
 
@@ -91,68 +94,90 @@ export function customRegisterEvent(univer: Univer, univerAPI: FUniver) {
 }
 
 function registerMainRightClickEvent(univer: Univer, univerAPI: FUniver) {
-    const fWorkbook = univerAPI.getActiveWorkbook();
-    if (!fWorkbook) return;
-
-    const fWorksheet = fWorkbook.getActiveSheet();
-    if (!fWorksheet) return;
-
     const injector = univer.__getInjector();
     const renderManagerService = injector.get(IRenderManagerService);
-    const render = renderManagerService.getRenderById(fWorkbook.getId());
-    if (!render) return;
-
-    const { components } = render;
-    const mainComponent = components.get(SHEET_VIEW_KEY.MAIN);
-    if (!mainComponent) return;
-
+    const lifeCycleService = injector.get(LifecycleService);
     const contextMenuService = injector.get(IContextMenuService);
 
-    univerAPI.registerEventHandler(
-        'MainRightClickEvent',
-        () => mainComponent.onPointerDown$.subscribeEvent((event) => {
-            if (event.button !== 2) return;
+    let sheetRenderUnit: Nullable<IRender>;
+    const combined$ = combineLatest([
+        renderManagerService.created$,
+        lifeCycleService.lifecycle$,
+    ]);
+    const disposable = new DisposableCollection();
 
-            const activeRange = fWorksheet.getActiveRange();
-            const eventParams: IMainRightClickEventParams = {
-                event,
-                row: activeRange?.getRow() ?? 0,
-                column: activeRange?.getColumn() ?? 0,
-            };
+    univerAPI.disposeWithMe(combined$.subscribe(([created, lifecycle]) => {
+        if (created.type === UniverInstanceType.UNIVER_SHEET) {
+            sheetRenderUnit = created;
+        }
+        if (lifecycle <= LifecycleStages.Rendered) return;
+        if (!sheetRenderUnit) return;
 
-            univerAPI.fireEvent('MainRightClickEvent', eventParams);
+        const { components } = sheetRenderUnit;
+        const mainComponent = components.get(SHEET_VIEW_KEY.MAIN);
+        if (!mainComponent) return;
 
-            if (eventParams.cancel) {
-                requestAnimationFrame(() => {
-                    contextMenuService.hideContextMenu();
-                });
-            }
-        })
-    );
+        const fWorkbook = univerAPI.getWorkbook(sheetRenderUnit.unitId);
+        if (!fWorkbook) return;
+
+        const fWorksheet = fWorkbook.getActiveSheet();
+        if (!fWorksheet) return;
+
+        disposable.dispose();
+
+        disposable.add(
+            univerAPI.registerEventHandler(
+                'MainRightClickEvent',
+                () => mainComponent.onPointerDown$.subscribeEvent((event) => {
+                    if (event.button !== 2) return;
+
+                    const activeRange = fWorksheet.getActiveRange();
+                    const eventParams: IMainRightClickEventParams = {
+                        event,
+                        row: activeRange?.getRow() ?? 0,
+                        column: activeRange?.getColumn() ?? 0,
+                    };
+
+                    univerAPI.fireEvent('MainRightClickEvent', eventParams);
+
+                    // If the event is canceled, do not show the context menu
+                    if (eventParams.cancel) {
+                        requestAnimationFrame(() => {
+                            contextMenuService.hideContextMenu();
+                        });
+                    }
+                })
+            )
+        );
+
+        univerAPI.disposeWithMe(disposable);
+    }));
 }
 
 function registerRemoveColumnEvent(univer: Univer, univerAPI: FUniver) {
     const injector = univer.__getInjector();
     const commandService = injector.get(ICommandService);
 
-    univerAPI.registerEventHandler(
-        'RemoveColumnEvent',
-        () => commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id !== RemoveColByRangeCommand.id) return;
+    univerAPI.disposeWithMe(
+        univerAPI.registerEventHandler(
+            'RemoveColumnEvent',
+            () => commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== RemoveColByRangeCommand.id) return;
 
-            const target = univerAPI.getCommandSheetTarget(commandInfo);
-            if (!target) return;
+                const target = univerAPI.getCommandSheetTarget(commandInfo);
+                if (!target) return;
 
-            const { range } = commandInfo.params as IRemoveColByRangeCommandParams;
-            const eventParams: IRemoveColumnEventParams = {
-                workbook: target.workbook,
-                worksheet: target.worksheet,
-                startColumn: range.startColumn,
-                endColumn: range.endColumn,
-            };
+                const { range } = commandInfo.params as IRemoveColByRangeCommandParams;
+                const eventParams: IRemoveColumnEventParams = {
+                    workbook: target.workbook,
+                    worksheet: target.worksheet,
+                    startColumn: range.startColumn,
+                    endColumn: range.endColumn,
+                };
 
-            univerAPI.fireEvent('RemoveColumnEvent', eventParams);
-        })
+                univerAPI.fireEvent('RemoveColumnEvent', eventParams);
+            })
+        )
     );
 }
 
@@ -160,28 +185,30 @@ function registerBeforeRemoveColumnEvent(univer: Univer, univerAPI: FUniver) {
     const injector = univer.__getInjector();
     const commandService = injector.get(ICommandService);
 
-    univerAPI.registerEventHandler(
-        'BeforeRemoveColumnEvent',
-        () => commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandInfo.id !== RemoveColByRangeCommand.id) return;
+    univerAPI.disposeWithMe(
+        univerAPI.registerEventHandler(
+            'BeforeRemoveColumnEvent',
+            () => commandService.beforeCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== RemoveColByRangeCommand.id) return;
 
-            const target = univerAPI.getCommandSheetTarget(commandInfo);
-            if (!target) return;
+                const target = univerAPI.getCommandSheetTarget(commandInfo);
+                if (!target) return;
 
-            const { range } = commandInfo.params as IRemoveColByRangeCommandParams;
-            const eventParams: IBeforeRemoveColumnEventParams = {
-                workbook: target.workbook,
-                worksheet: target.worksheet,
-                startColumn: range.startColumn,
-                endColumn: range.endColumn,
-            };
+                const { range } = commandInfo.params as IRemoveColByRangeCommandParams;
+                const eventParams: IBeforeRemoveColumnEventParams = {
+                    workbook: target.workbook,
+                    worksheet: target.worksheet,
+                    startColumn: range.startColumn,
+                    endColumn: range.endColumn,
+                };
 
-            univerAPI.fireEvent('BeforeRemoveColumnEvent', eventParams);
+                univerAPI.fireEvent('BeforeRemoveColumnEvent', eventParams);
 
-            if (eventParams.cancel) {
-                throw new CanceledError();
-            }
-        })
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                }
+            })
+        )
     );
 }
 

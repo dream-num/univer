@@ -86,410 +86,439 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
         const commandService = injector.get(ICommandService);
 
         // Float DOM Add Events
-        this.registerEventHandler(
-            this.Event.BeforeFloatDomAdd,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeFloatDomAdd,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as IInsertDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const { drawings } = params;
-                const floatDomDrawings = drawings.filter(
-                    (drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_DOM
-                ) as ISheetFloatDom[];
-
-                if (floatDomDrawings.length === 0) {
-                    return;
-                }
-
-                const eventParams: IBeforeFloatDomAddParam = {
-                    workbook,
-                    drawings: floatDomDrawings,
-                };
-
-                this.fireEvent(this.Event.BeforeFloatDomAdd, eventParams);
-
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
-        );
-
-        this.registerEventHandler(
-            this.Event.FloatDomAdded,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
-
-                const params = commandInfo.params as IInsertDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const { drawings } = params;
-                const floatDomDrawings = drawings.filter(
-                    (drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_DOM
-                ) as ISheetFloatDom[];
-
-                if (floatDomDrawings.length === 0) {
-                    return;
-                }
-
-                this.fireEvent(this.Event.FloatDomAdded, {
-                    workbook,
-                    drawings: floatDomDrawings,
-                });
-            })
-        );
-
-        this.registerEventHandler(
-            this.Event.BeforeOverGridImageInsert,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
-
-                const params = commandInfo.params as IInsertDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const { drawings } = params;
-                const eventParams: IBeforeOverGridImageInsertParam = {
-                    workbook,
-                    insertImageParams: drawings as ISheetImage[],
-                };
-
-                this.fireEvent(this.Event.BeforeOverGridImageInsert, eventParams);
-
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
-        );
-
-        this.registerEventHandler(
-            this.Event.BeforeOverGridImageRemove,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
-
-                const params = commandInfo.params as IDeleteDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const drawingManagerService = injector.get(IDrawingManagerService);
-
-                const { drawings } = params;
-                const willRemoveDrawings = drawings.map((drawing) => {
-                    return drawingManagerService.getDrawingByParam(drawing);
-                }) as ISheetImage[];
-
-                const eventParams: IBeforeOverGridImageRemoveParam = {
-                    workbook,
-                    images: this._createFOverGridImage(willRemoveDrawings),
-                };
-
-                this.fireEvent(this.Event.BeforeOverGridImageRemove, eventParams);
-
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
-        );
-
-        this.registerEventHandler(
-            this.Event.BeforeOverGridImageChange,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetSheetDrawingCommand.id) return;
-
-                const params = commandInfo.params as ISetDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const { drawings } = params;
-                const drawingManagerService = injector.get(IDrawingManagerService);
-
-                const images: IBeforeOverGridImageChangeParamObject[] = [];
-                drawings.forEach((drawing) => {
-                    const image = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage;
-                    if (image == null) {
+                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
                         return;
                     }
 
-                    images.push({
-                        changeParam: drawing,
-                        image: this._injector.createInstance(FOverGridImage, image),
+                    const { drawings } = params;
+                    const floatDomDrawings = drawings.filter(
+                        (drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_DOM
+                    ) as ISheetFloatDom[];
+
+                    if (floatDomDrawings.length === 0) {
+                        return;
+                    }
+
+                    const eventParams: IBeforeFloatDomAddParam = {
+                        workbook,
+                        drawings: floatDomDrawings,
+                    };
+
+                    this.fireEvent(this.Event.BeforeFloatDomAdd, eventParams);
+
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.FloatDomAdded,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
+
+                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
+
+                    const { drawings } = params;
+                    const floatDomDrawings = drawings.filter(
+                        (drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_DOM
+                    ) as ISheetFloatDom[];
+
+                    if (floatDomDrawings.length === 0) {
+                        return;
+                    }
+
+                    this.fireEvent(this.Event.FloatDomAdded, {
+                        workbook,
+                        drawings: floatDomDrawings,
                     });
-                });
+                })
+            )
+        );
 
-                const eventParams: IBeforeOverGridImageChangeParam = {
-                    workbook,
-                    images,
-                };
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeOverGridImageInsert,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                this.fireEvent(this.Event.BeforeOverGridImageChange, eventParams);
+                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
 
-                if (eventParams.cancel) {
-                    drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
-                    throw new CanceledError();
-                }
-            })
+                    const { drawings } = params;
+                    const eventParams: IBeforeOverGridImageInsertParam = {
+                        workbook,
+                        insertImageParams: drawings as ISheetImage[],
+                    };
+
+                    this.fireEvent(this.Event.BeforeOverGridImageInsert, eventParams);
+
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeOverGridImageRemove,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
+
+                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
+
+                    const drawingManagerService = injector.get(IDrawingManagerService);
+
+                    const { drawings } = params;
+                    const willRemoveDrawings = drawings.map((drawing) => {
+                        return drawingManagerService.getDrawingByParam(drawing);
+                    }) as ISheetImage[];
+
+                    const eventParams: IBeforeOverGridImageRemoveParam = {
+                        workbook,
+                        images: this._createFOverGridImage(willRemoveDrawings),
+                    };
+
+                    this.fireEvent(this.Event.BeforeOverGridImageRemove, eventParams);
+
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeOverGridImageChange,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetSheetDrawingCommand.id) return;
+
+                    const params = commandInfo.params as ISetDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
+
+                    const { drawings } = params;
+                    const drawingManagerService = injector.get(IDrawingManagerService);
+
+                    const images: IBeforeOverGridImageChangeParamObject[] = [];
+                    drawings.forEach((drawing) => {
+                        const image = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage;
+                        if (image == null) {
+                            return;
+                        }
+
+                        images.push({
+                            changeParam: drawing,
+                            image: this._injector.createInstance(FOverGridImage, image),
+                        });
+                    });
+
+                    const eventParams: IBeforeOverGridImageChangeParam = {
+                        workbook,
+                        images,
+                    };
+
+                    this.fireEvent(this.Event.BeforeOverGridImageChange, eventParams);
+
+                    if (eventParams.cancel) {
+                        drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
+                        throw new CanceledError();
+                    }
+                })
+            )
         );
 
         // Float DOM Update Events
-        this.registerEventHandler(
-            this.Event.BeforeFloatDomUpdate,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeFloatDomUpdate,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as ISetDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const { drawings } = params;
-                const drawingManagerService = injector.get(IDrawingManagerService);
-
-                const floatDomDrawings: ISheetFloatDom[] = [];
-                drawings.forEach((drawing) => {
-                    const dom = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetFloatDom;
-                    if (dom?.drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                        floatDomDrawings.push(dom);
+                    const params = commandInfo.params as ISetDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
                     }
-                });
 
-                if (floatDomDrawings.length === 0) {
-                    return;
-                }
+                    const { drawings } = params;
+                    const drawingManagerService = injector.get(IDrawingManagerService);
 
-                const eventParams: IBeforeFloatDomUpdateParam = {
-                    workbook,
-                    drawings: floatDomDrawings,
-                };
+                    const floatDomDrawings: ISheetFloatDom[] = [];
+                    drawings.forEach((drawing) => {
+                        const dom = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetFloatDom;
+                        if (dom?.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                            floatDomDrawings.push(dom);
+                        }
+                    });
 
-                this.fireEvent(this.Event.BeforeFloatDomUpdate, eventParams);
+                    if (floatDomDrawings.length === 0) {
+                        return;
+                    }
 
-                if (eventParams.cancel) {
-                    drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
-                    throw new CanceledError();
-                }
-            })
+                    const eventParams: IBeforeFloatDomUpdateParam = {
+                        workbook,
+                        drawings: floatDomDrawings,
+                    };
+
+                    this.fireEvent(this.Event.BeforeFloatDomUpdate, eventParams);
+
+                    if (eventParams.cancel) {
+                        drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
+                        throw new CanceledError();
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.FloatDomUpdated,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetSheetDrawingCommand.id) return;
+        // Float DOM Update Events
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.FloatDomUpdated,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as ISetDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
-
-                const { drawings } = params;
-                const drawingManagerService = injector.get(IDrawingManagerService);
-
-                const floatDomDrawings: ISheetFloatDom[] = [];
-                drawings.forEach((drawing) => {
-                    const dom = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetFloatDom;
-                    if (dom?.drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                        floatDomDrawings.push(dom);
+                    const params = commandInfo.params as ISetDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
                     }
-                });
 
-                if (floatDomDrawings.length === 0) {
-                    return;
-                }
+                    const { drawings } = params;
+                    const drawingManagerService = injector.get(IDrawingManagerService);
 
-                this.fireEvent(this.Event.FloatDomUpdated, {
-                    workbook,
-                    drawings: floatDomDrawings,
-                });
-            })
+                    const floatDomDrawings: ISheetFloatDom[] = [];
+                    drawings.forEach((drawing) => {
+                        const dom = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetFloatDom;
+                        if (dom?.drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                            floatDomDrawings.push(dom);
+                        }
+                    });
+
+                    if (floatDomDrawings.length === 0) {
+                        return;
+                    }
+
+                    this.fireEvent(this.Event.FloatDomUpdated, {
+                        workbook,
+                        drawings: floatDomDrawings,
+                    });
+                })
+            )
         );
 
         // Float DOM Delete Events
-        this.registerEventHandler(
-            this.Event.BeforeFloatDomDelete,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeFloatDomDelete,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as IDeleteDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
+                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
 
-                const drawingManagerService = injector.get(IDrawingManagerService);
+                    const drawingManagerService = injector.get(IDrawingManagerService);
 
-                const { drawings } = params;
-                const floatDomDrawings = drawings
-                    .map((drawing) => drawingManagerService.getDrawingByParam(drawing))
-                    .filter((drawing): drawing is ISheetFloatDom =>
-                        drawing?.drawingType === DrawingTypeEnum.DRAWING_DOM
-                    );
+                    const { drawings } = params;
+                    const floatDomDrawings = drawings
+                        .map((drawing) => drawingManagerService.getDrawingByParam(drawing))
+                        .filter((drawing): drawing is ISheetFloatDom =>
+                            drawing?.drawingType === DrawingTypeEnum.DRAWING_DOM
+                        );
 
-                if (floatDomDrawings.length === 0) {
-                    return;
-                }
+                    if (floatDomDrawings.length === 0) {
+                        return;
+                    }
 
-                const eventParams: IBeforeFloatDomDeleteParam = {
-                    workbook,
-                    drawings: floatDomDrawings,
-                };
+                    const eventParams: IBeforeFloatDomDeleteParam = {
+                        workbook,
+                        drawings: floatDomDrawings,
+                    };
 
-                this.fireEvent(this.Event.BeforeFloatDomDelete, eventParams);
+                    this.fireEvent(this.Event.BeforeFloatDomDelete, eventParams);
 
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.FloatDomDeleted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.FloatDomDeleted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as IDeleteDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
+                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
 
-                const { drawings } = params;
+                    const { drawings } = params;
 
-                this.fireEvent(this.Event.FloatDomDeleted, {
-                    workbook,
-                    drawings: drawings.filter((i) => i.drawingType === DrawingTypeEnum.DRAWING_DOM).map((i) => i.drawingId),
-                });
-            })
+                    this.fireEvent(this.Event.FloatDomDeleted, {
+                        workbook,
+                        drawings: drawings.filter((i) => i.drawingType === DrawingTypeEnum.DRAWING_DOM).map((i) => i.drawingId),
+                    });
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeOverGridImageSelect,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetDrawingSelectedOperation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeOverGridImageSelect,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetDrawingSelectedOperation.id) return;
 
-                const drawings = commandInfo.params as IDrawingSearch[];
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null) {
-                    return;
-                }
-                const drawingManagerService = injector.get(IDrawingManagerService);
+                    const drawings = commandInfo.params as IDrawingSearch[];
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null) {
+                        return;
+                    }
+                    const drawingManagerService = injector.get(IDrawingManagerService);
 
-                const oldSelectedDrawings = drawingManagerService.getFocusDrawings() as ISheetImage[];
-                const selectedDrawings = drawings.map((drawing) => {
-                    return drawingManagerService.getDrawingByParam(drawing);
-                }) as ISheetImage[];
+                    const oldSelectedDrawings = drawingManagerService.getFocusDrawings() as ISheetImage[];
+                    const selectedDrawings = drawings.map((drawing) => {
+                        return drawingManagerService.getDrawingByParam(drawing);
+                    }) as ISheetImage[];
 
-                const eventParams: IBeforeOverGridImageSelectParam = {
-                    workbook,
-                    selectedImages: this._createFOverGridImage(selectedDrawings),
-                    oldSelectedImages: this._createFOverGridImage(oldSelectedDrawings),
-                };
+                    const eventParams: IBeforeOverGridImageSelectParam = {
+                        workbook,
+                        selectedImages: this._createFOverGridImage(selectedDrawings),
+                        oldSelectedImages: this._createFOverGridImage(oldSelectedDrawings),
+                    };
 
-                this.fireEvent(this.Event.BeforeOverGridImageSelect, eventParams);
+                    this.fireEvent(this.Event.BeforeOverGridImageSelect, eventParams);
 
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.OverGridImageInserted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.OverGridImageInserted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as IInsertDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
+                    const params = commandInfo.params as IInsertDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
 
-                const { drawings } = params;
-                this.fireEvent(this.Event.OverGridImageInserted, {
-                    workbook,
-                    images: this._createFOverGridImage(drawings as ISheetImage[]),
-                });
-            })
+                    const { drawings } = params;
+                    this.fireEvent(this.Event.OverGridImageInserted, {
+                        workbook,
+                        images: this._createFOverGridImage(drawings as ISheetImage[]),
+                    });
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.OverGridImageRemoved,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.OverGridImageRemoved,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as IDeleteDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
+                    const params = commandInfo.params as IDeleteDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
 
-                const { drawings } = params;
-                this.fireEvent(this.Event.OverGridImageRemoved, {
-                    workbook,
-                    removeImageParams: drawings,
-                });
-            })
+                    const { drawings } = params;
+                    this.fireEvent(this.Event.OverGridImageRemoved, {
+                        workbook,
+                        removeImageParams: drawings,
+                    });
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.OverGridImageChanged,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetSheetDrawingCommand.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.OverGridImageChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetSheetDrawingCommand.id) return;
 
-                const params = commandInfo.params as ISetDrawingCommandParams;
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null || params == null) {
-                    return;
-                }
+                    const params = commandInfo.params as ISetDrawingCommandParams;
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null || params == null) {
+                        return;
+                    }
 
-                const { drawings } = params;
-                const drawingManagerService = injector.get(IDrawingManagerService);
+                    const { drawings } = params;
+                    const drawingManagerService = injector.get(IDrawingManagerService);
 
-                const images = drawings.map((drawing) => {
-                    return this._injector.createInstance(FOverGridImage, drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage);
-                });
+                    const images = drawings.map((drawing) => {
+                        return this._injector.createInstance(FOverGridImage, drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage);
+                    });
 
-                this.fireEvent(this.Event.OverGridImageChanged, {
-                    workbook,
-                    images,
-                });
-            })
+                    this.fireEvent(this.Event.OverGridImageChanged, {
+                        workbook,
+                        images,
+                    });
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.OverGridImageSelected,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SetDrawingSelectedOperation.id) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.OverGridImageSelected,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SetDrawingSelectedOperation.id) return;
 
-                const drawings = commandInfo.params as IDrawingSearch[];
-                const workbook = this.getActiveWorkbook();
-                if (workbook == null) {
-                    return;
-                }
-                const drawingManagerService = injector.get(IDrawingManagerService);
+                    const drawings = commandInfo.params as IDrawingSearch[];
+                    const workbook = this.getActiveWorkbook();
+                    if (workbook == null) {
+                        return;
+                    }
+                    const drawingManagerService = injector.get(IDrawingManagerService);
 
-                const selectedDrawings = drawings.map((drawing) => {
-                    return drawingManagerService.getDrawingByParam(drawing);
-                }) as ISheetImage[];
+                    const selectedDrawings = drawings.map((drawing) => {
+                        return drawingManagerService.getDrawingByParam(drawing);
+                    }) as ISheetImage[];
 
-                this.fireEvent(this.Event.OverGridImageSelected, {
-                    workbook,
-                    selectedImages: this._createFOverGridImage(selectedDrawings as ISheetImage[]),
-                });
-            })
+                    this.fireEvent(this.Event.OverGridImageSelected, {
+                        workbook,
+                        selectedImages: this._createFOverGridImage(selectedDrawings as ISheetImage[]),
+                    });
+                })
+            )
         );
     }
 

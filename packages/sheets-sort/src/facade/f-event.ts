@@ -95,20 +95,24 @@ class FUniverSheetsSortEventMixin extends FUniver {
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.registerEventHandler(
-            this.Event.SheetBeforeRangeSort,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SortRangeCommand.id) return;
-                this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetBeforeRangeSort,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SortRangeCommand.id) return;
+                    this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetRangeSorted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== SortRangeCommand.id) return;
-                this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetRangeSorted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== SortRangeCommand.id) return;
+                    this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
+                })
+            )
         );
     }
 

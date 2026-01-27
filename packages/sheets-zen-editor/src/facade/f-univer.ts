@@ -36,165 +36,175 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
         const commandService = injector.get(ICommandService);
 
         // Register before command execution handlers
-        this.registerEventHandler(
-            this.Event.BeforeSheetEditStart,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === OpenZenEditorCommand.id) {
-                    const target = this.getCommandSheetTarget(commandInfo);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
-                    const editorBridgeService = injector.get(IEditorBridgeService);
-                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                    const { keycode, eventType } = params;
-                    const loc = editorBridgeService.getEditLocation()!;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetEditStart,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === OpenZenEditorCommand.id) {
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const editorBridgeService = injector.get(IEditorBridgeService);
+                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                        const { keycode, eventType } = params;
+                        const loc = editorBridgeService.getEditLocation()!;
 
-                    const eventParams: IBeforeSheetEditStartEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: true,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                        const eventParams: IBeforeSheetEditStartEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: true,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetEditEnd,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (
-                    commandInfo.id === CancelZenEditCommand.id ||
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetEditEnd,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (
+                        commandInfo.id === CancelZenEditCommand.id ||
                     commandInfo.id === ConfirmZenEditCommand.id
-                ) {
-                    const target = this.getCommandSheetTarget(commandInfo);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
-                    const editorBridgeService = injector.get(IEditorBridgeService);
-                    const univerInstanceService = injector.get(IUniverInstanceService);
-                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                    const { keycode, eventType } = params;
-                    const loc = editorBridgeService.getEditLocation()!;
+                    ) {
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const editorBridgeService = injector.get(IEditorBridgeService);
+                        const univerInstanceService = injector.get(IUniverInstanceService);
+                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                        const { keycode, eventType } = params;
+                        const loc = editorBridgeService.getEditLocation()!;
 
-                    const eventParams: IBeforeSheetEditEndEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: true,
-                        value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_ZEN_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
-                        isConfirm: commandInfo.id === ConfirmZenEditCommand.id,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                        const eventParams: IBeforeSheetEditEndEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: true,
+                            value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_ZEN_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                            isConfirm: commandInfo.id === ConfirmZenEditCommand.id,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
         // Register command execution handlers
-        this.registerEventHandler(
-            this.Event.SheetEditStarted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === OpenZenEditorCommand.id) {
-                    const target = this.getCommandSheetTarget(commandInfo);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetEditStarted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === OpenZenEditorCommand.id) {
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
 
-                    const editorBridgeService = injector.get(IEditorBridgeService);
-                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                    const { keycode, eventType } = params;
-                    const loc = editorBridgeService.getEditLocation()!;
-                    const eventParams: ISheetEditStartedEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: true,
-                    };
-                    this.fireEvent(this.Event.SheetEditStarted, eventParams);
-                }
-            })
+                        const editorBridgeService = injector.get(IEditorBridgeService);
+                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                        const { keycode, eventType } = params;
+                        const loc = editorBridgeService.getEditLocation()!;
+                        const eventParams: ISheetEditStartedEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: true,
+                        };
+                        this.fireEvent(this.Event.SheetEditStarted, eventParams);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetEditEnded,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (
-                    commandInfo.id === CancelZenEditCommand.id ||
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetEditEnded,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (
+                        commandInfo.id === CancelZenEditCommand.id ||
                     commandInfo.id === ConfirmZenEditCommand.id
-                ) {
-                    const target = this.getCommandSheetTarget(commandInfo);
-                    if (!target) {
-                        return;
+                    ) {
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+
+                        const editorBridgeService = injector.get(IEditorBridgeService);
+                        const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                        const { keycode, eventType } = params;
+                        const loc = editorBridgeService.getEditLocation()!;
+
+                        const eventParams: ISheetEditEndedEventParams = {
+                            row: loc.row,
+                            column: loc.column,
+                            eventType,
+                            keycode,
+                            workbook,
+                            worksheet,
+                            isZenEditor: true,
+                            isConfirm: commandInfo.id === ConfirmZenEditCommand.id,
+                        };
+                        this.fireEvent(this.Event.SheetEditEnded, eventParams);
                     }
-                    const { workbook, worksheet } = target;
-
-                    const editorBridgeService = injector.get(IEditorBridgeService);
-                    const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
-                    const { keycode, eventType } = params;
-                    const loc = editorBridgeService.getEditLocation()!;
-
-                    const eventParams: ISheetEditEndedEventParams = {
-                        row: loc.row,
-                        column: loc.column,
-                        eventType,
-                        keycode,
-                        workbook,
-                        worksheet,
-                        isZenEditor: true,
-                        isConfirm: commandInfo.id === ConfirmZenEditCommand.id,
-                    };
-                    this.fireEvent(this.Event.SheetEditEnded, eventParams);
-                }
-            })
+                })
+            )
         );
 
         // Register rich text editing mutation handler
-        this.registerEventHandler(
-            this.Event.SheetEditChanging,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === RichTextEditingMutation.id) {
-                    const target = this.getActiveSheet();
-                    if (!target) {
-                        return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetEditChanging,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === RichTextEditingMutation.id) {
+                        const target = this.getActiveSheet();
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const editorBridgeService = injector.get(IEditorBridgeService);
+                        const univerInstanceService = injector.get(IUniverInstanceService);
+                        const params = commandInfo.params as IRichTextEditingMutationParams;
+                        if (!editorBridgeService.isVisible().visible) return;
+                        const { unitId } = params;
+                        if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                            const { row, column } = editorBridgeService.getEditLocation()!;
+                            const eventParams: ISheetEditChangingEventParams = {
+                                workbook,
+                                worksheet,
+                                row,
+                                column,
+                                value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_ZEN_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                                isZenEditor: true,
+                            };
+                            this.fireEvent(this.Event.SheetEditChanging, eventParams);
+                        }
                     }
-                    const { workbook, worksheet } = target;
-                    const editorBridgeService = injector.get(IEditorBridgeService);
-                    const univerInstanceService = injector.get(IUniverInstanceService);
-                    const params = commandInfo.params as IRichTextEditingMutationParams;
-                    if (!editorBridgeService.isVisible().visible) return;
-                    const { unitId } = params;
-                    if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                        const { row, column } = editorBridgeService.getEditLocation()!;
-                        const eventParams: ISheetEditChangingEventParams = {
-                            workbook,
-                            worksheet,
-                            row,
-                            column,
-                            value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_ZEN_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
-                            isZenEditor: true,
-                        };
-                        this.fireEvent(this.Event.SheetEditChanging, eventParams);
-                    }
-                }
-            })
+                })
+            )
         );
     }
 

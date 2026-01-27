@@ -25,13 +25,13 @@ test('no error on constructing and disposing', async ({ page }) => {
     });
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet());
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit());
 
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet(0));
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet(0));
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit(0));
 
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet(2000));
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet(2000));
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit(0));
 
     await page.evaluate(() => window.E2EControllerAPI.disposeUniver());
@@ -49,16 +49,16 @@ test('no error on constructing and disposing sheet unit', async ({ page }) => {
 
     await page.goto('http://localhost:3000/sheets/');
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit());
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet());
 
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit(0));
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet(0));
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet(0));
 
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit(500));
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet(1000));
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet(1000));
 
     await page.evaluate(() => window.E2EControllerAPI.disposeCurrSheetUnit(3000));
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet(1000));
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet(1000));
     await page.evaluate(() => window.E2EControllerAPI.disposeUniver());
 
     expect(errored).toBeFalsy();

@@ -62,7 +62,7 @@ export class DataSyncReplicaController extends Disposable {
                 if (commandInfo.type === CommandType.MUTATION && !(options as IRemoteSyncMutationOptions)?.fromSync) {
                     this._remoteSyncService.syncMutation({
                         mutationInfo: commandInfo as IMutationInfo,
-                    });
+                    }, options);
                 }
             })
         );

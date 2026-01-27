@@ -48,7 +48,7 @@
         "@antfu/eslint-config": "^6.7.3",
         "@commitlint/cli": "^20.3.1",
         "@commitlint/config-conventional": "^20.3.1",
-        "@eslint-react/eslint-plugin": "^2.5.1",
+        "@eslint-react/eslint-plugin": "^2.7.4",
         "@playwright/test": "^1.57.0",
         "@release-it-plugins/workspaces": "^5.0.3",
         "@release-it/conventional-changelog": "^10.0.4",

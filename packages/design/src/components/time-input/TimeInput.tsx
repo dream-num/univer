@@ -52,7 +52,8 @@ export function TimeInput(props: ITimeInputProps) {
                   univer-pl-6 univer-pr-2 univer-text-center univer-text-gray-800 univer-shadow univer-outline-none
                   univer-transition-all univer-duration-200
                   focus:univer-border-primary-600
-                  dark:!univer-text-white dark:focus:!univer-border-primary-500
+                  dark:!univer-text-white
+                  dark:focus:!univer-border-primary-500
                   [&::-webkit-calendar-picker-indicator]:univer-hidden
                   [&::-webkit-calendar-picker-indicator]:univer-appearance-none
                 `, borderClassName, className)}

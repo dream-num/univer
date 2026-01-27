@@ -218,7 +218,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
         >
             <input
                 className={clsx(`
-                  univer-box-border univer-h-full univer-w-full univer-appearance-none univer-pl-1.5 univer-pr-5
+                  univer-box-border univer-size-full univer-appearance-none univer-pl-1.5 univer-pr-5
                   univer-text-gray-900
                   focus:univer-outline-none
                   dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white
@@ -248,7 +248,8 @@ export function DefinedName({ disable }: { disable: boolean }) {
                       univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
                       hover:univer-bg-gray-100
-                      dark:!univer-text-white dark:hover:!univer-bg-gray-800
+                      dark:!univer-text-white
+                      dark:hover:!univer-bg-gray-800
                     `, {
                         'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent dark:!univer-text-gray-700': disable,
                     })}

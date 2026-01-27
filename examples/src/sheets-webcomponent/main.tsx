@@ -59,7 +59,7 @@ import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-compon
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import React from 'react';
+import * as React from 'react';
 import '../global.css';
 import '@univerjs/sheets/facade';
 

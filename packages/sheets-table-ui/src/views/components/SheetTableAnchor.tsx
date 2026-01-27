@@ -111,7 +111,7 @@ export const SheetTableAnchor = () => {
     }
 
     return (
-        <div className="univer-absolute univer-z-50 univer-h-0 univer-w-0">
+        <div className="univer-absolute univer-z-50 univer-size-0">
             {anchorPosition.map((item) => {
                 const table = tableManager.getTableById(unitId, item.tableId);
                 if (!table) return null;
@@ -136,7 +136,7 @@ export const SheetTableAnchor = () => {
                         key={item.tableId}
                         className={clsx(`
                           univer-shadow-xs univer-absolute univer-box-border univer-cursor-pointer univer-items-center
-                          univer-rounded-xl univer-pl-2 univer-pr-2
+                          univer-rounded-xl univer-px-2
                         `, borderClassName, {
                             'univer-flex': !shouldHidden,
                             'univer-hidden': shouldHidden,
@@ -177,11 +177,11 @@ export const SheetTableAnchor = () => {
                             key={item.tableId}
                             align="start"
                             overlay={(
-                                <div className="univer-pb-2 univer-pt-2">
+                                <div className="univer-py-2">
                                     <div
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-gap-2 univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-gap-2 univer-px-2 univer-py-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                         onClick={() => {
@@ -193,15 +193,13 @@ export const SheetTableAnchor = () => {
                                         {localeService.t('sheets-table.rename')}
                                     </div>
                                     <div
-                                        className={`
-                                          univer-mb-1 univer-mt-1 univer-h-px univer-w-full univer-bg-gray-200
-                                        `}
+                                        className="univer-my-1 univer-h-px univer-w-full univer-bg-gray-200"
                                     />
                                     <div
                                         onClick={() => handleChangeRange(item.tableId)}
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-gap-2 univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-gap-2 univer-px-2 univer-py-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                     >
@@ -211,7 +209,7 @@ export const SheetTableAnchor = () => {
                                     <div
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-gap-2 univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-gap-2 univer-px-2 univer-py-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                         onClick={() => {
@@ -240,14 +238,12 @@ export const SheetTableAnchor = () => {
                                         {localeService.t('sheets-table.setTheme')}
                                     </div>
                                     <div
-                                        className={`
-                                          univer-mb-1 univer-mt-1 univer-h-px univer-w-full univer-bg-gray-200
-                                        `}
+                                        className="univer-my-1 univer-h-px univer-w-full univer-bg-gray-200"
                                     />
                                     <div
                                         className={`
                                           univer-flex univer-min-w-32 univer-cursor-pointer univer-items-center
-                                          univer-pb-1 univer-pl-2 univer-pr-2 univer-pt-1 univer-text-sm
+                                          univer-px-2 univer-py-1 univer-text-sm
                                           hover:univer-bg-gray-200
                                         `}
                                         onClick={() => {

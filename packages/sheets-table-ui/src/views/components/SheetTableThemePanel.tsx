@@ -201,7 +201,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
 
                                 <div
                                     className={`
-                                      univer-absolute univer-right-[-3px] univer-top-[-3px] univer-h-3 univer-w-3
+                                      univer-absolute univer-right-[-3px] univer-top-[-3px] univer-size-3
                                       univer-rounded-md univer-bg-gray-200 univer-text-center univer-text-xs
                                       univer-leading-[10px]
                                     `}
@@ -264,7 +264,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         `, borderClassName)}
                                     >
                                         <div
-                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName, {
+                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName, {
                                                 'univer-text-white': headerBgIsDark,
                                                 'univer-text-gray-900': !headerBgIsDark,
                                             })}
@@ -272,7 +272,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                                 background: headerBg,
                                             }}
                                         />
-                                        <DropdownIcon className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -319,10 +319,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         `, borderClassName)}
                                     >
                                         <div
-                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
+                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: firstRowBg }}
                                         />
-                                        <DropdownIcon className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -367,10 +367,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         `, borderClassName)}
                                     >
                                         <div
-                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
+                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: secondRowBg }}
                                         />
-                                        <DropdownIcon className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>
@@ -416,10 +416,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         `, borderClassName)}
                                     >
                                         <div
-                                            className={clsx('univer-h-4 univer-w-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
+                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
                                             style={{ background: lastRowBg }}
                                         />
-                                        <DropdownIcon className="univer-h-2 univer-w-2" />
+                                        <DropdownIcon className="univer-size-2" />
                                     </div>
                                 </Dropdown>
                             </div>

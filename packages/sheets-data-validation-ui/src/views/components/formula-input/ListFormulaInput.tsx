@@ -111,7 +111,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                 `, borderClassName)}
             >
                 <div
-                    className="univer-box-border univer-h-4 univer-w-4 univer-rounded univer-text-base"
+                    className="univer-box-border univer-size-4 univer-rounded univer-text-base"
                     style={{ background: value }}
                 />
 

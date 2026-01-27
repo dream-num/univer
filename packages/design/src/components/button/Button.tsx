@@ -37,7 +37,8 @@ export const buttonVariants = cva(
                   hover:univer-bg-gray-100
                   active:univer-bg-gray-200
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-700 dark:!univer-text-white
-                  dark:hover:!univer-bg-gray-600 dark:active:!univer-bg-gray-700
+                  dark:hover:!univer-bg-gray-600
+                  dark:active:!univer-bg-gray-700
                 `,
                 primary: `
                   univer-border-primary-600 univer-bg-primary-600 univer-text-white
@@ -53,7 +54,9 @@ export const buttonVariants = cva(
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
                   hover:univer-bg-gray-100
                   active:univer-bg-gray-200
-                  dark:!univer-text-white dark:hover:!univer-bg-gray-700 dark:active:!univer-bg-gray-600
+                  dark:!univer-text-white
+                  dark:hover:!univer-bg-gray-700
+                  dark:active:!univer-bg-gray-600
                 `,
                 link: `
                   univer-underline-current univer-border-transparent univer-bg-transparent univer-text-primary-600
@@ -65,7 +68,9 @@ export const buttonVariants = cva(
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
                   hover:univer-bg-gray-100
                   active:univer-bg-gray-200
-                  dark:!univer-text-white dark:hover:!univer-bg-gray-700 dark:active:!univer-bg-gray-600
+                  dark:!univer-text-white
+                  dark:hover:!univer-bg-gray-700
+                  dark:active:!univer-bg-gray-600
                 `,
             },
             size: {

@@ -123,7 +123,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         >
             <canvas
                 ref={canvasRef}
-                className="univer-h-full univer-w-full univer-cursor-crosshair univer-rounded"
+                className="univer-size-full univer-cursor-crosshair univer-rounded"
                 onPointerDown={(e) => {
                     setIsDragging(true);
                     handlePointerEvent(e);

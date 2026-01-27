@@ -323,7 +323,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             <div
                 ref={sheetEmbeddingRef}
                 className={clsx(`
-                  univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-items-center
+                  univer-relative univer-box-border univer-flex univer-size-full univer-items-center
                   univer-justify-around univer-gap-2 univer-rounded-none univer-p-0 univer-ring-1
                 `, {
                     'univer-ring-primary-500': isFocus,
@@ -332,7 +332,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             >
                 <div
                     ref={formulaEditorContainerRef}
-                    className="univer-relative univer-h-full univer-w-full"
+                    className="univer-relative univer-size-full"
                     onMouseUp={handleMouseUp}
                 />
             </div>

@@ -17,7 +17,8 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu } from '@univerjs/design';
-import React, { useMemo, useRef, useState } from 'react';
+import * as React from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ComponentManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
@@ -192,9 +193,9 @@ export function Slider(props: ISliderProps) {
                     <a
                         key="reset-button"
                         className={`
-                          univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-h-0.5
-                          univer-w-0.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
-                          univer-rounded-full univer-bg-white
+                          univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-size-0.5
+                          -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full
+                          univer-bg-white
                         `}
                         role="button"
                         onClick={handleReset}

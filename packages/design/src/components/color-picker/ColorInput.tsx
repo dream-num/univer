@@ -150,7 +150,8 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
         <div
             className={`
               univer-flex univer-items-center univer-gap-2
-              [&>input]:univer-w-11 [&>input]:univer-border-gray-200 [&>input]:focus:univer-border-primary-500
+              [&>input]:univer-w-11 [&>input]:univer-border-gray-200
+              [&>input]:focus:univer-border-primary-500
               dark:[&>input]:!univer-border-gray-600 dark:[&>input]:!univer-text-white
             `}
         >

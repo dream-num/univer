@@ -187,8 +187,8 @@ function SelectList(props: ISelectListProps) {
                             </div>
                             <div
                                 className={`
-                                  univer-ml-3 univer-h-4 univer-w-4 univer-flex-shrink-0 univer-flex-grow-0
-                                  univer-text-base univer-text-primary-500
+                                  univer-ml-3 univer-size-4 univer-flex-shrink-0 univer-flex-grow-0 univer-text-base
+                                  univer-text-primary-500
                                 `}
                             >
                                 {selected && <CheckMarkIcon className="univer-text-primary-600" />}

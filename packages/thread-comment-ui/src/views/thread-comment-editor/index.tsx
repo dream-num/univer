@@ -166,7 +166,7 @@ export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; use
         })}
     >
         <img
-            className="univer-mr-1.5 univer-h-6 univer-w-6 univer-rounded-full"
+            className="univer-mr-1.5 univer-size-6 univer-rounded-full"
             src={user.avatar}
             draggable={false}
         />

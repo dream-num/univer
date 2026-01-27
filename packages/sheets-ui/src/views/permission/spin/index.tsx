@@ -26,7 +26,7 @@ interface ISpinProps {
 
 const Spin = ({ loading, children }: ISpinProps) => {
     return (
-        <div className="univer-relative univer-h-full univer-w-full">
+        <div className="univer-relative univer-size-full">
             {loading && (
                 <div
                     className={`

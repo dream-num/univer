@@ -316,7 +316,7 @@ function RectPopup(props: IRectPopupProps) {
             {mask && (
                 <div
                     data-u-comp="rect-popup-mask"
-                    className="univer-fixed univer-bottom-0 univer-left-0 univer-right-0 univer-top-0 univer-z-[100]"
+                    className="univer-fixed univer-inset-0 univer-z-[100]"
                     style={{ zIndex: maskZIndex }}
                     onClick={onMaskClick}
                 />

@@ -82,7 +82,7 @@ export const SwitchUnits = () => {
                                 {isActive && (
                                     <div
                                         className={`
-                                          univer-absolute -univer-bottom-1 univer-left-1/2 univer-h-1 univer-w-1
+                                          univer-absolute -univer-bottom-1 univer-left-1/2 univer-size-1
                                           -univer-translate-x-1/2 univer-transform univer-rounded-full
                                           univer-bg-blue-500
                                         `}

@@ -147,7 +147,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
                           univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2
                           univer-pt-1.5
                         `]: !noStyle,
-                        'univer-h-full univer-w-full': noStyle,
+                        'univer-size-full': noStyle,
                         [borderClassName]: !noStyle,
                     }
                 )}

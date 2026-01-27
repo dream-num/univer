@@ -149,10 +149,9 @@ export function HelpFunction(props: IHelpFunctionProps) {
                             <div className="univer-flex">
                                 <div
                                     className={`
-                                      univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded univer-bg-transparent
-                                      univer-p-0 univer-text-xs univer-text-gray-500 univer-outline-none
-                                      univer-transition-colors
+                                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                                      univer-justify-center univer-rounded univer-bg-transparent univer-p-0
+                                      univer-text-xs univer-text-gray-500 univer-outline-none univer-transition-colors
                                       hover:univer-bg-gray-200
                                       dark:hover:!univer-bg-gray-600
                                     `}
@@ -163,12 +162,12 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                 </div>
                                 <div
                                     className={`
-                                      univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded univer-bg-transparent
-                                      univer-p-0 univer-text-xs univer-text-gray-600 univer-outline-none
-                                      univer-transition-colors
+                                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                                      univer-justify-center univer-rounded univer-bg-transparent univer-p-0
+                                      univer-text-xs univer-text-gray-600 univer-outline-none univer-transition-colors
                                       hover:univer-bg-gray-300
-                                      dark:!univer-text-gray-200 dark:hover:!univer-bg-gray-600
+                                      dark:!univer-text-gray-200
+                                      dark:hover:!univer-bg-gray-600
                                     `}
                                     onClick={onClose}
                                 >

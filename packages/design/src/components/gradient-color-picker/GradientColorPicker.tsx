@@ -177,7 +177,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         key={index}
                         className={clsx(
                             `
-                              univer-absolute univer-top-1/2 univer-h-4 univer-w-4 -univer-translate-x-1/2
+                              univer-absolute univer-top-1/2 univer-size-4 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full univer-border-2
                               univer-border-white univer-shadow-md
                             `,

@@ -17,47 +17,47 @@ exports[`ColorPicker > should render correctly 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow !univer-border-gray-200"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow !univer-border-gray-200"
           style="background-color: #FFFFFF;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #E1EFFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FDE8E8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FEECDC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FFF4B9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #DEF7EC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #D5F5F6;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #EDEBFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FCE8F3;"
           type="button"
         />
@@ -66,47 +66,47 @@ exports[`ColorPicker > should render correctly 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #CDD0D8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #A4CAFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F8B4B4;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FDBA8C;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FAC815;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #84E1BC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #7EDCE2;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #CABFFD;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F8B4D9;"
           type="button"
         />
@@ -115,47 +115,47 @@ exports[`ColorPicker > should render correctly 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #979DAC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #3F83F8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F05252;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FF5A1F;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #D49D0F;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #0DA471;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #0694A2;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #9061F9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #E74694;"
           type="button"
         />
@@ -164,47 +164,47 @@ exports[`ColorPicker > should render correctly 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #414657;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #1A56DB;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #C81E1E;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #B43403;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #9A6D15;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #046C4E;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #036672;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #6C2BD9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #BF125D;"
           type="button"
         />
@@ -213,47 +213,47 @@ exports[`ColorPicker > should render correctly 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:!univer-ring-primary-600 dark:!univer-ring-offset-gray-600"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:!univer-ring-primary-600 dark:!univer-ring-offset-gray-600"
           style="background-color: #000000;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #233876;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #771D1D;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #771D1D;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #634312;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #014737;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #014451;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #4A1D96;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #751A3D;"
           type="button"
         />
@@ -291,47 +291,47 @@ exports[`ColorPicker > should render with value 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow !univer-border-gray-200"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow !univer-border-gray-200"
           style="background-color: #FFFFFF;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #E1EFFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FDE8E8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FEECDC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FFF4B9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #DEF7EC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #D5F5F6;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #EDEBFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FCE8F3;"
           type="button"
         />
@@ -340,47 +340,47 @@ exports[`ColorPicker > should render with value 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #CDD0D8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #A4CAFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F8B4B4;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FDBA8C;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FAC815;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #84E1BC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #7EDCE2;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #CABFFD;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F8B4D9;"
           type="button"
         />
@@ -389,47 +389,47 @@ exports[`ColorPicker > should render with value 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #979DAC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #3F83F8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F05252;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FF5A1F;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #D49D0F;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #0DA471;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #0694A2;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #9061F9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #E74694;"
           type="button"
         />
@@ -438,47 +438,47 @@ exports[`ColorPicker > should render with value 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #414657;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #1A56DB;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #C81E1E;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #B43403;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #9A6D15;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #046C4E;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #036672;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #6C2BD9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #BF125D;"
           type="button"
         />
@@ -487,47 +487,47 @@ exports[`ColorPicker > should render with value 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #000000;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #233876;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #771D1D;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #771D1D;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #634312;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #014737;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #014451;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #4A1D96;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #751A3D;"
           type="button"
         />
@@ -565,47 +565,47 @@ exports[`ColorPicker > should support format hex 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow !univer-border-gray-200"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow !univer-border-gray-200"
           style="background-color: #FFFFFF;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #E1EFFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FDE8E8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FEECDC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FFF4B9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #DEF7EC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #D5F5F6;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #EDEBFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FCE8F3;"
           type="button"
         />
@@ -614,47 +614,47 @@ exports[`ColorPicker > should support format hex 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #CDD0D8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #A4CAFE;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F8B4B4;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FDBA8C;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FAC815;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #84E1BC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #7EDCE2;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #CABFFD;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F8B4D9;"
           type="button"
         />
@@ -663,47 +663,47 @@ exports[`ColorPicker > should support format hex 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #979DAC;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #3F83F8;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #F05252;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #FF5A1F;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #D49D0F;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #0DA471;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #0694A2;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #9061F9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #E74694;"
           type="button"
         />
@@ -712,47 +712,47 @@ exports[`ColorPicker > should support format hex 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #414657;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #1A56DB;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #C81E1E;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #B43403;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #9A6D15;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #046C4E;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #036672;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #6C2BD9;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #BF125D;"
           type="button"
         />
@@ -761,47 +761,47 @@ exports[`ColorPicker > should support format hex 1`] = `
         class="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
       >
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #000000;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #233876;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #771D1D;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #771D1D;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #634312;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #014737;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #014451;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #4A1D96;"
           type="button"
         />
         <button
-          class="univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
+          class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
           style="background-color: #751A3D;"
           type="button"
         />

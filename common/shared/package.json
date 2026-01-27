@@ -30,7 +30,7 @@
         "@vitejs/plugin-vue": "^6.0.3",
         "@vitest/coverage-istanbul": "^4.0.18",
         "autoprefixer": "^10.4.23",
-        "eslint-plugin-better-tailwindcss": "^3.8.0",
+        "eslint-plugin-better-tailwindcss": "^4.0.2",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",

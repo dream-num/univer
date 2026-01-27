@@ -30,15 +30,17 @@ export const RemoteSyncServiceName = 'rpc.remote-sync.service';
  */
 export const IRemoteSyncService = createIdentifier<IRemoteSyncService>(RemoteSyncServiceName);
 export interface IRemoteSyncService {
-    syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
+    syncMutation(params: { mutationInfo: IMutationInfo }, options?: IExecutionOptions): Promise<boolean>;
 }
 export class RemoteSyncPrimaryService implements IRemoteSyncService {
     constructor(@ICommandService private readonly _commandService: ICommandService) {
         // empty
     }
 
-    async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
+    async syncMutation(params: { mutationInfo: IMutationInfo }, options?: IExecutionOptions): Promise<boolean> {
+        const { fromCollab, ...restOptions } = options || {};
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
+            ...restOptions,
             onlyLocal: true,
             fromSync: true,
         });
@@ -60,7 +62,7 @@ export interface IRemoteInstanceService {
 
     createInstance(params: { unitID: string; type: UniverInstanceType; snapshot: IWorkbookData }): Promise<boolean>;
     disposeInstance(params: { unitID: string }): Promise<boolean>;
-    syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
+    syncMutation(params: { mutationInfo: IMutationInfo }, options?: IExecutionOptions): Promise<boolean>;
 }
 
 export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
@@ -76,8 +78,8 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
         return Promise.resolve(true);
     }
 
-    async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
-        return this._applyMutation(params.mutationInfo);
+    async syncMutation(params: { mutationInfo: IMutationInfo }, options?: IExecutionOptions): Promise<boolean> {
+        return this._applyMutation(params.mutationInfo, options);
     }
 
     async createInstance(params: {
@@ -111,9 +113,11 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
         return this._univerInstanceService.disposeUnit(params.unitID);
     }
 
-    protected _applyMutation(mutationInfo: IMutationInfo): boolean {
+    protected _applyMutation(mutationInfo: IMutationInfo, options?: IExecutionOptions): boolean {
         const { id, params: mutationParams } = mutationInfo;
+        const { fromCollab, ...restOptions } = options || {};
         return this._commandService.syncExecuteCommand(id, mutationParams, {
+            ...restOptions,
             onlyLocal: true,
             fromSync: true,
         });

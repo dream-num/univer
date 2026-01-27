@@ -15,10 +15,48 @@
  */
 
 import type { ICommandInfo, IDisposable, IUnitRange } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams, IExprTreeNode, IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults, IFormulaExecuteResultMap, IFormulaStringMap, ISequenceNode, ISetCellFormulaDependencyCalculationResultMutation, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation, ISetFormulaDependencyCalculationResultMutation, ISetFormulaStringBatchCalculationResultMutation, ISetQueryFormulaDependencyAllResultMutation } from '@univerjs/engine-formula';
+import type {
+    FormulaExecutedStateType,
+    IExecutionInProgressParams,
+    IExprTreeNode,
+    IFormulaDependencyTreeFullJson,
+    IFormulaDependencyTreeJson,
+    IFormulaDependentsAndInRangeResults,
+    IFormulaExecuteResultMap,
+    IFormulaStringMap,
+    ISequenceNode,
+    ISetCellFormulaDependencyCalculationResultMutation,
+    ISetFormulaCalculationNotificationMutation,
+    ISetFormulaCalculationStartMutation,
+    ISetFormulaDependencyCalculationResultMutation,
+    ISetFormulaStringBatchCalculationResultMutation,
+    ISetQueryFormulaDependencyAllResultMutation,
+} from '@univerjs/engine-formula';
 import { ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, GlobalComputingStatusService, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder, SetCellFormulaDependencyCalculationMutation, SetCellFormulaDependencyCalculationResultMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetFormulaDependencyCalculationMutation, SetFormulaDependencyCalculationResultMutation, SetFormulaStringBatchCalculationMutation, SetFormulaStringBatchCalculationResultMutation, SetQueryFormulaDependencyAllMutation, SetQueryFormulaDependencyAllResultMutation, SetQueryFormulaDependencyMutation, SetQueryFormulaDependencyResultMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import {
+    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
+    ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
+    GlobalComputingStatusService,
+    IDefinedNamesService,
+    IFunctionService,
+    ISuperTableService,
+    LexerTreeBuilder,
+    SetCellFormulaDependencyCalculationMutation,
+    SetCellFormulaDependencyCalculationResultMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
+    SetFormulaDependencyCalculationMutation,
+    SetFormulaDependencyCalculationResultMutation,
+    SetFormulaStringBatchCalculationMutation,
+    SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyAllMutation,
+    SetQueryFormulaDependencyAllResultMutation,
+    SetQueryFormulaDependencyMutation,
+    SetQueryFormulaDependencyResultMutation,
+    SetTriggerFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
 import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
@@ -238,120 +276,6 @@ export class FFormula extends FBase {
      */
     setMaxIteration(maxIteration: number): void {
         this._configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, maxIteration);
-    }
-
-    /**
-     * Listens for the moment when formula-calculation results are applied.
-     *
-     * This event fires after the engine completes a calculation cycle and
-     * dispatches a `SetFormulaCalculationResultMutation`.
-     * The callback is invoked during an idle frame to avoid blocking UI updates.
-     *
-     * @param {Function} callback - A function called with the calculation result payload
-     * once the result-application mutation is emitted.
-     * @returns {IDisposable} A disposable used to unsubscribe from the event.
-     *
-     * @example
-     * ```ts
-     * const formulaEngine = univerAPI.getFormula();
-     *
-     * const dispose = formulaEngine.calculationResultApplied((result) => {
-     *   console.log('Calculation results applied:', result);
-     * });
-     *
-     * // Later…
-     * dispose.dispose();
-     * ```
-     */
-    calculationResultApplied(callback: (result: ISetFormulaCalculationResultMutation) => void): IDisposable {
-        return this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetFormulaCalculationResultMutation.id) {
-                return;
-            }
-
-            const params = command.params as ISetFormulaCalculationResultMutation;
-
-            if (params !== undefined) {
-                requestIdleCallback(() => {
-                    callback(params);
-                });
-            }
-        });
-    }
-
-    /**
-     * Waits for formula-calculation results to be applied.
-     *
-     * This method resolves under three conditions:
-     * 1. A real calculation runs and the engine emits a "calculation started" signal,
-     *    followed by a "calculation result applied" signal.
-     * 2. No calculation actually starts within 500 ms — the method assumes there is
-     *    nothing to wait for and resolves automatically.
-     * 3. A global 30 s timeout triggers, in which case the promise rejects.
-     *
-     * The API internally listens to both “calculation in progress” events and
-     * “calculation result applied” events, ensuring it behaves correctly whether
-     * formulas are recalculated or skipped due to cache/state.
-     *
-     * @returns {Promise<void>} A promise that resolves when calculation results are applied
-     * or when no calculation occurs within the start-detection window.
-     *
-     * @example
-     * ```ts
-     * const formulaEngine = univerAPI.getFormula();
-     *
-     * // Wait for formula updates to apply before reading values.
-     * await formulaEngine.onCalculationResultApplied();
-     *
-     * const value = sheet.getRange("C24").getValue();
-     * console.log("Updated value:", value);
-     * ```
-     */
-    onCalculationResultApplied(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            let started = false;
-            let finished = false;
-
-            // Global timeout: reject if the whole calculation hangs
-            const mainTimer = setTimeout(() => {
-                cleanup();
-                reject(new Error('Calculation end timeout'));
-            }, 30_000);
-
-            // Watchdog: if no "calculation started" signal is received within 500ms,
-            // assume there is no real calculation running and resolve immediately.
-            const startWatchdog = setTimeout(() => {
-                if (!started) {
-                    cleanup();
-                    resolve();
-                }
-            }, 500);
-
-            // Listen for "calculation in progress" signal (stageInfo)
-            const processingDisposable = this.calculationProcessing(() => {
-                if (started) return;
-                started = true;
-
-                // A start signal is received → no need for the watchdog anymore
-                clearTimeout(startWatchdog);
-            });
-
-            // Listen for the "calculation completed" signal
-            const endDisposable = this.calculationResultApplied(() => {
-                if (finished) return;
-                finished = true;
-
-                cleanup();
-                resolve();
-            });
-
-            function cleanup(): void {
-                clearTimeout(mainTimer);
-                clearTimeout(startWatchdog);
-                processingDisposable.dispose();
-                endDisposable.dispose();
-            }
-        });
     }
 
     /**

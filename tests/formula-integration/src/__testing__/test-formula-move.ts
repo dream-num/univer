@@ -66,12 +66,13 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // move row 3 to before row 5
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
 
     await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
@@ -88,7 +89,6 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
     // perform undo operation
     await testBed.api.undo();
     await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();
@@ -121,12 +121,13 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // move row 3 to before row 5
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
 
     await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
@@ -143,7 +144,6 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
     // perform undo operation
     await testBed.api.undo();
     await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();
@@ -176,6 +176,8 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // move D4:D5 to G13:G14
     const fromRange = worksheet.getRange('D4:D5').getRange();
     const toRange = worksheet.getRange('G13:G14').getRange();
@@ -185,7 +187,6 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
     });
 
     await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
@@ -202,7 +203,6 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
     // perform undo operation
     await testBed.api.undo();
     await testBed.api.getFormula().onCalculationResultApplied();
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();

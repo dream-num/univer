@@ -53,9 +53,9 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
 
     return (
         <div
-            data-u-comp="slide-tab-item"
             key={sheetId}
             data-id={sheetId}
+            data-u-comp="slide-tab-item"
             className={clsx(`
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
               univer-flex-row univer-items-center univer-rounded univer-text-xs univer-transition-[colors,box-shadow]

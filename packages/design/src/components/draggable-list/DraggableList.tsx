@@ -56,9 +56,9 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
         <ReactGridLayout
             {...gridProps}
             cols={12}
-            preventCollision={false}
-            isResizable={false}
             isDraggable
+            isResizable={false}
+            preventCollision={false}
             onLayoutChange={(layout) => {
                 const newList = layout.sort((prev, aft) => prev.y - aft.y).map((item) => listMap.get(item.i)!);
                 onListChange(newList);

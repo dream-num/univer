@@ -62,16 +62,16 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
                     </RadioGroup>
                 )}
                 <Select
-                    value={operator}
                     options={secondaryOptions}
+                    value={operator}
                     onChange={(operator) => onFormParamsChange({ [name]: operator as FilterOperator })}
                 />
                 {shouldRenderInput && (
                     <div>
                         <Input
                             className="univer-mt-2"
-                            value={val}
                             placeholder={placeholder}
+                            value={val}
                             onChange={(value) => onFormParamsChange({ [name === 'operator1' ? 'val1' : 'val2']: value })}
                         />
                     </div>
@@ -88,7 +88,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
             {/* primary condition */}
             {(condition && formParams) && (
                 <>
-                    <Select value={condition.operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
+                    <Select options={primaryOptions} value={condition.operator} onChange={onPrimaryConditionChange} />
                     {FilterConditionItems.getItemByOperator(condition.operator).numOfParameters !== 0
                         ? (
                             <div

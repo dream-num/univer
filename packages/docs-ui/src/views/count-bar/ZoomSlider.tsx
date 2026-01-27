@@ -79,8 +79,8 @@ export function ZoomSlider() {
     return (
         <Slider
             min={DOC_ZOOM_RANGE[0]}
-            value={zoom}
             shortcuts={ZOOM_MAP}
+            value={zoom}
             onChange={handleChange}
         />
     );

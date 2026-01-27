@@ -225,15 +225,15 @@ function DocSideMenuContent() {
             className="univer-absolute univer-bottom-0 univer-left-0 univer-top-0 univer-z-[100] univer-w-[0px]"
         >
             <SideMenu
-                menus={menus}
-                open={open}
-                onOpenChange={setOpen}
-                mode={mode}
-                maxWidth={mode === 'float' ? undefined : Math.floor(left) - 10}
-                wrapperClass="univer-mt-12"
                 activeId={activeId}
-                onClick={handleClick}
                 maxHeight={canvasHeight - 48}
+                maxWidth={mode === 'float' ? undefined : Math.floor(left) - 10}
+                menus={menus}
+                mode={mode}
+                open={open}
+                wrapperClass="univer-mt-12"
+                onClick={handleClick}
+                onOpenChange={setOpen}
             />
         </div>
     );

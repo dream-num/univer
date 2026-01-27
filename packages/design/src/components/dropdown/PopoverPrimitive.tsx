@@ -41,12 +41,9 @@ function PopoverContent({
         <Portal>
             <Content
                 data-slot="popover-content"
-                align={align}
-                sideOffset={sideOffset}
                 className={clsx(
                     `
-                      univer-outline-hidden univer-z-[1080] univer-max-h-[var(--radix-popper-available-height)]
-                      univer-overflow-y-auto univer-rounded-md univer-bg-white univer-text-gray-900 univer-shadow-md
+                      univer-outline-hidden
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
                       data-[state=open]:univer-zoom-in-95
                       data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
@@ -55,12 +52,17 @@ function PopoverContent({
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2
                       data-[side=top]:univer-slide-in-from-bottom-2
-                      dark:!univer-bg-gray-900 dark:!univer-text-white dark:focus-visible:!univer-border-gray-600
+                      univer-z-[1080] univer-max-h-[--radix-popper-available-height] univer-overflow-y-auto
+                      univer-rounded-md univer-bg-white univer-text-gray-900 univer-shadow-md
+                      dark:!univer-bg-gray-900 dark:!univer-text-white
+                      dark:focus-visible:!univer-border-gray-600
                     `,
                     borderClassName,
                     scrollbarClassName,
                     className
                 )}
+                align={align}
+                sideOffset={sideOffset}
                 {...props}
             />
         </Portal>

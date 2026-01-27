@@ -146,10 +146,10 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             </div>
 
             <DrawingArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
-            <DrawingTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
+            <DrawingTransform drawings={drawings} transformShow={hasTransform === true ? transformShow : false} />
             <DrawingAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />
             <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} />
-            <DrawingGroup hasGroup={hasGroup} drawings={drawings} />
+            <DrawingGroup drawings={drawings} hasGroup={hasGroup} />
         </>
     );
 };

@@ -82,15 +82,16 @@ export const DocThreadCommentPanel = () => {
 
     return (
         <ThreadCommentPanel
-            unitId={unitId}
+            disableAdd={isInValidSelection}
+            getSubUnitName={() => ''}
+            showComments={commentIds}
             subUnitId$={subUnitId$}
+            tempComment={tempComment}
             type={UniverInstanceType.UNIVER_DOC}
+            unitId={unitId}
             onAdd={() => {
                 commandService.executeCommand(StartAddCommentOperation.id);
             }}
-            getSubUnitName={() => ''}
-            disableAdd={isInValidSelection}
-            tempComment={tempComment}
             onAddComment={(comment) => {
                 // attach an comment to an custom-range
                 if (!comment.parentId) {
@@ -117,7 +118,6 @@ export const DocThreadCommentPanel = () => {
                 }
                 return true;
             }}
-            showComments={commentIds}
         />
     );
 };

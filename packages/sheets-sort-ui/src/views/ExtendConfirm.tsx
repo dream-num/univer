@@ -34,8 +34,8 @@ export const ExtendConfirm = (props: IExtendConfirmProps) => {
 
             <RadioGroup
                 className="univer-mt-4"
-                value={extend}
                 direction="vertical"
+                value={extend}
                 onChange={(value) => {
                     setExtend(value as string);
                     props.onChange(value as string);

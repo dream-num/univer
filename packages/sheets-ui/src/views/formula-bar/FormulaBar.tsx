@@ -293,7 +293,7 @@ export function FormulaBar(props: IProps) {
                 <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
 
-            <div className="univer-flex univer-h-full univer-w-full">
+            <div className="univer-flex univer-size-full">
                 <div className={clsx('univer-py-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disabled })}>
                     <div
                         className={clsx(`
@@ -331,7 +331,8 @@ export function FormulaBar(props: IProps) {
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
                               univer-p-1 univer-text-base
                               hover:univer-bg-gray-100
-                              dark:!univer-text-white dark:hover:!univer-bg-gray-700
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-700
                             `}
                             onClick={handlerFxBtnClick}
                         >
@@ -344,27 +345,29 @@ export function FormulaBar(props: IProps) {
                     <div
                         ref={ref}
                         className="univer-relative univer-flex-1"
+                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
+                                keyboardEventConfig={keyCodeConfig}
                                 className={`
-                                  univer-relative univer-h-full univer-w-full univer-break-words univer-outline-none
+                                  univer-relative univer-size-full univer-break-words univer-outline-none
                                   [&>div]:univer-ring-transparent
                                 `}
+                                autoScrollbar={false}
+                                disableContextMenu={false}
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
-                                onChange={() => { }}
                                 isFocus={isFocusFxBar}
-                                unitId={editState?.unitId}
-                                subUnitId={editState?.sheetId}
+                                isSingle={false}
                                 isSupportAcrossSheet
                                 resetSelectionOnBlur={false}
-                                isSingle={false}
-                                keyboardEventConfig={keyCodeConfig}
+                                subUnitId={editState?.sheetId}
+                                unitId={editState?.unitId}
+                                onChange={() => { }}
                                 onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
                                     isRefSelecting.current = isSelecting;
                                     if (!isFocusing) return;
@@ -374,8 +377,6 @@ export function FormulaBar(props: IProps) {
                                         editorBridgeService.disableForceKeepVisible();
                                     }
                                 }}
-                                autoScrollbar={false}
-                                disableContextMenu={false}
                             />
                         )}
                         {/* When the editor is hidden, we just cover a div on the editor because re-instantiate
@@ -384,7 +385,7 @@ export function FormulaBar(props: IProps) {
                             <div
                                 className={`
                                   univer-pointer-events-none univer-relative univer-left-0 univer-top-0 univer-z-[100]
-                                  univer-h-full univer-w-full univer-cursor-not-allowed univer-bg-white
+                                  univer-size-full univer-cursor-not-allowed univer-bg-white
                                 `}
                             />
                         )}

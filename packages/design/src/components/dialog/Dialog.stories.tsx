@@ -39,9 +39,9 @@ export const DialogBasic = {
                 <Button onClick={() => setVisible(true)}>open dialog</Button>
                 <Dialog
                     open={visible}
-                    title="hello world"
-                    showOk
                     showCancel
+                    showOk
+                    title="hello world"
                     onOpenChange={setVisible}
                 >
                     xxxx
@@ -59,12 +59,12 @@ export const DialogDraggable = {
             <>
                 <Button onClick={() => setVisible(true)}>open dialog</Button>
                 <Dialog
-                    open={visible}
-                    title="hello world"
-                    draggable
-                    destroyOnClose
-                    preservePositionOnDestroy
                     defaultPosition={{ x: 100, y: 100 }}
+                    destroyOnClose
+                    draggable
+                    open={visible}
+                    preservePositionOnDestroy
+                    title="hello world"
                     onClose={() => setVisible(false)}
                 >
                     xxxx

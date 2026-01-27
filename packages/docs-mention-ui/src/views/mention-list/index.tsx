@@ -38,11 +38,11 @@ export const MentionList = (props: IMentionListProps) => {
         <div
             ref={ref}
             data-editorid={editorId}
-            tabIndex={0}
             className={clsx(`
               univer-max-h-72 univer-w-72 univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-2
               univer-shadow-md
             `, borderClassName)}
+            tabIndex={0}
             onClick={onClick}
         >
             {mentions.map((typeMentions) => (

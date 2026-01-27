@@ -35,8 +35,6 @@ export const DraggableListDemo = {
 
         return (
             <DraggableList
-                list={list}
-                onListChange={setList}
                 idKey="key"
                 itemRender={(item) => (
                     <div
@@ -45,8 +43,10 @@ export const DraggableListDemo = {
                         {item.title}
                     </div>
                 )}
-                rowHeight={32}
+                list={list}
                 margin={[0, 12]}
+                rowHeight={32}
+                onListChange={setList}
             />
         );
     },

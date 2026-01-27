@@ -92,7 +92,7 @@ describe('InputNumber', () => {
     });
 
     it('should emit blur event with final value & empty input', () => {
-        const { container } = render(<TestComponent onChange={onChange} allowEmpty />);
+        const { container } = render(<TestComponent allowEmpty onChange={onChange} />);
         const input = container.querySelector('input')!;
         fireEvent.change(input, { target: { value: '' } });
         fireEvent.blur(input);

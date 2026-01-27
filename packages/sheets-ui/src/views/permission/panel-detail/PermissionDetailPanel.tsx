@@ -69,15 +69,15 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
             className="univer-mt-4 univer-flex univer-h-[calc(100%-16px)] univer-flex-col"
         >
             <PermissionDetailMainPart
+                desc={desc}
                 permissionId={activeRule.permissionId}
                 ranges={ranges}
+                rangesErrMsg={rangesErrMsg}
+                onDescChange={(v) => setDesc(v)}
                 onRangesChange={(v: IRange[], err?: string) => {
                     setRanges(v);
                     setRangesErrMsg(err);
                 }}
-                rangesErrMsg={rangesErrMsg}
-                desc={desc}
-                onDescChange={(v) => setDesc(v)}
             />
             <PermissionDetailUser
                 {...{
@@ -89,14 +89,14 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
                 }}
             />
             <PermissionDetailFooterPart
-                permissionId={activeRule.permissionId}
+                desc={desc}
+                editState={editState}
                 id={activeRule.id}
+                oldRule={oldRule}
+                permissionId={activeRule.permissionId}
                 ranges={ranges}
                 rangesErrMsg={rangesErrMsg}
-                desc={desc}
                 viewState={viewState}
-                editState={editState}
-                oldRule={oldRule}
             />
         </div>
     );

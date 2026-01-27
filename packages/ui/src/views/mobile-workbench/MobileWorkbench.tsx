@@ -152,8 +152,8 @@ export function MobileWorkbench(props: IUniverAppProps) {
 
                             <section
                                 ref={contentRef}
-                                className="univer-relative univer-overflow-hidden"
                                 data-range-selector
+                                className="univer-relative univer-overflow-hidden"
                                 onContextMenu={(e) => e.preventDefault()}
                             >
                                 <ComponentContainer key="content" components={contentComponents} />

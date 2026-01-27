@@ -34,10 +34,10 @@ export default meta;
 function PagerDemo() {
     return (
         <>
-            <FormLayout label="行标题与列标题" desc="转到“查看”>“冻结”可选择要在所有页面重复的行/列">
+            <FormLayout desc="转到“查看”>“冻结”可选择要在所有页面重复的行/列" label="行标题与列标题">
                 <Input placeholder="请输入" />
             </FormLayout>
-            <FormLayout label="行标题与列标题" desc="转到“查看”>“冻结”可选择要在所有页面重复的行/列" error="123">
+            <FormLayout desc="转到“查看”>“冻结”可选择要在所有页面重复的行/列" error="123" label="行标题与列标题">
                 <Select value="" onChange={() => { /* empty */ }} />
             </FormLayout>
         </>

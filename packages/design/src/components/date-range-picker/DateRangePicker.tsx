@@ -59,25 +59,25 @@ export function DateRangePicker(props: IDateRangePickerProps) {
     return (
         <Dropdown
             align="start"
+            open={open}
             overlay={(
                 <div className="univer-grid univer-grid-cols-2 univer-gap-2 univer-p-2">
                     <Calendar
-                        value={value[0]}
                         max={value[1]}
+                        value={value[0]}
                         onValueChange={(date) => {
                             handleValueChange([date, value[1]]);
                         }}
                     />
                     <Calendar
-                        value={value[1]}
                         min={value[0]}
+                        value={value[1]}
                         onValueChange={(date) => {
                             handleValueChange([value[0], date]);
                         }}
                     />
                 </div>
             )}
-            open={open}
             onOpenChange={setOpen}
         >
             <button

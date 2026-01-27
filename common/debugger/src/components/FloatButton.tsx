@@ -63,7 +63,7 @@ export const AIButton = () => {
         console.warn('click');
     };
     return (
-        <button type="button" style={divStyle} onClick={clickHandler}>
+        <button style={divStyle} type="button" onClick={clickHandler}>
             AI
             <style>
                 {`

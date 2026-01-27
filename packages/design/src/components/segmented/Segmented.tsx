@@ -97,8 +97,8 @@ export function Segmented<T extends ItemValue = ItemValue>({
 
     return (
         <div
-            data-u-comp="segmented"
             ref={containerRef}
+            data-u-comp="segmented"
             className={clsx(`
               univer-relative univer-box-border univer-flex univer-gap-4 univer-rounded-lg univer-bg-gray-100 univer-p-1
               dark:!univer-bg-gray-800

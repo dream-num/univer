@@ -199,12 +199,12 @@ export const DefinedNameContainer = () => {
                     </Button>
                     {editState && (
                         <DefinedNameInput
-                            confirm={insertConfirm}
                             cancel={closeInput}
-                            state={editState}
+                            confirm={insertConfirm}
+                            formulaOrRefString={getInertFormulaOrRefString()}
                             inputId="insertDefinedName"
                             name={getInsertDefinedName()}
-                            formulaOrRefString={getInertFormulaOrRefString()}
+                            state={editState}
                         />
                     )}
                 </div>
@@ -263,7 +263,7 @@ export const DefinedNameContainer = () => {
                                       dark:hover:!univer-bg-gray-600
                                     `}
                                 >
-                                    <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
+                                    <Tooltip placement="top" title={localeService.t('definedName.updateButton')}>
                                         <a
                                             className={`
                                               univer-rounded univer-p-1
@@ -277,7 +277,7 @@ export const DefinedNameContainer = () => {
                                             <PenIcon />
                                         </a>
                                     </Tooltip>
-                                    <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
+                                    <Tooltip placement="top" title={localeService.t('definedName.deleteButton')}>
                                         <a
                                             className={`
                                               univer-rounded univer-p-1 univer-text-red-600
@@ -305,15 +305,15 @@ export const DefinedNameContainer = () => {
 
                             {definedName.id === editorKey && (
                                 <DefinedNameInput
-                                    confirm={insertConfirm}
                                     cancel={closeInput}
-                                    state={definedName.id === editorKey}
+                                    comment={definedName.comment}
+                                    confirm={insertConfirm}
+                                    formulaOrRefString={definedName.formulaOrRefString}
                                     id={definedName.id}
                                     inputId={definedName.id + index}
-                                    name={definedName.name}
-                                    formulaOrRefString={definedName.formulaOrRefString}
-                                    comment={definedName.comment}
                                     localSheetId={definedName.localSheetId}
+                                    name={definedName.name}
+                                    state={definedName.id === editorKey}
                                 />
                             )}
                         </div>

@@ -116,11 +116,11 @@ export function MultipleSelect(props: IMultipleSelectProps) {
 
     return (
         <DropdownMenu
-            className="univer-w-[var(--radix-popper-anchor-width)] univer-min-w-36"
+            className="univer-w-[--radix-popper-anchor-width] univer-min-w-36"
             align="start"
-            open={open}
-            items={items}
             disabled={disabled}
+            items={items}
+            open={open}
             onOpenChange={handleOpenChange}
         >
             <div

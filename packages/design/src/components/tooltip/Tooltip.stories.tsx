@@ -40,22 +40,22 @@ export const Playground = {
                     `}
                 >
                     <div className="univer-absolute univer-top-0">
-                        <Tooltip title="hello world" placement="top">
+                        <Tooltip placement="top" title="hello world">
                             <Button>top</Button>
                         </Tooltip>
                     </div>
                     <div className="univer-absolute univer-right-0">
-                        <Tooltip title="hello world" placement="right">
+                        <Tooltip placement="right" title="hello world">
                             <Button>right</Button>
                         </Tooltip>
                     </div>
                     <div className="univer-absolute univer-bottom-0">
-                        <Tooltip title="hello world" placement="bottom">
+                        <Tooltip placement="bottom" title="hello world">
                             <Button>bottom</Button>
                         </Tooltip>
                     </div>
                     <div className="univer-absolute univer-left-0">
-                        <Tooltip title="hello world" placement="left">
+                        <Tooltip placement="left" title="hello world">
                             <Button>left</Button>
                         </Tooltip>
                     </div>
@@ -72,9 +72,9 @@ export const Playground = {
                 <div>
 
                     <Tooltip
-                        title="https://docs.google.com/spreadsheets/d/1nt6WeRPP7E8LSUdJQZBetYJandjhNa4G6i-plp__hRA/edit?gid=0#gid=0"
-                        showIfEllipsis
                         placement="bottom"
+                        showIfEllipsis
+                        title="https://docs.google.com/spreadsheets/d/1nt6WeRPP7E8LSUdJQZBetYJandjhNa4G6i-plp__hRA/edit?gid=0#gid=0"
                     >
                         <div className="univer-w-72 univer-truncate">
                             https://docs.google.com/spreadsheets/d/1nt6WeRPP7E8LSUdJQZBetYJandjhNa4G6i-plp__hRA/edit?gid=0#gid=0
@@ -84,10 +84,10 @@ export const Playground = {
 
                 <div>
                     <Tooltip
-                        title="Full text"
-                        showIfEllipsis
-                        placement="bottom"
                         asChild={false}
+                        placement="bottom"
+                        showIfEllipsis
+                        title="Full text"
                     >
                         <span>not ellipsis</span>
                     </Tooltip>

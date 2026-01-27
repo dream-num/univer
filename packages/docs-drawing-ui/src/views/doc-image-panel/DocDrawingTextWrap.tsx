@@ -298,7 +298,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             </div>
 
             <div>
-                <RadioGroup value={wrappingStyle} onChange={handleWrappingStyleChange} direction="vertical">
+                <RadioGroup direction="vertical" value={wrappingStyle} onChange={handleWrappingStyleChange}>
                     <Radio value={TextWrappingStyle.INLINE}>{localeService.t('image-text-wrap.inline')}</Radio>
                     <Radio value={TextWrappingStyle.WRAP_SQUARE}>{localeService.t('image-text-wrap.square')}</Radio>
                     <Radio value={TextWrappingStyle.WRAP_TOP_AND_BOTTOM}>{localeService.t('image-text-wrap.topAndBottom')}</Radio>
@@ -317,7 +317,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             </div>
 
             <div>
-                <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
+                <RadioGroup direction="horizontal" disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange}>
                     <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
                     <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
                     <Radio value={WrapTextType.RIGHT}>{localeService.t('image-text-wrap.rightOnly')}</Radio>
@@ -342,9 +342,9 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 <div>
                     <span>{localeService.t('image-text-wrap.top')}</span>
                     <InputNumber
-                        min={MIN_MARGIN}
-                        max={MAX_MARGIN}
                         disabled={disableDistTB}
+                        max={MAX_MARGIN}
+                        min={MIN_MARGIN}
                         precision={1}
                         value={distToText.distT}
                         onChange={(val) => { handleDistToTextChange(val, 'distT'); }}
@@ -353,9 +353,9 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 <div>
                     <span>{localeService.t('image-text-wrap.left')}</span>
                     <InputNumber
-                        min={MIN_MARGIN}
-                        max={MAX_MARGIN}
                         disabled={disableDistLR}
+                        max={MAX_MARGIN}
+                        min={MIN_MARGIN}
                         precision={1}
                         value={distToText.distL}
                         onChange={(val) => { handleDistToTextChange(val, 'distL'); }}
@@ -372,9 +372,9 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 <div>
                     <span>{localeService.t('image-text-wrap.bottom')}</span>
                     <InputNumber
-                        min={MIN_MARGIN}
-                        max={MAX_MARGIN}
                         disabled={disableDistTB}
+                        max={MAX_MARGIN}
+                        min={MIN_MARGIN}
                         precision={1}
                         value={distToText.distB}
                         onChange={(val) => { handleDistToTextChange(val, 'distB'); }}
@@ -383,9 +383,9 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 <div>
                     <span>{localeService.t('image-text-wrap.right')}</span>
                     <InputNumber
-                        min={MIN_MARGIN}
-                        max={MAX_MARGIN}
                         disabled={disableDistLR}
+                        max={MAX_MARGIN}
+                        min={MIN_MARGIN}
                         precision={1}
                         value={distToText.distR}
                         onChange={(val) => { handleDistToTextChange(val, 'distR'); }}

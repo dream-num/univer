@@ -68,9 +68,6 @@ export function Popup(props: IPopupProps) {
 
     return createPortal(
         <CSSTransition
-            in={visible}
-            nodeRef={nodeRef}
-            timeout={500}
             classNames={{
                 enter: 'univer-popup-enter',
                 enterActive: 'univer-popup-enter-active',
@@ -78,6 +75,9 @@ export function Popup(props: IPopupProps) {
                 exitActive: 'univer-popup-exit',
                 exitDone: 'univer-popup-exit-active',
             }}
+            in={visible}
+            nodeRef={nodeRef}
+            timeout={500}
         >
             <section
                 ref={nodeRef}

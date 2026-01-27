@@ -80,8 +80,8 @@ export const SheetBar = () => {
                 {/* Add sheet button */}
                 <SheetBarButton
                     className="univer-mr-2"
-                    onClick={addSheet}
                     disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}
+                    onClick={addSheet}
                 >
                     <IncreaseIcon />
                 </SheetBarButton>

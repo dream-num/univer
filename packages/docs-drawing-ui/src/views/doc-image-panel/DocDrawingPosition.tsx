@@ -399,10 +399,10 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 <div>
                     <span>{localeService.t('image-position.absolutePosition')}</span>
                     <InputNumber
-                        min={MIN_OFFSET}
-                        max={MAX_OFFSET}
-                        precision={1}
                         disabled={disabled}
+                        max={MAX_OFFSET}
+                        min={MIN_OFFSET}
+                        precision={1}
                         value={hPosition.posOffset}
                         onChange={(val) => {
                             handlePositionChange('positionH', {
@@ -415,9 +415,9 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 <div>
                     <span>{localeService.t('image-position.toTheRightOf')}</span>
                     <Select
-                        value={String(hPosition.relativeFrom)}
                         disabled={disabled}
                         options={HORIZONTAL_RELATIVE_FROM}
+                        value={String(hPosition.relativeFrom)}
                         onChange={handleHorizontalRelativeFromChange}
                     />
                 </div>
@@ -441,10 +441,10 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 <div>
                     <span>{localeService.t('image-position.absolutePosition')}</span>
                     <InputNumber
-                        min={MIN_OFFSET}
-                        max={MAX_OFFSET}
-                        precision={1}
                         disabled={disabled}
+                        max={MAX_OFFSET}
+                        min={MIN_OFFSET}
+                        precision={1}
                         value={vPosition.posOffset}
                         onChange={(val) => {
                             handlePositionChange('positionV', {
@@ -458,8 +458,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                     <span>{localeService.t('image-position.bellow')}</span>
                     <Select
                         disabled={disabled}
-                        value={String(vPosition.relativeFrom)}
                         options={VERTICAL_RELATIVE_FROM}
+                        value={String(vPosition.relativeFrom)}
                         onChange={handleVerticalRelativeFromChange}
                     />
                 </div>
@@ -476,8 +476,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
             <div>
                 <Checkbox
-                    disabled={disabled}
                     checked={followTextMove}
+                    disabled={disabled}
                     onChange={handleFollowTextMoveCheck}
                 >
                     {localeService.t('image-position.moveObjectWithText')}

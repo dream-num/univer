@@ -77,9 +77,9 @@ export function Radio(props: IRadioProps) {
                 <input
                     ref={inputRef}
                     className="univer-absolute univer-size-0 univer-opacity-0"
-                    type="radio"
                     checked={checked}
                     disabled={disabled}
+                    type="radio"
                     onChange={handleChange}
                 />
                 <span

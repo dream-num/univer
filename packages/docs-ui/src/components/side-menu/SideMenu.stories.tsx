@@ -49,10 +49,10 @@ export const SideMenuBasic = {
             <SideMenu
                 maxHeight={150}
                 menus={menus}
-                onClick={handleClick}
-                open={open}
-                onOpenChange={setOpen}
                 mode="side-bar"
+                open={open}
+                onClick={handleClick}
+                onOpenChange={setOpen}
             />
         );
     },
@@ -78,7 +78,7 @@ export const CustomStyledSideMenu = {
             borderRadius: '4px',
         };
 
-        return <SideMenu maxHeight={150} menus={menus} className="custom-side-menu" style={customStyle} />;
+        return <SideMenu className="custom-side-menu" style={customStyle} maxHeight={150} menus={menus} />;
     },
 };
 

@@ -51,7 +51,7 @@ export const ButtonSize = {
                 <div>
                     <Button size="small">small button</Button>
                     <Button>medium button</Button>
-                    <Button variant="primary" size="large">
+                    <Button size="large" variant="primary">
                         large button
                     </Button>
                 </div>
@@ -66,10 +66,10 @@ export const ButtonDisabled = {
             <>
                 <div>
                     <Button disabled>default button</Button>
-                    <Button variant="text" disabled>
+                    <Button disabled variant="text">
                         text button
                     </Button>
-                    <Button variant="primary" disabled>
+                    <Button disabled variant="primary">
                         primary button
                     </Button>
                 </div>

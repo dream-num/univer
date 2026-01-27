@@ -34,7 +34,7 @@ describe('HoverCard', () => {
 
     it('should show overlay when open is true', () => {
         const { getByText } = render(
-            <HoverCard overlay={<div>Overlay Content</div>} open>
+            <HoverCard open overlay={<div>Overlay Content</div>}>
                 <button type="button">Trigger</button>
             </HoverCard>
         );
@@ -43,7 +43,7 @@ describe('HoverCard', () => {
 
     it('should respect openDelay prop', () => {
         const { getByText } = render(
-            <HoverCard overlay={<div>Overlay Content</div>} openDelay={500} open>
+            <HoverCard open openDelay={500} overlay={<div>Overlay Content</div>}>
                 <button type="button">Trigger</button>
             </HoverCard>
         );

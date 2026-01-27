@@ -124,13 +124,13 @@ export const DocHyperLinkEdit = () => {
                 {editing
                     ? (
                         <FormLayout
-                            label={localeService.t('docLink.edit.label')}
                             error={showError && !label ? localeService.t('docLink.edit.labelError') : ''}
+                            label={localeService.t('docLink.edit.label')}
                         >
                             <Input
+                                autoFocus
                                 value={label}
                                 onChange={setLabel}
-                                autoFocus
                                 onKeyDown={(evt) => {
                                     if (evt.keyCode === KeyCode.ENTER) {
                                         handleConfirm();
@@ -141,13 +141,13 @@ export const DocHyperLinkEdit = () => {
                     )
                     : null}
                 <FormLayout
-                    label={localeService.t('docLink.edit.address')}
                     error={showError && !isLegal ? localeService.t('docLink.edit.addressError') : ''}
+                    label={localeService.t('docLink.edit.address')}
                 >
                     <Input
+                        autoFocus
                         value={link}
                         onChange={setLink}
-                        autoFocus
                         onKeyDown={(evt) => {
                             if (evt.keyCode === KeyCode.ENTER) {
                                 handleConfirm();
@@ -161,8 +161,8 @@ export const DocHyperLinkEdit = () => {
                     {localeService.t('docLink.edit.cancel')}
                 </Button>
                 <Button
-                    variant="primary"
                     disabled={!link}
+                    variant="primary"
                     onClick={handleConfirm}
                 >
                     {localeService.t('docLink.edit.confirm')}

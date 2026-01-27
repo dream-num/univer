@@ -29,7 +29,7 @@ describe('Calendar', () => {
     function renderCalendar(props = {}) {
         const date = new Date(2023, 7, 15);
         return render(
-            <ConfigProvider mountContainer={null} locale={{ Calendar: enUS.design.Calendar }}>
+            <ConfigProvider locale={{ Calendar: enUS.design.Calendar }} mountContainer={null}>
                 <Calendar value={date} onValueChange={onChange} {...props} />
             </ConfigProvider>
         );

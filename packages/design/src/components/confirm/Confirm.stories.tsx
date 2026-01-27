@@ -42,8 +42,8 @@ export const ConfirmBasic = {
             <>
                 <Button onClick={handleToggleVisible}>open confirm</Button>
                 <Confirm
-                    visible={visible}
                     title="hello world"
+                    visible={visible}
                     onClose={handleToggleVisible}
                     onConfirm={handleToggleVisible}
                 >

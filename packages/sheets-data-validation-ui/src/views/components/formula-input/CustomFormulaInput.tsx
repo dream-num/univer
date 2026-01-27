@@ -45,10 +45,10 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                   [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                 `, borderClassName)}
                 initValue={value?.formula1 ?? '=' as any}
-                unitId={unitId}
-                subUnitId={subUnitId}
                 isFocus={isFocusFormulaEditor}
                 isSupportAcrossSheet
+                subUnitId={subUnitId}
+                unitId={unitId}
                 onChange={(newValue) => {
                     const newFormula = (newValue ?? '').trim();
                     if (newFormula === value?.formula1) {

@@ -218,9 +218,9 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             <div>
                 <Input
                     className="univer-w-full"
+                    allowClear
                     placeholder={localeService.t('definedName.inputNamePlaceholder')}
                     value={nameValue}
-                    allowClear
                     onChange={setNameValue}
                 />
             </div>
@@ -234,11 +234,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 ? (
                     RangeSelector && (
                         <RangeSelector
-                            unitId={unitId}
-                            subUnitId={subUnitId}
                             initialValue={formulaOrRefStringValue}
-                            onChange={(_, text) => rangeSelectorChange(text)}
+                            subUnitId={subUnitId}
                             supportAcrossSheet
+                            unitId={unitId}
+                            onChange={(_, text) => rangeSelectorChange(text)}
                         />
                     )
                 )
@@ -256,18 +256,18 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                                   [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                                 `, borderClassName)}
                                 initValue={formulaOrRefStringValue as any}
-                                unitId={unitId}
-                                subUnitId={subUnitId}
                                 isFocus={isFocusFormulaEditor}
                                 isSupportAcrossSheet
+                                subUnitId={subUnitId}
+                                unitId={unitId}
                                 onChange={(v = '') => {
                                     const formula = v || '';
                                     formulaEditorChange(formula);
                                 }}
+                                onFocus={() => setIsFocusFormulaEditor(true)}
                                 onVerify={(res: boolean) => {
                                     setValidFormulaOrRange(res);
                                 }}
-                                onFocus={() => setIsFocusFormulaEditor(true)}
                             />
                         </div>
                     </div>
@@ -275,18 +275,18 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             <div>
                 <Select
                     className="univer-w-full"
-                    value={localSheetIdValue}
                     options={options}
+                    value={localSheetIdValue}
                     onChange={setLocalSheetIdValue}
                 />
             </div>
             <div>
                 <Input
                     className="univer-w-full"
+                    allowClear
                     placeholder={localeService.t('definedName.inputCommentPlaceholder')}
                     value={commentValue}
                     onChange={setCommentValue}
-                    allowClear
                 />
             </div>
             <div

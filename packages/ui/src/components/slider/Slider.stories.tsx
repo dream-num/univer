@@ -42,14 +42,14 @@ export const Playground = {
             <>
                 <Slider
                     min={0}
-                    value={value}
                     shortcuts={[50, 75, 100, 125, 150, 175, 200, 400]}
+                    value={value}
                     onChange={handleChange}
                 />
                 <Slider
                     min={20}
-                    value={value}
                     shortcuts={[50, 75, 100, 125, 150, 175, 200, 400]}
+                    value={value}
                     onChange={handleChange}
                 />
             </>

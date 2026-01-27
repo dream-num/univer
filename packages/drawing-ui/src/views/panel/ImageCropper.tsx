@@ -138,7 +138,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
                     {localeService.t('image-panel.crop.start')}
                 </Button>
 
-                <Select value={cropValue} options={cropOptions} onChange={handleCropChange} />
+                <Select options={cropOptions} value={cropValue} onChange={handleCropChange} />
             </div>
         </div>
     );

@@ -28,7 +28,7 @@ describe('KBD', () => {
     });
 
     it('should render with custom className', () => {
-        const { container } = render(<KBD className="custom-class" keyboard="Ctrl" />);
+        const { container } = render(<KBD keyboard="Ctrl" className="custom-class" />);
         expect(container.querySelector('.custom-class')).toBeTruthy();
     });
 

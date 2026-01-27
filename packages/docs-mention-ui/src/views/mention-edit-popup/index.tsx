@@ -58,11 +58,11 @@ export const MentionEditPopup = () => {
     return (
         <MentionList
             editorId={editPopup.unitId}
+            mentions={mentions}
             onClick={() => {
                 popupService.closeEditPopup();
                 editorService.focus(editPopup.unitId);
             }}
-            mentions={mentions}
             onSelect={async (mention) => {
                 await commandService.executeCommand(AddDocMentionCommand.id, {
                     unitId: univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)!.getUnitId(),

@@ -142,8 +142,8 @@ const HighlightCellInput = (props: {
                         <WrapperError errorText={numberError}>
                             <InputNumber
                                 className="univer-w-full"
-                                min={Number.MIN_SAFE_INTEGER}
                                 max={Number.MAX_SAFE_INTEGER}
+                                min={Number.MIN_SAFE_INTEGER}
                                 value={inputNumberValue}
                                 onChange={_onChange}
                             />
@@ -167,13 +167,13 @@ const HighlightCellInput = (props: {
                 return (
                     <div className="univer-mt-3 univer-flex univer-items-center">
                         <WrapperError errorText={numberMinError}>
-                            <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
+                            <InputNumber max={Number.MAX_SAFE_INTEGER} min={Number.MIN_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
                         </WrapperError>
                         <WrapperError errorText={numberMaxError}>
                             <InputNumber
                                 className="univer-ml-3"
-                                min={Number.MIN_SAFE_INTEGER}
                                 max={Number.MAX_SAFE_INTEGER}
+                                min={Number.MIN_SAFE_INTEGER}
                                 value={inputNumberMax}
                                 onChange={onChangeMax}
                             />
@@ -378,34 +378,34 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
             <div className="univer-flex univer-justify-between univer-gap-4">
                 <Select
                     className="univer-mt-3 univer-w-full"
-                    onChange={onTypeChange}
-                    value={subType}
                     options={typeOptions}
+                    value={subType}
+                    onChange={onTypeChange}
                 />
                 {operatorOptions?.length && (
                     <Select
                         className="univer-mt-3 univer-w-full"
-                        onChange={onOperatorChange}
-                        value={operator || ''}
                         options={operatorOptions}
+                        value={operator || ''}
+                        onChange={onOperatorChange}
                     />
                 )}
             </div>
             <HighlightCellInput
                 key={inputRenderKey}
-                value={value}
                 interceptorManager={interceptorManager}
-                type={subType}
                 operator={operator}
                 rule={rule}
+                type={subType}
+                value={value}
                 onChange={onInputChange}
             />
             <div className={previewClassName}>
                 <Preview rule={getResult({}) as IConditionalFormattingRuleConfig} />
             </div>
             <ConditionalStyleEditor
-                style={rule?.style}
                 className="univer-ml-1"
+                style={rule?.style}
                 onChange={(v) => {
                     setStyle(v);
                     onChange(getResult({ style: v }));

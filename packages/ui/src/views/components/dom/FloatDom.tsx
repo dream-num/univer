@@ -101,13 +101,13 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
         ? (
             <Component
                 {...layerProps}
-                unitId={layer.unitId}
-                unit={instance}
-                floatDomId={layer.id}
                 context={{
                     docDisabled,
                     root: innerDomRef,
                 }}
+                floatDomId={layer.id}
+                unit={instance}
+                unitId={layer.unitId}
             />
         )
         : null, [Component, layerProps]);
@@ -132,11 +132,11 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
                 overflow: 'hidden',
                 transformOrigin: 'center center',
             }}
-            onPointerMove={(e) => {
-                layer.onPointerMove(e.nativeEvent);
-            }}
             onPointerDown={(e) => {
                 layer.onPointerDown(e.nativeEvent);
+            }}
+            onPointerMove={(e) => {
+                layer.onPointerMove(e.nativeEvent);
             }}
             onPointerUp={(e) => {
                 layer.onPointerUp(e.nativeEvent);
@@ -146,10 +146,10 @@ export const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => 
             }}
         >
             <div
-                id={id}
                 ref={innerDomRef}
                 className="univer-absolute univer-overflow-hidden"
                 style={{ ...innerStyle.current }}
+                id={id}
             >
                 {component}
             </div>
@@ -166,9 +166,9 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
 
     return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
         <FloatDomSingle
+            key={layer[0]}
             id={layer[1].domId ?? layer[0]}
             layer={layer[1]}
-            key={layer[0]}
         />
     ));
 };

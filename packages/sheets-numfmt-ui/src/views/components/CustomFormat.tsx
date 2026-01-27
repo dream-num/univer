@@ -72,11 +72,11 @@ export function CustomFormat(props: IBusinessComponentProps) {
         <div>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.customFormat')}</div>
             <Input
-                placeholder={localeService.t('sheet.numfmt.customFormat')}
-                onBlur={handleBlur}
-                value={pattern}
-                onChange={setPattern}
                 className="univer-mt-2 univer-w-full"
+                placeholder={localeService.t('sheet.numfmt.customFormat')}
+                value={pattern}
+                onBlur={handleBlur}
+                onChange={setPattern}
             />
             <div
                 className={clsx('univer-mt-2 univer-max-h-[400px] univer-overflow-auto univer-rounded-lg univer-p-2', borderClassName)}
@@ -84,11 +84,11 @@ export function CustomFormat(props: IBusinessComponentProps) {
                 {options.map((p) => (
                     <div
                         key={p}
-                        onClick={() => handleClick(p as string)}
                         className={`
                           univer-flex univer-cursor-pointer univer-items-center univer-gap-1.5 univer-py-1.5
                           univer-text-sm
                         `}
+                        onClick={() => handleClick(p as string)}
                     >
                         <div className="univer-flex univer-w-4 univer-items-center univer-text-primary-600">
                             {pattern === p && <CheckMarkIcon />}

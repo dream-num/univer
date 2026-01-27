@@ -15,11 +15,11 @@
  */
 
 export const BorderMedium = ({ className }: { className: string }) => (
-    <svg className={className} width="120" height="3" viewBox="0 0 120 3" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} fill="none" height="3" viewBox="0 0 120 3" width="120" xmlns="http://www.w3.org/2000/svg">
         <path
-            fillRule="evenodd"
             clipRule="evenodd"
             d="M119.991 2.42035H-0.0090332V0.420349H119.991V2.42035Z"
+            fillRule="evenodd"
         />
     </svg>
 );

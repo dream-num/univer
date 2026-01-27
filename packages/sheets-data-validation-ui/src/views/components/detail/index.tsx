@@ -250,14 +250,14 @@ export function DataValidationDetail() {
     return (
         <div data-u-comp="data-validation-detail" className="univer-py-2">
             <FormLayout
-                label={localeService.t('dataValidation.panel.range')}
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
+                label={localeService.t('dataValidation.panel.range')}
             >
                 <RangeSelector
-                    selectorRef={rangeSelectorInstance}
-                    unitId={unitId}
-                    subUnitId={subUnitId}
                     initialValue={rangeStr}
+                    selectorRef={rangeSelectorInstance}
+                    subUnitId={subUnitId}
+                    unitId={unitId}
                     onChange={(doc, str) => {
                         if (!isFocusRangeSelector && rangeSelectorInstance.current?.verify()) {
                             handleUpdateRuleRanges(str);
@@ -275,11 +275,11 @@ export function DataValidationDetail() {
             <FormLayout label={localeService.t('dataValidation.panel.type')}>
                 <Select
                     className="univer-w-full"
-                    value={localRule.type}
                     options={validators?.sort((a, b) => a.order - b.order)?.map((validator) => ({
                         label: localeService.t(validator.title),
                         value: validator.id,
                     }))}
+                    value={localRule.type}
                     onChange={handleChangeType}
                 />
             </FormLayout>
@@ -288,7 +288,6 @@ export function DataValidationDetail() {
                     <FormLayout label={localeService.t('dataValidation.panel.operator')}>
                         <Select
                             className="univer-w-full"
-                            value={`${localRule.operator}`}
                             options={[
                                 {
                                     value: '',
@@ -299,6 +298,7 @@ export function DataValidationDetail() {
                                     label: operatorNames[i],
                                 })),
                             ]}
+                            value={`${localRule.operator}`}
                             onChange={(operator) => {
                                 handleUpdateRuleSetting({
                                     ...baseRule,
@@ -314,6 +314,11 @@ export function DataValidationDetail() {
                     <FormulaInput
                         key={key + localRule.type}
                         isTwoFormula={isTwoFormula}
+                        ruleId={ruleId}
+                        showError={showError}
+                        subUnitId={subUnitId}
+                        unitId={unitId}
+                        validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
                         value={{
                             formula1: localRule.formula1,
                             formula2: localRule.formula2,
@@ -324,11 +329,6 @@ export function DataValidationDetail() {
                                 ...value,
                             });
                         }}
-                        showError={showError}
-                        validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
-                        unitId={unitId}
-                        subUnitId={subUnitId}
-                        ruleId={ruleId}
                     />
                 )
                 : null}
@@ -343,7 +343,7 @@ export function DataValidationDetail() {
                     {localeService.t('dataValidation.panel.allowBlank')}
                 </Checkbox>
             </FormLayout>
-            <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
+            <DataValidationOptions extraComponent={validator.optionsInput} value={options} onChange={handleUpdateRuleOptions} />
             <div className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
                 <Button className="univer-ml-3" onClick={handleDelete}>
                     {localeService.t('dataValidation.panel.removeRule')}

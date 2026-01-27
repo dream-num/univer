@@ -34,14 +34,14 @@ describe('Dialog', () => {
     });
 
     it('should render custom footer', () => {
-        const { getByText } = render(<Dialog open footer={<div>Custom Footer</div>}>content</Dialog>);
+        const { getByText } = render(<Dialog footer={<div>Custom Footer</div>} open>content</Dialog>);
         expect(getByText('Custom Footer')).toBeInTheDocument();
     });
 
     it('should call onOpenChange and onClose when close button clicked', () => {
         const onOpenChange = vi.fn();
         const onClose = vi.fn();
-        const { container } = render(<Dialog open title="T" onOpenChange={onOpenChange} onClose={onClose}>content</Dialog>);
+        const { container } = render(<Dialog open title="T" onClose={onClose} onOpenChange={onOpenChange}>content</Dialog>);
         const closeBtn = container.querySelector('[data-slot="close"]') as HTMLElement;
         if (closeBtn) {
             closeBtn.click();
@@ -53,7 +53,7 @@ describe('Dialog', () => {
     it('should call onOk and onCancel', () => {
         const onOk = vi.fn();
         const onCancel = vi.fn();
-        const { getByText } = render(<Dialog open showOk showCancel onOk={onOk} onCancel={onCancel}>content</Dialog>);
+        const { getByText } = render(<Dialog open showCancel showOk onCancel={onCancel} onOk={onOk}>content</Dialog>);
         getByText(/ok|确定/i).click();
         getByText(/cancel|取消/i).click();
         expect(onOk).toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe('Dialog', () => {
 
     it('should not close when maskClosable is false', () => {
         const onOpenChange = vi.fn();
-        const { container } = render(<Dialog open maskClosable={false} onOpenChange={onOpenChange}>content</Dialog>);
+        const { container } = render(<Dialog maskClosable={false} open onOpenChange={onOpenChange}>content</Dialog>);
         // mock the mask click event
         const mask = container.querySelector('.univer-fixed');
         if (mask) {

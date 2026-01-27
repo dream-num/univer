@@ -98,9 +98,9 @@ export function Checkbox(props: ICheckboxProps) {
                 <input
                     ref={inputRef}
                     className="univer-absolute univer-size-0 univer-opacity-0"
-                    type="checkbox"
                     checked={checked}
                     disabled={disabled}
+                    type="checkbox"
                     onChange={handleChange}
                 />
                 <span

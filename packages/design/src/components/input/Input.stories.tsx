@@ -58,7 +58,7 @@ export const InputDisabled = {
         return (
             <>
                 <Input disabled />
-                <Input value="disabled content" disabled />
+                <Input disabled value="disabled content" />
             </>
         );
     },
@@ -69,7 +69,7 @@ export const Clear = {
         return (
             <>
                 <Input allowClear />
-                <Input value="content" allowClear />
+                <Input allowClear value="content" />
             </>
         );
     },
@@ -79,7 +79,7 @@ export const ClearWithPage = {
     render() {
         return (
             <>
-                <Input value="with some very long content to push content offset" allowClear slot={<Pager value={1} total={10} />} />
+                <Input allowClear slot={<Pager total={10} value={1} />} value="with some very long content to push content offset" />
             </>
         );
     },

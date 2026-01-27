@@ -38,10 +38,10 @@ export const GlobalRangeSelector = () => {
 
     return (
         <RangeSelector
-            unitId={current?.unitId ?? ''}
-            subUnitId={current?.subUnitId ?? ''}
             hideEditor
             selectorRef={instance}
+            subUnitId={current?.subUnitId ?? ''}
+            unitId={current?.unitId ?? ''}
             onChange={(_, value) => {
                 current?.callback(value?.split(',').map((i) => deserializeRangeWithSheet(i)) ?? []);
             }}

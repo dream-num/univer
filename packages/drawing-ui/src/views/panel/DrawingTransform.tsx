@@ -372,18 +372,18 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                 <div>
                     <span>{localeService.t('image-panel.transform.width')}</span>
                     <InputNumber
+                        min={MIN_DRAWING_WIDTH_LIMIT}
                         precision={1}
                         value={width}
-                        min={MIN_DRAWING_WIDTH_LIMIT}
                         onChange={(val) => { handleWidthChange(val); }}
                     />
                 </div>
                 <div>
                     <span>{localeService.t('image-panel.transform.height')}</span>
                     <InputNumber
+                        min={MIN_DRAWING_HEIGHT_LIMIT}
                         precision={1}
                         value={height}
-                        min={MIN_DRAWING_HEIGHT_LIMIT}
                         onChange={(val) => { handleHeightChange(val); }}
                     />
                 </div>
@@ -412,10 +412,10 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                 <div>
                     <span>{localeService.t('image-panel.transform.rotate')}</span>
                     <InputNumber
+                        max={RANGE_DRAWING_ROTATION_LIMIT[1]}
+                        min={RANGE_DRAWING_ROTATION_LIMIT[0]}
                         precision={1}
                         value={rotation}
-                        min={RANGE_DRAWING_ROTATION_LIMIT[0]}
-                        max={RANGE_DRAWING_ROTATION_LIMIT[1]}
                         onChange={handleRotationChange}
                     />
                 </div>

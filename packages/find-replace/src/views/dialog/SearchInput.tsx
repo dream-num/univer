@@ -67,20 +67,20 @@ export function SearchInput(props: ISearchInputProps) {
                 data-u-comp="search-input"
                 autoFocus
                 placeholder={localeService.t('find-replace.dialog.find-placeholder')}
+                slot={(
+                    <Pager
+                        loop
+                        text={text}
+                        total={matchesCount}
+                        value={matchesPosition}
+                        onChange={handleChangePosition}
+                    />
+                )}
                 value={value}
                 onChange={(value) => {
                     setValue(value);
                     onChange?.(value);
                 }}
-                slot={(
-                    <Pager
-                        loop
-                        text={text}
-                        value={matchesPosition}
-                        total={matchesCount}
-                        onChange={handleChangePosition}
-                    />
-                )}
                 {...rest}
             />
         </div>

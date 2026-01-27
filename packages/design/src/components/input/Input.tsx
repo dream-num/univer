@@ -29,7 +29,8 @@ export const inputVariants = cva(
       univer-box-border univer-w-full univer-rounded-md univer-bg-white univer-transition-colors univer-duration-200
       placeholder:univer-text-gray-400
       focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50
-      dark:!univer-bg-gray-700 dark:!univer-text-white dark:focus:!univer-ring-primary-900
+      dark:!univer-bg-gray-700 dark:!univer-text-white
+      dark:focus:!univer-ring-primary-900
     `,
     {
         variants: {
@@ -134,7 +135,6 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             >
                 <input
                     ref={ref}
-                    type={type}
                     className={clsx(
                         inputVariants({ size }),
                         borderClassName,
@@ -145,31 +145,30 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                         (allowClear && !slot) && 'univer-pr-8',
                         inputClass
                     )}
-                    placeholder={placeholder}
-                    value={value}
-                    disabled={disabled}
-                    autoFocus={autoFocus}
-                    onClick={onClick}
-                    onKeyDown={onKeyDown}
-                    onChange={handleChange}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
                     style={{ ...inputStyle, paddingRight }}
+                    autoFocus={autoFocus}
+                    disabled={disabled}
+                    placeholder={placeholder}
+                    type={type}
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={handleChange}
+                    onClick={onClick}
+                    onFocus={onFocus}
+                    onKeyDown={onKeyDown}
                     {...props}
                 />
                 {hasSlotContent && (
                     <div
+                        ref={slotRef}
                         className={`
                           univer-absolute univer-right-2 univer-flex univer-items-center univer-gap-1
                           univer-rounded-full
                         `}
-                        ref={slotRef}
                     >
                         {slot}
                         {allowClear && value && !disabled && (
                             <button
-                                type="button"
-                                onClick={handleClear}
                                 className={`
                                   univer-flex univer-size-4 univer-cursor-pointer univer-items-center
                                   univer-rounded-full univer-border-none univer-bg-transparent univer-p-1
@@ -177,6 +176,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                                   hover:univer-text-gray-500
                                   focus:univer-outline-none
                                 `}
+                                type="button"
+                                onClick={handleClear}
                             >
                                 <CloseIcon className="univer-size-3" />
                             </button>

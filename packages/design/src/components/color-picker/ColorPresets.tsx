@@ -45,16 +45,15 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
                     {row.map((color, j) => (
                         <button
                             key={j}
-                            type="button"
                             className={clsx(`
-                              univer-box-border univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full
-                              univer-border univer-border-solid univer-border-transparent univer-bg-gray-300
-                              univer-transition-shadow
+                              univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border
+                              univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow
                             `, {
                                 'univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:!univer-ring-primary-600 dark:!univer-ring-offset-gray-600': color.toUpperCase() === currentColor.toUpperCase(),
                                 '!univer-border-gray-200': i === 0 && j === 0,
                             })}
                             style={{ backgroundColor: color }}
+                            type="button"
                             onClick={() => handleSelectPreset(color)}
                         />
                     ))}

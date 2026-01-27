@@ -104,8 +104,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         if (menuType === MenuItemType.BUTTON_SELECTOR) {
             return (
                 <div
-                    data-u-command={id}
                     data-disabled={disabled}
+                    data-u-command={id}
                     className={clsx(`
                       univer-animate-in univer-fade-in univer-group univer-relative univer-flex univer-h-6
                       univer-cursor-pointer univer-items-center univer-rounded univer-pr-5 univer-text-sm
@@ -131,22 +131,23 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     >
                         <CustomLabel
                             icon={iconToDisplay}
+                            label={label}
                             title={title!}
                             value={value}
-                            label={label}
                             onChange={handleSelectionsValueChange}
                         />
                     </div>
 
                     <DropdownMenuWrapper
+                        disabled={disabled}
                         menuId={id}
+                        options={options}
                         slot={slot}
                         value={value}
-                        options={options}
-                        disabled={disabled}
                         onOptionSelect={handleSelect}
                     >
                         <div
+                            data-disabled={disabled}
                             className={clsx(`
                               univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex univer-h-6
                               univer-w-5 univer-items-center univer-justify-center univer-rounded-r
@@ -158,7 +159,6 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                                 'univer-bg-gray-200 dark:!univer-bg-gray-500': activated,
                                 'univer-bg-gray-100': activated && disabled,
                             })}
-                            data-disabled={disabled}
                         >
                             <MoreDownIcon />
                         </div>
@@ -168,11 +168,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         } else {
             return (
                 <DropdownMenuWrapper
+                    disabled={disabled}
                     menuId={id}
+                    options={options}
                     slot={slot}
                     value={value}
-                    options={options}
-                    disabled={disabled}
                     onOptionSelect={handleSelect}
                 >
                     <div
@@ -192,9 +192,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                     >
                         <CustomLabel
                             icon={iconToDisplay}
+                            label={label}
                             title={title!}
                             value={value}
-                            label={label}
                             onChange={handleSelectionsValueChange}
                         />
                         <div
@@ -219,15 +219,15 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             <ToolbarButton
                 data-u-command={id}
                 className="univer-text-sm"
-                noIcon={!icon}
                 active={activated}
                 disabled={disabled}
+                noIcon={!icon}
                 onClick={() => executeCommand(props.commandId ?? props.id, commandValue)}
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {isCustomComponent
                     ? (
-                        <CustomLabel title={title!} value={value} label={label} />
+                        <CustomLabel label={label} title={title!} value={value} />
                     )
                     : (
                         icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
@@ -251,8 +251,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     return !hidden && (
         <TooltipWrapper
             ref={ref}
-            title={tooltipTitle}
             placement="bottom"
+            title={tooltipTitle}
         >
             {renderItem()}
         </TooltipWrapper>

@@ -415,9 +415,7 @@ export function SheetBarTabs() {
     return (
         <DropdownLegacy
             className="univer-select-none"
-            visible={visible}
             align={{ offset }}
-            trigger={['contextMenu']}
             overlay={(
                 <UIMenu
                     menuType={ContextMenuPosition.FOOTER_TABS}
@@ -428,13 +426,15 @@ export function SheetBarTabs() {
                     }}
                 />
             )}
+            trigger={['contextMenu']}
+            visible={visible}
             onVisibleChange={onVisibleChange}
         >
             <div
-                className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 ref={slideTabBarContainerRef}
-                onDragStart={(e) => e.preventDefault()}
+                className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
             >
                 <div
                     data-u-comp="slide-tab-bar"

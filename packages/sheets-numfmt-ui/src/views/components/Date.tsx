@@ -61,7 +61,7 @@ export function DatePanel(props: IBusinessComponentProps) {
         <div>
             <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{localeService.t('sheet.numfmt.dateType')}</div>
             <div className="univer-mt-2">
-                <SelectList value={suffix} options={options} onChange={handleChange} />
+                <SelectList options={options} value={suffix} onChange={handleChange} />
             </div>
             <div
                 className={`

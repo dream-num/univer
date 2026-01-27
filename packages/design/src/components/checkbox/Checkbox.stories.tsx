@@ -53,7 +53,7 @@ export const CheckboxDisabled = {
                 <Checkbox disabled>
                     checkbox 1
                 </Checkbox>
-                <Checkbox disabled checked>
+                <Checkbox checked disabled>
                     checkbox 2
                 </Checkbox>
             </>
@@ -70,7 +70,7 @@ export const CheckboxIndeterminate = {
 
         return (
             <>
-                <Checkbox checked={checked} onChange={handleChange} indeterminate>checkbox 1</Checkbox>
+                <Checkbox checked={checked} indeterminate onChange={handleChange}>checkbox 1</Checkbox>
                 <Checkbox disabled indeterminate>
                     checkbox 2
                 </Checkbox>

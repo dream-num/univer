@@ -155,11 +155,11 @@ export function Calendar(props: ICalendarProps) {
                 className="univer-mb-4 univer-flex univer-items-center univer-justify-between"
             >
                 <DayButton
+                    aria-label="Previous Month"
                     className={`
                       univer-text-lg univer-text-gray-500
                       dark:!univer-text-gray-200
                     `}
-                    aria-label="Previous Month"
                     onClick={prevMonth}
                 >
                     <MoreRightIcon className="univer-rotate-180" />
@@ -170,11 +170,11 @@ export function Calendar(props: ICalendarProps) {
                     <span>{months[currentMonth]}</span>
                 </span>
                 <DayButton
+                    aria-label="Next Month"
                     className={`
                       univer-text-lg univer-text-gray-500
                       dark:!univer-text-gray-200
                     `}
-                    aria-label="Next Month"
                     onClick={nextMonth}
                 >
                     <MoreRightIcon />
@@ -207,8 +207,8 @@ export function Calendar(props: ICalendarProps) {
                                     'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
                                     'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day) && !isDisabled(day),
                                 })}
-                                onClick={() => handleChangeDate(day)}
                                 disabled={isDisabled(day)}
+                                onClick={() => handleChangeDate(day)}
                             >
                                 {day}
                             </DayButton>

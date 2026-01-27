@@ -160,16 +160,17 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     const renderComment = (comment: IThreadComment) => (
         <ThreadCommentTree
-            prefix={prefix}
-            getSubUnitName={getSubUnitName}
             key={comment.id}
-            id={comment.id}
-            unitId={comment.unitId}
-            subUnitId={comment.subUnitId}
             refStr={comment.ref}
-            type={type}
+            getSubUnitName={getSubUnitName}
+            id={comment.id}
+            prefix={prefix}
             showEdit={activeCommentId?.commentId === comment.id}
             showHighlight={activeCommentId?.commentId === comment.id}
+            subUnitId={comment.subUnitId}
+            type={type}
+            unitId={comment.unitId}
+            onAddComment={onAddComment}
             onClick={() => {
                 shouldScroll.current = false;
                 if (!comment.resolved) {
@@ -186,10 +187,9 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     commandService.executeCommand(SetActiveCommentOperation.id);
                 }
             }}
+            onDeleteComment={onDeleteComment}
             onMouseEnter={() => onItemEnter?.(comment)}
             onMouseLeave={() => onItemLeave?.(comment)}
-            onAddComment={onAddComment}
-            onDeleteComment={onDeleteComment}
             onResolve={(resolved: boolean) => onResolve?.(comment.id, resolved)}
         />
     );
@@ -201,7 +201,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     ? (
                         <Select
                             borderless
-                            value={unit}
                             options={[
                                 {
                                     value: 'current',
@@ -212,13 +211,13 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     label: localeService.t('threadCommentUI.filter.sheet.all'),
                                 },
                             ]}
+                            value={unit}
                             onChange={setUnit}
                         />
                     )
                     : null}
                 <Select
                     borderless
-                    value={status}
                     options={[
                         {
                             value: 'all',
@@ -237,6 +236,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                             label: localeService.t('threadCommentUI.filter.status.concernMe'),
                         },
                     ]}
+                    value={status}
                     onChange={setStatus}
                 />
             </div>

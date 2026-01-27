@@ -32,8 +32,6 @@ const HoverCardContent = forwardRef<
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
     <Content
         ref={ref}
-        align={align}
-        sideOffset={sideOffset}
         className={clsx(
             `
               data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0 data-[state=open]:univer-zoom-in-95
@@ -50,6 +48,8 @@ const HoverCardContent = forwardRef<
             borderClassName,
             className
         )}
+        align={align}
+        sideOffset={sideOffset}
         {...props}
     />
 ));

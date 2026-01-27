@@ -77,11 +77,11 @@ function HexInput({ hsv, onChange }: IInputProps) {
                   focus:univer-border-primary-500 focus:univer-outline-none
                   dark:!univer-text-white
                 `, borderClassName)}
-                value={inputValue}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 maxLength={6}
                 spellCheck={false}
+                value={inputValue}
+                onBlur={handleBlur}
+                onChange={handleChange}
             />
             <span
                 className={`
@@ -150,34 +150,35 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
         <div
             className={`
               univer-flex univer-items-center univer-gap-2
-              [&>input]:univer-w-11 [&>input]:univer-border-gray-200 [&>input]:focus:univer-border-primary-500
+              [&>input]:univer-w-11 [&>input]:univer-border-gray-200
+              [&>input]:focus:univer-border-primary-500
               dark:[&>input]:!univer-border-gray-600 dark:[&>input]:!univer-text-white
             `}
         >
             <input
+                maxLength={3}
                 value={localValues.r}
+                onBlur={handleBlur}
                 onChange={(e) => handleChange('r', e.target.value)}
-                onBlur={handleBlur}
-                maxLength={3}
             />
             <input
+                maxLength={3}
                 value={localValues.g}
-                onChange={(e) => handleChange('g', e.target.value)}
                 onBlur={handleBlur}
-                maxLength={3}
+                onChange={(e) => handleChange('g', e.target.value)}
             />
             <input
-                value={localValues.b}
-                onChange={(e) => handleChange('b', e.target.value)}
-                onBlur={handleBlur}
                 maxLength={3}
+                value={localValues.b}
+                onBlur={handleBlur}
+                onChange={(e) => handleChange('b', e.target.value)}
             />
             {format === 'rgba' && (
                 <input
-                    value={localValues.a}
-                    onChange={(e) => handleChange('a', e.target.value)}
-                    onBlur={handleBlur}
                     maxLength={4}
+                    value={localValues.a}
+                    onBlur={handleBlur}
+                    onChange={(e) => handleChange('a', e.target.value)}
                 />
             )}
         </div>
@@ -198,7 +199,7 @@ export function ColorInput({ hsv, alpha, format, onChange }: IColorInputProps) {
         >
             <div className="univer-relative univer-flex univer-flex-1 univer-gap-2">
                 <HexInput hsv={hsv} onChange={onChange} />
-                <RgbInput hsv={hsv} alpha={alpha} format={format} onChange={onChange} />
+                <RgbInput alpha={alpha} format={format} hsv={hsv} onChange={onChange} />
             </div>
         </div>
     );

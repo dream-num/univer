@@ -88,17 +88,6 @@ export function App() {
 
     return (
         <Mosaic<ViewId>
-            renderTile={(id, path) => (
-                <MosaicWindow<ViewId>
-                    path={path}
-                    title={TITLE_MAP[id]}
-                    toolbarControls={<div />}
-                >
-                    <div id={`app-${id}`} className="univer-h-full">
-                        {TITLE_MAP[id]}
-                    </div>
-                </MosaicWindow>
-            )}
             initialValue={{
                 direction: 'row',
                 first: 'a',
@@ -108,6 +97,17 @@ export function App() {
                     second: 'c',
                 },
             }}
+            renderTile={(id, path) => (
+                <MosaicWindow<ViewId>
+                    path={path}
+                    title={TITLE_MAP[id]}
+                    toolbarControls={<div />}
+                >
+                    <div className="univer-h-full" id={`app-${id}`}>
+                        {TITLE_MAP[id]}
+                    </div>
+                </MosaicWindow>
+            )}
         />
     );
 };

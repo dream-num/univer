@@ -15,7 +15,7 @@
  */
 
 export const BorderHair = ({ className }: { className: string }) => (
-    <svg className={className} width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} fill="none" height="2" viewBox="0 0 120 2" width="120" xmlns="http://www.w3.org/2000/svg">
         <path d="M-0.00976562 1.65707H0.990234V0.657074H-0.00976562V1.65707Z" />
         <path d="M2.32361 1.65707H3.32361V0.657074H2.32361V1.65707Z" />
         <path d="M5.65698 1.65707H4.65698V0.657074H5.65698V1.65707Z" />

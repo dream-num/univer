@@ -143,19 +143,19 @@ export const SheetsThreadCommentPanel = () => {
 
     return (
         <ThreadCommentPanel
-            unitId={unitId}
+            getSubUnitName={getSubUnitName}
+            sortComments={sortComments}
             subUnitId$={subUnitId$}
             type={UniverInstanceType.UNIVER_SHEET}
+            unitId={unitId}
             onAdd={handleAdd}
-            getSubUnitName={getSubUnitName}
-            onResolve={handleResolve}
-            sortComments={sortComments}
-            onItemEnter={handleHover}
-            onItemLeave={handleLeave}
             onDeleteComment={() => {
                 handleLeave();
                 return true;
             }}
+            onItemEnter={handleHover}
+            onItemLeave={handleLeave}
+            onResolve={handleResolve}
         />
     );
 };

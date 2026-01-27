@@ -198,12 +198,12 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             </header>
 
                             <section
+                                ref={contentRef}
+                                data-range-selector
                                 className={`
                                   univer-relative univer-overflow-hidden
                                   dark:!univer-bg-gray-900
                                 `}
-                                ref={contentRef}
-                                data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
                                 <ComponentContainer key="content" components={contentComponents} />

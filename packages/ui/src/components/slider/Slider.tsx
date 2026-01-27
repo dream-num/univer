@@ -17,7 +17,8 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu } from '@univerjs/design';
-import React, { useMemo, useRef, useState } from 'react';
+import * as React from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ComponentManager } from '../../common';
 import { useDependency } from '../../utils/di';
 
@@ -171,9 +172,9 @@ export function Slider(props: ISliderProps) {
         >
             <Button
                 className="univer-size-6 univer-p-0"
+                disabled={value <= min || disabled}
                 size="small"
                 variant="text"
-                disabled={value <= min || disabled}
                 onClick={() => handleStep(-10)}
             >
                 <ReduceIcon />
@@ -188,13 +189,13 @@ export function Slider(props: ISliderProps) {
                     width: `${SLIDER_WIDTH}px`,
                 }}
             >
-                <div ref={sliderInnerRailRef} role="track" className="univer-relative univer-h-0.5">
+                <div ref={sliderInnerRailRef} className="univer-relative univer-h-0.5" role="track">
                     <a
                         key="reset-button"
                         className={`
-                          univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-h-0.5
-                          univer-w-0.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
-                          univer-rounded-full univer-bg-white
+                          univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block univer-size-0.5
+                          -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full
+                          univer-bg-white
                         `}
                         role="button"
                         onClick={handleReset}
@@ -208,11 +209,11 @@ export function Slider(props: ISliderProps) {
                             'hover:univer-gray-200 univer-cursor-pointer': !disabled,
                             'univer-cursor-not-allowed': disabled,
                         })}
-                        role="handle"
-                        type="button"
                         style={{
                             left: `${offset}%`,
                         }}
+                        role="handle"
+                        type="button"
                         onPointerDown={handleMouseDown}
                     />
                 </div>
@@ -220,9 +221,9 @@ export function Slider(props: ISliderProps) {
 
             <Button
                 className="univer-size-6 univer-p-0"
+                disabled={value >= max || disabled}
                 size="small"
                 variant="text"
-                disabled={value >= max || disabled}
                 onClick={() => handleStep(10)}
             >
                 <IncreaseIcon />

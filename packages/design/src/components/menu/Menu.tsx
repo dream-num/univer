@@ -30,8 +30,8 @@ export const Menu = forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((
     return mountContainer && (
         <RcMenu
             ref={ref}
-            prefixCls={clsx('univer-menu', props.className)}
             getPopupContainer={() => mountContainer}
+            prefixCls={clsx('univer-menu', props.className)}
             {...rest}
             className={wrapperClass}
         />
@@ -69,9 +69,7 @@ export interface ITinyMenuGroupProps {
 export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
     return (
         <div
-            className={`
-              univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-pl-0 univer-pr-0
-            `}
+            className="univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-px-0"
         >
             {items.map((item) => {
                 const ele = (

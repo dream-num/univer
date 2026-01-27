@@ -201,8 +201,8 @@ export function Ribbon(props: IRibbonProps) {
             >
                 {ribbonType === 'classic' && ribbon.length > 1 && (
                     <ClassicMenu
-                        ribbon={ribbon}
                         activatedTab={activatedTab}
+                        ribbon={ribbon}
                         onSelectTab={handleSelectTab}
                     />
                 )}
@@ -234,20 +234,20 @@ export function Ribbon(props: IRibbonProps) {
             >
                 {ribbonType === 'default' && ribbon.length > 1 && (
                     <DefaultMenu
-                        ribbon={ribbon}
                         activatedTab={activatedTab}
+                        ribbon={ribbon}
                         onSelectTab={handleSelectTab}
                     />
                 )}
 
                 <div
-                    data-u-comp="ribbon-toolbar"
                     ref={containerRef}
+                    data-u-comp="ribbon-toolbar"
+                    aria-label={localeService.t(activatedTab)}
                     className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
                         'univer-justify-center': ribbonType === 'classic',
                     })}
                     role="toolbar"
-                    aria-label={localeService.t(activatedTab)}
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
@@ -270,12 +270,11 @@ export function Ribbon(props: IRibbonProps) {
                         >
                             <Dropdown
                                 collisionPadding={{ right: 12, left: 12 }}
-                                onOpenAutoFocus={(e) => e.preventDefault()}
                                 overlay={(
                                     <div
                                         className={`
-                                          univer-box-border univer-grid
-                                          univer-max-w-[var(--radix-popper-available-width)] univer-gap-2 univer-p-2
+                                          univer-box-border univer-grid univer-max-w-[--radix-popper-available-width]
+                                          univer-gap-2 univer-p-2
                                         `}
                                     >
                                         {activeGroup.hiddenGroups.map((groupItem) => (
@@ -296,12 +295,13 @@ export function Ribbon(props: IRibbonProps) {
                                         ))}
                                     </div>
                                 )}
+                                onOpenAutoFocus={(e) => e.preventDefault()}
                             >
                                 <button
-                                    type="button"
-                                    className={toolbarButtonClassName}
-                                    aria-label={localeService.t('ribbon.more')}
                                     aria-haspopup="true"
+                                    aria-label={localeService.t('ribbon.more')}
+                                    className={toolbarButtonClassName}
+                                    type="button"
                                 >
                                     <MoreFunctionIcon />
                                 </button>

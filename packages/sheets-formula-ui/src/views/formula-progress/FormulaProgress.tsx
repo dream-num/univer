@@ -33,5 +33,5 @@ export function FormulaProgressBar() {
         triggerCalculationController.clearProgress();
     }, [triggerCalculationController]);
 
-    return <ProgressBar progress={progress} onTerminate={terminateCalculation} onClearProgress={clearProgress} />;
+    return <ProgressBar progress={progress} onClearProgress={clearProgress} onTerminate={terminateCalculation} />;
 }

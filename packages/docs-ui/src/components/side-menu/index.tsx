@@ -95,14 +95,14 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
     return (
         <div className={clsx('univer-relative', wrapperClass)} style={wrapperStyle}>
             <div
-                onClick={() => onOpenChange?.(!open)}
                 className={clsx(`
-                  univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-h-8 univer-w-8
+                  univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-size-8
                   univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
                   univer-text-gray-800 univer-shadow-sm
                   dark:!univer-bg-gray-600 dark:!univer-text-gray-200
                 `, iconClass)}
                 style={iconStyle}
+                onClick={() => onOpenChange?.(!open)}
             >
                 {open ? <LeftIcon /> : <CatalogueIcon />}
             </div>
@@ -132,7 +132,6 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                 >
                     {menus?.map((menu) => (
                         <div
-                            id={`univer-side-menu-${menu.id}`}
                             key={menu.id}
                             className={clsx(
                                 commonClass,
@@ -147,6 +146,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                             style={{
                                 paddingLeft: (menu.level - 1) * 12,
                             }}
+                            id={`univer-side-menu-${menu.id}`}
                             onClick={() => {
                                 onClick?.(menu);
                             }}

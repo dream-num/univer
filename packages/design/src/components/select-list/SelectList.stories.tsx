@@ -60,6 +60,6 @@ export const Playground = {
             setValue(value as string);
         }
 
-        return <SelectList value={value} options={options} onChange={handleChange} />;
+        return <SelectList options={options} value={value} onChange={handleChange} />;
     },
 };

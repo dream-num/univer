@@ -86,14 +86,14 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
             {localeService.t(prefix)}
             <div className="univer-w-16" onClick={(e) => e.stopPropagation()}>
                 <InputNumber
-                    value={Number(inputValue)}
-                    size="mini"
-                    precision={0}
-                    min={min}
-                    max={max}
                     disabled={disabled}
-                    onPressEnter={handlePressEnter}
+                    max={max}
+                    min={min}
+                    precision={0}
+                    size="mini"
+                    value={Number(inputValue)}
                     onChange={handleChange}
+                    onPressEnter={handlePressEnter}
                 />
             </div>
             {localeService.t(suffix)}

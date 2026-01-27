@@ -77,7 +77,7 @@ function Examples() {
             className="univer-flex univer-h-full univer-flex-col univer-items-center univer-justify-center univer-gap-6"
         >
             <header className="univer-flex univer-items-center">
-                <img className="univer-w-24" src="/favicon.svg" alt="Univer" draggable={false} />
+                <img className="univer-w-24" alt="Univer" draggable={false} src="/favicon.svg" />
                 <h1 className="univer-text-slate-700">
                     <span
                         className={`

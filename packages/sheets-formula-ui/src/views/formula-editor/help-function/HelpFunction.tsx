@@ -119,12 +119,12 @@ export function HelpFunction(props: IHelpFunctionProps) {
     return functionInfo
         ? hidden
             ? (
-                <RectPopup key="hidden" portal anchorRect$={position$} direction="left-center">
+                <RectPopup key="hidden" anchorRect$={position$} direction="left-center" portal>
                     <HelpHiddenTip onClick={() => setHidden(false)} />
                 </RectPopup>
             )
             : (
-                <RectPopup key="show" portal onClickOutside={() => reset()} anchorRect$={position$} direction="vertical">
+                <RectPopup key="show" anchorRect$={position$} direction="vertical" portal onClickOutside={() => reset()}>
                     <div
                         className={clsx(`
                           univer-m-0 univer-box-border univer-w-[250px] univer-select-none univer-list-none
@@ -141,18 +141,17 @@ export function HelpFunction(props: IHelpFunctionProps) {
                             `, borderTopClassName)}
                         >
                             <Help
+                                active={paramIndex}
                                 prefix={functionInfo.functionName}
                                 value={functionInfo.functionParameter}
-                                active={paramIndex}
                                 onClick={handleSwitchActive}
                             />
                             <div className="univer-flex">
                                 <div
                                     className={`
-                                      univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded univer-bg-transparent
-                                      univer-p-0 univer-text-xs univer-text-gray-500 univer-outline-none
-                                      univer-transition-colors
+                                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                                      univer-justify-center univer-rounded univer-bg-transparent univer-p-0
+                                      univer-text-xs univer-text-gray-500 univer-outline-none univer-transition-colors
                                       hover:univer-bg-gray-200
                                       dark:hover:!univer-bg-gray-600
                                     `}
@@ -163,12 +162,12 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                 </div>
                                 <div
                                     className={`
-                                      univer-ml-2 univer-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded univer-bg-transparent
-                                      univer-p-0 univer-text-xs univer-text-gray-600 univer-outline-none
-                                      univer-transition-colors
+                                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                                      univer-justify-center univer-rounded univer-bg-transparent univer-p-0
+                                      univer-text-xs univer-text-gray-600 univer-outline-none univer-transition-colors
                                       hover:univer-bg-gray-300
-                                      dark:!univer-text-gray-200 dark:hover:!univer-bg-gray-600
+                                      dark:!univer-text-gray-200
+                                      dark:hover:!univer-bg-gray-600
                                     `}
                                     onClick={onClose}
                                 >

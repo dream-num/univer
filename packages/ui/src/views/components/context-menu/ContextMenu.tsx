@@ -77,7 +77,7 @@ export function DesktopContextMenu() {
     }
 
     return (
-        <Popup visible={visible} offset={offset}>
+        <Popup offset={offset} visible={visible}>
             <section ref={contentRef}>
                 {menuType && (
                     <Menu

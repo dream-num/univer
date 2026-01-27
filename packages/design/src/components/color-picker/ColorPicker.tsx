@@ -158,8 +158,8 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                             />
                             {format === 'rgba' && (
                                 <MemoizedAlphaSlider
-                                    hsv={hsv}
                                     alpha={alpha}
+                                    hsv={hsv}
                                     onChange={handleAlphaChange}
                                 />
                             )}
@@ -167,9 +167,9 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                     </div>
 
                     <MemoizedColorInput
-                        hsv={hsv}
                         alpha={alpha}
                         format={format}
+                        hsv={hsv}
                         onChange={(h, s, v, a) => {
                             handleColorChange(h, s, v);
                             if (a !== undefined) handleAlphaChange(a);

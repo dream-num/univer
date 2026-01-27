@@ -87,22 +87,22 @@ export function Confirm(props: IConfirmProps) {
 
     return (
         <Dialog
-            open={visible}
-            title={title}
-            maskClosable={false}
+            closable={closable}
             footer={(
                 <Footer
-                    locale={locale!}
                     cancelText={cancelText}
+                    closable={closable}
                     confirmText={confirmText}
+                    locale={locale!}
                     onClose={onClose}
                     onConfirm={onConfirm}
-                    closable={closable}
                 />
             )}
-            onClose={onClose}
+            maskClosable={false}
+            open={visible}
+            title={title}
             width={width}
-            closable={closable}
+            onClose={onClose}
         >
             {children}
         </Dialog>

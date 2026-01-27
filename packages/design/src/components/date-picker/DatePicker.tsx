@@ -52,12 +52,12 @@ export function DatePicker(props: IDatePickerProps) {
     return (
         <Dropdown
             align="start"
+            open={open}
             overlay={(
                 <div className="univer-p-2">
                     <Calendar value={value} onValueChange={handleValueChange} />
                 </div>
             )}
-            open={open}
             onOpenChange={setOpen}
         >
             <button

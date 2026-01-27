@@ -178,7 +178,7 @@ export function Tree(props: ITreeProps) {
                             handleExpendItem(treeItem);
                         }}
                     >
-                        <Tooltip className="univer-block" showIfEllipsis placement="top" title={title}>
+                        <Tooltip className="univer-block" placement="top" showIfEllipsis title={title}>
                             <span className="univer-block">
                                 {title}
                             </span>
@@ -196,9 +196,9 @@ export function Tree(props: ITreeProps) {
             <div className="univer-tree-list" style={style}>
                 <VirtualList
                     data={flatData}
-                    itemKey={(item) => item.key}
                     height={height}
                     itemHeight={itemHeight}
+                    itemKey={(item) => item.key}
                 >
                     {(item: ITreeItemProps) => renderTreeItem(item)}
                 </VirtualList>

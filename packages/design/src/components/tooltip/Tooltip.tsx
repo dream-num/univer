@@ -239,7 +239,6 @@ export function Tooltip(props: ITooltipProps) {
         tooltipNode = createPortal(
             <div
                 ref={tooltipRef}
-                role="tooltip"
                 className={clsx(`
                   univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-pointer-events-auto univer-absolute
                   univer-z-[1081] univer-box-border univer-w-fit univer-max-w-sm univer-text-balance univer-rounded-lg
@@ -251,6 +250,7 @@ export function Tooltip(props: ITooltipProps) {
                     top: coords?.top ?? -9999,
                     left: coords?.left ?? -9999,
                 }}
+                role="tooltip"
                 onMouseEnter={() => showTooltip()}
                 onMouseLeave={() => hideTooltip()}
             >

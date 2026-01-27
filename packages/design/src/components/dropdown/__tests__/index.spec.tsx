@@ -34,7 +34,7 @@ describe('Dropdown', () => {
 
     it('should show overlay when open is true', () => {
         const { getByText } = render(
-            <Dropdown overlay={<div>Overlay Content</div>} open>
+            <Dropdown open overlay={<div>Overlay Content</div>}>
                 <button type="button">Trigger</button>
             </Dropdown>
         );

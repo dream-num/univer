@@ -72,8 +72,8 @@ export function Pager(props: IPagerProps) {
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-600
                             `}
-                            type="button"
                             role="button"
+                            type="button"
                             onClick={onClickLeftArrow}
                         >
                             <MoreLeftIcon />
@@ -87,8 +87,8 @@ export function Pager(props: IPagerProps) {
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-600
                             `}
-                            type="button"
                             role="button"
+                            type="button"
                             onClick={onClickRightArrow}
                         >
                             <MoreRightIcon />

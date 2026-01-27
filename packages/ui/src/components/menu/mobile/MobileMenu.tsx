@@ -93,18 +93,18 @@ function MobileMenuItem(props: IMobileMenuItemProps) {
 
     return (
         <button
-            type="button"
+            key={id}
             className={clsx(`
               univer-w-18 univer-flex univer-flex-col univer-items-center univer-justify-center univer-border-none
               univer-bg-transparent univer-text-white
               [&>span]:univer-mt-0.5 [&>span]:univer-w-full [&>span]:univer-truncate [&>span]:univer-text-sm
               [&>svg]:univer-size-[18px] [&>svg]:univer-text-lg
             `)}
-            key={id}
             disabled={disabled}
+            type="button"
             onClick={() => onClick({ id })}
         >
-            <CustomLabel value={value} title={title} label={label} icon={icon} />
+            <CustomLabel icon={icon} label={label} title={title} value={value} />
         </button>
     );
 }

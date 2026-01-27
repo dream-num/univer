@@ -240,9 +240,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
             </div>
             <div className="univer-mt-4">
                 <RangeSelector
-                    unitId={unitId}
-                    subUnitId={subUnitId}
                     initialValue={rangeString}
+                    subUnitId={subUnitId}
+                    unitId={unitId}
                     onChange={(_, text) => onRangeSelectorChange(text)}
                     onVerify={handleVerify}
                 />
@@ -258,8 +258,8 @@ export const RuleEdit = (props: IRuleEditProps) => {
             </div>
             <Select
                 className="univer-mt-4 univer-w-full"
-                value={ruleType}
                 options={options}
+                value={ruleType}
                 onChange={(e) => setRuleType(e)}
             />
             <StyleEditor

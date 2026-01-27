@@ -43,10 +43,11 @@ const AutoFocusInputNumber = (props: {
     const ref = useRef<HTMLInputElement>(null);
     return (
         <InputNumber
-            step={step}
             ref={ref}
-            min={min}
+            className={className}
             max={max}
+            min={min}
+            step={step}
             value={value}
             onChange={(v) => {
                 onChange(v ?? 0).finally(() => {
@@ -58,7 +59,6 @@ const AutoFocusInputNumber = (props: {
                     }, 30);
                 });
             }}
-            className={className}
         />
     );
 };
@@ -103,7 +103,7 @@ export function ParagraphSetting() {
             >
                 {alignmentOptions.map((item) => {
                     return (
-                        <Tooltip title={item.label} key={item.value} placement="bottom">
+                        <Tooltip key={item.value} placement="bottom" title={item.label}>
                             <span
                                 className={clsx(`
                                   hover:univer-bg-black/60
@@ -179,11 +179,11 @@ export function ParagraphSetting() {
                         className="univer-mt-4 univer-flex univer-w-[162px] univer-flex-col univer-gap-1.5"
                     >
                         <Select
-                            value={`${spacingRule}`}
                             options={[
                                 { label: localeService.t('doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
                                 { label: localeService.t('doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
                             ]}
+                            value={`${spacingRule}`}
                             onChange={(v) => setSpacingRule(Number(v))}
                         />
                         <AutoFocusInputNumber

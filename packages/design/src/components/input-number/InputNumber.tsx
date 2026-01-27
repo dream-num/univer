@@ -318,12 +318,12 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                     <Input
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}
+                        disabled={disabled}
                         size={size}
                         value={inputValue}
-                        disabled={disabled}
+                        onBlur={handleBlur}
                         onChange={handleInputChange}
                         onFocus={onFocus}
-                        onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
                     />
 
@@ -343,33 +343,35 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                             )}
                         >
                             <button
+                                aria-label="increment"
                                 className={`
                                   univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
                                   univer-items-center univer-justify-center univer-border-none univer-bg-transparent
                                   univer-p-0 univer-transition-colors
                                   hover:univer-bg-gray-100
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                                  dark:!univer-text-white
+                                  dark:hover:!univer-bg-gray-600
                                 `}
-                                type="button"
-                                aria-label="increment"
-                                tabIndex={-1}
                                 disabled={disabled || (max !== undefined && internalValue !== null && internalValue >= max)}
+                                tabIndex={-1}
+                                type="button"
                                 onClick={() => handleClick(true)}
                             >
                                 +
                             </button>
                             <button
+                                aria-label="decrement"
                                 className={`
                                   univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
                                   univer-items-center univer-justify-center univer-border-none univer-bg-transparent
                                   univer-p-0 univer-transition-colors
                                   hover:univer-bg-gray-100
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                                  dark:!univer-text-white
+                                  dark:hover:!univer-bg-gray-600
                                 `}
-                                type="button"
-                                aria-label="decrement"
-                                tabIndex={-1}
                                 disabled={disabled || (min !== undefined && internalValue !== null && internalValue <= min)}
+                                tabIndex={-1}
+                                type="button"
                                 onClick={() => handleClick(false)}
                             >
                                 -

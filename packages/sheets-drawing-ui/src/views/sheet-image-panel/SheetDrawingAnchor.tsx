@@ -150,7 +150,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             </header>
 
             <div>
-                <RadioGroup value={value} onChange={handleChange} direction="vertical">
+                <RadioGroup direction="vertical" value={value} onChange={handleChange}>
                     <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('drawing-anchor.both')}</Radio>
                     <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('drawing-anchor.position')}</Radio>
                     <Radio value={SheetDrawingAnchorType.None}>{localeService.t('drawing-anchor.none')}</Radio>

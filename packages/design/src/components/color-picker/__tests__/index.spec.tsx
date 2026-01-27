@@ -153,7 +153,7 @@ describe('ColorInput', () => {
     }
 
     it('should call onChange when color input changes', () => {
-        const { container } = render(<TestComponent onChange={onChange} alpha={1} format="hex" />);
+        const { container } = render(<TestComponent alpha={1} format="hex" onChange={onChange} />);
         const inputs = container.querySelectorAll('input[type="text"]') as unknown as HTMLInputElement[];
 
         const [rInput, gInput, bInput] = inputs;

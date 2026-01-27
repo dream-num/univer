@@ -34,18 +34,18 @@ afterEach(cleanup);
 
 describe('Select', () => {
     it('should render with value', () => {
-        const { getByText } = render(<Select value="1" options={options} onChange={() => {}} />);
+        const { getByText } = render(<Select options={options} value="1" onChange={() => {}} />);
         expect(getByText('Option 1')).toBeInTheDocument();
     });
 
     it('should render with group value', () => {
-        const { getByText } = render(<Select value="g2" options={options} onChange={() => {}} />);
+        const { getByText } = render(<Select options={options} value="g2" onChange={() => {}} />);
         expect(getByText('G2')).toBeInTheDocument();
     });
 
     it('should call onChange when select changes', () => {
         const handleChange = vi.fn();
-        const { container } = render(<Select value="1" options={options} onChange={handleChange} />);
+        const { container } = render(<Select options={options} value="1" onChange={handleChange} />);
         const selectDiv = container.querySelector('[data-u-comp="select"]');
         if (selectDiv) {
             selectDiv.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -59,7 +59,7 @@ describe('Select', () => {
 
     it('should not call onChange when disabled', () => {
         const handleChange = vi.fn();
-        const { container } = render(<Select value="1" options={options} onChange={handleChange} disabled />);
+        const { container } = render(<Select disabled options={options} value="1" onChange={handleChange} />);
         const selectDiv = container.querySelector('[data-u-comp="select"]');
         if (selectDiv) {
             selectDiv.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -72,21 +72,21 @@ describe('Select', () => {
     });
 
     it('should render borderless', () => {
-        const { container } = render(<Select value="1" options={options} onChange={() => {}} borderless />);
+        const { container } = render(<Select borderless options={options} value="1" onChange={() => {}} />);
         expect(container.querySelector('[data-u-comp="select"]')).toHaveClass('univer-border-transparent', { exact: false });
     });
 });
 
 describe('MultipleSelect', () => {
     it('should render with values', () => {
-        const { getByText } = render(<MultipleSelect value={['1', '2']} options={options} onChange={() => {}} />);
+        const { getByText } = render(<MultipleSelect options={options} value={['1', '2']} onChange={() => {}} />);
         expect(getByText('Option 1')).toBeInTheDocument();
         expect(getByText('Option 2')).toBeInTheDocument();
     });
 
     it('should call onChange when select changes', () => {
         const handleChange = vi.fn();
-        const { container } = render(<MultipleSelect value={['1']} options={options} onChange={handleChange} />);
+        const { container } = render(<MultipleSelect options={options} value={['1']} onChange={handleChange} />);
         const selectDiv = container.querySelector('[data-u-comp="select"]');
         if (selectDiv) {
             selectDiv.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -100,7 +100,7 @@ describe('MultipleSelect', () => {
 
     it('should not call onChange when disabled', () => {
         const handleChange = vi.fn();
-        const { container } = render(<MultipleSelect value={['1']} options={options} onChange={handleChange} disabled />);
+        const { container } = render(<MultipleSelect disabled options={options} value={['1']} onChange={handleChange} />);
         const selectDiv = container.querySelector('[data-u-comp="select"]');
         if (selectDiv) {
             selectDiv.dispatchEvent(new MouseEvent('click', { bubbles: true }));

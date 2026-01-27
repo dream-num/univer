@@ -55,7 +55,6 @@ export const SwitchUnits = () => {
                         return (
                             <div
                                 key={sheet.getUnitId()}
-                                onClick={() => switchSheet(sheet)}
                                 className={clsx(`
                                   univer-relative univer-min-w-0 univer-flex-shrink-0 univer-transform
                                   univer-cursor-pointer univer-whitespace-nowrap univer-rounded-lg univer-px-4
@@ -75,6 +74,7 @@ export const SwitchUnits = () => {
                                     `]: !isActive,
                                 })}
                                 title={sheet.getUnitId()}
+                                onClick={() => switchSheet(sheet)}
                             >
                                 <span className="univer-max-w-32 univer-truncate">
                                     {sheet.getUnitId()}
@@ -82,7 +82,7 @@ export const SwitchUnits = () => {
                                 {isActive && (
                                     <div
                                         className={`
-                                          univer-absolute -univer-bottom-1 univer-left-1/2 univer-h-1 univer-w-1
+                                          univer-absolute -univer-bottom-1 univer-left-1/2 univer-size-1
                                           -univer-translate-x-1/2 univer-transform univer-rounded-full
                                           univer-bg-blue-500
                                         `}

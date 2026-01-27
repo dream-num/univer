@@ -60,11 +60,11 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
                     <div className="univer-mt-2 univer-w-32">
                         <InputNumber
-                            value={decimal}
-                            step={1}
-                            precision={0}
                             max={20}
                             min={0}
+                            precision={0}
+                            step={1}
+                            value={decimal}
                             onChange={handleDecimalChange}
                         />
                     </div>

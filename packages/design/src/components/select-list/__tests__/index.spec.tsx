@@ -29,31 +29,31 @@ describe('SelectList', () => {
     ];
 
     it('should render with value', () => {
-        const { getByText } = render(<SelectList value="a" options={options} onChange={() => {}} />);
+        const { getByText } = render(<SelectList options={options} value="a" onChange={() => {}} />);
         expect(getByText('A')).toBeInTheDocument();
     });
 
     it('should call onChange when select changes (single)', () => {
         const handleChange = vi.fn();
-        const { getByText } = render(<SelectList value="a" options={options} onChange={handleChange} />);
+        const { getByText } = render(<SelectList options={options} value="a" onChange={handleChange} />);
         getByText('B').click();
         expect(handleChange).toHaveBeenCalledWith('b');
     });
 
     it('should call onChange when select changes (multi)', () => {
         const handleChange = vi.fn();
-        const { getByText } = render(<SelectList value={['a']} options={options} onChange={handleChange} multiple />);
+        const { getByText } = render(<SelectList multiple options={options} value={['a']} onChange={handleChange} />);
         getByText('B').click();
         expect(handleChange).toHaveBeenCalledWith(['a', 'b']);
     });
 
     it('should hide check mark', () => {
-        const { container } = render(<SelectList value="a" options={options} onChange={() => {}} hideCheckMark />);
+        const { container } = render(<SelectList hideCheckMark options={options} value="a" onChange={() => {}} />);
         expect(container.querySelector('svg')).toBeNull();
     });
 
     it('should apply color style', () => {
-        const { getByText } = render(<SelectList value="b" options={options} onChange={() => {}} />);
+        const { getByText } = render(<SelectList options={options} value="b" onChange={() => {}} />);
         expect(getByText('B')).toHaveStyle({ color: 'red' });
     });
 });

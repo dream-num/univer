@@ -177,7 +177,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         key={index}
                         className={clsx(
                             `
-                              univer-absolute univer-top-1/2 univer-h-4 univer-w-4 -univer-translate-x-1/2
+                              univer-absolute univer-top-1/2 univer-size-4 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full univer-border-2
                               univer-border-white univer-shadow-md
                             `,
@@ -223,9 +223,9 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 <div className="univer-flex-1">
                     <div className="univer-mb-1 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.offset}</div>
                     <InputNumber
-                        value={value.stops[selectedIndex]?.offset}
-                        min={0}
                         max={100}
+                        min={0}
+                        value={value.stops[selectedIndex]?.offset}
                         onChange={handleStopOffsetChange}
                     />
                 </div>
@@ -233,9 +233,9 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     <div className="univer-flex-1">
                         <div className="univer-mb-1 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</div>
                         <InputNumber
-                            value={value.angle}
-                            min={0}
                             max={360}
+                            min={0}
+                            value={value.angle}
                             onChange={handleAngleChange}
                         />
                     </div>
@@ -243,9 +243,9 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 <div className="univer-flex univer-gap-1">
                     <Tooltip title={locale?.GradientColorPicker.delete}>
                         <Button
+                            disabled={value.stops.length <= 2}
                             variant="danger"
                             onClick={handleRemoveStop}
-                            disabled={value.stops.length <= 2}
                         >
                             <DeleteIcon />
                         </Button>

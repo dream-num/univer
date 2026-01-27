@@ -17,7 +17,7 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { LifecycleStages } from '@univerjs/core';
-import React from 'react';
+import * as React from 'react';
 
 export function simpleRangePopupDemo(univer: Univer, univerAPI: FUniver) {
     // Register a custom component

@@ -116,9 +116,9 @@ function SelectList(props: ISelectListProps) {
                           focus:univer-border-primary-500 focus:univer-outline-none
                           dark:!univer-text-white
                         `}
+                        autoFocus
                         type="text"
                         value={lowerFilter}
-                        autoFocus
                         onChange={handleSearchChange}
                     />
                 </div>
@@ -187,8 +187,8 @@ function SelectList(props: ISelectListProps) {
                             </div>
                             <div
                                 className={`
-                                  univer-ml-3 univer-h-4 univer-w-4 univer-flex-shrink-0 univer-flex-grow-0
-                                  univer-text-base univer-text-primary-500
+                                  univer-ml-3 univer-size-4 univer-flex-shrink-0 univer-flex-grow-0 univer-text-base
+                                  univer-text-primary-500
                                 `}
                             >
                                 {selected && <CheckMarkIcon className="univer-text-primary-600" />}
@@ -239,9 +239,13 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
     return (
         <SelectList
             style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
+            location={location}
+            multiple={multiple}
+            options={options}
+            showEdit={showEdit}
+            showSearch={showSearch}
             title={multiple ? localeService.t('dataValidation.listMultiple.dropdown') : localeService.t('dataValidation.list.dropdown')}
             value={deserializeListOptions(localValue ?? '')}
-            multiple={multiple}
             onChange={async (newValue) => {
                 const str = serializeListOptions(newValue);
                 setLocalValue(str);
@@ -250,11 +254,7 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
                     hideFn();
                 }
             }}
-            options={options}
             onEdit={onEdit}
-            location={location}
-            showEdit={showEdit}
-            showSearch={showSearch}
         />
     );
 }

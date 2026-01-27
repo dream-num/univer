@@ -35,7 +35,7 @@ describe('Segmented', () => {
     });
 
     it('should select by defaultValue', () => {
-        const { getByText } = render(<Segmented items={items} defaultValue="b" />);
+        const { getByText } = render(<Segmented defaultValue="b" items={items} />);
         expect(getByText('B')).toHaveClass('univer-text-gray-900', { exact: false });
     });
 

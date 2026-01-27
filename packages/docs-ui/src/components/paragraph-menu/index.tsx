@@ -61,8 +61,8 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
     return (
         <>
             <div
-                data-u-comp="paragraph-menu"
                 ref={anchorRef}
+                data-u-comp="paragraph-menu"
                 className={clsx(`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
                   univer-rounded-full univer-px-2.5 univer-py-0
@@ -72,6 +72,10 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                     'univer-bg-gray-100 dark:!univer-bg-gray-700': visible,
                     'univer-bg-white dark:!univer-bg-gray-700': !visible,
                 })}
+                onClick={() => {
+                    setVisible(true);
+                    docParagraphMenuService?.setParagraphMenuActive(true);
+                }}
                 onMouseEnter={(e) => {
                     popup.onPointerEnter?.(e);
                     isMouseOver.current = true;
@@ -85,10 +89,6 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                 }}
                 onMouseLeave={() => {
                     isMouseOver.current = false;
-                }}
-                onClick={() => {
-                    setVisible(true);
-                    docParagraphMenuService?.setParagraphMenuActive(true);
                 }}
             >
                 <icon.component
@@ -106,11 +106,11 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
             </div>
             {visible && (
                 <RectPopup
-                    portal
-                    mask
-                    maskZIndex={100}
                     anchorRect$={anchorRect$}
                     direction="left"
+                    mask
+                    maskZIndex={100}
+                    portal
                     onMaskClick={handleHideMenu}
                 >
                     <section

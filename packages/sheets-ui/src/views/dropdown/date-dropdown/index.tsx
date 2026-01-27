@@ -63,8 +63,8 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                 )
                 : (
                     <Calendar
-                        value={date.toDate()}
                         showTime={showTime ?? patternType === 'datetime'}
+                        value={date.toDate()}
                         onValueChange={(newValue) => {
                             setLocalDate(dayjs(newValue));
                         }}
@@ -74,7 +74,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
             <footer
                 className={clsx('univer-mt-2 univer-flex univer-justify-end univer-pt-2', borderTopClassName)}
             >
-                <Button size="small" variant="primary" onClick={handleSave} disabled={!date || !date.isValid()}>
+                <Button disabled={!date || !date.isValid()} size="small" variant="primary" onClick={handleSave}>
                     {localeService.t('dataValidation.alert.ok')}
                 </Button>
             </footer>

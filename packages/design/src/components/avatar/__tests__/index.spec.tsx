@@ -41,7 +41,7 @@ describe('Avatar', () => {
     });
 
     it('renders the image with fit', () => {
-        const { container } = render(<Avatar src="test.png" fit="contain" />);
+        const { container } = render(<Avatar fit="contain" src="test.png" />);
 
         expect(container.innerHTML).contains('object-fit: contain');
     });

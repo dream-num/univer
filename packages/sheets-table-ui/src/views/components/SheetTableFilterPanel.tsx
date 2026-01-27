@@ -167,33 +167,33 @@ export function SheetTableFilterPanel() {
             )}
             <div className="univer-w-full">
                 <Segmented
-                    value={filterBy}
                     items={filterByItems}
+                    value={filterBy}
                     onChange={(value) => setFilterBy(value as FilterByEnum)}
                 />
             </div>
             <div className="univer-z-10 univer-h-60">
-                <div className="univer-mt-3 univer-h-full univer-w-full">
+                <div className="univer-mt-3 univer-size-full">
                     {filterBy === FilterByEnum.Items
                         ? (
                             <SheetTableItemsFilterPanel
-                                tableFilter={tableFilter}
-                                unitId={unitId}
-                                subUnitId={subUnitId}
-                                tableId={tableId}
-                                columnIndex={columnIndex}
                                 checkedItemSet={checkedItemSet}
+                                columnIndex={columnIndex}
                                 setCheckedItemSet={setCheckedItemSet}
+                                subUnitId={subUnitId}
+                                tableFilter={tableFilter}
+                                tableId={tableId}
+                                unitId={unitId}
                             />
                         )
                         : (
                             <SheetTableConditionPanel
-                                tableFilter={tableFilter}
-                                unitId={unitId}
-                                subUnitId={subUnitId}
-                                tableId={tableId}
                                 columnIndex={columnIndex}
                                 conditionInfo={conditionInfo}
+                                subUnitId={subUnitId}
+                                tableFilter={tableFilter}
+                                tableId={tableId}
+                                unitId={unitId}
                                 onChange={setConditionInfo}
                             />
                         )}

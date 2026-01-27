@@ -52,12 +52,12 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
         ? (
             <Component
                 {...layerProps}
-                unitId={layer.unitId}
-                unit={instance}
-                floatDomId={layer.id}
                 context={{
                     root: innerDomRef,
                 }}
+                floatDomId={layer.id}
+                unit={instance}
+                unitId={layer.unitId}
             />
         )
         : null, [Component, layerProps]);
@@ -79,11 +79,11 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
                 height: Math.max(position.endY - position.startY - 2, 0),
                 transform: transformRef.current,
             }}
-            onPointerMove={(e) => {
-                layer.onPointerMove(e.nativeEvent);
-            }}
             onPointerDown={(e) => {
                 layer.onPointerDown(e.nativeEvent);
+            }}
+            onPointerMove={(e) => {
+                layer.onPointerMove(e.nativeEvent);
             }}
             onPointerUp={(e) => {
                 layer.onPointerUp(e.nativeEvent);
@@ -94,9 +94,9 @@ export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; 
         >
             <div
                 ref={innerDomRef}
-                id={id}
                 className="univer-absolute univer-overflow-hidden"
                 style={{ ...innerStyle }}
+                id={id}
             >
                 {component}
             </div>

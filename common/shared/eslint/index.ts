@@ -134,6 +134,52 @@ export const baseRules: Partial<Rules> = {
         },
     ],
 
+    'perfectionist/sort-jsx-props': [
+        'error',
+        {
+            customGroups: [
+                {
+                    elementNamePattern: 'key',
+                    groupName: 'key',
+                },
+                {
+                    elementNamePattern: '^ref',
+                    groupName: 'ref',
+                },
+                {
+                    elementNamePattern: '^data-',
+                    groupName: 'dataAttr',
+                },
+                {
+                    elementNamePattern: '^aria-',
+                    groupName: 'ariaAttr',
+                },
+                {
+                    elementNamePattern: 'className',
+                    groupName: 'className',
+                },
+                {
+                    elementNamePattern: 'style',
+                    groupName: 'style',
+                },
+                {
+                    elementNamePattern: '^on[A-Z]',
+                    groupName: 'callback',
+                },
+            ],
+            groups: [
+                'key',
+                'ref',
+                'dataAttr',
+                'ariaAttr',
+                'className',
+                'style',
+                'unknown',
+                'callback',
+            ],
+        },
+    ],
+
     // IMPORTANT: To ensure compatibility, some features of React 19 will be disabled.
     'react/no-forward-ref': 'off',
     'react/no-context-provider': 'off',
@@ -311,7 +357,7 @@ export const tailwindcssPreset = (): Linter.Config => {
                 group: 'newLine',
                 lineBreakStyle,
             }],
-            'better-tailwindcss/no-unregistered-classes': 'off',
+            'better-tailwindcss/no-unknown-classes': 'off',
             'better-tailwindcss/no-conflicting-classes': 'off',
         },
     };

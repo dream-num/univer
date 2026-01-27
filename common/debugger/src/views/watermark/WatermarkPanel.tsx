@@ -56,11 +56,11 @@ export function WatermarkPanel() {
             <div className="univer-grid univer-gap-2">
                 <div className="univer-text-gray-400">Type</div>
                 <Select
-                    value={watermarkType}
                     options={[
                         { label: 'Text', value: IWatermarkTypeEnum.Text },
                         { label: 'Image', value: IWatermarkTypeEnum.Image },
                     ]}
+                    value={watermarkType}
                     onChange={(v) => {
                         setWatermarkType(v as IWatermarkTypeEnum);
                         if (v === IWatermarkTypeEnum.Text) {

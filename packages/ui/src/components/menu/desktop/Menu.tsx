@@ -160,7 +160,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
         });
 
         return (
-            <DesignMenuItem disabled={option.disabled} key={key} eventKey={key} className={_className} onClick={handleClick}>
+            <DesignMenuItem key={key} className={_className} disabled={option.disabled} eventKey={key} onClick={handleClick}>
                 <span
                     className={clsx(contentClassName, {
                         'univer-relative univer-pl-5': !(
@@ -174,10 +174,10 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                         </span>
                     )}
                     <CustomLabel
-                        value$={option.value$}
-                        value={option.value}
-                        label={option.label}
                         icon={option.icon}
+                        label={option.label}
+                        value={option.value}
+                        value$={option.value$}
                         onChange={onChange}
                     />
                 </span>
@@ -201,8 +201,8 @@ export const Menu = (props: IBaseMenuProps) => {
     }
     return (
         <DesignMenu
-            style={style}
             ref={handleSetMenuEl}
+            style={style}
             selectable={false}
         >
             <MenuOptionsWrapper {...restProps} />
@@ -251,21 +251,21 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         return (
             <DesignMenuItem
                 key={item.id}
-                eventKey={item.id}
-                disabled={disabled}
                 className={clsx({
                     'univer-bg-gray-200': activated,
                 })}
+                disabled={disabled}
+                eventKey={item.id}
                 onClick={() => {
                     onClick({ commandId: item.commandId, value: inputValue, id: item.id });
                 }}
             >
                 <span className={contentClassName}>
                     <CustomLabel
-                        value={value}
-                        title={title}
-                        label={label}
                         icon={item.icon}
+                        label={label}
+                        title={title}
+                        value={value}
                         onChange={onChange}
                     />
                 </span>
@@ -281,27 +281,27 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 <DesignSubMenu
                     key={item.id}
                     eventKey={item.id}
+                    expandIcon={<MoreIcon className={moreIconClassName} />}
                     popupOffset={[18, 0]}
                     title={(
                         <span className={contentClassName}>
                             <CustomLabel
+                                icon={item.icon}
+                                label={item.label}
                                 title={item.title}
                                 value={inputValue}
                                 onChange={onChange}
-                                icon={item.icon}
-                                label={item.label}
                             />
                             {item.shortcut && ` (${item.shortcut})`}
                         </span>
                     )}
-                    expandIcon={<MoreIcon className={moreIconClassName} />}
                 >
                     <DesignMenuItemGroup>
                         {selections.length > 0 && (
                             <MenuOptionsWrapper
-                                parentKey={item.id}
                                 menuType={item.id}
                                 options={selections}
+                                parentKey={item.id}
                                 onOptionSelect={(v) => {
                                     onClick({ value: v.value, id: item.id, commandId: v.commandId });
                                 }}
@@ -316,10 +316,10 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <DesignMenuItem key={item.id} eventKey={item.id}>
                 <span className={contentClassName}>
                     <CustomLabel
-                        title={item.title}
-                        value={inputValue}
                         icon={item.icon}
                         label={item.label}
+                        title={item.title}
+                        value={inputValue}
                         onChange={onChange}
                     />
                     {item.shortcut && ` (${item.shortcut})`}
@@ -337,13 +337,13 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <DesignSubMenu
                 key={item.id}
                 eventKey={item.id}
+                expandIcon={<MoreIcon className={moreIconClassName} />}
                 popupOffset={[18, 0]}
                 title={(
                     <span className={contentClassName}>
-                        <CustomLabel title={item.title} icon={item.icon} label={item.label} onChange={onChange} />
+                        <CustomLabel icon={item.icon} label={item.label} title={item.title} onChange={onChange} />
                     </span>
                 )}
-                expandIcon={<MoreIcon className={moreIconClassName} />}
             >
                 <DesignMenuItemGroup>
                     {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}

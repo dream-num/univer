@@ -28,7 +28,7 @@ import copyPlugin from 'esbuild-plugin-copy';
 import vue3 from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
-import React from 'react';
+import * as React from 'react';
 import tailwindcss from 'tailwindcss';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

@@ -99,8 +99,11 @@ export function DataValidationList(props: { workbook: Workbook }) {
         <div className="univer-pb-4">
             {rulesByPermissionCheck?.map((rule) => (
                 <DataValidationItem
-                    unitId={unitId}
+                    key={rule.uid}
+                    disable={rule.disable ?? false}
+                    rule={rule}
                     subUnitId={subUnitId}
+                    unitId={unitId}
                     onClick={() => {
                         if (rule.disable) return;
                         dataValidationPanelService.setActiveRule({
@@ -109,9 +112,6 @@ export function DataValidationList(props: { workbook: Workbook }) {
                             rule,
                         });
                     }}
-                    rule={rule}
-                    key={rule.uid}
-                    disable={rule.disable ?? false}
                 />
             ))}
             <div className="univer-mt-4 univer-flex univer-flex-row univer-justify-end univer-gap-2">

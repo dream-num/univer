@@ -31,24 +31,20 @@ export function ClassicMenu({
     const localeService = useDependency(LocaleService);
     return (
         <div
+            aria-label={localeService.t('ribbon.menu')}
             className={`
-              univer-flex univer-h-full univer-w-full univer-items-center univer-justify-center univer-gap-1
-              univer-overflow-x-auto univer-rounded-md univer-bg-gray-50 univer-px-3
+              univer-flex univer-size-full univer-items-center univer-justify-center univer-gap-1 univer-overflow-x-auto
+              univer-rounded-md univer-bg-gray-50 univer-px-3
               dark:!univer-bg-gray-900
             `}
             role="tablist"
-            aria-label={localeService.t('ribbon.menu')}
         >
             {ribbon.map((group) => {
                 const isActive = activatedTab === group.key;
                 return (
                     <button
                         key={group.key}
-                        type="button"
-                        role="tab"
                         aria-selected={isActive}
-                        title={localeService.t(group.key)}
-                        onClick={() => onSelectTab(group)}
                         className={clsx(`
                           univer-focus:outline-none univer-focus:ring-2 univer-focus:ring-primary-500
                           dark:!univer-focus:ring-primary-300
@@ -66,6 +62,10 @@ export function ClassicMenu({
                               univer-bg-transparent univer-text-gray-700
                               dark:!univer-text-gray-200
                             `)}
+                        role="tab"
+                        title={localeService.t(group.key)}
+                        type="button"
+                        onClick={() => onSelectTab(group)}
                     >
                         {localeService.t(group.key)}
                     </button>

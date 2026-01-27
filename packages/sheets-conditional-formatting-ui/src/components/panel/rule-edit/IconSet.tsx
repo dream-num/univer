@@ -88,9 +88,9 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                               [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                             `, borderClassName)}
                             initValue={String(props.value) as any}
-                            unitId={unitId}
-                            subUnitId={subUnitId}
                             isFocus={isFocusFormulaEditor}
+                            subUnitId={subUnitId}
+                            unitId={unitId}
                             onChange={(v = '') => {
                                 const formula = v || '';
                                 onChange(formula);
@@ -145,8 +145,8 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
                                                 <img
                                                     key={index}
                                                     className="univer-size-5"
-                                                    src={base64}
                                                     draggable={false}
+                                                    src={base64}
                                                 />
                                             ))}
                                         </a>
@@ -207,8 +207,8 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
                     >
                         <img
                             className="univer-size-5"
-                            src={item.base64}
                             draggable={false}
+                            src={item.base64}
                             onClick={() => handleClick(item)}
                         />
                     </div>
@@ -306,7 +306,7 @@ const IconSetRuleEdit = (props: {
                             <Dropdown
                                 overlay={(
                                     <div className="univer-rounded-lg univer-p-4">
-                                        <IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />
+                                        <IconItemList iconId={item.iconId} iconType={item.iconType} onClick={handleIconClick} />
                                     </div>
                                 )}
                             >
@@ -320,7 +320,7 @@ const IconSetRuleEdit = (props: {
                                     `, borderClassName)}
                                 >
                                     {icon
-                                        ? <img src={icon} className="univer-size-4" draggable={false} />
+                                        ? <img className="univer-size-4" draggable={false} src={icon} />
                                         : <SlashDoubleIcon className="univer-size-4" />}
                                     <MoreDownIcon />
                                 </div>
@@ -375,9 +375,9 @@ const IconSetRuleEdit = (props: {
                                         }}
                                     />
                                     <TextInput
+                                        error={error}
                                         id={index}
                                         type={item.value.type}
-                                        error={error}
                                         value={item.value.value || ''}
                                         onChange={(v) => {
                                             handleValueValueChange(v, index);
@@ -446,12 +446,12 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                 {list.map((icon, index) => (icon
                     ? (
                         <img
-                            className="univer-size-5"
                             key={index}
+                            className="univer-size-5"
                             src={icon}
                         />
                     )
-                    : <SlashDoubleIcon className="univer-size-5" key={index} />))}
+                    : <SlashDoubleIcon key={index} className="univer-size-5" />))}
             </div>
         );
     }, [configList]);
@@ -594,7 +594,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     {localeService.t('sheet.cf.iconSet.onlyShowIcon')}
                 </div>
             </div>
-            <IconSetRuleEdit errorMap={errorMap} onChange={handleChange} configList={configList} />
+            <IconSetRuleEdit configList={configList} errorMap={errorMap} onChange={handleChange} />
         </div>
     );
 };

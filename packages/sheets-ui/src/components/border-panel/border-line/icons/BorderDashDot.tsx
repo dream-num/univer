@@ -15,7 +15,7 @@
  */
 
 export const BorderDashDot = ({ className }: { className: string }) => (
-    <svg className={className} width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} fill="none" height="2" viewBox="0 0 120 2" width="120" xmlns="http://www.w3.org/2000/svg">
         <path d="M0.98999 1.08218H-0.0100098V0.0821838H0.98999V1.08218Z" />
         <path d="M5.78992 1.08218H2.78992V0.0821838H5.78992V1.08218Z" />
         <path d="M7.58984 1.08218H8.58984V0.0821838H7.58984V1.08218Z" />

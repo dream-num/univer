@@ -37,9 +37,9 @@ export const CalendarBasic = {
             <>
                 <div>
                     <Calendar
+                        showTime
                         value={date}
                         onValueChange={setDate}
-                        showTime
                     />
                 </div>
             </>

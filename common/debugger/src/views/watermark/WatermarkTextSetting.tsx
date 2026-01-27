@@ -35,9 +35,9 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
             <div className="univer-mb-4 univer-grid univer-gap-1">
                 <div>Content</div>
                 <Input
+                    placeholder="Enter text"
                     value={config.content}
                     onChange={(val) => onChange({ ...config, content: val })}
-                    placeholder="Enter text"
                 />
             </div>
 
@@ -46,9 +46,9 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-gap-1">
                         <div>Font Size</div>
                         <InputNumber
-                            value={config.fontSize}
                             max={72}
                             min={12}
+                            value={config.fontSize}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, fontSize: Number.parseInt(val.toString()) });
@@ -60,11 +60,11 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-gap-1">
                         <div>Direction</div>
                         <Select
-                            value={config.direction}
                             options={[
                                 { label: 'Left to Right', value: 'ltr' },
                                 { label: 'Right to Left', value: 'rtl' },
                             ]}
+                            value={config.direction}
                             onChange={(v) => onChange({ ...config, direction: v as 'ltr' | 'rtl' })}
                         />
                     </div>
@@ -141,9 +141,9 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-flex-1 univer-gap-1">
                         <div>Rotate</div>
                         <InputNumber
-                            value={config.rotate}
                             max={360}
                             min={-360}
+                            value={config.rotate}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, rotate: Number.parseInt(val.toString()) });
@@ -164,8 +164,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-gap-1">
                         <div>Horizontal Spacing</div>
                         <InputNumber
-                            value={config.spacingX}
                             min={0}
+                            value={config.spacingX}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, spacingX: Number.parseInt(val.toString()) });
@@ -177,8 +177,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-gap-1">
                         <div>Vertical Spacing</div>
                         <InputNumber
-                            value={config.spacingY}
                             min={0}
+                            value={config.spacingY}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, spacingY: Number.parseInt(val.toString()) });
@@ -192,8 +192,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-gap-1">
                         <div>Horizontal Start Position</div>
                         <InputNumber
-                            value={config.x}
                             min={0}
+                            value={config.x}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, x: Number.parseInt(val.toString()) });
@@ -205,8 +205,8 @@ export function WatermarkTextSetting(props: IWatermarkTextSettingProps) {
                     <div className="univer-grid univer-gap-1">
                         <div>Vertical Start Position</div>
                         <InputNumber
-                            value={config.y}
                             min={0}
+                            value={config.y}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, y: Number.parseInt(val.toString()) });

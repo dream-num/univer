@@ -47,8 +47,8 @@ export const ListTypePicker = (props: IListTypePickerProps) => {
                     >
                         <img
                             className="univer-size-full"
-                            src={item.img}
                             draggable={false}
+                            src={item.img}
                         />
                     </a>
                 );

@@ -94,13 +94,13 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
 
     return (
         <button
-            type="button"
             className={clsx(toolbarButtonClassName, {
                 'univer-px-2': noIcon,
                 '!univer-bg-gray-200 dark:!univer-bg-gray-500': active,
             })}
             style={style}
             disabled={disabled}
+            type="button"
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}
             {...restProps}

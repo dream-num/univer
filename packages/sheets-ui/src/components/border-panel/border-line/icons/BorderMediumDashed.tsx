@@ -15,7 +15,7 @@
  */
 
 export const BorderMediumDashed = ({ className }: { className: string }) => (
-    <svg className={className} width="118" height="3" viewBox="0 0 118 3" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} fill="none" height="3" viewBox="0 0 118 3" width="118" xmlns="http://www.w3.org/2000/svg">
         <path d="M-0.00854492 2.94815H1.99146V0.948151H-0.00854492V2.94815Z" />
         <path d="M6.09668 2.94815H8.09668V0.948151H6.09668V2.94815Z" />
         <path d="M14.2019 2.94815H12.2019V0.948151H14.2019V2.94815Z" />

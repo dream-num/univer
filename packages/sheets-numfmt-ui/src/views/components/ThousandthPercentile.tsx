@@ -60,9 +60,9 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
             <div className="univer-mt-2">
                 <InputNumber
                     disabled={isInputDisable}
-                    value={decimal}
                     max={20}
                     min={0}
+                    value={decimal}
                     onChange={handleDecimalChange}
                 />
             </div>
@@ -71,7 +71,7 @@ export function ThousandthPercentilePanel(props: IBusinessComponentProps) {
                 {localeService.t('sheet.numfmt.negType')}
             </div>
             <div className="univer-mt-2">
-                <SelectList onChange={handleClick} options={options} value={suffix} />
+                <SelectList options={options} value={suffix} onChange={handleClick} />
             </div>
             <div
                 className={`

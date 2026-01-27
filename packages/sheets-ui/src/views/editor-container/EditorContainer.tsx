@@ -19,7 +19,8 @@ import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
@@ -147,22 +148,23 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         >
             {FormulaEditor && (
                 <FormulaEditor
-                    editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
+                    keyboardEventConfig={keyCodeConfig}
                     className={`
-                      univer-relative univer-flex univer-h-full univer-w-full
+                      univer-relative univer-flex univer-size-full
                       [&_canvas]:univer-absolute
                     `}
+                    autoScrollbar={false}
+                    disableContextMenu={false}
+                    disableSelectionOnClick
+                    editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
                     initValue=""
-                    onChange={() => {}}
                     isFocus={visible?.visible}
-                    unitId={editState?.unitId}
-                    subUnitId={editState?.sheetId}
-                    keyboardEventConfig={keyCodeConfig}
-                    onMoveInEditor={onMoveInEditor}
+                    isSingle={false}
                     isSupportAcrossSheet
                     resetSelectionOnBlur={false}
-                    isSingle={false}
-                    autoScrollbar={false}
+                    subUnitId={editState?.sheetId}
+                    unitId={editState?.unitId}
+                    onChange={() => {}}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2, isFocusing: boolean) => {
                         isRefSelecting.current = isSelecting;
                         if (!isFocusing) return;
@@ -172,8 +174,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
-                    disableSelectionOnClick
-                    disableContextMenu={false}
+                    onMoveInEditor={onMoveInEditor}
                 />
             )}
         </div>

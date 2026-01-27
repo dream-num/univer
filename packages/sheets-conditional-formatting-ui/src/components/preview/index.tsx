@@ -92,7 +92,7 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
                 <div className={previewClassName}>
                     {iconSet.map((base64, index) => (
                         base64 ?
-                            <img key={index} className="univer-h-full" src={base64} draggable={false} />
+                            <img key={index} className="univer-h-full" draggable={false} src={base64} />
                             : <SlashDoubleIcon key={index} />))}
                 </div>
             );

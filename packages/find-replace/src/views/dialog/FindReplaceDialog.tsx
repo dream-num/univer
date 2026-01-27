@@ -74,11 +74,11 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
         <>
             <SearchInput
                 findCompleted={findCompleted}
+                findReplaceService={findReplaceService}
+                initialFindString={findString}
+                localeService={localeService}
                 matchesCount={matchesCount}
                 matchesPosition={matchesPosition}
-                findReplaceService={findReplaceService}
-                localeService={localeService}
-                initialFindString={findString}
                 onChange={onFindStringChange}
             />
             <div className="univer-mt-4 univer-text-center">
@@ -178,13 +178,13 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
         <div>
             <FormLayout label={localeService.t('find-replace.dialog.find')}>
                 <SearchInput
-                    findCompleted={findCompleted}
                     className="univer-find-input"
+                    findCompleted={findCompleted}
+                    findReplaceService={findReplaceService}
+                    initialFindString={inputtingFindString}
+                    localeService={localeService}
                     matchesCount={matchesCount}
                     matchesPosition={matchesPosition}
-                    findReplaceService={findReplaceService}
-                    localeService={localeService}
-                    initialFindString={inputtingFindString}
                     onChange={onFindStringChange}
                 />
             </FormLayout>
@@ -196,15 +196,15 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                 />
             </FormLayout>
             <FormLayout label={localeService.t('find-replace.dialog.find-direction.title')}>
-                <Select value={findDirection} options={findDirectionOptions} onChange={onChangeFindDirection} />
+                <Select options={findDirectionOptions} value={findDirection} onChange={onChangeFindDirection} />
             </FormLayout>
             <FormDualColumnLayout>
                 <>
                     <FormLayout label={localeService.t('find-replace.dialog.find-scope.title')}>
-                        <Select value={findScope} options={findScopeOptions} onChange={onChangeFindScope} />
+                        <Select options={findScopeOptions} value={findScope} onChange={onChangeFindScope} />
                     </FormLayout>
                     <FormLayout label={localeService.t('find-replace.dialog.find-by.title')}>
-                        <Select value={findBy} options={findByOptions} onChange={onChangeFindBy} />
+                        <Select options={findByOptions} value={findBy} onChange={onChangeFindBy} />
                     </FormLayout>
                 </>
             </FormDualColumnLayout>
@@ -233,7 +233,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                 </>
             </FormDualColumnLayout>
             <div className="univer-mt-6 univer-flex univer-justify-between">
-                <Button variant="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t('find-replace.dialog.find')}</Button>
+                <Button disabled={findDisabled} variant="primary" onClick={onClickFindButton}>{localeService.t('find-replace.dialog.find')}</Button>
                 <span className="univer-inline-flex univer-gap-2">
                     <Button disabled={replaceDisabled} onClick={onClickReplaceButton}>{localeService.t('find-replace.dialog.replace')}</Button>
                     <Button disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t('find-replace.dialog.replace-all')}</Button>

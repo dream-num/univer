@@ -77,7 +77,6 @@ const ColorSelect = (props: IColorSelectProps) => {
             align="start"
             disabled={disabled}
             open={open}
-            onOpenChange={setOpen}
             overlay={(
                 <div
                     className={`
@@ -100,6 +99,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                     )}
                 </div>
             )}
+            onOpenChange={setOpen}
         >
             <div
                 className={clsx(`
@@ -111,7 +111,7 @@ const ColorSelect = (props: IColorSelectProps) => {
                 `, borderClassName)}
             >
                 <div
-                    className="univer-box-border univer-h-4 univer-w-4 univer-rounded univer-text-base"
+                    className="univer-box-border univer-size-4 univer-rounded univer-text-base"
                     style={{ background: value }}
                 />
 
@@ -362,16 +362,16 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                               [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                             `, borderClassName)}
                             initValue={formulaStr as any}
-                            unitId={unitId}
-                            subUnitId={subUnitId}
                             isFocus={isFocusFormulaEditor}
                             isSupportAcrossSheet
-                            onFocus={() => setIsFocusFormulaEditor(true)}
+                            subUnitId={subUnitId}
+                            unitId={unitId}
                             onChange={(v = '') => {
                                 const str = (v ?? '').trim();
                                 setFormulaStrCopy(str);
                                 updateFormula(str);
                             }}
+                            onFocus={() => setIsFocusFormulaEditor(true)}
                         />
                         {refFinalList.length > 0 && (
                             <div className="univer-mt-3">
@@ -380,8 +380,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                         <Template
                                             key={item.id}
                                             className="univer-mb-3"
-                                            item={item}
                                             commonProps={{ onItemChange: handleRefItemChange }}
+                                            item={item}
                                         />
                                     );
                                 })}
@@ -393,22 +393,22 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     <FormLayout error={formula1Res}>
                         <div className="-univer-mt-3">
                             <DraggableList
-                                list={strList}
-                                onListChange={setStrList}
-                                rowHeight={28}
-                                margin={[0, 12]}
                                 draggableHandle=".draggableHandle"
+                                idKey="id"
                                 itemRender={(item) => (
                                     <Template
                                         key={item.id}
-                                        item={item}
                                         commonProps={{
                                             onItemChange: handleStrItemChange,
                                             onItemDelete: handleStrItemDelete,
                                         }}
+                                        item={item}
                                     />
                                 )}
-                                idKey="id"
+                                list={strList}
+                                margin={[0, 12]}
+                                rowHeight={28}
+                                onListChange={setStrList}
                             />
                             <a
                                 className={`

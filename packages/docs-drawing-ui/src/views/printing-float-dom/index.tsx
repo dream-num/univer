@@ -70,7 +70,7 @@ export const DocPrintingFloatDom = (props: IPrintingFloatDomProps) => {
     return (
         <div className="univer-absolute univer-left-0 univer-top-0">
             {floatDomParams.map(([id, floatDom]) => (
-                <PrintFloatDomSingle key={id} layer={floatDom} id={id} position={floatDom.position} />
+                <PrintFloatDomSingle key={id} id={id} layer={floatDom} position={floatDom.position} />
             ))}
         </div>
     );

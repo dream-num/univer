@@ -310,9 +310,9 @@ export function Dialog(props: IDialogProps) {
 
     return (
         <DialogProvider
+            modal={mask !== false}
             open={open}
             onOpenChange={handleOpenChange}
-            modal={mask !== false}
         >
             <DialogContent
                 ref={handleContentRef}
@@ -351,10 +351,10 @@ export function Dialog(props: IDialogProps) {
                 }}
             >
                 <DialogHeader
+                    data-drag-handle={draggable ? 'true' : undefined}
                     className={clsx({
                         '!univer-hidden': !title,
                     })}
-                    data-drag-handle={draggable ? 'true' : undefined}
                     style={{
                         cursor: draggable ? 'grab' : undefined,
                         userSelect: draggable ? 'none' : undefined,

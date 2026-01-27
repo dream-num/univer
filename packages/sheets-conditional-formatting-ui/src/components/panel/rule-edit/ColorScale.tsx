@@ -77,9 +77,9 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                     `, borderClassName)}
                     initValue={formulaInitValue as any}
-                    unitId={unitId}
-                    subUnitId={subUnitId}
                     isFocus={isFocusFormulaEditor}
+                    subUnitId={subUnitId}
+                    unitId={unitId}
                     onChange={(v = '') => {
                         const formula = v || '';
                         onChange(formula);
@@ -266,10 +266,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
                 <TextInput
-                    id="min"
                     className="univer-ml-1"
-                    value={minValue}
+                    id="min"
                     type={minType}
+                    value={minValue}
                     onChange={(v) => {
                         setMinValue(v);
                         handleChange({
@@ -336,10 +336,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
 
                 <TextInput
-                    id="median"
                     className="univer-ml-1"
-                    value={medianValue}
+                    id="median"
                     type={medianType}
+                    value={medianValue}
                     onChange={(v) => {
                         setMedianValue(v);
                         handleChange({
@@ -408,10 +408,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
                 <TextInput
-                    id="max"
                     className="univer-ml-1"
-                    value={maxValue}
+                    id="max"
                     type={maxType}
+                    value={maxValue}
                     onChange={(v) => {
                         setMaxValue(v);
                         handleChange({

@@ -188,7 +188,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     }, []);
 
     return searchList.length > 0 && visible && (
-        <RectPopup portal anchorRect$={position$} direction="vertical">
+        <RectPopup anchorRect$={position$} direction="vertical" portal>
             <ul
                 ref={(v) => {
                     ulRef.current = v!;
@@ -214,15 +214,15 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         `, {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                         })}
-                        onMouseEnter={() => handleLiMouseEnter(index)}
-                        onMouseLeave={handleLiMouseLeave}
-                        onMouseMove={debounceResetMouseState}
                         onClick={() => {
                             handleFunctionSelect(item.name, item.functionType);
                             if (editor) {
                                 editor.focus();
                             }
                         }}
+                        onMouseEnter={() => handleLiMouseEnter(index)}
+                        onMouseLeave={handleLiMouseLeave}
+                        onMouseMove={debounceResetMouseState}
                     >
                         <span className="univer-block univer-truncate univer-text-xs">
                             <span className="univer-text-red-500">{item.name.substring(0, searchText.length)}</span>

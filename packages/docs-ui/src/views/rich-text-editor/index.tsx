@@ -139,6 +139,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     return (
         <div className={className} style={style}>
             <div
+                ref={sheetEmbeddingRef}
                 className={clsx(
                     {
                         'univer-border-primary-500': isFocusing && !noStyle,
@@ -147,12 +148,11 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
                           univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2
                           univer-pt-1.5
                         `]: !noStyle,
-                        'univer-h-full univer-w-full': noStyle,
+                        'univer-size-full': noStyle,
                         [borderClassName]: !noStyle,
                     }
                 )}
                 style={{ height }}
-                ref={sheetEmbeddingRef}
             >
                 <div
                     ref={formulaEditorContainerRef}

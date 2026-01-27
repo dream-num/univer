@@ -56,7 +56,7 @@ export const CheckboxGroupVertical = {
         }
 
         return (
-            <CheckboxGroup value={value} onChange={handleChange} direction="vertical">
+            <CheckboxGroup direction="vertical" value={value} onChange={handleChange}>
                 <Checkbox value="test">test</Checkbox>
                 <Checkbox value="test1">test1</Checkbox>
             </CheckboxGroup>

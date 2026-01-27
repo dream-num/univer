@@ -80,6 +80,7 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
         >
             <Dropdown
                 align="start"
+                open={visible}
                 overlay={(
                     <ul
                         className={clsx(`
@@ -104,7 +105,6 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                         ))}
                     </ul>
                 )}
-                open={visible}
                 onOpenChange={onVisibleChange}
             >
                 <div

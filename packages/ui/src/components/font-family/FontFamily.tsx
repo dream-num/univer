@@ -122,12 +122,12 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
                   [&_input]:univer-h-6 [&_input]:univer-w-7 [&_input]:univer-border-none
                   [&_input]:!univer-bg-transparent [&_input]:univer-p-0 [&_input]:univer-text-sm
                 `}
+                disabled={disabled}
                 type="text"
                 value={inputValue}
+                onBlur={handleBlur}
                 onChange={handleChangeSelection}
                 onKeyDown={handleKeyDown}
-                onBlur={handleBlur}
-                disabled={disabled}
             />
         </div>
     );

@@ -157,21 +157,21 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                           [&_.react-grid-item]:univer-transition-none
                           [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
                         `}
-                        list={dragList}
-                        onListChange={setList}
-                        idKey="id"
                         draggableHandle="[data-u-comp=sort-panel-item-handler]"
+                        idKey="id"
                         itemRender={(item) => (
                             <SortOptionItem
-                                titles={titles}
-                                list={dragList}
                                 item={item}
-                                onChange={(value, index) => onItemChange(index, value)}
+                                list={dragList}
                                 scrollPosition={scrollPosition}
+                                titles={titles}
+                                onChange={(value, index) => onItemChange(index, value)}
                             />
                         )}
-                        rowHeight={32}
+                        list={dragList}
                         margin={[0, 12]}
+                        rowHeight={32}
+                        onListChange={setList}
                     />
                 </div>
             </div>
@@ -241,11 +241,12 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                 </div>
                 {/* TODO@wzhudev: change it to the Select component later. */}
                 <Dropdown
+                    open={visible}
                     overlay={(
                         <ul
                             className={clsx(`
                               univer-my-0 univer-box-border univer-grid univer-max-h-[310px]
-                              univer-w-[var(--radix-popper-anchor-width)] univer-items-center univer-gap-1
+                              univer-w-[--radix-popper-anchor-width] univer-items-center univer-gap-1
                               univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg univer-border
                               univer-bg-white univer-p-1 univer-text-base univer-shadow-lg
                             `, scrollbarClassName)}
@@ -253,7 +254,6 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             {availableMenu.map((menuItem) => (
                                 <li
                                     key={menuItem.index}
-                                    onClick={() => handleChangeColIndex(menuItem)}
                                     className={`
                                       univer-relative univer-box-border univer-flex univer-h-7 univer-cursor-pointer
                                       univer-list-none univer-items-center univer-justify-between univer-rounded
@@ -261,6 +261,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                                       hover:univer-bg-gray-100
                                       dark:hover:!univer-bg-gray-700
                                     `}
+                                    onClick={() => handleChangeColIndex(menuItem)}
                                 >
                                     <span className="univer-max-w-[220px] univer-truncate">
                                         {menuItem.label}
@@ -274,7 +275,6 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             ))}
                         </ul>
                     )}
-                    open={visible}
                     onOpenChange={onVisibleChange}
                 >
                     <div

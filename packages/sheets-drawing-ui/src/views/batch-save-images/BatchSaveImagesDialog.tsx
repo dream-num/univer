@@ -117,8 +117,8 @@ export function BatchSaveImagesDialog() {
             </FormLayout>
 
             <FormLayout label={localeService.t('sheetImage.save.fileNameConfig')}>
-                <CheckboxGroup value={fileNameParts} onChange={handleFileNamePartsChange} direction="vertical">
-                    <Checkbox value={FileNamePart.CELL_ADDRESS} disabled={!hasAvailableColumns}>
+                <CheckboxGroup direction="vertical" value={fileNameParts} onChange={handleFileNamePartsChange}>
+                    <Checkbox disabled={!hasAvailableColumns} value={FileNamePart.CELL_ADDRESS}>
                         {localeService.t('sheetImage.save.useRowCol')}
                     </Checkbox>
                     {hasAvailableColumns && (
@@ -132,8 +132,8 @@ export function BatchSaveImagesDialog() {
             {showColumnSelect && (
                 <FormLayout label={localeService.t('sheetImage.save.selectColumn')}>
                     <Select
-                        value={selectedColumn}
                         options={columnOptions}
+                        value={selectedColumn}
                         onChange={handleColumnChange}
                     />
                 </FormLayout>
@@ -148,13 +148,13 @@ export function BatchSaveImagesDialog() {
                   univer-flex univer-justify-end univer-gap-2 univer-border-t univer-border-gray-200 univer-pt-3
                 `}
             >
-                <Button onClick={handleCancel} disabled={saving}>
+                <Button disabled={saving} onClick={handleCancel}>
                     {localeService.t('sheetImage.save.cancel')}
                 </Button>
                 <Button
+                    disabled={saving || images.length === 0}
                     variant="primary"
                     onClick={handleConfirm}
-                    disabled={saving || images.length === 0}
                 >
                     {saving ? localeService.t('sheetImage.save.saving') : localeService.t('sheetImage.save.confirm')}
                 </Button>

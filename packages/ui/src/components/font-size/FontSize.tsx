@@ -50,13 +50,13 @@ export const FontSize = (props: IFontSizeProps) => {
                   [&_input]:univer-h-6 [&_input]:univer-w-7 [&_input]:univer-border-none
                   [&_input]:!univer-bg-transparent [&_input]:univer-p-0 [&_input]:univer-text-sm
                 `}
-                value={_value}
                 controls={false}
-                min={min}
-                max={max}
-                onKeyDown={handleStopPropagation}
-                onChange={handleChange}
                 disabled={disabled}
+                max={max}
+                min={min}
+                value={_value}
+                onChange={handleChange}
+                onKeyDown={handleStopPropagation}
             />
         </div>
     );

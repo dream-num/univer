@@ -26,19 +26,21 @@ function Separator({
 }: ComponentProps<typeof Root>) {
     return (
         <Root
-            data-u-comp="separator"
             data-slot="separator-root"
-            decorative={decorative}
-            orientation={orientation}
+            data-u-comp="separator"
             className={clsx(
                 `
                   univer-shrink-0 univer-bg-gray-200
-                  data-[orientation=horizontal]:univer-h-px data-[orientation=horizontal]:univer-w-full
-                  data-[orientation=vertical]:univer-h-full data-[orientation=vertical]:univer-w-px
+                  data-[orientation=horizontal]:univer-h-px
+                  data-[orientation=vertical]:univer-h-full
+                  data-[orientation=horizontal]:univer-w-full
+                  data-[orientation=vertical]:univer-w-px
                   dark:!univer-bg-gray-600
                 `,
                 className
             )}
+            decorative={decorative}
+            orientation={orientation}
             {...props}
         />
     );

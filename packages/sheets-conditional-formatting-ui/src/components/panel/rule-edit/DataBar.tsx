@@ -73,9 +73,9 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                     `, borderClassName)}
                     initValue={v as any}
-                    unitId={unitId}
-                    subUnitId={subUnitId}
                     isFocus={isFocusFormulaEditor}
+                    subUnitId={subUnitId}
+                    unitId={unitId}
                     onChange={(v = '') => {
                         const formula = v || '';
                         onChange(formula);
@@ -88,8 +88,8 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
     return (
         <InputNumber
             className={className}
-            value={Number(value) || 0}
             disabled={disabled}
+            value={Number(value) || 0}
             onChange={(v) => {
                 onChange(v || 0);
             }}
@@ -395,9 +395,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
 
                     <InputText
-                        id="min"
                         className="univer-ml-3"
                         disabled={!isShowInput(minValueType)}
+                        id="min"
                         type={minValueType}
                         value={minValue}
                         onChange={(v) => {

@@ -43,18 +43,18 @@ export const SheetsThreadCommentCell = () => {
 
     return (
         <ThreadCommentTree
+            refStr={ref}
+            autoFocus={trigger === 'context-menu'}
+            getSubUnitName={getSubUnitName}
+            id={rootId}
+            prefix="cell"
+            subUnitId={subUnitId}
+            type={UniverInstanceType.UNIVER_SHEET}
+            unitId={unitId}
             onClick={() => {
                 sheetsThreadCommentPopupService.persistPopup();
             }}
-            prefix="cell"
-            id={rootId}
-            unitId={unitId}
-            subUnitId={subUnitId}
-            type={UniverInstanceType.UNIVER_SHEET}
-            refStr={ref}
             onClose={onClose}
-            getSubUnitName={getSubUnitName}
-            autoFocus={trigger === 'context-menu'}
         />
     );
 };

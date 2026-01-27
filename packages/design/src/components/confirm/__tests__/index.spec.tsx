@@ -23,18 +23,18 @@ afterEach(cleanup);
 
 describe('Confirm', () => {
     it('should not render when visible is false', () => {
-        const { queryByText } = render(<Confirm visible={false} title="T">content</Confirm>);
+        const { queryByText } = render(<Confirm title="T" visible={false}>content</Confirm>);
         expect(queryByText('T')).not.toBeInTheDocument();
     });
 
     it('should render with title and content', () => {
-        const { getByText } = render(<Confirm visible title="Test Title">Dialog Content</Confirm>);
+        const { getByText } = render(<Confirm title="Test Title" visible>Dialog Content</Confirm>);
         expect(getByText('Test Title')).toBeInTheDocument();
         expect(getByText('Dialog Content')).toBeInTheDocument();
     });
 
     it('should render custom button text', () => {
-        const { getByText } = render(<Confirm visible cancelText="No" confirmText="Yes">content</Confirm>);
+        const { getByText } = render(<Confirm cancelText="No" confirmText="Yes" visible>content</Confirm>);
         expect(getByText('No')).toBeInTheDocument();
         expect(getByText('Yes')).toBeInTheDocument();
     });

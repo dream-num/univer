@@ -157,12 +157,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
 
     return (
         <Dialog
-            width="328px"
-            open={visible}
-            title={localeService.t('rangeSelector.title')}
             draggable
-            mask={false}
-            maskClosable={false}
             footer={(
                 <footer className="univer-flex univer-gap-2">
                     <Button onClick={onClose}>{localeService.t('rangeSelector.cancel')}</Button>
@@ -183,6 +178,11 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     </Button>
                 </footer>
             )}
+            mask={false}
+            maskClosable={false}
+            open={visible}
+            title={localeService.t('rangeSelector.title')}
+            width="328px"
             onClose={onClose}
         >
             <div
@@ -199,9 +199,9 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                                 'univer-border-primary-600': focusIndex === index,
                             })}
                             placeholder={localeService.t('rangeSelector.placeHolder')}
-                            onFocus={() => setFocusIndex(index)}
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}
+                            onFocus={() => setFocusIndex(index)}
                         />
                         {ranges.length > 1 && (
                             <DeleteIcon
@@ -326,18 +326,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
-                        onFocusChange={(focusing, newValue) => {
-                            setFocusing(focusing);
-                            onFocusChange?.(focusing, newValue);
-                        }}
                         editorRef={setEditor}
-                        onClickOutside={() => {
-                            setFocusing(false);
-                            blurEditor();
-                            onClickOutside?.();
-                        }}
                         icon={(
-                            <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
+                            <Tooltip placement="bottom" title={localeService.t('rangeSelector.buttonTooltip')}>
                                 <SelectRangeIcon
                                     className={`
                                       univer-cursor-pointer
@@ -347,15 +338,30 @@ export function RangeSelector(props: IRangeSelectorProps) {
                                 />
                             </Tooltip>
                         )}
+                        onClickOutside={() => {
+                            setFocusing(false);
+                            blurEditor();
+                            onClickOutside?.();
+                        }}
+                        onFocusChange={(focusing, newValue) => {
+                            setFocusing(focusing);
+                            onFocusChange?.(focusing, newValue);
+                        }}
                     />
                 )
                 : null}
             <RangeSelectorDialog
                 initialValue={rangeSelectorRanges}
-                unitId={unitId}
-                subUnitId={subUnitId}
-                visible={popupVisible}
+                keepSheetReference={keepSheetReference}
                 maxRangeCount={maxRangeCount}
+                subUnitId={subUnitId}
+                supportAcrossSheet={supportAcrossSheet}
+                unitId={unitId}
+                visible={popupVisible}
+                onClose={() => {
+                    setPopupVisible(false);
+                    setRangeSelectorRanges([]);
+                }}
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);
                     const empty = RichTextBuilder.newEmptyData();
@@ -368,12 +374,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
                         blurEditor();
                     });
                 }}
-                onClose={() => {
-                    setPopupVisible(false);
-                    setRangeSelectorRanges([]);
-                }}
-                supportAcrossSheet={supportAcrossSheet}
-                keepSheetReference={keepSheetReference}
                 onShowBySelection={(ranges: IUnitRangeName[]) => {
                     if (focusing || forceShowDialogWhenSelectionChanged) {
                         setRangeSelectorRanges(ranges);

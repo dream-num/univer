@@ -121,12 +121,12 @@ export function PageSettings(props: IConfirmChildrenProps) {
                     {localeService.t('page-settings.paper-size')}
                 </label>
                 <Select
-                    value={settings.paperSize}
-                    onChange={handlePaperSizeChange}
                     options={PAPER_TYPES.map((p) => ({
                         label: localeService.t(`page-settings.page-size.${p.toLocaleLowerCase()}`),
                         value: p,
                     }))}
+                    value={settings.paperSize}
+                    onChange={handlePaperSizeChange}
                 />
             </div>
 
@@ -146,8 +146,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 {localeService.t('page-settings.top')}
                             </label>
                             <InputNumber
-                                precision={2}
                                 max={settings.pageSise.height / 2}
+                                precision={2}
                                 value={settings.margins.top}
                                 onChange={(e) => handleMarginChange('top', e)}
                             />
@@ -157,8 +157,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 {localeService.t('page-settings.bottom')}
                             </label>
                             <InputNumber
-                                precision={2}
                                 max={settings.pageSise.height / 2}
+                                precision={2}
                                 value={settings.margins.bottom}
                                 onChange={(e) => handleMarginChange('bottom', e)}
                             />
@@ -170,8 +170,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 {localeService.t('page-settings.left')}
                             </label>
                             <InputNumber
-                                precision={2}
                                 max={settings.pageSise.width / 2}
+                                precision={2}
                                 value={settings.margins.left}
                                 onChange={(e) => handleMarginChange('left', e)}
                             />
@@ -181,8 +181,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                 {localeService.t('page-settings.right')}
                             </label>
                             <InputNumber
-                                precision={2}
                                 max={settings.pageSise.width / 2}
+                                precision={2}
                                 value={settings.margins.right}
                                 onChange={(e) => handleMarginChange('right', e)}
                             />

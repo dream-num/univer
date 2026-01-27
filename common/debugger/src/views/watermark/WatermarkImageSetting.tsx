@@ -77,10 +77,10 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Opacity</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.opacity}
                             max={1}
                             min={0}
                             step={0.05}
+                            value={config.opacity}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, opacity: Number.parseFloat(val.toString()) });
@@ -112,8 +112,8 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Width</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.width}
                             min={20}
+                            value={config.width}
                             onChange={(val) => {
                                 if (val != null) {
                                     const newWidth = Math.max(20, Number.parseInt(val.toString()));
@@ -131,8 +131,8 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Height</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.height}
                             min={20}
+                            value={config.height}
                             onChange={(val) => {
                                 if (val != null) {
                                     const newHeight = Math.max(20, Number.parseInt(val.toString()));
@@ -156,9 +156,9 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Rotate</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.rotate}
                             max={360}
                             min={-360}
+                            value={config.rotate}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, rotate: Number.parseInt(val.toString()) });
@@ -180,8 +180,8 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Horizontal Spacing</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.spacingX}
                             min={0}
+                            value={config.spacingX}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, spacingX: Number.parseInt(val.toString()) });
@@ -194,8 +194,8 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Vertical Spacing</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.spacingY}
                             min={0}
+                            value={config.spacingY}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, spacingY: Number.parseInt(val.toString()) });
@@ -209,8 +209,8 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Horizontal Start Position</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.x}
                             min={0}
+                            value={config.x}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, x: Number.parseInt(val.toString()) });
@@ -223,8 +223,8 @@ export function WatermarkImageSetting({ config, onChange }: IWatermarkImageSetti
                         <div>Vertical Start Position</div>
                         <InputNumber
                             className="univer-box-border univer-h-7"
-                            value={config.y}
                             min={0}
+                            value={config.y}
                             onChange={(val) => {
                                 if (val != null) {
                                     onChange({ ...config, y: Number.parseInt(val.toString()) });

@@ -138,9 +138,9 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                             return (
                                 <DropdownMenuRadioItem
                                     key={option.value}
-                                    value={option.value}
                                     disabled={option.disabled}
                                     hideIndicator={item.hideIndicator}
+                                    value={option.value}
                                 >
                                     {option.label}
                                 </DropdownMenuRadioItem>
@@ -155,8 +155,8 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                 <DropdownMenuCheckboxItem
                     key={index}
                     className={className}
-                    disabled={item.disabled}
                     checked={item.checked}
+                    disabled={item.disabled}
                     onSelect={() => {
                         item.onSelect?.(item.value);
                     }}

@@ -441,17 +441,17 @@ export const CellLinkEdit = () => {
             {showLabel
                 ? (
                     <FormLayout
-                        label={localeService.t('hyperLink.form.label')}
                         error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
+                        label={localeService.t('hyperLink.form.label')}
                     >
                         <Input
+                            autoFocus
+                            placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
                             value={display}
                             onChange={(v) => {
                                 setDisplay(v);
                                 setByPayload.current = false;
                             }}
-                            placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
-                            autoFocus
                             onKeyDown={(e) => {
                                 if (e.keyCode === KeyCode.ENTER) {
                                     handleSubmit();
@@ -477,6 +477,8 @@ export const CellLinkEdit = () => {
                     error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
                 >
                     <Input
+                        autoFocus
+                        placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
                         value={payload}
                         onChange={(newLink) => {
                             setPayload(newLink);
@@ -485,8 +487,6 @@ export const CellLinkEdit = () => {
                                 setByPayload.current = true;
                             }
                         }}
-                        placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
-                        autoFocus
                         onKeyDown={(e) => {
                             if (e.keyCode === KeyCode.ENTER) {
                                 handleSubmit();
@@ -498,13 +498,14 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <RangeSelector
-                        unitId={workbook.getUnitId()}
-                        subUnitId={subUnitId}
-                        maxRangeCount={1}
-                        supportAcrossSheet
                         initialValue={payload}
+                        maxRangeCount={1}
                         resetRange={selections as ISelectionWithStyle[]}
+                        subUnitId={subUnitId}
+                        supportAcrossSheet
+                        unitId={workbook.getUnitId()}
                         onChange={(_, text) => handleRangeChange(text)}
+                        onFocusChange={(focus) => isFocusRangeSelectorSet(focus)}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             setSelectorDialogVisible(visible);
                             if (visible) {
@@ -539,7 +540,6 @@ export const CellLinkEdit = () => {
                                 setHide(false);
                             }
                         }}
-                        onFocusChange={(focus) => isFocusRangeSelectorSet(focus)}
                     />
                 </FormLayout>
             )}
@@ -581,16 +581,16 @@ export const CellLinkEdit = () => {
             )}
             {customHyperLinkSidePanel?.Form && (
                 <customHyperLinkSidePanel.Form
+                    display={display}
                     linkId={id}
                     payload={payload}
-                    display={display}
-                    showError={showError}
                     setByPayload={setByPayload}
                     setDisplay={(newLink) => {
                         setDisplay(newLink);
                         setByPayload.current = true;
                     }}
                     setPayload={setPayload}
+                    showError={showError}
                 />
             )}
             <div className="univer-flex univer-flex-row univer-justify-end univer-gap-2">

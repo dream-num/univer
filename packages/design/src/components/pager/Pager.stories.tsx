@@ -32,7 +32,7 @@ export default meta;
 function PagerDemo() {
     const [count, setCount] = useState(1);
 
-    return <Pager value={count} total={10} onChange={setCount} loop />;
+    return <Pager loop total={10} value={count} onChange={setCount} />;
 }
 
 export const Playground = {

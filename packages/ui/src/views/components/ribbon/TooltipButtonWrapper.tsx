@@ -98,13 +98,13 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     return (
         <Dropdown
             align={align}
+            disabled={disabled}
+            open={dropdownVisible}
             overlay={(
                 <div className="univer-grid univer-gap-2">
                     {overlay}
                 </div>
             )}
-            disabled={disabled}
-            open={dropdownVisible}
             onOpenChange={handleVisibleChange}
         >
             <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
@@ -140,9 +140,9 @@ function Label({ icon, value, option, onOptionSelect }: {
             <CustomLabel
                 className="univer-text-sm"
                 icon={icon}
-                value$={option.value$}
-                value={option.value}
                 label={option.label}
+                value={option.value}
+                value$={option.value$}
                 onChange={onChange}
             />
         </div>
@@ -232,8 +232,8 @@ export function DropdownMenuWrapper({
                 overlay={options.map((option, index) => (
                     <Label
                         key={index}
-                        value={value}
                         option={option}
+                        value={value}
                         onOptionSelect={onOptionSelect}
                     />
                 ))}
@@ -253,8 +253,8 @@ export function DropdownMenuWrapper({
             children: (
                 <Label
                     icon={option.icon}
-                    value={value}
                     option={option}
+                    value={value}
                     onOptionSelect={onOptionSelect}
                 />
             ),
@@ -282,13 +282,13 @@ export function DropdownMenuWrapper({
                 children: (
                     <Label
                         icon={icon}
-                        value={value}
                         option={{
                             label: {
                                 name: title,
                                 selectable: false,
                             },
                         }}
+                        value={value}
                     />
                 ),
                 onSelect: () => {
@@ -303,8 +303,8 @@ export function DropdownMenuWrapper({
         return (
             <DropdownMenu
                 align="start"
-                items={items}
                 disabled={disabled}
+                items={items}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
             >
@@ -327,13 +327,13 @@ export function DropdownMenuWrapper({
                     children: (
                         <Label
                             icon={icon}
-                            value={value}
                             option={{
                                 label: {
                                     name: title,
                                     selectable: false,
                                 },
                             }}
+                            value={value}
                         />
                     ),
                     onSelect: () => {
@@ -351,8 +351,8 @@ export function DropdownMenuWrapper({
         return (
             <DropdownMenu
                 align="start"
-                items={items}
                 disabled={disabled}
+                items={items}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
             >

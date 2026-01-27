@@ -67,8 +67,8 @@ export function FilterByValue(props: { model: ByValuesModel }) {
         >
             <Input
                 autoFocus
-                value={searchText}
                 placeholder={localeService.t('sheets-filter.panel.search-placeholder')}
+                value={searchText}
                 onChange={onSearchValueChange}
             />
             <div
@@ -86,14 +86,14 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                     <div
                         data-u-comp="sheets-filter-panel-values-item-inner"
                         className={`
-                          univer-box-border univer-flex univer-h-7 univer-items-center univer-rounded-md univer-pb-0
-                          univer-pl-5 univer-pr-0.5 univer-pt-0 univer-text-sm
+                          univer-box-border univer-flex univer-h-7 univer-items-center univer-rounded-md univer-py-0
+                          univer-pl-5 univer-pr-0.5 univer-text-sm
                         `}
                     >
                         <Checkbox
-                            indeterminate={indeterminate}
-                            disabled={items.length === 0}
                             checked={allChecked}
+                            disabled={items.length === 0}
+                            indeterminate={indeterminate}
                             onChange={onCheckAllToggled}
                         />
                         <span
@@ -118,22 +118,6 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                 </div>
                 <div data-u-comp="sheets-filter-panel-values-virtual" className="univer-flex-grow">
                     <Tree
-                        data={items}
-                        defaultExpandAll={false}
-                        valueGroup={extractCheckedKeys(items)}
-                        // height={180}
-                        onChange={(node) => {
-                            model.onFilterCheckToggled(node as IFilterByValueWithTreeItem);
-                        }}
-                        defaultCache={treeMap}
-                        itemHeight={28}
-                        treeNodeClassName={`
-                          univer-pr-2 univer-border-box univer-rounded-md
-                          [&:hover_a]:univer-inline-block
-                          hover:univer-bg-gray-50 univer-h-full
-                          univer-text-gray-900 dark:hover:!univer-bg-gray-900
-                          dark:!univer-text-white
-                        `}
                         attachRender={(item) => (
                             <div
                                 className={`
@@ -176,6 +160,22 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                 </a>
                             </div>
                         )}
+                        data={items}
+                        defaultCache={treeMap}
+                        defaultExpandAll={false}
+                        itemHeight={28}
+                        treeNodeClassName={`
+                          univer-pr-2 univer-border-box univer-rounded-md
+                          [&:hover_a]:univer-inline-block
+                          hover:univer-bg-gray-50 univer-h-full
+                          univer-text-gray-900 dark:hover:!univer-bg-gray-900
+                          dark:!univer-text-white
+                        `}
+                        valueGroup={extractCheckedKeys(items)}
+                        // height={180}
+                        onChange={(node) => {
+                            model.onFilterCheckToggled(node as IFilterByValueWithTreeItem);
+                        }}
                     />
                 </div>
             </div>

@@ -79,7 +79,7 @@ export const PrintingFloatDom = (props: IPrintingFloatDomProps) => {
     return (
         <div style={{ position: 'absolute', top: 0, left: 0 }}>
             {floatDomParams.map(([id, floatDom]) => (
-                <PrintFloatDomSingle key={id} layer={floatDom} id={id} position={floatDom.position} />
+                <PrintFloatDomSingle key={id} id={id} layer={floatDom} position={floatDom.position} />
             ))}
         </div>
     );

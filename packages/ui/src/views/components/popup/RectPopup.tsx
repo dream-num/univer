@@ -316,14 +316,14 @@ function RectPopup(props: IRectPopupProps) {
             {mask && (
                 <div
                     data-u-comp="rect-popup-mask"
-                    className="univer-fixed univer-bottom-0 univer-left-0 univer-right-0 univer-top-0 univer-z-[100]"
+                    className="univer-fixed univer-inset-0 univer-z-[100]"
                     style={{ zIndex: maskZIndex }}
                     onClick={onMaskClick}
                 />
             )}
             <section
-                data-u-comp="rect-popup"
                 ref={nodeRef}
+                data-u-comp="rect-popup"
                 className={clsx(`
                   univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
                 `, {
@@ -331,8 +331,8 @@ function RectPopup(props: IRectPopupProps) {
                     'univer-animate-in univer-fade-in-70': !hidden,
                 })}
                 style={{ ...positionRef.current, zIndex }}
-                onPointerDown={(e) => e.stopPropagation()}
                 onClick={onClick}
+                onPointerDown={(e) => e.stopPropagation()}
                 onPointerEnter={onPointerEnter}
                 onPointerLeave={onPointerLeave}
             >

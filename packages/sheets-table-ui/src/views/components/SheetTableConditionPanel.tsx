@@ -94,16 +94,16 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
             <Dropdown
                 align="start"
                 open={conditionVisible}
-                onOpenChange={setConditionVisible}
                 overlay={(
                     <CascaderList
-                        value={[conditionInfo.type, conditionInfo.compare!]}
-                        options={cascaderOptions}
-                        onChange={handleChange}
                         contentClassName="univer-flex-1"
+                        options={cascaderOptions}
+                        value={[conditionInfo.type, conditionInfo.compare!]}
                         wrapperClassName="!univer-h-[150px]"
+                        onChange={handleChange}
                     />
                 )}
+                onOpenChange={setConditionVisible}
             >
                 <div
                     className={clsx(`
@@ -138,8 +138,8 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                             : (
                                 <InputNumber
                                     className="univer-h-7 univer-w-full"
-                                    value={conditionInfo.info.number}
                                     controls={false}
+                                    value={conditionInfo.info.number}
                                     onChange={(v) => {
                                         if (v !== null) {
                                             handleConditionInfo({ number: v });
@@ -177,19 +177,19 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                     <div className="univer-flex univer-items-center univer-gap-2">
                         <InputNumber
                             className="univer-w-full"
+                            controls={false}
                             value={conditionInfo.info.numberRange?.[0]}
                             onChange={(v) => {
                                 if (v !== null) {
                                     handleConditionInfo({ numberRange: [v, conditionInfo.info.numberRange?.[1]] });
                                 }
                             }}
-                            controls={false}
                         />
                         <span> - </span>
                         <InputNumber
                             className="univer-w-full"
-                            value={conditionInfo.info.numberRange?.[1]}
                             controls={false}
+                            value={conditionInfo.info.numberRange?.[1]}
                             onChange={(v) => {
                                 if (v !== null) {
                                     handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], v] });
@@ -201,8 +201,8 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 {!!(subComponentType === ConditionSubComponentEnum.Select) && (
                     <Select
                         className="univer-w-full"
-                        value={conditionInfo.info.dateSelect ?? conditionDateOptions[0].value}
                         options={conditionDateOptions}
+                        value={conditionInfo.info.dateSelect ?? conditionDateOptions[0].value}
                         onChange={(v) => handleConditionInfo({ dateSelect: v })}
                     />
                 )}

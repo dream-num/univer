@@ -46,7 +46,7 @@ export const RadioDisabled = {
         return (
             <>
                 <Radio disabled>radio 1</Radio>
-                <Radio disabled checked>
+                <Radio checked disabled>
                     radio 2
                 </Radio>
             </>

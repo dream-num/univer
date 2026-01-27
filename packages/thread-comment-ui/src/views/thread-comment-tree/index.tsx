@@ -109,10 +109,10 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     };
 
     return (
-        <div className="univer-relative univer-mb-3 univer-pl-[30px]" onMouseLeave={() => setShowReply(false)} onMouseEnter={() => setShowReply(true)}>
+        <div className="univer-relative univer-mb-3 univer-pl-[30px]" onMouseEnter={() => setShowReply(true)} onMouseLeave={() => setShowReply(false)}>
             <div
                 className={`
-                  univer-absolute univer-left-0 univer-top-0 univer-h-6 univer-w-6 univer-rounded-full univer-bg-cover
+                  univer-absolute univer-left-0 univer-top-0 univer-size-6 univer-rounded-full univer-bg-cover
                   univer-bg-center univer-bg-no-repeat
                 `}
                 style={{
@@ -133,9 +133,9 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         ? (
                                             <div
                                                 className={`
-                                                  univer-ml-1 univer-inline-flex univer-h-6 univer-w-6
-                                                  univer-cursor-pointer univer-items-center univer-justify-center
-                                                  univer-rounded-sm univer-text-base
+                                                  univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
+                                                  univer-items-center univer-justify-center univer-rounded-sm
+                                                  univer-text-base
                                                   hover:univer-bg-gray-50
                                                 `}
                                                 onClick={() => onReply(user)}
@@ -181,7 +181,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                     >
                                         <div
                                             className={`
-                                              univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                              univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                               univer-items-center univer-justify-center univer-rounded-sm
                                               univer-text-base
                                               hover:univer-bg-gray-50
@@ -207,13 +207,13 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             {editing
                 ? (
                     <ThreadCommentEditor
-                        type={type}
-                        id={item.id}
-                        comment={item}
-                        onCancel={() => onEditingChange?.(false)}
                         autoFocus
-                        unitId={unitId}
+                        comment={item}
+                        id={item.id}
                         subUnitId={subUnitId}
+                        type={type}
+                        unitId={unitId}
+                        onCancel={() => onEditingChange?.(false)}
                         onSave={({ text, attachments }) => {
                             onEditingChange?.(false);
                             commandService.executeCommand(
@@ -244,7 +244,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                     switch (item.type) {
                                         case 'mention':
                                             return (
-                                                <a className="univer-text-primary-600" key={i}>
+                                                <a key={i} className="univer-text-primary-600">
                                                     {item.content.label}
                                                     {' '}
                                                 </a>
@@ -363,7 +363,6 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     return (
         <div
-            id={`${prefix}-${unitId}-${subUnitId}-${id}`}
             className={clsx(`
               univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4
               dark:!univer-bg-gray-900 dark:!univer-text-white
@@ -373,6 +372,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 'univer-shadow': !resolved && (showHighlight || isHover || prefix === 'cell'),
             })}
             style={style}
+            id={`${prefix}-${unitId}-${subUnitId}-${id}`}
             onClick={onClick}
             onMouseEnter={() => {
                 onMouseEnter?.();
@@ -416,8 +416,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
                         <div
                             className={clsx(`
-                              univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                              univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
+                              univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer univer-items-center
+                              univer-justify-center univer-rounded-[3px] univer-text-base
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-800
                             `, {
@@ -431,7 +431,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             ? (
                                 <div
                                     className={`
-                                      univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                      univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
                                       hover:univer-bg-gray-50
                                       dark:hover:!univer-bg-gray-800
@@ -452,15 +452,17 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 {renderComments.map(
                     (item) => (
                         <ThreadCommentItem
-                            unitId={unitId}
-                            subUnitId={subUnitId}
-                            item={item}
                             key={item.id}
-                            isRoot={item.id === comments?.root.id}
                             editing={editingId === item.id}
+                            isRoot={item.id === comments?.root.id}
+                            item={item}
                             resolved={comments?.root.resolved}
+                            subUnitId={subUnitId}
                             type={type}
+                            unitId={unitId}
+                            onAddComment={onAddComment}
                             onClose={onClose}
+                            onDeleteComment={onDeleteComment}
                             onEditingChange={(editing) => {
                                 if (editing) {
                                     setEditingId(item.id);
@@ -488,8 +490,6 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     ]));
                                 });
                             }}
-                            onAddComment={onAddComment}
-                            onDeleteComment={onDeleteComment}
                         />
                     )
                 )}
@@ -499,9 +499,15 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     <ThreadCommentEditor
                         key={`${autoFocus}`}
                         ref={editorRef}
+                        autoFocus={autoFocus || (!comments)}
+                        subUnitId={subUnitId}
                         type={type}
                         unitId={unitId}
-                        subUnitId={subUnitId}
+                        onCancel={() => {
+                            if (!comments) {
+                                onClose?.();
+                            }
+                        }}
                         onSave={async ({ text, attachments }) => {
                             const comment: IThreadComment = {
                                 text,
@@ -530,12 +536,6 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             );
                             if (scroller.current) {
                                 scroller.current.scrollTop = scroller.current.scrollHeight;
-                            }
-                        }}
-                        autoFocus={autoFocus || (!comments)}
-                        onCancel={() => {
-                            if (!comments) {
-                                onClose?.();
                             }
                         }}
                     />

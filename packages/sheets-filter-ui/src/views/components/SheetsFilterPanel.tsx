@@ -85,8 +85,8 @@ export function FilterPanel() {
             />
             <div className="univer-mb-1 univer-flex-shrink-0 univer-flex-grow-0">
                 <Segmented
-                    value={filterBy}
                     items={items}
+                    value={filterBy}
                     onChange={(value) => onFilterByTypeChange(value as FilterBy)}
                 />
             </div>
@@ -114,7 +114,7 @@ export function FilterPanel() {
                   univer-justify-between univer-overflow-hidden
                 `}
             >
-                <Button variant="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>
+                <Button disabled={clearFilterDisabled} variant="link" onClick={onClearCriteria}>
                     {localeService.t('sheets-filter.panel.clear-filter')}
                 </Button>
                 <span className="univer-flex univer-gap-2">

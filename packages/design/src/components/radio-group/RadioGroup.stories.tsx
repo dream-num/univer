@@ -56,7 +56,7 @@ export const RadioGroupVertical = {
         }
 
         return (
-            <RadioGroup value={value} onChange={handleChange} direction="vertical">
+            <RadioGroup direction="vertical" value={value} onChange={handleChange}>
                 <Radio value="test">test</Radio>
                 <Radio value="test1">test1</Radio>
             </RadioGroup>

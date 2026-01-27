@@ -15,7 +15,7 @@
  */
 
 export const BorderDotted = ({ className }: { className: string }) => (
-    <svg className={className} width="120" height="2" viewBox="0 0 120 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} fill="none" height="2" viewBox="0 0 120 2" width="120" xmlns="http://www.w3.org/2000/svg">
         <path d="M0.491699 1.69537H1.4917V0.695374H0.491699V1.69537Z" />
         <path d="M4.2981 1.69537H5.2981V0.695374H4.2981V1.69537Z" />
         <path d="M9.10449 1.69537H8.10449V0.695374H9.10449V1.69537Z" />

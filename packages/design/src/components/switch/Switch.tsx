@@ -40,8 +40,8 @@ const Switch = (props: ISwitchProps) => {
             <label className="univer-relative univer-inline-block univer-h-4 univer-w-7">
                 <input
                     className="univer-size-0 univer-opacity-0"
-                    type="checkbox"
                     checked={checked}
+                    type="checkbox"
                     onChange={handleChange}
                 />
                 <span
@@ -55,7 +55,7 @@ const Switch = (props: ISwitchProps) => {
                 >
                     <span
                         className={clsx(`
-                          univer-absolute univer-bottom-0.5 univer-left-0.5 univer-h-3 univer-w-3 univer-rounded-full
+                          univer-absolute univer-bottom-0.5 univer-left-0.5 univer-size-3 univer-rounded-full
                           univer-bg-white univer-transition-transform univer-duration-200
                         `, {
                             'univer-translate-x-3': checked,

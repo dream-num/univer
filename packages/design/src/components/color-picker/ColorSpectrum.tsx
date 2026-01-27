@@ -117,13 +117,13 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
 
     return (
         <div
-            data-u-comp="color-picker-spectrum"
             ref={containerRef}
+            data-u-comp="color-picker-spectrum"
             className="univer-relative univer-overflow-hidden"
         >
             <canvas
                 ref={canvasRef}
-                className="univer-h-full univer-w-full univer-cursor-crosshair univer-rounded"
+                className="univer-size-full univer-cursor-crosshair univer-rounded"
                 onPointerDown={(e) => {
                     setIsDragging(true);
                     handlePointerEvent(e);

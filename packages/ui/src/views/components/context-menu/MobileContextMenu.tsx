@@ -63,7 +63,7 @@ export function MobileContextMenu() {
     }
 
     return (
-        <Popup visible={visible} offset={offset}>
+        <Popup offset={offset} visible={visible}>
             <section onPointerDown={(e) => e.stopPropagation()}>
                 {/* TODO@wzhudev: maybe we should add another component for mobile devices. */}
                 {menuType && (

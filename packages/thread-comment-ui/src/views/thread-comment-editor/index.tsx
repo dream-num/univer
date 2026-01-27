@@ -113,21 +113,21 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     return (
         <div onClick={(e) => e.preventDefault()}>
             <RichTextEditor
-                className="univer-w-full"
-                editorRef={editor}
-                editorId={DOCS_COMMENT_EDITOR_UNIT_ID_KEY}
-                autoFocus={autoFocus}
                 keyboardEventConfig={keyboardEventConfig}
-                placeholder={localeService.t('threadCommentUI.editor.placeholder')}
+                className="univer-w-full"
+                autoFocus={autoFocus}
+                editorId={DOCS_COMMENT_EDITOR_UNIT_ID_KEY}
+                editorRef={editor}
                 initialValue={comment?.text && getSnapshot(comment.text)}
-                onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
                 isSingle={false}
                 maxHeight={64}
+                placeholder={localeService.t('threadCommentUI.editor.placeholder')}
                 onClickOutside={() => {
                     setTimeout(() => {
                         editorService.focus(rootEditorId);
                     }, 30);
                 }}
+                onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
             />
             {editing
                 ? (
@@ -143,8 +143,8 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                             {localeService.t('threadCommentUI.editor.cancel')}
                         </Button>
                         <Button
-                            variant="primary"
                             disabled={!canSubmit}
+                            variant="primary"
                             onClick={handleSave}
                         >
                             {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}
@@ -166,9 +166,9 @@ export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; use
         })}
     >
         <img
-            className="univer-mr-1.5 univer-h-6 univer-w-6 univer-rounded-full"
-            src={user.avatar}
+            className="univer-mr-1.5 univer-size-6 univer-rounded-full"
             draggable={false}
+            src={user.avatar}
         />
         <span>{user.name}</span>
     </div>

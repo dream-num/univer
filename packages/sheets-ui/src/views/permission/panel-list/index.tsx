@@ -271,6 +271,7 @@ export function SheetPermissionPanelList() {
                                       univer-mt-3 univer-rounded-lg univer-p-3
                                       hover:univer-bg-gray-50
                                     `, borderClassName)}
+                                    onMouseLeave={() => setCurrentRuleRanges([])}
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
                                         const activeSheet = workbook.getActiveSheet();
@@ -289,7 +290,6 @@ export function SheetPermissionPanelList() {
                                             ranges !== currentRuleRanges && setCurrentRuleRanges(ranges);
                                         }
                                     }}
-                                    onMouseLeave={() => setCurrentRuleRanges([])}
                                 >
                                     <div className="univer-flex univer-h-5 univer-justify-between univer-leading-5">
                                         <Tooltip title={ruleName}>
@@ -339,7 +339,7 @@ export function SheetPermissionPanelList() {
 
                                             <Tooltip title={item.creator?.name ?? ''}>
                                                 <div>
-                                                    <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
+                                                    <Avatar className="univer-mr-1.5" size={24} src={item.creator?.avatar} />
                                                 </div>
                                             </Tooltip>
                                             <span
@@ -400,7 +400,7 @@ export function SheetPermissionPanelList() {
                     <div
                         className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
                     >
-                        <img width={240} height={120} src={panelListEmptyBase64} alt="" draggable={false} />
+                        <img alt="" draggable={false} height={120} src={panelListEmptyBase64} width={240} />
                         <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t('permission.dialog.listEmpty')}</p>
                     </div>
                 )}

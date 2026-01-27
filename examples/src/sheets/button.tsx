@@ -35,10 +35,10 @@ export const ButtonRangeSelector = () => {
             <Button onClick={() => selectorRef.current?.showDialog([])}>Start Select</Button>
             <RangeSelector
                 key={`${workbook?.getUnitId() ?? ''}_${worksheet?.getSheetId() ?? ''}`}
-                selectorRef={selectorRef}
                 hideEditor
-                unitId={workbook?.getUnitId() ?? ''}
+                selectorRef={selectorRef}
                 subUnitId={worksheet?.getSheetId() ?? ''}
+                unitId={workbook?.getUnitId() ?? ''}
                 onChange={(_, str) => {
                     loggerSerive.log('==onChange', str);
                 }}

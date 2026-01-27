@@ -86,8 +86,8 @@ export function ZoomSlider() {
         <Slider
             disabled={disabled}
             min={SHEET_ZOOM_RANGE[0]}
-            value={zoom}
             shortcuts={ZOOM_MAP}
+            value={zoom}
             onChange={handleChange}
         />
     );

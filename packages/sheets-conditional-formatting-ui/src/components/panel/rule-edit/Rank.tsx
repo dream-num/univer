@@ -151,8 +151,8 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <Select
                 className="univer-mt-3 univer-w-full"
-                value={type}
                 options={options}
+                value={type}
                 onChange={(v) => {
                     setType(v);
                     _onChange({ type: v, isPercent, value, style });
@@ -161,8 +161,8 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             {['isNotBottom', 'isBottom'].includes(type) && (
                 <div className="univer-mt-3 univer-flex univer-items-center">
                     <InputNumber
-                        min={1}
                         max={1000}
+                        min={1}
                         value={value}
                         onChange={(v) => {
                             const value = v || 0;
@@ -189,8 +189,8 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 <Preview rule={getResult({ type, isPercent, value, style }) as IConditionalFormattingRuleConfig} />
             </div>
             <ConditionalStyleEditor
-                style={rule?.style}
                 className="univer-mt-3"
+                style={rule?.style}
                 onChange={(v) => {
                     setStyle(v);
                     _onChange({ type, isPercent, value, style: v });

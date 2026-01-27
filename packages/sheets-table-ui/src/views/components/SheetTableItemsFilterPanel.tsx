@@ -117,7 +117,7 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
 
     return (
         <div className="univer-flex univer-h-full univer-flex-col">
-            <Input autoFocus value={searchText} placeholder={localeService.t('sheets-table.filter.search-placeholder')} onChange={onSearchValueChange} />
+            <Input autoFocus placeholder={localeService.t('sheets-table.filter.search-placeholder')} value={searchText} onChange={onSearchValueChange} />
             <div
                 className={clsx(`
                   univer-mt-2 univer-box-border univer-flex univer-h-[180px] univer-max-h-[180px] univer-flex-grow
@@ -130,9 +130,9 @@ export function SheetTableItemsFilterPanel(props: ISheetTableItemsFilterPanelPro
                     <div className="univer-h-full">
                         <div className="univer-flex univer-items-center univer-px-2 univer-py-1">
                             <Checkbox
-                                indeterminate={indeterminate}
-                                disabled={items.length === 0}
                                 checked={allChecked}
+                                disabled={items.length === 0}
+                                indeterminate={indeterminate}
                                 onChange={onCheckAllToggled}
                             >
                                 <div className="univer-flex univer-h-5 univer-flex-1 univer-items-center univer-text-sm">

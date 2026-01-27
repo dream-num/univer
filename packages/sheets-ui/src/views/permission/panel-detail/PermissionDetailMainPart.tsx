@@ -78,23 +78,23 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
         <>
             <FormLayout
                 className="univer-font-medium"
-                label={localeService.t('permission.panel.protectedRange')}
                 error={rangesErrMsg}
+                label={localeService.t('permission.panel.protectedRange')}
             >
                 {RangeSelector && (
                     <RangeSelector
-                        unitId={unitId}
-                        subUnitId={subUnitId}
                         initialValue={ranges?.map((i) => serializeRange(i)).join(',')}
+                        subUnitId={subUnitId}
+                        unitId={unitId}
                         onChange={(_, text) => handleRangeChange(text)}
                     />
                 )}
             </FormLayout>
             <FormLayout className="univer-font-medium" label={localeService.t('permission.panel.permissionDirection')}>
                 <Input
+                    placeholder={localeService.t('permission.panel.permissionDirectionPlaceholder')}
                     value={desc}
                     onChange={(v) => onDescChange(v)}
-                    placeholder={localeService.t('permission.panel.permissionDirectionPlaceholder')}
                 />
             </FormLayout>
         </>

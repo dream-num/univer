@@ -104,12 +104,10 @@ export function Gallery(props: IGalleryProps) {
 
     return createPortal(
         <div
-            data-u-comp="gallery"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Image gallery"
-            tabIndex={-1}
             ref={dialogRef}
+            data-u-comp="gallery"
+            aria-label="Image gallery"
+            aria-modal="true"
             className={clsx(
                 `
                   univer-absolute univer-inset-0 univer-z-[1080] univer-flex univer-size-full univer-select-none
@@ -121,10 +119,12 @@ export function Gallery(props: IGalleryProps) {
                 },
                 className
             )}
+            role="dialog"
+            tabIndex={-1}
         >
             <div
-                className="univer-absolute univer-inset-0 univer-size-full univer-bg-gray-900 univer-opacity-80"
                 aria-hidden="true"
+                className="univer-absolute univer-inset-0 univer-size-full univer-bg-gray-900 univer-opacity-80"
                 onClick={() => onOpenChange?.(false)}
             />
 
@@ -139,9 +139,9 @@ export function Gallery(props: IGalleryProps) {
                         style={{
                             transform: `scale(${zoomLevel})`,
                         }}
-                        src={activeImage}
                         alt={`Image ${activeImageIndex + 1} of ${images.length}`}
                         draggable={false}
+                        src={activeImage}
                     />
                 )}
             </div>
@@ -160,30 +160,30 @@ export function Gallery(props: IGalleryProps) {
                       [&_[data-u-comp=pager-left-arrow]:hover]:!univer-bg-gray-600
                       [&_[data-u-comp=pager-right-arrow]:hover]:!univer-bg-gray-600
                     `}
-                    value={activeImageIndex + 1}
                     total={images.length}
+                    value={activeImageIndex + 1}
                     onChange={(value) => setActiveImageIndex(value - 1)}
                 />
                 <button
-                    type="button"
                     aria-label="Zoom in"
                     className={buttonClassName}
+                    type="button"
                     onClick={() => handleToggleZoom(0.25)}
                 >
                     <ZoomInIcon aria-hidden="true" />
                 </button>
                 <button
-                    type="button"
                     aria-label="Zoom out"
                     className={buttonClassName}
+                    type="button"
                     onClick={() => handleToggleZoom(-0.25)}
                 >
                     <ZoomOutIcon aria-hidden="true" />
                 </button>
                 <button
-                    type="button"
                     aria-label="Reset zoom"
                     className={buttonClassName}
+                    type="button"
                     onClick={() => handleToggleZoom('reset')}
                 >
                     <OneToOneIcon aria-hidden="true" />

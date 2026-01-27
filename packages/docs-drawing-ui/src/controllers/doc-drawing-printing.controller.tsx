@@ -97,12 +97,12 @@ export class DocDrawingPrintingController extends Disposable {
 
                             render(
                                 <PrintingFloatDomInjector
-                                    unitId={unitId}
+                                    bound={pos.bound}
                                     floatDomInfos={floatDomInfos}
+                                    offset={pos.offset}
                                     scene={pos.scene}
                                     skeleton={pos.skeleton}
-                                    offset={pos.offset}
-                                    bound={pos.bound}
+                                    unitId={unitId}
                                 />,
                                 pos.root
                             );

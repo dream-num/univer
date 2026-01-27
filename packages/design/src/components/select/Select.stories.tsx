@@ -64,8 +64,8 @@ export const SelectBasic = {
 
         return (
             <>
-                <Select value={value} options={options} onChange={handleChange} />
-                <Select disabled value={value} options={options} onChange={handleChange} />
+                <Select options={options} value={value} onChange={handleChange} />
+                <Select disabled options={options} value={value} onChange={handleChange} />
             </>
         );
     },
@@ -87,8 +87,8 @@ export const SelectMultiple = {
             <>
                 {values.toString()}
                 <MultipleSelect
-                    value={values}
                     options={options}
+                    value={values}
                     onChange={handleChange}
                 />
             </>
@@ -106,7 +106,7 @@ export const SelectEmpty = {
             setValue(value as string);
         }
 
-        return <Select value={value} options={options} onChange={handleChange} />;
+        return <Select options={options} value={value} onChange={handleChange} />;
     },
 };
 
@@ -126,10 +126,10 @@ export const SelectBorderless = {
 
         return (
             <Select
-                value={value}
-                options={options}
-                onChange={handleChange}
                 borderless
+                options={options}
+                value={value}
+                onChange={handleChange}
             />
         );
     },
@@ -176,6 +176,6 @@ export const SelectGroup = {
             setValue(value as string);
         }
 
-        return <Select value={value} options={options} onChange={handleChange} />;
+        return <Select options={options} value={value} onChange={handleChange} />;
     },
 };

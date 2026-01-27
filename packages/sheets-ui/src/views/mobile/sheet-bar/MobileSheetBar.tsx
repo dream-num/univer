@@ -114,6 +114,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     return (
         <div
             ref={containerRef}
+            aria-label="Sheet tabs"
             className={clsx(
                 `
                   univer-h-10 univer-w-full univer-overflow-x-auto univer-overflow-y-hidden univer-border-b
@@ -123,14 +124,16 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                 scrollbarClassName
             )}
             role="tablist"
-            aria-label="Sheet tabs"
         >
             <div className="univer-flex univer-h-full univer-flex-nowrap univer-items-center">
                 {sheetList.map((sheet) => (
                     <div
+                        key={sheet.sheetId}
                         ref={(element) => {
                             tabMapRef.current.set(sheet.sheetId!, element);
                         }}
+                        aria-controls={`sheet-${sheet.sheetId}`}
+                        aria-selected={sheet.sheetId === activeKey}
                         className={clsx(`
                           univer-relative univer-box-border univer-flex univer-h-full univer-max-w-36 univer-shrink-0
                           univer-cursor-pointer univer-select-none univer-items-center univer-justify-center
@@ -140,10 +143,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                             'univer-bg-white univer-text-blue-600 dark:!univer-bg-gray-700 dark:!univer-text-blue-400': sheet.sheetId === activeKey,
                             'univer-text-gray-600 hover:univer-bg-gray-50 active:univer-bg-gray-100 dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-700': sheet.sheetId !== activeKey,
                         })}
-                        key={sheet.sheetId}
                         role="tab"
-                        aria-selected={sheet.sheetId === activeKey}
-                        aria-controls={`sheet-${sheet.sheetId}`}
                         tabIndex={sheet.sheetId === activeKey ? 0 : -1}
                         onClick={() => handleClick(sheet.sheetId!)}
                     >
@@ -153,6 +153,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         {/* Active Indicator */}
                         {sheet.sheetId === activeKey && (
                             <div
+                                aria-hidden="true"
                                 className={clsx(`
                                   univer-absolute univer-left-0 univer-right-0 univer-top-0 univer-h-1
                                   univer-bg-blue-600 univer-transition-all
@@ -162,7 +163,6 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                                 style={sheet.color
                                     ? { backgroundColor: sheet.color }
                                     : undefined}
-                                aria-hidden="true"
                             />
                         )}
                     </div>

@@ -58,7 +58,7 @@ export function HoverCard(props: IHoverCardProps) {
     }
 
     return (
-        <HoverCardPrimitive open={open} onOpenChange={handleChangeOpen} openDelay={openDelay}>
+        <HoverCardPrimitive open={open} openDelay={openDelay} onOpenChange={handleChangeOpen}>
             <HoverCardTrigger asChild>{children}</HoverCardTrigger>
             <HoverCardPortal>
                 <HoverCardContent {...restProps}>

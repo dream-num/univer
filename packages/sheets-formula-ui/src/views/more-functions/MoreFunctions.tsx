@@ -73,24 +73,24 @@ export function MoreFunctions() {
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (
                     <Button
+                        className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                         variant="primary"
                         onClick={handleClickNextPrev}
-                        className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                     >
                         {localeService.t('formula.moreFunctions.next')}
                     </Button>
                 )}
                 {inputParams && (
-                    <Button onClick={handleClickNextPrev} className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0">
+                    <Button className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0" onClick={handleClickNextPrev}>
                         {localeService.t('formula.moreFunctions.prev')}
                     </Button>
                 )}
                 {selectFunction && !!workbook && (
                     <Button
+                        className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                         disabled={!functionInfo}
                         variant="primary"
                         onClick={handleConfirm}
-                        className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"
                     >
                         {localeService.t('formula.moreFunctions.confirm')}
                     </Button>

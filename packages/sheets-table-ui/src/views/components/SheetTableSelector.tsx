@@ -39,10 +39,11 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
     return (
         <>
             <RangeSelector
-                maxRangeCount={1}
-                unitId={unitId}
-                subUnitId={subUnitId}
                 initialValue={serializeRange(range)}
+                maxRangeCount={1}
+                subUnitId={subUnitId}
+                supportAcrossSheet={false}
+                unitId={unitId}
                 onChange={(_, text) => {
                     const originValue = serializeRange(range);
                     const newRange = deserializeRangeWithSheet(text).range;
@@ -107,7 +108,6 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                     setSelectedRange(newRange);
                     setRangeError('');
                 }}
-                supportAcrossSheet={false}
             />
             {rangeError && (
                 <div className="univer-mt-1 univer-text-xs univer-text-red-500">
@@ -118,6 +118,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
             <div className="univer-mt-4 univer-flex univer-justify-end">
                 <Button onClick={onCancel}>{localeService.t('sheets-table.cancel')}</Button>
                 <Button
+                    className="univer-ml-2"
                     variant="primary"
                     onClick={() => {
                         if (rangeError) {
@@ -129,7 +130,6 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                             range: selectedRange,
                         });
                     }}
-                    className="univer-ml-2"
                 >
                     {localeService.t('sheets-table.confirm')}
                 </Button>

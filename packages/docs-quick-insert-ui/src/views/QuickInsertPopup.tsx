@@ -245,15 +245,13 @@ export const QuickInsertPopup = () => {
 
             return (
                 <MenuItem
+                    key={menu.id}
                     // @ts-expect-error
                     ref={(node) => {
                         if (node) {
                             menuNodeMapRef.current.set(menu.id, node);
                         }
                     }}
-                    onMouseEnter={() => setFocusedMenuIndex(currentMenuIndex)}
-                    onMouseLeave={() => setFocusedMenuIndex(Number.NaN)}
-                    key={menu.id}
                     className={clsx('univer-w-[calc(220px-var(--padding-base)*2)] univer-text-sm', {
                         'hover:univer-bg-transparent': !isFocused,
                         'univer-bg-gray-100 dark:!univer-bg-gray-500': isFocused,
@@ -261,12 +259,14 @@ export const QuickInsertPopup = () => {
                     onClick={() => {
                         handleMenuSelect(menu as IDocPopupMenuItem);
                     }}
+                    onMouseEnter={() => setFocusedMenuIndex(currentMenuIndex)}
+                    onMouseLeave={() => setFocusedMenuIndex(Number.NaN)}
                 >
                     <div
                         className="univer-flex univer-w-full univer-items-center univer-px-1"
                     >
                         {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
-                        <Tooltip showIfEllipsis title={menu.title} placement="right">
+                        <Tooltip placement="right" showIfEllipsis title={menu.title}>
                             <span className="univer-truncate">{menu.title}</span>
                         </Tooltip>
                     </div>

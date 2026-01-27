@@ -77,9 +77,9 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
                     <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.decimalLength')}</div>
                     <div className="univer-mt-2 univer-w-32">
                         <InputNumber
-                            value={decimal}
                             max={20}
                             min={0}
+                            value={decimal}
                             onChange={onDecimalChange}
                         />
                     </div>
@@ -88,8 +88,8 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
                     <div className="univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyType')}</div>
                     <div className="univer-mt-2 univer-w-36">
                         <Select
-                            value={suffix}
                             options={options}
+                            value={suffix}
                             onChange={onSelect}
                         />
                     </div>
@@ -100,7 +100,7 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
             </div>
 
             <div className="univer-mt-2">
-                <SelectList value={pattern} options={negativeOptions} onChange={onChange} />
+                <SelectList options={negativeOptions} value={pattern} onChange={onChange} />
             </div>
 
             <div className="univer-mt-4 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.currencyDes')}</div>

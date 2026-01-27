@@ -39,10 +39,10 @@ export function FilterSyncSwitch() {
             <div className="univer-flex univer-items-center univer-gap-1">
                 <span>{localeService.t('sheets-filter.sync.title')}</span>
                 <Tooltip
+                    asChild
                     title={enabled
                         ? localeService.t('sheets-filter.sync.statusTips.off')
                         : localeService.t('sheets-filter.sync.statusTips.on')}
-                    asChild
                 >
                     <InfoIcon className="univer-block" />
                 </Tooltip>

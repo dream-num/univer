@@ -98,9 +98,9 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
         <>
             <FormLayout className="univer-font-medium" label={localeService.t('permission.panel.editPermission')}>
                 <RadioGroup
+                    className="univer-flex univer-flex-col"
                     value={editState}
                     onChange={(v) => onEditStateChange(v as EditStateEnum)}
-                    className="univer-flex univer-flex-col"
                 >
                     <Radio value={EditStateEnum.OnlyMe}>
                         <span>{localeService.t('permission.panel.onlyICanEdit')}</span>
@@ -145,11 +145,11 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                         <Select
                                             className="!univer-w-[90px] univer-min-w-0 univer-cursor-pointer"
                                             borderless
-                                            value="edit"
                                             options={[
                                                 { label: `${localeService.t('permission.panel.canEdit')}`, value: 'edit' },
                                                 { label: `${localeService.t('permission.panel.delete')}`, value: 'delete' },
                                             ]}
+                                            value="edit"
                                             onChange={(v) => {
                                                 if (v === 'delete') {
                                                     sheetPermissionUserManagerService.setSelectUserList(selectUserList.filter((i) => i.subject?.userID !== item.subject?.userID));
@@ -166,7 +166,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                       univer-justify-center
                                     `}
                                 >
-                                    <img width={240} height={120} src={UserEmptyBase64} alt="" />
+                                    <img alt="" height={120} src={UserEmptyBase64} width={240} />
                                     <p
                                         className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400"
                                     >
@@ -180,12 +180,12 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             )}
             <FormLayout className="univer-font-medium" label={localeService.t('permission.panel.viewPermission')}>
                 <RadioGroup
-                    value={viewState}
-                    onChange={(v) => onViewStateChange(v as ViewStateEnum)}
                     className={`
                       univer-flex univer-flex-col
                       last:univer-mb-0
                     `}
+                    value={viewState}
+                    onChange={(v) => onViewStateChange(v as ViewStateEnum)}
                 >
                     <Radio value={ViewStateEnum.OthersCanView}>
                         <span>{localeService.t('permission.panel.othersCanView')}</span>

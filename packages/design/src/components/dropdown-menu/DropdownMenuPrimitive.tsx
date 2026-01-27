@@ -96,15 +96,16 @@ function DropdownMenuSubTrigger({
 }) {
     return (
         <SubTrigger
-            data-slot="dropdown-menu-sub-trigger"
             data-inset={inset}
+            data-slot="dropdown-menu-sub-trigger"
             className={clsx(
                 `
                   univer-flex univer-cursor-default univer-select-none univer-items-center univer-justify-between
                   univer-gap-2 univer-rounded univer-px-2 univer-py-1.5 univer-text-sm univer-outline-none
                   data-[state=open]:univer-bg-gray-100
                   focus:univer-bg-gray-100
-                  dark:data-[state=open]:!univer-bg-gray-600 dark:focus:!univer-bg-gray-600
+                  dark:data-[state=open]:!univer-bg-gray-600
+                  dark:focus:!univer-bg-gray-600
                   [&_svg]:univer-pointer-events-none [&_svg]:univer-size-4 [&_svg]:univer-shrink-0
                 `,
                 className
@@ -134,7 +135,7 @@ function DropdownMenuSubContent({
                   data-[side=left]:univer-slide-in-from-right-2
                   data-[side=right]:univer-slide-in-from-left-2
                   data-[side=top]:univer-slide-in-from-bottom-2
-                  univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
+                  univer-z-[1080] univer-box-border univer-max-h-[--radix-popper-available-height]
                   univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
                   univer-shadow-md
                   dark:!univer-bg-gray-700 dark:!univer-text-white
@@ -157,7 +158,6 @@ function DropdownMenuContent({
         <Portal>
             <Content
                 data-slot="dropdown-menu-content"
-                sideOffset={sideOffset}
                 className={clsx(
                     `
                       data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
@@ -168,7 +168,7 @@ function DropdownMenuContent({
                       data-[side=left]:univer-slide-in-from-right-2
                       data-[side=right]:univer-slide-in-from-left-2
                       data-[side=top]:univer-slide-in-from-bottom-2
-                      univer-z-[1080] univer-box-border univer-max-h-[var(--radix-popper-available-height)]
+                      univer-z-[1080] univer-box-border univer-max-h-[--radix-popper-available-height]
                       univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
                       univer-shadow-md
                       dark:!univer-bg-gray-700 dark:!univer-text-white
@@ -177,6 +177,7 @@ function DropdownMenuContent({
                     scrollbarClassName,
                     className
                 )}
+                sideOffset={sideOffset}
                 {...props}
             />
         </Portal>
@@ -194,8 +195,8 @@ function DropdownMenuItem({
 }) {
     return (
         <Item
-            data-slot="dropdown-menu-item"
             data-inset={inset}
+            data-slot="dropdown-menu-item"
             data-variant={variant}
             className={clsx(
                 `
@@ -243,7 +244,7 @@ function DropdownMenuCheckboxItem({
             {!hideIndicator && (
                 <span
                     className={`
-                      univer-absolute univer-left-2 univer-flex univer-h-3.5 univer-w-3.5 univer-items-center
+                      univer-absolute univer-left-2 univer-flex univer-size-3.5 univer-items-center
                       univer-justify-center
                     `}
                 >
@@ -287,7 +288,7 @@ function DropdownMenuRadioItem({
             {!hideIndicator && (
                 <span
                     className={`
-                      univer-absolute univer-left-2 univer-flex univer-h-3.5 univer-w-3.5 univer-items-center
+                      univer-absolute univer-left-2 univer-flex univer-size-3.5 univer-items-center
                       univer-justify-center
                     `}
                 >
@@ -313,8 +314,8 @@ function DropdownMenuLabel({
 }) {
     return (
         <Label
-            data-slot="dropdown-menu-label"
             data-inset={inset}
+            data-slot="dropdown-menu-label"
             className={clsx(
                 'univer-px-2 univer-py-1.5 univer-text-sm univer-font-semibold',
                 className

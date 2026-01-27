@@ -102,15 +102,15 @@ export function DropdownLegacy(props: IDropdownLegacyProps) {
     return mountContainer && (
         <RcDropdown
             {...props}
-            overlayClassName={className}
-            prefixCls="univer-dropdown"
-            getPopupContainer={() => mountContainer}
-            trigger={trigger}
-            animation="slide-up"
-            placement={placement}
-            overlay={overlay}
-            alignPoint={alignPoint}
             align={align}
+            alignPoint={alignPoint}
+            animation="slide-up"
+            getPopupContainer={() => mountContainer}
+            overlay={overlay}
+            overlayClassName={className}
+            placement={placement}
+            prefixCls="univer-dropdown"
+            trigger={trigger}
             onVisibleChange={onVisibleChange}
         >
             {children}

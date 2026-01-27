@@ -43,6 +43,7 @@ export function RenderSheetFooter() {
 
     return (
         <section
+            data-range-selector
             className={`
               univer-box-border univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-[1fr,auto,auto,auto]
               univer-items-center univer-justify-between univer-bg-white univer-px-5 univer-text-gray-900
@@ -51,7 +52,6 @@ export function RenderSheetFooter() {
             style={{
                 height: SHEET_FOOTER_BAR_HEIGHT,
             }}
-            data-range-selector
         >
             {sheetBar && <SheetBar />}
             {statisticBar && <StatusBar />}

@@ -43,7 +43,7 @@ export const PopupBasic = {
         return (
             <section>
                 <Button onClick={handleClick}>Click me</Button>
-                <Popup visible={visible} offset={offset}>
+                <Popup offset={offset} visible={visible}>
                     <span>xxxx</span>
                 </Popup>
             </section>

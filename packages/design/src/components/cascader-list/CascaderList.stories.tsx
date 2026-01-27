@@ -184,6 +184,6 @@ export const Playground = {
             setValue(value);
         }
 
-        return <CascaderList wrapperClassName="univer-h-[150px]" value={value} options={options} onChange={handleChange} />;
+        return <CascaderList options={options} value={value} wrapperClassName="univer-h-[150px]" onChange={handleChange} />;
     },
 };

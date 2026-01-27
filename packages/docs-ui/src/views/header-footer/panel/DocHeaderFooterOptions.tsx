@@ -236,8 +236,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                     <span>{localeService.t('headerFooter.headerTopMargin')}</span>
                     <InputNumber
                         className="univer-mt-1.5 univer-w-4/5"
-                        min={0}
                         max={200}
+                        min={0}
                         precision={1}
                         value={options.marginHeader}
                         onChange={(val) => { handleMarginChange(val as number, 'marginHeader'); }}
@@ -247,8 +247,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                     <span>{localeService.t('headerFooter.footerBottomMargin')}</span>
                     <InputNumber
                         className="univer-mt-1.5 univer-w-4/5"
-                        min={0}
                         max={200}
+                        min={0}
                         precision={1}
                         value={options.marginFooter}
                         onChange={(val) => { handleMarginChange(val as number, 'marginFooter'); }}

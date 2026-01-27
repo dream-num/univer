@@ -134,7 +134,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             >
                 <StrikethroughIcon />
             </div>
-            <ColorPicker color={fontColor} onChange={setFontColor} Icon={FontColorDoubleIcon} />
+            <ColorPicker color={fontColor} Icon={FontColorDoubleIcon} onChange={setFontColor} />
             <ColorPicker color={bgColor} onChange={setBgColor} />
         </div>
     );

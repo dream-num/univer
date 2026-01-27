@@ -113,7 +113,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                       dark:!univer-text-white
                     `}
                 >
-                    <Select value={alignValue} options={alignOptions} onChange={handleAlignChange} />
+                    <Select options={alignOptions} value={alignValue} onChange={handleAlignChange} />
                 </div>
             </div>
         </div>

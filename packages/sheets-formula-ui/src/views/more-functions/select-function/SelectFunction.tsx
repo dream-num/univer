@@ -155,15 +155,15 @@ export function SelectFunction(props: ISelectFunctionProps) {
     return (
         <div>
             <div className="univer-flex univer-items-center univer-justify-between univer-gap-2">
-                <Select value={typeSelected} options={options} onChange={handleSelectChange} />
+                <Select options={options} value={typeSelected} onChange={handleSelectChange} />
 
                 <Input
+                    allowClear
                     placeholder={localeService.t('formula.moreFunctions.searchFunctionPlaceholder')}
-                    onKeyDown={handleSelectListKeyDown}
+                    size="small"
                     value={searchText}
                     onChange={handleSearchInputChange}
-                    size="small"
-                    allowClear
+                    onKeyDown={handleSelectListKeyDown}
                 />
             </div>
 
@@ -173,8 +173,8 @@ export function SelectFunction(props: ISelectFunctionProps) {
                       univer-mb-0 univer-mt-2 univer-box-border univer-max-h-72 univer-w-full univer-select-none
                       univer-list-none univer-overflow-y-auto univer-rounded univer-p-3 univer-outline-none
                     `, borderClassName, scrollbarClassName)}
-                    onKeyDown={handleSelectListKeyDown}
                     tabIndex={-1}
+                    onKeyDown={handleSelectListKeyDown}
                 >
                     {selectList.map(({ name }, index) => (
                         <li
@@ -186,9 +186,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
                             `, {
                                 'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                             })}
+                            onClick={() => setCurrentFunctionInfo(index)}
                             onMouseEnter={() => handleLiMouseEnter(index)}
                             onMouseLeave={handleLiMouseLeave}
-                            onClick={() => setCurrentFunctionInfo(index)}
                         >
                             {nameSelected === index && (
                                 <CheckMarkIcon

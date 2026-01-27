@@ -118,7 +118,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
             <div>
                 <div className="univer-mt-3.5 univer-text-sm univer-text-gray-400">{t('sheet.numfmt.numfmtType')}</div>
                 <div className="univer-mt-2">
-                    <Select className="univer-w-full" value={type} options={selectOptions} onChange={handleSelect} />
+                    <Select className="univer-w-full" options={selectOptions} value={type} onChange={handleSelect} />
                 </div>
                 <div>
                     {BusinessComponent && (
@@ -130,7 +130,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
             </div>
 
             <div className="univer-mb-5 univer-mt-3.5 univer-flex univer-justify-end">
-                <Button onClick={handleCancel} className="univer-mr-3">
+                <Button className="univer-mr-3" onClick={handleCancel}>
                     {t('sheet.numfmt.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleConfirm}>

@@ -69,7 +69,7 @@ export const SheetPermissionUserDialog = () => {
                                 `}
                                 onClick={() => handleChangeUser(item)}
                             >
-                                <Avatar src={item.subject?.avatar} size={24} />
+                                <Avatar size={24} src={item.subject?.avatar} />
                                 <div className="univer-ml-1.5 univer-flex-1">{item.subject?.name}</div>
                                 {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkIcon /></div>)}
                             </div>
@@ -79,9 +79,9 @@ export const SheetPermissionUserDialog = () => {
                         <div className="univer-flex univer-h-full univer-flex-col univer-items-center">
                             <img
                                 className="univer-w-full"
-                                src={UserEmptyBase64}
                                 alt="empty list"
                                 draggable={false}
+                                src={UserEmptyBase64}
                             />
                             <p className="univer-text-sm univer-text-gray-400">
                                 {localeService.t('permission.dialog.userEmpty')}

@@ -116,15 +116,15 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                       [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                     `, borderClassName)}
                     errorText={formulaError}
-                    isFocus={isFocusFormulaEditor}
                     initValue={formula as any}
-                    unitId={workbook.getUnitId()}
+                    isFocus={isFocusFormulaEditor}
                     subUnitId={worksheet?.getSheetId()}
-                    onFocus={() => { setIsFocusFormulaEditor(true); }}
+                    unitId={workbook.getUnitId()}
                     onChange={(formula) => {
                         setFormula(formula);
                         _onChange({ style, formula });
                     }}
+                    onFocus={() => { setIsFocusFormulaEditor(true); }}
                     onVerify={(result, formula) => {
                         if (!result || formula.length === 1) {
                             setFormulaError(localeService.t('sheet.cf.errorMessage.formulaError'));
@@ -139,8 +139,8 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                 <Preview rule={getResult({ style, formula }) as IConditionalFormattingRuleConfig} />
             </div>
             <ConditionalStyleEditor
-                style={rule?.style}
                 className="univer-mt-3"
+                style={rule?.style}
                 onChange={(v) => {
                     setStyle(v);
                     _onChange({ style: v, formula });

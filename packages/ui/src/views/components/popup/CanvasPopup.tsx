@@ -85,12 +85,12 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
     return (
         <RectPopup
             {...popup}
-            hidden={hidden}
             anchorRect$={anchorRect$}
             direction={popup.direction}
-            onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
             excludeRects={excludeRectsRef}
+            hidden={hidden}
+            onClickOutside={popup.onClickOutside}
             {
                 ...popup.customActive
                     ? null

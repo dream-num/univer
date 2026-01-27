@@ -130,9 +130,9 @@ export function Avatar(props: IAvatarProps) {
             {src && (
                 <img
                     className="univer-block univer-size-full"
+                    alt={alt}
                     src={src}
                     title={title}
-                    alt={alt}
                     onError={onError}
                     onLoad={onLoad}
                 />

@@ -329,7 +329,7 @@ export const RuleList = (props: IRuleListProps) => {
                     ).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
                 <div className="univer-flex univer-justify-end">
-                    <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
+                    <Tooltip placement="bottom" title={localeService.t('sheet.cf.panel.createRule')}>
                         <a
                             className="univer-size-5 univer-cursor-pointer"
                             onClick={handleCreate}
@@ -339,7 +339,7 @@ export const RuleList = (props: IRuleListProps) => {
                     </Tooltip>
                     {(ruleList.length && isHasAllRuleEditPermission)
                         ? (
-                            <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
+                            <Tooltip placement="bottom" title={localeService.t('sheet.cf.panel.clear')}>
                                 <a
                                     className="univer-size-5 univer-cursor-pointer"
                                     onClick={handleClear}
@@ -365,14 +365,14 @@ export const RuleList = (props: IRuleListProps) => {
                           [&_.react-grid-item]:univer-transition-none
                           [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
                         `}
+                        cols={12}
                         draggableHandle=".draggableHandle"
                         layout={layout}
-                        cols={12}
+                        margin={[0, 10]}
                         rowHeight={60}
                         width={layoutWidth}
-                        margin={[0, 10]}
-                        onDragStop={handleDragStop}
                         onDragStart={handleDragStart}
+                        onDragStop={handleDragStop}
                     >
                         {ruleListByPermissionCheck?.map((rule, index) => {
                             return (
@@ -386,12 +386,12 @@ export const RuleList = (props: IRuleListProps) => {
                                         `, {
                                             'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === index,
                                         })}
-                                        onMouseMove={() => {
-                                            rule.ranges !== currentRuleRanges && setCurrentRuleRanges(rule.ranges);
-                                        }}
-                                        onMouseLeave={() => setCurrentRuleRanges([])}
                                         onClick={() => {
                                             onClick(rule);
+                                        }}
+                                        onMouseLeave={() => setCurrentRuleRanges([])}
+                                        onMouseMove={() => {
+                                            rule.ranges !== currentRuleRanges && setCurrentRuleRanges(rule.ranges);
                                         }}
                                     >
                                         <div

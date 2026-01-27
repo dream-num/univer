@@ -40,7 +40,7 @@ export const GalleryBasic = {
             <>
                 <div>
                     <Button onClick={() => setOpen(true)}>Open Gallery</Button>
-                    <Gallery open={open} onOpenChange={setOpen} images={images} />
+                    <Gallery images={images} open={open} onOpenChange={setOpen} />
                 </div>
             </>
         );

@@ -17,18 +17,18 @@
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, HoverCard } from '@univerjs/design';
-import { DatabaseIcon, EyeIcon, FunctionIcon, HomeIcon, InsertIcon, MoreDownIcon, MoreFunctionIcon } from '@univerjs/icons';
 import { useState } from 'react';
+import { ComponentManager } from '../../../../common';
 import { RibbonPosition } from '../../../../services/menu/types';
 import { useDependency } from '../../../../utils/di';
 
 const iconMap = {
-    [RibbonPosition.START]: HomeIcon,
-    [RibbonPosition.INSERT]: InsertIcon,
-    [RibbonPosition.FORMULAS]: FunctionIcon,
-    [RibbonPosition.DATA]: DatabaseIcon,
-    [RibbonPosition.VIEW]: EyeIcon,
-    [RibbonPosition.OTHERS]: MoreFunctionIcon,
+    [RibbonPosition.START]: 'HomeIcon',
+    [RibbonPosition.INSERT]: 'InsertIcon',
+    [RibbonPosition.FORMULAS]: 'FunctionIcon',
+    [RibbonPosition.DATA]: 'DatabaseIcon',
+    [RibbonPosition.VIEW]: 'EyeIcon',
+    [RibbonPosition.OTHERS]: 'MoreFunctionIcon',
 };
 
 export function DefaultMenu({
@@ -41,6 +41,9 @@ export function DefaultMenu({
     onSelectTab: (tab: IMenuSchema) => void;
 }) {
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const [groupSelectorVisible, setGroupSelectorVisible] = useState(false);
 
@@ -57,7 +60,7 @@ export function DefaultMenu({
             overlay={(
                 <div className="univer-grid univer-gap-1 univer-px-2 univer-py-1">
                     {ribbon.map((group) => {
-                        const Icon = iconMap[group.key as RibbonPosition];
+                        const Icon = componentManager.get(iconMap[group.key as RibbonPosition]);
 
                         return (
                             <a

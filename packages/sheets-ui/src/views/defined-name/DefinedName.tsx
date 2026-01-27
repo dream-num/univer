@@ -21,9 +21,8 @@ import type { IScrollToCellCommandParams } from '../../commands/commands/set-scr
 import { AbsoluteRefType, debounce, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { MoreDownIcon } from '@univerjs/icons';
 import { getPrimaryForRange, SetSelectionsOperation, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
 import { genNormalSelectionStyle } from '../../services/selection/const';
@@ -37,6 +36,9 @@ export function DefinedName({ disable }: { disable: boolean }) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+    const componentManager = useDependency(ComponentManager);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook?.getUnitId();

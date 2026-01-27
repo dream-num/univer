@@ -17,8 +17,7 @@
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
-import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
@@ -42,6 +41,8 @@ export interface IImagePopupMenuProps {
 export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const { popup } = props;
 
+    const componentManager = useDependency(ComponentManager);
+
     const menuItems = popup?.extraProps?.menuItems;
 
     if (!menuItems) return null;
@@ -51,6 +52,9 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
 
     const [visible, setVisible] = useState(false);
     const [isHovered, setHovered] = useState(false);
+
+    const AutofillDoubleIcon = componentManager.get('AutofillDoubleIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const handleMouseEnter = () => {
         setHovered(true);

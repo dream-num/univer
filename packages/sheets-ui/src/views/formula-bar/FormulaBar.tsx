@@ -29,7 +29,6 @@ import {
 import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { CheckMarkIcon, CloseIcon, DropdownIcon, FxIcon } from '@univerjs/icons';
 import {
     RangeProtectionCache,
     RangeProtectionRuleModel,
@@ -93,6 +92,11 @@ export function FormulaBar(props: IProps) {
     const editorService = useDependency(IEditorService);
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const disableEdit = config?.disableEdit;
+
+    const CloseIcon = componentManager.get('CloseIcon');
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
+    const FxIcon = componentManager.get('FxIcon');
+    const DropdownIcon = componentManager.get('DropdownIcon');
 
     useLayoutEffect(() => {
         const subscription = workbook.activeSheet$.pipe(

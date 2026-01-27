@@ -19,7 +19,6 @@ import type { IDropdownMenuProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { clsx, DropdownMenu } from '@univerjs/design';
-import { CheckMarkIcon, ConvertIcon, EyelashIcon } from '@univerjs/icons';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -31,7 +30,7 @@ import {
     SetWorksheetShowCommand,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
@@ -52,8 +51,13 @@ export function SheetBarMenu() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
+    const componentManager = useDependency(ComponentManager);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+
+    const ConvertIcon = componentManager.get('ConvertIcon');
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
+    const EyelashIcon = componentManager.get('EyelashIcon');
 
     const handleClick = (item: ISheetBarMenuItem) => {
         const { sheetId } = item;

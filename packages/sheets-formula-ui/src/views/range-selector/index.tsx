@@ -21,9 +21,8 @@ import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core'
 import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { useDependency, useEvent } from '@univerjs/ui';
+import { ComponentManager, useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -86,9 +85,13 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+    const componentManager = useDependency(ComponentManager);
     const [ranges, setRanges] = useState<string[]>([]);
     const [focusIndex, setFocusIndex] = useState(0);
     const scrollbarRef = useRef<HTMLDivElement>(null);
+
+    const DeleteIcon = componentManager.get('DeleteIcon');
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
 
     useEffect(() => {
         if (visible && initialValue.length) {
@@ -261,6 +264,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
+
+    const SelectRangeIcon = componentManager.get('SelectRangeIcon');
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);

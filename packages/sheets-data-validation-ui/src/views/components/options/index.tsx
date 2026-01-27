@@ -17,7 +17,6 @@
 import type { IDataValidationRuleOptions } from '@univerjs/core';
 import { DataValidationErrorStyle, LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
-import { MoreDownIcon, MoreUpIcon } from '@univerjs/icons';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
@@ -34,6 +33,9 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
     const [show, setShow] = useState(false);
 
     const ExtraOptions = extraComponent ? componentManager.get(extraComponent) : null;
+
+    const MoreUpIcon = componentManager.get('MoreUpIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     return (
         <>

@@ -19,8 +19,7 @@ import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
-import { MoreDownIcon, PasteSpecialDoubleIcon } from '@univerjs/icons';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { useActiveWorkbook } from '../../components/hook';
@@ -113,6 +112,10 @@ export const ClipboardPopupMenu = () => {
     const pasteOptionsCache = useObservable(clipboardService.pasteOptionsCache$, null);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
+
+    const PasteSpecialDoubleIcon = componentManager.get('PasteSpecialDoubleIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const [menuHovered, setMenuHovered] = useState(false);
     const [visible, setVisible] = useState(false);

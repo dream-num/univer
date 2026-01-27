@@ -19,7 +19,6 @@ import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@u
 import { generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { DeleteIcon, IncreaseIcon, PenIcon } from '@univerjs/icons';
 import {
     InsertDefinedNameCommand,
     RemoveDefinedNameCommand,
@@ -28,7 +27,7 @@ import {
     SetWorksheetShowCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
 
@@ -38,6 +37,7 @@ export const DefinedNameContainer = () => {
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
+    const componentManager = useDependency(ComponentManager);
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const unitId = workbook?.getUnitId();
@@ -56,6 +56,10 @@ export const DefinedNameContainer = () => {
     const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>([]);
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
     const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
+
+    const IncreaseIcon = componentManager.get('IncreaseIcon');
+    const PenIcon = componentManager.get('PenIcon');
+    const DeleteIcon = componentManager.get('DeleteIcon');
 
     useEffect(() => {
         setDefinedNames(getDefinedNameMap());

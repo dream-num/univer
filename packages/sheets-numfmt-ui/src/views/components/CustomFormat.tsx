@@ -17,9 +17,8 @@
 import type { IBusinessComponentProps } from './interface';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input } from '@univerjs/design';
-import { CheckMarkIcon } from '@univerjs/icons';
 import { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 
@@ -31,6 +30,9 @@ export function CustomFormat(props: IBusinessComponentProps) {
     const userHabitController = useDependency(UserHabitController);
     const localStorageService = useDependency(ILocalStorageService);
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
 
     const [pattern, setPattern] = useState(defaultPattern);
     action.current = () => {

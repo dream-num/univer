@@ -19,7 +19,6 @@ import type { IBorderInfo } from '@univerjs/sheets';
 import type { IBorderPanelProps } from './interface';
 import { BorderStyleTypes } from '@univerjs/core';
 import { clsx, ColorPicker, Dropdown, Separator } from '@univerjs/design';
-import { CheckMarkIcon, MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { BorderStyleManagerService, SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, useDependency } from '@univerjs/ui';
 import { BorderLine } from './border-line/BorderLine';
@@ -100,6 +99,10 @@ export function BorderPanel(props: IBorderPanelProps) {
     const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('bd');
     const color = isAllValuesSame ? getBorderColor(currentValue as Nullable<IBorderData>) : undefined;
     const type = isAllValuesSame ? getBorderStyle(currentValue as Nullable<IBorderData>) : undefined;
+
+    const PaintBucketDoubleIcon = componentManager.get('PaintBucketDoubleIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
 
     const { onChange, value } = props;
 

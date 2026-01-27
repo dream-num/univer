@@ -18,9 +18,8 @@ import type { ITableFilterItem } from '@univerjs/sheets-table';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
-import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 import { ConditionSubComponentEnum } from './type';
 import { datePickerSet, getCascaderListOptions, getConditionDateSelect, getSubComponentType } from './util';
@@ -38,6 +37,9 @@ interface IConditionFilterProps {
 export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
     const { conditionInfo, onChange } = props;
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const [conditionVisible, setConditionVisible] = useState(false);
 

@@ -18,8 +18,7 @@ import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentFlavor, ICommandService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
-import { CheckMarkIcon, CloseIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
 import { IZenEditorManagerService } from '../../services/zen-editor.service';
@@ -70,6 +69,10 @@ export function ZenEditor() {
     const editorService = useDependency(IEditorService);
 
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
+
+    const CloseIcon = componentManager.get('CloseIcon');
+    const CheckMarkIcon = componentManager.get('CheckMarkIcon');
 
     useEffect(() => {
         const editorDom = editorRef.current;

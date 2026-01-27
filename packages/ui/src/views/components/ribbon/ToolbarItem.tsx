@@ -18,7 +18,6 @@ import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } fro
 import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { MoreDownIcon } from '@univerjs/icons';
 import { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
 import { ComponentManager } from '../../../common/component-manager';
@@ -35,6 +34,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
     const componentManager = useDependency(ComponentManager);
+
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const { value, hidden, disabled, activated } = useToolbarItemStatus(props);
 

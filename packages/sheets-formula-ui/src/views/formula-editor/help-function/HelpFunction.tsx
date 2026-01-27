@@ -18,9 +18,8 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { CloseIcon, MoreIcon } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { ComponentManager, RectPopup, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPosition } from '../hooks/use-editor-position';
@@ -99,10 +98,15 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
     const [contentVisible, setContentVisible] = useState(false);
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
     const editorId = editor.getEditorId();
     const [position$] = useEditorPosition(editorId, !!functionInfo, [functionInfo, paramIndex]);
+
+    const MoreIcon = componentManager.get('MoreIcon');
+    const CloseIcon = componentManager.get('CloseIcon');
+
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }

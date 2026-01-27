@@ -2155,9 +2155,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^1.1.1
-        version: 1.1.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2438,9 +2435,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^1.1.1
-        version: 1.1.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2818,9 +2812,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^1.1.1
-        version: 1.1.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

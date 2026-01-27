@@ -18,10 +18,9 @@ import type { IRangeThemeStyleItem, ISetRangeThemeMutationParams } from '@univer
 import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSetConfig } from '@univerjs/sheets-table';
 import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
-import { DropdownIcon } from '@univerjs/icons';
 import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import { AddTableThemeCommand, customEmptyThemeWithBorderStyle, processStyleWithBorderStyle, RemoveTableThemeCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { TABLE_BORDER_DEFAULT, TABLE_BORDER_NONE, TABLE_CUSTOM_NAME_PREFIX, TABLE_DEFAULT_BG_COLOR, TABLE_DEFAULT_NAME_PREFIX } from '../../const';
 import { SheetTableThemeUIController } from '../../controllers/sheet-table-theme-ui.controller';
@@ -44,6 +43,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const { unitId, subUnitId, tableId } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
     const tableManager = useDependency(TableManager);
     const table = tableManager.getTableById(unitId, tableId);
     const rangeThemeModel = useDependency(SheetRangeThemeModel);
@@ -53,6 +53,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const tableRefresh = useObservable(sheetTableThemeUIController.refreshTable$);
 
     const errorService = useDependency(ErrorService);
+
+    const DropdownIcon = componentManager.get('DropdownIcon');
 
     const [, setRefresh] = useState(Math.random());
 

@@ -17,10 +17,9 @@
 import type { IUniverSheetsTableUIConfig } from '../../controllers/config.schema';
 import { cellToRange, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, Input } from '@univerjs/design';
-import { DeleteIcon, GridOutlineIcon, MoreDownIcon, PaintBucketDoubleIcon, RenameIcon } from '@univerjs/icons';
 import { getSheetCommandTarget, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService } from '@univerjs/sheets';
 import { DeleteSheetTableCommand, SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { openRangeSelector } from '../../commands/operations/open-table-selector.operation';
 import { SHEET_TABLE_THEME_PANEL, SHEET_TABLE_THEME_PANEL_ID } from '../../const';
@@ -50,6 +49,14 @@ export const SheetTableAnchor = () => {
 
     const [, setRefresh] = useState(Math.random());
     const configService = useDependency(IConfigService);
+    const componentManager = useDependency(ComponentManager);
+
+    const RenameIcon = componentManager.get('RenameIcon');
+    const GridOutlineIcon = componentManager.get('GridOutlineIcon');
+    const PaintBucketDoubleIcon = componentManager.get('PaintBucketDoubleIcon');
+    const DeleteIcon = componentManager.get('DeleteIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
+
     const tableConfig = configService.getConfig<IUniverSheetsTableUIConfig>(SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY);
     const anchorHeight = tableConfig?.anchorHeight ?? 24;
     const anchorBackgroundColor = tableConfig?.anchorBackgroundColor ?? 'rgb(53,91,183)';

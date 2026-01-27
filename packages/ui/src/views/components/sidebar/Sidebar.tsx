@@ -17,8 +17,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { CloseIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef } from 'react';
+import { ComponentManager } from '../../../common';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -40,8 +40,11 @@ export interface ISidebarMethodOptions {
 
 export function Sidebar() {
     const sidebarService = useDependency(ISidebarService);
+    const componentManager = useDependency(ComponentManager);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    const CloseIcon = componentManager.get('CloseIcon');
 
     const options = useMemo(() => {
         if (!sidebarOptions) {

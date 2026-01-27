@@ -17,8 +17,7 @@
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown } from '@univerjs/design';
-import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
@@ -48,6 +47,10 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
 
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const componentManager = useDependency(ComponentManager);
+
+    const AutofillDoubleIcon = componentManager.get('AutofillDoubleIcon');
+    const MoreDownIcon = componentManager.get('MoreDownIcon');
 
     const [visible, setVisible] = useState(false);
     const [isHovered, setHovered] = useState(false);

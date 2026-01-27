@@ -28,16 +28,16 @@
         "@typescript-eslint/parser": "^8.50.1",
         "@vitejs/plugin-react": "^5.1.2",
         "@vitejs/plugin-vue": "^6.0.3",
-        "@vitest/coverage-istanbul": "^4.0.16",
+        "@vitest/coverage-istanbul": "^4.0.18",
         "autoprefixer": "^10.4.23",
         "eslint-plugin-better-tailwindcss": "^3.8.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "fs-extra": "^11.3.3",
-        "happy-dom": "20.0.11",
+        "happy-dom": "20.3.9",
         "javascript-obfuscator": "^5.1.0",
-        "postcss-preset-env": "^10.5.0",
+        "postcss-preset-env": "^11.1.2",
         "postcss-replace": "^2.0.1",
         "sort-keys": "^6.0.0",
         "tailwind-scrollbar": "^3",
@@ -45,7 +45,7 @@
         "vite": "^7.3.1",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-external": "^6.2.2",
-        "vitest": "^4.0.16"
+        "vitest": "^4.0.18"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

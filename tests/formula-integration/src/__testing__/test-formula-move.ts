@@ -66,6 +66,8 @@ export async function expectMoveFormulaRowsResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // move row 3 to before row 5
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
@@ -119,6 +121,8 @@ export async function expectMoveFormulaSiRowsResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // move row 3 to before row 5
     const rowSpec = worksheet.getRange('3:3');
     worksheet.moveRows(rowSpec, 4);
@@ -171,6 +175,8 @@ export async function expectMoveFormulaCellResultMatchesSnapshot() {
     const univerInstanceService = testBed.get(IUniverInstanceService);
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
+
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     // move D4:D5 to G13:G14
     const fromRange = worksheet.getRange('D4:D5').getRange();

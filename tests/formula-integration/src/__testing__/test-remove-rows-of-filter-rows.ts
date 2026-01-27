@@ -66,6 +66,8 @@ export async function expectRemoveRowsOfFilterRowsResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // remove rows 2 to 5, where the 3 to 4 rows are filtered rows
     worksheet.deleteRows(1, 4);
 

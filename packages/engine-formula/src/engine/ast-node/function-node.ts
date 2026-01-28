@@ -367,9 +367,13 @@ export class FunctionNode extends BaseAstNode {
 
         referenceObject.setArrayFormulaCellData(this._currentConfigService.getArrayFormulaCellData());
 
+        referenceObject.setArrayFormulaRange(this._currentConfigService.getArrayFormulaRange());
+
         referenceObject.setRuntimeData(this._runtimeService.getUnitData());
 
         referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
+
+        referenceObject.setRuntimeArrayFormulaRange(this._runtimeService.getUnitArrayFormula());
 
         referenceObject.setRuntimeFeatureCellData(this._runtimeService.getRuntimeFeatureCellData());
     }

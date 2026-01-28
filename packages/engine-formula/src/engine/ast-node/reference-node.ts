@@ -76,11 +76,15 @@ export class ReferenceNode extends BaseAstNode {
 
         referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
 
+        referenceObject.setArrayFormulaRange(currentConfigService.getArrayFormulaRange());
+
         referenceObject.setRuntimeData(runtimeService.getUnitData());
 
         referenceObject.setUnitStylesData(currentConfigService.getUnitStylesData());
 
         referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
+
+        referenceObject.setRuntimeArrayFormulaRange(runtimeService.getUnitArrayFormula());
 
         referenceObject.setRuntimeFeatureCellData(runtimeService.getRuntimeFeatureCellData());
 

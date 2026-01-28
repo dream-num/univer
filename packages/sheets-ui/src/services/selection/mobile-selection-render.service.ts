@@ -231,9 +231,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
             // show contextmenu when longpress and change selection area
             // do not show contextmenu when click a cell
-            if (showContextMenu) {
-                this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-            }
+            this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
         };
         spreadsheet?.onPointerMove$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state) => {
             const edge = 10;
@@ -691,8 +689,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
 
-        const currCellRange = activeSelectionControl.model.currentCell;
-
         const anchorCell = this._anchorCellForExpanding ?? activeSelectionControl.model.currentCell;
 
         const startRowOfActiveCell = anchorCell?.mergeInfo?.startRow ?? anchorCell?.actualRow ?? -1;
@@ -721,19 +717,17 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             newSelectionRange = skeleton.expandRangeByMerge(newSelectionRange);
         } else if (rangeType === RANGE_TYPE.COLUMN) {
             newSelectionRange = {
-                startRow: Math.min(cursorCellRange.startRow, currCellRange?.actualRow ?? -1),
-                startColumn: Math.min(cursorCellRange.startColumn, currCellRange?.actualColumn ?? -1),
-                endRow: Math.max(cursorCellRange.endRow, currCellRange?.actualRow ?? -1),
-                endColumn: Math.max(cursorCellRange.endColumn, currCellRange?.actualColumn ?? -1),
-
+                startRow: 0,
+                startColumn: Math.min(cursorCellRange.startColumn, startColumnOfActiveCell),
+                endRow: skeleton.getRowCount() - 1,
+                endColumn: Math.max(cursorCellRange.endColumn, endColOfActiveCell),
             };
         } else if (rangeType === RANGE_TYPE.ROW) {
             newSelectionRange = {
-                startRow: Math.min(cursorCellRange.startRow, currCellRange?.actualRow ?? -1),
-                startColumn: Math.min(cursorCellRange.startColumn, currCellRange?.actualColumn ?? -1),
-                endRow: Math.max(cursorCellRange.endRow, currCellRange?.actualRow ?? -1),
-                endColumn: Math.max(cursorCellRange.endColumn, currCellRange?.actualColumn ?? -1),
-
+                startRow: Math.min(cursorCellRange.startRow, startRowOfActiveCell),
+                startColumn: 0,
+                endRow: Math.max(cursorCellRange.endRow, endRowOfActiveCell),
+                endColumn: skeleton.getColumnCount() - 1,
             };
         }
 

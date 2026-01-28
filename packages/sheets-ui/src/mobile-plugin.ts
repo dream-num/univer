@@ -56,9 +56,9 @@ import { FormatPainterRenderController } from './controllers/render-controllers/
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
-import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 // import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { MobileHeaderResizeRenderController } from './controllers/render-controllers/mobile/mobile-header-resize.render-controller';
 import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
@@ -248,7 +248,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         const modules: Dependency[] = [
             [HeaderMoveRenderController],
             [HeaderUnhideRenderController],
-            [HeaderResizeRenderController],
             // TODO: Should not register these two Controllers at the same time
             [SheetsScrollRenderController],
             [MobileSheetsScrollRenderController],
@@ -266,6 +265,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [ForceStringRenderController],
             [CellCustomRenderController],
             // [SheetContextMenuMobileRenderController],
+            [MobileHeaderResizeRenderController],
             [MoveRangeRenderController],
 
             // editor

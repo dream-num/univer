@@ -15,9 +15,9 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
+import type { IArrayFormulaRangeType, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
-import { CellValueType, isTextFormat, moveRangeByOffset } from '@univerjs/core';
+import { CellValueType, isTextFormat, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isNullCellForFormula } from '../../basics/is-null-cell';
@@ -69,7 +69,11 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _arrayFormulaCellData: IRuntimeUnitDataType = {};
 
+    private _arrayFormulaRange: IArrayFormulaRangeType = {};
+
     private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
+
+    private _runtimeArrayFormulaRange: IArrayFormulaRangeType = {};
 
     private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
 
@@ -332,12 +336,28 @@ export class BaseReferenceObject extends ObjectClassType {
         this._arrayFormulaCellData = unitData;
     }
 
+    getArrayFormulaRange() {
+        return this._arrayFormulaRange;
+    }
+
+    setArrayFormulaRange(rangeData: IArrayFormulaRangeType) {
+        this._arrayFormulaRange = rangeData;
+    }
+
     getRuntimeArrayFormulaCellData() {
         return this._runtimeArrayFormulaCellData;
     }
 
     setRuntimeArrayFormulaCellData(unitData: IRuntimeUnitDataType) {
         this._runtimeArrayFormulaCellData = unitData;
+    }
+
+    getRuntimeArrayFormulaRange() {
+        return this._runtimeArrayFormulaRange;
+    }
+
+    setRuntimeArrayFormulaRange(rangeData: IArrayFormulaRangeType) {
+        this._runtimeArrayFormulaRange = rangeData;
     }
 
     getRuntimeFeatureCellData() {
@@ -484,6 +504,14 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeArrayFormulaCellData?.[this.getUnitId()]?.[this.getSheetId()];
     }
 
+    getCurrentActiveArrayFormulaRange() {
+        return this._arrayFormulaRange?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
+    getCurrentRuntimeActiveArrayFormulaRange() {
+        return this._runtimeArrayFormulaRange?.[this.getUnitId()]?.[this.getSheetId()];
+    }
+
     getCellData(row: number, column: number) {
         const activeSheetData = this.getCurrentActiveSheetData();
 
@@ -493,13 +521,39 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeArrayFormulaCellData = this.getCurrentRuntimeActiveArrayFormulaCellData();
 
-        return (
-            activeRuntimeData?.getValue(row, column) ||
+        const activeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentActiveArrayFormulaRange());
+
+        const activeRuntimeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentRuntimeActiveArrayFormulaRange());
+
+        let cellData: Nullable<ICellData> = activeRuntimeData?.getValue(row, column) ||
             activeRuntimeArrayFormulaCellData?.getValue(row, column) ||
-            this.getRuntimeFeatureCellValue(row, column) ||
-            activeArrayFormulaCellData?.getValue(row, column) ||
-            activeSheetData?.cellData.getValue(row, column)
-        );
+            this.getRuntimeFeatureCellValue(row, column);
+
+        if (cellData) {
+            return cellData;
+        }
+
+        cellData = activeArrayFormulaCellData?.getValue(row, column);
+
+        if (cellData) {
+            // Check if the cell is in the runtime array formula range. if so, do not return the original array formula cell data.
+            let isInRuntimeArrayFormulaRange = false;
+
+            activeArrayFormulaRangeMatrix.forValue((_row, _column, range) => {
+                if (row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn && activeRuntimeArrayFormulaRangeMatrix.getValue(_row, _column)) {
+                    isInRuntimeArrayFormulaRange = true;
+                    return false;
+                }
+            });
+
+            if (!isInRuntimeArrayFormulaRange) {
+                return cellData;
+            }
+
+            return null;
+        }
+
+        return activeSheetData?.cellData.getValue(row, column);
     }
 
     getRuntimeFeatureCellValue(row: number, column: number) {

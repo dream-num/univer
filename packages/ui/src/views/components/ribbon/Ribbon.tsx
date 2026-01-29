@@ -141,7 +141,7 @@ export function Ribbon(props: IRibbonProps) {
                     ribbonService.setFakeToolbarVisible(false);
                 });
             }
-        }, 100));
+        }, 10));
 
         observer.observe(containerRef.current);
 

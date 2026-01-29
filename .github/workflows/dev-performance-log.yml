@@ -5,6 +5,13 @@ on:
         branches:
             - dev
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
 jobs:
     e2e-test:
         runs-on: ubuntu-latest
@@ -26,6 +33,12 @@ jobs:
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
+
+            - name: Cache Playwright browsers
+              uses: actions/cache@v4
+              with:
+                  path: ~/.cache/ms-playwright
+                  key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
             - name: Install Playwright Browsers
               run: pnpm exec playwright install --with-deps chromium

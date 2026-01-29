@@ -226,7 +226,7 @@ export function Ribbon(props: IRibbonProps) {
                     setFakeToolbarVisible(false);
                 });
             }
-        }, 100));
+        }, 10));
 
         observer.observe(containerRef.current);
 

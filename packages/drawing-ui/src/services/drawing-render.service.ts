@@ -34,7 +34,7 @@ export class DrawingRenderService {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) { }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     async renderImages(imageParam: IImageData, scene: Scene) {
         const {
             transform: singleTransform,
@@ -73,6 +73,14 @@ export class DrawingRenderService {
 
             if (imageShape != null) {
                 imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                continue;
+            }
+
+            if (!this._drawingManagerService.getDrawingVisible()) {
+                continue;
+            }
+
+            if (subUnitId !== this._getActiveSheetId()) {
                 continue;
             }
 
@@ -115,14 +123,6 @@ export class DrawingRenderService {
             const image = new Image(imageShapeKey, imageConfig);
             if (shouldBeCache) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
-            }
-
-            if (!this._drawingManagerService.getDrawingVisible()) {
-                continue;
-            }
-
-            if (subUnitId !== this._getActiveSheetId()) {
-                continue;
             }
 
             scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);

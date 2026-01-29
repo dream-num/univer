@@ -147,7 +147,7 @@ export class DrawingRenderService {
 
     private _getActiveSheetId(): string | undefined {
         return this._univerInstanceService
-            .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             ?.getActiveSheet()
             ?.getSheetId();
     }

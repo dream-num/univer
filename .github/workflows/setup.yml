@@ -7,7 +7,12 @@ on:
         branches: [dev]
 
 permissions:
+    actions: write
     pull-requests: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     set-pr-info:
@@ -16,8 +21,8 @@ jobs:
         steps:
             - name: Save PR info
               run: |
-                  echo ${{ github.event.pull_request.number }} > ./pr-id.txt
-                  echo ${{ github.head_ref }} >> ./pr-ref.txt
+                  echo ${{ github.event.pull_request.number || '' }} > ./pr-id.txt
+                  echo ${{ github.head_ref || github.ref_name }} >> ./pr-ref.txt
                   echo ${{ github.event.pull_request.head.repo.full_name || github.repository }} >> ./pr-repo.txt
 
             - name: Upload PR number

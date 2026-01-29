@@ -369,7 +369,7 @@ export function getSetCellValueMutations(
             if (isTextFormat(style?.n?.pattern)) {
                 cellValue.t = CellValueType.STRING;
             } else {
-                const content = String(value.v);
+                const content = String(value.v).trim();
                 const numfmtValue = getNumfmtParseValueFilter(content);
                 if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
                     // If the numeric string will lose precision when converted to a number, set the cell type to force string
@@ -479,7 +479,7 @@ export function getSetCellStyleMutations(
             }
             (newValue.s as IStyleData).n = style?.n;
         } else {
-            const content = String(value.v);
+            const content = String(value.v).trim();
             const numfmtValue = getNumfmtParseValueFilter(content);
             if (numfmtValue?.z) {
                 if (!newValue.s) {

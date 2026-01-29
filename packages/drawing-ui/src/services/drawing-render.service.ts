@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch } from '@univerjs/core';
+import type { IDrawingSearch, Workbook } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, IURLImageService } from '@univerjs/core';
+import { DrawingTypeEnum, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
@@ -30,7 +30,8 @@ export class DrawingRenderService {
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IGalleryService private readonly _galleryService: IGalleryService,
-        @IURLImageService private readonly _urlImageService: IURLImageService
+        @IURLImageService private readonly _urlImageService: IURLImageService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) { }
 
     // eslint-disable-next-line max-lines-per-function
@@ -120,6 +121,10 @@ export class DrawingRenderService {
                 continue;
             }
 
+            if (subUnitId !== this._getActiveSheetId()) {
+                continue;
+            }
+
             scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
             if (this._drawingManagerService.getDrawingEditable()) {
                 scene.attachTransformerTo(image);
@@ -138,6 +143,13 @@ export class DrawingRenderService {
         }
 
         return images;
+    }
+
+    private _getActiveSheetId(): string | undefined {
+        return this._univerInstanceService
+            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            ?.getActiveSheet()
+            ?.getSheetId();
     }
 
     renderFloatDom(param: IDocFloatDomData, scene: Scene) {

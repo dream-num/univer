@@ -16,7 +16,7 @@
 
 import type { CellValue, ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, ISelectionCell, IStyleData, Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import {
     CellValueType,
@@ -208,11 +208,42 @@ export class StatusBarController extends Disposable {
         );
 
         this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionSet$.subscribe((selections) => {
+                    if (selections) {
+                        _statisticsHandler(selections);
+                    }
+                })
+            )
+        );
+
+        this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetRangeValuesMutation.id) {
                     const selections = this._selectionManagerService.getCurrentSelections();
-                    if (selections) {
-                        _statisticsHandler(selections as ISelectionWithStyle[]);
+                    const { cellValue } = command.params as ISetRangeValuesMutationParams;
+
+                    if (selections && selections.length > 0 && cellValue) {
+                        const cellValueMatrix = new ObjectMatrix(cellValue);
+
+                        // Do not update statistics if the changed cells are outside the current selection
+                        let valueInSelection = false;
+
+                        cellValueMatrix.forValue((row, col) => {
+                            if (
+                                selections.some((selection) => {
+                                    const range = selection.range;
+                                    return row >= range.startRow && row <= range.endRow && col >= range.startColumn && col <= range.endColumn;
+                                })
+                            ) {
+                                valueInSelection = true;
+                                return false; // Stop iteration
+                            }
+                        });
+
+                        if (valueInSelection) {
+                            _statisticsHandler(selections as ISelectionWithStyle[]);
+                        }
                     }
                 }
             })

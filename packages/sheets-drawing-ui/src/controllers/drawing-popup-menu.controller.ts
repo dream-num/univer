@@ -25,7 +25,6 @@ import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
@@ -50,8 +49,8 @@ export class DrawingPopupMenuController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._create(workbook));
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._dispose(workbook));
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
 
         this._setupLoadingStatus();
@@ -81,6 +80,7 @@ export class DrawingPopupMenuController extends RxDisposable {
 
         const unitId = workbook.getUnitId();
         this._renderManagerService.removeRender(unitId);
+        this._initImagePopupMenu.delete(unitId);
     }
 
     private _create(workbook: Nullable<Workbook>) {

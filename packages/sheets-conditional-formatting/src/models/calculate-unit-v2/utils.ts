@@ -28,7 +28,7 @@ import { ConditionalFormattingViewModel } from '../conditional-formatting-view-m
 export function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
 }
-export const isNullable = (v: any) => [undefined, null].includes(v);
+export const isNullable = (v: Nullable<CellValue>) => v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
 export const getCellValue = (cell?: ICellData) => {
     if (!cell) {
         return null;

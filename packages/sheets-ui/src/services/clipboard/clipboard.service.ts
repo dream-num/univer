@@ -320,7 +320,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 // After the pop-up window prompts, can paste the contents of the clipboard as much as possible.
             }
 
-            return this._pasteHTML(html, pasteType);
+            return this._pasteHTML(html, pasteType, text);
         }
 
         // clipboard item from excel may contain image, so we need to check if the clipboard item is from excel
@@ -359,7 +359,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (files && !isFromExcel) {
             return this._pasteFiles(files, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
         } else if (html) {
-            return this._pasteHTML(html, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+            return this._pasteHTML(html, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, text);
         } else if (text) {
             // Converts text with tabs and newlines into an HTML table
             if (/[\n\t]/.test(text)) {
@@ -586,22 +586,22 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
     }
 
-    private async _pasteHTML(html: string, pasteType: IPasteHookValueType): Promise<boolean> {
+    private async _pasteHTML(html: string, pasteType: IPasteHookValueType, text?: string): Promise<boolean> {
         const copyId = extractId(html);
         if (copyId && this._copyContentCache.get(copyId)) {
             return this._pasteInternal(copyId, pasteType);
         }
-        return this._pasteExternal(html, pasteType);
+        return this._pasteExternal(html, pasteType, text);
     }
 
-    private async _pasteExternal(html: string, pasteType: IPasteHookValueType): Promise<boolean> {
+    private async _pasteExternal(html: string, pasteType: IPasteHookValueType, text?: string): Promise<boolean> {
         // this._logService.log('[SheetClipboardService]', 'pasting external content', html);
 
         // steps of pasting:
 
         // 1. get properties of the table by parsing raw html content, including col properties / row properties
         // cell properties and cell contents.
-        const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
+        const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html, text);
         if (!cellMatrix) {
             return false;
         }

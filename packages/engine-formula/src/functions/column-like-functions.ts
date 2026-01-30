@@ -17,76 +17,48 @@
 import type { IFunctionNames } from '../basics/function';
 
 import { FUNCTION_NAMES_DATE } from './date/function-names';
+import { FUNCTION_NAMES_ENGINEERING } from './engineering/function-names';
+import { FUNCTION_NAMES_FINANCIAL } from './financial/function-names';
 import { FUNCTION_NAMES_INFORMATION } from './information/function-names';
 import { FUNCTION_NAMES_LOGICAL } from './logical/function-names';
 import { FUNCTION_NAMES_LOOKUP } from './lookup/function-names';
 import { FUNCTION_NAMES_MATH } from './math/function-names';
 import { FUNCTION_NAMES_STATISTICAL } from './statistical/function-names';
 import { FUNCTION_NAMES_TEXT } from './text/function-names';
+import { FUNCTION_NAMES_WEB } from './web/function-names';
 
-/**
- * Function names that can also appear as column identifiers
- * in full-column references like:
- *
- *   IF:IF, LOG:LOG, SIN:SIN
- *
- * NOTE:
- * Real validation must still rely on column label parsing (A..XFD).
- * This set is for parser edge cases / compatibility heuristics only.
- */
-export const COLUMN_LIKE_FUNCTION_NAMES = new Set<IFunctionNames>([
-    FUNCTION_NAMES_INFORMATION.N,
-    // Logical
-    FUNCTION_NAMES_LOGICAL.IF,
-    FUNCTION_NAMES_LOGICAL.OR,
-    FUNCTION_NAMES_LOGICAL.AND,
-    FUNCTION_NAMES_LOGICAL.NOT,
+const ALL_GROUPS = [
+    FUNCTION_NAMES_DATE,
+    FUNCTION_NAMES_ENGINEERING,
+    FUNCTION_NAMES_FINANCIAL,
+    FUNCTION_NAMES_INFORMATION,
+    FUNCTION_NAMES_LOGICAL,
+    FUNCTION_NAMES_LOOKUP,
+    FUNCTION_NAMES_MATH,
+    FUNCTION_NAMES_STATISTICAL,
+    FUNCTION_NAMES_TEXT,
+    FUNCTION_NAMES_WEB,
+] as const;
 
-    // Math / trig / numeric
-    FUNCTION_NAMES_MATH.LOG,
-    FUNCTION_NAMES_MATH.LN,
-    FUNCTION_NAMES_MATH.PI,
-    FUNCTION_NAMES_MATH.COS,
-    FUNCTION_NAMES_MATH.SIN,
-    FUNCTION_NAMES_MATH.TAN,
-    FUNCTION_NAMES_MATH.EXP,
-    FUNCTION_NAMES_STATISTICAL.MIN,
-    FUNCTION_NAMES_STATISTICAL.MAX,
-    FUNCTION_NAMES_MATH.MOD,
-    FUNCTION_NAMES_MATH.ABS,
-    FUNCTION_NAMES_MATH.ROUND,
-    FUNCTION_NAMES_MATH.POWER,
+function colLabelToIndex(label: string): number {
+  // A=1 ... Z=26 ... XFD=16384
+    let n = 0;
+    for (let i = 0; i < label.length; i++) {
+        const c = label.charCodeAt(i);
+        if (c < 65 || c > 90) return -1;
+        n = n * 26 + (c - 64);
+    }
+    return n;
+}
 
-    // Information
-    FUNCTION_NAMES_LOOKUP.ROW,
-    FUNCTION_NAMES_INFORMATION.TYPE,
-    FUNCTION_NAMES_INFORMATION.NA,
-    FUNCTION_NAMES_INFORMATION.ERROR_TYPE,
-    FUNCTION_NAMES_INFORMATION.CELL,
-    FUNCTION_NAMES_INFORMATION.INFO,
+const MAX_COL = colLabelToIndex('XFD'); // 16384
 
-    // Text
-    FUNCTION_NAMES_TEXT.TEXT,
-    FUNCTION_NAMES_TEXT.LEFT,
-    FUNCTION_NAMES_TEXT.RIGHT,
-    FUNCTION_NAMES_TEXT.MID,
-    FUNCTION_NAMES_TEXT.VALUE,
-    FUNCTION_NAMES_TEXT.T,
-    FUNCTION_NAMES_TEXT.LEN,
-    FUNCTION_NAMES_TEXT.TRIM,
-    FUNCTION_NAMES_TEXT.UPPER,
-    FUNCTION_NAMES_TEXT.LOWER,
-    FUNCTION_NAMES_TEXT.PROPER,
-    FUNCTION_NAMES_TEXT.CLEAN,
-    FUNCTION_NAMES_TEXT.SUBSTITUTE,
-    FUNCTION_NAMES_TEXT.REPT,
-    FUNCTION_NAMES_TEXT.FIND,
-    FUNCTION_NAMES_TEXT.SEARCH,
-    FUNCTION_NAMES_TEXT.CODE,
-    FUNCTION_NAMES_TEXT.CHAR,
-    FUNCTION_NAMES_TEXT.EXACT,
-
-    // Date / time
-    FUNCTION_NAMES_DATE.DATE,
-    FUNCTION_NAMES_DATE.TIME,
-]);
+export const COLUMN_LIKE_FUNCTION_NAMES = new Set<IFunctionNames>(
+    ALL_GROUPS
+        .flatMap((g) => Object.values(g) as IFunctionNames[])
+        .filter((name) => /^[A-Z]{1,3}$/.test(name as string))
+        .filter((name) => {
+            const idx = colLabelToIndex(name as string);
+            return idx > 0 && idx <= MAX_COL;
+        })
+);

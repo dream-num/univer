@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    sheetsSort: {
+        title: 'Triedenie',
+        toolbar: {
+            'sort-asc': 'vzostupné poradie',
+            'sort-desc': 'zostupné poradie',
+            'sort-custom': 'vlastné poradie',
+        },
+        'context-menu': {
+            'sort-asc': 'vzostupné poradie',
+            'sort-desc': 'zostupné poradie',
+            'sort-custom': 'vlastné poradie',
+        },
+    },
+};
+
+export default locale;

@@ -28,20 +28,32 @@ const locales = [
         value: LocaleType.FR_FR,
     },
     {
-        label: '简体中文',
-        value: LocaleType.ZH_CN,
-    },
-    {
         label: 'Русский',
         value: LocaleType.RU_RU,
     },
     {
-        label: '繁體中文',
-        value: LocaleType.ZH_TW,
-    },
-    {
         label: 'Tiếng Việt',
         value: LocaleType.VI_VN,
+    },
+    {
+        label: 'Español',
+        value: LocaleType.ES_ES,
+    },
+    {
+        label: 'Català',
+        value: LocaleType.CA_ES,
+    },
+    {
+        label: 'Slovenčina',
+        value: LocaleType.SK_SK,
+    },
+    {
+        label: '简体中文',
+        value: LocaleType.ZH_CN,
+    },
+    {
+        label: '繁體中文',
+        value: LocaleType.ZH_TW,
     },
     {
         label: '日本語',
@@ -51,16 +63,9 @@ const locales = [
         label: '한국어',
         value: LocaleType.KO_KR,
     },
-    {
-        label: 'Español',
-        value: 'es-ES',
-    },
-    {
-        label: 'Català',
-        value: 'ca-ES',
-    },
 ];
 
+// eslint-disable-next-line max-lines-per-function
 export function useLocale() {
     const localeService = useDependency(LocaleService);
 
@@ -85,14 +90,20 @@ export function useLocale() {
             case LocaleType.JA_JP:
                 locales = await import('@univerjs/mockdata/locales/ja-JP');
                 break;
+            case LocaleType.FA_IR:
+                locales = await import('@univerjs/mockdata/locales/fr-FR');
+                break;
             case LocaleType.KO_KR:
                 locales = await import('@univerjs/mockdata/locales/ko-KR');
                 break;
-            case 'es-ES':
+            case LocaleType.ES_ES:
                 locales = await import('@univerjs/mockdata/locales/es-ES');
                 break;
-            case 'ca-ES':
+            case LocaleType.CA_ES:
                 locales = await import('@univerjs/mockdata/locales/ca-ES');
+                break;
+            case LocaleType.SK_SK:
+                locales = await import('@univerjs/mockdata/locales/sk-SK');
                 break;
             case LocaleType.EN_US:
             default:

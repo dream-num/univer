@@ -30,6 +30,7 @@ import frFR from '@univerjs/mockdata/locales/fr-FR';
 import jaJP from '@univerjs/mockdata/locales/ja-JP';
 import koKR from '@univerjs/mockdata/locales/ko-KR';
 import ruRU from '@univerjs/mockdata/locales/ru-RU';
+import skSK from '@univerjs/mockdata/locales/sk-SK';
 import viVN from '@univerjs/mockdata/locales/vi-VN';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import zhTW from '@univerjs/mockdata/locales/zh-TW';
@@ -112,6 +113,7 @@ function createNewInstance() {
             [LocaleType.VI_VN]: viVN,
             [LocaleType.ZH_CN]: zhCN,
             [LocaleType.ZH_TW]: zhTW,
+            [LocaleType.SK_SK]: skSK,
         },
         logLevel: LogLevel.VERBOSE,
     });

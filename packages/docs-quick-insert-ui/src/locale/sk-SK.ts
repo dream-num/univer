@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    docQuickInsert: {
+        menu: {
+            numberedList: 'Číslovaný zoznam',
+            bulletedList: 'Odrážkový zoznam',
+            divider: 'Oddeľovač',
+            text: 'Text',
+            table: 'Tabuľka',
+            image: 'Obrázok',
+        },
+        group: {
+            basics: 'Základy',
+        },
+        placeholder: 'Nenašli sa žiadne výsledky',
+        keywordInputPlaceholder: 'Zadajte kľúčové slová',
+    },
+};
+
+export default locale;

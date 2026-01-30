@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-    JA_JP = 'jaJP',
-    KO_KR = 'koKR',
-    ES_ES = 'esES',
-    CA_ES = 'caES',
-    SK_SK = 'skSK',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    sheets: {
+        tabs: {
+            sheetCopy: '(Kópia{0})',
+            sheet: 'Hárok',
+        },
+        info: {
+            overlappingSelections: 'Na prekrývajúcich sa výberoch nie je možné použiť tento príkaz',
+            acrossMergedCell: 'Cez zlúčenú bunku',
+            partOfCell: 'Je vybraná iba časť zlúčenej bunky',
+            hideSheet: 'Po skrytí tohto hárka nebude viditeľný žiadny hárok',
+        },
+    },
+};
+
+export default locale;

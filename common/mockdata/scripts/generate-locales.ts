@@ -32,6 +32,7 @@ const locales = [
     'ja-JP',
     'es-ES',
     'ca-ES',
+    'sk-SK',
 ];
 
 /**
@@ -42,15 +43,24 @@ async function generateLocales() {
 
     const pkgJsonFile = fs.readJsonSync(path.resolve(__dirname, '../package.json'));
 
-    const packages = fs.readdirSync(path.resolve(__dirname, '../../../packages'))
-        .filter((dir) => fs.statSync(path.join(__dirname, '../../../packages', dir)).isDirectory())
-        .map((dir) => path.join(__dirname, '../../../packages', dir));
+    const packagesRoot = path.resolve(__dirname, '../../../packages');
+    const packageEntries = fs.existsSync(packagesRoot)
+        ? fs.readdirSync(packagesRoot, { withFileTypes: true })
+        : [];
+    const packages = packageEntries
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => path.join(packagesRoot, entry.name))
+        .filter((pkgPath) => fs.existsSync(pkgPath));
 
     const allPackages = [...packages];
     for (const pkg of allPackages) {
         const localePath = path.join(pkg, 'src/locale');
         if (fs.existsSync(localePath)) {
-            const pkgJson = fs.readJSONSync(path.join(pkg, 'package.json'));
+            const pkgJsonPath = path.join(pkg, 'package.json');
+            if (!fs.existsSync(pkgJsonPath)) {
+                continue;
+            }
+            const pkgJson = fs.readJSONSync(pkgJsonPath);
             packageNames.push(pkgJson.name);
             pkgJsonFile.dependencies[pkgJson.name] = 'workspace:*';
         }

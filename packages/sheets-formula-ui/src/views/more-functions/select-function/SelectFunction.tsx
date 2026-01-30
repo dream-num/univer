@@ -20,7 +20,6 @@ import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, Input, scrollbarClassName, Select } from '@univerjs/design';
-import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { IDescriptionService, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
@@ -51,7 +50,11 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
 
-    const options = getFunctionTypeValues(FunctionType, localeService, Boolean(customFunction));
+    const options = getFunctionTypeValues(localeService, Boolean(customFunction))
+        .filter(
+            (option) => descriptionService.getSearchListByType(Number(option.value)).length > 0
+        );
+
     options.unshift({
         label: localeService.t('formula.moreFunctions.allFunctions'),
         value: allTypeValue,

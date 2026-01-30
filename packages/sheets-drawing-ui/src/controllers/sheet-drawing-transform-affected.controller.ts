@@ -1164,6 +1164,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 });
             });
 
+            this._sheetDrawingService.removeNotification(removeDrawings);
             this._drawingManagerService.removeNotification(removeDrawings);
         });
     }
@@ -1197,6 +1198,8 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 });
             });
 
+            this._sheetDrawingService.removeNotification(removeDrawings);
+            this._sheetDrawingService.addNotification(insertDrawings);
             this._drawingManagerService.removeNotification(removeDrawings);
             this._drawingManagerService.addNotification(insertDrawings);
         }, 0);
@@ -1293,6 +1296,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             return;
         }
 
+        this._sheetDrawingService.refreshTransform(updateDrawings);
         this._drawingManagerService.refreshTransform(updateDrawings);
 
         this._commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);

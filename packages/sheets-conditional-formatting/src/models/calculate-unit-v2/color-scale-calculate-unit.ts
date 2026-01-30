@@ -82,9 +82,9 @@ export class ColorScaleCalculateUnit extends BaseCalculateUnit<IConfigItem[], st
         if (!preComputingResult) {
             return null;
         }
-        const value = context.getCellValue(row, col);
-        if (value.t === CellValueType.NUMBER) {
-            const v = Number(value.v);
+        const cell = context.getCellValue(row, col);
+        if (cell.t === CellValueType.NUMBER) {
+            const v = Number(cell.v);
             if (!Number.isNaN(v)) {
                 const color = getColorScaleFromValue(preComputingResult, v);
                 return color;

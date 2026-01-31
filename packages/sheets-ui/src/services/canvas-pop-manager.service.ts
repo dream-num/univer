@@ -289,7 +289,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         let offsetY = 0;
         let drawingType = undefined;
         if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
-
             drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
         }
         if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {

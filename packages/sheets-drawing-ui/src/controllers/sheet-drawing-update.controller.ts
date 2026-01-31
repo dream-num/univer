@@ -625,8 +625,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             for (const param of params) {
                 const sheetTransform = this._getSheetTransformByParam(param.parent);
                 const grpParam = {
-                    parent: { ...params[0].parent, sheetTransform },
-                    children: params[0].children,
+                    parent: { ...param.parent, sheetTransform },
+                    children: param.children,
 
                 }
                 grpParams.push(grpParam);

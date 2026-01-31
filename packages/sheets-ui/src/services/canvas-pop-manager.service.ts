@@ -19,7 +19,7 @@ import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, Spread
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map, throttleTime } from 'rxjs';
@@ -287,7 +287,11 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         let offsetX = 0;
         let offsetY = 0;
-        const drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
+        let drawingType = undefined;
+        if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
+
+            drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
+        }
         if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
             const offset = this._popupMenuOffsetMap.get(drawingType)!;
             offsetX = offset.offsetX;

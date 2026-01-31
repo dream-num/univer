@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.15.4](https://github.com/dream-num/univer/compare/v0.15.3...v0.15.4) (2026-01-31)
+
+
+### Bug Fixes
+
+* **api:** fix api FFormula.calculationResultApplied and FFormula.onCalculationResultApplied ([#6522](https://github.com/dream-num/univer/issues/6522)) ([39c9244](https://github.com/dream-num/univer/commit/39c9244cbf2d9aa17db646d449604a431edfd1be))
+* **cf:** fix the issue of duplicate values in conditional formatting ([#6547](https://github.com/dream-num/univer/issues/6547)) ([8308b35](https://github.com/dream-num/univer/commit/8308b35fc6427b4e3914c8e0e83d3d7b52a76d0d))
+* **disposeUnit:** fix the issue of drawing disposeUnit ([#6543](https://github.com/dream-num/univer/issues/6543)) ([bd159b0](https://github.com/dream-num/univer/commit/bd159b05fd4721c7eb9908873a31357547baf7b4))
+* **docs-ui:** improve focus-trap handling by ensuring container stays within the modal subtree ([#6546](https://github.com/dream-num/univer/issues/6546)) ([be2d617](https://github.com/dream-num/univer/commit/be2d617dd4a026c7187607bfd16c1cc564bb64e2))
+* fix an issue where disposeUnit would clear all event listeners ([#6508](https://github.com/dream-num/univer/issues/6508)) ([e0b514c](https://github.com/dream-num/univer/commit/e0b514c811a269701e212b964762c3783cfdfb87))
+* fix where floating images were not positioned correctly after inserting rows in some scenarios ([#6541](https://github.com/dream-num/univer/issues/6541)) ([88cb6fc](https://github.com/dream-num/univer/commit/88cb6fcca9470aa1f93d0c181ec977fd5c3d6306))
+* fix where formulas reference a changed array formula range would result in abnormal updates ([#6527](https://github.com/dream-num/univer/issues/6527)) ([9817568](https://github.com/dream-num/univer/commit/981756801a8eb390b16b1adb259cdc17c593e4e9))
+* **formula:** column like functions error ([#6540](https://github.com/dream-num/univer/issues/6540)) ([583c195](https://github.com/dream-num/univer/commit/583c19532c127caa3d9a9bda61813882343e54cf))
+* **formula:** update column like list ([#6542](https://github.com/dream-num/univer/issues/6542)) ([6802917](https://github.com/dream-num/univer/commit/6802917ab62ec7c9a98450579cb8f54c9fde3913))
+* icon more will disappear when change screen in some cases ([#6535](https://github.com/dream-num/univer/issues/6535)) ([b9a3b82](https://github.com/dream-num/univer/commit/b9a3b8299bc49f08b544ea62b8ea05b851393f97))
+* **image:** image switched double ([#6536](https://github.com/dream-num/univer/issues/6536)) ([6e62e29](https://github.com/dream-num/univer/commit/6e62e293adf9790834cd3ff2e71318468fae281a))
+* **image:** load multiple ([#6537](https://github.com/dream-num/univer/issues/6537)) ([ab669e4](https://github.com/dream-num/univer/commit/ab669e4503f944b5ad15ad843585249d44556941))
+* **mobile:** header selection and resize ([#6529](https://github.com/dream-num/univer/issues/6529)) ([71f21cd](https://github.com/dream-num/univer/commit/71f21cd0eaa88ee8f8bd9fa98fcf67c07dd26cee))
+* optimize the API so that the statistics bar is also updated when setting the selection range ([#6533](https://github.com/dream-num/univer/issues/6533)) ([4b3baeb](https://github.com/dream-num/univer/commit/4b3baeb83a8c23667885ae3842d3b1e0da864c3e))
+* **paste:** fix extra spaces after pasting text copied from Excel ([#6538](https://github.com/dream-num/univer/issues/6538)) ([2453581](https://github.com/dream-num/univer/commit/245358136d21f463178df206f96925be54f3a09b))
+* **shape:** the editor should not get focus when shap editor is focus ([#6516](https://github.com/dream-num/univer/issues/6516)) ([9f9855c](https://github.com/dream-num/univer/commit/9f9855c87fb504186c5ad1d1a782fcc21c0a9a9c))
+* **sheets-formula-ui:** hide empty function list of SelectFunction ([#6545](https://github.com/dream-num/univer/issues/6545)) ([9a96853](https://github.com/dream-num/univer/commit/9a9685345a510fffa17bfb8d4f0a304420da4aaf))
+
+
+### Features
+
+* **i18n:** support sk-SK ([#6544](https://github.com/dream-num/univer/issues/6544)) ([466f299](https://github.com/dream-num/univer/commit/466f2999dbebcc9a05a7327014ece8e7789ebba0))
+* sidebar use default cursor ([#6518](https://github.com/dream-num/univer/issues/6518)) ([2ed474e](https://github.com/dream-num/univer/commit/2ed474e8abc8ce638188815df9bd5d50a88c6878))
+* **viewport:** export func ([#6521](https://github.com/dream-num/univer/issues/6521)) ([975cdff](https://github.com/dream-num/univer/commit/975cdff46b30ef61ee4549d6c3bcfdd746f891bd))
+
 ## [0.15.3](https://github.com/dream-num/univer/compare/v0.15.2...v0.15.3) (2026-01-24)
 
 

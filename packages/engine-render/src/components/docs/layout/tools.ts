@@ -62,6 +62,7 @@ import {
     PageOrientType,
     SectionType,
     SpacingRule,
+    TextDirection,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -129,6 +130,33 @@ export function getLastNotFullColumnInfo(page: IDocumentSkeletonPage) {
             };
         }
     }
+}
+
+export function getParagraphTextDirection(
+    paragraphStyle: Nullable<IParagraphStyle>,
+    sectionBreakConfig: ISectionBreakConfig
+): TextDirection {
+    const paragraphDirection = paragraphStyle?.direction;
+    if (
+        paragraphDirection === TextDirection.LEFT_TO_RIGHT ||
+        paragraphDirection === TextDirection.RIGHT_TO_LEFT
+    ) {
+        return paragraphDirection;
+    }
+
+    const sectionDirection = sectionBreakConfig.contentDirection;
+    if (sectionDirection === TextDirection.RIGHT_TO_LEFT) {
+        return TextDirection.RIGHT_TO_LEFT;
+    }
+
+    return TextDirection.LEFT_TO_RIGHT;
+}
+
+export function isRTLParagraph(
+    paragraphStyle: Nullable<IParagraphStyle>,
+    sectionBreakConfig: ISectionBreakConfig
+): boolean {
+    return getParagraphTextDirection(paragraphStyle, sectionBreakConfig) === TextDirection.RIGHT_TO_LEFT;
 }
 
 export function getLastNotFullDivideInfo(page: IDocumentSkeletonPage) {

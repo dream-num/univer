@@ -20,11 +20,11 @@ import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonP
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { HorizontalAlign } from '@univerjs/core';
-import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
+import { hasArabic, hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
 import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
-import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
+import { getFontConfigFromLastGlyph, getGlyphGroupWidth, isRTLParagraph, lineIterator } from '../../tools';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:
@@ -55,6 +55,59 @@ function overhang(c: string): number {
             return 0;
         }
     }
+}
+
+type RunDirection = 'ltr' | 'rtl';
+
+const HEBREW_REG = /[\u0590-\u05FF]/;
+const LATIN_OR_DIGIT_REG = /[A-Za-z0-9]/;
+
+function getStrongDirection(content: string): RunDirection | null {
+    if (hasArabic(content) || HEBREW_REG.test(content)) {
+        return 'rtl';
+    }
+
+    if (LATIN_OR_DIGIT_REG.test(content) || hasCJKText(content)) {
+        return 'ltr';
+    }
+
+    return null;
+}
+
+function findNextStrongDirection(glyphs: IDocumentSkeletonDivide['glyphGroup'], index: number): RunDirection | null {
+    for (let i = index; i < glyphs.length; i++) {
+        const dir = getStrongDirection(glyphs[i].content);
+        if (dir) {
+            return dir;
+        }
+    }
+
+    return null;
+}
+
+function buildDirectionalRuns(glyphs: IDocumentSkeletonDivide['glyphGroup'], baseDirection: RunDirection) {
+    const runs: Array<{ dir: RunDirection; glyphs: IDocumentSkeletonDivide['glyphGroup'] }> = [];
+    let currentDir: RunDirection | null = null;
+
+    for (let i = 0; i < glyphs.length; i++) {
+        const glyph = glyphs[i];
+        let dir = getStrongDirection(glyph.content);
+
+        if (!dir) {
+            dir = currentDir ?? findNextStrongDirection(glyphs, i + 1) ?? baseDirection;
+        }
+
+        const lastRun = runs[runs.length - 1];
+        if (!lastRun || lastRun.dir !== dir) {
+            runs.push({ dir, glyphs: [glyph] });
+        } else {
+            lastRun.glyphs.push(glyph);
+        }
+
+        currentDir = dir;
+    }
+
+    return runs;
 }
 
 function getDivideShrinkability(divide: IDocumentSkeletonDivide): number {
@@ -124,7 +177,7 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
  * Therefore, multiple calculations are performed, which may impact performance.
  * Needs optimization for efficiency.
  */
-function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: HorizontalAlign) {
+function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: HorizontalAlign, isRTL: boolean) {
     const { divides } = line;
 
     for (let i = 0; i < divides.length; i++) {
@@ -139,11 +192,10 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
         if (divide.isFull) {
             let remaining = width - glyphGroupWidth;
 
-            // Handle hanging punctuation to the right.
-            // TODO: @jocs Handle hanging punctuation to the left if text dir is RTL.
+            // Handle hanging punctuation to the right (or left for RTL).
             if (divide.glyphGroup.length > 1) {
-                const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
-                const amount = overhang(lastGlyph.content) * lastGlyph.width;
+                const glyph = isRTL ? divide.glyphGroup[0] : divide.glyphGroup[divide.glyphGroup.length - 1];
+                const amount = overhang(glyph.content) * glyph.width;
 
                 remaining += amount;
             }
@@ -269,6 +321,35 @@ function addHyphenDash(
     }
 }
 
+function applyBidiGlyphPositions(line: IDocumentSkeletonLine, baseDirection: RunDirection) {
+    for (const divide of line.divides) {
+        const runs = buildDirectionalRuns(divide.glyphGroup, baseDirection);
+        const visualRuns = baseDirection === 'rtl' ? runs.slice().reverse() : runs;
+        let cursor = baseDirection === 'rtl' ? getGlyphGroupWidth(divide) : 0;
+
+        for (const run of visualRuns) {
+            const runWidth = run.glyphs.reduce((sum, glyph) => sum + glyph.width, 0);
+            const runStart = baseDirection === 'rtl' ? cursor - runWidth : cursor;
+
+            if (run.dir === 'ltr') {
+                let local = runStart;
+                for (const glyph of run.glyphs) {
+                    glyph.left = local;
+                    local += glyph.width;
+                }
+            } else {
+                let local = baseDirection === 'rtl' ? cursor : runStart + runWidth;
+                for (const glyph of run.glyphs) {
+                    local -= glyph.width;
+                    glyph.left = local;
+                }
+            }
+
+            cursor = baseDirection === 'rtl' ? runStart : runStart + runWidth;
+        }
+    }
+}
+
 export function lineAdjustment(
     pages: IDocumentSkeletonPage[],
     viewModel: DocumentViewModel,
@@ -286,6 +367,10 @@ export function lineAdjustment(
 
         const { paragraphStyle = {} } = paragraph;
         const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
+        const isRTL = isRTLParagraph(paragraphStyle, sectionBreakConfig);
+        const effectiveAlign = horizontalAlign === HorizontalAlign.UNSPECIFIED && isRTL
+            ? HorizontalAlign.RIGHT
+            : horizontalAlign;
         // If the last glyph is a CJK punctuation, we want to shrink it.
         shrinkStartAndEndCJKPunctuation(line);
         // restore the original glyph width.
@@ -293,6 +378,7 @@ export function lineAdjustment(
         // Add dash to the end of divide when divide is break by Hyphen.
         addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
         // Handle horizontal align: left\center\right\justified.
-        horizontalAlignHandler(line, horizontalAlign);
+        horizontalAlignHandler(line, effectiveAlign, isRTL);
+        applyBidiGlyphPositions(line, isRTL ? 'rtl' : 'ltr');
     });
 }

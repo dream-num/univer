@@ -26,6 +26,31 @@ export interface ILocales {
     [key: string]: ILanguagePack;
 }
 
+const RTL_LOCALE_PREFIXES = new Set([
+    'ar',
+    'fa',
+    'he',
+    'ur',
+    'ps',
+    'dv',
+    'ku',
+    'yi',
+]);
+
+export function isRTLLocale(locale?: string): boolean {
+    if (!locale) {
+        return false;
+    }
+
+    const normalized = locale.toLowerCase();
+    const prefix = normalized.slice(0, 2);
+    return RTL_LOCALE_PREFIXES.has(prefix);
+}
+
+export function getLocaleDirection(locale?: string): 'ltr' | 'rtl' {
+    return isRTLLocale(locale) ? 'rtl' : 'ltr';
+}
+
 // eslint-disable-next-line ts/no-explicit-any
 type MergeLocalesInput = Record<string, any>;
 /**

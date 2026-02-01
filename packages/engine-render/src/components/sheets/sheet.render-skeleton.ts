@@ -60,6 +60,7 @@ import {
     Range,
     searchArray,
     SheetSkeleton,
+    TextDirection,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -1080,10 +1081,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     // eslint-disable-next-line complexity, max-lines-per-function
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
         // wrap and angle handler
-        const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
+        const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy, style } = docsConfig;
         const cell = this._cellData.getValue(row, column);
         const { t: cellValueType = CellValueType.STRING } = cell || {};
         let horizontalAlignPos = horizontalAlign;
+        const isRTL = style?.td === TextDirection.RIGHT_TO_LEFT;
         /**
          * #univer-pro/issues/334
          * When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
@@ -1092,6 +1094,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
                 horizontalAlignPos = HorizontalAlign.CENTER;
             } else if ((vertexAngle > 0 && vertexAngle !== VERTICAL_ROTATE_ANGLE) || vertexAngle === -VERTICAL_ROTATE_ANGLE) {
+                horizontalAlignPos = HorizontalAlign.RIGHT;
+            } else if (isRTL) {
                 horizontalAlignPos = HorizontalAlign.RIGHT;
             }
         }

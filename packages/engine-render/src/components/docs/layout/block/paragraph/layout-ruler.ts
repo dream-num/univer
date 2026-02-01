@@ -57,6 +57,7 @@ import {
     getNumberUnitValue,
     getPositionHorizon,
     getPositionVertical,
+    isRTLParagraph,
     isColumnFull,
     lineIterator,
     mergeByV,
@@ -473,6 +474,7 @@ function _lineOperator(
         indentStart,
         indentEnd,
     } = paragraphStyle;
+    const isRTL = isRTLParagraph(paragraphStyle, sectionBreakConfig);
 
     const {
         paragraphLineGapDefault,
@@ -599,7 +601,8 @@ function _lineOperator(
         indentStart,
         indentEnd,
         charSpaceApply,
-        isParagraphFirstShapedText
+        isParagraphFirstShapedText,
+        isRTL
     );
 
     // 如果宽度不足以容纳边距,这里留 1px 的宽度进行占位.
@@ -1073,12 +1076,31 @@ function __getIndentPadding(
     indentStart: Nullable<INumberUnit>,
     indentEnd: Nullable<INumberUnit>,
     charSpaceApply: number,
-    isParagraphFirstShapedText = false
+    isParagraphFirstShapedText = false,
+    isRTL = false
 ) {
     const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
     const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
     const indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
     const indentEndNumber = getNumberUnitValue(indentEnd, charSpaceApply);
+
+    if (isRTL) {
+        const paddingLeft = indentEndNumber;
+        let paddingRight = indentStartNumber;
+
+        if (indentFirstLineNumber > 0 && isParagraphFirstShapedText) {
+            paddingRight += indentFirstLineNumber;
+        }
+
+        if (hangingNumber > 0 && !isParagraphFirstShapedText) {
+            paddingRight += hangingNumber;
+        }
+
+        return {
+            paddingLeft,
+            paddingRight,
+        };
+    }
 
     let paddingLeft = indentStartNumber;
     const paddingRight = indentEndNumber;

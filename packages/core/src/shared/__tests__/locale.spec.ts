@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { mergeLocales } from '../locale';
+import { getLocaleDirection, isRTLLocale, mergeLocales } from '../locale';
 
 describe('mergeLocales function', () => {
     it('should merge multiple locale objects correctly', () => {
@@ -51,5 +51,12 @@ describe('mergeLocales function', () => {
         const merged1 = mergeLocales(locale1, locale2);
 
         expect(merged1).toEqual({ key: 'value' });
+    });
+
+    it('should detect RTL locales', () => {
+        expect(isRTLLocale('faIR')).toBe(true);
+        expect(getLocaleDirection('faIR')).toBe('rtl');
+        expect(isRTLLocale('enUS')).toBe(false);
+        expect(getLocaleDirection('enUS')).toBe('ltr');
     });
 });

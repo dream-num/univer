@@ -33,6 +33,7 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
     const contentLength = content.length;
     const {
         textRotation,
+        textDirection,
         paddingData,
         horizontalAlign = HorizontalAlign.UNSPECIFIED,
         verticalAlign = VerticalAlign.UNSPECIFIED,
@@ -58,6 +59,9 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
                     startIndex: contentLength,
                     paragraphStyle: {
                         horizontalAlign,
+                        ...(textDirection != null && textDirection !== TextDirection.UNSPECIFIED
+                            ? { direction: textDirection }
+                            : {}),
                     },
                 },
             ],

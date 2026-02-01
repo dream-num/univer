@@ -16,7 +16,7 @@
 
 import type { IUniverUIConfig } from '../../controllers/config.schema';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
+import { getLocaleDirection, IConfigService, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -105,6 +105,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     }, [onRendered]);
 
     const [locale, setLocale] = useState(localeService.getLocales());
+    const [direction, setDirection] = useState(() => getLocaleDirection(localeService.getCurrentLocale()));
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -112,9 +113,16 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     useEffect(() => {
         document.body.appendChild(portalContainer);
 
+        const updateLocaleState = () => {
+            setLocale(localeService.getLocales());
+            setDirection(getLocaleDirection(localeService.getCurrentLocale()));
+        };
+
+        updateLocaleState();
+
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
-                setLocale(localeService.getLocales());
+                updateLocaleState();
             }),
         ];
 
@@ -126,6 +134,10 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
             document.body.removeChild(portalContainer);
         };
     }, [localeService, mountContainer, portalContainer]);
+
+    useEffect(() => {
+        portalContainer.setAttribute('dir', direction);
+    }, [portalContainer, direction]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
@@ -142,6 +154,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 `, {
                     'univer-dark': darkMode,
                 })}
+                dir={direction}
                 tabIndex={-1}
                 onBlur={(e) => e.stopPropagation()}
                 onContextMenu={(e) => e.preventDefault()}

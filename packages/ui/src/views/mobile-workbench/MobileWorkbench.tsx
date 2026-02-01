@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { LocaleService, ThemeService } from '@univerjs/core';
+import { getLocaleDirection, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigProvider } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
@@ -72,6 +72,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     }, [onRendered]);
 
     const [locale, setLocale] = useState(localeService.getLocales());
+    const [direction, setDirection] = useState(() => getLocaleDirection(localeService.getCurrentLocale()));
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -89,9 +90,16 @@ export function MobileWorkbench(props: IUniverAppProps) {
     useEffect(() => {
         document.body.appendChild(portalContainer);
 
+        const updateLocaleState = () => {
+            setLocale(localeService.getLocales());
+            setDirection(getLocaleDirection(localeService.getCurrentLocale()));
+        };
+
+        updateLocaleState();
+
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
-                setLocale(localeService.getLocales());
+                updateLocaleState();
             }),
         ];
 
@@ -103,6 +111,10 @@ export function MobileWorkbench(props: IUniverAppProps) {
             document.body.removeChild(portalContainer);
         };
     }, [localeService, mountContainer, portalContainer]);
+
+    useEffect(() => {
+        portalContainer.setAttribute('dir', direction);
+    }, [portalContainer, direction]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
@@ -119,6 +131,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 `, {
                     'univer-dark': darkMode,
                 })}
+                dir={direction}
                 tabIndex={-1}
                 onBlur={(e) => e.stopPropagation()}
             >

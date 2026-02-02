@@ -216,6 +216,29 @@ export class ColumnManager {
         return this._columnData[columnPos];
     }
 
+    insertColumnsWithData(startColumn: number, endColumn: number, columnDataInfo?: IObjectArrayPrimitiveType<IColumnData>) {
+        const count = endColumn - startColumn + 1;
+        // ColumnData key is column index, default is ascending order
+        const columns = Object.keys(this._columnData);
+
+        // Move existing columns data after startColumn to the right, use reverse order to avoid overwrite
+        for (let i = columns.length - 1; i >= 0; i--) {
+            const columnIndex = Number(columns[i]);
+            if (columnIndex >= startColumn) {
+                this._columnData[columnIndex + count] = this._columnData[columnIndex];
+                delete this._columnData[columnIndex];
+            }
+        }
+
+        // Insert new column data
+        for (let c = startColumn; c <= endColumn; c++) {
+            const columnData = columnDataInfo?.[c - startColumn];
+            if (columnData !== undefined && columnData !== null && Object.keys(columnData).length > 0) {
+                this._columnData[c] = { ...columnData };
+            }
+        }
+    }
+
     /**
      * Remove column data of given column
      * @param columnPos

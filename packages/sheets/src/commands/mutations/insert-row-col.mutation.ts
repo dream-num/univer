@@ -21,7 +21,7 @@ import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export const InsertRowMutationUndoFactory = (
@@ -50,24 +50,20 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
         }
 
         const { worksheet } = target;
-        // TODO@wzhudev: should not expose row data and let outside modules to modify it directly
-        // the correct way to do this is to provide a method from RowManager to modify row data
-        const rowWrapper = worksheet.getRowManager().getRowData();
+        const rowManager = worksheet.getRowManager();
         const { range, rowInfo } = params;
         const { startRow, endRow } = range;
 
-        for (let r = startRow; r <= endRow; r++) {
-            if (rowInfo && rowInfo[r - startRow]) {
-                insertMatrixArray(r, rowInfo[r - startRow], rowWrapper);
-            }
-        }
+        // insert row data
+        rowManager.insertRowsWithData(startRow, endRow, rowInfo);
 
+        // update worksheet row count
         const insertedRowCount = endRow - startRow + 1;
         worksheet.setRowCount(worksheet.getRowCount() + insertedRowCount);
 
         // remove cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();
-        cellMatrix.insertRows(range.startRow, insertedRowCount);
+        cellMatrix.insertRows(startRow, insertedRowCount);
 
         return true;
     },
@@ -99,16 +95,14 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         };
 
         const { worksheet } = target;
-        const columnWrapper = worksheet.getColumnManager().getColumnData();
+        const columnManager = worksheet.getColumnManager();
         const { range, colInfo } = params;
         const { startColumn, endColumn } = range;
 
-        for (let c = startColumn; c <= endColumn; c++) {
-            if (colInfo && colInfo[c - startColumn]) {
-                insertMatrixArray(c, colInfo[c - startColumn], columnWrapper);
-            }
-        }
+        // insert column data
+        columnManager.insertColumnsWithData(startColumn, endColumn, colInfo);
 
+        // update worksheet column count
         const insertedColumnCount = endColumn - startColumn + 1;
         worksheet.setColumnCount(worksheet.getColumnCount() + insertedColumnCount);
 

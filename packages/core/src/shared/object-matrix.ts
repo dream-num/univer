@@ -62,26 +62,6 @@ export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatri
     return maxIndex + 1;
 }
 
-export function insertMatrixArray<T>(
-    index: number,
-    value: T,
-    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
-) {
-    const length = getArrayLength(o);
-    const array = o;
-
-    // move all items after index in backward order
-    for (let i = length - 1; i >= index; i--) {
-        if (array[i] === undefined) {
-            delete array[i + 1];
-        } else {
-            array[i + 1] = array[i];
-        }
-    }
-
-    array[index] = value;
-}
-
 export function spliceArray<T>(
     start: number,
     count: number,

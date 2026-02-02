@@ -253,11 +253,15 @@ export abstract class BaseObject extends Disposable {
     get ancestorGroup() {
         let group: Nullable<BaseObject> = null;
         let parent = this.getParent();
-        while (parent != null) {
+        while (parent != null && parent) {
             if (parent.classType === RENDER_CLASS_TYPE.GROUP) {
                 group = parent;
             }
-            parent = parent.getParent();
+            if (parent.classType === RENDER_CLASS_TYPE.GROUP) {
+                parent = parent.getParent();
+            } else {
+                parent = null;
+            }
         }
         return group;
     }

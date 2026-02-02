@@ -638,7 +638,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
                 const grpParam = {
                     parent: { ...param.parent, sheetTransform },
-                    children: children,
+                    children,
 
                 };
                 grpParams.push(grpParam);
@@ -652,10 +652,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
             const unGroupParams = [];
-            for(const param of params) {
-                const {children} = param;
+            for (const param of params) {
+                const { children } = param;
                 const childParams = [];
-                for(const child of children) {
+                for (const child of children) {
                     const childSheetTransform = this._getSheetTransformByParam(child);
                     if (childSheetTransform != null) {
                         childParams.push({
@@ -668,7 +668,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     ...param,
                     children: childParams,
                 });
-           }
+            }
             this._commandService.executeCommand(UngroupSheetDrawingCommand.id, unGroupParams);
         }));
     }

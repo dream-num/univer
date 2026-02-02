@@ -110,15 +110,34 @@ export class SheetsNotePopupController extends Disposable {
                 if (!cell?.location) return;
 
                 const { unitId, subUnitId, row, col } = cell.location;
+                const render = this._renderManagerService.getRenderById(unitId);
+                const skeleton = render?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId)?.skeleton;
 
-                const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
+                let targetRow = row;
+                let targetCol = col;
+                let note = this._sheetsNoteModel.getNote(unitId, subUnitId, targetRow, targetCol);
+                if (!note && skeleton) {
+                    const actualCell = skeleton.getCellWithCoordByIndex(row, col);
+                    const { startRow, endRow, startColumn, endColumn } = actualCell.mergeInfo;
+                    if (startRow !== endRow || startColumn !== endColumn) {
+                        const sheetNotes = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
+                        sheetNotes?.forValue((r, c, candidate) => {
+                            if (r >= startRow && r <= endRow && c >= startColumn && c <= endColumn) {
+                                note = candidate;
+                                targetRow = r;
+                                targetCol = c;
+                                return false;
+                            }
+                        });
+                    }
+                }
                 if (note?.show) return;
                 if (note) {
                     this._sheetsNotePopupService.showPopup({
                         unitId,
                         subUnitId,
-                        row,
-                        col,
+                        row: targetRow,
+                        col: targetCol,
                         temp: true,
                     });
                 } else {

@@ -132,6 +132,12 @@ export class RowManager {
         return this._rowData[rowPos];
     }
 
+    /**
+     * Insert rows data at given position
+     * @param {number} startRow - start row index
+     * @param {number} endRow - end row index
+     * @param {IObjectArrayPrimitiveType<IRowData>} [rowDataInfo] - row data info
+     */
     insertRowsWithData(startRow: number, endRow: number, rowDataInfo?: IObjectArrayPrimitiveType<IRowData>) {
         const count = endRow - startRow + 1;
         // RowData key is row index, default is ascending order

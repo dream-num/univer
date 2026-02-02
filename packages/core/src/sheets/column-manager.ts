@@ -216,6 +216,12 @@ export class ColumnManager {
         return this._columnData[columnPos];
     }
 
+    /**
+     * Insert columns data at given position
+     * @param {number} startColumn - start column index
+     * @param {number} endColumn - end column index
+     * @param {IObjectArrayPrimitiveType<IColumnData>} [columnDataInfo] - column data info
+     */
     insertColumnsWithData(startColumn: number, endColumn: number, columnDataInfo?: IObjectArrayPrimitiveType<IColumnData>) {
         const count = endColumn - startColumn + 1;
         // ColumnData key is column index, default is ascending order

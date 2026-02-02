@@ -624,9 +624,21 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             const grpParams = [];
             for (const param of params) {
                 const sheetTransform = this._getSheetTransformByParam(param.parent);
+
+                const children = [];
+                for (const child of param.children) {
+                    const childSheetTransform = this._getSheetTransformByParam(child);
+                    if (childSheetTransform != null) {
+                        children.push({
+                            ...child,
+                            sheetTransform: childSheetTransform,
+                        });
+                    }
+                }
+
                 const grpParam = {
                     parent: { ...param.parent, sheetTransform },
-                    children: param.children,
+                    children: children,
 
                 };
                 grpParams.push(grpParam);
@@ -639,7 +651,25 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
 
         this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
+            const unGroupParams = [];
+            for(const param of params) {
+                const {children} = param;
+                const childParams = [];
+                for(const child of children) {
+                    const childSheetTransform = this._getSheetTransformByParam(child);
+                    if (childSheetTransform != null) {
+                        childParams.push({
+                            ...child,
+                            sheetTransform: childSheetTransform,
+                        });
+                    }
+                }
+                unGroupParams.push({
+                    ...param,
+                    children: childParams,
+                });
+           }
+            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, unGroupParams);
         }));
     }
 

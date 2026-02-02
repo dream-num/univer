@@ -628,7 +628,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     parent: { ...param.parent, sheetTransform },
                     children: param.children,
 
-                }
+                };
                 grpParams.push(grpParam);
             }
             if (grpParams.length > 0) {

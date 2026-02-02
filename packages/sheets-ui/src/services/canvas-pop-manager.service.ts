@@ -287,7 +287,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         let offsetX = 0;
         let offsetY = 0;
-        let drawingType = undefined;
+        let drawingType;
         if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
             drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
         }

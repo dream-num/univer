@@ -98,33 +98,42 @@ export const InsertRowCommand: ICommand = {
 export const InsertRowByRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-by-range',
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: IInsertRowCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) {
+            throw new Error('Workbook or Worksheet not found at InsertRowByRangeCommand');
+        };
 
-        const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
-
-        const { workbook, worksheet } = target;
-        const { range, direction, unitId, subUnitId, cellValue } = params;
+        const { workbook, worksheet, unitId, subUnitId } = target;
+        const { range, direction, cellValue } = params;
         const { startRow, endRow } = range;
         range.rangeType = RANGE_TYPE.ROW;
 
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
-        const height = worksheet.getRowHeight(anchorRow);
+        if (anchorRow < 0 || anchorRow > worksheet.getRowCount() - 1) {
+            throw new Error('Anchor row is out of bounds in InsertRowByRangeCommand');
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // insert row properties & undos
         const insertRowParams: IInsertRowMutationParams = {
             unitId,
             subUnitId,
             range,
-            rowInfo: new Array(endRow - startRow + 1).fill(undefined).map(() => ({
+        };
+
+        const height = worksheet.getRowHeight(anchorRow);
+        if (height !== worksheet.getConfig().defaultRowHeight) {
+            insertRowParams.rowInfo = new Array(endRow - startRow + 1).fill(undefined).map(() => ({
                 h: height,
                 hd: BooleanNumber.FALSE,
-            })), // row height should inherit from the anchor row
-        };
+            }));
+        }
+
         const undoRowInsertionParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
             accessor,
             insertRowParams
@@ -409,32 +418,41 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 export const InsertColByRangeCommand: ICommand<IInsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-by-range',
-
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: IInsertColCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) {
+            throw new Error('Workbook or Worksheet not found at InsertColByRangeCommand');
+        }
 
-        const { range, direction, subUnitId, unitId, cellValue } = params;
-        const { startColumn, endColumn } = params.range;
+        const { workbook, worksheet, unitId, subUnitId } = target;
+        const { range, direction, cellValue } = params;
+        const { startColumn, endColumn } = range;
         range.rangeType = RANGE_TYPE.COLUMN;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
         const anchorCol = direction === Direction.LEFT ? startColumn : startColumn - 1;
-        const width = worksheet.getColumnWidth(anchorCol);
+        if (anchorCol < 0 || anchorCol > worksheet.getColumnCount() - 1) {
+            throw new Error('Anchor column is out of bounds in InsertColByRangeCommand');
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // insert cols & undos
         const insertColParams: IInsertColMutationParams = {
             unitId,
             subUnitId,
             range,
-            colInfo: new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
+        };
+
+        const width = worksheet.getColumnWidth(anchorCol);
+        if (width !== worksheet.getConfig().defaultColumnWidth) {
+            insertColParams.colInfo = new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
                 w: width,
                 hd: BooleanNumber.FALSE,
-            })),
-        };
+            }));
+        }
 
         const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
             accessor,
@@ -445,7 +463,7 @@ export const InsertColByRangeCommand: ICommand<IInsertColCommandParams> = {
         const undos: IMutationInfo[] = [{ id: RemoveColMutation.id, params: undoColInsertionParams }];
 
         // set range values
-        if (cellValue) {
+        if (cellValue && Object.keys(cellValue).length > 0) {
             redos.push({
                 id: SetRangeValuesMutation.id,
                 params: {

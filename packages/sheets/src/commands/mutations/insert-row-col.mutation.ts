@@ -22,16 +22,15 @@ import type {
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { CommandType, insertMatrixArray, IUniverInstanceService } from '@univerjs/core';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export const InsertRowMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertRowMutationParams
 ): IRemoveRowsMutationParams => {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
+    const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+    if (!target) {
+        throw new Error('Workbook or Worksheet not found at InsertRowMutationUndoFactory');
     }
 
     return {
@@ -45,43 +44,30 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     id: 'sheet.mutation.insert-row',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, range, rowInfo } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-
-        const universheet = univerInstanceService.getUniverSheetInstance(unitId);
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
+        const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) {
+            throw new Error('Workbook or Worksheet not found at InsertRowMutation');
         }
 
-        const worksheet = universheet.getSheetBySheetId(subUnitId);
-        if (worksheet == null) {
-            throw new Error('worksheet is null error!');
-        }
-
+        const { worksheet } = target;
         // TODO@wzhudev: should not expose row data and let outside modules to modify it directly
         // the correct way to do this is to provide a method from RowManager to modify row data
         const rowWrapper = worksheet.getRowManager().getRowData();
-        const defaultRowInfo = {
-            h: worksheet.getConfig().defaultRowHeight,
-            hd: 0,
-        };
+        const { range, rowInfo } = params;
+        const { startRow, endRow } = range;
 
-        const rowIndex = range.startRow;
-        const rowCount = range.endRow - range.startRow + 1;
-
-        for (let j = rowIndex; j < rowIndex + rowCount; j++) {
-            if (rowInfo) {
-                insertMatrixArray(j, rowInfo[j - range.startRow] ?? defaultRowInfo, rowWrapper);
-            } else {
-                insertMatrixArray(j, defaultRowInfo, rowWrapper);
+        for (let r = startRow; r <= endRow; r++) {
+            if (rowInfo && rowInfo[r - startRow]) {
+                insertMatrixArray(r, rowInfo[r - startRow], rowWrapper);
             }
         }
 
-        worksheet.setRowCount(worksheet.getRowCount() + rowCount);
+        const insertedRowCount = endRow - startRow + 1;
+        worksheet.setRowCount(worksheet.getRowCount() + insertedRowCount);
 
         // remove cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();
-        cellMatrix.insertRows(range.startRow, rowCount);
+        cellMatrix.insertRows(range.startRow, insertedRowCount);
 
         return true;
     },
@@ -91,11 +77,9 @@ export const InsertColMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertColMutationParams
 ): IRemoveColMutationParams => {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
+    const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+    if (!target) {
+        throw new Error('Workbook or Worksheet not found at InsertColMutationUndoFactory');
     }
 
     return {
@@ -109,40 +93,28 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
     id: 'sheet.mutation.insert-col',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) {
+            throw new Error('Workbook or Worksheet not found at InsertColMutation');
+        };
 
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
-        }
-
-        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) return false;
-        const manager = worksheet.getColumnManager();
+        const { worksheet } = target;
+        const columnWrapper = worksheet.getColumnManager().getColumnData();
         const { range, colInfo } = params;
-        const columnPrimitive = manager.getColumnData();
-        const columnWrapper = columnPrimitive;
+        const { startColumn, endColumn } = range;
 
-        const colIndex = range.startColumn;
-        const colCount = range.endColumn - range.startColumn + 1;
-        const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
-        for (let j = colIndex; j < colIndex + colCount; j++) {
-            const defaultColInfo = {
-                w: defaultColWidth,
-                hd: 0,
-            };
-            if (colInfo) {
-                insertMatrixArray(j, colInfo[j - range.startColumn] ?? defaultColInfo, columnWrapper);
-            } else {
-                insertMatrixArray(j, defaultColInfo, columnWrapper);
+        for (let c = startColumn; c <= endColumn; c++) {
+            if (colInfo && colInfo[c - startColumn]) {
+                insertMatrixArray(c, colInfo[c - startColumn], columnWrapper);
             }
         }
 
-        worksheet.setColumnCount(worksheet.getColumnCount() + range.endColumn - range.startColumn + 1);
+        const insertedColumnCount = endColumn - startColumn + 1;
+        worksheet.setColumnCount(worksheet.getColumnCount() + insertedColumnCount);
 
         // remove cells contents by directly mutating worksheetCellMatrix
         const cellMatrix = worksheet.getCellMatrix();
-        cellMatrix.insertColumns(range.startColumn, colCount);
+        cellMatrix.insertColumns(range.startColumn, insertedColumnCount);
 
         return true;
     },

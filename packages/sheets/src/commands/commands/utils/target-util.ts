@@ -60,9 +60,7 @@ export function getSheetCommandTarget(univerInstanceService: IUniverInstanceServ
     if (!workbook) return null;
 
     const worksheet = subUnitId ? workbook.getSheetBySheetId(subUnitId) : workbook.getActiveSheet(true);
-    if (!worksheet) {
-        return null;
-    }
+    if (!worksheet) return null;
 
     return {
         worksheet,
@@ -79,9 +77,7 @@ export function getSheetMutationTarget(univerInstanceService: IUniverInstanceSer
     if (!workbook) return null;
 
     const worksheet = workbook.getSheetBySheetId(subUnitId);
-    if (!worksheet) {
-        return null;
-    }
+    if (!worksheet) return null;
 
     return {
         worksheet,

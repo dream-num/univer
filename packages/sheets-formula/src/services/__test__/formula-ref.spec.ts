@@ -16,7 +16,7 @@
 
 import type { IRange } from '@univerjs/core';
 import type { ITestBed } from './util';
-import { ICommandService } from '@univerjs/core';
+import { Direction, ICommandService } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
@@ -285,6 +285,7 @@ describe('FormulaRefRangeService', () => {
                     startRow: 0,
                     endRow: 9999,
                 },
+                direction: Direction.LEFT,
             }
         );
 

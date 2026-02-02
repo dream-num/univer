@@ -36,6 +36,10 @@ const locales = [
         value: LocaleType.VI_VN,
     },
     {
+        label: 'فارسی',
+        value: LocaleType.FA_IR,
+    },
+    {
         label: 'Español',
         value: LocaleType.ES_ES,
     },
@@ -91,7 +95,7 @@ export function useLocale() {
                 locales = await import('@univerjs/mockdata/locales/ja-JP');
                 break;
             case LocaleType.FA_IR:
-                locales = await import('@univerjs/mockdata/locales/fr-FR');
+                locales = await import('@univerjs/mockdata/locales/fa-IR');
                 break;
             case LocaleType.KO_KR:
                 locales = await import('@univerjs/mockdata/locales/ko-KR');

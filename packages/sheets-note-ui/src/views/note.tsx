@@ -26,7 +26,12 @@ import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
-export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase }> }) => {
+type INotePopupLocation = ISheetLocationBase & {
+    temp?: boolean;
+    trigger?: string;
+};
+
+export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation }> }) => {
     const { popup } = props;
 
     const noteModel = useDependency(SheetsNoteModel);
@@ -58,6 +63,17 @@ export const SheetsNote = (props: { popup: IPopup<{ location: ISheetLocationBase
             textareaRef.current.style.height = `${note.height}px`;
         }
     }, [activePopup, textareaRef]);
+
+    useEffect(() => {
+        if (!activePopup || activePopup.temp || !activePopup.trigger) return;
+        if (!textareaRef.current) return;
+
+        const focusId = requestAnimationFrame(() => {
+            textareaRef.current?.focus();
+        });
+
+        return () => cancelAnimationFrame(focusId);
+    }, [activePopup]);
 
     const commandService = useDependency(ICommandService);
     const updateNote = useDebounceFn((newNote: ISheetNote) => {

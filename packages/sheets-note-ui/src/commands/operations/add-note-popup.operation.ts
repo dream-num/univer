@@ -50,7 +50,7 @@ export const AddNotePopupOperation: ICommand = {
             row: primary.actualRow,
             col: primary.actualColumn,
             temp: false,
-            trigger: params?.trigger,
+            trigger: params?.trigger ?? 'add-note',
         });
 
         return true;

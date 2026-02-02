@@ -133,6 +133,35 @@ export class RowManager {
     }
 
     /**
+     * Insert rows data at given position
+     * @param {number} startRow - start row index
+     * @param {number} endRow - end row index
+     * @param {IObjectArrayPrimitiveType<IRowData>} [rowDataInfo] - row data info
+     */
+    insertRowsWithData(startRow: number, endRow: number, rowDataInfo?: IObjectArrayPrimitiveType<IRowData>) {
+        const count = endRow - startRow + 1;
+        // RowData key is row index, default is ascending order
+        const rows = Object.keys(this._rowData);
+
+        // Move existing row data after startRow downwards, use reverse order to avoid overwrite
+        for (let i = rows.length - 1; i >= 0; i--) {
+            const rowIndex = Number(rows[i]);
+            if (rowIndex >= startRow) {
+                this._rowData[rowIndex + count] = this._rowData[rowIndex];
+                delete this._rowData[rowIndex];
+            }
+        }
+
+        // Insert new row data
+        for (let r = startRow; r <= endRow; r++) {
+            const rowData = rowDataInfo?.[r - startRow];
+            if (rowData !== undefined && rowData !== null && Object.keys(rowData).length > 0) {
+                this._rowData[r] = { ...rowData };
+            }
+        }
+    }
+
+    /**
      * Remove row data of given row
      * @param rowPos
      */

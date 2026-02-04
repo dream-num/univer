@@ -134,7 +134,7 @@ export function getClearContentMutationParamForRange(worksheet: Worksheet, range
             if (!leftTopCellValue && worksheet.cellHasValue(cellData) && (cellData.v !== '' || (cellData.p?.body?.dataStream?.length ?? 0) > 2)) {
                 leftTopCellValue = cellData;
             }
-            redoMatrix.setValue(row, col, { s: cellData.s });
+            redoMatrix.setValue(row, col, cellData.s ? { s: cellData.s } : null);
         }
     });
     redoMatrix.setValue(startRow, startColumn, leftTopCellValue);

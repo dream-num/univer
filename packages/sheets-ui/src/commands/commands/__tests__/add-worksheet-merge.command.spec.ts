@@ -485,7 +485,11 @@ describe('Test add worksheet merge commands', () => {
                     pattern: '0%',
                 },
             });
-            expect(worksheet.getCellRaw(20, 1)).toBeUndefined();
+            expect(worksheet.getCellStyle(20, 1)).toStrictEqual({
+                n: {
+                    pattern: '0%',
+                },
+            });
         });
     });
 

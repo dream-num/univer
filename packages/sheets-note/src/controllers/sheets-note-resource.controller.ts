@@ -17,7 +17,7 @@
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import type { ISheetNote } from '../models/sheets-note.model';
-import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { RemoveNoteMutation, UpdateNoteMutation } from '../commands/mutations/note.mutation';
 import { PLUGIN_NAME } from '../const';
@@ -51,16 +51,20 @@ export class SheetsNoteResourceController extends Disposable {
             }
 
             const result: INoteData = {};
-            unitMap.forEach((matrix, sheetId) => {
+
+            unitMap.forEach((subUnitMap, subUnitId) => {
                 const sheetNotes: INoteData[string] = {};
-                matrix.forValue((row, col, note) => {
+
+                subUnitMap.forEach((note) => {
+                    const { row, col } = note;
                     if (!sheetNotes[row]) {
                         sheetNotes[row] = {};
                     }
                     sheetNotes[row][col] = note;
                 });
+
                 if (Object.keys(sheetNotes).length > 0) {
-                    result[sheetId] = sheetNotes;
+                    result[subUnitId] = sheetNotes;
                 }
             });
 
@@ -123,23 +127,24 @@ export class SheetsNoteResourceController extends Disposable {
                             return { redos: [], undos: [] };
                         }
 
-                        const noteMatrix = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
+                        const sheetNotes = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
 
-                        if (!noteMatrix) {
+                        if (!sheetNotes) {
                             return { redos: [], undos: [] };
                         }
 
                         const redos: IMutationInfo[] = [];
                         const undos: IMutationInfo[] = [];
 
-                        noteMatrix.forValue((row, col, note) => {
+                        sheetNotes.forEach((note) => {
                             redos.push({
                                 id: RemoveNoteMutation.id,
                                 params: {
                                     unitId,
                                     sheetId: subUnitId,
-                                    row,
-                                    col,
+                                    noteId: note.id,
+                                    row: note.row,
+                                    col: note.col,
                                 },
                             });
                             undos.push({
@@ -147,8 +152,8 @@ export class SheetsNoteResourceController extends Disposable {
                                 params: {
                                     unitId,
                                     sheetId: subUnitId,
-                                    row,
-                                    col,
+                                    row: note.row,
+                                    col: note.col,
                                     note,
                                 },
                             });
@@ -163,24 +168,26 @@ export class SheetsNoteResourceController extends Disposable {
                             return { redos: [], undos: [] };
                         }
 
-                        const noteMatrix = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
+                        const sheetNotes = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
 
-                        if (!noteMatrix) {
+                        if (!sheetNotes) {
                             return { redos: [], undos: [] };
                         }
 
                         const redos: IMutationInfo[] = [];
                         const undos: IMutationInfo[] = [];
 
-                        noteMatrix.forValue((row, col, note) => {
+                        sheetNotes.forEach((note) => {
+                            const newNote = { ...note, id: generateRandomId(6) }; // Generate new ID for the copied note
+
                             redos.push({
                                 id: UpdateNoteMutation.id,
                                 params: {
                                     unitId,
                                     sheetId: targetSubUnitId,
-                                    row,
-                                    col,
-                                    note,
+                                    row: newNote.row,
+                                    col: newNote.col,
+                                    note: newNote,
                                 },
                             });
                             undos.push({
@@ -188,8 +195,9 @@ export class SheetsNoteResourceController extends Disposable {
                                 params: {
                                     unitId,
                                     sheetId: targetSubUnitId,
-                                    row,
-                                    col,
+                                    noteId: newNote.id,
+                                    row: newNote.row,
+                                    col: newNote.col,
                                 },
                             });
                         });

@@ -121,14 +121,16 @@ export class SheetsNotePopupController extends Disposable {
                     const { startRow, endRow, startColumn, endColumn } = actualCell.mergeInfo;
                     if (startRow !== endRow || startColumn !== endColumn) {
                         const sheetNotes = this._sheetsNoteModel.getSheetNotes(unitId, subUnitId);
-                        sheetNotes?.forValue((r, c, candidate) => {
-                            if (r >= startRow && r <= endRow && c >= startColumn && c <= endColumn) {
-                                note = candidate;
-                                targetRow = r;
-                                targetCol = c;
-                                return false;
+                        if (sheetNotes) {
+                            for (const [_id, _note] of sheetNotes) {
+                                if (_note.row >= startRow && _note.row <= endRow && _note.col >= startColumn && _note.col <= endColumn) {
+                                    note = _note;
+                                    targetRow = _note.row;
+                                    targetCol = _note.col;
+                                    break;
+                                }
                             }
-                        });
+                        }
                     }
                 }
                 if (note?.show) return;

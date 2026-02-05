@@ -47,7 +47,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const currentRender = renderManagerService.getRenderById(activePopup.unitId)!;
 
-    const [note, setNote] = useState<ISheetNote | null>(null);
+    const [note, setNote] = useState<Partial<ISheetNote> | null>(null);
 
     useEffect(() => {
         const { unitId, subUnitId, row, col } = activePopup;
@@ -76,7 +76,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
     }, [activePopup]);
 
     const commandService = useDependency(ICommandService);
-    const updateNote = useDebounceFn((newNote: ISheetNote) => {
+    const updateNote = useDebounceFn((newNote: Partial<ISheetNote>) => {
         if (!activePopup) return;
 
         if (newNote.note) {

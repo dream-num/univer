@@ -38,9 +38,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                 () => {
                     const model = injector.get(SheetsNoteModel);
                     return model.change$.subscribe((change) => {
-                        if (change.type === 'update' && !change.oldNote && change.note) {
-                            const { unitId, sheetId, row, col, note } = change;
-                            const target = this.getSheetTarget(unitId, sheetId);
+                        if (change.type === 'update' && !change.oldNote && change.newNote) {
+                            const { unitId, subUnitId, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
                             if (!target) {
                                 return;
                             }
@@ -49,9 +49,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             this.fireEvent(this.Event.SheetNoteAdd, {
                                 workbook,
                                 worksheet,
-                                row,
-                                col,
-                                note,
+                                row: newNote.row,
+                                col: newNote.col,
+                                note: newNote,
                             });
                         }
                     });
@@ -65,9 +65,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                 () => {
                     const model = injector.get(SheetsNoteModel);
                     return model.change$.subscribe((change) => {
-                        if (change.type === 'update' && change.oldNote && !change.note) {
-                            const { unitId, sheetId, row, col, oldNote } = change;
-                            const target = this.getSheetTarget(unitId, sheetId);
+                        if (change.type === 'update' && change.oldNote && !change.newNote) {
+                            const { unitId, subUnitId, oldNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
                             if (!target) {
                                 return;
                             }
@@ -76,8 +76,8 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             this.fireEvent(this.Event.SheetNoteDelete, {
                                 workbook,
                                 worksheet,
-                                row,
-                                col,
+                                row: oldNote.row,
+                                col: oldNote.col,
                                 oldNote,
                             });
                         }
@@ -92,9 +92,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                 () => {
                     const model = injector.get(SheetsNoteModel);
                     return model.change$.subscribe((change) => {
-                        if (change.type === 'update' && change.oldNote && change.note) {
-                            const { unitId, sheetId, row, col, note, oldNote } = change;
-                            const target = this.getSheetTarget(unitId, sheetId);
+                        if (change.type === 'update' && change.oldNote && change.newNote) {
+                            const { unitId, subUnitId, oldNote, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
                             if (!target) {
                                 return;
                             }
@@ -103,9 +103,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             this.fireEvent(this.Event.SheetNoteUpdate, {
                                 workbook,
                                 worksheet,
-                                row,
-                                col,
-                                note,
+                                row: newNote.row,
+                                col: newNote.col,
+                                note: newNote,
                                 oldNote,
                             });
                         }
@@ -120,9 +120,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                 () => {
                     const model = injector.get(SheetsNoteModel);
                     return model.change$.subscribe((change) => {
-                        if (change.type === 'update' && change.oldNote && change.note && !change.oldNote.show && change.note.show) {
-                            const { unitId, sheetId, row, col } = change;
-                            const target = this.getSheetTarget(unitId, sheetId);
+                        if (change.type === 'update' && change.oldNote && change.newNote && !change.oldNote.show && change.newNote.show) {
+                            const { unitId, subUnitId, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
                             if (!target) {
                                 return;
                             }
@@ -131,8 +131,8 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             this.fireEvent(this.Event.SheetNoteShow, {
                                 workbook,
                                 worksheet,
-                                row,
-                                col,
+                                row: newNote.row,
+                                col: newNote.col,
                             });
                         }
                     });
@@ -146,9 +146,9 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                 () => {
                     const model = injector.get(SheetsNoteModel);
                     return model.change$.subscribe((change) => {
-                        if (change.type === 'update' && change.oldNote && change.note && change.oldNote.show && !change.note.show) {
-                            const { unitId, sheetId, row, col } = change;
-                            const target = this.getSheetTarget(unitId, sheetId);
+                        if (change.type === 'update' && change.oldNote && change.newNote && change.oldNote.show && !change.newNote.show) {
+                            const { unitId, subUnitId, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
                             if (!target) {
                                 return;
                             }
@@ -157,8 +157,8 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             this.fireEvent(this.Event.SheetNoteHide, {
                                 workbook,
                                 worksheet,
-                                row,
-                                col,
+                                row: newNote.row,
+                                col: newNote.col,
                             });
                         }
                     });
@@ -202,12 +202,14 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                     if (command.id === SheetDeleteNoteCommand.id) {
                         const model = injector.get(SheetsNoteModel);
                         const { unitId, sheetId, row, col } = command.params as IRemoveNoteMutationParams;
+                        if (row === undefined || col === undefined) return;
+
                         const oldNote = model.getNote(unitId, sheetId, row, col);
                         if (!oldNote) return;
+
                         const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
+                        if (!target) return;
+
                         const { workbook, worksheet } = target;
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteDelete, {
                             workbook,
@@ -216,6 +218,7 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             col,
                             oldNote,
                         });
+
                         if (cancel) {
                             throw new CanceledError();
                         }

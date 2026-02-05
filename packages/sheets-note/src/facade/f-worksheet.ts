@@ -18,18 +18,13 @@ import type { ISheetNote } from '@univerjs/sheets-note';
 import { SheetsNoteModel } from '@univerjs/sheets-note';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
-export interface ISheetNoteInfo extends ISheetNote {
-    row: number;
-    col: number;
-}
-
 /**
  * @ignore
  */
 export interface IFSheetsNoteWorksheet {
     /**
      * Get all annotations in the worksheet
-     * @returns {ISheetNoteInfo[]} An array of all annotations in the worksheet
+     * @returns {ISheetNote[]} An array of all annotations in the worksheet
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -43,24 +38,17 @@ export interface IFSheetsNoteWorksheet {
      * });
      * ```
      */
-    getNotes(): ISheetNoteInfo[];
+    getNotes(): ISheetNote[];
 }
 
 export class FSheetsNoteWorksheet extends FWorksheet implements IFSheetsNoteWorksheet {
-    override getNotes(): ISheetNoteInfo[] {
+    override getNotes(): ISheetNote[] {
         const model = this._injector.get(SheetsNoteModel);
         const notes = model.getSheetNotes(this.getWorkbook().getUnitId(), this.getSheetId());
-        const arr: ISheetNoteInfo[] = [];
-
-        notes?.forValue((row, col, note) => {
-            arr.push({
-                ...note,
-                row,
-                col,
-            });
-        });
-
-        return arr;
+        if (!notes) {
+            return [];
+        }
+        return Array.from(notes.values()).map((note) => ({ ...note }));
     }
 }
 

@@ -41,7 +41,7 @@ export class SheetsCellContentController extends Disposable {
                     effect: InterceptorEffectEnum.Style,
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
-                        const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
+                        const note = this._sheetsNoteModel.getNote(unitId, subUnitId, { row, col });
                         if (note) {
                             if (!cell || cell === pos.rawData) {
                                 cell = { ...pos.rawData };

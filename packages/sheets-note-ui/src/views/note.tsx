@@ -21,10 +21,11 @@ import type { IUniverSheetsNoteUIConfig } from '../controllers/config.schema';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetDeleteNoteCommand, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
+import { SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { SheetsNotePopupService } from '../services/sheets-note-popup.service';
 
 type INotePopupLocation = ISheetLocationBase & {
     temp?: boolean;
@@ -37,7 +38,9 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
     const noteModel = useDependency(SheetsNoteModel);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const notePopupService = useDependency(SheetsNotePopupService);
     const config = useConfigValue<IUniverSheetsNoteUIConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
+
     const activePopup = popup.extraProps?.location;
     if (!activePopup) {
         console.error('Popup extraProps or location is undefined.');
@@ -51,16 +54,25 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
 
     useEffect(() => {
         const { unitId, subUnitId, row, col } = activePopup;
+        const note = noteModel.getNote(unitId, subUnitId, { row, col });
+        const width = note?.width ?? config?.defaultNoteSize?.width ?? 160;
+        const height = note?.height ?? config?.defaultNoteSize?.height ?? 72;
 
-        const { width = 160, height = 72 } = config?.defaultNoteSize ?? {};
-        const note = noteModel.getNote(unitId, subUnitId, row, col) ?? { width, height, note: '' };
+        if (!note) {
+            const initNote: Partial<ISheetNote> = {
+                width,
+                height,
+                note: '',
+            };
+            setNote(initNote);
+            updateNote(initNote);
+        } else {
+            setNote(note);
+        }
 
         if (textareaRef.current) {
-            // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-            setNote(note);
-
-            textareaRef.current.style.width = `${note.width}px`;
-            textareaRef.current.style.height = `${note.height}px`;
+            textareaRef.current.style.width = `${width}px`;
+            textareaRef.current.style.height = `${height}px`;
         }
     }, [activePopup, textareaRef]);
 
@@ -79,26 +91,32 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
     const updateNote = useDebounceFn((newNote: Partial<ISheetNote>) => {
         if (!activePopup) return;
 
-        if (newNote.note) {
-            commandService.executeCommand(SheetUpdateNoteCommand.id, {
-                unitId: activePopup.unitId,
-                sheetId: activePopup.subUnitId!,
-                row: activePopup.row,
-                col: activePopup.col,
-                note: newNote,
-            });
-        } else {
-            commandService.executeCommand(SheetDeleteNoteCommand.id, {
-                unitId: activePopup.unitId,
-                sheetId: activePopup.subUnitId!,
-                row: activePopup.row,
-                col: activePopup.col,
-            });
+        const { unitId, subUnitId, row, col } = activePopup;
+        const result = commandService.syncExecuteCommand(SheetUpdateNoteCommand.id, {
+            unitId,
+            sheetId: subUnitId,
+            row,
+            col,
+            note: newNote,
+        });
+
+        // If the update fails
+        if (!result) {
+            const oldNote = noteModel.getNote(unitId, subUnitId, { noteId: newNote.id, row, col });
+
+            if (oldNote) {
+                // Revert to old note
+                setNote(oldNote);
+            } else {
+                // Hide popup if no old note exists
+                notePopupService.hidePopup(true);
+            }
         }
     });
 
     const handleNoteChange = useCallback((value: string) => {
         if (!note) return;
+        if (value === note.note) return;
 
         const newNote = { ...note, note: value };
         setNote(newNote);
@@ -107,6 +125,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
 
     const handleResize = useCallback((width: number, height: number) => {
         if (!note) return;
+        if (width === note.width && height === note.height) return;
 
         const newNote = { ...note, width, height };
         setNote(newNote);

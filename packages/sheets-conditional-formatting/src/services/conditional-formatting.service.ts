@@ -143,7 +143,7 @@ export class ConditionalFormattingService extends Disposable {
                 onUnLoad: (unitID) => {
                     this._conditionalFormattingRuleModel.deleteUnitId(unitID);
                     if (isInternalEditorID(unitID)) return;
-                    this._conditionalFormattingViewModelV2.dispose();
+                    this._conditionalFormattingViewModelV2.clearCache();
                 },
                 onLoad: (unitID, value) => {
                     Object.keys(value).forEach((subunitId) => {

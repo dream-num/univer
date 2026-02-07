@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, ICellData, ICellDataWithSpanAndDisplay, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,

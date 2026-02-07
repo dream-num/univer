@@ -35,7 +35,6 @@ import {
     IShortcutService,
     IUIPartsService,
 } from '@univerjs/ui';
-import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
@@ -55,7 +54,6 @@ import {
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
-import { RefillCommand } from '../../commands/commands/refill.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
 import {
@@ -249,14 +247,11 @@ export class SheetUIMobileController extends Disposable {
             SetZoomRatioCommand,
             SetZoomRatioOperation,
             ShowMenuListCommand,
-            RefillCommand,
             InsertRangeMoveDownConfirmCommand,
             DeleteRangeMoveUpConfirmCommand,
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
             SidebarDefinedNameOperation,
-            AutoFillCommand,
-            AutoClearContentCommand,
 
             // permission
             SheetPermissionOpenPanelOperation,

@@ -19,13 +19,13 @@
 import type { IAccessor, IBorderData, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, IStyleData, Nullable } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
+    IDiscreteRange,
     IMoveRangeMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
     ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
-import type { IDiscreteRange } from '../utils/range-tools';
 import {
     cellToRange,
     CellValueType,
@@ -48,6 +48,7 @@ import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
+    discreteRangeToRange,
     getAddMergeMutationRangeByType,
     getPrimaryForRange,
     getSheetCommandTarget,
@@ -63,7 +64,7 @@ import {
 } from '@univerjs/sheets';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
-import { discreteRangeToRange, virtualizeDiscreteRanges } from '../utils/range-tools';
+import { virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 /**

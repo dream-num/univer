@@ -15,34 +15,35 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import type { APPLY_TYPE } from '../../services/auto-fill/type';
+import type { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
-import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
+import { generateNullCellValue } from '../../basics/utils';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { SheetsSelectionsService } from '../../services/selections';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../operations/selection.operation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IAutoFillCommandParams {
     sourceRange: IRange;
     targetRange: IRange;
     unitId?: string; // if not provided, use current unitId
     subUnitId?: string; // if not provided, use current subUnitId
-    applyType?: APPLY_TYPE; // manual apply type
+    applyType?: AUTO_FILL_APPLY_TYPE; // manual apply type
 }
 
 export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.auto-fill',
-
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
-        const autoFillService = accessor.get(IAutoFillService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
+        const { unitId, subUnitId } = target;
         const { sourceRange, targetRange, applyType } = params;
-
-        const commandTarget = getSheetCommandTarget(univerInstanceService, params);
-        if (!commandTarget) return false;
-
-        const { subUnitId, unitId } = commandTarget;
+        const autoFillService = accessor.get(IAutoFillService);
         return autoFillService.triggerAutoFill(unitId, subUnitId, sourceRange, targetRange, applyType);
     },
 };
@@ -55,17 +56,19 @@ export interface IAutoClearContentCommand {
 export const AutoClearContentCommand: ICommand = {
     id: 'sheet.command.auto-clear-content',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IAutoClearContentCommand) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
+        const selectionsService = accessor.get(SheetsSelectionsService);
 
         const { unitId, subUnitId } = target;
         const { clearRange, selectionRange } = params;
+        const { startColumn, startRow } = selectionRange;
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
@@ -76,31 +79,53 @@ export const AutoClearContentCommand: ICommand = {
             accessor,
             clearMutationParams
         );
-        const { startColumn, startRow } = selectionRange;
-        const param: ISetSelectionsOperationParams = {
-            selections: [
-                {
-                    primary: {
-                        startColumn,
-                        startRow,
-                        endColumn: startColumn,
-                        endRow: startRow,
-                        actualRow: startRow,
-                        actualColumn: startColumn,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                    },
-                    range: {
-                        ...selectionRange,
-                    },
-                },
-            ],
-            unitId,
-            subUnitId,
-        };
-        commandService.executeCommand(SetSelectionsOperation.id, param);
 
-        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
+        const redos = [
+            {
+                id: SetRangeValuesMutation.id,
+                params: clearMutationParams,
+            },
+            {
+                id: SetSelectionsOperation.id,
+                params: {
+                    selections: [
+                        {
+                            primary: {
+                                startColumn,
+                                startRow,
+                                endColumn: startColumn,
+                                endRow: startRow,
+                                actualRow: startRow,
+                                actualColumn: startColumn,
+                                isMerged: false,
+                                isMergedMainCell: false,
+                            },
+                            range: {
+                                ...selectionRange,
+                            },
+                        },
+                    ],
+                    unitId,
+                    subUnitId,
+                },
+            },
+        ];
+        const undos = [
+            {
+                id: SetRangeValuesMutation.id,
+                params: undoClearMutationParams,
+            },
+            {
+                id: SetSelectionsOperation.id,
+                params: {
+                    selections: [selectionsService.getCurrentLastSelection()],
+                    unitId,
+                    subUnitId,
+                },
+            },
+        ];
+
+        const result = sequenceExecute(redos, commandService);
         if (result) {
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: SetRangeValuesMutation.id,
@@ -108,12 +133,13 @@ export const AutoClearContentCommand: ICommand = {
             });
 
             sequenceExecute(afterInterceptors.redos, commandService);
+
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 unitID: unitId,
-                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }, ...afterInterceptors.undos],
-                redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...afterInterceptors.redos],
+                undoMutations: [...undos, ...afterInterceptors.undos],
+                redoMutations: [...redos, ...afterInterceptors.redos],
             });
 
             return true;

@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, ICellDataWithSpanAndDisplay, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from './clipboard.service';
 
 export enum COPY_TYPE {

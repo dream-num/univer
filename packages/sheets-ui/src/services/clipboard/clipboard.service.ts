@@ -24,9 +24,8 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { IDiscreteRange, ISetRangeValuesMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,

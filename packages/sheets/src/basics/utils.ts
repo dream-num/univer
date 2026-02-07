@@ -142,6 +142,16 @@ export function getActiveWorksheet(instanceService: UniverInstanceService): [Nul
     return [workbook, worksheet];
 }
 
+export function discreteRangeToRange(discreteRange: IDiscreteRange): IRange {
+    const { rows, cols } = discreteRange;
+    return {
+        startRow: rows[0],
+        endRow: rows[rows.length - 1],
+        startColumn: cols[0],
+        endColumn: cols[cols.length - 1],
+    };
+}
+
 export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string): IDiscreteRange | null {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = unitId

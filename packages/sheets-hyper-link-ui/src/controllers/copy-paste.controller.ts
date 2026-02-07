@@ -15,7 +15,8 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type { IDiscreteRange } from '@univerjs/sheets';
+import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, generateRandomId, Inject, Injector, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { rangeToDiscreteRange } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';

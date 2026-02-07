@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { RenderManagerService } from '@univerjs/engine-render';
-import type { ISetRangeValuesMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { IAccessor, IDisposable, IMutationInfo, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
+import type { ISetWorksheetRowAutoHeightMutationParams } from '../../commands/mutations/set-worksheet-row-height.mutation';
 import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
 import { createIdentifier, Direction, Disposable, ICommandService, Inject, Injector, IUndoRedoService, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Rectangle, toDisposable, UniverInstanceType } from '@univerjs/core';
-
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { rangeToDiscreteRange, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
+import { discreteRangeToRange, rangeToDiscreteRange } from '../../basics/utils';
 import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
-import { AFFECT_LAYOUT_STYLES } from '../../controllers/auto-height.controller';
-import { discreteRangeToRange } from '../../controllers/utils/range-tools';
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import {
+import { AFFECT_LAYOUT_STYLES } from '../../commands/commands/set-style.command';
+import { getPrimaryForRange } from '../../commands/commands/utils/selection-utils';
+import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
+import { SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
+import AutoFillRules from './rules';
+import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_HOOK_TYPE } from './type';
+
+const {
     chnNumberRule,
     chnWeek2Rule,
     chnWeek3Rule,
@@ -37,12 +40,11 @@ import {
     loopSeriesRule,
     numberRule,
     otherRule,
-} from './rules';
-import { APPLY_TYPE, AutoFillHookType } from './type';
+} = AutoFillRules;
 
 export interface IAutoFillService {
-    applyType$: Observable<APPLY_TYPE>;
-    applyType: APPLY_TYPE;
+    applyType$: Observable<AUTO_FILL_APPLY_TYPE>;
+    applyType: AUTO_FILL_APPLY_TYPE;
 
     direction: Direction;
 
@@ -52,7 +54,7 @@ export interface IAutoFillService {
     showMenu$: Observable<boolean>;
     setShowMenu: (show: boolean) => void;
 
-    setDisableApplyType: (type: APPLY_TYPE, disable: boolean) => void;
+    setDisableApplyType: (type: AUTO_FILL_APPLY_TYPE, disable: boolean) => void;
 
     getRules(): IAutoFillRule[];
     isFillingStyle(): boolean;
@@ -66,21 +68,21 @@ export interface IAutoFillService {
     getAllHooks(): ISheetAutoFillHook[];
     getActiveHooks(): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
-    fillData(applyType: APPLY_TYPE): boolean;
+    fillData(applyType: AUTO_FILL_APPLY_TYPE): boolean;
 
-    triggerAutoFill(unitId: string, subUnitId: string, source: IRange, target: IRange, manualApplyType?: APPLY_TYPE): Promise<boolean>;
+    triggerAutoFill(unitId: string, subUnitId: string, source: IRange, target: IRange, manualApplyType?: AUTO_FILL_APPLY_TYPE): Promise<boolean>;
 }
 
 export interface IApplyMenuItem {
     label: string;
-    value: APPLY_TYPE;
+    value: AUTO_FILL_APPLY_TYPE;
     disable: boolean;
 }
 
 export class AutoFillService extends Disposable implements IAutoFillService {
     private _rules: IAutoFillRule[] = [];
     private _hooks: ISheetAutoFillHook[] = [];
-    private readonly _applyType$: BehaviorSubject<APPLY_TYPE> = new BehaviorSubject<APPLY_TYPE>(APPLY_TYPE.SERIES);
+    private readonly _applyType$: BehaviorSubject<AUTO_FILL_APPLY_TYPE> = new BehaviorSubject<AUTO_FILL_APPLY_TYPE>(AUTO_FILL_APPLY_TYPE.SERIES);
     private _isFillingStyle: boolean = true;
 
     private _prevUndos: IMutationInfo[] = [];
@@ -100,22 +102,22 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     private readonly _menu$: BehaviorSubject<IApplyMenuItem[]> = new BehaviorSubject<IApplyMenuItem[]>([
         {
             label: 'autoFill.copy',
-            value: APPLY_TYPE.COPY,
+            value: AUTO_FILL_APPLY_TYPE.COPY,
             disable: false,
         },
         {
             label: 'autoFill.series',
-            value: APPLY_TYPE.SERIES,
+            value: AUTO_FILL_APPLY_TYPE.SERIES,
             disable: false,
         },
         {
             label: 'autoFill.formatOnly',
-            value: APPLY_TYPE.ONLY_FORMAT,
+            value: AUTO_FILL_APPLY_TYPE.ONLY_FORMAT,
             disable: false,
         },
         {
             label: 'autoFill.noFormat',
-            value: APPLY_TYPE.NO_FORMAT,
+            value: AUTO_FILL_APPLY_TYPE.NO_FORMAT,
             disable: false,
         },
     ]);
@@ -124,9 +126,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     constructor(
         @ICommandService private _commandService: ICommandService,
         @IUndoRedoService private _undoRedoService: IUndoRedoService,
-        @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -163,13 +163,13 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    async triggerAutoFill(unitId: string, subUnitId: string, source: IRange, selection: IRange, manualApplyType?: APPLY_TYPE) {
+    async triggerAutoFill(unitId: string, subUnitId: string, source: IRange, selection: IRange, manualApplyType?: AUTO_FILL_APPLY_TYPE) {
         // if source range === dest range, do nothing;
         if (
             source.startColumn === selection.startColumn &&
-                source.startRow === selection.startRow &&
-                source.endColumn === selection.endColumn &&
-                source.endRow === selection.endRow
+            source.startRow === selection.startRow &&
+            source.endColumn === selection.endColumn &&
+            source.endRow === selection.endRow
         ) {
             return false;
         }
@@ -239,7 +239,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             subUnitId,
         };
 
-        const preferTypes: APPLY_TYPE[] = [];
+        const preferTypes: AUTO_FILL_APPLY_TYPE[] = [];
         const activeHooks = this.getActiveHooks();
         activeHooks.forEach((hook) => {
             const type = hook?.onBeforeFillData?.({ source: autoFillSource, target: autoFillTarget, unitId, subUnitId }, direction!);
@@ -281,7 +281,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         }
 
         if (hook.type === undefined) {
-            hook.type = AutoFillHookType.Append;
+            hook.type = AUTO_FILL_HOOK_TYPE.APPEND;
         }
         this._hooks.push(hook);
         return toDisposable(() => {
@@ -318,14 +318,14 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const enabledHooks = this._hooks.filter(
             (h) => !h.disable?.({ source, target, unitId, subUnitId }, this._direction, this.applyType) === true
         );
-        const onlyHooks = enabledHooks.filter((h) => h.type === AutoFillHookType.Only);
+        const onlyHooks = enabledHooks.filter((h) => h.type === AUTO_FILL_HOOK_TYPE.ONLY);
         if (onlyHooks.length > 0) {
             return this._getOneByPriority(onlyHooks);
         }
 
-        const defaultHooks = this._getOneByPriority(enabledHooks.filter((h) => h.type === AutoFillHookType.Default));
+        const defaultHooks = this._getOneByPriority(enabledHooks.filter((h) => h.type === AUTO_FILL_HOOK_TYPE.DEFAULT));
 
-        const appendHooks = enabledHooks.filter((h) => h.type === AutoFillHookType.Append) || [];
+        const appendHooks = enabledHooks.filter((h) => h.type === AUTO_FILL_HOOK_TYPE.APPEND) || [];
 
         return [...defaultHooks, ...appendHooks];
     }
@@ -334,7 +334,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         return this._applyType$.getValue();
     }
 
-    set applyType(type: APPLY_TYPE) {
+    set applyType(type: AUTO_FILL_APPLY_TYPE) {
         this._applyType$.next(type);
     }
 
@@ -366,7 +366,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._autoFillLocation$.next(location);
     }
 
-    setDisableApplyType(type: APPLY_TYPE, disable: boolean) {
+    setDisableApplyType(type: AUTO_FILL_APPLY_TYPE, disable: boolean) {
         this._menu$.next(
             this._menu$.getValue().map((item) => {
                 if (item.value === type) {
@@ -385,9 +385,9 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    fillData(applyType: APPLY_TYPE) {
+    fillData(applyType: AUTO_FILL_APPLY_TYPE) {
         this.applyType = applyType;
-        const activeWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const activeWorkbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const activeUnitId = activeWorkbook?.getUnitId();
         const activeSubUnitId = activeWorkbook?.getActiveSheet()?.getSheetId();
         const { source, target, unitId = activeUnitId, subUnitId = activeSubUnitId } = this.autoFillLocation || {};
@@ -395,6 +395,11 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         if (!source || !target || !unitId || !subUnitId) {
             return false;
         }
+
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) return false;
 
         const direction = this.direction;
 
@@ -407,14 +412,18 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
         const activeHooks = this.getActiveHooks();
-        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!;
 
         // If filling the active sheet, update the selection immediately
         if (unitId === activeUnitId && subUnitId === activeSubUnitId) {
             this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                 selections: [
                     {
-                        primary: { ...(this._selectionManagerService.getCurrentLastSelection()?.primary ?? selection) },
+                        primary: getPrimaryForRange({
+                            startRow: source.rows[0],
+                            endRow: source.rows[source.rows.length - 1],
+                            startColumn: source.cols[0],
+                            endColumn: source.cols[source.cols.length - 1],
+                        }, worksheet),
                         range: {
                             ...selection,
                             rangeType: RANGE_TYPE.NORMAL,
@@ -441,28 +450,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const result = redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
 
         // deal with auto-height
-        const autoHeightRanges: IRange[] = [];
-        if (applyType !== APPLY_TYPE.NO_FORMAT) {
-            redos.forEach((m) => {
-                if (m.id === SetRangeValuesMutation.id) {
-                    const { cellValue } = m.params as ISetRangeValuesMutationParams;
-                    const matrix = new ObjectMatrix(cellValue);
-                    matrix.forValue((row, col, value) => {
-                        const style = Object.keys(workbook.getStyles().get(value?.s) || {});
-                        if (value?.p || (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s)))) {
-                            autoHeightRanges.push({ startRow: row, endRow: row, startColumn: col, endColumn: col });
-                        }
-                    });
-                }
-            });
-        }
+        const { redos: autoHeightRedos, undos: autoHeightUndos } = this._getAutoHeightUndoRedos(redos, workbook, worksheet);
+        redos.push(...autoHeightRedos);
+        undos.push(...autoHeightUndos);
 
-        const autoHeightUndoRedos = this._getAutoHeightUndoRedos(unitId, subUnitId, autoHeightRanges);
-        const autoHeightResult = autoHeightUndoRedos.redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
-        if (autoHeightResult) {
-            undos.push(...autoHeightUndoRedos.undos);
-            redos.push(...autoHeightUndoRedos.redos);
-        }
         if (result) {
             this._prevUndos = undos;
             // add to undo redo services
@@ -479,18 +470,64 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         return true;
     }
 
-    private _getAutoHeightUndoRedos(unitId: string, subUnitId: string, ranges: IRange[]) {
-        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
-        const skeleton = sheetSkeletonService?.getCurrentParam()?.skeleton;
-        if (!skeleton) return { redos: [], undos: [] };
+    private _getAutoHeightUndoRedos(executedRedos: IMutationInfo[], workbook: Workbook, worksheet: Worksheet) {
+        if (this.applyType === AUTO_FILL_APPLY_TYPE.NO_FORMAT) {
+            return { undos: [], redos: [] };
+        }
 
-        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
-        const redoParams: ISetWorksheetRowAutoHeightMutationParams = { subUnitId, unitId, rowsAutoHeightInfo };
-        const worksheet = skeleton.worksheet;
+        const rowsAutoHeightInfo: IRowAutoHeightInfo[] = [];
+        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+        const rowManager = worksheet.getRowManager();
+
+        executedRedos.forEach((m) => {
+            if (m.id === SetRangeValuesMutation.id) {
+                const { cellValue } = m.params as ISetRangeValuesMutationParams;
+                const matrix = new ObjectMatrix(cellValue);
+                matrix.forValue((row, col, value) => {
+                    const style = Object.keys(workbook.getStyles().get(value?.s) || {});
+                    if (value?.p || (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s)))) {
+                        const cellHeight = worksheet.getCellHeight(row, col);
+                        const rowData = rowManager.getRow(row);
+                        if ((!rowData && cellHeight !== defaultRowHeight) || (rowData && cellHeight !== rowManager.getRowHeight(row))) {
+                            rowsAutoHeightInfo.push({
+                                row,
+                                autoHeight: cellHeight,
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        if (rowsAutoHeightInfo.length === 0) {
+            return { undos: [], redos: [] };
+        }
+
+        const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+            rowsAutoHeightInfo,
+        };
         const undoParams = SetWorksheetRowAutoHeightMutationFactory(redoParams, worksheet);
+
+        const redo = {
+            id: SetWorksheetRowAutoHeightMutation.id,
+            params: redoParams,
+        };
+        const result = this._commandService.syncExecuteCommand(redo.id, redo.params);
+
+        if (!result) {
+            return { undos: [], redos: [] };
+        }
+
         return {
-            undos: [{ id: SetWorksheetRowAutoHeightMutation.id, params: undoParams }],
-            redos: [{ id: SetWorksheetRowAutoHeightMutation.id, params: redoParams }],
+            redos: [redo],
+            undos: [
+                {
+                    id: SetWorksheetRowAutoHeightMutation.id,
+                    params: undoParams,
+                },
+            ],
         };
     }
 }

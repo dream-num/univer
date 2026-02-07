@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject, Injector, ObjectMatrix } from '@univerjs/core';
-import { IAutoFillService } from '@univerjs/sheets-ui';
+import { IAutoFillService } from '@univerjs/sheets';
 import { resizeImageByCell } from './sheet-cell-image.controller';
 
 export class SheetCellImageAutofillController extends Disposable {

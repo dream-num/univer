@@ -15,7 +15,8 @@
  */
 
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IDiscreteRange, IPasteHookValueType } from '@univerjs/sheets-ui';
+import type { IDiscreteRange } from '@univerjs/sheets';
+import type { IPasteHookValueType } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, ObjectMatrix, queryObjectMatrix, Rectangle } from '@univerjs/core';
 import { rangeToDiscreteRange } from '@univerjs/sheets';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';

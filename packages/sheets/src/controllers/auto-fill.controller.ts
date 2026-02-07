@@ -14,308 +14,107 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveSheetMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-} from '@univerjs/sheets';
-import type {
-    APPLY_FUNCTIONS,
-    IAutoFillLocation,
-    ICopyDataInType,
-    ICopyDataPiece,
-    IRuleConfirmedData,
-    ISheetAutoFillHook,
-} from '../services/auto-fill/type';
+import type { ICellData, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../basics';
+import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
+import type { AUTO_FILL_APPLY_FUNCTIONS, IAutoFillCopyDataInType, IAutoFillCopyDataPiece, IAutoFillLocation, IAutoFillRuleConfirmedData } from '../services/auto-fill/type';
 import {
     Direction,
     Disposable,
-    DisposableCollection,
-    ICommandService,
     Inject,
     Injector,
     IUniverInstanceService,
     ObjectMatrix,
     Rectangle,
     Tools,
-    UniverInstanceType,
 } from '@univerjs/core';
-
-import { DeviceInputEventType, getCurrentTypeOfRenderer, IRenderManagerService } from '@univerjs/engine-render';
-import {
-    AddMergeUndoMutationFactory,
-    AddWorksheetMergeMutation,
-    getAddMergeMutationRangeByType,
-    InsertColMutation,
-    InsertRowMutation,
-    MoveColsMutation,
-    MoveRangeMutation,
-    MoveRowsMutation,
-    RemoveColMutation,
-    RemoveMergeUndoMutationFactory,
-    RemoveRowMutation,
-    RemoveSheetMutation,
-    RemoveWorksheetMergeMutation,
-    SetRangeValuesCommand,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-    SetSelectionsOperation,
-    SetWorksheetActiveOperation,
-    SetWorksheetColWidthMutation,
-    SetWorksheetRowHeightMutation,
-} from '@univerjs/sheets';
-import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
-import { RefillCommand } from '../commands/commands/refill.command';
-import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
-import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
+import { discreteRangeToRange } from '../basics/utils';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
+import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../commands/mutations/set-range-values.mutation';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
-import { otherRule } from '../services/auto-fill/rules';
-import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
-import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
-import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
-import { SheetsRenderService } from '../services/sheets-render.service';
-import { discreteRangeToRange, generateNullCellValueRowCol } from './utils/range-tools';
+import AutoFillRules from '../services/auto-fill/rules';
+import AutoFillTools from '../services/auto-fill/tools';
+import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AUTO_FILL_HOOK_TYPE } from '../services/auto-fill/type';
+import { getAddMergeMutationRangeByType } from './merge-cell.controller';
+
+const { getLenS, getDataIndex, fillCopy, fillCopyStyles, generateNullCellValueRowCol } = AutoFillTools;
+const { otherRule } = AutoFillRules;
 
 export class AutoFillController extends Disposable {
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];
-    private _currentLocation: Nullable<IAutoFillLocation> = null;
+    private _copyData: IAutoFillCopyDataPiece[] = [];
 
-    private _copyData: ICopyDataPiece[] = [];
-    private _defaultHook: ISheetAutoFillHook;
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
-        this._defaultHook = {
-            id: 'default',
-            type: AutoFillHookType.Default,
-            priority: 0,
-            onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
-                return this._presetAndCacheData(location, direction);
-            },
-            onFillData: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => {
-                return this._fillData(location, direction, applyType);
-            },
-        };
+
         this._init();
     }
 
     private _init() {
         this._initDefaultHook();
-        this._initSelectionControlFillChanged();
-        this._initQuitListener();
-        this._initSkeletonChange();
     }
 
-    private _initSkeletonChange() {
-        this.disposeWithMe(this._sheetsRenderService.registerSkeletonChangingMutations(AutoFillCommand.id));
+    quit() {
+        this._beforeApplyData = [];
+        this._copyData = [];
     }
 
     private _initDefaultHook() {
-        this.disposeWithMe(this._autoFillService.addHook(this._defaultHook));
-    }
-
-    private _initQuitListener() {
-        const quitCommands = [
-            SetCellEditVisibleOperation.id,
-            AutoClearContentCommand.id,
-            SetRangeValuesCommand.id,
-            SetZoomRatioOperation.id,
-            SetWorksheetActiveOperation.id,
-            MoveRangeMutation.id,
-            RemoveRowMutation.id,
-            RemoveColMutation.id,
-            InsertRowMutation.id,
-            InsertColMutation.id,
-            MoveRowsMutation.id,
-            MoveColsMutation.id,
-            SetWorksheetColWidthMutation.id,
-            SetWorksheetRowHeightMutation.id,
-            SetRangeValuesMutation.id,
-        ];
-
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
-            const fromCollab = options?.fromCollab;
-            const fromSync = options?.fromSync;
-            const fromFormula = options?.fromFormula;
-            if (quitCommands.includes(command.id)
-                && !fromCollab
-                && !fromSync
-                && !fromFormula
-                && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id
-                && (command.params as IMutationCommonParams).trigger !== RefillCommand.id
-            ) {
-                this._quit();
-            }
-            if (command.id === RemoveSheetMutation.id) {
-                if ((command.params as IRemoveSheetMutationParams).unitId === this._currentLocation?.unitId &&
-                    (command.params as IRemoveSheetMutationParams).subUnitId === this._currentLocation?.subUnitId) {
-                    this._quit();
-                }
-            }
-        }));
-        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit: UnitModel) => {
-            if (unit.getUnitId() === this._currentLocation?.unitId) {
-                this._quit();
-            }
+        this.disposeWithMe(this._autoFillService.addHook({
+            id: 'default',
+            type: AUTO_FILL_HOOK_TYPE.DEFAULT,
+            priority: 0,
+            onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
+                return this._presetAndCacheData(location, direction);
+            },
+            onFillData: (location: IAutoFillLocation, direction: Direction, applyType: AUTO_FILL_APPLY_TYPE) => {
+                return this._fillData(location, direction, applyType);
+            },
         }));
     }
 
-    private _quit() {
-        this._currentLocation = null;
-        this._beforeApplyData = [];
-        this._copyData = [];
-        this._autoFillService.setShowMenu(false);
-    }
+    private _presetAndCacheData(location: IAutoFillLocation, direction: Direction) {
+        const { unitId, subUnitId, target } = location;
+        // cache original data of apply range
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
 
-    private _initSelectionControlFillChanged() {
-        const disposableCollection = new DisposableCollection();
-        const updateListener = () => {
-            // Each range change requires re-listening.
-            disposableCollection.dispose();
-
-            const currentRenderer = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._univerInstanceService, this._renderManagerService);
-            if (!currentRenderer) return;
-
-            const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
-            const selectionControls = selectionRenderService.getSelectionControls();
-            selectionControls.forEach((controlSelection) => {
-                disposableCollection.add(controlSelection.selectionFilled$.subscribe((filled) => {
-                    if (
-                        filled == null ||
-                                filled.startColumn === -1 ||
-                                filled.startRow === -1 ||
-                                filled.endColumn === -1 ||
-                                filled.endRow === -1
-                    ) {
-                        return;
-                    }
-                    const source: IRange = {
-                        startColumn: controlSelection.model.startColumn,
-                        endColumn: controlSelection.model.endColumn,
-                        startRow: controlSelection.model.startRow,
-                        endRow: controlSelection.model.endRow,
-                    };
-                    const selection: IRange = {
-                        startColumn: filled.startColumn,
-                        endColumn: filled.endColumn,
-                        startRow: filled.startRow,
-                        endRow: filled.endRow,
-                    };
-
-                    this._commandService.executeCommand(AutoFillCommand.id, { sourceRange: source, targetRange: selection });
-                }));
-
-                // double click to fill range, range length will align to left or right column.
-                // fill results will be as same as drag operation
-                disposableCollection.add(controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
-                    const source = {
-                        startColumn: controlSelection.model.startColumn,
-                        endColumn: controlSelection.model.endColumn,
-                        startRow: controlSelection.model.startRow,
-                        endRow: controlSelection.model.endRow,
-                    };
-                    this._handleDbClickFill(source);
-                }));
-
-                disposableCollection.add(controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
-                    const visibleState = this._editorBridgeService.isVisible();
-                    if (visibleState.visible) {
-                        this._commandService.syncExecuteCommand(
-                            SetCellEditVisibleOperation.id,
-                            {
-                                visible: false,
-                                eventType: DeviceInputEventType.PointerDown,
-                                unitId: currentRenderer.unitId,
-                            }
-                        );
-                    }
-                }));
-            });
-        };
-
-        updateListener();
-
-        // Should subscribe current current renderer change as well.
-        // TODO@yuhongz: this seems not ideal. This should be an `IRenderModule` for running with multiple renderers?
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id === SetSelectionsOperation.id) {
-                updateListener();
-            }
-        }));
-
-        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
-            .subscribe(() => updateListener()));
-    }
-
-    private _handleDbClickFill(source: IRange) {
-        const selection = this._detectFillRange(source);
-        // double click only works when dest range is longer than source range
-        if (selection.endRow <= source.endRow) {
-            return;
-        }
-
-        // double click effect is the same as drag effect, but the apply area is automatically calculated (by method '_detectFillRange')
-        this._commandService.executeCommand(AutoFillCommand.id, { sourceRange: source, targetRange: selection });
-    }
-
-    private _detectFillRange(source: IRange) {
-        const { startRow, endRow, startColumn, endColumn } = source;
-        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
         if (!worksheet) {
-            return source;
+            throw new Error(`Worksheet not found for unitId: ${unitId}, subUnitId: ${subUnitId}`);
         }
-        const matrix = worksheet.getCellMatrix();
-        const maxRow = worksheet.getMaxRows();
-        const maxColumn = worksheet.getMaxColumns();
-        let detectEndRow = endRow + 1;
-        // left column first, or consider right column.
-        if (startColumn > 0 && matrix.getValue(detectEndRow, startColumn - 1)?.v != null) {
-            while (matrix.getValue(detectEndRow + 1, startColumn - 1)?.v != null && detectEndRow < maxRow) {
-                detectEndRow += 1;
-            }
-        } else if (endColumn < maxColumn - 1 && matrix.getValue(detectEndRow, endColumn + 1)?.v != null) {
-            while (matrix.getValue(detectEndRow + 1, endColumn + 1)?.v != null && detectEndRow < maxRow) {
-                detectEndRow += 1;
-            }
+
+        const currentCellDatas = worksheet.getCellMatrix();
+        // cache the original data in currentCellDatas in apply range for later use / refill
+        const applyData: Nullable<ICellData>[][] = [];
+        target.rows.forEach((i) => {
+            const row: Nullable<ICellData>[] = [];
+            target.cols.forEach((j) => {
+                row.push(Tools.deepClone(currentCellDatas.getValue(i, j)));
+            });
+            applyData.push(row);
+        });
+        this._beforeApplyData = applyData;
+        this._copyData = this._getCopyData(location, direction);
+        if (this._shouldDisableSeries(this._copyData)) {
+            this._autoFillService.setDisableApplyType(AUTO_FILL_APPLY_TYPE.SERIES, true);
+            return AUTO_FILL_APPLY_TYPE.COPY;
         } else {
-            detectEndRow = endRow;
+            this._autoFillService.setDisableApplyType(AUTO_FILL_APPLY_TYPE.SERIES, false);
         }
-
-        // If the fill range contains data, stop filling at the first row of data.
-        for (let i = endRow + 1; i <= detectEndRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                if (matrix.getValue(i, j)?.v != null) {
-                    detectEndRow = i - 1;
-                    break;
-                }
-            }
-        }
-
-        return {
-            startColumn,
-            endColumn,
-            startRow,
-            endRow: detectEndRow,
-        };
+        return this._getPreferredApplyType(this._copyData);
     }
 
     // calc apply data according to copy data and direction
     private _getApplyData(
-        copyDataPiece: ICopyDataPiece,
+        copyDataPiece: IAutoFillCopyDataPiece,
         csLen: number,
         asLen: number,
         direction: Direction,
-        applyType: APPLY_TYPE,
+        applyType: AUTO_FILL_APPLY_TYPE,
         hasStyle: boolean = true,
         location: IAutoFillLocation
     ) {
@@ -324,7 +123,7 @@ export class AutoFillController extends Disposable {
         const rsd = asLen % csLen;
         const rules = this._autoFillService.getRules();
 
-        if (!hasStyle && applyType === APPLY_TYPE.ONLY_FORMAT) {
+        if (!hasStyle && applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT) {
             console.error('ERROR: only format can not be applied when hasStyle is false');
             return [];
         }
@@ -381,40 +180,40 @@ export class AutoFillController extends Disposable {
     }
 
     private _applyFunctions(
-        copySquad: ICopyDataInType,
+        copySquad: IAutoFillCopyDataInType,
         len: number,
         direction: Direction,
-        applyType: APPLY_TYPE,
-        customApplyFunctions: APPLY_FUNCTIONS,
-        copyDataPiece: ICopyDataPiece,
+        applyType: AUTO_FILL_APPLY_TYPE,
+        customApplyFunctions: AUTO_FILL_APPLY_FUNCTIONS,
+        copyDataPiece: IAutoFillCopyDataPiece,
         location: IAutoFillLocation
     ) {
         const { data } = copySquad;
         const isReverse = direction === Direction.UP || direction === Direction.LEFT;
 
         // according to applyType, apply functions. if customApplyFunctions is provided, use it instead of default apply functions
-        if (applyType === APPLY_TYPE.COPY) {
-            const custom = customApplyFunctions?.[APPLY_TYPE.COPY];
+        if (applyType === AUTO_FILL_APPLY_TYPE.COPY) {
+            const custom = customApplyFunctions?.[AUTO_FILL_APPLY_TYPE.COPY];
             if (custom) {
                 return custom(copySquad, len, direction, copyDataPiece, location);
             }
             isReverse && data.reverse();
             return fillCopy(data, len);
         }
-        if (applyType === APPLY_TYPE.SERIES) {
-            const custom = customApplyFunctions?.[APPLY_TYPE.SERIES];
+        if (applyType === AUTO_FILL_APPLY_TYPE.SERIES) {
+            const custom = customApplyFunctions?.[AUTO_FILL_APPLY_TYPE.SERIES];
             if (custom) {
                 return custom(copySquad, len, direction, copyDataPiece);
             }
             isReverse && data.reverse();
             // special rules, if not provide custom SERIES apply functions, will be applied as copy
-            if (customApplyFunctions?.[APPLY_TYPE.COPY]) {
-                return customApplyFunctions[APPLY_TYPE.COPY](copySquad, len, direction, copyDataPiece, location);
+            if (customApplyFunctions?.[AUTO_FILL_APPLY_TYPE.COPY]) {
+                return customApplyFunctions[AUTO_FILL_APPLY_TYPE.COPY](copySquad, len, direction, copyDataPiece, location);
             }
             return fillCopy(data, len);
         }
-        if (applyType === APPLY_TYPE.ONLY_FORMAT) {
-            const custom = customApplyFunctions?.[APPLY_TYPE.ONLY_FORMAT];
+        if (applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT) {
+            const custom = customApplyFunctions?.[AUTO_FILL_APPLY_TYPE.ONLY_FORMAT];
             if (custom) {
                 return custom(copySquad, len, direction, copyDataPiece);
             }
@@ -432,7 +231,7 @@ export class AutoFillController extends Disposable {
 
         const currentCellDatas = worksheet.getCellMatrix();
         const rules = this._autoFillService.getRules();
-        const copyData: ICopyDataPiece[] = [];
+        const copyData: IAutoFillCopyDataPiece[] = [];
         const isVertical = direction === Direction.DOWN || direction === Direction.UP;
         let aArray: number[];
         let bArray: number[];
@@ -447,7 +246,7 @@ export class AutoFillController extends Disposable {
         aArray.forEach((a) => {
             // a copyDataPiece is an array of original cells in same column or row, depending on direction (horizontal or vertical)
             const copyDataPiece = this._getEmptyCopyDataPiece();
-            const prevData: IRuleConfirmedData = {
+            const prevData: IAutoFillRuleConfirmedData = {
                 type: undefined,
                 cellData: undefined,
             };
@@ -490,7 +289,7 @@ export class AutoFillController extends Disposable {
     }
 
     private _getEmptyCopyDataPiece() {
-        const copyDataPiece: ICopyDataPiece = {};
+        const copyDataPiece: IAutoFillCopyDataPiece = {};
         this._autoFillService.getRules().forEach((r) => {
             copyDataPiece[r.type] = [];
         });
@@ -570,47 +369,16 @@ export class AutoFillController extends Disposable {
         return applyMergeRanges;
     }
 
-    private _presetAndCacheData(location: IAutoFillLocation, direction: Direction) {
-        const { unitId, subUnitId, target } = location;
-        // cache original data of apply range
-        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
-
-        if (!worksheet) {
-            throw new Error('No active sheet found');
-        }
-
-        const currentCellDatas = worksheet.getCellMatrix();
-        // cache the original data in currentCellDatas in apply range for later use / refill
-        const applyData: Nullable<ICellData>[][] = [];
-        target.rows.forEach((i) => {
-            const row: Nullable<ICellData>[] = [];
-            target.cols.forEach((j) => {
-                row.push(Tools.deepClone(currentCellDatas.getValue(i, j)));
-            });
-            applyData.push(row);
-        });
-        this._beforeApplyData = applyData;
-        this._copyData = this._getCopyData(location, direction);
-        this._currentLocation = location;
-        if (this._shouldDisableSeries(this._copyData)) {
-            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
-            return APPLY_TYPE.COPY;
-        } else {
-            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
-        }
-        return this._getPreferredApplyType(this._copyData);
-    }
-
     // auto fill entry
-    // eslint-disable-next-line max-lines-per-function
-    private _fillData(location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) {
+    // eslint-disable-next-line max-lines-per-function, complexity
+    private _fillData(location: IAutoFillLocation, direction: Direction, applyType: AUTO_FILL_APPLY_TYPE) {
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
 
         let hasStyle = true;
-        if (applyType === APPLY_TYPE.NO_FORMAT) {
+        if (applyType === AUTO_FILL_APPLY_TYPE.NO_FORMAT) {
             hasStyle = false;
-            applyType = APPLY_TYPE.SERIES;
+            applyType = AUTO_FILL_APPLY_TYPE.SERIES;
         }
 
         const { source, target, unitId, subUnitId } = location;
@@ -698,7 +466,7 @@ export class AutoFillController extends Disposable {
             });
         }
 
-        if (applyType === APPLY_TYPE.ONLY_FORMAT) {
+        if (applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT) {
             applyDatas.forEach((row, rowIndex) => {
                 row.forEach((cellData, colIndex) => {
                     if (cellData) {
@@ -719,6 +487,7 @@ export class AutoFillController extends Disposable {
                 .getUniverSheetInstance(unitId)
                 ?.getSheetBySheetId(subUnitId)
                 ?.getMergeData();
+
             if (mergeData) {
                 mergeData.forEach((merge) => {
                     if (Rectangle.intersects(merge, targetRange)) {
@@ -726,18 +495,19 @@ export class AutoFillController extends Disposable {
                     }
                 });
             }
-            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-                unitId,
-                subUnitId,
-                ranges: deleteMergeRanges,
-            };
-
-            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = this._injector.invoke(
-                RemoveMergeUndoMutationFactory,
-                removeMergeMutationParams
-            );
 
             if (deleteMergeRanges.length) {
+                const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                    unitId,
+                    subUnitId,
+                    ranges: deleteMergeRanges,
+                };
+
+                const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = this._injector.invoke(
+                    RemoveMergeUndoMutationFactory,
+                    removeMergeMutationParams
+                );
+
                 redos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
                 undos.unshift({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
             }
@@ -812,28 +582,32 @@ export class AutoFillController extends Disposable {
         };
     }
 
-    private _shouldDisableSeries(copyData: ICopyDataPiece[]) {
+    private _shouldDisableSeries(copyData: IAutoFillCopyDataPiece[]) {
         // only formula or other type data, disable series
         return copyData.every((copyDataPiece) =>
             Object.keys(copyDataPiece).every((type) => (
-                copyDataPiece[type as DATA_TYPE]?.length === 0
-                || [DATA_TYPE.OTHER, DATA_TYPE.FORMULA].includes(type as DATA_TYPE)
+                copyDataPiece[type as AUTO_FILL_DATA_TYPE]?.length === 0
+                || [AUTO_FILL_DATA_TYPE.OTHER, AUTO_FILL_DATA_TYPE.FORMULA].includes(type as AUTO_FILL_DATA_TYPE)
             )
             )
         );
     }
 
-    private _getPreferredApplyType(copyData: ICopyDataPiece[]) {
+    private _getPreferredApplyType(copyData: IAutoFillCopyDataPiece[]) {
         // if all data is number and only one cell in piece, prefer copy
-        const preferCopy = copyData.every((copyDataPiece) =>
-            Object.keys(copyDataPiece).every((type) => (
-                copyDataPiece[type as DATA_TYPE]?.length === 0
-                || (copyDataPiece[type as DATA_TYPE]?.length === 1
-                    && copyDataPiece[type as DATA_TYPE][0].data.length === 1
-                    && DATA_TYPE.NUMBER === type as DATA_TYPE)
-            )
-            )
+        const preferCopy = copyData.every(
+            (copyDataPiece) =>
+                Object.keys(copyDataPiece).every(
+                    (type) => (
+                        copyDataPiece[type as AUTO_FILL_DATA_TYPE]?.length === 0 ||
+                        (
+                            copyDataPiece[type as AUTO_FILL_DATA_TYPE]?.length === 1 &&
+                            copyDataPiece[type as AUTO_FILL_DATA_TYPE][0].data.length === 1 &&
+                            AUTO_FILL_DATA_TYPE.NUMBER === type as AUTO_FILL_DATA_TYPE
+                        )
+                    )
+                )
         );
-        return preferCopy ? APPLY_TYPE.COPY : APPLY_TYPE.SERIES;
+        return preferCopy ? AUTO_FILL_APPLY_TYPE.COPY : AUTO_FILL_APPLY_TYPE.SERIES;
     }
 }

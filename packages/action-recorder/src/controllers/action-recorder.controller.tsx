@@ -21,6 +21,7 @@ import {
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    AutoFillCommand,
     CancelFrozenCommand,
     CopySheetCommand,
     DeleteRangeMoveLeftCommand,
@@ -32,6 +33,7 @@ import {
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     InsertSheetCommand,
+    RefillCommand,
     RemoveSheetCommand,
     SetFrozenCommand,
     SetHorizontalTextAlignCommand,
@@ -49,8 +51,6 @@ import {
 } from '@univerjs/sheets';
 import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import {
-    AutoFillCommand,
-    RefillCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,

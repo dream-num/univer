@@ -17,27 +17,24 @@
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IRange, Workbook } from '@univerjs/core';
+import type { UnitAction } from '@univerjs/protocol';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
-import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { Disposable, DisposableCollection, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs-ui';
-import { UnitAction } from '@univerjs/protocol';
-import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SheetPermissionCheckController, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SheetPermissionCheckController, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
-import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams | IAutoFillCommandParams;
+type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;
 
 export class SheetPermissionCheckUIController extends Disposable {
     disposableCollection = new DisposableCollection();
@@ -48,7 +45,6 @@ export class SheetPermissionCheckUIController extends Disposable {
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IDialogService private readonly _dialogService: IDialogService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
-        @IAutoFillService private _autoFillService: IAutoFillService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
 
@@ -175,11 +171,6 @@ export class SheetPermissionCheckUIController extends Disposable {
                 }
                 break;
 
-            case AutoFillCommand.id:
-                permission = this._permissionCheckByAutoFillCommand(params as IAutoFillCommandParams);
-                errorMsg = this._localeService.t('permission.dialog.autoFillErr');
-                break;
-
             default:
                 break;
         }
@@ -221,39 +212,5 @@ export class SheetPermissionCheckUIController extends Disposable {
                 worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
             });
         }
-    }
-
-    private _permissionCheckByAutoFillCommand(params?: IAutoFillCommandParams) {
-        if (!params) {
-            return false;
-        }
-
-        const { targetRange } = params;
-
-        const target = getSheetCommandTarget(this._univerInstanceService, params);
-        if (!target) {
-            return false;
-        }
-        const { worksheet, unitId, subUnitId } = target;
-
-        const permissionLapRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
-            return [...p, ...c.ranges];
-        }, [] as IRange[]).filter((range) => {
-            return Rectangle.intersects(range, targetRange);
-        });
-
-        const hasNotPermission = permissionLapRanges.some((range) => {
-            for (let row = range.startRow; row <= range.endRow; row++) {
-                for (let col = range.startColumn; col <= range.endColumn; col++) {
-                    const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                    if (permission?.[UnitAction.Edit] === false) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        });
-
-        return !hasNotPermission;
     }
 }

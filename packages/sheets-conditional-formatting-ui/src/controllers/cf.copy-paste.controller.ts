@@ -15,8 +15,9 @@
  */
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import type { IDiscreteRange, IPasteHookValueType } from '@univerjs/sheets-ui';
+import type { IPasteHookValueType } from '@univerjs/sheets-ui';
 import {
     Disposable,
     Inject,

@@ -16,7 +16,9 @@
 
 import { CellValueType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { needsUpdateCellValue } from '../tools';
+import AutoFillTools from '../tools';
+
+const { needsUpdateCellValue } = AutoFillTools;
 
 describe('Test tool', () => {
     it('Function needsUpdateCellValue', () => {

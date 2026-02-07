@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, ObjectMatrix } from '@univerjs/core';
-
-import type { IDiscreteRange } from '../../../controllers/utils/range-tools';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
 
 /**

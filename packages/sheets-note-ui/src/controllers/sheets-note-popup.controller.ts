@@ -41,6 +41,7 @@ export class SheetsNotePopupController extends Disposable {
         this._initSelectionUpdateListener();
         this._initEditorBridge();
         this._initHoverEvent();
+        this._initDeleteNoteListener();
     }
 
     private _handleSelectionChange(selections: ISelectionWithStyle[], unitId: string, subUnitId: string) {
@@ -64,13 +65,14 @@ export class SheetsNotePopupController extends Disposable {
 
         const row = actualCell.actualRow;
         const col = actualCell.actualColumn;
-        const note = this._sheetsNoteModel.getNote(unitId, subUnitId, row, col);
+        const note = this._sheetsNoteModel.getNote(unitId, subUnitId, { row, col });
         if (note?.show) return;
 
         if (note) {
             this._sheetsNotePopupService.showPopup({
                 unitId,
                 subUnitId,
+                noteId: note.id,
                 row,
                 col,
             });
@@ -115,7 +117,7 @@ export class SheetsNotePopupController extends Disposable {
 
                 let targetRow = row;
                 let targetCol = col;
-                let note = this._sheetsNoteModel.getNote(unitId, subUnitId, targetRow, targetCol);
+                let note = this._sheetsNoteModel.getNote(unitId, subUnitId, { row: targetRow, col: targetCol });
                 if (!note && skeleton) {
                     const actualCell = skeleton.getCellWithCoordByIndex(row, col);
                     const { startRow, endRow, startColumn, endColumn } = actualCell.mergeInfo;
@@ -138,12 +140,28 @@ export class SheetsNotePopupController extends Disposable {
                     this._sheetsNotePopupService.showPopup({
                         unitId,
                         subUnitId,
+                        noteId: note.id,
                         row: targetRow,
                         col: targetCol,
                         temp: true,
                     });
                 } else {
                     this._sheetsNotePopupService.hidePopup();
+                }
+            })
+        );
+    }
+
+    private _initDeleteNoteListener() {
+        this.disposeWithMe(
+            this._sheetsNoteModel.change$.subscribe((change) => {
+                if (!this._sheetsNotePopupService.activePopup) return;
+
+                const { unitId, subUnitId, noteId, row, col } = this._sheetsNotePopupService.activePopup;
+                const { oldNote, newNote } = change;
+
+                if (newNote === null && change.unitId === unitId && change.subUnitId === subUnitId && ((oldNote?.id && oldNote.id === noteId) || (oldNote?.row === row && oldNote.col === col))) {
+                    this._sheetsNotePopupService.hidePopup(true);
                 }
             })
         );

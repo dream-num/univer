@@ -123,17 +123,17 @@ export class SheetsNoteModel extends Disposable {
     }
 
     updateNote(unitId: string, subUnitId: string, row: number, col: number, note: Partial<ISheetNote>, silent?: boolean): void {
-        const _note = { ...note, row, col } as ISheetNote;
-        if (!note.id) {
-            _note.id = generateRandomId(6);
-        }
-
+        const oldNote = this._getNoteByParams(unitId, subUnitId, { noteId: note?.id, row, col });
         const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
-        const noteId = _note.id;
-        const oldNote = this._getNoteById(unitId, subUnitId, noteId);
-        subUnitMap.set(noteId, _note);
+        const newNote = {
+            ...note,
+            id: oldNote?.id || note.id || generateRandomId(6),
+            row,
+            col,
+        } as ISheetNote;
+        subUnitMap.set(newNote.id, newNote);
 
-        this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote: _note, silent });
+        this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote, silent });
     }
 
     removeNote(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number; silent?: boolean }): void {
@@ -180,8 +180,8 @@ export class SheetsNoteModel extends Disposable {
         this._change$.next({ unitId, subUnitId, oldNote, type: 'ref', newNote, silent });
     }
 
-    getNote(unitId: string, subUnitId: string, row: number, col: number): Nullable<ISheetNote> {
-        return this._getNoteByPosition(unitId, subUnitId, row, col);
+    getNote(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number }): Nullable<ISheetNote> {
+        return this._getNoteByParams(unitId, subUnitId, params);
     }
 
     getNotes() {

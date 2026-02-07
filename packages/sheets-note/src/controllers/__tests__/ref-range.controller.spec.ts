@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams } from '@univerjs/sheets';
+import type { ISheetNote } from '../../models/sheets-note.model';
 import { Direction, ICommandService, ILogService, Inject, Injector, IUndoRedoService, IUniverInstanceService, LocaleType, LogLevel, Plugin, touchDependencies, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import {
     InsertColByRangeCommand,
@@ -128,6 +129,7 @@ describe('test note ref range controller', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let sheetsNoteModel: SheetsNoteModel;
+    let getNoteByPosition: (row: number, col: number) => Nullable<ISheetNote>;
 
     beforeEach(() => {
         const testBed = createRefRangeTestBed();
@@ -147,6 +149,8 @@ describe('test note ref range controller', () => {
         commandService.registerCommand(SetSelectionsOperation);
 
         sheetsNoteModel = get(SheetsNoteModel);
+
+        getNoteByPosition = (row: number, col: number) => sheetsNoteModel.getNote(unitId, subUnitId, { row, col });
     });
 
     afterEach(() => univer.dispose());
@@ -169,12 +173,12 @@ describe('test note ref range controller', () => {
                 direction: Direction.DOWN,
             };
             expect(commandService.syncExecuteCommand(InsertRowByRangeCommand.id, params)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toBeUndefined();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 4, 3)).toStrictEqual({ ...D4CellNote, row: 4, col: 3 });
+            expect(getNoteByPosition(3, 3)).toBeUndefined();
+            expect(getNoteByPosition(4, 3)).toStrictEqual({ ...D4CellNote, row: 4, col: 3 });
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toStrictEqual(D4CellNote);
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 4, 3)).toBeUndefined();
+            expect(getNoteByPosition(3, 3)).toStrictEqual(D4CellNote);
+            expect(getNoteByPosition(4, 3)).toBeUndefined();
         });
 
         it('test D4 cell note when insert column', async () => {
@@ -194,12 +198,12 @@ describe('test note ref range controller', () => {
                 direction: Direction.RIGHT,
             };
             expect(commandService.syncExecuteCommand(InsertColByRangeCommand.id, params)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toBeUndefined();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 4)).toStrictEqual({ ...D4CellNote, row: 3, col: 4 });
+            expect(getNoteByPosition(3, 3)).toBeUndefined();
+            expect(getNoteByPosition(3, 4)).toStrictEqual({ ...D4CellNote, row: 3, col: 4 });
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toStrictEqual(D4CellNote);
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 4)).toBeUndefined();
+            expect(getNoteByPosition(3, 3)).toStrictEqual(D4CellNote);
+            expect(getNoteByPosition(3, 4)).toBeUndefined();
         });
 
         it('test D4 cell note when remove row', async () => {
@@ -218,12 +222,12 @@ describe('test note ref range controller', () => {
                 range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 9 },
             };
             expect(commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, params)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toBeUndefined();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 2, 3)).toStrictEqual({ ...D4CellNote, row: 2, col: 3 });
+            expect(getNoteByPosition(3, 3)).toBeUndefined();
+            expect(getNoteByPosition(2, 3)).toStrictEqual({ ...D4CellNote, row: 2, col: 3 });
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toStrictEqual(D4CellNote);
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 2, 3)).toBeUndefined();
+            expect(getNoteByPosition(3, 3)).toStrictEqual(D4CellNote);
+            expect(getNoteByPosition(2, 3)).toBeUndefined();
         });
 
         it('test D4 cell note when remove column', async () => {
@@ -242,12 +246,12 @@ describe('test note ref range controller', () => {
                 range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 2 },
             };
             expect(commandService.syncExecuteCommand(RemoveColByRangeCommand.id, params)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toBeUndefined();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 2)).toStrictEqual({ ...D4CellNote, row: 3, col: 2 });
+            expect(getNoteByPosition(3, 3)).toBeUndefined();
+            expect(getNoteByPosition(3, 2)).toStrictEqual({ ...D4CellNote, row: 3, col: 2 });
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 3)).toStrictEqual(D4CellNote);
-            expect(sheetsNoteModel.getNote(unitId, subUnitId, 3, 2)).toBeUndefined();
+            expect(getNoteByPosition(3, 3)).toStrictEqual(D4CellNote);
+            expect(getNoteByPosition(3, 2)).toBeUndefined();
         });
     });
 });

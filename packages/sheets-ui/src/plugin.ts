@@ -23,7 +23,7 @@ import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from 
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
-import { AutoFillUIController } from './controllers/auto-fill.controller';
+import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';

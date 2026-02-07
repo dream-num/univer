@@ -45,7 +45,7 @@ import {
 } from '@univerjs/sheets';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AutoFillUIController } from '../../../controllers/auto-fill.controller';
+import { AutoFillUIController } from '../../../controllers/auto-fill-ui.controller';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';

@@ -92,7 +92,7 @@ export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './component
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
-export { AutoFillUIController } from './controllers/auto-fill.controller';
+export { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 export { AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';

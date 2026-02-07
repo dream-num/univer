@@ -24,10 +24,10 @@ import { BehaviorSubject } from 'rxjs';
 import { discreteRangeToRange, rangeToDiscreteRange } from '../../basics/utils';
 import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { AFFECT_LAYOUT_STYLES } from '../../commands/commands/set-style.command';
+import { getPrimaryForRange } from '../../commands/commands/utils/selection-utils';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory } from '../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
-import { SheetsSelectionsService } from '../selections';
 import AutoFillRules from './rules';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_HOOK_TYPE } from './type';
 
@@ -127,7 +127,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         @ICommandService private _commandService: ICommandService,
         @IUndoRedoService private _undoRedoService: IUndoRedoService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -419,16 +418,12 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                 selections: [
                     {
-                        primary: {
-                            actualRow: selection.startRow,
-                            actualColumn: selection.startColumn,
-                            startRow: selection.startRow,
-                            endRow: selection.startRow,
-                            startColumn: selection.startColumn,
-                            endColumn: selection.startColumn,
-                            isMerged: false,
-                            isMergedMainCell: false,
-                        },
+                        primary: getPrimaryForRange({
+                            startRow: source.rows[0],
+                            endRow: source.rows[source.rows.length - 1],
+                            startColumn: source.cols[0],
+                            endColumn: source.cols[source.cols.length - 1],
+                        }, worksheet),
                         range: {
                             ...selection,
                             rangeType: RANGE_TYPE.NORMAL,

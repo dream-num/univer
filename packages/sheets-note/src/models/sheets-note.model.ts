@@ -127,7 +127,7 @@ export class SheetsNoteModel extends Disposable {
         const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
         const newNote = {
             ...note,
-            id: oldNote?.id || generateRandomId(6),
+            id: oldNote?.id || note.id || generateRandomId(6),
             row,
             col,
         } as ISheetNote;

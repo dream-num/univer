@@ -19,6 +19,7 @@ import type { IUniverSheetsConfig } from './controllers/config.schema';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { ActiveWorksheetController } from './controllers/active-worksheet.controller';
+import { AutoFillController } from './controllers/auto-fill.controller';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
@@ -35,6 +36,7 @@ import { RangeProtectionRenderModel } from './model/range-protection-render.mode
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionCache } from './model/range-protection.cache';
 import { SheetRangeThemeModel } from './model/range-theme-model';
+import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 import { SheetLazyExecuteScheduleService } from './services/lazy-execute-schedule.service';
@@ -130,6 +132,8 @@ export class UniverSheetsPlugin extends Plugin {
                 useClass: ExclusiveRangeService,
                 deps: [SheetsSelectionsService],
             }],
+            [IAutoFillService, { useClass: AutoFillService }],
+            [AutoFillController],
         ];
 
         if (!this._config?.notExecuteFormula) {
@@ -155,6 +159,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorksheetPermissionService],
             [SheetPermissionViewModelController],
             [SheetSkeletonService],
+            [AutoFillController],
         ]);
 
         if (!this._config?.onlyRegisterFormulaRelatedMutations) {

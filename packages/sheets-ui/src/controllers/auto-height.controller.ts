@@ -30,8 +30,6 @@ import {
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
-
 interface IAutoHeightParams {
     cellHeights?: ObjectMatrix<number>;
     autoHeightRanges?: IRange[];

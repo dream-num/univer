@@ -15,13 +15,12 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { APPLY_TYPE } from '../../services/auto-fill/type';
-
+import type { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
 import { CommandType } from '@univerjs/core';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 
-interface IRefillCommandParams {
-    type: APPLY_TYPE;
+export interface IRefillCommandParams {
+    type: AUTO_FILL_APPLY_TYPE;
 }
 
 export const RefillCommand: ICommand = {

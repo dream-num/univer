@@ -16,6 +16,7 @@
 
 import type { AbsoluteRefType, BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type {
+    AUTO_FILL_APPLY_TYPE,
     IMergeCellsUtilOptions,
     ISetBorderBasicCommandParams,
     ISetHorizontalTextAlignCommandParams,
@@ -36,6 +37,7 @@ import { FBaseInitialable } from '@univerjs/core/facade';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import {
     addMergeCellsUtil,
+    AutoFillCommand,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand,
@@ -2714,4 +2716,85 @@ export class FRange extends FBaseInitialable {
             fWorksheet
         );
     }
+
+    /**
+     * Fills the target range with data based on the data in the current range.
+     * @param {FRange} targetRange - The range to be filled with data.
+     * @param {AUTO_FILL_APPLY_TYPE} [applyType] - The type of data fill to be applied.
+     * @returns {Promise<boolean>} A promise that resolves to true if the fill operation was successful, false otherwise.
+     * @example
+     * ```ts
+     * // Auto-fill the range D1:D10 based on the data in the range C1:C2
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:A4');
+     *
+     * // Auto-fill without specifying applyType (default behavior)
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'))
+     *
+     * // Auto-fill with 'COPY' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'COPY')
+     *
+     * // Auto-fill with 'SERIES' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'SERIES')
+     * ```
+     *
+     * ```ts
+     * // Operate on a specific worksheet
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getSheetBySheetId('sheetId');
+     * const fRange = fWorksheet.getRange('A1:A4');
+     *
+     * // Auto-fill without specifying applyType (default behavior)
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'))
+     *
+     * // Auto-fill with 'COPY' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'COPY')
+     *
+     * // Auto-fill with 'SERIES' type
+     * await fRange.autoFill(fWorksheet.getRange('A1:A20'), 'SERIES')
+     * ```
+     */
+    autoFill(targetRange: FRange, applyType?: AUTO_FILL_APPLY_TYPE): Promise<boolean> {
+        const _sourceRange = this.getRange();
+        const _targetRange = targetRange.getRange();
+
+        if (!Rectangle.contains(_targetRange, _sourceRange)) {
+            throw new Error('AutoFill target range must contain source range');
+        }
+
+        const { startRow: sourceStartRow, startColumn: sourceStartColumn, endRow: sourceEndRow, endColumn: sourceEndColumn } = _sourceRange;
+        const { startRow: targetStartRow, startColumn: targetStartColumn, endRow: targetEndRow, endColumn: targetEndColumn } = _targetRange;
+
+        // If both row and column count are different, throw error
+        if ((sourceEndRow - sourceStartRow) !== (targetEndRow - targetStartRow) && (sourceEndColumn - sourceStartColumn) !== (targetEndColumn - targetStartColumn)) {
+            throw new Error('AutoFill can only fill in one direction');
+        }
+
+        // If the direction includes both left and right, throw error
+        if (
+            (sourceEndRow - sourceStartRow) === (targetEndRow - targetStartRow) &&
+            sourceStartColumn !== targetStartColumn &&
+            sourceEndColumn !== targetEndColumn
+        ) {
+            throw new Error('AutoFill can only fill in one direction');
+        }
+
+        // If the direction includes both up and down, throw error
+        if (
+            (sourceEndColumn - sourceStartColumn) === (targetEndColumn - targetStartColumn) &&
+            sourceStartRow !== targetStartRow &&
+            sourceEndRow !== targetEndRow
+        ) {
+            throw new Error('AutoFill can only fill in one direction');
+        }
+
+        return this._commandService.executeCommand(AutoFillCommand.id, {
+            sourceRange: _sourceRange,
+            targetRange: _targetRange,
+            unitId: this.getUnitId(),
+            subUnitId: this.getSheetId(),
+            applyType,
+        });
+    };
 }

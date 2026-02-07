@@ -31,6 +31,13 @@ import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
+    AUTO_FILL_APPLY_TYPE,
+    AutoClearContentCommand,
+    AutoFillCommand,
+    AutoFillController,
+    AutoFillService,
+    IAutoFillService,
+    RefillCommand,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
@@ -38,21 +45,13 @@ import {
 } from '@univerjs/sheets';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AutoFillController } from '../../../controllers/auto-fill.controller';
-import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
-import { APPLY_TYPE } from '../../../services/auto-fill/type';
+import { AutoFillUIController } from '../../../controllers/auto-fill.controller';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../../services/sheets-render.service';
-import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
-import { RefillCommand } from '../refill.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-const theme = {
-    colorBlack: '#35322b',
-};
 
 class mockSheetsRenderService {
     registerSkeletonChangingMutations(id: string) {
@@ -266,7 +265,7 @@ describe('Test auto fill rules in controller', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillController;
+    let autoFillController: AutoFillUIController;
     let themeService: ThemeService;
 
     let getValues: (
@@ -294,9 +293,10 @@ describe('Test auto fill rules in controller', () => {
             [IEditorBridgeService, { useClass: EditorBridgeService }],
             [IEditorService, { useClass: EditorService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
+            [SheetsRenderService, { useClass: mockSheetsRenderService }],
             [SheetSkeletonManagerService],
             [AutoFillController],
-            [SheetsRenderService, { useClass: mockSheetsRenderService }],
+            [AutoFillUIController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -307,7 +307,7 @@ describe('Test auto fill rules in controller', () => {
         const newTheme = set(theme, 'black', '#35322b');
         themeService.setTheme(newTheme);
 
-        autoFillController = get(AutoFillController);
+        autoFillController = get(AutoFillUIController);
         selectionManagerService = get(SheetsSelectionsService);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
@@ -785,7 +785,7 @@ describe('Test auto fill rules in controller', () => {
                 vt: 2,
             });
 
-            commandService.executeCommand(RefillCommand.id, { type: APPLY_TYPE.NO_FORMAT });
+            commandService.executeCommand(RefillCommand.id, { type: AUTO_FILL_APPLY_TYPE.NO_FORMAT });
 
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(6);
             const styles_refill = getStyles(14, 4, 14, 4);

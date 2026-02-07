@@ -28,8 +28,6 @@ import {
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
-
 export const createAutoColWidthUndoMutationsByRedos = (
     params: ISetWorksheetColWidthMutationParams,
     worksheet: Worksheet

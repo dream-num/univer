@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { CellValueType, Direction, isFormulaId, isFormulaString, Tools } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IDiscreteRange } from '../../basics';
+import type { IAutoFillCopyDataInTypeIndexInfo } from './type';
+import { CellValueType, Direction, isFormulaId, isFormulaString, ObjectMatrix, Tools } from '@univerjs/core';
 
-export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
-export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-export const chnUnitSection = ['', '万', '亿', '万亿', '亿亿'];
-export const chnUnitChar = ['', '十', '百', '千'];
+const chnNumChar = {
+    零: 0,
+    一: 1,
+    二: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+};
 
-export interface ICopyDataInType {
-    data: Array<Nullable<ICellData>>;
-    index: ICopyDataInTypeIndexInfo;
-}
+const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+const chnUnitSection = ['', '万', '亿', '万亿', '亿亿'];
+const chnUnitChar = ['', '十', '百', '千'];
 
-export type ICopyDataInTypeIndexInfo = number[];
-
-export const chnNameValue = {
+const chnNameValue = {
     十: { value: 10, secUnit: false },
     百: { value: 100, secUnit: false },
     千: { value: 1000, secUnit: false },
@@ -37,7 +44,7 @@ export const chnNameValue = {
     亿: { value: 100000000, secUnit: true },
 };
 
-export function chineseToNumber(chnStr?: Nullable<string>) {
+function chineseToNumber(chnStr?: Nullable<string>) {
     if (!chnStr) {
         return 0;
     }
@@ -76,7 +83,7 @@ export function chineseToNumber(chnStr?: Nullable<string>) {
     return rtn + section;
 }
 
-export function sectionToChinese(section: number) {
+function sectionToChinese(section: number) {
     let strIns = '';
     let chnStr = '';
     let unitPos = 0;
@@ -104,7 +111,7 @@ export function sectionToChinese(section: number) {
     return chnStr;
 }
 
-export function numberToChinese(num: number) {
+function numberToChinese(num: number) {
     let unitPos = 0;
     let strIns = '';
     let chnStr = '';
@@ -131,7 +138,7 @@ export function numberToChinese(num: number) {
     return chnStr;
 }
 
-export function isChnNumber(txt?: string) {
+function isChnNumber(txt?: string) {
     if (!txt) {
         return false;
     }
@@ -157,7 +164,7 @@ export function isChnNumber(txt?: string) {
     return isChnNumber;
 }
 
-export function matchExtendNumber(txt?: string) {
+function matchExtendNumber(txt?: string) {
     if (!txt) {
         return {
             isExtendNumber: false,
@@ -191,7 +198,7 @@ export function matchExtendNumber(txt?: string) {
     };
 }
 
-export function isChnWeek1(txt: string) {
+function isChnWeek1(txt: string) {
     let isChnWeek1;
     if (txt.length === 1) {
         if (txt === '日' || chineseToNumber(txt) < 7) {
@@ -206,7 +213,7 @@ export function isChnWeek1(txt: string) {
     return isChnWeek1;
 }
 
-export function isChnWeek2(txt: string) {
+function isChnWeek2(txt: string) {
     let isChnWeek2;
     if (txt.length === 2) {
         if (
@@ -229,7 +236,7 @@ export function isChnWeek2(txt: string) {
     return isChnWeek2;
 }
 
-export function isChnWeek3(txt: string) {
+function isChnWeek3(txt: string) {
     let isChnWeek3;
     if (txt.length === 3) {
         if (
@@ -252,7 +259,7 @@ export function isChnWeek3(txt: string) {
     return isChnWeek3;
 }
 
-export function getLenS(indexArr: any[], rsd: number) {
+function getLenS(indexArr: any[], rsd: number) {
     let s = 0;
 
     for (let j = 0; j < indexArr.length; j++) {
@@ -268,10 +275,8 @@ export function getLenS(indexArr: any[], rsd: number) {
 
 /**
  * equal diff
- * @param arr
- * @returns
  */
-export function isEqualDiff(arr: number[]) {
+function isEqualDiff(arr: number[]) {
     let diff = true;
     const step = arr[1] - arr[0];
 
@@ -285,8 +290,8 @@ export function isEqualDiff(arr: number[]) {
     return diff;
 }
 
-export function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
-    const obj: ICopyDataInTypeIndexInfo = [];
+function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
+    const obj: IAutoFillCopyDataInTypeIndexInfo = [];
 
     const num = Math.floor(asLen / csLen);
     const rsd = asLen % csLen;
@@ -321,7 +326,7 @@ export function getDataIndex(csLen: number, asLen: number, indexArr: number[]) {
     return obj;
 }
 
-export function fillCopy(data: Array<Nullable<ICellData>>, len: number) {
+function fillCopy(data: Array<Nullable<ICellData>>, len: number) {
     const applyData = [];
 
     for (let i = 1; i <= len; i++) {
@@ -344,7 +349,7 @@ export function fillCopy(data: Array<Nullable<ICellData>>, len: number) {
     return applyData;
 }
 
-export function fillCopyStyles(data: Array<Nullable<ICellData>>, len: number) {
+function fillCopyStyles(data: Array<Nullable<ICellData>>, len: number) {
     const applyData = [];
     for (let i = 1; i <= len; i++) {
         const index = (i - 1) % data.length;
@@ -356,7 +361,7 @@ export function fillCopyStyles(data: Array<Nullable<ICellData>>, len: number) {
     return applyData;
 }
 
-export function isEqualRatio(arr: number[]) {
+function isEqualRatio(arr: number[]) {
     let ratio = true;
     const step = arr[1] / arr[0];
 
@@ -370,7 +375,7 @@ export function isEqualRatio(arr: number[]) {
     return ratio;
 }
 
-export function getXArr(len: number) {
+function getXArr(len: number) {
     const xArr = [];
 
     for (let i = 1; i <= len; i++) {
@@ -380,7 +385,7 @@ export function getXArr(len: number) {
     return xArr;
 }
 
-export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direction: Direction) {
+function fillSeries(data: Array<Nullable<ICellData>>, len: number, direction: Direction) {
     const applyData = [];
 
     const dataNumArr = [];
@@ -427,7 +432,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
     return applyData;
 }
 
-export function forecast(x: number, yArr: number[], xArr: number[], forward = true) {
+function forecast(x: number, yArr: number[], xArr: number[], forward = true) {
     function getAverage(arr: number[]) {
         let sum = 0;
 
@@ -460,7 +465,7 @@ export function forecast(x: number, yArr: number[], xArr: number[], forward = tr
     return Math.round((a + b * x) * 100000) / 100000;
 }
 
-export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, step: number) {
+function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, step: number) {
     const applyData = [];
     const reg = /0|([1-9]+[0-9]*)/g;
 
@@ -490,7 +495,8 @@ export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, 
 
     return applyData;
 }
-export function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
+
+function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
     const applyData = [];
 
     for (let i = 1; i <= len; i++) {
@@ -509,8 +515,8 @@ export function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
     return applyData;
 }
 
-// weektype: 0-日 1-周 2-星期
-export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step: number, weekType: number = 0) {
+// weekType: 0-日 1-周 2-星期
+function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step: number, weekType: number = 0) {
     const keywordMap = [
         ['日', '一', '二', '三', '四', '五', '六'],
         ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
@@ -552,7 +558,7 @@ export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step:
     return applyData;
 }
 
-export function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, step: number) {
+function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, step: number) {
     const applyData = [];
 
     for (let i = 1; i <= len; i++) {
@@ -606,7 +612,7 @@ const LOOP_SERIES: { [key: string]: string[] } = {
     chSeason2: ['春季', '夏季', '秋季', '冬季'],
 };
 
-export function isLoopSeries(txt: string) {
+function isLoopSeries(txt: string) {
     let isLoopSeries = false;
     Object.keys(LOOP_SERIES).forEach((key) => {
         if (LOOP_SERIES[key].includes(txt)) {
@@ -616,7 +622,7 @@ export function isLoopSeries(txt: string) {
     return isLoopSeries;
 }
 
-export function getLoopSeriesInfo(txt: string) {
+function getLoopSeriesInfo(txt: string) {
     let name = '';
     const series: string[] = [];
     Object.keys(LOOP_SERIES).forEach((key) => {
@@ -628,7 +634,7 @@ export function getLoopSeriesInfo(txt: string) {
     return { name, series };
 }
 
-export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, step: number, series: string[]) {
+function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, step: number, series: string[]) {
     const seriesLen = series.length;
     const applyData = [];
 
@@ -655,7 +661,8 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
     return applyData;
 }
 
-export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange) {
+// eslint-disable-next-line max-lines-per-function
+function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange) {
     const repeats: Array<{
         repeatStartCell: { col: number; row: number };
         relativeRange: IRange;
@@ -802,10 +809,8 @@ export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange)
 
 /**
  * Formulas or Boolean values do not need to update cell.v
- * @param cell
- * @returns
  */
-export function needsUpdateCellValue(cell: ICellData) {
+function needsUpdateCellValue(cell: ICellData) {
     if (isFormulaString(cell.f) || isFormulaId(cell.si)) {
         return false;
     }
@@ -819,10 +824,72 @@ export function needsUpdateCellValue(cell: ICellData) {
 
 /**
  * Remove cell.custom
- * @param cell
  */
-export function removeCellCustom(cell: Nullable<ICellData>) {
+function removeCellCustom(cell: Nullable<ICellData>) {
     if (cell && 'custom' in cell) {
         delete cell.custom;
     }
 }
+
+function reverseIfNeed<T>(data: T[], reverse: boolean): T[] {
+    return reverse ? data.reverse() : data;
+}
+
+function generateNullCellValueRowCol(range: IDiscreteRange[]): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    range.forEach((r) => {
+        const { rows, cols } = r;
+        rows.forEach((i) => {
+            cols.forEach((j) => {
+                cellValue.setValue(i, j, {
+                    v: null,
+                    p: null,
+                    f: null,
+                    si: null,
+                    custom: null,
+                });
+            });
+        });
+    });
+
+    return cellValue.clone();
+}
+
+const AutoFillTools = {
+    chnNumChar,
+    chnNumChar2,
+    chnUnitSection,
+    chnUnitChar,
+    chnNameValue,
+    chineseToNumber,
+    sectionToChinese,
+    numberToChinese,
+    isChnNumber,
+    matchExtendNumber,
+    isChnWeek1,
+    isChnWeek2,
+    isChnWeek3,
+    getLenS,
+    isEqualDiff,
+    getDataIndex,
+    fillCopy,
+    fillCopyStyles,
+    isEqualRatio,
+    getXArr,
+    fillSeries,
+    forecast,
+    fillExtendNumber,
+    fillOnlyFormat,
+    fillChnWeek,
+    fillChnNumber,
+    isLoopSeries,
+    getLoopSeriesInfo,
+    fillLoopSeries,
+    getAutoFillRepeatRange,
+    needsUpdateCellValue,
+    removeCellCustom,
+    reverseIfNeed,
+    generateNullCellValueRowCol,
+};
+
+export default AutoFillTools;

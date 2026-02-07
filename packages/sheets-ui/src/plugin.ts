@@ -23,7 +23,7 @@ import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from 
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
-import { AutoFillController } from './controllers/auto-fill.controller';
+import { AutoFillUIController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
@@ -64,7 +64,6 @@ import { SheetSkeletonRenderController } from './controllers/render-controllers/
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { AutoHeightService } from './services/auto-height.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -150,7 +149,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [ICellEditorManagerService, { useClass: CellEditorManagerService }],
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
             [IRefSelectionsService, { useClass: RefSelectionsService }],
-            [IAutoFillService, { useClass: AutoFillService }],
             [SheetPrintInterceptorService],
             [IStatusBarService, { useClass: StatusBarService }],
             [IMarkSelectionService, { useClass: MarkSelectionService }],
@@ -170,7 +168,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsRenderService],
             [SheetUIController],
             [StatusBarController],
-            [AutoFillController],
+            [AutoFillUIController],
             [FormatPainterController],
             [SheetsDefinedNameController],
             [EditorDataSyncController],
@@ -228,7 +226,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     override onSteady(): void {
         touchDependencies(this._injector, [
             [FormatPainterController],
-            [AutoFillController],
+            [AutoFillUIController],
             [SheetPermissionInterceptorClipboardController],
         ]);
     }

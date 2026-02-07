@@ -19,6 +19,7 @@ import type { IClipboardItem } from './mock-clipboard';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    discreteRangeToRange,
     MoveRangeMutation,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
@@ -29,7 +30,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { discreteRangeToRange } from '../../../controllers/utils/range-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';

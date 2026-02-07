@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { IDiscreteRange, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ObjectMatrix } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 

@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
+import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
@@ -27,6 +28,7 @@ import { CustomCommandExecutionError, Disposable, DisposableCollection, ICommand
 import { deserializeRangeWithSheet, deserializeRangeWithSheetWithCache, IDefinedNamesService, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
+import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
@@ -53,7 +55,7 @@ import { SheetsSelectionsService } from '../../services/selections';
 /* eslint-disable max-lines-per-function */
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams;
+type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams | IAutoFillCommandParams;
 export class SheetPermissionCheckController extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -222,6 +224,10 @@ export class SheetPermissionCheckController extends Disposable {
             case DeleteRangeMoveUpCommand.id:
                 permission = this._permissionCheckWithInsertRangeMove('top');
                 errorMsg = this._localeService.t('permission.dialog.insertOrDeleteMoveRangeErr');
+                break;
+            case AutoFillCommand.id:
+                permission = this._permissionCheckByAutoFillCommand(params as IAutoFillCommandParams);
+                errorMsg = this._localeService.t('permission.dialog.autoFillErr');
                 break;
 
             default:
@@ -572,5 +578,39 @@ export class SheetPermissionCheckController extends Disposable {
             }
         }
         return true;
+    }
+
+    private _permissionCheckByAutoFillCommand(params?: IAutoFillCommandParams) {
+        if (!params) {
+            return false;
+        }
+
+        const { targetRange } = params;
+
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
+
+        const permissionLapRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
+            return [...p, ...c.ranges];
+        }, [] as IRange[]).filter((range) => {
+            return Rectangle.intersects(range, targetRange);
+        });
+
+        const hasNotPermission = permissionLapRanges.some((range) => {
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                    if (permission?.[UnitAction.Edit] === false) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+
+        return !hasNotPermission;
     }
 }

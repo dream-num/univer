@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';

@@ -17,7 +17,6 @@
 import './global.css';
 
 export { getEditorObject } from './basics/editor/get-editor-object';
-export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteByShortKeyParams,
     type ISheetPasteParams,
@@ -59,7 +58,6 @@ export {
     ViewSheetPermissionFromContextMenuCommand,
     ViewSheetPermissionFromSheetBarCommand,
 } from './commands/commands/range-protection.command';
-export { RefillCommand } from './commands/commands/refill.command';
 export { RemoveColConfirmCommand, RemoveRowConfirmCommand } from './commands/commands/remove-row-col-confirm.command';
 export { RemoveSheetConfirmCommand } from './commands/commands/remove-sheet-confirm.command';
 export { ApplyFormatPainterCommand, SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from './commands/commands/set-format-painter.command';
@@ -94,8 +92,8 @@ export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './component
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
-export { AutoFillController } from './controllers/auto-fill.controller';
-export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
+export { AutoFillUIController } from './controllers/auto-fill.controller';
+export { AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { type IUniverSheetsUIConfig } from './controllers/config.schema';
@@ -118,16 +116,11 @@ export { SheetUIController } from './controllers/sheet-ui.controller';
 export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
-export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { discreteRangeToRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsUIPlugin } from './plugin';
-export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
-export { getAutoFillRepeatRange } from './services/auto-fill/tools';
-export { APPLY_TYPE, DATA_TYPE, type IAutoFillRule, type ICopyDataInTypeIndexInfo } from './services/auto-fill/type';
-export type { IAutoFillLocation, ICopyDataPiece, ISheetAutoFillHook } from './services/auto-fill/type';
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { type IDropdownParam, ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';

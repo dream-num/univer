@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
 import { generateRandomId, LRUMap } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';

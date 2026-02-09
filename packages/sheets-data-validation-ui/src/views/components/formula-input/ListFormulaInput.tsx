@@ -27,6 +27,7 @@ import { useDependency, useEvent, useObservable, useSidebarClick } from '@univer
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
+import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 
 const DEFAULT_COLOR_PRESET = [
     '#FFFFFF',
@@ -171,6 +172,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const dataValidatorRegistryService = useDependency(DataValidatorRegistryService);
     const dataValidationModel = useDependency(DataValidationModel);
     const dataValidationFormulaController = useDependency(DataValidationFormulaController);
+    const dataValidationPanelService = useDependency(DataValidationPanelService);
     const [refColors, setRefColors] = useState(() => formula2.split(','));
     const listValidator = dataValidatorRegistryService.getValidatorItem(DataValidationType.LIST) as ListValidator;
     const [refOptions, setRefOptions] = useState<string[]>([]);
@@ -327,6 +329,14 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         const isOutSide = formulaEditorRef.current?.isClickOutSide(e);
         isOutSide && setIsFocusFormulaEditor(false);
     });
+
+    useEffect(() => {
+        if (isFocusFormulaEditor) {
+            dataValidationPanelService.setFocusFormulaEditorActiveRuleSubUnitId(subUnitId);
+        } else {
+            dataValidationPanelService.setFocusFormulaEditorActiveRuleSubUnitId(null);
+        }
+    }, [isFocusFormulaEditor, subUnitId, dataValidationPanelService]);
 
     return (
         <>

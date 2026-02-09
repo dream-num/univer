@@ -21,11 +21,12 @@ import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, L
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { ComponentManager, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { of } from 'rxjs';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';
 
@@ -56,6 +57,13 @@ export function DataValidationDetail() {
     const commandService = useDependency(ICommandService);
     const dataValidationModel = useDependency(DataValidationModel);
     const localeService = useDependency(LocaleService);
+    const workbook = useObservable(
+        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
+        undefined,
+        undefined,
+        []
+    );
+    const worksheet = useObservable(() => workbook?.activeSheet$ ?? of(null), undefined, undefined, []);
     const [localRule, setLocalRule] = useState<ISheetDataValidationRule>(rule);
     const validator = validatorService.getValidatorItem(localRule.type);
     const [showError, setShowError] = useState(false);
@@ -99,6 +107,15 @@ export function DataValidationDetail() {
     const operatorNames = validator.operatorNames;
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
+    const goBackActiveRuleSheet = () => {
+        if (worksheet?.getSheetId() !== subUnitId) {
+            commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                unitId,
+                subUnitId,
+            });
+        }
+    };
+
     const handleOk = () => {
         if (rangeSelectorInstance.current?.editor?.isFocus()) {
             handleUpdateRuleRanges(rangeSelectorInstance.current?.getValue());
@@ -112,6 +129,8 @@ export function DataValidationDetail() {
         } else {
             setShowError(true);
         }
+
+        goBackActiveRuleSheet();
     };
 
     const handleUpdateRuleRanges = useEvent((rangeText: string) => {
@@ -180,6 +199,7 @@ export function DataValidationDetail() {
             subUnitId,
         });
         dataValidationPanelService.setActiveRule(null);
+        goBackActiveRuleSheet();
     };
 
     const baseRule = {

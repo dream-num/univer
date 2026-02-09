@@ -34,7 +34,7 @@ import {
     virtualizeDiscreteRanges,
 } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
-import { transformToDrawingPosition } from '../basics/transform-position';
+import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 
@@ -314,6 +314,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 return {
                     transform: newTransform,
                     sheetTransform: transformToDrawingPosition(newTransform, selectionRenderService) ?? sheetTransform,
+                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, selectionRenderService) ?? sheetTransform,
                 };
             },
         });
@@ -325,6 +326,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         getTransform: (transform: ISheetDrawing['transform'], sheetTransform: ISheetDrawing['sheetTransform']) => {
             transform: ISheetDrawing['transform'];
             sheetTransform: ISheetDrawing['sheetTransform'];
+            axisAlignSheetTransform: ISheetDrawing['sheetTransform'];
         };
         isCut: boolean;
     }) {
@@ -353,6 +355,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 drawingId: isCut ? drawing.drawingId : generateRandomId(),
                 transform: transformContext.transform,
                 sheetTransform: transformContext.sheetTransform,
+                axisAlignSheetTransform: transformContext.axisAlignSheetTransform,
             };
 
             if (isCut) {
@@ -460,26 +463,33 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         return this._generateMutations(drawings, {
             unitId,
             subUnitId,
-            getTransform: (transform, sheetTransform) => ({
-                transform: {
+            getTransform: (transform, sheetTransform) => {
+                const newTransform = {
                     ...transform,
                     left: (transform?.left ?? 0) + leftOffset,
                     top: (transform?.top ?? 0) + topOffset,
-                },
-                sheetTransform: {
-                    ...sheetTransform,
-                    to: {
-                        ...sheetTransform.to,
-                        row: sheetTransform.to.row + rowOffset,
-                        column: sheetTransform.to.column + columnOffset,
+                };
+                const render = this._renderManagerService.getRenderById(unitId);
+                const selectionRenderService = render?.with(ISheetSelectionRenderService)!;
+
+                return {
+                    transform: newTransform,
+                    sheetTransform: {
+                        ...sheetTransform,
+                        to: {
+                            ...sheetTransform.to,
+                            row: sheetTransform.to.row + rowOffset,
+                            column: sheetTransform.to.column + columnOffset,
+                        },
+                        from: {
+                            ...sheetTransform.from,
+                            row: sheetTransform.from.row + rowOffset,
+                            column: sheetTransform.from.column + columnOffset,
+                        },
                     },
-                    from: {
-                        ...sheetTransform.from,
-                        row: sheetTransform.from.row + rowOffset,
-                        column: sheetTransform.from.column + columnOffset,
-                    },
-                },
-            }),
+                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, selectionRenderService) ?? sheetTransform,
+                };
+            },
             isCut: copyType === COPY_TYPE.CUT,
         });
     }

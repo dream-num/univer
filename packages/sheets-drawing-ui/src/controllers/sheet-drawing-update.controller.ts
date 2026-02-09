@@ -30,7 +30,7 @@ import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
+import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
@@ -209,6 +209,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return;
         }
 
+        const newTransform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService)!;
         const sheetDrawingParam: ISheetDrawing = {
             unitId,
             subUnitId,
@@ -216,8 +217,9 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService),
+            transform:newTransform,
             sheetTransform,
+            axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, this._selectionRenderService) ?? sheetTransform,
         };
 
         return this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
@@ -574,8 +576,9 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 }
 
                 const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+                const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
 
-                if (sheetTransform == null) {
+                if (sheetTransform == null || axisAlignSheetTransform == null) {
                     return;
                 }
 
@@ -587,6 +590,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     ...param,
                     transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService) },
                     sheetTransform: { ...sheetTransform },
+                    axisAlignSheetTransform: { ...axisAlignSheetTransform },
                 };
 
                 drawings.push(newDrawing);
@@ -601,7 +605,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _getSheetTransformByParam(param: IDrawingParam): Nullable<ISheetDrawingPosition> {
+    private _getSheetTransformByParam(param: IDrawingParam): Nullable<{
+        sheetTransform: ISheetDrawingPosition;
+        axisAlignSheetTransform: ISheetDrawingPosition;
+    }> {
         const { unitId, subUnitId, drawingId, transform } = param;
         if (transform == null) {
             return null;
@@ -613,10 +620,12 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
         const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
 
-        if (sheetTransform == null) {
+        const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+
+        if (sheetTransform == null || axisAlignSheetTransform == null) {
             return null;
         }
-        return sheetTransform;
+        return { sheetTransform, axisAlignSheetTransform };
     }
 
     private _groupDrawingListener() {
@@ -627,11 +636,12 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
                 const children = [];
                 for (const child of param.children) {
-                    const childSheetTransform = this._getSheetTransformByParam(child);
-                    if (childSheetTransform != null) {
+                    const childSheetTransformInfo = this._getSheetTransformByParam(child);
+                    if (childSheetTransformInfo != null) {
                         children.push({
                             ...child,
-                            sheetTransform: childSheetTransform,
+                            sheetTransform: childSheetTransformInfo.sheetTransform,
+                            axisAlignSheetTransform: childSheetTransformInfo.axisAlignSheetTransform,
                         });
                     }
                 }

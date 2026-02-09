@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IAutoFillRule } from './type';
-import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
+import { CellValueType, Direction, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import AutoFillTools from './tools';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE } from './type';
 
@@ -49,7 +49,8 @@ const dateRule: IAutoFillRule = {
         if ((typeof cellData?.v === 'number' || cellData?.t === CellValueType.NUMBER)
             && cellData.s) {
             if (typeof cellData.s === 'string') {
-                const workbook = accessor.get(IUniverInstanceService).getFocusedUnit() as Workbook;
+                const workbook = accessor.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                if (!workbook) return false;
                 const style = workbook.getStyles().get(cellData.s);
                 const pattern = style?.n?.pattern;
                 if (pattern) {

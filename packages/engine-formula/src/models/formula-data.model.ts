@@ -599,7 +599,7 @@ export class FormulaDataModel extends Disposable {
 
                         // Calculation is only required when there is only a formula and no value
                         const isFormula = isFormulaString(currentCell?.f) || isFormulaId(currentCell?.si);
-                        const noValue = currentCell?.v === undefined;
+                        const noValue = currentCell?.v === undefined || currentCell?.v === null || currentCell?.v === '';
 
                         if (!(isFormula && noValue)) continue;
 

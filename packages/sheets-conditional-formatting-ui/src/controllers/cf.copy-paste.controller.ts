@@ -15,8 +15,9 @@
  */
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import type { IDiscreteRange, IPasteHookValueType } from '@univerjs/sheets-ui';
+import type { IPasteHookValueType } from '@univerjs/sheets-ui';
 import {
     Disposable,
     Inject,
@@ -34,7 +35,7 @@ import {
     rangeToDiscreteRange,
 } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
@@ -138,9 +139,9 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         }
 
         const specialPastes: IPasteHookValueType[] = [
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-            PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
-            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
+            PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER,
         ];
 
         if (

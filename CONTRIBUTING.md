@@ -66,7 +66,6 @@ The structure of the repository is as follows:
 ├── examples/ demos running on the web
 ├── mockdata/ mock data for development
 ├── packages/ Univer core and plugins
-├── packages-experimental/ experimental plugins (not published on npm.com)
 ```
 
 The file structure of a plugin should be organized as follows:

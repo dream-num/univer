@@ -65,7 +65,6 @@ export {
 } from './services/clipboard/clipboard-interface.service';
 export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
-export { IConfirmService, TestConfirmService } from './services/confirm/confirm.service';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export { ContextMenuService, type IContextMenuHandler, IContextMenuService } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
@@ -114,6 +113,7 @@ export { INotificationService } from './services/notification/notification.servi
 export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts/parts.service';
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
+export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';

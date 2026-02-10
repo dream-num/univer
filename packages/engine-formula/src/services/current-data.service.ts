@@ -46,6 +46,7 @@ export interface IFormulaDirtyData {
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
     maxIteration?: number;
+    isCalculateTreeModel?: boolean; // whether to calculate the dependency tree model
     rowData?: IUnitRowData; // Include rows hidden by filters
 }
 
@@ -113,6 +114,8 @@ export interface IFormulaCurrentConfigService {
     getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
+
+    loadDataLite(rowData?: IUnitRowData): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -343,6 +346,23 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._excludedCell = config.excludedCell;
 
         this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
+    }
+
+    loadDataLite(rowData?: IUnitRowData) {
+        const { allUnitData, unitSheetNameMap, unitStylesData } = this._loadSheetData();
+
+        this._unitData = allUnitData;
+
+        this._unitStylesData = unitStylesData;
+
+        this._sheetNameMap = unitSheetNameMap;
+
+        this._formulaData = this._formulaDataModel.getFormulaData();
+        this._arrayFormulaCellData = convertUnitDataToRuntime(this._formulaDataModel.getArrayFormulaCellData());
+        this._arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+
+        // apply row data, including rows hidden by filters
+        rowData && this._applyUnitRowData(rowData);
     }
 
     getDirtyData(): IFormulaDirtyData {

@@ -19,4 +19,4 @@ export type { IUniverSheetsDrawingConfig } from './controllers/config.schema';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
-export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom, ISheetImage } from './services/sheet-drawing.service';
+export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom, ISheetImage, ISheetShape } from './services/sheet-drawing.service';

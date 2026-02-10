@@ -27,7 +27,7 @@ import { useDocHight } from '../../formula-editor/hooks/use-highlight';
 export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean, unitId: string, subUnitId: string) {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const highlightDoc = useDocHight('');
-    const change = useObservable(editor?.getDocumentDataModel().change$);
+    const change = useObservable(editor?.getDocumentDataModel()!.change$);
     const [sequenceNodes, setSequenceNodes] = useState<(string | ISequenceNode)[]>([]);
     const markSelectionService = useDependency(IMarkSelectionService);
     const last = useRef('');
@@ -35,7 +35,7 @@ export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean, 
 
     useEffect(() => {
         if (!editor) return;
-        const text = editor.getDocumentDataModel().getPlainText();
+        const text = editor.getDocumentDataModel()!.getPlainText();
         if (last.current === text) {
             return;
         }

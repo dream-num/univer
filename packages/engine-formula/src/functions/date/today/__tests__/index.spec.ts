@@ -21,7 +21,7 @@ import { Today } from '../index';
 describe('Test today function', () => {
     beforeEach(() => {
         vi.useFakeTimers();
-        vi.setSystemTime(new Date(2020, 0, 1));
+        vi.setSystemTime(Date.UTC(2020, 0, 1));
     });
 
     afterEach(() => {

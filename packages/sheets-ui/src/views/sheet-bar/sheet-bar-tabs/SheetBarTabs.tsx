@@ -18,7 +18,7 @@ import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
-import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
+import { ICommandService, IConfirmService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
 import { DropdownLegacy } from '@univerjs/design';
 import { LockIcon } from '@univerjs/icons';
 
@@ -37,7 +37,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -82,11 +82,11 @@ export function SheetBarTabs() {
                 const name = hasProtect
                     ? (
                         <>
-                            <LockIcon />
-                            <span className="univer-outline-none">{sheet.getName()}</span>
+                            <LockIcon className="univer-shrink-0" />
+                            <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
                         </>
                     )
-                    : <span className="univer-outline-none">{sheet.getName()}</span>;
+                    : <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>;
 
                 return {
                     sheetId: sheet.getSheetId(),
@@ -147,6 +147,11 @@ export function SheetBarTabs() {
             slideTabBarContainer: slideTabBarContainerRef.current,
             currentIndex: 0,
             onChangeName: (subUnitId: string, worksheetName: string) => {
+                if (workbook.getSheetBySheetId(subUnitId)?.getName() === worksheetName) {
+                    updateSheetItems();
+                    return;
+                }
+
                 commandService.executeCommand(SetWorksheetNameCommand.id, {
                     subUnitId,
                     name: worksheetName,

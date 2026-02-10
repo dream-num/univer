@@ -29,4 +29,5 @@ export enum LocaleType {
     KO_KR = 'koKR',
     ES_ES = 'esES',
     CA_ES = 'caES',
+    SK_SK = 'skSK',
 }

@@ -1,5 +1,5 @@
 // The type definition is copied from:
-// packages-experimental/debugger/src/controllers/e2e/e2e.controller.ts
+// common/debugger/src/controllers/e2e/e2e.controller.ts
 export interface IE2EControllerAPI {
     loadAndRelease(id: number, loadTimeout?: number, disposeTimeout?: number): Promise<void>;
     loadDefaultSheet(loadTimeout?: number): Promise<void>;

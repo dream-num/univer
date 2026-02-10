@@ -172,36 +172,40 @@ export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverC
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.registerEventHandler(
-            this.Event.CrosshairHighlightEnabledChanged,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (
-                    commandInfo.id === EnableCrosshairHighlightOperation.id ||
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CrosshairHighlightEnabledChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (
+                        commandInfo.id === EnableCrosshairHighlightOperation.id ||
                     commandInfo.id === DisableCrosshairHighlightOperation.id ||
                     commandInfo.id === ToggleCrosshairHighlightOperation.id
-                ) {
-                    const activeSheet = this.getActiveSheet();
-                    if (!activeSheet) return;
-                    this.fireEvent(this.Event.CrosshairHighlightEnabledChanged, {
-                        enabled: this.getCrosshairHighlightEnabled(),
-                        ...activeSheet,
-                    });
-                }
-            })
+                    ) {
+                        const activeSheet = this.getActiveSheet();
+                        if (!activeSheet) return;
+                        this.fireEvent(this.Event.CrosshairHighlightEnabledChanged, {
+                            enabled: this.getCrosshairHighlightEnabled(),
+                            ...activeSheet,
+                        });
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.CrosshairHighlightColorChanged,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetCrosshairHighlightColorOperation.id) {
-                    const activeSheet = this.getActiveSheet();
-                    if (!activeSheet) return;
-                    this.fireEvent(this.Event.CrosshairHighlightColorChanged, {
-                        color: this.getCrosshairHighlightColor(),
-                        ...activeSheet,
-                    });
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CrosshairHighlightColorChanged,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetCrosshairHighlightColorOperation.id) {
+                        const activeSheet = this.getActiveSheet();
+                        if (!activeSheet) return;
+                        this.fireEvent(this.Event.CrosshairHighlightColorChanged, {
+                            color: this.getCrosshairHighlightColor(),
+                            ...activeSheet,
+                        });
+                    }
+                })
+            )
         );
     }
 

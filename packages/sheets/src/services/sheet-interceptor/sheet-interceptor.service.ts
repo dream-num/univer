@@ -386,7 +386,7 @@ export class SheetInterceptorService extends Disposable {
         const key = _key ?? byNamesKey;
         let composed = this._composedInterceptorByKey.get(key);
 
-        if (!composed || this._interceptorsDirty) {
+        if (!composed || !this._interceptorsDirty) {
             let interceptors = this._interceptorsByName.get(byNamesKey) as unknown as Array<IInterceptor<any, any>> | undefined;
             if (interceptors && filter) {
                 interceptors = interceptors.filter(filter);

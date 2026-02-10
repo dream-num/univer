@@ -28,8 +28,6 @@ import {
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
-
 export const createAutoColWidthUndoMutationsByRedos = (
     params: ISetWorksheetColWidthMutationParams,
     worksheet: Worksheet
@@ -65,7 +63,7 @@ export class AutoWidthController extends Disposable {
         const defaultValue = { redos: [], undos: [] };
         const { _univerInstanceService: univerInstanceService } = this;
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return defaultValue;
 
         const { unitId, subUnitId, worksheet } = target;

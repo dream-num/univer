@@ -38,7 +38,10 @@ const univer = new Univer({
 
 // core plugins
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverUIPlugin, { container: 'app' });
+univer.registerPlugin(UniverUIPlugin, {
+    container: 'app',
+    ribbonType: 'classic',
+});
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin);
 // base-render

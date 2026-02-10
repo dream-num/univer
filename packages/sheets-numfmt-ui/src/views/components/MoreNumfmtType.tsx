@@ -18,7 +18,13 @@ import type { FormatType } from '@univerjs/sheets';
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { getPatternPreview, getPatternType, localeCurrencySymbolMap, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import {
+    getPatternPreview,
+    getPatternType,
+    localeCurrencySymbolMap,
+    SetNumfmtCommand,
+    SheetsNumfmtCellContentController,
+} from '@univerjs/sheets-numfmt';
 import { ILayoutService, useDependency } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
@@ -93,8 +99,8 @@ export function Options() {
                     <div
                         key={index}
                         className={`
-                          univer-flex univer-h-7 univer-items-center univer-justify-between univer-gap-6 univer-rounded
-                          univer-px-2 univer-text-sm
+                          univer-flex univer-h-7 univer-cursor-default univer-items-center univer-justify-between
+                          univer-gap-6 univer-rounded univer-px-2 univer-text-sm
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `}
@@ -102,7 +108,12 @@ export function Options() {
                     >
                         <span>{localeService.t(item.label)}</span>
 
-                        <span className="univer-text-xs univer-text-gray-500">
+                        <span
+                            className={`
+                              univer-text-xs univer-text-gray-500
+                              dark:!univer-text-gray-400
+                            `}
+                        >
                             {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.locale).result.trim() : ''}
                         </span>
                     </div>

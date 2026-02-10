@@ -15,11 +15,11 @@
  */
 
 import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, fromEventSubject, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map, throttleTime } from 'rxjs';
@@ -47,6 +47,7 @@ type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: s
 export class SheetCanvasPopManagerService extends Disposable {
     // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
+    private _popupMenuOffsetMap = new Map<DrawingTypeEnum, { offsetX: number; offsetY: number }>();
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -95,6 +96,16 @@ export class SheetCanvasPopManagerService extends Disposable {
     }
 
     /**
+     * Register a feature menu offset for a specific drawing type.
+     * @param {DrawingTypeEnum} type the drawing type
+     * @param offsetX The offset x
+     * @param offsetY The offset y
+     */
+    registerFeatureMenuOffset(type: DrawingTypeEnum, offsetX: number, offsetY: number) {
+        this._popupMenuOffsetMap.set(type, { offsetX, offsetY });
+    }
+
+    /**
      * Get the feature menu by drawing type, the function should be called when a drawing element need trigger popup menu, so the unitId, subUnitId, drawingId should be provided.
      * @param {string} unitId the unit id
      * @param {string} subUnitId the sub unit id
@@ -112,6 +123,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     override dispose(): void {
         super.dispose();
         this._popupMenuFeatureMap.clear();
+        this._popupMenuOffsetMap.clear();
     }
 
     private _createHiddenRectObserver(params: { row: number; column: number; worksheet: Worksheet; skeleton: SpreadsheetSkeleton; currentRender: IRender }) {
@@ -273,10 +285,22 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
         const { left, top, width, height } = targetObject;
 
+        let offsetX = 0;
+        let offsetY = 0;
+        let drawingType;
+        if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
+            drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
+        }
+        if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
+            const offset = this._popupMenuOffsetMap.get(drawingType)!;
+            offsetX = offset.offsetX;
+            offsetY = offset.offsetY;
+        }
+
         const bound: IBoundRectNoAngle = {
             left,
-            right: left + width,
-            top,
+            right: left + width + offsetX,
+            top: top + offsetY,
             bottom: top + height,
         };
 
@@ -422,17 +446,18 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
-        let workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        let worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return null;
-        }
+        let workbook = _unitId
+            ? this._univerInstanceService.getUnit<Workbook>(_unitId)
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return null;
+
+        let worksheet = _subUnitId
+            ? workbook.getSheetBySheetId(_subUnitId)
+            : workbook.getActiveSheet();
+        if (!worksheet) return null;
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        if ((_unitId && unitId !== _unitId) || (_subUnitId && subUnitId !== _subUnitId)) {
-            return null;
-        }
         const currentRender = this._renderManagerService.getRenderById(unitId);
         const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
@@ -680,12 +705,14 @@ export class SheetCanvasPopManagerService extends Disposable {
         const { top, left, width } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;
 
-        return {
+        const result = {
             left: ((cellInfo.startX - scrollXY.x) * scaleAdjust * scaleX) + left,
             right: (cellInfo.endX - scrollXY.x) * scaleAdjust * scaleX + left,
             top: ((cellInfo.startY - scrollXY.y) * scaleAdjust * scaleY) + top,
             bottom: ((cellInfo.endY - scrollXY.y) * scaleAdjust * scaleY) + top,
         };
+
+        return result;
     }
     // #endregion
 
@@ -760,6 +787,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             right: rightBottomCoord.right,
             bottom: rightBottomCoord.bottom,
         };
+
         return {
             position$,
             position,

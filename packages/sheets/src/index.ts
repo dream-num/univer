@@ -30,6 +30,7 @@ export { expandToContinuousRange } from './basics/expand-range';
 export {
     type IAddWorksheetMergeMutationParams,
     type IDeleteRangeMutationParams,
+    type IDiscreteRange,
     type IInsertColMutationParams,
     type IInsertRangeMutationParams,
     type IInsertRowMutationParams,
@@ -39,7 +40,7 @@ export {
     type IRemoveSheetMutationParams,
     type IRemoveWorksheetMergeMutationParams,
     type IWorksheetRangeThemeStyleMutationParams,
-} from './basics/interfaces/mutation-interface';
+} from './basics/interfaces';
 export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/range-merge';
 export {
     convertPrimaryWithCoordToPrimary,
@@ -54,7 +55,7 @@ export {
 } from './basics/selection';
 export { SplitDelimiterEnum, splitRangeText } from './basics/split-range-text';
 export { findFirstNonEmptyCell } from './basics/utils';
-export { generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange } from './basics/utils';
+export { discreteRangeToRange, generateNullCell, generateNullCellValue, getVisibleRanges, rangeToDiscreteRange } from './basics/utils';
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
 export {
     addMergeCellsUtil,
@@ -62,10 +63,14 @@ export {
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    getClearContentMutationParamForRange,
+    getClearContentMutationParamsForRanges,
+    type IMergeCellsUtilOptions,
 } from './commands/commands/add-worksheet-merge.command';
 export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';
 export { AppendRowCommand, type IAppendRowCommandParams } from './commands/commands/append-row.command';
+export { AutoClearContentCommand, AutoFillCommand, type IAutoClearContentCommand, type IAutoFillCommandParams } from './commands/commands/auto-fill.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand, type IClearSelectionContentCommandParams } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
@@ -77,8 +82,8 @@ export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams 
 export { DeleteWorksheetProtectionCommand } from './commands/commands/delete-worksheet-protection.command';
 export { DeleteWorksheetRangeThemeStyleCommand } from './commands/commands/delete-worksheet-range-theme.command';
 export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
-export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
-export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
+export { type IInsertRangeMoveDownCommandParams, InsertRangeMoveDownCommand } from './commands/commands/insert-range-move-down.command';
+export { type IInsertRangeMoveRightCommandParams, InsertRangeMoveRightCommand } from './commands/commands/insert-range-move-right.command';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,
@@ -103,11 +108,11 @@ export {
     MoveColsCommand,
     MoveRowsCommand,
 } from './commands/commands/move-rows-cols.command';
+export { type IRefillCommandParams, RefillCommand } from './commands/commands/refill.command';
 export { RegisterWorksheetRangeThemeStyleCommand } from './commands/commands/register-range-theme.command';
 export type { IRegisterWorksheetRangeThemeStyleCommandParams } from './commands/commands/register-range-theme.command';
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
 export { type IRemoveColByRangeCommandParams, type IRemoveRowByRangeCommandParams, type IRemoveRowColCommandInterceptParams, type IRemoveRowColCommandParams, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
-
 export { type IRemoveSheetCommandParams, RemoveSheetCommand } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export { type IReorderRangeCommandParams, ReorderRangeCommand } from './commands/commands/reorder-range.command';
@@ -135,6 +140,7 @@ export { type ICancelFrozenCommandParams, type ISetFrozenCommandParams } from '.
 export { CancelFrozenCommand, SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { type ISetGridlinesColorCommandParams, SetGridlinesColorCommand } from './commands/commands/set-gridlines-color.command';
 export { SetProtectionCommand } from './commands/commands/set-protection.command';
+export { type ISetRangeCustomMetadataCommandParams, SetRangeCustomMetadataCommand } from './commands/commands/set-range-custom-metadata.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export { type ISetRowDataCommandParams, SetRowDataCommand } from './commands/commands/set-row-data.command';
 export {
@@ -144,6 +150,7 @@ export {
     SetSpecificRowsVisibleCommand,
 } from './commands/commands/set-row-visible.command';
 export {
+    AFFECT_LAYOUT_STYLES,
     type ISetColorCommandParams,
     type ISetFontFamilyCommandParams,
     type ISetFontSizeCommandParams,
@@ -191,6 +198,7 @@ export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { SplitTextToColumnsCommand } from './commands/commands/split-text-to-columns.command';
 export type { ISplitTextToColumnsCommandParams } from './commands/commands/split-text-to-columns.command';
+export { type ITextToNumberCommandParams, TextToNumberCommand } from './commands/commands/text-to-number.command';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
 export { UnregisterWorksheetRangeThemeStyleCommand } from './commands/commands/unregister-range-theme.command';
@@ -281,7 +289,6 @@ export {
     SetRowVisibleMutation,
 } from './commands/mutations/set-row-visible.mutation';
 export { type ISetTabColorMutationParams, SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
-
 export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 export {
     type ISetWorksheetColWidthMutationParams,
@@ -303,11 +310,12 @@ export {
     type ISetWorksheetRowAutoHeightMutationParams,
     type ISetWorksheetRowHeightMutationParams,
     type ISetWorksheetRowIsAutoHeightMutationParams,
-
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,
+    SetWorksheetRowIsAutoHeightMutationFactory,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type IToggleGridlinesMutationParams, ToggleGridlinesMutation } from './commands/mutations/toggle-gridlines.mutation';
 export { type IUnregisterWorksheetRangeThemeStyleMutationParams, UnregisterWorksheetRangeThemeStyleMutation } from './commands/mutations/unregister-range-theme-style.mutation';
@@ -320,6 +328,7 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getSelectionsService } from './commands/utils/selection-command-util';
+export { AutoFillController } from './controllers/auto-fill.controller';
 export { defaultLargeSheetOperationConfig, type ILargeSheetOperationConfig, type IUniverSheetsConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
@@ -338,6 +347,22 @@ export type { IRangeThemeStyleJSON } from './model/range-theme-util';
 export { RangeThemeStyle } from './model/range-theme-util';
 export type { IRangeThemeStyleItem } from './model/range-theme-util';
 export { UniverSheetsPlugin } from './plugin';
+export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
+export { default as AutoFillRules } from './services/auto-fill/rules';
+export { default as AutoFillTools } from './services/auto-fill/tools';
+export {
+    type AUTO_FILL_APPLY_FUNCTIONS,
+    AUTO_FILL_APPLY_TYPE,
+    AUTO_FILL_DATA_TYPE,
+    AUTO_FILL_HOOK_TYPE,
+    type IAutoFillCopyDataInType,
+    type IAutoFillCopyDataInTypeIndexInfo,
+    type IAutoFillCopyDataPiece,
+    type IAutoFillLocation,
+    type IAutoFillRule,
+    type IAutoFillRuleConfirmedData,
+    type ISheetAutoFillHook,
+} from './services/auto-fill/type';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 export { SheetLazyExecuteScheduleService } from './services/lazy-execute-schedule.service';

@@ -15,22 +15,27 @@
  */
 
 import type { DocumentDataModel, IAccessor } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
 
 export function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
+    const editorService = accessor.get(IEditorService);
 
-    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    const editorUnitId = editorService.getFocusId() ?? DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
     const activeTextRange = textSelectionService.getActiveTextRange();
 
     if (editorDataModel == null || activeTextRange == null) return null;
 
     const textRuns = editorDataModel.getBody()?.textRuns;
+
     if (textRuns == null) return;
 
-    const { startOffset } = activeTextRange;
-    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset <= ed);
+    const { startOffset, endOffset } = activeTextRange;
+    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && endOffset <= ed);
+
     return textRun;
 }

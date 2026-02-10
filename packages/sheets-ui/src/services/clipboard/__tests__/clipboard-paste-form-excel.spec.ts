@@ -23,6 +23,7 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -30,7 +31,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample, excelSample2, excelSample3, excelSample4, excelSample5 } from './constant';
+import { excelSample, excelSample2, excelSample3, excelSample4, excelSample5, excelSample6 } from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -99,6 +100,7 @@ describe('Test clipboard', () => {
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
 
         sheetSkeletonManagerService = get(SheetSkeletonManagerService);
         sheetClipboardService = get(ISheetClipboardService);
@@ -215,7 +217,14 @@ describe('Test clipboard', () => {
             expect(cellStyle?.bg).toStrictEqual({ rgb: 'rgb(15,158,213)' });
             const richTextStyle = getValues(2, 3, 2, 3)?.[0]?.[0]?.p;
             expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
-            expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);
+            expect(richTextStyle?.body?.paragraphs).toStrictEqual([
+                {
+                    paragraphStyle: {
+                        horizontalAlign: 0,
+                    },
+                    startIndex: 6,
+                },
+            ]);
             expect(richTextStyle?.body?.textRuns).toStrictEqual([
                 {
                     st: 1,
@@ -411,6 +420,37 @@ describe('Test clipboard', () => {
             const cellValue = getValues(0, 0, 0, 0)?.[0]?.[0];
             expect(cellValue?.v).toBe(23123);
             expect(cellValue?.t).toBe(CellValueType.NUMBER);
+        });
+
+        it('copy value is `  1   3   `, no specific format', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+
+            // set selection to K1:L1
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            // paste data, excelSample2 value is 000123456
+            const res = await sheetClipboardService.legacyPaste(excelSample6);
+            expect(res).toBeTruthy();
+
+            // check the values
+            const cellValue = getValues(0, 0, 0, 0)?.[0]?.[0];
+            // space char code is 32(' '), no-break space char code is 160(\u00A0)
+            expect(cellValue?.v).toMatch(/[ \u00A0]{2}1[ \u00A0]{3}3[ \u00A0]{3}/);
+            expect(cellValue?.t).toBe(CellValueType.STRING);
         });
     });
 });

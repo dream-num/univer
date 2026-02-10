@@ -37,7 +37,7 @@ function getHasNote$(accessor: IAccessor): Observable<boolean> {
         if (!target) return false;
         const { actualColumn, actualRow } = selection.primary;
         const noteModel = accessor.get(SheetsNoteModel);
-        return Boolean(noteModel.getNote(target.unitId, target.subUnitId, actualRow, actualColumn));
+        return Boolean(noteModel.getNote(target.unitId, target.subUnitId, { row: actualRow, col: actualColumn }));
     }));
 }
 

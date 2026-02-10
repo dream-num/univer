@@ -20,7 +20,7 @@ import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { COPY_TYPE, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getSetCellFormulaMutations } from '../formula-clipboard.controller';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -99,7 +99,7 @@ describe('Test paste with formula', () => {
                     cols: [2, 3],
                 },
                 copyType: COPY_TYPE.COPY,
-                pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+                pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
             };
 
             const pasteFrom = {
@@ -329,7 +329,7 @@ describe('Test paste with formula', () => {
                     rows: [0, 1, 2, 3],
                     cols: [5, 6, 7, 8],
                 },
-                pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+                pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
             };
 
             const pasteFrom = {

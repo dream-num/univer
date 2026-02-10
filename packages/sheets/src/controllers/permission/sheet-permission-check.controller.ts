@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
+import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
@@ -27,6 +28,7 @@ import { CustomCommandExecutionError, Disposable, DisposableCollection, ICommand
 import { deserializeRangeWithSheet, deserializeRangeWithSheetWithCache, IDefinedNamesService, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
+import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
@@ -53,8 +55,7 @@ import { SheetsSelectionsService } from '../../services/selections';
 /* eslint-disable max-lines-per-function */
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams;
-
+type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISetSpecificRowsVisibleCommandParams | IAutoFillCommandParams;
 export class SheetPermissionCheckController extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -224,6 +225,10 @@ export class SheetPermissionCheckController extends Disposable {
                 permission = this._permissionCheckWithInsertRangeMove('top');
                 errorMsg = this._localeService.t('permission.dialog.insertOrDeleteMoveRangeErr');
                 break;
+            case AutoFillCommand.id:
+                permission = this._permissionCheckByAutoFillCommand(params as IAutoFillCommandParams);
+                errorMsg = this._localeService.t('permission.dialog.autoFillErr');
+                break;
 
             default:
                 break;
@@ -361,42 +366,33 @@ export class SheetPermissionCheckController extends Disposable {
     }
 
     public permissionCheckWithRanges(permissionTypes: IPermissionTypes, selectionRanges?: IRange[], unitId?: string, subUnitId?: string) {
-        const target = getSheetCommandTarget(this._univerInstanceService);
-        if (!target) {
-            return false;
-        }
-        const { workbook, worksheet } = target;
-        if (!unitId) {
-            unitId = workbook.getUnitId();
-        }
-        if (!subUnitId) {
-            subUnitId = worksheet.getSheetId();
-        }
+        const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
+        if (!target) return false;
+
         const ranges = selectionRanges ?? this._selectionManagerService.getCurrentSelections()?.map((selection) => {
             return selection.range;
         });
+        if (!ranges) return false;
 
-        if (!ranges) {
-            return false;
-        }
-
+        const { unitId: _unitId, subUnitId: _subUnitId } = target;
         const { workbookTypes, worksheetTypes, rangeTypes } = permissionTypes;
+
         const permissionIds = [];
         if (workbookTypes) {
-            permissionIds.push(...workbookTypes.map((F) => new F(unitId).id));
+            permissionIds.push(...workbookTypes.map((F) => new F(_unitId).id));
         }
         if (worksheetTypes) {
-            permissionIds.push(...worksheetTypes.map((F) => new F(unitId, subUnitId).id));
+            permissionIds.push(...worksheetTypes.map((F) => new F(_unitId, _subUnitId).id));
         }
         if (rangeTypes) {
-            this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
+            this._rangeProtectionRuleModel.getSubunitRuleList(_unitId, _subUnitId).forEach((rule) => {
                 const overlap = ranges.some((range) => {
                     return rule.ranges.some((r) => {
                         return Rectangle.intersects(r, range);
                     });
                 });
                 if (overlap) {
-                    permissionIds.push(...rangeTypes.map((F) => new F(unitId, subUnitId, rule.permissionId).id));
+                    permissionIds.push(...rangeTypes.map((F) => new F(_unitId, _subUnitId, rule.permissionId).id));
                 }
             });
         }
@@ -409,17 +405,18 @@ export class SheetPermissionCheckController extends Disposable {
     }
 
     private _permissionCheckByMoveCommand(params: IMoveRowsCommandParams | IMoveColsCommandParams) {
-        const target = getSheetCommandTarget(this._univerInstanceService);
-        if (!target) {
-            return false;
-        }
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
+        if (!target) return false;
+
         const { worksheet, unitId, subUnitId } = target;
+
         const toRange = params.toRange;
         if (toRange.endRow === worksheet.getRowCount() - 1) {
             toRange.endColumn = toRange.startColumn;
         } else {
             toRange.endRow = toRange.startRow;
         }
+
         const permissionLapRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
             return [...p, ...c.ranges];
         }, [] as IRange[]).filter((range) => {
@@ -429,6 +426,7 @@ export class SheetPermissionCheckController extends Disposable {
         if (permissionLapRanges.length > 0) {
             return false;
         }
+
         permissionLapRanges.forEach((range) => {
             for (let row = range.startRow; row <= range.endRow; row++) {
                 for (let col = range.startColumn; col <= range.endColumn; col++) {
@@ -562,23 +560,57 @@ export class SheetPermissionCheckController extends Disposable {
             }
         }
         if (range) {
-            const target = getSheetCommandTarget(this._univerInstanceService);
-            if (!target) {
-                return false;
-            }
-            const unitId = params.unitId || target.unitId;
-            const subunitId = params.subUnitId || target.subUnitId;
-            const permissionList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subunitId).filter((rule) => {
+            const target = getSheetCommandTarget(this._univerInstanceService, params);
+            if (!target) return false;
+
+            const { unitId, subUnitId } = target;
+
+            const permissionList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
                 return rule.ranges.some((ruleRange) => {
                     return Rectangle.intersects(ruleRange, range);
                 });
             });
-            const permissionIds = permissionList.map((rule) => new RangeProtectionPermissionEditPoint(unitId, subunitId, rule.permissionId).id);
+            const permissionIds = permissionList.map((rule) => new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
+
             const editPermission = this._permissionService.composePermission(permissionIds).every((permission) => permission.value);
             if (!editPermission) {
                 return false;
             }
         }
         return true;
+    }
+
+    private _permissionCheckByAutoFillCommand(params?: IAutoFillCommandParams) {
+        if (!params) {
+            return false;
+        }
+
+        const { targetRange } = params;
+
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
+
+        const permissionLapRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
+            return [...p, ...c.ranges];
+        }, [] as IRange[]).filter((range) => {
+            return Rectangle.intersects(range, targetRange);
+        });
+
+        const hasNotPermission = permissionLapRanges.some((range) => {
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                    if (permission?.[UnitAction.Edit] === false) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+
+        return !hasNotPermission;
     }
 }

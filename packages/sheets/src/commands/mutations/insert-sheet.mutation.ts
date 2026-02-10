@@ -19,7 +19,7 @@ import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { cloneWorksheetData, CommandType, IUniverInstanceService } from '@univerjs/core';
 
 /**
  * Generate undo mutation of a `InsertSheetMutation`
@@ -53,6 +53,6 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
             workbook.addStyles(styles);
         }
 
-        return workbook.addWorksheet(sheet.id, index, sheet);
+        return workbook.addWorksheet(sheet.id, index, cloneWorksheetData(sheet));
     },
 };

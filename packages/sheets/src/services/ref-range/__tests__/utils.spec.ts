@@ -1181,7 +1181,7 @@ describe('test ref-range move', () => {
             const result = handleInsertRowCommon(info, targetRange);
 
             expect(result).toEqual([{
-                startRow: 8,
+                startRow: 5,
                 endRow: 13, // 10 + (7 - 5 + 1)
                 startColumn: 2,
                 endColumn: 8,
@@ -1311,7 +1311,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual([{
                 startRow: 2,
                 endRow: 8,
-                startColumn: 8, // 5 + (7 - 5 + 1)
+                startColumn: 5,
                 endColumn: 13, // 10 + (7 - 5 + 1)
             }]);
         });

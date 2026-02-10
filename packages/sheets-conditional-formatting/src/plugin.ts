@@ -16,7 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { AddCfCommand } from './commands/commands/add-cf.command';
 import { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
@@ -26,7 +27,6 @@ import { MoveCfCommand } from './commands/commands/move-cf.command';
 import { SetCfCommand } from './commands/commands/set-cf.command';
 import { AddConditionalRuleMutation } from './commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
-import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 import { MoveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from './commands/mutations/set-conditional-rule.mutation';
 import {
@@ -38,6 +38,7 @@ import { ConditionalFormattingViewModel } from './models/conditional-formatting-
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
 
+@DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -78,7 +79,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
             DeleteConditionalRuleMutation,
             SetConditionalRuleMutation,
             MoveConditionalRuleMutation,
-            ConditionalFormattingFormulaMarkDirty,
         ].forEach((m) => {
             this._commandService.registerCommand(m);
         });
@@ -86,6 +86,9 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
 
     override onStarting(): void {
         this._injector.get(ConditionalFormattingService);
-        touchDependencies(this._injector, [[ConditionalFormattingService], [ConditionalFormattingViewModel]]);
+        touchDependencies(this._injector, [
+            [ConditionalFormattingService],
+            [ConditionalFormattingViewModel],
+        ]);
     }
 }

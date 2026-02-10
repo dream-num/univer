@@ -460,11 +460,24 @@ export class TableManager extends Disposable {
     }
 
     deleteUnitId(unitId: string) {
+        const unitMap = this._tableMap.get(unitId);
+        if (unitMap) {
+            unitMap.forEach((table) => table.dispose());
+        }
         this._tableMap.delete(unitId);
     }
 
     override dispose() {
         super.dispose();
+
+        this._tableAdd$.complete();
+        this._tableDelete$.complete();
+        this._tableNameChanged$.complete();
+        this._tableRangeChanged$.complete();
+        this._tableThemeChanged$.complete();
+        this._tableFilterChanged$.complete();
+        this._tableInitStatus.complete();
+
         this._tableMap.forEach((unitMap) => {
             unitMap.forEach((table) => table.dispose());
             unitMap.clear();

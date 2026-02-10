@@ -72,7 +72,7 @@ export function useEditor(opts: IUseEditorProps) {
             setEditor(editor);
 
             if (autoFocus) {
-                editor.focus();
+                editorService.focus(editorId);
                 const end = (snapshot.body?.dataStream.length ?? 2) - 2;
                 editor.setSelectionRanges([{ startOffset: end, endOffset: end }]);
             }

@@ -62,10 +62,8 @@ export function getArrayLength<T>(o: IObjectArrayPrimitiveType<T> | IObjectMatri
     return maxIndex + 1;
 }
 
-/**
- * This function has bug of undefined value to be inserted.
- * @deprecated
- */
+const isEmptyValue = (value: any): boolean => value === undefined || value === null || (typeof value === 'object' && Object.keys(value).length === 0);
+
 export function insertMatrixArray<T>(
     index: number,
     value: T,
@@ -76,10 +74,16 @@ export function insertMatrixArray<T>(
 
     // move all items after index in backward order
     for (let i = length - 1; i >= index; i--) {
-        array[i + 1] = array[i];
+        if (isEmptyValue(array[i])) {
+            delete array[i + 1];
+        } else {
+            array[i + 1] = array[i];
+        }
     }
 
-    array[index] = value;
+    if (!isEmptyValue(value)) {
+        array[index] = value;
+    }
 }
 
 export function spliceArray<T>(

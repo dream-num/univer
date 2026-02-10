@@ -18,11 +18,11 @@ import type { IStyleData, Nullable } from '@univerjs/core';
 import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, dayjs, Range, Tools } from '@univerjs/core';
-import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
+import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
-import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 
 interface IConfig {
     value: any;
@@ -32,7 +32,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
         const ruleConfig = context.rule.rule as IHighlightCell;
-        const ranges = context.rule.ranges;
+        const ranges = filterRange(context.rule.ranges, context.worksheet.getMaxRows() - 1, context.worksheet.getMaxColumns() - 1);
         // eslint-disable-next-line max-lines-per-function, complexity
         const getCache = () => {
             switch (ruleConfig.subType) {
@@ -42,8 +42,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = context.getCellValue(row, col);
-                            const v = getCellValue(cell || undefined);
-                            if (cell && cell.t === CellValueType.NUMBER && v !== undefined) {
+                            const v = getCellValue(cell);
+                            if (cell && cell.t === CellValueType.NUMBER && !isNullable(v)) {
                                 sum += Number(v) || 0;
                                 count++;
                             }
@@ -57,8 +57,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = context.getCellValue(row, col);
-                            const v = getCellValue(cell || undefined);
-                            if (v !== undefined) {
+                            const v = getCellValue(cell);
+                            if (!isNullable(v)) {
                                 const cache = cacheMap.get(v);
                                 if (cache) {
                                     cacheMap.set(v, cache + 1);
@@ -75,8 +75,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = context.getCellValue(row, col);
-                            const v = getCellValue(cell || undefined);
-                            if (cell && cell.t === CellValueType.NUMBER && v !== undefined) {
+                            const v = getCellValue(cell);
+                            if (cell && cell.t === CellValueType.NUMBER && !isNullable(v)) {
                                 allValue.push(Number(v) || 0);
                             }
                         });
@@ -246,8 +246,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                 }
                 case CFSubRuleType.text: {
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
-                    const value = getCellValue(cellValue!);
-                    const v = value === null ? '' : String(value);
+                    const value = getCellValue(cellValue);
+                    const v = isNullable(value) ? '' : String(value);
                     const condition = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
                         case CFTextOperator.beginsWith: {
@@ -286,7 +286,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     }
                 }
                 case CFSubRuleType.timePeriod: {
-                    const value = getCellValue(cellValue!);
+                    const value = getCellValue(cellValue);
                     if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER || !preComputingResult) {
                         return;
                     }
@@ -338,7 +338,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     }
                 }
                 case CFSubRuleType.rank: {
-                    const value = getCellValue(cellValue!);
+                    const value = getCellValue(cellValue);
 
                     const v = Number(value);
 
@@ -355,7 +355,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     }
                 }
                 case CFSubRuleType.uniqueValues: {
-                    const value = getCellValue(cellValue!);
+                    const value = getCellValue(cellValue);
 
                     if (isNullable(value) || !preComputingResult) {
                         return false;
@@ -364,19 +364,25 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     return uniqueCache.get(value) === 1;
                 }
                 case CFSubRuleType.duplicateValues: {
-                    const value = getCellValue(cellValue!);
+                    const value = getCellValue(cellValue);
 
                     if (isNullable(value) || !preComputingResult) {
                         return false;
                     }
-                    const uniqueCache = preComputingResult.value;
-                    return uniqueCache.get(value) !== 1;
+                    const uniqueCacheValue = preComputingResult.value.get(value);
+
+                    return uniqueCacheValue && uniqueCacheValue !== 1;
                 }
                 case CFSubRuleType.formula: {
                     // const _ruleConfig = ruleConfig as IFormulaHighlightCell;
                     const cache = preComputingResult?.value;
                     if (cache) {
-                        const value = cache.getValue(row, col);
+                        // The formula result matrix starts from (0,0), but we need to use relative coordinates
+                        // based on the first range's start position
+                        const firstRange = context.rule.ranges[0];
+                        const relativeRow = row - firstRange.startRow;
+                        const relativeCol = col - firstRange.startColumn;
+                        const value = cache.getValue(relativeRow, relativeCol);
                         return value === true;
                     }
                     return false;

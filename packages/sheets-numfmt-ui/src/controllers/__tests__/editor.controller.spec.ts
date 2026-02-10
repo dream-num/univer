@@ -26,6 +26,7 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
+import { excelDateSerial } from '@univerjs/engine-formula';
 import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -509,8 +510,7 @@ describe('test editor', () => {
         };
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
-
-        expect(result?.v).toBe(45691);
+        expect(result?.v).toBe(excelDateSerial(new Date(new Date().getFullYear(), 1, 3)));
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
 

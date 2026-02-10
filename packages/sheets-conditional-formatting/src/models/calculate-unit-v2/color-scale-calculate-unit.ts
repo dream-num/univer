@@ -17,11 +17,13 @@
 import type { IColorScale, IConditionFormattingRule } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
+import { FormulaResultStatus } from '@univerjs/engine-formula';
 import { isObject } from '@univerjs/engine-render';
 import { CFValueType } from '../../base/const';
-import { FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { filterRange, getColorScaleFromValue, getValueByType, isNullable } from './utils';
+
+;
 
 interface IConfigItem {
     value: number;
@@ -80,9 +82,9 @@ export class ColorScaleCalculateUnit extends BaseCalculateUnit<IConfigItem[], st
         if (!preComputingResult) {
             return null;
         }
-        const value = context.getCellValue(row, col);
-        if (value.t === CellValueType.NUMBER) {
-            const v = Number(value.v);
+        const cell = context.getCellValue(row, col);
+        if (cell.t === CellValueType.NUMBER) {
+            const v = Number(cell.v);
             if (!Number.isNaN(v)) {
                 const color = getColorScaleFromValue(preComputingResult, v);
                 return color;

@@ -31,6 +31,7 @@ export class WorkbookSelectionModel extends Disposable {
      * Selection data model for each worksheet.
      */
     private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
+    private _worksheetLastSelectionPrimaryCell = new Map<string, Nullable<ISelectionCell>>();
 
     private readonly _selectionMoveStart$ = new Subject<Nullable<ISelectionWithStyle[]>>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
@@ -67,6 +68,7 @@ export class WorkbookSelectionModel extends Disposable {
 
         //@ts-ignore
         this._workbook = null!;
+        this.clear();
     }
 
     addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
@@ -130,17 +132,26 @@ export class WorkbookSelectionModel extends Disposable {
         return this._worksheetSelections.get(sheetId)!;
     }
 
+    getLastSelectionPrimaryCellOfWorksheet(sheetId: string): Nullable<ISelectionCell> {
+        return this._worksheetLastSelectionPrimaryCell.get(sheetId) ?? null;
+    }
+
     setSelectionsOfWorksheet(sheetId: string, selections: ISelectionWithStyle[]): void {
         this._worksheetSelections.set(sheetId, [...selections]);
+        if (selections.length > 0 && selections[selections.length - 1].primary) {
+            this._worksheetLastSelectionPrimaryCell.set(sheetId, selections[selections.length - 1].primary!);
+        }
     }
 
     deleteSheetSelection(sheetId: string) {
         this._worksheetSelections.set(sheetId, []);
+        this._worksheetLastSelectionPrimaryCell.delete(sheetId);
     }
 
     /** Clear all selections in this workbook. */
     clear(): void {
         this._worksheetSelections.clear();
+        this._worksheetLastSelectionPrimaryCell.clear();
         this._selectionSet$.next([]);
     }
 

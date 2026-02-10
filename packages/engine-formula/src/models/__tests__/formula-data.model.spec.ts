@@ -200,20 +200,6 @@ describe('Test formula data model', () => {
                 };
 
                 const result = {
-                    1: {
-                        3: {
-                            f: '=SUM(A2)',
-                            si: 'OSPtzm',
-                        },
-                    },
-                    2: {
-                        3: {
-                            f: '=SUM(A2)',
-                            si: 'OSPtzm',
-                            x: 0,
-                            y: 1,
-                        },
-                    },
                     3: {
                         3: null,
                     },

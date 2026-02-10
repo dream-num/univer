@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import type { IConfirmPartMethodOptions } from '@univerjs/ui';
+import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
+    IConfirmService,
     IUniverInstanceService,
     LocaleService,
     RANGE_TYPE,
     RedoCommand,
+    TestConfirmService,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeMutation,
+    AddWorksheetMergeVerticalCommand,
+    getClearContentMutationParamForRange,
     InsertColAfterCommand,
     InsertColBeforeCommand,
     InsertColByRangeCommand,
@@ -54,16 +60,7 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
-import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { getClearContentMutationParamForRange } from '../../../common/utils';
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../add-worksheet-merge.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test add worksheet merge commands', () => {
@@ -74,26 +71,7 @@ describe('Test add worksheet merge commands', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [
-                IConfirmService,
-                {
-                    useClass: class MockConfirmService implements IConfirmService {
-                        confirmOptions$: Subject<IConfirmPartMethodOptions[]> = new Subject();
-
-                        open(params: IConfirmPartMethodOptions): IDisposable {
-                            throw new Error('Method not implemented.');
-                        }
-
-                        confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
-                            return Promise.resolve(true);
-                        }
-
-                        close(id: string): void {
-                            throw new Error('Method not implemented.');
-                        }
-                    },
-                },
-            ],
+            [IConfirmService, { useClass: TestConfirmService }],
             [RefRangeService],
             [MergeCellController],
         ]);
@@ -507,7 +485,11 @@ describe('Test add worksheet merge commands', () => {
                     pattern: '0%',
                 },
             });
-            expect(worksheet.getCellRaw(20, 1)).toBeUndefined();
+            expect(worksheet.getCellStyle(20, 1)).toStrictEqual({
+                n: {
+                    pattern: '0%',
+                },
+            });
         });
     });
 

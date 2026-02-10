@@ -16,6 +16,7 @@
 
 import type { Injector } from '@wendellhu/redi';
 import { IImageIoService, ImageSourceType } from '../../services/image-io/image-io.service';
+import { IURLImageService } from '../../services/image-io/url-image.service';
 import { LRUMap } from '../lru/lru-map';
 
 export class ImageCacheMap {
@@ -23,7 +24,7 @@ export class ImageCacheMap {
 
     constructor(
         private _injector: Injector,
-        maxSize = 100
+        maxSize = 1000
     ) {
         this._imageCacheMap = new LRUMap(maxSize);
     }
@@ -41,12 +42,20 @@ export class ImageCacheMap {
             (async () => {
                 const newImageElement = new Image();
                 const imageIoService = this._injector.has(IImageIoService) ? this._injector.get(IImageIoService) : null;
+                const urlImageService = this._injector.has(IURLImageService) ? this._injector.get(IURLImageService) : null;
 
                 if (imageSourceType === ImageSourceType.UUID) {
                     try {
                         newImageElement.src = await imageIoService?.getImage(source) || '';
                     } catch (error) {
                         console.error(error);
+                    }
+                } else if (imageSourceType === ImageSourceType.URL) {
+                    try {
+                        const url = await urlImageService?.getImage(source);
+                        newImageElement.src = url || source;
+                    } catch (error) {
+                        newImageElement.src = source;
                     }
                 } else {
                     newImageElement.src = source;

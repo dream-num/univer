@@ -15,18 +15,19 @@
  */
 
 import type { LocaleService } from '@univerjs/core';
-import type { FunctionType, IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
+import { FunctionType } from '@univerjs/engine-formula';
 
 export function getFunctionTypeValues(
-    enumObj: typeof FunctionType,
-    localeService: LocaleService
+    localeService: LocaleService,
+    customFormula: boolean
 ): Array<{ label: string; value: string }> {
     // Exclude the DefinedName key
-    return Object.keys(enumObj)
-        .filter((key) => isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table')
+    return Object.keys(FunctionType)
+        .filter((key) => isNaN(Number(key)) && key !== 'DefinedName' && key !== 'Table' && (customFormula || key !== 'User'))
         .map((key) => ({
             label: localeService.t(`formula.functionType.${key.toLocaleLowerCase()}`),
-            value: `${enumObj[key as keyof typeof FunctionType]}`,
+            value: `${FunctionType[key as keyof typeof FunctionType]}`,
         }));
 }
 

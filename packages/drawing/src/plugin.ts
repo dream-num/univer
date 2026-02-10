@@ -17,13 +17,14 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDrawingConfig } from './controllers/config.schema';
 
-import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, IURLImageService, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
 import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingManagerService } from './services/drawing-manager-impl.service';
 import { IDrawingManagerService } from './services/drawing-manager.service';
 import { ImageIoService } from './services/image-io-impl.service';
 import { IImageIoService } from './services/image-io.service';
+import { URLImageService } from './services/url-image.service';
 
 const PLUGIN_NAME = 'UNIVER_DRAWING_PLUGIN';
 
@@ -55,6 +56,7 @@ export class UniverDrawingPlugin extends Plugin {
     private _initDependencies(): void {
         const dependencies: Dependency[] = [
             [IImageIoService, { useClass: ImageIoService }],
+            [IURLImageService, { useClass: URLImageService }],
             [IDrawingManagerService, { useClass: DrawingManagerService }],
         ];
 

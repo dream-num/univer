@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, IDrawingParam, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, generateRandomId, ICommandService, IContextService, ImageSourceType, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, generateRandomId, ICommandService, IContextService, ImageSourceType, Inject, Injector, IURLImageService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
@@ -108,7 +108,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IURLImageService private readonly _urlImageService: IURLImageService
     ) {
         super();
 
@@ -353,7 +354,13 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
     // eslint-disable-next-line max-lines-per-function
     async insertCellImageByUrl(url: string, location?: ISheetLocationBase) {
-        const { width, height, image } = await getImageSize(url || '');
+        let src = url;
+        try {
+            src = await this._urlImageService.getImage(url);
+        } catch (error) {
+            console.error(`Failed to get image from URLImageService: ${url}`, error);
+        }
+        const { width, height, image } = await getImageSize(src || '');
         this._imageIoService.addImageSourceCache(url, ImageSourceType.URL, image);
         const selection = this._workbookSelections.getCurrentLastSelection();
         if (!selection) {
@@ -594,15 +601,75 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
+    private _getSheetTransformByParam(param: IDrawingParam): Nullable<ISheetDrawingPosition> {
+        const { unitId, subUnitId, drawingId, transform } = param;
+        if (transform == null) {
+            return null;
+        }
+        const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
+
+        if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
+            return null;
+        }
+        const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+
+        if (sheetTransform == null) {
+            return null;
+        }
+        return sheetTransform;
+    }
+
     private _groupDrawingListener() {
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
-            const { unitId, subUnitId, drawingId } = params[0].parent;
-            this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
+            const grpParams = [];
+            for (const param of params) {
+                const sheetTransform = this._getSheetTransformByParam(param.parent);
+
+                const children = [];
+                for (const child of param.children) {
+                    const childSheetTransform = this._getSheetTransformByParam(child);
+                    if (childSheetTransform != null) {
+                        children.push({
+                            ...child,
+                            sheetTransform: childSheetTransform,
+                        });
+                    }
+                }
+
+                const grpParam = {
+                    parent: { ...param.parent, sheetTransform },
+                    children,
+
+                };
+                grpParams.push(grpParam);
+            }
+            if (grpParams.length > 0) {
+                this._commandService.executeCommand(GroupSheetDrawingCommand.id, grpParams);
+                const { unitId, subUnitId, drawingId } = params[0].parent;
+                this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
+            }
         }));
 
         this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
+            const unGroupParams = [];
+            for (const param of params) {
+                const { children } = param;
+                const childParams = [];
+                for (const child of children) {
+                    const childSheetTransform = this._getSheetTransformByParam(child);
+                    if (childSheetTransform != null) {
+                        childParams.push({
+                            ...child,
+                            sheetTransform: childSheetTransform,
+                        });
+                    }
+                }
+                unGroupParams.push({
+                    ...param,
+                    children: childParams,
+                });
+            }
+            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, unGroupParams);
         }));
     }
 

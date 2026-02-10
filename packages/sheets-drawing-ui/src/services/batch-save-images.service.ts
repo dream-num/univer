@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
 declare global {
@@ -139,7 +139,17 @@ export interface IBatchSaveImagesService {
     /**
      * Get all column indices that are within the current selection
      */
+    /**
+     * Get all column indices that are within the current selection
+     */
     getSelectionColumnIndices(): Set<number>;
+
+    /**
+     * Register a custom image downloader for URL images
+     * @param downloader The downloader function that takes a URL and returns a base64 string
+     * @returns A disposable object to unregister the downloader
+     */
+    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable;
 }
 
 export const IBatchSaveImagesService = createIdentifier<IBatchSaveImagesService>('sheets-drawing-ui.batch-save-images.service');
@@ -245,9 +255,17 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetsSelectionsService) private readonly _selectionService: SheetsSelectionsService,
-        @IImageIoService private readonly _imageIoService: IImageIoService
+        @IImageIoService private readonly _imageIoService: IImageIoService,
+        @IURLImageService private readonly _urlImageService: IURLImageService
     ) {
         super();
+    }
+
+    /**
+     * @deprecated Use IURLImageService directly
+     */
+    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
+        return this._urlImageService.registerURLImageDownloader(downloader);
     }
 
     getCellImagesInSelection(): ICellImageInfo[] {
@@ -666,6 +684,11 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
             const imageUrl = await this._imageIoService.getImage(imageInfo.source);
             return imageSourceToBlob(imageUrl, ImageSourceType.URL);
         }
+
+        if (imageInfo.imageSourceType === ImageSourceType.URL) {
+            return this._urlImageService.downloadImage(imageInfo.source);
+        }
+
         return imageSourceToBlob(imageInfo.source, imageInfo.imageSourceType);
     }
 }

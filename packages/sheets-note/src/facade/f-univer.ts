@@ -16,8 +16,9 @@
 
 import type { Injector } from '@univerjs/core';
 import type { IRemoveNoteMutationParams, IUpdateNoteMutationParams } from '@univerjs/sheets-note';
-import { CanceledError, ICommandService } from '@univerjs/core';
+import { CanceledError, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 
 /**
@@ -30,144 +31,156 @@ export interface IFUniverSheetNoteMixin {
 export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteMixin {
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
-        this.registerEventHandler(
-            this.Event.SheetNoteAdd,
-            () => {
-                const model = injector.get(SheetsNoteModel);
-                return model.change$.subscribe((change) => {
-                    if (change.type === 'update' && !change.oldNote && change.note) {
-                        const { unitId, sheetId, row, col, note, oldNote } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+        const commandService = injector.get(ICommandService);
 
-                        this.fireEvent(this.Event.SheetNoteAdd, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                            note,
-                        });
-                    }
-                });
-            }
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetNoteAdd,
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && !change.oldNote && change.newNote) {
+                            const { unitId, subUnitId, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
+
+                            this.fireEvent(this.Event.SheetNoteAdd, {
+                                workbook,
+                                worksheet,
+                                row: newNote.row,
+                                col: newNote.col,
+                                note: newNote,
+                            });
+                        }
+                    });
+                }
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetNoteDelete,
-            () => {
-                const model = injector.get(SheetsNoteModel);
-                return model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && !change.note) {
-                        const { unitId, sheetId, row, col, note, oldNote } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetNoteDelete,
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && !change.newNote) {
+                            const { unitId, subUnitId, oldNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteDelete, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                            oldNote,
-                        });
-                    }
-                });
-            }
+                            this.fireEvent(this.Event.SheetNoteDelete, {
+                                workbook,
+                                worksheet,
+                                row: oldNote.row,
+                                col: oldNote.col,
+                                oldNote,
+                            });
+                        }
+                    });
+                }
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetNoteUpdate,
-            () => {
-                const model = injector.get(SheetsNoteModel);
-                return model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && change.note) {
-                        const { unitId, sheetId, row, col, note, oldNote } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetNoteUpdate,
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && change.newNote) {
+                            const { unitId, subUnitId, oldNote, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteUpdate, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                            note,
-                            oldNote,
-                        });
-                    }
-                });
-            }
+                            this.fireEvent(this.Event.SheetNoteUpdate, {
+                                workbook,
+                                worksheet,
+                                row: newNote.row,
+                                col: newNote.col,
+                                note: newNote,
+                                oldNote,
+                            });
+                        }
+                    });
+                }
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetNoteShow,
-            () => {
-                const model = injector.get(SheetsNoteModel);
-                return model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && change.note && !change.oldNote.show && change.note.show) {
-                        const { unitId, sheetId, row, col } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetNoteShow,
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && change.newNote && !change.oldNote.show && change.newNote.show) {
+                            const { unitId, subUnitId, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteShow, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                        });
-                    }
-                });
-            }
+                            this.fireEvent(this.Event.SheetNoteShow, {
+                                workbook,
+                                worksheet,
+                                row: newNote.row,
+                                col: newNote.col,
+                            });
+                        }
+                    });
+                }
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetNoteHide,
-            () => {
-                const model = injector.get(SheetsNoteModel);
-                return model.change$.subscribe((change) => {
-                    if (change.type === 'update' && change.oldNote && change.note && change.oldNote.show && !change.note.show) {
-                        const { unitId, sheetId, row, col } = change;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetNoteHide,
+                () => {
+                    const model = injector.get(SheetsNoteModel);
+                    return model.change$.subscribe((change) => {
+                        if (change.type === 'update' && change.oldNote && change.newNote && change.oldNote.show && !change.newNote.show) {
+                            const { unitId, subUnitId, newNote } = change;
+                            const target = this.getSheetTarget(unitId, subUnitId);
+                            if (!target) {
+                                return;
+                            }
+                            const { workbook, worksheet } = target;
 
-                        this.fireEvent(this.Event.SheetNoteHide, {
-                            workbook,
-                            worksheet,
-                            row,
-                            col,
-                        });
-                    }
-                });
-            }
+                            this.fireEvent(this.Event.SheetNoteHide, {
+                                workbook,
+                                worksheet,
+                                row: newNote.row,
+                                col: newNote.col,
+                            });
+                        }
+                    });
+                }
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetNoteAdd,
-            () => {
-                const commandService = injector.get(ICommandService);
-                return commandService.beforeCommandExecuted((command) => {
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetNoteAdd,
+                () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetUpdateNoteCommand.id) {
-                        const model = injector.get(SheetsNoteModel);
                         const { unitId, sheetId, row, col, note } = command.params as IUpdateNoteMutationParams;
-                        const oldNote = model.getNote(unitId, sheetId, row, col);
-                        if (oldNote) return;
+
                         const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
+                        if (!target) return;
+
+                        const model = injector.get(SheetsNoteModel);
+                        const oldNote = model.getNote(unitId, sheetId, { noteId: note.id, row, col });
+                        if (oldNote) return;
+
                         const { workbook, worksheet } = target;
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteAdd, {
                             workbook,
@@ -180,24 +193,23 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             throw new CanceledError();
                         }
                     }
-                });
-            }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetNoteDelete,
-            () => {
-                const commandService = injector.get(ICommandService);
-                return commandService.beforeCommandExecuted((command) => {
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetNoteDelete,
+                () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetDeleteNoteCommand.id) {
-                        const model = injector.get(SheetsNoteModel);
                         const { unitId, sheetId, row, col } = command.params as IRemoveNoteMutationParams;
-                        const oldNote = model.getNote(unitId, sheetId, row, col);
-                        if (!oldNote) return;
                         const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
+                        if (!target) return;
+                        if (row === undefined || col === undefined) return;
+                        const model = injector.get(SheetsNoteModel);
+                        const oldNote = model.getNote(unitId, sheetId, { row, col });
+                        if (!oldNote) return;
+
                         const { workbook, worksheet } = target;
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteDelete, {
                             workbook,
@@ -206,28 +218,29 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             col,
                             oldNote,
                         });
+
                         if (cancel) {
                             throw new CanceledError();
                         }
                     }
-                });
-            }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetNoteUpdate,
-            () => {
-                const commandService = injector.get(ICommandService);
-                return commandService.beforeCommandExecuted((command) => {
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetNoteUpdate,
+                () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetUpdateNoteCommand.id) {
-                        const model = injector.get(SheetsNoteModel);
                         const { unitId, sheetId, row, col, note } = command.params as IUpdateNoteMutationParams;
-                        const oldNote = model.getNote(unitId, sheetId, row, col);
-                        if (!oldNote) return;
+
                         const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
+                        if (!target) return;
+
+                        const model = injector.get(SheetsNoteModel);
+                        const oldNote = model.getNote(unitId, sheetId, { row, col });
+                        if (!oldNote) return;
+
                         const { workbook, worksheet } = target;
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteUpdate, {
                             workbook,
@@ -241,66 +254,82 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                             throw new CanceledError();
                         }
                     }
-                });
-            }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetNoteShow,
-            () => {
-                const commandService = injector.get(ICommandService);
-                return commandService.beforeCommandExecuted((command) => {
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetNoteShow,
+                () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetToggleNotePopupCommand.id) {
-                        const model = injector.get(SheetsNoteModel);
-                        const { unitId, sheetId, row, col } = command.params as IUpdateNoteMutationParams;
-                        const oldNote = model.getNote(unitId, sheetId, row, col);
-                        if (oldNote?.show) return;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                        const target = getSheetCommandTarget(injector.get(IUniverInstanceService));
+                        if (!target) return;
+
+                        const { unitId, subUnitId } = target;
+                        const workbook = this.getUniverSheet(unitId);
+                        if (!workbook) return;
+                        const worksheet = workbook.getSheetBySheetId(subUnitId);
+                        if (!worksheet) return;
+
+                        const sheetsSelectionsService = injector.get(SheetsSelectionsService);
+                        const selection = sheetsSelectionsService.getCurrentLastSelection();
+                        if (!selection?.primary) return;
+
+                        const sheetsNoteModel = injector.get(SheetsNoteModel);
+                        const { actualColumn, actualRow } = selection.primary;
+                        const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
+                        if (!note || note.show) return;
+
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteShow, {
                             workbook,
                             worksheet,
-                            row,
-                            col,
+                            row: actualRow,
+                            col: actualColumn,
                         });
                         if (cancel) {
                             throw new CanceledError();
                         }
                     }
-                });
-            }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetNoteHide,
-            () => {
-                const commandService = injector.get(ICommandService);
-                return commandService.beforeCommandExecuted((command) => {
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetNoteHide,
+                () => commandService.beforeCommandExecuted((command) => {
                     if (command.id === SheetToggleNotePopupCommand.id) {
-                        const model = injector.get(SheetsNoteModel);
-                        const { unitId, sheetId, row, col } = command.params as IUpdateNoteMutationParams;
-                        const oldNote = model.getNote(unitId, sheetId, row, col);
-                        if (!oldNote?.show) return;
-                        const target = this.getSheetTarget(unitId, sheetId);
-                        if (!target) {
-                            return;
-                        }
-                        const { workbook, worksheet } = target;
+                        const target = getSheetCommandTarget(injector.get(IUniverInstanceService));
+                        if (!target) return;
+
+                        const { unitId, subUnitId } = target;
+                        const workbook = this.getUniverSheet(unitId);
+                        if (!workbook) return;
+                        const worksheet = workbook.getSheetBySheetId(subUnitId);
+                        if (!worksheet) return;
+
+                        const sheetsSelectionsService = injector.get(SheetsSelectionsService);
+                        const selection = sheetsSelectionsService.getCurrentLastSelection();
+                        if (!selection?.primary) return;
+
+                        const sheetsNoteModel = injector.get(SheetsNoteModel);
+                        const { actualColumn, actualRow } = selection.primary;
+                        const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
+                        if (!note || !note.show) return;
+
                         const cancel = this.fireEvent(this.Event.BeforeSheetNoteHide, {
                             workbook,
                             worksheet,
-                            row,
-                            col,
+                            row: actualRow,
+                            col: actualColumn,
                         });
                         if (cancel) {
                             throw new CanceledError();
                         }
                     }
-                });
-            }
+                })
+            )
         );
     }
 }

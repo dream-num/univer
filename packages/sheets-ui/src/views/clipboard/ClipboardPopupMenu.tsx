@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
@@ -25,7 +25,7 @@ import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
-import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
@@ -151,7 +151,7 @@ export const ClipboardPopupMenu = () => {
                         type: 'checkbox',
                         value: item.value,
                         label: localeService.t(item.label),
-                        checked: pasteOptionsCache?.pasteType === PREDEFINED_HOOK_NAME[item.value as IPasteHookKeyType],
+                        checked: pasteOptionsCache?.pasteType === PREDEFINED_HOOK_NAME_PASTE[item.value as IPasteHookKeyType],
                         onSelect: () => handleClick(item.value),
                     }))}
                     open={visible}

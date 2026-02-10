@@ -30,6 +30,7 @@ import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
+import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -367,9 +368,13 @@ export class FunctionNode extends BaseAstNode {
 
         referenceObject.setArrayFormulaCellData(this._currentConfigService.getArrayFormulaCellData());
 
+        referenceObject.setArrayFormulaRange(this._currentConfigService.getArrayFormulaRange());
+
         referenceObject.setRuntimeData(this._runtimeService.getUnitData());
 
         referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
+
+        referenceObject.setRuntimeArrayFormulaRange(this._runtimeService.getUnitArrayFormula());
 
         referenceObject.setRuntimeFeatureCellData(this._runtimeService.getRuntimeFeatureCellData());
     }
@@ -458,11 +463,17 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._runtimeService);
 
-        if (!Number.isNaN(Number(tokenTrim)) && !this._isParentUnionNode(param)) {
+        const isColon = this._isParentUnionNode(param);
+
+        if (!Number.isNaN(Number(tokenTrim)) && !isColon) {
             return ErrorNode.create(ErrorType.VALUE);
         }
 
         const tokenTrimUpper = tokenTrim.toUpperCase();
+
+        if (isColon && COLUMN_LIKE_FUNCTION_NAMES.has(tokenTrimUpper)) {
+            return;
+        }
 
         if (this._functionService.hasExecutor(tokenTrimUpper)) {
             const functionNode = this.create(tokenTrimUpper);

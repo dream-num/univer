@@ -68,14 +68,14 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                             {cellFillColors.map((color, index) => (
                                 <div
                                     key={`sheets-filter-cell-fill-color-${index}`}
-                                    className="univer-relative univer-h-6 univer-w-6"
+                                    className="univer-relative univer-size-6"
                                     onClick={() => handleSelectCellFillColor(color)}
                                 >
                                     {!color.color
                                         ? (
                                             <BanIcon
                                                 className={`
-                                                  univer-h-6 univer-w-6 univer-cursor-pointer univer-rounded-full
+                                                  univer-size-6 univer-cursor-pointer univer-rounded-full
                                                   hover:univer-ring-2 hover:univer-ring-offset-2
                                                   hover:univer-ring-offset-white
                                                 `}
@@ -85,7 +85,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                             <button
                                                 type="button"
                                                 className={clsx(`
-                                                  univer-box-border univer-h-6 univer-w-6 univer-cursor-pointer
+                                                  univer-box-border univer-size-6 univer-cursor-pointer
                                                   univer-rounded-full univer-border univer-border-solid
                                                   univer-border-transparent univer-bg-gray-300 univer-transition-shadow
                                                   hover:univer-ring-2 hover:univer-ring-offset-2
@@ -120,15 +120,14 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                             {cellTextColors.map((color, index) => (
                                 <div
                                     key={`sheets-filter-cell-text-color-${index}`}
-                                    className="univer-relative univer-h-6 univer-w-6"
+                                    className="univer-relative univer-size-6"
                                     onClick={() => handleSelectCellTextColor(color)}
                                 >
                                     <div
                                         className={`
-                                          univer-box-border univer-flex univer-h-full univer-w-full
-                                          univer-cursor-pointer univer-items-center univer-justify-center
-                                          univer-rounded-full univer-border univer-border-solid
-                                          univer-border-[rgba(13,13,13,0.06)] univer-p-0.5
+                                          univer-box-border univer-flex univer-size-full univer-cursor-pointer
+                                          univer-items-center univer-justify-center univer-rounded-full univer-border
+                                          univer-border-solid univer-border-[rgba(13,13,13,0.06)] univer-p-0.5
                                           hover:univer-ring-2 hover:univer-ring-offset-2 hover:univer-ring-offset-white
                                           dark:!univer-border-[rgba(255,255,255,0.06)]
                                         `}
@@ -146,8 +145,8 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                 {cellFillColors.length <= 1 && cellTextColors.length <= 1 && (
                     <div
                         className={`
-                          univer-flex univer-h-full univer-w-full univer-items-center univer-justify-center
-                          univer-text-sm univer-text-gray-900
+                          univer-flex univer-size-full univer-items-center univer-justify-center univer-text-sm
+                          univer-text-gray-900
                           dark:!univer-text-gray-200
                         `}
                     >
@@ -163,12 +162,12 @@ function CheckedIcon() {
     return (
         <div
             className={`
-              univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-flex univer-h-3 univer-w-3
-              univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
+              univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-flex univer-size-3 univer-cursor-pointer
+              univer-items-center univer-justify-center univer-rounded-full univer-bg-white
             `}
         >
             <SuccessIcon
-                className="univer-h-full univer-w-full univer-font-bold univer-text-[#418F1F]"
+                className="univer-size-full univer-font-bold univer-text-[#418F1F]"
             />
         </div>
     );

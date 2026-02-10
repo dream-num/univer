@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
+import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { CommandType, ICommandService } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
-
 import { whenSheetFocused } from '../../controllers/shortcuts/utils';
-import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 
 const SHEET_CLIPBOARD_PRIORITY = 998;
 
@@ -72,12 +72,20 @@ export const SheetPasteCommand: IMultiCommand = {
         // TODO: @yuhongz: check if there is excel content in the clipboard, if so
         // ask users to use shortcuts instead.
 
-        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
-        const clipboardItems = await clipboardInterfaceService.read();
         const sheetClipboardService = accessor.get(ISheetClipboardService);
 
-        if (clipboardItems.length !== 0) {
-            return sheetClipboardService.paste(clipboardItems[0], params?.value);
+        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
+        if (clipboardInterfaceService.supportClipboard) {
+            const clipboardItems = await clipboardInterfaceService.read();
+            if (clipboardItems.length !== 0) {
+                return sheetClipboardService.paste(clipboardItems[0], params?.value);
+            }
+        }
+
+        const lastCopyId = sheetClipboardService.copyContentCache().getLastCopyId();
+        if (lastCopyId) {
+            console.warn('Since the current environment does not support the Clipboard API, we will use the internal copyId to paste the content.');
+            return sheetClipboardService.pasteByCopyId(lastCopyId, params?.value);
         }
 
         return false;
@@ -101,7 +109,9 @@ export const SheetPasteValueCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SheetPasteCommand.id, { value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE });
+        return commandService.executeCommand(SheetPasteCommand.id, {
+            value: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE,
+        });
     },
 };
 
@@ -111,7 +121,7 @@ export const SheetPasteFormatCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         return commandService.executeCommand(SheetPasteCommand.id, {
-            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            value: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
         });
     },
 };
@@ -122,7 +132,7 @@ export const SheetPasteColWidthCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         return commandService.executeCommand(SheetPasteCommand.id, {
-            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            value: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH,
         });
     },
 };
@@ -133,7 +143,7 @@ export const SheetPasteBesidesBorderCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         return commandService.executeCommand(SheetPasteCommand.id, {
-            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            value: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER,
         });
     },
 };
@@ -141,7 +151,7 @@ export const SheetPasteBesidesBorderCommand: ICommand = {
 export const SheetOptionalPasteCommand: ICommand = {
     id: 'sheet.command.optional-paste',
     type: CommandType.COMMAND,
-    handler: async (accessor, { type }: { type: keyof typeof PREDEFINED_HOOK_NAME }) => {
+    handler: async (accessor, { type }: { type: IPasteHookKeyType }) => {
         const clipboardService = accessor.get(ISheetClipboardService);
 
         return clipboardService.rePasteWithPasteType(type);

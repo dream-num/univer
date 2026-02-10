@@ -48,6 +48,7 @@ import { Product } from '../math/product';
 import { Sum } from '../math/sum';
 import { Sumif } from '../math/sumif';
 import { Sumifs } from '../math/sumifs';
+import { Compare } from '../meta/compare';
 import { Divided } from '../meta/divided';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
 import { Minus } from '../meta/minus';
@@ -57,6 +58,7 @@ import { Max } from '../statistical/max';
 import { Min } from '../statistical/min';
 import { Concatenate } from '../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
+import { Left } from '../text/left';
 import { Len } from '../text/len';
 import { T } from '../text/t';
 import { Text } from '../text/text';
@@ -423,6 +425,72 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             t: CellValueType.STRING,
                         },
                     },
+                    50: {
+                        1: {
+                            v: 'start_time',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    51: {
+                        1: {
+                            v: '2026-01-08 11:06:27 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    52: {
+                        1: {
+                            v: '2026-01-08 11:14:34 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    53: {
+                        1: {
+                            v: '2026-01-05 23:25:23 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    54: {
+                        1: {
+                            v: '2026-01-06 09:40:38 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    55: {
+                        1: {
+                            v: '2026-01-06 09:17:29 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    56: {
+                        1: {
+                            v: '2026-01-08 10:54:10 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    57: {
+                        1: {
+                            v: '2026-01-07 00:41:04 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    58: {
+                        1: {
+                            v: '2026-01-08 10:28:46 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    59: {
+                        1: {
+                            v: '2026-01-06 01:46:22 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    60: {
+                        1: {
+                            v: '2026-01-04 03:47:28 UTC',
+                            t: CellValueType.STRING,
+                        },
+                    },
                 },
             },
         },
@@ -500,6 +568,7 @@ describe('Test nested functions', () => {
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
             new Len(FUNCTION_NAMES_TEXT.LEN),
+            new Compare(FUNCTION_NAMES_META.COMPARE),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
             new Product(FUNCTION_NAMES_MATH.PRODUCT),
             new Fact(FUNCTION_NAMES_MATH.FACT),
@@ -508,7 +577,8 @@ describe('Test nested functions', () => {
             new Hyperlink(FUNCTION_NAMES_LOOKUP.HYPERLINK),
             new Row(FUNCTION_NAMES_LOOKUP.ROW),
             new Match(FUNCTION_NAMES_LOOKUP.MATCH),
-            new Index(FUNCTION_NAMES_LOOKUP.INDEX)
+            new Index(FUNCTION_NAMES_LOOKUP.INDEX),
+            new Left(FUNCTION_NAMES_TEXT.LEFT)
         );
 
         calculate = (formula: string) => {
@@ -714,6 +784,22 @@ describe('Test nested functions', () => {
 
             const result9 = calculate('=IFERROR(INDEX($B$22:$B$33,MATCH(30-ROW($D$21),$A$22:$A$33,0)),"")');
             expect(result9).toStrictEqual([['December']]);
+        });
+
+        it('Left formula compare test', () => {
+            const result = calculate('=LEFT($B$52:$B$61,10)="2026-01-04"');
+            expect(result).toStrictEqual([
+                [false],
+                [false],
+                [false],
+                [false],
+                [false],
+                [false],
+                [false],
+                [false],
+                [false],
+                [true],
+            ]);
         });
     });
 });

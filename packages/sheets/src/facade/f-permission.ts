@@ -186,7 +186,31 @@ export class FPermission extends FBase {
         // }
         let collaborators: ICollaborator[] = [];
         if (options?.allowedUsers) {
-            collaborators = options.allowedUsers.map((id) => ({ id, role: UnitRole.Editor, subject: undefined }));
+            // Fetch existing collaborators first
+            const existingCollaborators = await this._authzIoService.listCollaborators({
+                objectID: unitId,
+                unitID: unitId,
+            });
+
+            // Create a map of allowed user IDs for easy lookup
+            const allowedUserIds = new Set(options.allowedUsers);
+
+            // Filter and include only the allowed users with complete information
+            collaborators = existingCollaborators
+                .filter((c) => allowedUserIds.has(c.subject?.userID || c.id))
+                .map((c) => ({
+                    id: c.id,
+                    role: UnitRole.Editor,
+                    subject: c.subject,
+                }));
+
+            // Check for any user IDs that weren't found in existing collaborators
+            const foundUserIds = new Set(collaborators.map((c) => c.subject?.userID || c.id));
+            options.allowedUsers.forEach((userId) => {
+                if (!foundUserIds.has(userId)) {
+                    console.error(`User ${userId} not found in collaborators list`);
+                }
+            });
         }
 
         const permissionId = await this._authzIoService.create({
@@ -302,6 +326,27 @@ export class FPermission extends FBase {
         if (!permissionPoint) {
             this._permissionService.addPermissionPoint(instance);
         }
+
+        // IMPORTANT: Update authzIoService FIRST to set override before triggering pointChange$
+        if (permissionId) {
+            const actionNumber = instance.subType;
+            // Set strategy: Reader role = deny, Owner role = allow
+            await this._authzIoService.update({
+                objectType: UnitObject.Worksheet,
+                objectID: permissionId,
+                strategies: [{
+                    action: actionNumber,
+                    role: value ? UnitRole.Owner : UnitRole.Reader,
+                }],
+                unitID: unitId,
+                share: undefined,
+                name: '',
+                scope: undefined,
+                collaborators: undefined,
+            });
+        }
+        // Now update permissionPoint, which triggers pointChange$ and _initWorksheetPermissionPointsChange()
+        // At this point, authzIoService.allowed() will find the override and return the correct value
         this._permissionService.updatePermissionPoint(instance.id, value);
 
         return permissionId;
@@ -374,15 +419,46 @@ export class FPermission extends FBase {
      * }]);
      * ```
      */
+    // eslint-disable-next-line max-lines-per-function
     async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: FRange[], options?: IRangeProtectionOptions): Promise<{
         permissionId: string;
         ruleId: string;
     } | undefined> {
+        // Fetch existing collaborators if allowedUsers is provided
+        let collaborators: ICollaborator[] = [];
+        if (options?.allowedUsers) {
+            // Fetch existing collaborators first
+            const existingCollaborators = await this._authzIoService.listCollaborators({
+                objectID: unitId,
+                unitID: unitId,
+            });
+
+            // Create a map of allowed user IDs for easy lookup
+            const allowedUserIds = new Set(options.allowedUsers);
+
+            // Filter and include only the allowed users with complete information
+            collaborators = existingCollaborators
+                .filter((c) => allowedUserIds.has(c.subject?.userID || c.id))
+                .map((c) => ({
+                    id: c.id,
+                    role: UnitRole.Editor,
+                    subject: c.subject,
+                }));
+
+            // Check for any user IDs that weren't found in existing collaborators
+            const foundUserIds = new Set(collaborators.map((c) => c.subject?.userID || c.id));
+            options.allowedUsers.forEach((userId) => {
+                if (!foundUserIds.has(userId)) {
+                    console.error(`User ${userId} not found in collaborators list`);
+                }
+            });
+        }
+
         // Create permission ID with collaborators support
         const permissionId = await this._authzIoService.create({
             objectType: UnitObject.SelectRange,
             selectRangeObject: {
-                collaborators: options?.allowedUsers?.map((id) => ({ id, role: UnitRole.Editor, subject: undefined })) ?? [],
+                collaborators,
                 unitID: unitId,
                 name: options?.name || '',
                 scope: undefined,

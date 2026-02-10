@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type React from 'react';
+import type * as React from 'react';
 import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
 import { Component, createRef } from 'react';
 

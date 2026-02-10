@@ -42,12 +42,13 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaCalculationStartMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
     RemoveSheetMutation,
     SetBorderCommand,
+    SetRangeCustomMetadataCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
     SheetInterceptorService,
@@ -115,7 +116,8 @@ export class UpdateFormulaController extends Disposable {
                         (options && options.syncOnly === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id ||
-                        params.trigger === ClearSelectionFormatCommand.id
+                        params.trigger === ClearSelectionFormatCommand.id ||
+                        params.trigger === SetRangeCustomMetadataCommand.id
                     ) {
                         return;
                     }
@@ -156,7 +158,7 @@ export class UpdateFormulaController extends Disposable {
             {
                 unitId,
                 subUnitId: sheetId,
-                cellValue: formulaDataToCellData(newSheetFormulaData),
+                cellValue: formulaDataToCellData(newSheetFormulaData, cellValue),
             },
             {
                 onlyLocal: true,
@@ -271,7 +273,7 @@ export class UpdateFormulaController extends Disposable {
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
         const params = this._getDirtyDataByCalculationMode(calculationMode);
 
-        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
+        this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, { onlyLocal: true });
     }
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {

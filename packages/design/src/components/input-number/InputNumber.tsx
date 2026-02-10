@@ -348,7 +348,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                   univer-items-center univer-justify-center univer-border-none univer-bg-transparent
                                   univer-p-0 univer-transition-colors
                                   hover:univer-bg-gray-100
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                                  dark:!univer-text-white
+                                  dark:hover:!univer-bg-gray-600
                                 `}
                                 type="button"
                                 aria-label="increment"
@@ -364,7 +365,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                   univer-items-center univer-justify-center univer-border-none univer-bg-transparent
                                   univer-p-0 univer-transition-colors
                                   hover:univer-bg-gray-100
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-600
+                                  dark:!univer-text-white
+                                  dark:hover:!univer-bg-gray-600
                                 `}
                                 type="button"
                                 aria-label="decrement"

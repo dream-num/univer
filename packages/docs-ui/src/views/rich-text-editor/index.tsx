@@ -25,8 +25,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { IEditorService } from '../../services/editor/editor-manager.service';
-import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { useKeyboardEvent, useResize } from './hooks';
+import { useEditorClickOutside, useIsFocusing, useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/use-editor';
 import { useLeftAndRightArrow } from './hooks/use-left-and-right-arrow';
 import { useOnChange } from './hooks/use-on-change';
@@ -49,6 +48,7 @@ export interface IRichTextEditorProps {
     defaultHeight?: number;
     icon?: ReactNode;
     editorRef?: RefObject<Editor | null> | ((editor: Editor | null) => void);
+    noStyle?: boolean;
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -70,6 +70,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         icon,
         editorRef,
         placeholder,
+        noStyle,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -86,9 +87,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     });
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
-    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
-    const selections = useObservable(docSelectionRenderService?.textSelectionInner$);
-    const isFocusing = Boolean((docSelectionRenderService?.isFocusing ?? false) && selections?.textRanges.some((r) => r.collapsed));
+    const isFocusing = useIsFocusing(editorId);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
     const { checkScrollBar } = useResize(editor, isSingle, true, true);
@@ -131,26 +130,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         onFocusChange?.(isFocusing, getPlainText(data?.body?.dataStream ?? ''));
     }, [isFocusing, onFocusChange]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (editorService.getFocusId() !== editorId) return;
-
-            const id = (event.target as HTMLDivElement)?.dataset?.editorid;
-            if (id === editorId) return;
-            if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
-                onClickOutside?.();
-            }
-        };
-
-        const timer = setTimeout(() => {
-            document.addEventListener('click', handleClickOutside);
-        }, 100);
-
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-            clearTimeout(timer);
-        };
-    }, [editor, editorId, editorService, onClickOutside]);
+    useEditorClickOutside(editorId, sheetEmbeddingRef, onClickOutside);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
@@ -159,13 +139,18 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     return (
         <div className={className} style={style}>
             <div
-                className={clsx(`
-                  univer-relative univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
-                  univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2
-                  univer-pt-1.5
-                `, borderClassName, {
-                    'univer-border-primary-500': isFocusing,
-                })}
+                className={clsx(
+                    {
+                        'univer-border-primary-500': isFocusing && !noStyle,
+                        [`
+                          univer-relative univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
+                          univer-justify-around univer-gap-2 univer-rounded-md univer-pb-0.5 univer-pl-1.5 univer-pr-2
+                          univer-pt-1.5
+                        `]: !noStyle,
+                        'univer-size-full': noStyle,
+                        [borderClassName]: !noStyle,
+                    }
+                )}
                 style={{ height }}
                 ref={sheetEmbeddingRef}
             >

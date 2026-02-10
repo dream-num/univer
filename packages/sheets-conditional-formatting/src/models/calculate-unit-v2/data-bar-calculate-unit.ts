@@ -18,11 +18,13 @@ import type { ICellData } from '@univerjs/core';
 import type { IConditionFormattingRule, IDataBar } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
+import { FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFValueType } from '../../base/const';
 import { defaultDataBarNativeColor, defaultDataBarPositiveColor, defaultPlaceholderColor } from '../../render/data-bar.render';
-import { FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { filterRange, getValueByType, isNullable } from './utils';
+
+;
 
 const getSafeValue = (v: number) => Math.max(Math.min(100, v), 0);
 

@@ -451,17 +451,17 @@ export enum ReferenceObjectType {
 export function getReferenceObjectFromCache(trimToken: string, type: ReferenceObjectType) {
     let referenceObject: BaseReferenceObject;
     switch (type) {
-        case ReferenceObjectType.CELL:
-            referenceObject = new CellReferenceObject(trimToken);
-            break;
         case ReferenceObjectType.COLUMN:
             referenceObject = new ColumnReferenceObject(trimToken);
             break;
         case ReferenceObjectType.ROW:
             referenceObject = new RowReferenceObject(trimToken);
             break;
+
+        case ReferenceObjectType.CELL:
         default:
-            throw new Error('Unknown reference object type');
+            referenceObject = new CellReferenceObject(trimToken);
+            break;
     }
 
     return referenceObject;

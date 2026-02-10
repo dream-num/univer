@@ -15,6 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -38,12 +39,13 @@ import {
     WorksheetProtectionRuleModel,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { SheetsUIPart } from '../../consts/ui-name';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
@@ -89,6 +91,8 @@ export function FormulaBar(props: IProps) {
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     const ref = useRef<HTMLDivElement>(null);
     const editorService = useDependency(IEditorService);
+    const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+    const disableEdit = config?.disableEdit;
 
     useLayoutEffect(() => {
         const subscription = workbook.activeSheet$.pipe(
@@ -227,7 +231,8 @@ export function FormulaBar(props: IProps) {
     }
 
     // TODO Is there a need to disable an editor here?
-    const { viewDisable, editDisable } = disableInfo;
+    const { viewDisable, editDisable: permissionEditDisable } = disableInfo;
+    const editDisable = permissionEditDisable || !!disableEdit;
     const disabled = editDisable || imageDisable;
     const shouldSkipFocus = useRef(false);
 
@@ -288,7 +293,7 @@ export function FormulaBar(props: IProps) {
                 <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
 
-            <div className="univer-flex univer-h-full univer-w-full">
+            <div className="univer-flex univer-size-full">
                 <div className={clsx('univer-py-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disabled })}>
                     <div
                         className={clsx(`
@@ -326,7 +331,8 @@ export function FormulaBar(props: IProps) {
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
                               univer-p-1 univer-text-base
                               hover:univer-bg-gray-100
-                              dark:!univer-text-white dark:hover:!univer-bg-gray-700
+                              dark:!univer-text-white
+                              dark:hover:!univer-bg-gray-700
                             `}
                             onClick={handlerFxBtnClick}
                         >
@@ -346,7 +352,7 @@ export function FormulaBar(props: IProps) {
                         {FormulaEditor && (
                             <FormulaEditor
                                 className={`
-                                  univer-relative univer-h-full univer-w-full univer-break-words univer-outline-none
+                                  univer-relative univer-size-full univer-break-words univer-outline-none
                                   [&>div]:univer-ring-transparent
                                 `}
                                 disableSelectionOnClick
@@ -379,7 +385,7 @@ export function FormulaBar(props: IProps) {
                             <div
                                 className={`
                                   univer-pointer-events-none univer-relative univer-left-0 univer-top-0 univer-z-[100]
-                                  univer-h-full univer-w-full univer-cursor-not-allowed univer-bg-white
+                                  univer-size-full univer-cursor-not-allowed univer-bg-white
                                 `}
                             />
                         )}

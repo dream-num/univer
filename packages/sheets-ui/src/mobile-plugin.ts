@@ -23,8 +23,7 @@ import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from 
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
-import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
-import { AutoFillController } from './controllers/auto-fill.controller';
+import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
@@ -57,16 +56,15 @@ import { FormatPainterRenderController } from './controllers/render-controllers/
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
-import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 // import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { MobileHeaderResizeRenderController } from './controllers/render-controllers/mobile/mobile-header-resize.render-controller';
 import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { AutoHeightService } from './services/auto-height.service';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -148,7 +146,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [ICellEditorManagerService, { useClass: CellEditorManagerService }],
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
             [IRefSelectionsService, { useClass: RefSelectionsService }],
-            [IAutoFillService, { useClass: AutoFillService }],
             [SheetPrintInterceptorService],
             [IStatusBarService, { useClass: StatusBarService }],
             [IMarkSelectionService, { useClass: MarkSelectionService }],
@@ -162,14 +159,13 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SheetCellEditorResizeService],
 
             // controllers
-            [ActiveWorksheetController],
             [AutoHeightController],
             [AutoWidthController],
             [FormulaEditorController],
             [SheetsRenderService],
             [SheetUIMobileController],
             [StatusBarController],
-            [AutoFillController],
+            [AutoFillUIController],
             [FormatPainterController],
             [SheetsDefinedNameController],
             [EditorDataSyncController],
@@ -200,7 +196,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetUIMobileController],
             [SheetsRenderService],
-            [ActiveWorksheetController],
             [SheetPermissionCheckUIController],
             [SheetPermissionInitUIController],
         ]);
@@ -227,7 +222,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     override onSteady(): void {
         touchDependencies(this._injector, [
             [FormatPainterController],
-            [AutoFillController],
+            [AutoFillUIController],
             [SheetPermissionInterceptorClipboardController],
         ]);
     }
@@ -251,7 +246,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         const modules: Dependency[] = [
             [HeaderMoveRenderController],
             [HeaderUnhideRenderController],
-            [HeaderResizeRenderController],
             // TODO: Should not register these two Controllers at the same time
             [SheetsScrollRenderController],
             [MobileSheetsScrollRenderController],
@@ -269,6 +263,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [ForceStringRenderController],
             [CellCustomRenderController],
             // [SheetContextMenuMobileRenderController],
+            [MobileHeaderResizeRenderController],
             [MoveRangeRenderController],
 
             // editor

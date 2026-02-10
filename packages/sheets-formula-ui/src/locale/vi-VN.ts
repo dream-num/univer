@@ -118,6 +118,7 @@ const locale: typeof enUS = {
         },
 
         operation: {
+            copyFormulaOnly: 'Chỉ sao chép công thức',
             pasteFormula: 'Chỉ dán công thức',
         },
     },

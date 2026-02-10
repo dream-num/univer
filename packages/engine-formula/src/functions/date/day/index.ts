@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { excelSerialToDate, isValidDateStr } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -64,9 +64,8 @@ export class Day extends BaseFunction {
             date = excelSerialToDate(dateSerial);
         }
 
-        const month = date.getDate();
-        const valueObject = NumberValueObject.create(month);
+        const day = date.getUTCDate();
 
-        return valueObject;
+        return NumberValueObject.create(day);
     }
 }

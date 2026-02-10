@@ -341,6 +341,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     // Update drawings edit status and opacity. You can not edit header footer images when you are editing body. and vice verse.
     private _updateDrawingsEditStatus() {
+        if (!this._context) return;
+
         const { unit: docDataModel, scene, unitId } = this._context;
         const viewModel = this._renderManagerSrv
             .getRenderById(unitId)

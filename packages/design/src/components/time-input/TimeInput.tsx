@@ -30,7 +30,11 @@ export function TimeInput(props: ITimeInputProps) {
     const { className, value, onValueChange } = props;
 
     function handleChangeTime(event: ChangeEvent<HTMLInputElement>) {
-        const newValue = dayjs(event.target.value, 'HH:mm:ss').toDate();
+        const timeString = event.target.value;
+        const [hours, minutes, seconds] = timeString.split(':').map(Number);
+        const newValue = new Date(value ?? Date.now());
+        newValue.setHours(hours, minutes, seconds, 0);
+
         onValueChange?.(newValue);
     };
 
@@ -48,7 +52,8 @@ export function TimeInput(props: ITimeInputProps) {
                   univer-pl-6 univer-pr-2 univer-text-center univer-text-gray-800 univer-shadow univer-outline-none
                   univer-transition-all univer-duration-200
                   focus:univer-border-primary-600
-                  dark:!univer-text-white dark:focus:!univer-border-primary-500
+                  dark:!univer-text-white
+                  dark:focus:!univer-border-primary-500
                   [&::-webkit-calendar-picker-indicator]:univer-hidden
                   [&::-webkit-calendar-picker-indicator]:univer-appearance-none
                 `, borderClassName, className)}

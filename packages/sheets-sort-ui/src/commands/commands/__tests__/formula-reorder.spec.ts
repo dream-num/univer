@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, Injector, Nullable, Univer } from '@univerjs/core';
-import type { IConfirmPartMethodOptions } from '@univerjs/ui';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import { ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
 import { ReorderRangeCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
-import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSortUIService } from '../../../services/sheets-sort-ui.service';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -38,26 +35,7 @@ describe('Test "Sort Range Commands"', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [
-                IConfirmService,
-                {
-                    useClass: class MockConfirmService implements IConfirmService {
-                        confirmOptions$: Subject<IConfirmPartMethodOptions[]> = new Subject();
-
-                        open(params: IConfirmPartMethodOptions): IDisposable {
-                            throw new Error('Method not implemented.');
-                        }
-
-                        confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
-                            return Promise.resolve(true);
-                        }
-
-                        close(id: string): void {
-                            throw new Error('Method not implemented.');
-                        }
-                    },
-                },
-            ],
+            [IConfirmService, { useClass: TestConfirmService }],
         ]);
         univer = testBed.univer;
         get = testBed.get;

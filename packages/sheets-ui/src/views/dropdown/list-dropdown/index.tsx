@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
 import type { IBaseDropdownProps } from '../type';
 import {
-    BuildTextUtils,
     ColorKit,
-    ICommandService,
-    IUniverInstanceService,
     LocaleService,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
-import { RichTextEditingMutation } from '@univerjs/docs';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
     RangeProtectionPermissionEditPoint,
@@ -37,9 +30,8 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { RectPopup, useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
-import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { useDependency } from '@univerjs/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function serializeListOptions(options: string[]) {
     return options.filter(Boolean).join(',');
@@ -57,17 +49,42 @@ interface ISelectListProps {
     title?: string;
     onEdit?: () => void;
     style?: CSSProperties;
-    filter?: string;
     location: ISheetLocation;
     showEdit?: boolean;
+    showSearch?: boolean;
 }
 
 function SelectList(props: ISelectListProps) {
-    const { value, onChange, multiple, options, title, onEdit, filter, style, location, showEdit: showEditOnDropdown } = props;
+    const { value, onChange, multiple, options, title, onEdit, style, location, showEdit: showEditOnDropdown, showSearch: showSearchOnDropdown } = props;
     const localeService = useDependency(LocaleService);
-    const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
-    const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
+
+    const searchRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        let timer: NodeJS.Timeout | null = null;
+
+        if (showSearchOnDropdown) {
+            timer = setTimeout(() => {
+                searchRef.current?.focus();
+            }, 0);
+        }
+
+        return () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        };
+    }, [showSearchOnDropdown]);
+
+    const [lowerFilter, setLowerFilter] = useState('');
+    const filteredOptions = useMemo(() => {
+        return options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
+    }, [options, lowerFilter]);
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLowerFilter(e.target.value.toLowerCase());
+    };
+
     const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
     const hasPermission = useMemo(() => sheetPermissionCheckController.permissionCheckWithRanges(
         {
@@ -89,9 +106,26 @@ function SelectList(props: ISelectListProps) {
             `, borderClassName)}
             style={style}
         >
+            {showSearchOnDropdown && (
+                <div className="univer-box-border univer-flex univer-w-full univer-px-2">
+                    <input
+                        ref={searchRef}
+                        className={`
+                          univer-w-full univer-rounded-md univer-border univer-border-[rgba(13,13,13,0.12)] univer-px-2
+                          univer-py-1 univer-text-sm
+                          focus:univer-border-primary-500 focus:univer-outline-none
+                          dark:!univer-text-white
+                        `}
+                        type="text"
+                        value={lowerFilter}
+                        autoFocus
+                        onChange={handleSearchChange}
+                    />
+                </div>
+            )}
             <div className="univer-px-3.5 univer-py-1 univer-pt-2 univer-text-xs">{title}</div>
             <div
-                key={filter}
+                key={lowerFilter}
                 className={clsx(`
                   univer-flex univer-max-h-52 univer-flex-col univer-gap-1 univer-overflow-y-auto univer-px-2
                   univer-py-1
@@ -153,8 +187,8 @@ function SelectList(props: ISelectListProps) {
                             </div>
                             <div
                                 className={`
-                                  univer-ml-3 univer-h-4 univer-w-4 univer-flex-shrink-0 univer-flex-grow-0
-                                  univer-text-base univer-text-primary-500
+                                  univer-ml-3 univer-size-4 univer-flex-shrink-0 univer-flex-grow-0 univer-text-base
+                                  univer-text-primary-500
                                 `}
                             >
                                 {selected && <CheckMarkIcon className="univer-text-primary-600" />}
@@ -188,39 +222,19 @@ export interface IListDropdownProps {
     options: { label: string; value: string; color?: string }[];
     defaultValue?: string;
     showEdit?: boolean;
+    showSearch?: boolean;
 }
 
 export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDropdownProps> }) {
-    const { popup: { extraProps } } = props;
-    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple, showEdit } = extraProps!;
+    const { popup: { extraProps, anchorRect } } = props;
+    const { location, hideFn, onChange, onEdit, options, defaultValue, multiple, showSearch, showEdit } = extraProps!;
+
     const { worksheet } = location;
-    const [editingText, setEditingText] = useState('');
-    const commandService = useDependency(ICommandService);
+    if (!worksheet) return null;
+
     const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState(defaultValue);
-    const editorBridgeService = useDependency(IEditorBridgeService);
-    const instanceService = useDependency(IUniverInstanceService);
-    const anchorRect = RectPopup.useContext();
-    const cellWidth = (anchorRect.current?.right ?? 0) - (anchorRect.current?.left ?? 0);
-
-    useEffect(() => {
-        const dispose = commandService.onCommandExecuted((command) => {
-            if (command.id === RichTextEditingMutation.id) {
-                const params = command.params as IRichTextEditingMutationParams;
-                const { unitId } = params;
-                const unit = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-                if (!unit || !editorBridgeService.isVisible().visible) return;
-                const text = BuildTextUtils.transform.getPlainText(unit.getSnapshot().body?.dataStream ?? '');
-                setEditingText(text);
-            }
-        });
-
-        return () => {
-            dispose.dispose();
-        };
-    }, [commandService, editorBridgeService, instanceService]);
-
-    if (!worksheet) return null;
+    const cellWidth = (anchorRect?.right ?? 0) - (anchorRect?.left ?? 0);
 
     return (
         <SelectList
@@ -238,9 +252,9 @@ export function ListDropDown(props: { popup: IPopup<IListDropdownProps & IBaseDr
             }}
             options={options}
             onEdit={onEdit}
-            filter={editingText}
             location={location}
             showEdit={showEdit}
+            showSearch={showSearch}
         />
     );
 }

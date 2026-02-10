@@ -19,7 +19,6 @@
 import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
-
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -27,7 +26,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isRealNum, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -474,10 +473,10 @@ export class HtmlToUSMService {
          * "<span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1,234.57 "
          */
         if (cell.innerHTML.includes('mso-spacerun:yes')) {
-            const cellText = cell.innerHTML.replace(/<span[^>]*mso-spacerun:yes[^>]*>[\s\S]*?<\/span>/gi, '');
-            const parseInfo = numfmt.parseNumber(cellText);
+            const cellText = cell.innerHTML.replace(/<span[^>]*mso-spacerun:yes[^>]*>[\s\S]*?<\/span>/gi, '').replace(/\s/g, '');
+            const parseInfo = getNumfmtParseValueFilter(cellText);
 
-            if (parseInfo && parseInfo.v !== undefined && parseInfo.v !== null) {
+            if (parseInfo && parseInfo.z && isRealNum(parseInfo.v)) {
                 return {
                     cellText,
                     cellRichStyle: undefined,

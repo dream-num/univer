@@ -49,10 +49,10 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
-import { ContextMenuGroup, ContextMenuPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonDataGroup, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     SheetCopyCommand,
-    // SheetCutCommand,
+    SheetCutCommand,
     SheetPasteBesidesBorderCommand,
     SheetPasteColWidthCommand,
     SheetPasteCommand,
@@ -87,7 +87,7 @@ import {
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
-import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetColumnFrozenCommand, SetFirstColumnFrozenCommand, SetFirstRowFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
@@ -99,6 +99,20 @@ import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
 import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
 import { FontSizeDecreaseMenuItemFactory, FontSizeIncreaseMenuItemFactory, FontSizeSelectorMenuItemFactory } from './menu/font.menu';
+import {
+    CancelFrozenMenuItemFactory,
+    FrozenColMenuItemFactory,
+    FrozenFirstColMenuItemFactory,
+    FrozenFirstRowMenuItemFactory,
+    FrozenMenuItemFactory,
+    FrozenRowMenuItemFactory,
+    SHEET_FROZEN_COLUMN_HEADER_MENU_ID,
+    SHEET_FROZEN_MENU_ID,
+    SHEET_FROZEN_ROW_HEADER_MENU_ID,
+    SheetFrozenColumnHeaderMenuItemFactory,
+    SheetFrozenMenuItemFactory,
+    SheetFrozenRowHeaderMenuItemFactory,
+} from './menu/frozen.menu';
 import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
@@ -115,16 +129,14 @@ import {
 import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
-    CancelFrozenMenuItemFactory,
     ColAutoWidthMenuItemFactory,
+    COPY_SPECIAL_MENU_ID,
     CopyMenuItemFactory,
-    // CutMenuItemFactory,
+    CopySpacialMenuItemFactory,
+    CutMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FormatPainterMenuItemFactory,
-    FrozenColMenuItemFactory,
-    FrozenMenuItemFactory,
-    FrozenRowMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
     HorizontalAlignMenuItemFactory,
@@ -132,7 +144,6 @@ import {
     PASTE_SPECIAL_MENU_ID,
     PasteBesidesBorderMenuItemFactory,
     PasteColWidthMenuItemFactory,
-    // PasteColWidthMenuItemFactory,
     PasteFormatMenuItemFactory,
     PasteMenuItemFactory,
     PasteSpacialMenuItemFactory,
@@ -141,10 +152,6 @@ import {
     ResetTextColorMenuItemFactory,
     SetColWidthMenuItemFactory,
     SetRowHeightMenuItemFactory,
-    SHEET_FROZEN_HEADER_MENU_ID,
-    SHEET_FROZEN_MENU_ID,
-    SheetFrozenHeaderMenuItemFactory,
-    SheetFrozenMenuItemFactory,
     ShowColMenuItemFactory,
     ShowRowMenuItemFactory,
     StrikeThroughMenuItemFactory,
@@ -176,6 +183,7 @@ import {
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
 } from './menu/sheet.menu';
+import { Text2NumberContextMenuItemFactory, Text2NumberToolbarMenuItemFactory, TEXT_TO_NUMBER_CONTEXT_MENU_ID, TEXT_TO_NUMBER_TOOLBAR_MENU_ID } from './menu/text-to-number.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonPosition.START]: {
@@ -288,19 +296,31 @@ export const menuSchema: MenuSchemaType = {
             },
         },
     },
+    [RibbonPosition.DATA]: {
+        [RibbonDataGroup.OTHERS]: {
+            [TEXT_TO_NUMBER_TOOLBAR_MENU_ID]: {
+                order: 0,
+                menuItemFactory: Text2NumberToolbarMenuItemFactory,
+            },
+        },
+    },
     [ContextMenuPosition.MAIN_AREA]: {
         [ContextMenuGroup.FORMAT]: {
             [SheetCopyCommand.name]: {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
             },
-            // [SheetCutCommand.name]: {
-            //     order: 1,
-            //     menuItemFactory: CutMenuItemFactory,
-            // },
+            [SheetCutCommand.name]: {
+                order: 1,
+                menuItemFactory: CutMenuItemFactory,
+            },
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
+            },
+            [COPY_SPECIAL_MENU_ID]: {
+                order: 2.5,
+                menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
                 order: 3,
@@ -337,6 +357,10 @@ export const menuSchema: MenuSchemaType = {
                     order: 2,
                     menuItemFactory: ClearSelectionAllMenuItemFactory,
                 },
+            },
+            [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
+                order: 5,
+                menuItemFactory: Text2NumberContextMenuItemFactory,
             },
         },
         [ContextMenuGroup.LAYOUT]: {
@@ -396,8 +420,16 @@ export const menuSchema: MenuSchemaType = {
                     order: 2,
                     menuItemFactory: FrozenColMenuItemFactory,
                 },
-                [CancelFrozenCommand.id]: {
+                [SetFirstRowFrozenCommand.id]: {
                     order: 3,
+                    menuItemFactory: FrozenFirstRowMenuItemFactory,
+                },
+                [SetFirstColumnFrozenCommand.id]: {
+                    order: 4,
+                    menuItemFactory: FrozenFirstColMenuItemFactory,
+                },
+                [CancelFrozenCommand.id]: {
+                    order: 5,
                     menuItemFactory: CancelFrozenMenuItemFactory,
                 },
             },
@@ -435,13 +467,17 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
             },
-            // [SheetCutCommand.name]: {
-            //     order: 1,
-            //     menuItemFactory: CutMenuItemFactory,
-            // },
+            [SheetCutCommand.name]: {
+                order: 1,
+                menuItemFactory: CutMenuItemFactory,
+            },
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
+            },
+            [COPY_SPECIAL_MENU_ID]: {
+                order: 2.5,
+                menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
                 order: 3,
@@ -479,6 +515,10 @@ export const menuSchema: MenuSchemaType = {
                     menuItemFactory: ClearSelectionAllMenuItemFactory,
                 },
             },
+            [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
+                order: 5,
+                menuItemFactory: Text2NumberContextMenuItemFactory,
+            },
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
@@ -510,15 +550,19 @@ export const menuSchema: MenuSchemaType = {
                 order: 4,
                 menuItemFactory: ColAutoWidthMenuItemFactory,
             },
-            [SHEET_FROZEN_HEADER_MENU_ID]: {
+            [SHEET_FROZEN_COLUMN_HEADER_MENU_ID]: {
                 order: 5,
-                menuItemFactory: SheetFrozenHeaderMenuItemFactory,
-                [SetSelectionFrozenCommand.id]: {
-                    order: 0,
-                    menuItemFactory: FrozenMenuItemFactory,
+                menuItemFactory: SheetFrozenColumnHeaderMenuItemFactory,
+                [SetColumnFrozenCommand.id]: {
+                    order: 2,
+                    menuItemFactory: FrozenColMenuItemFactory,
+                },
+                [SetFirstColumnFrozenCommand.id]: {
+                    order: 4,
+                    menuItemFactory: FrozenFirstColMenuItemFactory,
                 },
                 [CancelFrozenCommand.id]: {
-                    order: 3,
+                    order: 5,
                     menuItemFactory: CancelFrozenMenuItemFactory,
                 },
             },
@@ -556,13 +600,17 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
             },
-            // [SheetCutCommand.name]: {
-            //     order: 1,
-            //     menuItemFactory: CutMenuItemFactory,
-            // },
+            [SheetCutCommand.name]: {
+                order: 1,
+                menuItemFactory: CutMenuItemFactory,
+            },
             [SheetPasteCommand.name]: {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
+            },
+            [COPY_SPECIAL_MENU_ID]: {
+                order: 2.5,
+                menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
                 order: 3,
@@ -600,6 +648,10 @@ export const menuSchema: MenuSchemaType = {
                     menuItemFactory: ClearSelectionAllMenuItemFactory,
                 },
             },
+            [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
+                order: 5,
+                menuItemFactory: Text2NumberContextMenuItemFactory,
+            },
         },
         [ContextMenuGroup.LAYOUT]: {
             order: 1,
@@ -631,15 +683,19 @@ export const menuSchema: MenuSchemaType = {
                 order: 4,
                 menuItemFactory: FitContentMenuItemFactory,
             },
-            [SHEET_FROZEN_HEADER_MENU_ID]: {
+            [SHEET_FROZEN_ROW_HEADER_MENU_ID]: {
                 order: 5,
-                menuItemFactory: SheetFrozenHeaderMenuItemFactory,
-                [SetSelectionFrozenCommand.id]: {
-                    order: 0,
-                    menuItemFactory: FrozenMenuItemFactory,
+                menuItemFactory: SheetFrozenRowHeaderMenuItemFactory,
+                [SetRowFrozenCommand.id]: {
+                    order: 1,
+                    menuItemFactory: FrozenRowMenuItemFactory,
+                },
+                [SetFirstRowFrozenCommand.id]: {
+                    order: 3,
+                    menuItemFactory: FrozenFirstRowMenuItemFactory,
                 },
                 [CancelFrozenCommand.id]: {
-                    order: 3,
+                    order: 5,
                     menuItemFactory: CancelFrozenMenuItemFactory,
                 },
             },

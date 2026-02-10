@@ -26,6 +26,10 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    AutoFillCommand,
+    AutoFillController,
+    AutoFillService,
+    IAutoFillService,
     RangeProtectionRenderModel,
     RangeProtectionService,
     RemoveWorksheetMergeMutation,
@@ -34,10 +38,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import {
-    AutoFillCommand,
-    AutoFillController,
-    AutoFillService,
-    IAutoFillService,
+    AutoFillUIController,
     ISheetSelectionRenderService,
     SheetSelectionRenderService,
     SheetsRenderService,
@@ -67,14 +68,15 @@ describe('Test auto fill with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
-            [AutoFillController],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
+            [SheetsRenderService, { useClass: mockSheetsRenderService }],
+            [AutoFillController],
+            [AutoFillUIController],
             [FormulaAutoFillController],
             [RangeProtectionService],
             [RangeProtectionRenderModel],
-            [SheetsRenderService, { useClass: mockSheetsRenderService }],
         ]);
 
         univer = testBed.univer;
@@ -87,6 +89,7 @@ describe('Test auto fill with formula', () => {
         themeService.setTheme(newTheme);
 
         get(AutoFillController);
+        get(AutoFillUIController);
 
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);

@@ -34,7 +34,7 @@ export interface IBaseSheetBarProps {
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { sheetId, label, color, selected, menuOverlay } = props;
+    const { sheetId, label, color, selected } = props;
 
     const [currentSelected, setCurrentSelected] = useState(selected);
 
@@ -62,7 +62,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             `, {
                 'dark:!univer-text-white': !color || (color && !getTextColor(color)),
                 'univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700 univer-shadow': currentSelected,
-                'dark:!univer-bg-gray-900': currentSelected && !color,
+                'dark:!univer-bg-gray-700': currentSelected && !color,
                 'univer-font-medium univer-text-gray-900 hover:univer-bg-gray-100': !currentSelected,
                 'dark:hover:!univer-bg-gray-700': !currentSelected && !color,
             })}
@@ -75,8 +75,9 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         >
             <div
                 className={`
-                  univer-box-border univer-flex univer-items-center univer-gap-1 univer-whitespace-nowrap univer-rounded
-                  univer-border-2 univer-border-solid univer-border-transparent univer-px-1.5 univer-py-1
+                  univer-box-border univer-flex univer-max-w-lg univer-items-center univer-gap-1 univer-overflow-hidden
+                  univer-whitespace-nowrap univer-rounded univer-border-2 univer-border-solid univer-border-transparent
+                  univer-px-1.5 univer-py-1
                 `}
             >
                 {label}

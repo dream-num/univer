@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch } from '@univerjs/core';
+import type { IDrawingSearch, Workbook } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
@@ -29,10 +29,12 @@ export class DrawingRenderService {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IGalleryService private readonly _galleryService: IGalleryService
+        @IGalleryService private readonly _galleryService: IGalleryService,
+        @IURLImageService private readonly _urlImageService: IURLImageService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) { }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     async renderImages(imageParam: IImageData, scene: Scene) {
         const {
             transform: singleTransform,
@@ -74,6 +76,14 @@ export class DrawingRenderService {
                 continue;
             }
 
+            if (!this._drawingManagerService.getDrawingVisible()) {
+                continue;
+            }
+
+            if (subUnitId !== this._getActiveSheetId()) {
+                continue;
+            }
+
             const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
             const zIndex = orders.indexOf(drawingId);
             const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
@@ -90,10 +100,18 @@ export class DrawingRenderService {
                         console.error(error);
                         continue;
                     }
+                } else if (imageSourceType === ImageSourceType.URL) {
+                    try {
+                        imageConfig.url = await this._urlImageService.getImage(source);
+                    } catch (error) {
+                        console.error(error);
+                        imageConfig.url = source;
+                    }
+                    shouldBeCache = true;
                 } else {
                     imageConfig.url = source;
+                    shouldBeCache = true;
                 }
-                shouldBeCache = true;
             }
 
             if (scene.getObject(imageShapeKey)) {
@@ -105,10 +123,6 @@ export class DrawingRenderService {
             const image = new Image(imageShapeKey, imageConfig);
             if (shouldBeCache) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
-            }
-
-            if (!this._drawingManagerService.getDrawingVisible()) {
-                continue;
             }
 
             scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
@@ -129,6 +143,13 @@ export class DrawingRenderService {
         }
 
         return images;
+    }
+
+    private _getActiveSheetId(): string | undefined {
+        return this._univerInstanceService
+            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            ?.getActiveSheet()
+            ?.getSheetId();
     }
 
     renderFloatDom(param: IDocFloatDomData, scene: Scene) {

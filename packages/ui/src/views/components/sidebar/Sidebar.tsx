@@ -133,9 +133,9 @@ export function Sidebar() {
             >
                 <header
                     className={`
-                      univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-items-center
-                      univer-justify-between univer-bg-white univer-p-4 univer-pb-2 univer-text-base univer-font-medium
-                      univer-text-gray-800
+                      univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-cursor-default
+                      univer-items-center univer-justify-between univer-bg-white univer-p-4 univer-pb-2 univer-text-base
+                      univer-font-medium univer-text-gray-800
                       dark:!univer-bg-gray-900 dark:!univer-text-white
                     `}
                 >
@@ -152,7 +152,7 @@ export function Sidebar() {
                     </a>
                 </header>
 
-                <section className="univer-box-border univer-px-4" style={options?.bodyStyle}>
+                <section className="univer-box-border univer-cursor-default univer-px-4" style={options?.bodyStyle}>
                     {options?.children}
                 </section>
 

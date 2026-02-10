@@ -356,7 +356,7 @@ export const SheetTableRemoveRowCommand: ICommand<ISheetTableRowColOperationComm
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) {
             return false;
         }
@@ -460,7 +460,7 @@ export const SheetTableRemoveColCommand: ICommand<ISheetTableRowColOperationComm
             return false;
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) {
             return false;
         }

@@ -30,6 +30,7 @@ import frFR from '@univerjs/mockdata/locales/fr-FR';
 import jaJP from '@univerjs/mockdata/locales/ja-JP';
 import koKR from '@univerjs/mockdata/locales/ko-KR';
 import ruRU from '@univerjs/mockdata/locales/ru-RU';
+import skSK from '@univerjs/mockdata/locales/sk-SK';
 import viVN from '@univerjs/mockdata/locales/vi-VN';
 import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import zhTW from '@univerjs/mockdata/locales/zh-TW';
@@ -54,6 +55,7 @@ import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-compon
 import { customRegisterEvent } from './custom/custom-register-event';
 import { UniverSheetsCustomShortcutPlugin } from './custom/custom-shortcut';
 import ImportCSVButtonPlugin from './custom/import-csv-button';
+import { simpleRangePopupDemo } from './custom/simple-range-popup';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -111,6 +113,7 @@ function createNewInstance() {
             [LocaleType.VI_VN]: viVN,
             [LocaleType.ZH_CN]: zhCN,
             [LocaleType.ZH_TW]: zhTW,
+            [LocaleType.SK_SK]: skSK,
         },
         logLevel: LogLevel.VERBOSE,
     });
@@ -123,11 +126,14 @@ function createNewInstance() {
         [UniverRenderEnginePlugin],
         [UniverUIPlugin, {
             container: 'app',
-            // ribbonType: 'classic',
-            customFontFamily: [
-                { value: 'PingFang SC', label: '苹方（简）', category: 'sans-serif' },
-                { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
-            ],
+            ribbonType: 'classic',
+            customFontFamily: {
+                list: [
+                    { value: 'PingFang SC', label: '苹方（简）', category: 'sans-serif' },
+                    { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
+                ],
+                // override: true,
+            },
         }],
         [UniverWebComponentAdapterPlugin],
         [UniverVue3AdapterPlugin],
@@ -202,6 +208,7 @@ function createNewInstance() {
 
     customRegisterEvent(univer, window.univerAPI!);
     // customRangePopups(univer, window.univerAPI!);
+    simpleRangePopupDemo(univer, window.univerAPI!);
 }
 
 createNewInstance();

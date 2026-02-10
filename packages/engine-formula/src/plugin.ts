@@ -24,7 +24,7 @@ import { FormulaController } from './controller/formula.controller';
 import { SetDependencyController } from './controller/set-dependency.controller';
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
-import { SetSuperTableController } from './controller/set-super-table.controller';
+// import { SetSuperTableController } from './controller/set-super-table.controller';
 import { Lexer } from './engine/analysis/lexer';
 import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from './engine/analysis/parser';
@@ -54,6 +54,7 @@ import { FunctionService, IFunctionService } from './services/function.service';
 import { GlobalComputingStatusService } from './services/global-computing-status.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from './services/hyperlink-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
+import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
@@ -87,7 +88,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
-            [SetSuperTableController],
+            // [SetSuperTableController],
         ]);
 
         if (!this._config?.notExecuteFormula) {
@@ -117,6 +118,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IFunctionService, { useClass: FunctionService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [RegisterOtherFormulaService],
             [IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }],
             [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             [ISuperTableService, { useClass: SuperTableService }],
@@ -125,7 +127,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [FormulaDataModel],
             //Controllers
             [FormulaController],
-            [SetSuperTableController],
+            // [SetSuperTableController],
             [ComputingStatusReporterController],
         ];
 

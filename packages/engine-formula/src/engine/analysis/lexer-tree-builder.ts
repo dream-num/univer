@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitSheetDefinedNameMap } from '../../basics/common';
+import type { IDirtyUnitSheetDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
@@ -1752,6 +1752,7 @@ export class LexerTreeBuilder extends Disposable {
                     if (lastString === prefixToken.MINUS) {
                         subLexerNode_minus = new LexerNode();
                         subLexerNode_minus.setToken(prefixToken.MINUS);
+                        subLexerNode_minus.setIndex(cur - this._segment.length, cur - this._segment.length);
                         sliceLength++;
                     }
 
@@ -1759,6 +1760,8 @@ export class LexerTreeBuilder extends Disposable {
                     if (lastString === prefixToken.AT || twoLastString === prefixToken.AT) {
                         subLexerNode_at = new LexerNode();
                         subLexerNode_at.setToken(prefixToken.AT);
+                        const startIndex = cur - this._segment.length + sliceLength;
+                        subLexerNode_at.setIndex(startIndex, startIndex);
 
                         if (subLexerNode_minus) {
                             subLexerNode_minus.addChildren(subLexerNode_at);
@@ -1794,6 +1797,7 @@ export class LexerTreeBuilder extends Disposable {
                     const subLexerNode_ref = new LexerNode();
                     subLexerNode_ref.setToken(this._segment);
                     subLexerNode_ref.setParent(subLexerNode_left);
+                    subLexerNode_ref.setIndex(cur - this._segment.length, cur - 1);
 
                     subLexerNode_left.getChildren().push(subLexerNode_ref);
                     this._resetSegment();
@@ -1822,6 +1826,7 @@ export class LexerTreeBuilder extends Disposable {
 
                 const subLexerNode = new LexerNode();
                 subLexerNode.setToken(currentString);
+                subLexerNode.setIndex(cur - 1, cur - 1);
 
                 const lastChildNode = this._getLastChildCurrent();
                 if (lastChildNode instanceof LexerNode) {
@@ -1949,6 +1954,16 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     getNewFormulaWithPrefix(formulaString: string, hasFunction: (functionToken: IFunctionNames) => boolean): string | null {
+        return null;
+    }
+
+    getFormulaExprTree(
+        formulaString: string,
+        unitId: string,
+        hasFunction: (functionToken: IFunctionNames) => boolean,
+        getDefinedNameName: (unitId: string, name: string) => Nullable<IDefinedNamesServiceParam>,
+        getTable: (unitId: string, tableName: string) => Nullable<ISuperTable>
+    ): IExprTreeNode | null {
         return null;
     }
 }

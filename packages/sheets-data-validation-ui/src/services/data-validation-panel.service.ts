@@ -38,6 +38,9 @@ export class DataValidationPanelService extends Disposable {
 
     private _closeDisposable: Nullable<IDisposable> = null;
 
+    // Record the worksheet to which the rule using the range selector belongs, so that the rule list is not switched when making cross-sheet selections
+    private _focusFormulaEditorActiveRuleSubUnitId: string | null = null;
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ISidebarService private readonly _sidebarService: ISidebarService
@@ -90,5 +93,13 @@ export class DataValidationPanelService extends Disposable {
     setActiveRule(rule: Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }>): void {
         this._activeRule = rule;
         this._activeRule$.next(rule);
+    }
+
+    setFocusFormulaEditorActiveRuleSubUnitId(subUnitId: string | null): void {
+        this._focusFormulaEditorActiveRuleSubUnitId = subUnitId;
+    }
+
+    getFocusFormulaEditorActiveRuleSubUnitId(): string | null {
+        return this._focusFormulaEditorActiveRuleSubUnitId;
     }
 }

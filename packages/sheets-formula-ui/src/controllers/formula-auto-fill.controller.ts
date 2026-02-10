@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import type { AutoFillService, IAutoFillLocation, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
+import type { AutoFillService, IAutoFillCopyDataInTypeIndexInfo, IAutoFillCopyDataPiece, IAutoFillLocation, IAutoFillRule } from '@univerjs/sheets';
 import {
     Direction,
     Disposable,
@@ -26,7 +26,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
+import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, IAutoFillService } from '@univerjs/sheets';
 
 export class FormulaAutoFillController extends Disposable {
     constructor(
@@ -40,17 +40,17 @@ export class FormulaAutoFillController extends Disposable {
 
     private _registerAutoFill(): void {
         const formulaRule: IAutoFillRule = {
-            type: DATA_TYPE.FORMULA,
+            type: AUTO_FILL_DATA_TYPE.FORMULA,
             priority: 1001,
             match: (cellData) => isFormulaString(cellData?.f) || isFormulaId(cellData?.si),
             isContinue: (prev, cur) => {
-                if (prev.type === DATA_TYPE.FORMULA) {
+                if (prev.type === AUTO_FILL_DATA_TYPE.FORMULA) {
                     return true;
                 }
                 return false;
             },
             applyFunctions: {
-                [APPLY_TYPE.COPY]: (dataWithIndex, len, direction, copyDataPiece, location) => {
+                [AUTO_FILL_APPLY_TYPE.COPY]: (dataWithIndex, len, direction, copyDataPiece, location) => {
                     const { data, index } = dataWithIndex;
                     return this._fillCopyFormula(data, len, direction, index, copyDataPiece, location as IAutoFillLocation);
                 },
@@ -63,8 +63,8 @@ export class FormulaAutoFillController extends Disposable {
         data: Array<Nullable<ICellData>>,
         len: number,
         direction: Direction,
-        index: ICopyDataInTypeIndexInfo,
-        copyDataPiece: ICopyDataPiece,
+        index: IAutoFillCopyDataInTypeIndexInfo,
+        copyDataPiece: IAutoFillCopyDataPiece,
         location: IAutoFillLocation
     ) {
         const step = getDataLength(copyDataPiece);
@@ -160,7 +160,7 @@ function directionToOffset(step: number, len: number, direction: Direction, loca
     return { offsetX, offsetY };
 }
 
-function getDataLength(copyDataPiece: ICopyDataPiece) {
+function getDataLength(copyDataPiece: IAutoFillCopyDataPiece) {
     let length = 0;
     for (const t in copyDataPiece) {
         copyDataPiece[t].forEach((item) => {

@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
@@ -69,6 +69,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         }
 
         const unitId = documentDataModel.getUnitId();
+        if (isInternalEditorID(unitId)) {
+            return;
+        }
         if (this._renderManagerService.has(unitId) && !this._initImagePopupMenu.has(unitId)) {
             this._popupMenuListener(unitId);
             this._initImagePopupMenu.add(unitId);
@@ -163,8 +166,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disposePopups.length = 0;
                 this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
                 this._drawingManagerService.focusDrawing(null);
-            }
-            )
+            })
         );
         this.disposeWithMe(
             transformer.changing$.subscribe(() => {

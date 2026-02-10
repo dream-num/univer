@@ -16,11 +16,19 @@
 
 import type { IAccessor, ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
+import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
+import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
+import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
+import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
-import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
+import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
+import type { IRemoveRowColCommandInterceptParams, IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
+import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import type { SheetsSelectionsService } from '../selections/selection.service';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -36,7 +44,7 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { Direction, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -47,27 +55,25 @@ import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation'
 import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
-import { SheetsSelectionsService } from '../selections/selection.service';
 import { EffectRefRangId, OperatorType } from './type';
 
-const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const handleRangeTypeInput = (range: IRange) => {
     const _range = { ...range };
     const isColumn = Number.isNaN(_range.startRow) && Number.isNaN(_range.endRow) && !Number.isNaN(_range.startColumn) && !Number.isNaN(_range.endColumn);
     const isRow = Number.isNaN(_range.startColumn) && Number.isNaN(_range.endColumn) && !Number.isNaN(_range.startRow) && !Number.isNaN(_range.endRow);
     if (_range.rangeType === RANGE_TYPE.COLUMN || isColumn) {
         _range.startRow = 0;
-        _range.endRow = MAX_SAFE_INTEGER;
+        _range.endRow = MAX_ROW_COUNT - 1;
     }
     if (_range.rangeType === RANGE_TYPE.ROW || isRow) {
         _range.startColumn = 0;
-        _range.endColumn = MAX_SAFE_INTEGER;
+        _range.endColumn = MAX_COLUMN_COUNT - 1;
     }
     if (_range.rangeType === RANGE_TYPE.ALL) {
         _range.startColumn = 0;
-        _range.endColumn = MAX_SAFE_INTEGER;
+        _range.endColumn = MAX_COLUMN_COUNT - 1;
         _range.startRow = 0;
-        _range.endRow = MAX_SAFE_INTEGER;
+        _range.endRow = MAX_ROW_COUNT - 1;
     }
     return _range;
 };
@@ -117,7 +123,7 @@ interface ILine {
 /**
  * see docs/tldr/ref-range/move-rows-cols.tldr
  */
-// eslint-disable-next-line max-lines-per-function, complexity
+// eslint-disable-next-line max-lines-per-function
 export const handleBaseMoveRowsCols = (
     fromRange: ILine,
     toRange: ILine,
@@ -961,69 +967,120 @@ export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, 
 
 export const handleRemoveRowCommon = (param: IRemoveRowColCommandInterceptParams, targetRange: IRange) => {
     const ranges = param.ranges ?? [param.range];
-    const matrix = new ObjectMatrix();
+    const removed: [number, number][] = ranges.map((range) => [range.startRow, range.endRow]);
+    const mergedRemoved = mergeIntervals(removed);
 
-    Range.foreach(targetRange, (row, col) => {
-        matrix.setValue(row, col, 1);
-    });
+    let targetStartRow = targetRange.startRow;
+    let targetEndRow = targetRange.endRow;
 
-    ranges.forEach((range) => {
-        const startRow = range.startRow;
-        const endRow = range.endRow;
-        const count = endRow - startRow + 1;
-        matrix.removeRows(startRow, count);
-    });
+    for (let i = mergedRemoved.length - 1; i >= 0; i--) {
+        const [startRow, endRow] = mergedRemoved[i];
 
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (value) => value === 1);
+        if (startRow <= targetRange.startRow && endRow >= targetRange.endRow) {
+            return [];
+        }
+
+        if (endRow < targetStartRow) {
+            const count = endRow - startRow + 1;
+            targetStartRow -= count;
+            targetEndRow -= count;
+        } else if (startRow > targetEndRow) {
+            // do nothing
+        } else {
+            const intersectStart = Math.max(startRow, targetStartRow);
+            const intersectEnd = Math.min(endRow, targetEndRow);
+            const intersectCount = intersectEnd - intersectStart + 1;
+
+            targetEndRow -= intersectCount;
+
+            if (startRow <= targetStartRow) {
+                const beforeCount = intersectStart - targetStartRow;
+                targetStartRow -= beforeCount;
+            }
+        }
+    }
+
+    return [
+        {
+            ...targetRange,
+            startRow: targetStartRow,
+            endRow: targetEndRow,
+        },
+    ];
 };
 
 export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams>, targetRange: IRange) => {
     const param = info.params!;
     const insertRow = param.range.startRow;
     const insertCount = param.range.endRow - param.range.startRow + 1;
+    const direction = param.direction;
 
-    if (targetRange.startRow >= insertRow) {
-        return [{
-            startRow: targetRange.startRow + insertCount,
-            endRow: targetRange.endRow + insertCount,
-            startColumn: targetRange.startColumn,
-            endColumn: targetRange.endColumn,
-        }];
-    } else if (targetRange.endRow < insertRow) {
-        return [targetRange];
+    if (direction === Direction.UP) {
+        if (insertRow < targetRange.startRow) {
+            return [{
+                ...targetRange,
+                startRow: targetRange.startRow + insertCount,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        } else if (insertRow <= targetRange.endRow) {
+            return [{
+                ...targetRange,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        }
     } else {
-        return [{
-            startRow: targetRange.startRow,
-            endRow: targetRange.endRow + insertCount,
-            startColumn: targetRange.startColumn,
-            endColumn: targetRange.endColumn,
-        }];
+        if (insertRow <= targetRange.startRow) {
+            return [{
+                ...targetRange,
+                startRow: targetRange.startRow + insertCount,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        } else if (insertRow <= targetRange.endRow + 1) {
+            return [{
+                ...targetRange,
+                endRow: targetRange.endRow + insertCount,
+            }];
+        }
     }
+
+    return [targetRange];
 };
 
 export const handleInsertColCommon = (info: ICommandInfo<IInsertColCommandParams>, targetRange: IRange) => {
     const param = info.params!;
     const insertColumn = param.range.startColumn;
     const insertCount = param.range.endColumn - param.range.startColumn + 1;
+    const direction = param.direction;
 
-    if (targetRange.startColumn >= insertColumn) {
-        return [{
-            startRow: targetRange.startRow,
-            endRow: targetRange.endRow,
-            startColumn: targetRange.startColumn + insertCount,
-            endColumn: targetRange.endColumn + insertCount,
-        }];
-    } else if (targetRange.endColumn < insertColumn) {
-        return [targetRange];
+    if (direction === Direction.LEFT) {
+        if (insertColumn < targetRange.startColumn) {
+            return [{
+                ...targetRange,
+                startColumn: targetRange.startColumn + insertCount,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        } else if (insertColumn <= targetRange.endColumn) {
+            return [{
+                ...targetRange,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        }
     } else {
-        return [{
-            startRow: targetRange.startRow,
-            endRow: targetRange.endRow,
-            startColumn: targetRange.startColumn,
-            endColumn: targetRange.endColumn + insertCount,
-        }];
+        if (insertColumn <= targetRange.startColumn) {
+            return [{
+                ...targetRange,
+                startColumn: targetRange.startColumn + insertCount,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        } else if (insertColumn <= targetRange.endColumn + 1) {
+            return [{
+                ...targetRange,
+                endColumn: targetRange.endColumn + insertCount,
+            }];
+        }
     }
+
+    return [targetRange];
 };
 
 export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
@@ -1461,67 +1518,77 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
-} {
+} | undefined {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     switch (command.id) {
         case EffectRefRangId.MoveColsCommandId: {
-            const params = command.params!;
-            const target = getSheetCommandTarget(univerInstanceService, {
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
-            })!;
+            const params = command.params as IMoveColsCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService, params);
+            if (!target) return;
+
+            const { unitId, subUnitId } = target;
+            const { fromRange, toRange } = params;
 
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
-                    params.fromRange,
-
+                    fromRange,
                     {
-                        ...params.toRange,
-                        startColumn: params.fromRange.startColumn < params.toRange.startColumn ? params.fromRange.endColumn + 1 : params.toRange.startColumn,
-                        endColumn: params.fromRange.startColumn < params.toRange.startColumn ? params.toRange.endColumn - 1 : params.fromRange.startColumn - 1,
+                        ...toRange,
+                        startColumn: fromRange.startColumn < toRange.startColumn ? fromRange.endColumn + 1 : toRange.startColumn,
+                        endColumn: fromRange.startColumn < toRange.startColumn ? toRange.endColumn - 1 : fromRange.startColumn - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.MoveRowsCommandId: {
-            const params = command.params!;
-            const target = getSheetCommandTarget(univerInstanceService, {
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
-            })!;
+            const params = command.params as IMoveRowsCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService, params);
+            if (!target) return;
+
+            const { unitId, subUnitId } = target;
+            const { fromRange, toRange } = params;
+
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
-                    params.fromRange,
+                    fromRange,
                     {
-                        ...params.toRange,
-                        startRow: params.fromRange.startRow < params.toRange.startRow ? params.fromRange.endRow + 1 : params.toRange.startRow,
-                        endRow: params.fromRange.startRow < params.toRange.startRow ? params.toRange.endRow - 1 : params.fromRange.startRow - 1,
+                        ...toRange,
+                        startRow: fromRange.startRow < toRange.startRow ? fromRange.endRow + 1 : toRange.startRow,
+                        endRow: fromRange.startRow < toRange.startRow ? toRange.endRow - 1 : fromRange.startRow - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.MoveRangeCommandId: {
-            const params = command.params!;
-            const target = getSheetCommandTarget(univerInstanceService)!;
+            const params = command.params as IMoveRangeCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return;
+
+            const { unitId, subUnitId } = target;
+            const { fromRange, toRange } = params;
 
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
-                ranges: [params.fromRange, params.toRange],
+                unitId,
+                subUnitId,
+                ranges: [fromRange, toRange],
             };
         }
         case EffectRefRangId.InsertRowCommandId: {
-            const params = command.params!;
-            const range: IRange = params.range;
+            const params = command.params as IInsertRowCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService, params);
+            if (!target) return;
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { range } = params;
+
             return {
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
                     ...range.startRow > 0
                         ? [{
@@ -1533,17 +1600,22 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                     {
                         ...range,
                         startRow: range.startRow,
-                        endRow: Number.MAX_SAFE_INTEGER,
+                        endRow: worksheet.getRowCount() - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.InsertColCommandId: {
-            const params = command.params!;
-            const range: IRange = params.range;
+            const params = command.params as IInsertColCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService, params);
+            if (!target) return;
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { range } = params;
+
             return {
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
                     ...range.startColumn > 0
                         ? [{
@@ -1555,100 +1627,105 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                     {
                         ...range,
                         startColumn: range.startColumn,
-                        endColumn: Number.MAX_SAFE_INTEGER,
+                        endColumn: worksheet.getColumnCount() - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.RemoveRowCommandId: {
-            const params = command.params!;
-            const range: IRange = params.range;
-            const target = getSheetCommandTarget(univerInstanceService)!;
+            const params = command.params as IRemoveRowColCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return;
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { range } = params;
+
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
                     range,
                     {
                         ...range,
                         startRow: range.endRow + 1,
-                        endRow: Number.MAX_SAFE_INTEGER,
+                        endRow: worksheet.getRowCount() - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.RemoveColCommandId: {
-            const params = command.params!;
-            const range: IRange = params.range;
-            const target = getSheetCommandTarget(univerInstanceService)!;
+            const params = command.params as IRemoveRowColCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return;
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { range } = params;
 
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
                     range,
                     {
                         ...range,
                         startColumn: range.endColumn + 1,
-                        endColumn: Number.MAX_SAFE_INTEGER,
+                        endColumn: worksheet.getColumnCount() - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.DeleteRangeMoveUpCommandId:
         case EffectRefRangId.InsertRangeMoveDownCommandId: {
-            const params = command;
-            const target = getSheetCommandTarget(univerInstanceService)!;
-            const range = params.params?.range || selectionManagerService.getCurrentSelections()?.map((s) => s.range)?.[0];
-            if (!range) {
-                return {
-                    unitId: target.unitId,
-                    subUnitId: target.subUnitId,
-                    ranges: [],
-                };
-            }
+            const params = command.params as IDeleteRangeMoveUpCommandParams | IInsertRangeMoveDownCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return;
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { range } = params;
 
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
                     range,
                     {
                         ...range,
                         startRow: range.endRow + 1,
-                        endRow: Number.MAX_SAFE_INTEGER,
+                        endRow: worksheet.getRowCount() - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.DeleteRangeMoveLeftCommandId:
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
-            const params = command;
-            const range = params.params?.range || selectionManagerService.getCurrentSelections()?.map((s) => s.range)?.[0];
-            const target = getSheetCommandTarget(univerInstanceService)!;
-            if (!range) {
-                return {
-                    unitId: target.unitId,
-                    subUnitId: target.subUnitId,
-                    ranges: [],
-                };
-            }
+            const params = command.params as IDeleteRangeMoveLeftCommandParams | IInsertRangeMoveRightCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return;
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { range } = params;
+
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: [
                     range,
                     {
                         ...range,
                         startColumn: range.endColumn + 1,
-                        endColumn: Number.MAX_SAFE_INTEGER,
+                        endColumn: worksheet.getColumnCount() - 1,
                     },
                 ],
             };
         }
         case EffectRefRangId.ReorderRangeCommandId: {
-            const params = command;
-            const { range, order } = params.params!;
+            const params = command.params as IReorderRangeCommandParams;
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return;
+
+            const { unitId, subUnitId } = target;
+            const { range, order } = params;
+
             const effectRanges = [];
             for (let row = range.startRow; row <= range.endRow; row++) {
                 if (row in order) {
@@ -1660,10 +1737,10 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                     });
                 }
             }
-            const target = getSheetCommandTarget(univerInstanceService)!;
+
             return {
-                unitId: target.unitId,
-                subUnitId: target.subUnitId,
+                unitId,
+                subUnitId,
                 ranges: effectRanges,
             };
         }

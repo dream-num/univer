@@ -22,8 +22,6 @@ import type {
     IObjectArrayPrimitiveType,
     IObjectMatrixPrimitiveType,
     IRange,
-    IRowData,
-    Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -32,7 +30,6 @@ import type {
     IInsertRowMutationParams,
     ISetRangeValuesMutationParams,
     ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
 import type {
     ICellDataWithSpanInfo,
@@ -42,16 +39,13 @@ import type {
     ISheetDiscreteRangeLocation,
 } from '../../services/clipboard/type';
 import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
-
 import type { IUniverSheetsUIConfig } from '../config.schema';
-
 import {
-    BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
-    DEFAULT_WORKSHEET_ROW_HEIGHT,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
+    getNumfmtParseValueFilter,
     handleStyleToString,
     ICommandService,
     IConfigService,
@@ -61,18 +55,16 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
-    numfmt,
     ObjectMatrix,
     RxDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { MessageType } from '@univerjs/design';
 import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
-
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
+    AddWorksheetMergeCommand,
     InsertColMutation,
     InsertRowMutation,
     MAX_CELL_PER_SHEET_KEY,
@@ -84,11 +76,10 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetWorksheetColWidthMutation,
-    SetWorksheetRowHeightMutation,
+    SetWorksheetColWidthMutationFactory,
 } from '@univerjs/sheets';
 import { BuiltInUIPart, connectInjector, IMessageService, IUIPartsService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
-import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -101,7 +92,7 @@ import {
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
@@ -231,6 +222,8 @@ export class SheetClipboardController extends RxDisposable {
 
         // register basic sheet clipboard hooks
         this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initCopyingHooks()));
+        this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initPastingRowsHook()));
+        this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initPastingColumnsHook()));
         this.disposeWithMe(this._sheetClipboardService.addClipboardHook(this._initPastingHook()));
         const disposables = this._initSpecialPasteHooks().map((hook) =>
             this._sheetClipboardService.addClipboardHook(hook)
@@ -243,7 +236,7 @@ export class SheetClipboardController extends RxDisposable {
         const self = this;
         let currentSheet: Worksheet | null = null;
         return {
-            id: PREDEFINED_HOOK_NAME.DEFAULT_COPY,
+            id: PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY,
             isDefaultHook: true,
             onBeforeCopy(unitId, subUnitId) {
                 currentSheet = self._getWorksheet(unitId, subUnitId);
@@ -265,7 +258,10 @@ export class SheetClipboardController extends RxDisposable {
                 }
 
                 const mergedCellByRowCol = currentSheet!.getMergedCell(row, col);
-
+                /**
+                 * This is for generating the copied HTML, which requires all the styles applied to the cell, including conditional formatting, data validation, number format, etc.
+                 * So here we use `getComposedCellStyle` to get the final style of the cell.
+                 */
                 const textStyle = currentSheet!.getComposedCellStyle(row, col);
 
                 let style = '';
@@ -312,13 +308,13 @@ export class SheetClipboardController extends RxDisposable {
             onAfterCopy() {
                 currentSheet = null;
             },
-            getFilteredOutRows(range: IRange) {
+            getFilteredOutRows(unitId: string, subUnitId: string, range: IRange) {
+                const worksheet = self._getWorksheet(unitId, subUnitId);
+                if (!worksheet) return [];
+
                 const { startRow, endRow } = range;
-                const worksheet = self._instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
                 const res: number[] = [];
-                if (!worksheet) {
-                    return res;
-                }
+
                 for (let r = startRow; r <= endRow; r++) {
                     if (worksheet.getRowFiltered(r)) {
                         res.push(r);
@@ -329,22 +325,13 @@ export class SheetClipboardController extends RxDisposable {
         };
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initPastingHook(): ISheetClipboardHook {
         const self = this;
 
-        let unitId: string | null = null;
-        let subUnitId: string | null = null;
-        let currentSheet: Worksheet | null = null;
-
         return {
-            id: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+            id: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
             isDefaultHook: true,
-            onBeforePaste({ unitId: unitId_, subUnitId: subUnitId_, range }) {
-                currentSheet = self._getWorksheet(unitId_, subUnitId_);
-                unitId = unitId_;
-                subUnitId = subUnitId_;
-
+            onBeforePaste({ range }) {
                 // examine if pasting would cause number of cells to exceed the upper limit
                 // this is not implemented yet
                 const maxConfig = self._configService.getConfig<number>(MAX_CELL_PER_SHEET_KEY);
@@ -357,216 +344,7 @@ export class SheetClipboardController extends RxDisposable {
                     }); // TODO: show error info
                     return false;
                 }
-
                 return true;
-            },
-
-            // eslint-disable-next-line max-lines-per-function
-            onPasteRows(pasteTo, rowProperties) {
-                const { range } = pasteTo;
-                const redoMutations: IMutationInfo[] = [];
-                const undoMutations: IMutationInfo[] = [];
-
-                // if the range is outside ot the worksheet's boundary, we should add rows
-                const maxRow = currentSheet!.getMaxRows();
-                const rowCount = maxRow - 1;
-                const addingRowsCount = range.rows[range.rows.length - 1] - rowCount;
-                const existingRowsCount = rowProperties.length - addingRowsCount;
-
-                const rowManager = currentSheet!.getRowManager();
-                if (addingRowsCount > 0) {
-                    const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
-                    rowProperties.slice(existingRowsCount).forEach((property, index) => {
-                        const { height: PropertyHeight } = property || {};
-                        if (PropertyHeight) {
-                            rowInfo[index] = {
-                                h: Number.parseFloat(PropertyHeight),
-                                hd: BooleanNumber.FALSE,
-                            };
-                        }
-                    });
-
-                    const addRowRange = {
-                        startColumn: range.cols[0],
-                        endColumn: range.cols[range.cols.length - 1],
-                        endRow: range.rows[range.rows.length - 1],
-                        startRow: maxRow,
-                    };
-
-                    const addRowMutation: IInsertRowMutationParams = {
-                        unitId: unitId!,
-                        subUnitId: subUnitId!,
-                        range: addRowRange,
-                        rowInfo,
-                    };
-                    redoMutations.push({
-                        id: InsertRowMutation.id,
-                        params: addRowMutation,
-                    });
-                    undoMutations.push({
-                        id: RemoveRowMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            range: addRowRange,
-                        },
-                    });
-                }
-
-                // get row height of existing rows
-                // TODO When Excel pasted, there was no width height, Do we still need to set the height?
-                const rowHeight: IObjectArrayPrimitiveType<number> = {};
-                const originRowHeight: IObjectArrayPrimitiveType<number> = {};
-                rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
-                    const { height: propertyHeight } = property;
-                    if (propertyHeight) {
-                        const rowConfigBeforePaste = rowManager.getRow(range.rows[0] + index);
-                        const willSetHeight = Number.parseFloat(propertyHeight);
-                        if (rowConfigBeforePaste) {
-                            const { h = DEFAULT_WORKSHEET_ROW_HEIGHT, ah = 0 } = rowConfigBeforePaste;
-                            const nowRowHeight = Math.max(h, ah);
-                            if (willSetHeight > nowRowHeight) {
-                                rowHeight[index + range.rows[0]] = willSetHeight;
-                                originRowHeight[index + range.rows[0]] = nowRowHeight;
-                            } else {
-                                rowHeight[index + range.rows[0]] = nowRowHeight;
-                                originRowHeight[index + range.rows[0]] = nowRowHeight;
-                            }
-                        } else {
-                            rowHeight[index + range.rows[0]] = willSetHeight;
-                            originRowHeight[index + range.rows[0]] = rowManager.getRow(range.rows[0] + index)?.h ?? DEFAULT_WORKSHEET_ROW_HEIGHT;
-                        }
-                    }
-                });
-
-                // apply row properties to the existing rows
-                if (Object.keys(rowHeight).length) {
-                    const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
-                        unitId: unitId!,
-                        subUnitId: subUnitId!,
-                        ranges: [{
-                            startRow: range.rows[0],
-                            endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
-                            startColumn: range.cols[0],
-                            endColumn: range.cols[range.cols.length - 1],
-                        }],
-                        rowHeight,
-                    };
-                    redoMutations.push({
-                        id: SetWorksheetRowHeightMutation.id,
-                        params: setRowPropertyMutation,
-                    });
-
-                    undoMutations.push({
-                        id: SetWorksheetRowHeightMutation.id,
-                        params: {
-                            ...setRowPropertyMutation,
-                            rowHeight: originRowHeight,
-                        },
-                    });
-                }
-
-                return {
-                    redos: redoMutations,
-                    undos: undoMutations,
-                };
-            },
-
-            // eslint-disable-next-line max-lines-per-function
-            onPasteColumns(pasteTo, colProperties, pasteType) {
-                const { range } = pasteTo;
-                const redoMutations: IMutationInfo[] = [];
-                const undoMutations: IMutationInfo[] = [];
-
-                // if the range is outside ot the worksheet's boundary, we should add rows
-                const maxColumn = currentSheet!.getMaxColumns();
-                const colCount = maxColumn - 1;
-                const addingColsCount = range.cols[range.cols.length - 1] - colCount;
-                const existingColsCount = colProperties.length - addingColsCount;
-
-                const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
-                const pasteToCols = range.cols;
-                const startColumn = pasteToCols[0];
-
-                if (addingColsCount > 0) {
-                    const addColRange = {
-                        startRow: range.rows[0],
-                        endRow: range.rows[range.rows.length - 1],
-                        endColumn: range.cols[range.cols.length - 1],
-                        startColumn: maxColumn,
-                    };
-                    const addColMutation: IInsertColMutationParams = {
-                        unitId: unitId!,
-                        subUnitId: subUnitId!,
-                        range: addColRange,
-                        colInfo: colProperties.slice(existingColsCount).map((property, index) => ({
-                            w: property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth,
-                            hd: BooleanNumber.FALSE,
-                        })),
-                    };
-                    redoMutations.push({
-                        id: InsertColMutation.id,
-                        params: addColMutation,
-                    });
-                    undoMutations.push({
-                        id: RemoveColMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            range: addColRange,
-                        },
-                    });
-                }
-
-                const targetSetColPropertyParams = {
-                    unitId: unitId!,
-                    subUnitId: subUnitId!,
-                    ranges: [{
-                        startRow: range.rows[0],
-                        endRow: range.rows[range.rows.length - 1],
-
-                        startColumn: range.cols[0],
-                        endColumn: Math.min(range.cols[range.cols.length - 1], maxColumn),
-                    }],
-                };
-
-                // apply col properties to the existing rows
-                if (colProperties.length > 0) {
-                    const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                        ...targetSetColPropertyParams,
-                        colWidth: colProperties
-                            .slice(0, existingColsCount)
-                            .reduce((p, c, index) => {
-                                p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
-                                return p;
-                            }, {} as IObjectArrayPrimitiveType<number>),
-                    };
-
-                    const undoSetColPropertyParams: ISetWorksheetColWidthMutationParams = {
-                        ...targetSetColPropertyParams,
-                        colWidth: colProperties
-                            .slice(0, existingColsCount)
-                            .reduce((p, c, index) => {
-                                p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
-                                return p;
-                            }, {} as IObjectArrayPrimitiveType<Nullable<number>>),
-                    };
-
-                    redoMutations.push({
-                        id: SetWorksheetColWidthMutation.id,
-                        params: setColPropertyMutation,
-                    });
-
-                    undoMutations.push({
-                        id: SetWorksheetColWidthMutation.id,
-                        params: undoSetColPropertyParams,
-                    });
-                }
-
-                return {
-                    redos: redoMutations,
-                    undos: undoMutations,
-                };
             },
 
             onPastePlainText(pasteTo: ISheetDiscreteRangeLocation, text: string, payload: ICopyPastePayload) {
@@ -581,9 +359,117 @@ export class SheetClipboardController extends RxDisposable {
             ) {
                 return self._onPasteCells(pasteFrom, pasteTo, data, payload);
             },
+        };
+    }
 
-            onAfterPaste(success) {
-                currentSheet = null;
+    private _initPastingRowsHook(): ISheetClipboardHook {
+        const self = this;
+
+        return {
+            id: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE_ROWS,
+            isDefaultHook: true,
+
+            onPasteRows(pasteTo) {
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
+                const { range, unitId, subUnitId } = pasteTo;
+                const { rows, cols } = range;
+
+                if (!rows || !cols || rows.length === 0 || cols.length === 0) {
+                    return { redos, undos };
+                }
+
+                const worksheet = self._getWorksheet(unitId, subUnitId);
+                const worksheetLastRow = worksheet.getMaxRows() - 1;
+
+                const pasteRangeEndRow = rows[rows.length - 1];
+                const pasteRangeStartColumn = cols[0];
+                const pasteRangeEndColumn = cols[cols.length - 1];
+
+                // If the range is outside ot the worksheet's boundary, we should add rows
+                const addingRowsCount = pasteRangeEndRow - worksheetLastRow;
+                if (addingRowsCount > 0) {
+                    const insertRowMutationParams: IInsertRowMutationParams = {
+                        unitId,
+                        subUnitId,
+                        range: {
+                            startRow: worksheetLastRow + 1,
+                            endRow: pasteRangeEndRow,
+                            startColumn: pasteRangeStartColumn,
+                            endColumn: pasteRangeEndColumn,
+                        },
+                    };
+
+                    redos.push({
+                        id: InsertRowMutation.id,
+                        params: insertRowMutationParams,
+                    });
+                    undos.push({
+                        id: RemoveRowMutation.id,
+                        params: insertRowMutationParams,
+                    });
+                }
+
+                return {
+                    redos,
+                    undos,
+                };
+            },
+        };
+    }
+
+    private _initPastingColumnsHook(): ISheetClipboardHook {
+        const self = this;
+
+        return {
+            id: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE_COLUMNS,
+            isDefaultHook: true,
+
+            onPasteColumns(pasteTo) {
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
+                const { range, unitId, subUnitId } = pasteTo;
+                const { rows, cols } = range;
+
+                if (!rows || !cols || rows.length === 0 || cols.length === 0) {
+                    return { redos, undos };
+                }
+
+                const worksheet = self._getWorksheet(unitId, subUnitId);
+                const worksheetLastColumn = worksheet.getMaxColumns() - 1;
+
+                const pasteRangeStartRow = rows[0];
+                const pasteRangeEndRow = rows[rows.length - 1];
+                const pasteRangeEndColumn = cols[cols.length - 1];
+
+                // If the range is outside ot the worksheet's boundary, we should add columns
+                const addingColsCount = pasteRangeEndColumn - worksheetLastColumn;
+                if (addingColsCount > 0) {
+                    const InsertColMutationParams: IInsertColMutationParams = {
+                        unitId,
+                        subUnitId,
+                        range: {
+                            startRow: pasteRangeStartRow,
+                            endRow: pasteRangeEndRow,
+                            startColumn: worksheetLastColumn + 1,
+                            endColumn: pasteRangeEndColumn,
+                        },
+                    };
+
+                    redos.push({
+                        id: InsertColMutation.id,
+                        params: InsertColMutationParams,
+                    });
+                    undos.push({
+                        id: RemoveColMutation.id,
+                        params: InsertColMutationParams,
+                    });
+                }
+
+                return {
+                    redos,
+                    undos,
+                };
             },
         };
     }
@@ -635,7 +521,7 @@ export class SheetClipboardController extends RxDisposable {
                     },
                 };
             } else {
-                const pattern = numfmt.parseNumber(text);
+                const pattern = getNumfmtParseValueFilter(text);
                 if (pattern?.z) {
                     cellValue = {
                         [range.rows[0]]: {
@@ -704,7 +590,7 @@ export class SheetClipboardController extends RxDisposable {
         const self = this;
 
         const specialPasteValueHook: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE,
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
@@ -715,7 +601,7 @@ export class SheetClipboardController extends RxDisposable {
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT,
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
@@ -761,7 +647,7 @@ export class SheetClipboardController extends RxDisposable {
         };
 
         const specialPasteColWidthHook: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH,
             specialPasteInfo: {
                 label: 'specialPaste.colWidth',
             },
@@ -772,80 +658,73 @@ export class SheetClipboardController extends RxDisposable {
                 };
             },
             onPasteColumns(pasteTo, colProperties, payload) {
-                const workbook = self._instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet()?.getSheetId();
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
 
-                if (!unitId || !subUnitId) {
-                    throw new Error('Cannot find unitId or subUnitId');
+                if (payload.pasteType !== PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
+                    return { redos, undos };
                 }
 
-                const redoMutations: IMutationInfo[] = [];
-                const undoMutations: IMutationInfo[] = [];
-                const currentSheet = self._getWorksheet(unitId, subUnitId);
+                const { range, unitId, subUnitId } = pasteTo;
+                const { rows, cols } = range;
 
-                const { range } = pasteTo;
-                const pasteToCols = range.cols;
-                const startColumn = pasteToCols[0];
-                // if the range is outside ot the worksheet's boundary, we should add rows
-                const maxColumn = currentSheet!.getMaxColumns();
-                const addingColsCount = range.cols[range.cols.length - 1] - maxColumn;
-                const existingColsCount = colProperties.length - addingColsCount;
+                if (!rows || !cols || rows.length === 0 || cols.length === 0) {
+                    return { redos, undos };
+                }
+
+                const worksheet = self._getWorksheet(unitId, subUnitId);
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
 
-                const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                    unitId: unitId!,
-                    subUnitId: subUnitId!,
-                    ranges: [{
-                        startRow: range.rows[0],
-                        endRow: Math.min(range.cols[range.cols.length - 1], maxColumn),
-                        startColumn: range.cols[0],
-                        endColumn: range.cols[range.cols.length - 1],
-                    }],
-                    colWidth: colProperties
-                        .slice(0, existingColsCount)
-                        .reduce((p, c, index) => {
-                            p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
-                            return p;
-                        }, {} as IObjectArrayPrimitiveType<number>),
-                };
+                const pasteRangeStartRow = rows[0];
+                const pasteRangeEndRow = rows[rows.length - 1];
+                const pasteRangeStartColumn = cols[0];
+                const pasteRangeEndColumn = cols[cols.length - 1];
 
-                const undoSetColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                    unitId: unitId!,
-                    subUnitId: subUnitId!,
-                    ranges: [{
-                        startRow: range.rows[0],
-                        endRow: Math.min(range.cols[range.cols.length - 1], maxColumn),
-                        startColumn: range.cols[0],
-                        endColumn: range.cols[range.cols.length - 1],
-                    }],
-                    colWidth: colProperties
-                        .slice(0, existingColsCount)
-                        .reduce((p, c, index) => {
-                            p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
-                            return p;
-                        }, {} as IObjectArrayPrimitiveType<Nullable<number>>),
-                };
+                const colPropertiesLength = colProperties.length;
+                if (colPropertiesLength > 0) {
+                    const colWidth: IObjectArrayPrimitiveType<number> = {};
 
-                redoMutations.push({
-                    id: SetWorksheetColWidthMutation.id,
-                    params: setColPropertyMutation,
-                });
+                    for (let c = pasteRangeStartColumn; c <= pasteRangeEndColumn; c++) {
+                        const index = (c - pasteRangeStartColumn) % colPropertiesLength;
+                        const property = colProperties[index];
+                        if (property.width && Number(property.width) !== defaultColumnWidth) {
+                            colWidth[c] = Number(property.width);
+                        }
+                    }
 
-                undoMutations.push({
-                    id: SetWorksheetColWidthMutation.id,
-                    params: undoSetColPropertyMutation,
-                });
+                    const setWorksheetColWidthMutationParams: ISetWorksheetColWidthMutationParams = {
+                        unitId,
+                        subUnitId,
+                        ranges: [
+                            {
+                                startRow: pasteRangeStartRow,
+                                endRow: pasteRangeEndRow,
+                                startColumn: pasteRangeStartColumn,
+                                endColumn: pasteRangeEndColumn,
+                            },
+                        ],
+                        colWidth,
+                    };
+
+                    redos.push({
+                        id: SetWorksheetColWidthMutation.id,
+                        params: setWorksheetColWidthMutationParams,
+                    });
+                    undos.unshift({
+                        id: SetWorksheetColWidthMutation.id,
+                        params: SetWorksheetColWidthMutationFactory(setWorksheetColWidthMutationParams, worksheet),
+                    });
+                }
 
                 return {
-                    redos: redoMutations,
-                    undos: undoMutations,
+                    redos,
+                    undos,
                 };
             },
         };
 
         const specialPasteBesidesBorder: ISheetClipboardHook = {
-            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            id: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER,
             specialPasteInfo: {
                 label: 'specialPaste.besidesBorder',
             },

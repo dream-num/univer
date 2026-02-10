@@ -39,7 +39,6 @@ import { UpdateFormulaController } from './controllers/update-formula.controller
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
-import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
 
 @DependentOn(UniverFormulaEnginePlugin)
@@ -72,7 +71,7 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     }
 }
 
-@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -100,7 +99,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [IDescriptionService, { useClass: DescriptionService }],
             [FormulaController],
             [FormulaRefRangeService],
-            [RegisterOtherFormulaService],
             [ArrayFormulaCellInterceptorController],
             [ImageFormulaCellInterceptorController],
             [TriggerCalculationController],

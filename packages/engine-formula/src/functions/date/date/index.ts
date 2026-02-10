@@ -81,7 +81,7 @@ export class DateFunction extends BaseFunction {
                 yearValue += 1900;
             }
 
-            const date = new Date(yearValue, monthValue - 1, dayValue);
+            const date = new Date(Date.UTC(yearValue, monthValue - 1, dayValue));
 
             const currentSerial = excelDateSerial(date);
 

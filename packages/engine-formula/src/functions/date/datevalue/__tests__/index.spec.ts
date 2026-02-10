@@ -35,7 +35,7 @@ describe('Test datevalue function', () => {
 
             const dateText2 = StringValueObject.create('5-Jul'); // 7.5 of current year
             const result2 = testFunction.calculate(dateText2);
-            expect(getObjectValue(result2)).toStrictEqual(excelDateSerial(new Date(new Date().getFullYear(), 6, 5)));
+            expect(getObjectValue(result2)).toStrictEqual(excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 6, 5))));
 
             const dateText3 = StringValueObject.create('2020-01-02 13:14:15');
             const result3 = testFunction.calculate(dateText3);

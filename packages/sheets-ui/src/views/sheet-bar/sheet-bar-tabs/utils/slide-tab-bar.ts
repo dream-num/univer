@@ -169,6 +169,7 @@ export class SlideTabItem {
 
                 if (e.key === 'Enter') {
                     input.blur();
+                    e.preventDefault();
                 }
             };
 

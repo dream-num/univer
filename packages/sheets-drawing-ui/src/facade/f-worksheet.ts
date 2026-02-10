@@ -730,12 +730,12 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                 ...drawingParm.transform,
                 ...config.position, // Merge with existing transform
             },
-            axisAlignSheetTransform:config.position
+            axisAlignSheetTransform: config.position
                 ? transformToAxisAlignPosition(
                     config.position,
                     selectionRenderService
                 ) ?? drawingParm.sheetTransform
-                : drawingParm.sheetTransform
+                : drawingParm.sheetTransform,
         };
         const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
         if (!res) {
@@ -793,7 +793,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                         update.config.position,
                         selectionRenderService
                     ) ?? drawingParm.sheetTransform
-                    : drawingParm.sheetTransform
+                    : drawingParm.sheetTransform,
             };
 
             drawings.push(newParam);

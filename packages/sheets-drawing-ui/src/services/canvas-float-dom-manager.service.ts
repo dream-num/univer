@@ -699,6 +699,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 width: initPosition.endX - initPosition.startX,
                 height: initPosition.endY - initPosition.startY,
             },
+            axisAlignSheetTransform: sheetTransform,
             data,
             allowTransform,
         };
@@ -783,6 +784,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
+            axisAlignSheetTransform: sheetTransform,
             transform: {
                 left: domPosFromRange.startX,
                 top: domPosFromRange.startY,
@@ -1036,6 +1038,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
+            axisAlignSheetTransform: sheetTransform,
             transform: {
                 left: headerCellPosition.startX,
                 top: headerCellPosition.startY,

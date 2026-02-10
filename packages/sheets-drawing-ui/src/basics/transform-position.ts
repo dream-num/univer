@@ -155,14 +155,13 @@ export function transformToDrawingPosition(transform: ITransformState, selection
  * [135°, 225°): use the original bound
  * [225°, 315°): rotate the bound 90° counterclockwise, and the left, top, bottom, right will use the rotated bound.
  * @param transform The transform state of the drawing element.
- * @param selectionRenderService 
+ * @param selectionRenderService
  * @return The axis-aligned position of the drawing element.
  */
 export function transformToAxisAlignPosition(
     transform: ITransformState,
     selectionRenderService: ISheetSelectionRenderService
 ): Nullable<ISheetDrawingPosition> {
-
     const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = transform;
 
     const norm = ((angle % 360) + 360) % 360;

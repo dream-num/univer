@@ -217,7 +217,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform:newTransform,
+            transform: newTransform,
             sheetTransform,
             axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, this._selectionRenderService) ?? sheetTransform,
         };

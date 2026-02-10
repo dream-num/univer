@@ -470,7 +470,40 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                     top: (transform?.top ?? 0) + topOffset,
                 };
                 const render = this._renderManagerService.getRenderById(unitId);
-                const selectionRenderService = render?.with(ISheetSelectionRenderService)!;
+                const selectionRenderService = render?.with(ISheetSelectionRenderService);
+
+                if (!selectionRenderService) {
+                    // todo ： if rotate has the angle, the axisAlignSheetTransform is not equal to sheetTransform, need to calculate the new axisAlignSheetTransform based on the new transform
+                    return {
+                        transform: newTransform,
+                        sheetTransform: {
+                            ...sheetTransform,
+                            to: {
+                                ...sheetTransform.to,
+                                row: sheetTransform.to.row + rowOffset,
+                                column: sheetTransform.to.column + columnOffset,
+                            },
+                            from: {
+                                ...sheetTransform.from,
+                                row: sheetTransform.from.row + rowOffset,
+                                column: sheetTransform.from.column + columnOffset,
+                            },
+                        },
+                        axisAlignSheetTransform: {
+                            ...sheetTransform,
+                            to: {
+                                ...sheetTransform.to,
+                                row: sheetTransform.to.row + rowOffset,
+                                column: sheetTransform.to.column + columnOffset,
+                            },
+                            from: {
+                                ...sheetTransform.from,
+                                row: sheetTransform.from.row + rowOffset,
+                                column: sheetTransform.from.column + columnOffset,
+                            },
+                        },
+                    };
+                }
 
                 return {
                     transform: newTransform,

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
 import type {
     ICopySheetCommandParams,
     IInsertColMutationParams,
+    IInsertRowMutationParams,
     IMoveColumnsMutationParams,
     IMoveRangeMutationParams,
     IMoveRowsMutationParams,
+    IRemoveColMutationParams,
     IRemoveRowsMutationParams,
     IRemoveSheetCommandParams,
     IReorderRangeMutationParams,
@@ -33,6 +35,7 @@ import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSet
 import { Disposable, ICommandService, Inject, Injector, IResourceManagerService, isInternalEditorID, IUniverInstanceService, merge, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
 import {
     CopySheetCommand,
+    getSheetCommandTarget,
     InsertColMutation,
     InsertRowMutation,
     MoveColsMutation,
@@ -163,12 +166,12 @@ export class ConditionalFormattingService extends Disposable {
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
-                        const unitId = params.unitId || getUnitId(this._univerInstanceService);
-                        const subUnitId = params.subUnitId || getSubUnitId(this._univerInstanceService);
-
-                        if (!subUnitId) {
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) {
                             return { redos: [], undos: [] };
                         }
+
+                        const { unitId, subUnitId } = target;
 
                         const ruleList = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         if (!ruleList) {
@@ -197,11 +200,13 @@ export class ConditionalFormattingService extends Disposable {
                         };
                     } else if (commandInfo.id === CopySheetCommand.id) {
                         const params = commandInfo.params as ICopySheetCommandParams & { targetSubUnitId: string };
-                        const { unitId, subUnitId, targetSubUnitId } = params;
-
-                        if (!unitId || !subUnitId || !targetSubUnitId) {
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) {
                             return { redos: [], undos: [] };
                         }
+
+                        const { unitId, subUnitId } = target;
+                        const { targetSubUnitId } = params;
 
                         const ruleList = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         if (!ruleList) {
@@ -266,9 +271,15 @@ export class ConditionalFormattingService extends Disposable {
                     }
                     case InsertColMutation.id:
                     case RemoveColMutation.id: {
-                        const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
+                        const params = commandInfo.params as IInsertColMutationParams | IRemoveColMutationParams;
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) return;
+
+                        const { worksheet, unitId, subUnitId } = target;
+                        const { range } = params;
+                        const effectRange: IRange = { ...range, endColumn: worksheet.getColumnCount() - 1 };
+
                         const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        const effectRange: IRange = { ...range, endColumn: Number.MAX_SAFE_INTEGER };
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
@@ -279,9 +290,15 @@ export class ConditionalFormattingService extends Disposable {
                     }
                     case RemoveRowMutation.id:
                     case InsertRowMutation.id: {
-                        const { range, unitId, subUnitId } = commandInfo.params as IRemoveRowsMutationParams;
+                        const params = commandInfo.params as IRemoveRowsMutationParams | IInsertRowMutationParams;
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) return;
+
+                        const { worksheet, unitId, subUnitId } = target;
+                        const { range } = params;
+                        const effectRange: IRange = { ...range, endRow: worksheet.getRowCount() - 1 };
+
                         const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        const effectRange: IRange = { ...range, endRow: Number.MAX_SAFE_INTEGER };
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
@@ -291,14 +308,20 @@ export class ConditionalFormattingService extends Disposable {
                         break;
                     }
                     case MoveRowsMutation.id: {
-                        const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveRowsMutationParams;
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                        const params = commandInfo.params as IMoveRowsMutationParams;
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) return;
+
+                        const { worksheet, unitId, subUnitId } = target;
+                        const { sourceRange, targetRange } = params;
                         const effectRange: IRange = {
                             startRow: Math.min(sourceRange.startRow, targetRange.startRow),
-                            endRow: Number.MAX_SAFE_INTEGER,
+                            endRow: worksheet.getRowCount() - 1,
                             startColumn: 0,
-                            endColumn: Number.MAX_SAFE_INTEGER,
+                            endColumn: worksheet.getColumnCount() - 1,
                         };
+
+                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
@@ -308,14 +331,20 @@ export class ConditionalFormattingService extends Disposable {
                         break;
                     }
                     case MoveColsMutation.id: {
-                        const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveColumnsMutationParams;
-                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                        const params = commandInfo.params as IMoveColumnsMutationParams;
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) return;
+
+                        const { worksheet, unitId, subUnitId } = target;
+                        const { sourceRange, targetRange } = params;
                         const effectRange: IRange = {
                             startRow: 0,
-                            endRow: Number.MAX_SAFE_INTEGER,
+                            endRow: worksheet.getRowCount() - 1,
                             startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),
-                            endColumn: Number.MAX_SAFE_INTEGER,
+                            endColumn: worksheet.getColumnCount() - 1,
                         };
+
+                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
@@ -356,6 +385,3 @@ export class ConditionalFormattingService extends Disposable {
         );
     }
 }
-
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();

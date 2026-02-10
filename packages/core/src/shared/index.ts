@@ -32,6 +32,7 @@ export * from './intervals';
 export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';
+export * from './max-row-column';
 export type { INumfmtLocaleTag } from './numfmt';
 export {
     DEFAULT_NUMBER_FORMAT,

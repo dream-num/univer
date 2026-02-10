@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange } from '@univerjs/core';
+import type { ICommandInfo, IRange, IUniverInstanceService } from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
 import type { IReorderRangeMutationParams } from '../../commands/mutations/reorder-range.mutation';
@@ -35,6 +35,7 @@ import type { IToggleGridlinesMutationParams } from '../../commands/mutations/to
 import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
 import type { IAddWorksheetMergeMutationParams, IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveWorksheetMergeMutationParams, IWorksheetRangeThemeStyleMutationParams } from '../interfaces';
 import { ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../../commands/mutations/delete-worksheet-range-theme.mutation';
@@ -45,7 +46,6 @@ import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/r
 import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../../commands/mutations/set-col-data.mutation';
-
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetGridlinesColorMutation } from '../../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
@@ -253,7 +253,7 @@ export type CommandListenerValueChange =
     };
 
 // eslint-disable-next-line max-lines-per-function
-export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitId: string; subUnitId: string; range: IRange }[] {
+export function getValueChangedEffectedRange(univerInstanceService: IUniverInstanceService, commandInfo: ICommandInfo): { unitId: string; subUnitId: string; range: IRange }[] {
     switch (commandInfo.id) {
         case SheetValueChangeType.SET_RANGE_VALUES: {
             const params = commandInfo.params as ISetRangeValuesMutationParams;
@@ -309,40 +309,59 @@ export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitI
         }
 
         case SheetValueChangeType.SET_WORKSHEET_DEFAULT_STYLE: {
-            const params = commandInfo.params as ISetWorksheetDefaultStyleMutationParams;
+            const target = getSheetCommandTarget(univerInstanceService, commandInfo.params as ISetWorksheetDefaultStyleMutationParams);
+            if (!target) return [];
+
+            const { worksheet, unitId, subUnitId } = target;
+
             return [{
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
-                range: { startRow: 0, endRow: Number.MAX_SAFE_INTEGER, startColumn: 0, endColumn: Number.MAX_SAFE_INTEGER },
+                unitId,
+                subUnitId,
+                range: {
+                    startRow: 0,
+                    endRow: worksheet.getRowCount() - 1,
+                    startColumn: 0,
+                    endColumn: worksheet.getColumnCount() - 1,
+                },
             }];
         }
 
         case SheetValueChangeType.SET_ROW_DATA: {
-            const params = commandInfo.params as ISetRowDataMutationParams;
-            const rowIndices = Object.keys(params.rowData).map(Number);
+            const target = getSheetCommandTarget(univerInstanceService, commandInfo.params as ISetRowDataMutationParams);
+            if (!target) return [];
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { rowData } = commandInfo.params as ISetRowDataMutationParams;
+            const rowIndices = Object.keys(rowData).map(Number);
             if (rowIndices.length === 0) return [];
+
             return [{
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
+                unitId,
+                subUnitId,
                 range: {
                     startRow: Math.min(...rowIndices),
                     endRow: Math.max(...rowIndices),
                     startColumn: 0,
-                    endColumn: Number.MAX_SAFE_INTEGER,
+                    endColumn: worksheet.getColumnCount() - 1,
                 },
             }];
         }
 
         case SheetValueChangeType.SET_COL_DATA: {
-            const params = commandInfo.params as ISetColDataMutationParams;
-            const colIndices = Object.keys(params.columnData).map(Number);
+            const target = getSheetCommandTarget(univerInstanceService, commandInfo.params as ISetColDataMutationParams);
+            if (!target) return [];
+
+            const { worksheet, unitId, subUnitId } = target;
+            const { columnData } = commandInfo.params as ISetColDataMutationParams;
+            const colIndices = Object.keys(columnData).map(Number);
             if (colIndices.length === 0) return [];
+
             return [{
-                unitId: params.unitId,
-                subUnitId: params.subUnitId,
+                unitId,
+                subUnitId,
                 range: {
                     startRow: 0,
-                    endRow: Number.MAX_SAFE_INTEGER,
+                    endRow: worksheet.getRowCount() - 1,
                     startColumn: Math.min(...colIndices),
                     endColumn: Math.max(...colIndices),
                 },

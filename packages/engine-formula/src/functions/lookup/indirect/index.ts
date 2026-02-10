@@ -17,6 +17,7 @@
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { regexTestColumn, regexTestRow, regexTestSingeRange } from '../../../basics/regex';
 import { operatorToken } from '../../../basics/token';
@@ -24,7 +25,6 @@ import { CellReferenceObject } from '../../../engine/reference-object/cell-refer
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
-
 import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
 import { deserializeRangeWithSheetWithCache } from '../../../engine/utils/reference-cache';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -110,7 +110,7 @@ export class Indirect extends BaseFunction {
 
         const { range, sheetName, unitId } = gridRange;
 
-        if (Number.isNaN(range.startRow) || range.endRow + 1 > 1048576 || Number.isNaN(range.startColumn) || range.endColumn + 1 > 16384) {
+        if (Number.isNaN(range.startRow) || range.endRow + 1 > MAX_ROW_COUNT || Number.isNaN(range.startColumn) || range.endColumn + 1 > MAX_COLUMN_COUNT) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 

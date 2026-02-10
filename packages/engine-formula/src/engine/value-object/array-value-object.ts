@@ -1974,7 +1974,8 @@ export class ValueObjectFactory {
             }
 
             // value ignore whether it is a number pattern
-            if (!isIgnoreNumberPattern) {
+            // If the rawValue is wrapped in double quotes (string literal), it should not be converted to a number/date pattern
+            if (!isIgnoreNumberPattern && !isStringWrappedByDoubleQuotes(rawValue)) {
                 const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue);
                 if (isNumberPattern) {
                     return NumberValueObject.create(value as number, pattern as string);

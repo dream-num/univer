@@ -428,6 +428,36 @@ describe('arrayValueObject test', () => {
             expect(stringValueObject.isString()).toBeTruthy();
         });
 
+        it('ValueObjectFactory should not convert quoted date string to number (issue #6392)', () => {
+            // When a date string is wrapped in quotes (string literal), it should remain a string
+            // not be converted to a date number
+            const dateStringLiteral = ValueObjectFactory.create('"2026-01-01"');
+
+            expect(dateStringLiteral.isString()).toBeTruthy();
+            expect(dateStringLiteral.getValue()).toBe('2026-01-01');
+
+            // Unquoted date string may be converted to number (date serial number)
+            const dateString = ValueObjectFactory.create('2026-01-01');
+
+            // This could be either string or number depending on implementation,
+            // but quoted strings should always be strings
+            expect(dateStringLiteral.isString()).toBeTruthy();
+        });
+
+        it('ValueObjectFactory should not convert quoted time string to number', () => {
+            const timeStringLiteral = ValueObjectFactory.create('"12:30:00"');
+
+            expect(timeStringLiteral.isString()).toBeTruthy();
+            expect(timeStringLiteral.getValue()).toBe('12:30:00');
+        });
+
+        it('ValueObjectFactory should not convert quoted percentage to number', () => {
+            const percentStringLiteral = ValueObjectFactory.create('"50%"');
+
+            expect(percentStringLiteral.isString()).toBeTruthy();
+            expect(percentStringLiteral.getValue()).toBe('50%');
+        });
+
         it('ValueObjectFactory create ErrorValueObject ', () => {
             let errorValueObject = ValueObjectFactory.create(Number.NaN);
 

@@ -201,6 +201,43 @@ describe('Test compare function', () => {
             const result = testFunction.calculate(value1, value2);
             expect(getObjectValue(result)).toStrictEqual([[ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF], [ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.NAME]]);
         });
+
+        it('Comparing string cell reference with string literal date (issue #6392)', () => {
+            // When comparing a cell reference containing a date string with a string literal date,
+            // the comparison should be lexical (string comparison), not date/numeric comparison
+            const cellValue = StringValueObject.create('2025-01-01');
+            const stringLiteral = StringValueObject.create('2026-01-01');
+
+            testFunction.setCompareType(compareToken.GREATER_THAN_OR_EQUAL);
+            const result = testFunction.calculate(cellValue, stringLiteral);
+            // "2025-01-01" >= "2026-01-01" should be FALSE (lexical comparison)
+            expect(result.getValue()).toBe(false);
+
+            testFunction.setCompareType(compareToken.LESS_THAN);
+            const result2 = testFunction.calculate(cellValue, stringLiteral);
+            // "2025-01-01" < "2026-01-01" should be TRUE (lexical comparison)
+            expect(result2.getValue()).toBe(true);
+
+            testFunction.setCompareType(compareToken.EQUALS);
+            const result3 = testFunction.calculate(cellValue, stringLiteral);
+            // "2025-01-01" = "2026-01-01" should be FALSE
+            expect(result3.getValue()).toBe(false);
+        });
+
+        it('Comparing string cell reference with same string literal date', () => {
+            const cellValue = StringValueObject.create('2025-01-01');
+            const stringLiteral = StringValueObject.create('2025-01-01');
+
+            testFunction.setCompareType(compareToken.EQUALS);
+            const result = testFunction.calculate(cellValue, stringLiteral);
+            // "2025-01-01" = "2025-01-01" should be TRUE
+            expect(result.getValue()).toBe(true);
+
+            testFunction.setCompareType(compareToken.GREATER_THAN_OR_EQUAL);
+            const result2 = testFunction.calculate(cellValue, stringLiteral);
+            // "2025-01-01" >= "2025-01-01" should be TRUE
+            expect(result2.getValue()).toBe(true);
+        });
     });
 });
 // describe('Test compare function2', () => {

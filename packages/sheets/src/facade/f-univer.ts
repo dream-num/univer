@@ -249,6 +249,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
      */
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
         const commandService = injector.get(ICommandService);
 
         this.disposeWithMe(
@@ -469,7 +470,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     if (COMMAND_LISTENER_VALUE_CHANGE.indexOf(commandInfo.id) > -1) {
                         const sheet = this.getActiveSheet();
                         if (!sheet) return;
-                        const ranges = getValueChangedEffectedRange(commandInfo)
+                        const ranges = getValueChangedEffectedRange(univerInstanceService, commandInfo)
                             .map(
                                 (range) => this.getWorkbook(range.unitId)
                                     ?.getSheetBySheetId(range.subUnitId)

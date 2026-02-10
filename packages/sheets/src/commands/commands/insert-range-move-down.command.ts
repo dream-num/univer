@@ -51,7 +51,7 @@ export const InsertRangeMoveDownCommandId = 'sheet.command.insert-range-move-dow
  */
 export const InsertRangeMoveDownCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.insert-range-move-down',
+    id: InsertRangeMoveDownCommandId,
 
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: IInsertRangeMoveDownCommandParams) => {

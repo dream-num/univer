@@ -15,8 +15,7 @@
  */
 
 import type { IRange, IUnitRangeName, IUnitRangeWithName } from '@univerjs/core';
-import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
-
+import { AbsoluteRefType, columnLabelToNumber, MAX_COLUMN_COUNT, MAX_ROW_COUNT, RANGE_TYPE, Tools } from '@univerjs/core';
 import { includeFormulaLexerToken } from '../../basics/match-token';
 import { isReferenceString, UNIT_NAME_REGEX_PRECOMPILING } from '../../basics/regex';
 import { prefixToken, SPACE_TOKEN } from '../../basics/token';
@@ -319,7 +318,7 @@ export function isReferenceStringWithEffectiveColumn(refString: string) {
      * where each worksheet can support columns ranging from A to XFD.
      * Therefore, the symbol for the maximum column is XFD.
      */
-    if (range.endColumn >= 16384) {
+    if (range.endColumn >= MAX_COLUMN_COUNT) {
         return false;
     }
 
@@ -451,9 +450,21 @@ export function unquoteSheetName(name: string) {
 }
 
 function isA1Notation(name: string) {
-    const match = name.match(/[1-9][0-9]{0,6}/);
-    // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
-    return /^[A-Z]+[1-9][0-9]{0,6}$/.test(name) && match !== null;
+    // Check if the name matches the A1 notation pattern
+    const match = /^([A-Z]+)([1-9][0-9]*)$/.exec(name);
+    if (!match) return false;
+
+    const [, columnPart, rowPart] = match;
+
+    // Validate row number
+    const row = Number(rowPart);
+    if (row < 1 || row > MAX_ROW_COUNT) return false;
+
+    // Validate column number
+    const column = columnLabelToNumber(columnPart);
+    if (column < 1 || column > MAX_COLUMN_COUNT) return false;
+
+    return true;
 }
 
 function isR1C1Notation(name: string) {

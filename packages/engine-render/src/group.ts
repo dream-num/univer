@@ -46,21 +46,6 @@ export class Group extends BaseObject {
         if (this._selfSizeMode) {
             return super.getState();
         }
-        // let groupLeft = Number.MAX_SAFE_INTEGER;
-        // let groupTop = Number.MAX_SAFE_INTEGER;
-        // let groupRight = Number.MIN_SAFE_INTEGER;
-        // let groupBottom = Number.MIN_SAFE_INTEGER;
-
-        // this._objects.forEach((o) => {
-        //     const { left, top, width, height } = o;
-        //     groupLeft = Math.min(groupLeft, left);
-        //     groupTop = Math.min(groupTop, top);
-        //     groupRight = Math.max(groupRight, left + width);
-        //     groupBottom = Math.max(groupBottom, top + height);
-        // });
-
-        // const groupWidth = groupRight - groupLeft;
-        // const groupHeight = groupBottom - groupTop;
 
         return getGroupState(this.left, this.top, this._objects.map((o) => o.getState()));
     }

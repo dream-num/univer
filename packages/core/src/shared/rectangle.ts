@@ -19,6 +19,7 @@ import type { IRange, IRectLTRB } from '../sheets/typedef';
 import type { Nullable } from './types';
 import RBush from 'rbush';
 import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
+import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from './max-row-column';
 import { mergeRanges, multiSubtractSingleRange, splitIntoGrid } from './range';
 
 /**
@@ -150,16 +151,15 @@ export class Rectangle {
             return src.startColumn <= target.endColumn && src.endColumn >= target.startColumn;
         }
 
-        const MAX = Math.floor(Number.MAX_SAFE_INTEGER / 10);
         const currentStartRow = Number.isNaN(src.startRow) ? 0 : src.startRow;
-        const currentEndRow = Number.isNaN(src.endRow) ? MAX : src.endRow;
+        const currentEndRow = Number.isNaN(src.endRow) ? MAX_ROW_COUNT - 1 : src.endRow;
         const currentStartColumn = Number.isNaN(src.startColumn) ? 0 : src.startColumn;
-        const currentEndColumn = Number.isNaN(src.endColumn) ? MAX : src.endColumn;
+        const currentEndColumn = Number.isNaN(src.endColumn) ? MAX_COLUMN_COUNT - 1 : src.endColumn;
 
         const incomingStartRow = Number.isNaN(target.startRow) ? 0 : target.startRow;
-        const incomingEndRow = Number.isNaN(target.endRow) ? MAX : target.endRow;
+        const incomingEndRow = Number.isNaN(target.endRow) ? MAX_ROW_COUNT - 1 : target.endRow;
         const incomingStartColumn = Number.isNaN(target.startColumn) ? 0 : target.startColumn;
-        const incomingEndColumn = Number.isNaN(target.endColumn) ? MAX : target.endColumn;
+        const incomingEndColumn = Number.isNaN(target.endColumn) ? MAX_COLUMN_COUNT - 1 : target.endColumn;
 
         const zx = Math.abs(currentStartColumn + currentEndColumn - incomingStartColumn - incomingEndColumn);
         const x = Math.abs(currentStartColumn - currentEndColumn) + Math.abs(incomingStartColumn - incomingEndColumn);

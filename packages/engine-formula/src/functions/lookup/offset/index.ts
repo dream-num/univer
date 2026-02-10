@@ -18,6 +18,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -217,8 +218,7 @@ export class Offset extends BaseFunction {
         const targetRow = referenceStartRow + rowOffset;
         const targetColumn = referenceStartColumn + columnOffset;
 
-        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
-        if (targetRow < 0 || targetColumn < 0) {
+        if (targetRow < 0 || targetColumn < 0 || targetRow >= MAX_ROW_COUNT || targetColumn >= MAX_COLUMN_COUNT) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
@@ -236,8 +236,7 @@ export class Offset extends BaseFunction {
         const targetRowWithHeight = heightCount > 0 ? targetRow + heightCount - 1 : targetRow + heightCount + 1;
         const targetColumnWithWidth = widthCount > 0 ? targetColumn + widthCount - 1 : targetColumn + widthCount + 1;
 
-        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
-        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0) {
+        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0 || targetRowWithHeight >= MAX_ROW_COUNT || targetColumnWithWidth >= MAX_COLUMN_COUNT) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 

@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Countif } from '../index';
 
@@ -148,6 +148,70 @@ describe('Test countif function', () => {
                 [1, 1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1, 1],
             ]);
+        });
+
+        it('Range with number criteria', async () => {
+            const range = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3;
+                2
+            }`);
+
+            const criteria = NumberValueObject.create(2);
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('Range with string criteria matching number', async () => {
+            const range = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3;
+                2
+            }`);
+
+            const criteria = StringValueObject.create('2');
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('Range with number criteria matching same value', async () => {
+            const range = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3
+            }`);
+
+            const criteria = NumberValueObject.create(2);
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toBe(1);
+        });
+
+        it('Range with string criteria matching number in range (issue #6065)', async () => {
+            // Simulates COUNTIF(A:A, A3) where A3 contains "1" (string) and A:A contains 1 (number)
+            const range = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [2],
+                    [3],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            // A3 contains "1" as string
+            const criteria = StringValueObject.create('1');
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toBe(1);
         });
     });
 });

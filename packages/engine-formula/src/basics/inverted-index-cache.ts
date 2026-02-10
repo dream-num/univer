@@ -81,7 +81,24 @@ export class InvertedIndexCache {
     }
 
     getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: NumericTuple[]) {
-        const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
+        const columnMap = this._cache.get(unitId)?.get(sheetId)?.get(column);
+        if (!columnMap) {
+            return undefined;
+        }
+
+        // Try to get rows with the original value
+        let rows = columnMap.get(value);
+
+        // If not found and value is a number, try to get rows with the string representation
+        // If not found and value is a string that represents a number, try to get rows with the number
+        if (!rows) {
+            if (typeof value === 'number') {
+                rows = columnMap.get(String(value));
+            } else if (typeof value === 'string' && !Number.isNaN(Number(value))) {
+                rows = columnMap.get(Number(value));
+            }
+        }
+
         // return rows?.values().filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
         return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }

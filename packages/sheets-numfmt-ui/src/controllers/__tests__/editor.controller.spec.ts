@@ -510,7 +510,7 @@ describe('test editor', () => {
         };
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
-        expect(result?.v).toBe(excelDateSerial(new Date(new Date().getFullYear(), 1, 3)));
+        expect(result?.v).toBe(excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 1, 3))));
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
 
@@ -530,6 +530,42 @@ describe('test editor', () => {
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
         expect(result?.v).toBe('1000,');
+    });
+
+    it('edit content 1000,1.00', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '1000,1.00' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe('1000,1.00');
+    });
+
+    it('edit content $1000', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '$1000' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(1000);
     });
 });
 

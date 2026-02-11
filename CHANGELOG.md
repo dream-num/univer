@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.15.5](https://github.com/dream-num/univer/compare/v0.15.4...v0.15.5) (2026-02-11)
+
+
+### Bug Fixes
+
+* add row/column manager insert method and optimze insertMatrixArray ([#6555](https://github.com/dream-num/univer/issues/6555)) ([be00938](https://github.com/dream-num/univer/commit/be00938dd8a85f2797d05fff06c045eb9f78c007))
+* add validity range protection to the insert row/column command ([#6553](https://github.com/dream-num/univer/issues/6553)) ([5844930](https://github.com/dream-num/univer/commit/58449302f8b7526a398032811b3424b0226b8d7f))
+* **condition:** history error ([#6565](https://github.com/dream-num/univer/issues/6565)) ([b24892b](https://github.com/dream-num/univer/commit/b24892b9d4c2f64eb0ee160c7f99230f020c72dd))
+* **drawing:** add axisAlignSheetTransform for sheet drawing ([#6574](https://github.com/dream-num/univer/issues/6574)) ([8b0c70e](https://github.com/dream-num/univer/commit/8b0c70e257c68ea0a19bb83443eff01f33256049))
+* fix an issue where border styles were lost when unmerging cells and then undo ([#6558](https://github.com/dream-num/univer/issues/6558)) ([ca913c9](https://github.com/dream-num/univer/commit/ca913c915f2daf27baba58e786155ce1e2737ab6))
+* fix auto-fill date rule ([#6570](https://github.com/dream-num/univer/issues/6570)) ([5c13384](https://github.com/dream-num/univer/commit/5c13384824991a2984cf16c0afc009dc838174b5))
+* fix the issue of border styles being lost after cell merging ([#6557](https://github.com/dream-num/univer/issues/6557)) ([797f587](https://github.com/dream-num/univer/commit/797f587a910c2d85d90fadfcf9dedba23e765ff6))
+* fix worksheet max row and column count ([#6575](https://github.com/dream-num/univer/issues/6575)) ([7c87f0d](https://github.com/dream-num/univer/commit/7c87f0d7afe67b4171db864e75c307926fbba8f0))
+* **formula:** fix calculation errors in formulas, such as 1,5 ([#6579](https://github.com/dream-num/univer/issues/6579)) ([a1048fb](https://github.com/dream-num/univer/commit/a1048fb232ae7a8e5f7369add2587f274233a1b8))
+* **formula:** fix time zone issues in date-related formulas ([#6578](https://github.com/dream-num/univer/issues/6578)) ([0cc433e](https://github.com/dream-num/univer/commit/0cc433e357bba97bcff58450b09c66cf276138f3))
+* **formula:** when empty with value is "" ([#6569](https://github.com/dream-num/univer/issues/6569)) ([7e59f3e](https://github.com/dream-num/univer/commit/7e59f3e1fc2570db5a6516402934096042e9c019))
+* **group:** add sheet transfrom for drawing cmd ([#6549](https://github.com/dream-num/univer/issues/6549)) ([cc70157](https://github.com/dream-num/univer/commit/cc70157965f88e102002baa6e0a568e5190f6a80))
+* **note:** fix sheets-note undo/redo ([#6562](https://github.com/dream-num/univer/issues/6562)) ([ff8a186](https://github.com/dream-num/univer/commit/ff8a18628bec256a5d450def10f39bfd9ed17725))
+* optimize data validation dropdown list allows cross-worksheet data referencing ([#6572](https://github.com/dream-num/univer/issues/6572)) ([47a330a](https://github.com/dream-num/univer/commit/47a330ac2923efad4a3666141c95ae68135272c7))
+* rename tab auto close dialog err ([#6577](https://github.com/dream-num/univer/issues/6577)) ([1f1bbe2](https://github.com/dream-num/univer/commit/1f1bbe23efbfd93e4055f39eb6ddfa8b5f8ede92))
+
+
+### Features
+
+* **sheets-note-ui:** enhance note popup functionality with default trigger ([#6554](https://github.com/dream-num/univer/issues/6554)) ([160e5e4](https://github.com/dream-num/univer/commit/160e5e4ec95b2ee733a0a27504ab179fb632bf00))
+
 ## [0.15.4](https://github.com/dream-num/univer/compare/v0.15.3...v0.15.4) (2026-01-31)
 
 

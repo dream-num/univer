@@ -16,7 +16,7 @@
 
 import './global.css';
 
-export { drawingPositionToTransform, transformToDrawingPosition } from './basics/transform-position';
+export { drawingPositionToTransform, transformToDrawingPosition, transformToAxisAlignPosition } from './basics/transform-position';
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
 export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
 export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';

@@ -24,7 +24,7 @@ import type { ISaveCellImagesOptions } from './f-range';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { FileNamePart, IBatchSaveImagesService, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
+import { FileNamePart, IBatchSaveImagesService, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
@@ -730,6 +730,12 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                 ...drawingParm.transform,
                 ...config.position, // Merge with existing transform
             },
+            axisAlignSheetTransform: config.position
+                ? transformToAxisAlignPosition(
+                    config.position,
+                    selectionRenderService
+                ) ?? drawingParm.sheetTransform
+                : drawingParm.sheetTransform,
         };
         const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
         if (!res) {
@@ -782,6 +788,12 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                     ...drawingParm.transform,
                     ...update.config.position, // Merge with existing transform
                 },
+                axisAlignSheetTransform: update.config.position
+                    ? transformToAxisAlignPosition(
+                        update.config.position,
+                        selectionRenderService
+                    ) ?? drawingParm.sheetTransform
+                    : drawingParm.sheetTransform,
             };
 
             drawings.push(newParam);

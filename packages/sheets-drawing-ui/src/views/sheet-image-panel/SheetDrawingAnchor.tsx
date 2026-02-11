@@ -70,7 +70,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
                 return true;
             }
 
-            const { unitId, subUnitId, drawingId, drawingType, anchorType, sheetTransform } = searchParam as ISheetDrawing;
+            const { unitId, subUnitId, drawingId, drawingType, anchorType, sheetTransform, axisAlignSheetTransform } = searchParam as ISheetDrawing;
 
             params.push({
                 unitId,
@@ -79,6 +79,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
                 anchorType,
                 sheetTransform,
                 drawingType,
+                axisAlignSheetTransform,
             });
         });
 

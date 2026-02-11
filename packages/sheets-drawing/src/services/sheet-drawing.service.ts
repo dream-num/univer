@@ -43,6 +43,10 @@ export interface ISheetDrawingPosition extends IRotationSkewFlipTransform, IShee
 
 export interface ISheetDrawingBase {
     sheetTransform: ISheetDrawingPosition;
+    /**
+     * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
+     */
+    axisAlignSheetTransform: ISheetDrawingPosition;
     anchorType?: SheetDrawingAnchorType;
 }
 
@@ -61,6 +65,10 @@ export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
     data?: Serializable;
     allowTransform?: boolean;
+     /**
+     * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
+     */
+    axisAlignSheetTransform: ISheetDrawingPosition;
 }
 
 // TODO@wzhudev: this shouldn't be here. It should be in the sheets package

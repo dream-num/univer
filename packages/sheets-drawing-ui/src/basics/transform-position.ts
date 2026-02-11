@@ -146,3 +146,41 @@ export function transformToDrawingPosition(transform: ITransformState, selection
         to,
     };
 }
+
+/**
+ * In excel, the basic drawing with rotate bound use major axis switch, axis-aligned bound will bu used.That means the position bound of drawing element will save as nearly axis-aligned rectangle.
+ * Here is the rule to convert transform to axis-aligned position:
+ * [-45°, 45°):  use the original bound
+ * [45°, 135°): rotate the bound 90° clockwise,and the left, top, bottom,right will use the rotated bound.
+ * [135°, 225°): use the original bound
+ * [225°, 315°): rotate the bound 90° counterclockwise, and the left, top, bottom, right will use the rotated bound.
+ * @param transform The transform state of the drawing element.
+ * @param selectionRenderService
+ * @return The axis-aligned position of the drawing element.
+ */
+export function transformToAxisAlignPosition(
+    transform: ITransformState,
+    selectionRenderService: ISheetSelectionRenderService
+): Nullable<ISheetDrawingPosition> {
+    const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = transform;
+
+    const norm = ((angle % 360) + 360) % 360;
+
+    const useSwappedAxis =
+        (norm >= 45 && norm < 135) ||
+        (norm >= 225 && norm < 315);
+
+    if (!useSwappedAxis) {
+        return transformToDrawingPosition(transform, selectionRenderService);
+    }
+
+    const rotatedTransform = {
+        ...transform,
+        left: left + width / 2 - height / 2,
+        top: top + height / 2 - width / 2,
+        width: height,
+        height: width,
+    };
+
+    return transformToDrawingPosition(rotatedTransform, selectionRenderService);
+}

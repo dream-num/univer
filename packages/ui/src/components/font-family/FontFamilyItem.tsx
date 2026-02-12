@@ -17,8 +17,8 @@
 import type { IFontConfig } from '../../services/font.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
-import { InfoIcon } from '@univerjs/icons';
-import { useEffect, useState } from 'react';
+import { CheckMarkIcon, InfoIcon } from '@univerjs/icons';
+import { useEffect, useMemo, useState } from 'react';
 import { IFontService } from '../../services/font.service';
 import { useDependency } from '../../utils/di';
 
@@ -27,6 +27,8 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
     const fontService = useDependency(IFontService);
 
     const [fonts, setFonts] = useState<IFontConfig[]>([]);
+
+    const _value = useMemo(() => value, [value]);
 
     useEffect(() => {
         const subscription = fontService.fonts$.subscribe((fonts) => {
@@ -50,24 +52,31 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
             style={{ fontFamily: value }}
         >
             {fonts.map((font) => (
-                <li key={font.value}>
-                    <button
-                        className={`
-                          univer-flex univer-h-7 univer-w-full univer-appearance-none univer-items-center
-                          univer-justify-between univer-gap-6 univer-rounded univer-border-none univer-bg-transparent
-                          univer-px-2
-                          hover:univer-bg-gray-100
-                          dark:!univer-text-white
-                          dark:hover:!univer-bg-gray-700
-                        `}
+                <li
+                    key={font.value}
+                    onClick={() => handleSelectFont(font.value)}
+                    className={`
+                      univer-flex univer-h-7 univer-cursor-pointer univer-items-center univer-justify-between
+                      univer-gap-2 univer-rounded univer-px-2 univer-py-1
+                      hover:univer-bg-gray-100
+                      dark:!univer-text-white
+                      dark:hover:!univer-bg-gray-700
+                    `}
+                >
+                    <span>
+                        {_value === font.value && (
+                            <CheckMarkIcon
+                                className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
+                            />
+                        )}
+                    </span>
+                    <span
+                        className="univer-flex univer-items-center univer-gap-2"
                         style={{
                             fontFamily: font.value,
                         }}
-                        type="button"
-                        onClick={() => handleSelectFont(font.value)}
                     >
                         {localeService.t(font.label)}
-
                         {!fontService.isFontSupported(font.value) && (
                             <Tooltip title={localeService.t('fontFamily.not-supported')}>
                                 <InfoIcon
@@ -78,7 +87,7 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
                                 />
                             </Tooltip>
                         )}
-                    </button>
+                    </span>
                 </li>
             ))}
         </ul>

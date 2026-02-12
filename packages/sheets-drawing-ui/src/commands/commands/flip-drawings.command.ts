@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand, ITransformState } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { Image } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
@@ -78,7 +78,7 @@ export const FlipSheetDrawingCommand: ICommand = {
                 continue;
             }
 
-            const transform = { ...(existing.transform ?? {}) } as any;
+            const transform = { ...existing.transform } as ITransformState;
 
             if (flipH) {
                 transform.flipX = !transform.flipX;

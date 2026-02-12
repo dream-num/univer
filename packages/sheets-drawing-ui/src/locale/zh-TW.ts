@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: '編輯',
         crop: '裁切',
         reset: '重置大小',
+        flipH: '水平翻轉',
+        flipV: '垂直翻轉',
     },
     'drawing-anchor': {
         title: '錨點屬性',

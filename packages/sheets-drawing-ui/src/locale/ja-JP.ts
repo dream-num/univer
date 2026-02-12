@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: '編集',
         crop: 'トリミング',
         reset: '元のサイズに戻す',
+        flipH: '左右反転',
+        flipV: '上下反転',
     },
     'drawing-anchor': {
         title: 'プロパティ',

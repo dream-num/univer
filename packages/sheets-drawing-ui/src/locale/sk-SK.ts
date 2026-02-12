@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: 'Upraviť',
         crop: 'Orezať',
         reset: 'Obnoviť veľkosť',
+        flipH: 'Prevrátiť vodorovne',
+        flipV: 'Prevrátiť zvisle',
     },
     'drawing-anchor': {
         title: 'Vlastnosti ukotvenia',

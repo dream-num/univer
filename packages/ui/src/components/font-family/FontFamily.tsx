@@ -53,7 +53,7 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
         });
 
         if (!font) {
-            return fixedValue;
+            return localeService.t(value);
         }
 
         return localeService.t(font.label);

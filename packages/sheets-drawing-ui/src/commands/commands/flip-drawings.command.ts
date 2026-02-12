@@ -74,7 +74,9 @@ export const FlipSheetDrawingCommand: ICommand = {
 
             const drawingData = sheetDrawingService.getDrawingData(unitId, subUnitId);
             const existing = drawingData?.[drawingId];
-            if (!existing) continue;
+            if (!existing) {
+                continue;
+            }
 
             const transform = { ...(existing.transform ?? {}) } as any;
 
@@ -87,7 +89,9 @@ export const FlipSheetDrawingCommand: ICommand = {
 
             const render = renderManagerService.getRenderById(unitId);
             const selectionRenderService = render?.with(ISheetSelectionRenderService);
-            if (!selectionRenderService) continue;
+            if (!selectionRenderService) {
+                continue;
+            }
 
             const sheetTransform = transformToDrawingPosition(transform, selectionRenderService);
             const axisAlignSheetTransform = transformToAxisAlignPosition(transform, selectionRenderService) as ISheetDrawingPosition;

@@ -317,7 +317,7 @@ export class Image extends Shape<IImageProps> {
             ctx.clip();
             ctx.drawImage(this._native, -left - this.width / 2, -top - this.height / 2, this.width + right + left, this.height + bottom + top);
         } else {
-            ctx.drawImage(this._native, - this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.drawImage(this._native, -this.width / 2, -this.height / 2, this.width, this.height);
         }
     }
 

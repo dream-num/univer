@@ -15,7 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, type IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { Image } from '@univerjs/engine-render';
+import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import {
     CommandType,
     DrawingTypeEnum,
@@ -23,10 +25,11 @@ import {
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
-import { IRenderManagerService, Image } from '@univerjs/engine-render';
-import { transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
-import { DrawingApplyType, ISheetDrawingPosition, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 interface IFlipDrawingCommandParam {
@@ -46,6 +49,7 @@ export interface IFlipSheetDrawingCommandParams {
 export const FlipSheetDrawingCommand: ICommand = {
     id: 'sheet.command.toggle-flip-drawings',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor: IAccessor, params?: IFlipSheetDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -57,10 +61,8 @@ export const FlipSheetDrawingCommand: ICommand = {
 
         const { drawings } = params;
 
-        let flipH = params.flipH;
-        let flipV = params.flipV;
-
-
+        const flipH = params.flipH;
+        const flipV = params.flipV;
 
         const unitIds: string[] = [];
 
@@ -77,13 +79,11 @@ export const FlipSheetDrawingCommand: ICommand = {
             const transform = { ...(existing.transform ?? {}) } as any;
 
             if (flipH) {
-                transform.flipX = !Boolean(transform.flipX);
+                transform.flipX = !transform.flipX;
             }
             if (flipV) {
-                transform.flipY = !Boolean(transform.flipY);
+                transform.flipY = !transform.flipY;
             }
-
-
 
             const render = renderManagerService.getRenderById(unitId);
             const selectionRenderService = render?.with(ISheetSelectionRenderService);
@@ -100,7 +100,7 @@ export const FlipSheetDrawingCommand: ICommand = {
                 transform,
                 sheetTransform,
                 axisAlignSheetTransform,
-            }
+            };
 
             const drawingType = existing.drawingType;
             if (drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
@@ -144,7 +144,7 @@ export const FlipSheetDrawingCommand: ICommand = {
                     }
                 }
             }
-             updateParams.push(updateParamItem);
+            updateParams.push(updateParamItem);
         }
 
         if (updateParams.length === 0) return false;
@@ -171,7 +171,6 @@ export const FlipSheetDrawingCommand: ICommand = {
     },
 };
 
-
 function getSceneByDrawingSearch(accessor: IAccessor, unitId: string) {
     const renderManagerService = accessor.get(IRenderManagerService);
     const render = renderManagerService.getRenderById(unitId);
@@ -179,6 +178,4 @@ function getSceneByDrawingSearch(accessor: IAccessor, unitId: string) {
         return null;
     }
     return render.scene;
-
-
 }

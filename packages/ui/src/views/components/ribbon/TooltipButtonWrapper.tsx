@@ -114,13 +114,15 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     );
 }
 
-function Label({ icon, value, option, onOptionSelect }: {
+function Label({ icon, value, option, onOptionSelect, disabled }: {
     icon?: IMenuItem['icon'];
     value?: string | number;
     option: IValueOption;
     onOptionSelect?: (option: IValueOption) => void;
+    disabled?: boolean;
 }) {
     const onChange = (v: string | number) => {
+        if (disabled) return;
         onOptionSelect?.({ value: v, label: option?.label, commandId: option?.commandId });
     };
 
@@ -235,6 +237,7 @@ export function DropdownMenuWrapper({
                         value={value}
                         option={option}
                         onOptionSelect={onOptionSelect}
+                        disabled={disabled}
                     />
                 ))}
             >

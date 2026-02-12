@@ -20,12 +20,14 @@ import {
     ICommandService,
     Inject,
     Injector,
+    IPermissionService,
     IResourceManagerService,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocumentEditablePermission } from '@univerjs/docs';
 import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -41,7 +43,8 @@ export class FDocument {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         this.id = this._documentDataModel.getUnitId();
     }
@@ -128,5 +131,27 @@ export class FDocument {
             ],
             true
         );
+    }
+
+    /**
+     * Used to modify the editing permissions of the document. When the value is false, editing is not allowed.
+     * @param {boolean} value  editable value want to set
+     * @returns {FDocument} FDocument instance
+     * @example
+     * ```ts
+     * // The code below sets the editing permissions of the document
+     * const fDocument = univerAPI.getActiveDocument();
+     * fDocument.setEditable(false);
+     * ```
+     */
+    setEditable(value: boolean): FDocument {
+        const instance = new DocumentEditablePermission(this._documentDataModel.getUnitId());
+        const editPermissionPoint = this._permissionService.getPermissionPoint(instance.id);
+        if (!editPermissionPoint) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+        this._permissionService.updatePermissionPoint(instance.id, value);
+
+        return this;
     }
 }

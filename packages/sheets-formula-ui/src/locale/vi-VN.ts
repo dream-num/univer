@@ -17,6 +17,7 @@
 import type enUS from './en-US';
 import array from './function-list/array/vi-VN';
 import compatibility from './function-list/compatibility/vi-VN';
+import crypto from './function-list/crypto/vi-VN';
 import cube from './function-list/cube/vi-VN';
 import database from './function-list/database/vi-VN';
 import date from './function-list/date/vi-VN';
@@ -63,6 +64,7 @@ const locale: typeof enUS = {
             ...web,
             ...array,
             ...univer,
+            ...crypto,
         },
 
         prompt: {

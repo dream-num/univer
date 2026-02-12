@@ -18,6 +18,7 @@ import type { IFunctionInfo } from '@univerjs/engine-formula';
 
 import { FUNCTION_LIST_ARRAY } from './array';
 import { FUNCTION_LIST_COMPATIBILITY } from './compatibility';
+import { FUNCTION_LIST_CRYPTO } from './crypto';
 import { FUNCTION_LIST_CUBE } from './cube';
 import { FUNCTION_LIST_DATABASE } from './database';
 import { FUNCTION_LIST_DATE } from './date';
@@ -48,4 +49,5 @@ export const FUNCTION_LIST: IFunctionInfo[] = [
     ...FUNCTION_LIST_WEB,
     ...FUNCTION_LIST_ARRAY,
     ...FUNCTION_LIST_UNIVER,
+    ...FUNCTION_LIST_CRYPTO,
 ];

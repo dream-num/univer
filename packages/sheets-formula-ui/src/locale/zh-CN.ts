@@ -17,6 +17,7 @@
 import type enUS from './en-US';
 import array from './function-list/array/zh-CN';
 import compatibility from './function-list/compatibility/zh-CN';
+import crypto from './function-list/crypto/zh-CN';
 import cube from './function-list/cube/zh-CN';
 import database from './function-list/database/zh-CN';
 import date from './function-list/date/zh-CN';
@@ -63,6 +64,7 @@ const locale: typeof enUS = {
             ...web,
             ...array,
             ...univer,
+            ...crypto,
         },
 
         prompt: {

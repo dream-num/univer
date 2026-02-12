@@ -47,6 +47,7 @@ import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
 import { functionArray } from '../functions/array/function-map';
 import { functionCompatibility } from '../functions/compatibility/function-map';
+import { functionCrypto } from '../functions/crypto/function-map';
 import { functionCube } from '../functions/cube/function-map';
 import { functionDatabase } from '../functions/database/function-map';
 import { functionDate } from '../functions/date/function-map';
@@ -141,6 +142,7 @@ export class FormulaController extends Disposable {
                 ...functionText,
                 ...functionUniver,
                 ...functionWeb,
+                ...functionCrypto,
             ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
         )
             .concat(config?.function ?? [])

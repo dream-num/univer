@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-
 import type { ILocalFileService, IOpenFileOptions } from './local-file.service';
+
+import { Disposable } from '@univerjs/core';
 
 export class DesktopLocalFileService extends Disposable implements ILocalFileService {
     openFile(options?: IOpenFileOptions): Promise<File[]> {
@@ -25,12 +25,30 @@ export class DesktopLocalFileService extends Disposable implements ILocalFileSer
             inputElement.type = 'file';
             inputElement.accept = options?.accept ?? '';
             inputElement.multiple = options?.multiple ?? false;
-            inputElement.onchange = (event) => {
-                const fileList = (event.target as HTMLInputElement).files;
-                if (fileList) {
-                    resolve(Array.from(fileList));
-                }
+
+            document.body.appendChild(inputElement);
+
+            let settled = false;
+            const settle = (files: File[]) => {
+                if (settled) return;
+                settled = true;
+                window.removeEventListener('focus', handleWindowFocus, true);
+                inputElement.remove();
+                resolve(files);
             };
+
+            const handleWindowFocus = () => {
+                // If the user cancels the file picker, `change` may never fire.
+                setTimeout(() => {
+                    if (!settled) settle([]);
+                });
+            };
+
+            inputElement.addEventListener('change', () => {
+                const fileList = inputElement.files;
+                settle(fileList ? Array.from(fileList) : []);
+            }, { once: true });
+            window.addEventListener('focus', handleWindowFocus, true);
             inputElement.click();
         });
     }

@@ -21,7 +21,7 @@ import type { UniverRenderingContext } from '../context';
 import type { Scene } from '../scene';
 import type { IShapeProps } from './shape';
 import { ObjectType } from '../base-object';
-import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
+import { RENDER_CLASS_TYPE, Transform, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import { Shape } from './shape';
 
@@ -286,7 +286,17 @@ export class Image extends Shape<IImageProps> {
 
         const m = this.transform.getMatrix();
         mainCtx.save();
-        mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        // if (this.flipX || this.flipY) {
+        //     const centerX = this.left + this.width / 2;
+        //     const centerY = this.top + this.height / 2;
+        //    mainCtx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
+        // }else {
+
+        //     mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        // }
+        const centerX = this.left + this.width / 2;
+        const centerY = this.top + this.height / 2;
+        mainCtx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
         if (this.opacity !== 1) {
             mainCtx.globalAlpha = this.opacity;
         }
@@ -303,11 +313,11 @@ export class Image extends Shape<IImageProps> {
         if (!this._renderByCropper && this.srcRect) {
             const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
             ctx.beginPath();
-            ctx.rect(0, 0, this.width, this.height);
+            ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height);
             ctx.clip();
-            ctx.drawImage(this._native, -left, -top, this.width + right + left, this.height + bottom + top);
+            ctx.drawImage(this._native, -left - this.width / 2, -top - this.height / 2, this.width + right + left, this.height + bottom + top);
         } else {
-            ctx.drawImage(this._native, 0, 0, this.width, this.height);
+            ctx.drawImage(this._native, - this.width / 2, -this.height / 2, this.width, this.height);
         }
     }
 
@@ -360,5 +370,33 @@ export class Image extends Shape<IImageProps> {
                 bottom: newBottom,
             });
         }
+    }
+
+    override isHit(coord: Vector2) {
+        // Build the same effective transform used in render():
+        // [m[0], m[1], m[2], m[3], centerX, centerY]
+        const m = this.transform.getMatrix();
+        const centerX = this.left + this.width / 2;
+        const centerY = this.top + this.height / 2;
+        const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
+
+        // Account for parent group transforms if applicable
+        const parent = this.getParent();
+        const effectiveTransform = this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP
+            ? parent.ancestorTransform.multiply(renderTransform)
+            : renderTransform;
+
+        const oCoord = effectiveTransform.invert().applyPoint(coord);
+        const halfWidth = this.width / 2;
+        const halfHeight = this.height / 2;
+        if (
+            oCoord.x >= -halfWidth - this.strokeWidth / 2 &&
+            oCoord.x <= halfWidth + this.strokeWidth / 2 &&
+            oCoord.y >= -halfHeight - this.strokeWidth / 2 &&
+            oCoord.y <= halfHeight + this.strokeWidth / 2
+        ) {
+            return true;
+        }
+        return false;
     }
 }

@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: 'Editar',
         crop: 'Recortar',
         reset: 'Restablecer tamaño',
+        flipH: 'Voltear horizontalmente',
+        flipV: 'Voltear verticalmente',
     },
     'drawing-anchor': {
         title: 'Propiedades de anclaje',

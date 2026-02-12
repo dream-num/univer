@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: 'Edita',
         crop: 'Retalla',
         reset: 'Restableix la mida',
+        flipH:'Gira horizontalmente',
+        flipV:'Gira verticalmente',
     },
     'drawing-anchor': {
         title: 'Propietats d’ancoratge',

@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: 'ویرایش',
         crop: 'کراپ',
         reset: 'بازنشانی اندازه',
+        flipH: 'چرخش افقی',
+        flipV: 'چرخش عمودی',
     },
     'drawing-anchor': {
         title: 'خواص لنگر',

@@ -47,6 +47,8 @@ const locale = {
         edit: 'Edit',
         crop: 'Crop',
         reset: 'Reset Size',
+        flipH:'Flip Horizontal',
+        flipV:'Flip Vertical',
     },
     'drawing-anchor': {
         title: 'Anchor Properties',

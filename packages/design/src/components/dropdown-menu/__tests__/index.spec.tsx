@@ -16,6 +16,7 @@
 
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { DropdownFilterMenu } from '../dropdown-filter-menu';
 import { DropdownMenu } from '../DropdownMenu';
 import '@testing-library/jest-dom/vitest';
 
@@ -108,5 +109,61 @@ describe('DropdownMenu', () => {
             </DropdownMenu>
         );
         expect(container).toMatchSnapshot();
+    });
+
+    describe('DropdownFilterMenu', () => {
+        it('should render with filter menu items', () => {
+            const menus = [
+                { key: '1', label: 'Menu 1' },
+                { key: '2', label: 'Menu 2' },
+            ];
+            const { container } = render(
+                <DropdownFilterMenu
+                    menus={menus}
+                    value={['1']}
+                    onChange={() => {}}
+                    trigger={<button type="button">Filter</button>}
+                />
+            );
+            expect(container).toMatchSnapshot();
+        });
+
+        it('should render with title and actions', () => {
+            const menus = [
+                { key: '1', label: 'Menu 1' },
+                { key: '2', label: 'Menu 2' },
+            ];
+            const { container } = render(
+                <DropdownFilterMenu
+                    menus={menus}
+                    value={['1']}
+                    onChange={() => {}}
+                    trigger={<button type="button">Filter</button>}
+                    title="Filter Options"
+                    showActions
+                    confirmText="Apply"
+                    cancelText="Reset"
+                />
+            );
+            expect(container).toMatchSnapshot();
+        });
+
+        it('should render with custom alignment and side', () => {
+            const menus = [
+                { key: '1', label: 'Menu 1' },
+                { key: '2', label: 'Menu 2' },
+            ];
+            const { container } = render(
+                <DropdownFilterMenu
+                    menus={menus}
+                    value={['1']}
+                    onChange={() => {}}
+                    trigger={<button type="button">Filter</button>}
+                    align="start"
+                    side="top"
+                />
+            );
+            expect(container).toMatchSnapshot();
+        });
     });
 });

@@ -114,6 +114,7 @@ export class UpdateFormulaController extends Disposable {
                     if (
                         (options && options.onlyLocal === true) ||
                         (options && options.syncOnly === true) ||
+                        (options && options.fromChangeset === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id ||
                         params.trigger === ClearSelectionFormatCommand.id ||

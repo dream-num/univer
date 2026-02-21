@@ -236,7 +236,7 @@ export class SheetSkeleton extends Skeleton {
                 const { h = defaultRowHeight, ah, ia } = rowDataItem;
                 if (
                     (ia == null || ia === BooleanNumber.TRUE) &&
-                    typeof ah === 'number'
+                    typeof ah === 'number' && ah > 0
                 ) {
                     rowHeight = ah;
                 } else {

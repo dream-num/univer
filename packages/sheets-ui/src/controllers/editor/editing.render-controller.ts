@@ -642,7 +642,17 @@ export class EditingRenderController extends Disposable {
         this._removeComposedCellStyleInCellData(cellData, worksheet.getComposedCellStyleWithoutSelf(row, column));
 
         const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
-        if (Tools.diffValue(cleanCellDataObject(finalCell), cleanCellDataObject(worksheet.getCellRaw(row, column)))) {
+
+        // If the cell data after interceptor is the same as the raw cell data, there is no need to execute setRangeValue command, just return directly.
+        const finalCellCleaned = cleanCellDataObject(finalCell);
+        if (finalCellCleaned?.s) {
+            finalCellCleaned.s = workbook.getStyles().get(finalCellCleaned.s);
+        }
+        const rawCellCleaned = cleanCellDataObject(worksheet.getCellRaw(row, column));
+        if (rawCellCleaned?.s) {
+            rawCellCleaned.s = workbook.getStyles().get(rawCellCleaned.s);
+        }
+        if (Tools.diffValue(finalCellCleaned, rawCellCleaned)) {
             return true;
         }
 

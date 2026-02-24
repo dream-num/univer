@@ -105,6 +105,7 @@ describe('test editor', () => {
         expect(result!.v).toEqual(0);
         expect(result!.t).toEqual(2);
     });
+
     it('before edit with data', () => {
         const params: ISetNumfmtMutationParams = {
             unitId,
@@ -137,6 +138,44 @@ describe('test editor', () => {
         // The data format needs to be entered in the editor with data string, not with real values
         expect(result!.v).toEqual(cellData!.v);
     });
+
+    it('before edit with percent', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            values: {
+                1: {
+                    ranges: [{ startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }],
+                },
+            },
+            refMap: {
+                1: {
+                    pattern: '0.00%',
+                },
+            },
+        };
+        commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = worksheet.getCell(10, 0);
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 10,
+            col: 0,
+            origin: cellData,
+        };
+
+        expect(cellData!.v).toEqual('100.12%');
+        expect(cellData!.t).toEqual(2);
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(cellData, location);
+        // The currency  format needs to be entered in the editor with real values, not with currency symbols
+        expect(result!.v).toEqual('100.1234567%');
+        expect(result!.t).toEqual(2);
+    });
+
     it('after edit with data', () => {
         const params: ISetNumfmtMutationParams = {
             unitId,
@@ -474,7 +513,7 @@ describe('test editor', () => {
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
-        expect(result?.v).toBe(0.20833333333333334);
+        expect(result?.v).toBe(0.2083333333333333);
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
 

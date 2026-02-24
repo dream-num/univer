@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { useEffect, useState } from 'react';
+import { isMenuButtonSelectorItem } from '../../../services/menu/menu';
 
 export interface IToolbarItemStatus {
     disabled: boolean;
@@ -24,6 +25,8 @@ export interface IToolbarItemStatus {
     value: any;
     activated: boolean;
     hidden: boolean;
+    // eslint-disable-next-line ts/no-explicit-any
+    selectionsValue: any;
 }
 
 // TODO@wzhudev: maybe we should use `useObservable` here.
@@ -37,21 +40,34 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
     const { disabled$, hidden$, activated$, value$ } = menuItem;
 
     // eslint-disable-next-line ts/no-explicit-any
+    let selectionsValue$: Observable<any> | undefined;
+
+    if (isMenuButtonSelectorItem(menuItem)) {
+        const { selections } = menuItem;
+
+        if (Array.isArray(selections)) {
+            selectionsValue$ = selections?.[0]?.value$;
+        }
+    }
+
+    // eslint-disable-next-line ts/no-explicit-any
     const [value, setValue] = useState<any>();
     const [disabled, setDisabled] = useState(false);
     const [activated, setActivated] = useState(false);
     const [hidden, setHidden] = useState(false);
+    // eslint-disable-next-line ts/no-explicit-any
+    const [selectionsValue, setSelectionsValue] = useState<any>();
 
     useEffect(() => {
         const subscriptions: Subscription[] = [];
-
         disabled$ && subscriptions.push(disabled$.subscribe((disabled) => setDisabled(disabled)));
         hidden$ && subscriptions.push(hidden$.subscribe((hidden) => setHidden(hidden)));
         activated$ && subscriptions.push(activated$.subscribe((activated) => setActivated(activated)));
         value$ && subscriptions.push(value$.subscribe((value) => setValue(value)));
+        selectionsValue$ && subscriptions.push(selectionsValue$.subscribe((value) => setSelectionsValue(value)));
 
         return () => subscriptions.forEach((subscription) => subscription.unsubscribe());
-    }, [activated$, disabled$, hidden$, value$]);
+    }, [activated$, disabled$, hidden$, value$, selectionsValue$]);
 
-    return { disabled, value, activated, hidden };
+    return { disabled, value, activated, hidden, selectionsValue };
 }

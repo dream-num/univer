@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Button } from '../../button/Button';
-import { message, Messager, MessageType } from '../Message';
+import { message, Messager, MessageType, removeMessage } from '../Message';
 
 afterEach(cleanup);
 
 describe('Message', () => {
-    it('renders correctly', () => {
+    it('renders correctly', async () => {
         const { container } = render(
             <>
                 <Button
@@ -41,6 +41,47 @@ describe('Message', () => {
 
         fireEvent.click(container.querySelector('button')!);
 
-        expect(screen.getByText('success content')).toBeTruthy();
+        await waitFor(() => {
+            expect(screen.getByText('success content')).toBeTruthy();
+        });
+    });
+
+    it('removes message by id', async () => {
+        render(<Messager />);
+
+        message({
+            id: 'message-test-id',
+            type: MessageType.Info,
+            content: 'message will be removed',
+            duration: Infinity,
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText('message will be removed')).toBeTruthy();
+        });
+
+        removeMessage('message-test-id');
+
+        await waitFor(() => {
+            expect(screen.queryByText('message will be removed')).toBeNull();
+        });
+    });
+
+    it('renders loading icon for loading message', async () => {
+        render(<Messager />);
+
+        message({
+            id: 'message-loading-id',
+            type: MessageType.Loading,
+            content: 'loading icon content',
+            duration: Infinity,
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText('loading icon content')).toBeTruthy();
+        });
+
+        const toastNode = screen.getByText('loading icon content').closest('[data-sonner-toast]');
+        expect(toastNode?.querySelector('[data-icon] svg')).toBeTruthy();
     });
 });

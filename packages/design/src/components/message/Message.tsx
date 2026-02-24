@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import type { ComponentProps, ReactNode } from 'react';
 import { ErrorIcon, InfoIcon, LoadingMultiIcon, SuccessIcon, WarningIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { Toaster as Sonner, toast } from 'sonner';
 import { clsx } from '../../helper/clsx';
-import { isBrowser } from '../../helper/is-browser';
 
 export enum MessageType {
     Success = 'success',
@@ -36,133 +35,140 @@ export interface IMessageProps {
     onClose?: () => void;
 }
 
-const iconMap = {
+export type IMessagerProps = Omit<ComponentProps<typeof Sonner>, 'id' | 'position' | 'visibleToasts' | 'toastOptions'>;
+
+const MESSAGE_TOASTER_ID = 'univer-message-toaster';
+const DEFAULT_MESSAGE_DURATION = 3000;
+const activeMessageIds = new Set<string>();
+const loadingIcon = <LoadingMultiIcon className="univer-animate-spin univer-text-violet-500" />;
+
+let messageCount = 0;
+
+const iconMap: Record<MessageType, ReactNode> = {
     [MessageType.Success]: <SuccessIcon className="univer-text-green-500" />,
     [MessageType.Info]: (
         <InfoIcon
             className={`
-              univer-text-indigo-600
-              dark:!univer-text-primary-500
+              univer-text-sky-500
+              dark:!univer-text-sky-400
             `}
         />
     ),
-    [MessageType.Warning]: <WarningIcon className="univer-text-yellow-400" />,
+    [MessageType.Warning]: <WarningIcon className="univer-text-amber-500" />,
     [MessageType.Error]: <ErrorIcon className="univer-text-red-500" />,
-    [MessageType.Loading]: <LoadingMultiIcon className="univer-animate-spin univer-text-yellow-400" />,
+    [MessageType.Loading]: loadingIcon,
 };
 
-const Message = ({ content, type = MessageType.Info }: IMessageProps) => {
-    const icon = useMemo(() => iconMap[type], [type]);
-
-    return (
-        <div
-            className={clsx(
-                `
-                  univer-animate-in univer-fade-in univer-slide-in-from-top-4 univer-min-w-[320px] univer-max-w-[480px]
-                  univer-rounded-xl univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-4
-                  univer-font-sans univer-shadow-md univer-transition-all univer-duration-300
-                  dark:!univer-border-gray-600 dark:!univer-bg-gray-700
-                `
-            )}
-        >
-            <div className="univer-flex univer-gap-2">
-                <span className="[&>svg]:univer-relative [&>svg]:univer-top-0.5 [&>svg]:univer-block">
-                    {icon}
-                </span>
-                <p
-                    className={`
-                      univer-m-0 univer-text-sm univer-text-gray-500 univer-opacity-90
-                      dark:!univer-text-gray-400
-                    `}
-                >
-                    {content}
-                </p>
-            </div>
-        </div>
-    );
+const typeClassMap: Record<MessageType, string> = {
+    [MessageType.Success]: '[&_[data-icon]]:univer-text-green-500',
+    [MessageType.Info]: '[&_[data-icon]]:univer-text-sky-500',
+    [MessageType.Warning]: '[&_[data-icon]]:univer-text-amber-500',
+    [MessageType.Error]: '[&_[data-icon]]:univer-text-red-500',
+    [MessageType.Loading]: '[&_[data-icon]]:univer-text-violet-500',
 };
 
-interface IMessageState {
-    messages: IMessageProps[];
-}
+const resolveToastMethod = (type: MessageType) => {
+    switch (type) {
+        case MessageType.Success:
+            return toast.success;
+        case MessageType.Warning:
+            return toast.warning;
+        case MessageType.Error:
+            return toast.error;
+        case MessageType.Loading:
+            return toast.loading;
+        case MessageType.Info:
+        default:
+            return toast.info;
+    }
+};
 
-let messageCount = 0;
+const createMessageId = () => {
+    const id = `univer-message-${messageCount}`;
+    messageCount += 1;
+    return id;
+};
 
-const createMessage = (() => {
-    let addMessage: (message: Omit<IMessageProps, 'id'>) => void = () => {};
-    let removeMessage: (id?: string) => void = () => {};
+export const Messager = ({ className, ...props }: IMessagerProps) => (
+    <Sonner
+        id={MESSAGE_TOASTER_ID}
+        position="top-center"
+        visibleToasts={4}
+        closeButton={false}
+        expand={false}
+        icons={{ loading: loadingIcon }}
+        offset={{ top: 16 }}
+        className={clsx(
+            `
+              [&_[data-sonner-toast]]:univer-bg-white/95
+              dark:[&_[data-sonner-toast]]:!univer-bg-gray-800/95
+              [&_[data-sonner-toast]]:univer-rounded-2xl [&_[data-sonner-toast]]:univer-border
+              [&_[data-sonner-toast]]:univer-border-solid [&_[data-sonner-toast]]:univer-border-gray-200
+              [&_[data-sonner-toast]]:univer-shadow-[0_16px_40px_-20px_rgba(15,23,42,0.55)]
+              [&_[data-sonner-toast]]:univer-backdrop-blur-sm
+              dark:[&_[data-sonner-toast]]:!univer-border-gray-600
+            `,
+            className
+        )}
+        toastOptions={{
+            duration: DEFAULT_MESSAGE_DURATION,
+            classNames: {
+                toast: `
+                  univer-group univer-min-h-0 univer-min-w-[320px] univer-max-w-[520px] univer-px-3.5 univer-py-3
+                  univer-font-sans univer-transition-all univer-duration-300
+                `,
+                title: `
+                  univer-m-0 univer-font-sans univer-text-sm univer-font-medium univer-leading-5 univer-text-gray-700
+                  dark:!univer-text-gray-100
+                `,
+                content: 'univer-gap-2.5',
+                icon: '[&>svg]:univer-block [&>svg]:univer-size-4',
+                success: typeClassMap[MessageType.Success],
+                info: typeClassMap[MessageType.Info],
+                warning: typeClassMap[MessageType.Warning],
+                error: typeClassMap[MessageType.Error],
+                loading: typeClassMap[MessageType.Loading],
+            },
+        }}
+        {...props}
+    />
+);
 
-    const Messager = () => {
-        if (!isBrowser()) return null;
+export const message = ({ content, duration, id, onClose, type = MessageType.Info }: IMessageProps) => {
+    const messageId = id ?? createMessageId();
+    const method = resolveToastMethod(type);
+    let closed = false;
 
-        const [state, setState] = useState<IMessageState>({ messages: [] });
+    const handleClose = () => {
+        if (closed) return;
 
-        removeMessage = (id?: string) => {
-            if (!id) {
-                setState({
-                    messages: [],
-                });
-            }
-
-            setState((prev) => ({
-                messages: prev.messages.filter((t) => t.id !== id),
-            }));
-        };
-
-        useEffect(() => {
-            const timers: number[] = [];
-            addMessage = (message) => {
-                const id = String(messageCount++);
-                setState((prev) => ({
-                    messages: [...prev.messages, { ...message, id }],
-                }));
-
-                if (message.duration !== Infinity) {
-                    const timer = window.setTimeout(() => {
-                        setState((prev) => ({
-                            messages: prev.messages.filter((t) => t.id !== id),
-                        }));
-                    }, message.duration || 3000);
-                    timers.push(timer);
-                }
-            };
-
-            return () => {
-                timers.forEach((timer) => {
-                    window.clearTimeout(timer);
-                });
-            };
-        }, []);
-
-        return createPortal(
-            <div
-                className={`
-                  univer-fixed univer-left-1/2 univer-top-4 univer-z-50 univer-flex -univer-translate-x-1/2
-                  univer-flex-col univer-items-center univer-gap-1
-                `}
-            >
-                {state.messages.map((message, index) => (
-                    <div
-                        key={message.id}
-                        style={{
-                            position: 'relative',
-                            top: `${index * 4}px`,
-                            zIndex: 50 - index,
-                        }}
-                    >
-                        <Message {...message} onClose={() => removeMessage(message.id)} />
-                    </div>
-                ))}
-            </div>,
-            document.body
-        );
+        closed = true;
+        activeMessageIds.delete(messageId);
+        onClose?.();
     };
 
-    return {
-        Messager,
-        message: (props: Omit<IMessageProps, 'id'>) => addMessage(props),
-        removeMessage,
-    };
-})();
+    method(content, {
+        id: messageId,
+        toasterId: MESSAGE_TOASTER_ID,
+        duration: duration ?? DEFAULT_MESSAGE_DURATION,
+        icon: type === MessageType.Loading ? undefined : iconMap[type],
+        onDismiss: handleClose,
+        onAutoClose: handleClose,
+    });
 
-export const { Messager, message, removeMessage } = createMessage;
+    activeMessageIds.add(messageId);
+    return messageId;
+};
+
+export const removeMessage = (id?: string) => {
+    if (typeof id !== 'undefined') {
+        toast.dismiss(id);
+        activeMessageIds.delete(id);
+        return;
+    }
+
+    activeMessageIds.forEach((messageId) => {
+        toast.dismiss(messageId);
+    });
+    activeMessageIds.clear();
+};

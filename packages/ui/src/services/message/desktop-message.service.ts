@@ -18,9 +18,12 @@ import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
-import { message, Messager, removeMessage } from '@univerjs/design';
+import { message, removeMessage } from '@univerjs/design';
+import { MessageContainer } from '../../components/message/MessageContainer';
 import { connectInjector } from '../../utils/di';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
+
+let messageId = 0;
 
 export class DesktopMessageService extends Disposable implements IMessageService {
     constructor(
@@ -34,22 +37,23 @@ export class DesktopMessageService extends Disposable implements IMessageService
 
     protected _initUIPart(): void {
         this.disposeWithMe(
-            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Messager, this._injector))
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(MessageContainer, this._injector))
         );
     }
 
     override dispose(): void {
+        super.dispose();
         removeMessage();
     }
 
     show(options: IMessageProps): IDisposable {
-        let op = options;
-        if (typeof options.id === 'undefined') {
-            op = Object.assign({}, options, { id: `message-${Date.now()}` });
-        }
+        const id = options.id ?? `message-${Date.now()}-${messageId}`;
+        messageId += 1;
+
+        const op = Object.assign({}, options, { id });
 
         message(op);
-        return toDisposable(() => removeMessage(op.id));
+        return toDisposable(() => removeMessage(id));
     }
 
     remove(id: string): void {

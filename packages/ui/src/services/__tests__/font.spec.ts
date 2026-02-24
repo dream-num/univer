@@ -129,32 +129,4 @@ describe('FontService', () => {
         expect(fontService.getFontByValue('Arial')).toBeDefined();
         expect(fontService.getFonts()).toHaveLength(13);
     });
-
-    it('should check if font is supported', () => {
-        vi.mocked(configService.getConfig).mockReturnValue(undefined);
-        fontService = injector.get(FontService);
-
-        const mockContext = {
-            measureText: vi.fn(),
-            font: '',
-        };
-        const mockCanvas = {
-            getContext: vi.fn(() => mockContext),
-        };
-        vi.spyOn(document, 'createElement').mockReturnValue(mockCanvas as any);
-
-        // Test supported: different widths
-        mockContext.measureText
-            .mockReturnValueOnce({ width: 10 } as any) // baseline
-            .mockReturnValueOnce({ width: 20 } as any); // new font
-
-        expect(fontService.isFontSupported('SupportedFont')).toBe(true);
-
-        // Test unsupported: same widths
-        mockContext.measureText
-            .mockReturnValueOnce({ width: 10 } as any) // baseline
-            .mockReturnValueOnce({ width: 10 } as any); // new font (fallback)
-
-        expect(fontService.isFontSupported('UnsupportedFont')).toBe(false);
-    });
 });

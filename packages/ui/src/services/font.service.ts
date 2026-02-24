@@ -198,18 +198,24 @@ export class FontService implements IFontService, IDisposable {
     isFontSupported(fontValue: string): boolean {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        if (!context) {
-            return false;
-        }
+        if (!context) return false;
 
-        const testString = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        context.font = '12px monospace';
-        const baselineWidth = context.measureText(testString).width;
+        const text = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const size = '72px';
 
-        context.font = `12px "${fontValue}", monospace`;
-        const newWidth = context.measureText(testString).width;
+        const baseFonts = ['monospace', 'serif', 'sans-serif'];
+        const defaultWidths: Record<string, number> = {};
 
-        return newWidth !== baselineWidth;
+        baseFonts.forEach((base) => {
+            context.font = `${size} ${base}`;
+            defaultWidths[base] = context.measureText(text).width;
+        });
+
+        return baseFonts.some((base) => {
+            context.font = `${size} "${fontValue}", ${base}`;
+            const width = context.measureText(text).width;
+            return width !== defaultWidths[base];
+        });
     }
 
     addFont(font: IFontConfig): void {

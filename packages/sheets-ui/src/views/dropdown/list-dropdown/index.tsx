@@ -114,7 +114,7 @@ function SelectList(props: ISelectListProps) {
                           univer-w-full univer-rounded-md univer-border univer-border-[rgba(13,13,13,0.12)] univer-px-2
                           univer-py-1 univer-text-sm
                           focus:univer-border-primary-500 focus:univer-outline-none
-                          dark:!univer-text-white
+                          dark:!univer-bg-black dark:!univer-text-white
                         `}
                         type="text"
                         value={lowerFilter}

@@ -18,6 +18,7 @@ import type { IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
+    BooleanNumber,
     BuildTextUtils,
     createIdentifier,
     DataStreamTreeTokenType,
@@ -39,6 +40,7 @@ import {
     toDisposable,
     Tools,
     UniverInstanceType,
+    WrapTextType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { ImageSourceType } from '@univerjs/drawing';
@@ -168,13 +170,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         let { html, text, files } = options;
         const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
-        if (!html && !text && files.length) {
-            html = await this._createImagePasteHtml(files);
+
+        if (files.length) {
+            html = await this._createImagePasteHtml(files, docUnitId);
+            text = '';
         }
+
         if (!html && !text) {
             this._logService.warn('[DocClipboardController] html and text cannot be both empty!');
             return false;
         }
+
         const partDocData = this._genDocDataFromHtmlAndText(html, text, docUnitId);
         // Paste in sheet editing mode without paste style, so we give textRuns empty array;
         if (docUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
@@ -520,9 +526,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return doc;
     }
 
-    private async _createImagePasteHtml(files: File[]) {
+    private async _createImagePasteHtml(files: File[], unitId?: string) {
         const doc: IDocumentData = {
-            id: '',
+            id: unitId || '',
             documentStyle: {},
             body: {
                 dataStream: '',
@@ -571,28 +577,61 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             body.customBlocks?.push({ startIndex: index, blockId: itemId });
             drawings[itemId] = {
                 drawingId: itemId,
-                unitId: '',
-                subUnitId: '',
+                unitId: unitId || '',
+                subUnitId: unitId || '',
                 imageSourceType: image.imageSourceType,
                 title: '',
                 source: image.source,
                 description: '',
                 layoutType: PositionedObjectLayoutType.INLINE,
                 drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+
                 transform: {
                     width,
                     height,
                     angle: 0,
+                    left: 0,
+                    top: 0,
+                    flipX: false,
+                    flipY: false,
+                    skewX: 0,
+                    skewY: 0,
+                    zIndex: 0,
                 },
+
                 docTransform: {
                     angle: 0,
                     size: { width, height },
                     positionH: { relativeFrom: ObjectRelativeFromH.CHARACTER, posOffset: 0 },
                     positionV: { relativeFrom: ObjectRelativeFromV.LINE, posOffset: 0 },
                 },
+
+                behindDoc: BooleanNumber.FALSE,
+                wrapText: WrapTextType.BOTH_SIDES,
+                distB: 0,
+                distL: 0,
+                distR: 0,
+                distT: 0,
+                allowTransform: true,
             } as IDocImage;
         }));
-        const html = this._umdToHtml.convert([doc]);
+        let html = this._umdToHtml.convert([doc]);
+
+        const copyId = genId();
+        html = html.replace(/(<[a-z][^>]*)/i, `$1 data-copy-id="${copyId}"`);
+
+        const cache: Partial<IDocumentData> = {
+            id: doc.id,
+            body: {
+                ...doc.body,
+                dataStream: doc.body?.dataStream || '',
+                customBlocks: [...(doc.body?.customBlocks || [])],
+            },
+            drawings: { ...doc.drawings },
+        };
+
+        copyContentCache.set(copyId, cache);
+
         return html;
     }
 }

@@ -47,11 +47,12 @@ export function SheetBarTabsContextMenu(props: ISheetBarTabsContextMenuProps) {
                 visible={visible}
                 anchorRect={anchorRect}
                 menuType={ContextMenuPosition.FOOTER_TABS}
+                anchorVertical="top"
                 menuOffset={MENU_OFFSET}
                 onRequestClose={() => onVisibleChange(false)}
                 onOptionSelect={(option: IValueOption) => {
-                    const { label: id, commandId, value } = option;
-                    onCommandSelect(commandId ?? id as string, value as string | number | undefined);
+                    const { label, id, commandId, value } = option;
+                    onCommandSelect(commandId ?? id ?? label as string, value as string | number | undefined);
                 }}
             />
         </>

@@ -32,6 +32,7 @@ export interface IAnchoredContextMenuProps {
     visible: boolean;
     anchorRect: IContextMenuAnchorRect | null;
     menuType: string;
+    anchorVertical?: 'top' | 'bottom';
     menuOffset?: number;
     onRequestClose: () => void;
     onOptionSelect?: (option: IValueOption) => void;
@@ -43,6 +44,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         visible,
         anchorRect,
         menuType,
+        anchorVertical = 'bottom',
         menuOffset = 0,
         onRequestClose,
         onOptionSelect,
@@ -141,11 +143,20 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             return [0, 0];
         }
 
-        return [anchorRect.left, anchorRect.bottom + menuOffset];
-    }, [anchorRect, menuOffset]);
+        const anchorY = anchorVertical === 'top' ? anchorRect.top : anchorRect.bottom;
+        const offsetY = anchorVertical === 'top'
+            ? anchorY - menuOffset
+            : anchorY + menuOffset;
+        return [anchorRect.left, offsetY];
+    }, [anchorRect, anchorVertical, menuOffset]);
 
     return (
-        <Popup visible={visible && !!anchorRect} offset={offset} overflowVisible>
+        <Popup
+            visible={visible && !!anchorRect}
+            offset={offset}
+            overflowVisible
+            placementY={anchorVertical === 'top' ? 'above' : 'below'}
+        >
             <section ref={contentRef}>
                 {menuType && (
                     <ContextMenuPanel

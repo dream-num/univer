@@ -43,10 +43,16 @@ export interface IPopupProps {
      * @default false
      */
     overflowVisible?: boolean;
+
+    /**
+     * vertical placement relative to `offset[1]`
+     * @default 'below'
+     */
+    placementY?: 'below' | 'above';
 }
 
 export function Popup(props: IPopupProps) {
-    const { children, visible = false, offset = [0, 0], overflowVisible = false } = props;
+    const { children, visible = false, offset = [0, 0], overflowVisible = false, placementY = 'below' } = props;
 
     const nodeRef = useRef(null);
 
@@ -66,7 +72,10 @@ export function Popup(props: IPopupProps) {
         const maxX = Math.max(0, innerWidth - clientWidth - POPUP_POINTER_OFFSET);
         const maxY = Math.max(0, innerHeight - clientHeight - POPUP_POINTER_OFFSET);
         const x = Math.min(Math.max(left, 0), maxX);
-        const y = Math.min(Math.max(top, 0), maxY);
+        const topWithPlacement = placementY === 'above'
+            ? top - clientHeight
+            : top;
+        const y = Math.min(Math.max(topWithPlacement, 0), maxY);
 
         return [x, y];
     };
@@ -81,7 +90,7 @@ export function Popup(props: IPopupProps) {
         if (nextOffset) {
             setRealOffset(nextOffset);
         }
-    }, [offset, visible]);
+    }, [offset, placementY, visible]);
 
     useEffect(() => {
         if (!visible) {
@@ -99,7 +108,7 @@ export function Popup(props: IPopupProps) {
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [offset, visible]);
+    }, [offset, placementY, visible]);
 
     function preventDefault(event: React.MouseEvent) {
         event.preventDefault();

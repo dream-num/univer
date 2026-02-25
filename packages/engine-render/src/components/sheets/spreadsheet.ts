@@ -553,8 +553,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor } = spreadsheetSkeleton;
-        const mergeCellRanges = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(rowColumnSegment);
+        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor, worksheet } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
@@ -633,6 +632,38 @@ export class Spreadsheet extends SheetComponent {
         //#endregion
 
         // clear line of merge cell
+        const mergeVisibleRanges: IRange[] = [];
+        let mergeVisibleRangeStartRow = startRow;
+
+        for (let r = startRow; r <= endRow; r++) {
+            if (worksheet.getRowVisible(r) === false) {
+                if (mergeVisibleRangeStartRow < r) {
+                    mergeVisibleRanges.push({
+                        startRow: mergeVisibleRangeStartRow,
+                        endRow: r - 1,
+                        startColumn,
+                        endColumn,
+                    });
+                }
+                mergeVisibleRangeStartRow = r + 1;
+                continue;
+            }
+
+            if (r === endRow) {
+                mergeVisibleRanges.push({
+                    startRow: mergeVisibleRangeStartRow,
+                    endRow: r,
+                    startColumn,
+                    endColumn,
+                });
+            }
+        }
+
+        const mergeCellRanges: IRange[] = [];
+        for (const mergeVisibleRange of mergeVisibleRanges) {
+            const mergeRangeInVisible = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
+            mergeCellRanges.push(...mergeRangeInVisible);
+        }
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges);
 
         // clear line of overflow cell

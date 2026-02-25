@@ -1268,7 +1268,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             };
         }
 
-        return this.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+        return this.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn, true);
     }
 
     override resetCache(): void {

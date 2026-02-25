@@ -15,7 +15,8 @@
  */
 
 import type { IRange } from './typedef';
-import { LRUMap, Rectangle, Tools } from '../shared';
+import type { Worksheet } from './worksheet';
+import { LRUMap, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
 
@@ -190,29 +191,42 @@ export class SpanModel extends Disposable {
         return this._mergeData.some((mergedCell) => mergedCell.startColumn <= column && column <= mergedCell.endColumn);
     }
 
-    public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    /**
+     * If the worksheet parameter is provided, it will check the visibility of rows in the range and skip the hidden rows.
+     * Otherwise, it will return all merged cells in the range.
+     */
+    public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number, worksheet?: Worksheet) {
         const ranges: IRange[] = [];
 
         const key = `${startRow}-${startColumn}-${endRow}-${endColumn}`;
         if (this._rangeMap.has(key)) {
             return this._getRangeFromCache(key);
         }
-        let index = 0;
+
         const indexes: number[] = [];
-        for (const range of this._mergeData || []) {
-            if (Rectangle.intersects(range, {
-                startRow,
-                endRow,
-                startColumn,
-                endColumn,
-            })) {
-                ranges.push({
-                    ...range,
-                });
-                indexes.push(index);
+        const indexesSet: Set<number> = new Set();
+
+        for (let r = startRow; r <= endRow; r++) {
+            if (worksheet?.getRowVisible(r) === false) continue;
+
+            const rowCache = this._cellCache.get(r);
+            // If the row cache is empty, it means there is no merged cell in this row, so we can skip this row directly.
+            if (!rowCache) continue;
+
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cellCache = rowCache.get(c);
+
+                if (cellCache === undefined || indexesSet.has(cellCache)) {
+                    continue;
+                }
+
+                const range = this._mergeData[cellCache];
+                ranges.push({ ...range });
+                indexes.push(cellCache);
+                indexesSet.add(cellCache);
             }
-            index++;
         }
+
         this._rangeMap.set(key, indexes);
         return ranges;
     }

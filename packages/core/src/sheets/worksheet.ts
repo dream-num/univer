@@ -492,7 +492,10 @@ export class Worksheet {
      * @param {number} endColumn The end column index of the range
      * @returns {IRange} The merged cell info list which has intersection with the given range or empty array if no merged cell in the range
      */
-    getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange[] {
+    getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number, isFilterHiddenRows: boolean = false): IRange[] {
+        if (isFilterHiddenRows) {
+            return this._spanModel.getMergedCellRange(startRow, startColumn, endRow, endColumn, this);
+        }
         return this._spanModel.getMergedCellRange(startRow, startColumn, endRow, endColumn);
     }
 

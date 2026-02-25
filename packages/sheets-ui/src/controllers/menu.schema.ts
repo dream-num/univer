@@ -305,7 +305,8 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {
-        [ContextMenuGroup.FORMAT]: {
+        [ContextMenuGroup.QUICK]: ({
+            quickLayout: 'tile',
             [SheetCopyCommand.name]: {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
@@ -318,12 +319,14 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
             },
+        } as MenuSchemaType),
+        [ContextMenuGroup.FORMAT]: {
             [COPY_SPECIAL_MENU_ID]: {
-                order: 2.5,
+                order: 0,
                 menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
-                order: 3,
+                order: 1,
                 menuItemFactory: PasteSpacialMenuItemFactory,
                 [SheetPasteValueCommand.id]: {
                     order: 0,
@@ -343,7 +346,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [CLEAR_SELECTION_MENU_ID]: {
-                order: 4,
+                order: 2,
                 menuItemFactory: ClearSelectionMenuItemFactory,
                 [ClearSelectionContentCommand.id]: {
                     order: 0,
@@ -359,7 +362,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
-                order: 5,
+                order: 3,
                 menuItemFactory: Text2NumberContextMenuItemFactory,
             },
         },
@@ -462,7 +465,8 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [ContextMenuPosition.COL_HEADER]: {
-        [ContextMenuGroup.FORMAT]: {
+        [ContextMenuGroup.QUICK]: ({
+            quickLayout: 'tile',
             [SheetCopyCommand.name]: {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
@@ -475,12 +479,14 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
             },
+        } as MenuSchemaType),
+        [ContextMenuGroup.FORMAT]: {
             [COPY_SPECIAL_MENU_ID]: {
-                order: 2.5,
+                order: 0,
                 menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
-                order: 3,
+                order: 1,
                 menuItemFactory: PasteSpacialMenuItemFactory,
                 [SheetPasteValueCommand.id]: {
                     order: 0,
@@ -500,7 +506,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [CLEAR_SELECTION_MENU_ID]: {
-                order: 4,
+                order: 2,
                 menuItemFactory: ClearSelectionMenuItemFactory,
                 [ClearSelectionContentCommand.id]: {
                     order: 0,
@@ -516,7 +522,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
-                order: 5,
+                order: 3,
                 menuItemFactory: Text2NumberContextMenuItemFactory,
             },
         },
@@ -595,7 +601,8 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [ContextMenuPosition.ROW_HEADER]: {
-        [ContextMenuGroup.FORMAT]: {
+        [ContextMenuGroup.QUICK]: ({
+            quickLayout: 'tile',
             [SheetCopyCommand.name]: {
                 order: 0,
                 menuItemFactory: CopyMenuItemFactory,
@@ -608,12 +615,14 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuItemFactory,
             },
+        } as MenuSchemaType),
+        [ContextMenuGroup.FORMAT]: {
             [COPY_SPECIAL_MENU_ID]: {
-                order: 2.5,
+                order: 0,
                 menuItemFactory: CopySpacialMenuItemFactory,
             },
             [PASTE_SPECIAL_MENU_ID]: {
-                order: 3,
+                order: 1,
                 menuItemFactory: PasteSpacialMenuItemFactory,
                 [SheetPasteValueCommand.id]: {
                     order: 0,
@@ -633,7 +642,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [CLEAR_SELECTION_MENU_ID]: {
-                order: 4,
+                order: 2,
                 menuItemFactory: ClearSelectionMenuItemFactory,
                 [ClearSelectionContentCommand.id]: {
                     order: 0,
@@ -649,7 +658,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [TEXT_TO_NUMBER_CONTEXT_MENU_ID]: {
-                order: 5,
+                order: 3,
                 menuItemFactory: Text2NumberContextMenuItemFactory,
             },
         },

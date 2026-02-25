@@ -66,6 +66,7 @@ export {
 export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
+export { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
 export { ContextMenuService, type IContextMenuHandler, IContextMenuService } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
@@ -127,6 +128,7 @@ export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 export type { IConfirmChildrenProps } from './views/components/confirm-part/interface';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
+export { AnchoredContextMenu, type IContextMenuAnchorRect } from './views/components/context-menu/AnchoredContextMenu';
 export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
 export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';

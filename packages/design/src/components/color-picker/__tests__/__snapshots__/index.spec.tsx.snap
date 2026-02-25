@@ -3,10 +3,7 @@
 exports[`ColorPicker > should render correctly 1`] = `
 <div>
   <div
-    class="
-              univer-cursor-default univer-space-y-2 univer-rounded-lg univer-bg-white
-              dark:!univer-bg-gray-700
-            "
+    class="univer-cursor-default univer-space-y-2 univer-rounded-lg"
     data-u-comp="color-picker"
   >
     <div
@@ -277,10 +274,7 @@ exports[`ColorPicker > should render correctly 1`] = `
 exports[`ColorPicker > should render with value 1`] = `
 <div>
   <div
-    class="
-              univer-cursor-default univer-space-y-2 univer-rounded-lg univer-bg-white
-              dark:!univer-bg-gray-700
-            "
+    class="univer-cursor-default univer-space-y-2 univer-rounded-lg"
     data-u-comp="color-picker"
   >
     <div
@@ -551,10 +545,7 @@ exports[`ColorPicker > should render with value 1`] = `
 exports[`ColorPicker > should support format hex 1`] = `
 <div>
   <div
-    class="
-              univer-cursor-default univer-space-y-2 univer-rounded-lg univer-bg-white
-              dark:!univer-bg-gray-700
-            "
+    class="univer-cursor-default univer-space-y-2 univer-rounded-lg"
     data-u-comp="color-picker"
   >
     <div

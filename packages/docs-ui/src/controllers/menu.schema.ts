@@ -187,7 +187,8 @@ export const menuSchema: MenuSchemaType = {
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {
-        [ContextMenuGroup.FORMAT]: {
+        [ContextMenuGroup.QUICK]: ({
+            quickLayout: 'tile',
             [DocCopyCommand.name]: {
                 order: 0,
                 menuItemFactory: CopyMenuFactory,
@@ -200,8 +201,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuFactory,
             },
+        } as MenuSchemaType),
+        [ContextMenuGroup.FORMAT]: {
             [DeleteLeftCommand.id]: {
-                order: 3,
+                order: 0,
                 menuItemFactory: DeleteMenuFactory,
             },
         },

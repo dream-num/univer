@@ -50,6 +50,7 @@ export class DrawingRenderService {
             isMultiTransform,
             transforms: multiTransforms,
         } = imageParam;
+
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return;
         }
@@ -58,29 +59,25 @@ export class DrawingRenderService {
             return;
         }
 
+        if (this._univerInstanceService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET && subUnitId !== this._getActiveSheetId()) {
+            return;
+        }
+
         if (singleTransform == null) {
             return;
         }
 
         const transforms = isMultiTransform && multiTransforms ? multiTransforms : [singleTransform];
-
         const images = [];
+
         for (const transform of transforms) {
             const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
             const index = transforms.indexOf(transform);
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }, isMultiTransform ? index : undefined);
-            const imageShape = scene.getObject(imageShapeKey);
 
+            const imageShape = scene.getObject(imageShapeKey);
             if (imageShape != null) {
                 imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
-                continue;
-            }
-
-            if (!this._drawingManagerService.getDrawingVisible()) {
-                continue;
-            }
-
-            if (subUnitId !== this._getActiveSheetId()) {
                 continue;
             }
 

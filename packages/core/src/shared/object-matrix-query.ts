@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IRange } from '../sheets/typedef';
+import type { Nullable } from './types';
 import { Range } from '../sheets/range';
 import { ObjectMatrix } from './object-matrix';
 import { Rectangle } from './rectangle';
-import type { IRange } from '../sheets/typedef';
-import type { Nullable } from './types';
 
 function maximalRectangle<T>(matrix: T[][], match: (val: T) => boolean) {
     if (matrix.length === 0 || matrix[0].length === 0) return null;
@@ -90,14 +90,34 @@ function resetMatrix<T>(matrix: Nullable<T>[][], range: IRange) {
  */
 export function queryObjectMatrix<T>(matrix: ObjectMatrix<T>, match: (value: T) => boolean) {
     const arrayMatrix = matrix.toFullArray();
+    const rows = arrayMatrix.length;
+    const cols = rows > 0 ? arrayMatrix[0].length : 0;
     const results: IRange[] = [];
-    while (true) {
+
+    // Limit iterations to prevent excessive computation. Each iteration extracts at least
+    // one maximal rectangle, so 1000 is a generous upper bound for practical use cases.
+    const MAX_ITERATIONS = 1000;
+    let iterations = 0;
+
+    while (iterations < MAX_ITERATIONS) {
+        iterations++;
         const rectangle = maximalRectangle(arrayMatrix, match);
         if (!rectangle) {
             break;
         }
 
         results.push(rectangle);
+
+        // If the rectangle covers the entire matrix, no need to continue.
+        if (
+            rectangle.startRow === 0 &&
+            rectangle.startColumn === 0 &&
+            rectangle.endRow === rows - 1 &&
+            rectangle.endColumn === cols - 1
+        ) {
+            break;
+        }
+
         resetMatrix(arrayMatrix, rectangle);
     }
 

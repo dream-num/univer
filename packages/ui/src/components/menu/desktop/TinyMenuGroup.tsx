@@ -79,8 +79,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
                 }
 
                 onOptionSelect?.({
-                    value: '',
-                    label: menuSchema.key,
+                    label: menuItem.id ?? menuSchema.key,
                     commandId: menuItem.commandId,
                     id: menuItem.id,
                     tooltip: menuItem.tooltip && localeService.t(menuItem.tooltip),
@@ -136,8 +135,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                 key: child.key,
                 onClick: () => {
                     onOptionSelect?.({
-                        value: '',
-                        label: child.key,
+                        label: child.item?.id ?? child.key,
                         commandId: child.item?.commandId,
                         id: child.item?.id,
                         tooltip: child.item?.tooltip && localeService.t(child.item?.tooltip),

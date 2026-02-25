@@ -61,6 +61,7 @@ interface IContextMenuMenuItemProps {
 const contentClassName = 'univer-inline-flex univer-items-center univer-gap-2';
 const menuViewportPadding = 8;
 const submenuOverlapOffset = 2;
+const submenuVisualGap = 20;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
@@ -273,6 +274,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         top: 0,
     });
     const [submenuPositionReady, setSubmenuPositionReady] = useState(false);
+    const [submenuPlacement, setSubmenuPlacement] = useState<'left' | 'right'>('right');
     const menuItemElementRef = useRef<HTMLDivElement | null>(null);
     const submenuElementRef = useRef<HTMLDivElement | null>(null);
 
@@ -326,6 +328,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             const useLeft = rightLeft + submenuRect.width + menuViewportPadding > window.innerWidth
                 && leftLeft >= menuViewportPadding;
             const left = useLeft ? leftLeft : rightLeft;
+            setSubmenuPlacement(useLeft ? 'left' : 'right');
 
             const maxTop = window.innerHeight - menuViewportPadding - submenuRect.height;
             const top = maxTop < menuViewportPadding
@@ -452,19 +455,13 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         <div
                             ref={submenuElementRef}
                             {...{ [CONTEXT_MENU_SUBMENU_PORTAL_ATTR]: 'true' }}
-                            className={clsx(
-                                `
-                                  univer-z-[1080] univer-w-max univer-max-w-[calc(100vw-16px)] univer-overflow-y-auto
-                                  univer-overscroll-contain univer-rounded-md univer-border univer-border-solid
-                                  univer-border-gray-200 univer-bg-white univer-p-2 univer-shadow-md
-                                  dark:!univer-border-gray-600 dark:!univer-bg-gray-700
-                                `,
-                                scrollbarClassName
-                            )}
+                            className="univer-z-[1080] univer-w-max univer-max-w-[calc(100vw-16px)]"
                             style={{
                                 position: 'fixed',
                                 left: submenuPosition.left,
                                 top: submenuPosition.top,
+                                paddingLeft: submenuPlacement === 'right' ? submenuVisualGap : 0,
+                                paddingRight: submenuPlacement === 'left' ? submenuVisualGap : 0,
                                 maxHeight: maxMenuHeight,
                                 visibility: submenuPositionReady ? 'visible' : 'hidden',
                                 pointerEvents: submenuPositionReady ? 'auto' : 'none',
@@ -479,81 +476,99 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             }}
                             onWheel={(event) => event.stopPropagation()}
                         >
-                            {hasSelectionSubmenu && (
-                                <div className="univer-grid univer-gap-1">
-                                    {selections.map((option, index) => {
-                                        const optionKey = `${menuItem.id}-${option.label ?? option.id}-${index}`;
-                                        const optionSelected = typeof inputValue !== 'undefined' && String(inputValue) === String(option.value);
+                            <div
+                                className={clsx(
+                                    `
+                                      univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border
+                                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
+                                      univer-shadow-md
+                                      dark:!univer-border-gray-600 dark:!univer-bg-gray-700
+                                    `,
+                                    scrollbarClassName
+                                )}
+                                style={{
+                                    maxHeight: maxMenuHeight,
+                                }}
+                            >
+                                {hasSelectionSubmenu && (
+                                    <div className="univer-grid univer-gap-1">
+                                        {selections.map((option, index) => {
+                                            const optionKey = `${menuItem.id}-${option.label ?? option.id}-${index}`;
+                                            const optionSelected = typeof inputValue !== 'undefined' && String(inputValue) === String(option.value);
 
-                                        return (
-                                            <button
-                                                key={optionKey}
-                                                type="button"
-                                                className={clsx(
-                                                    `
-                                                      univer-relative univer-flex univer-min-h-8 univer-w-full
-                                                      univer-items-center univer-rounded-md univer-border-none
-                                                      univer-bg-transparent univer-px-2 univer-text-left univer-text-sm
-                                                      dark:!univer-text-white
-                                                    `,
-                                                    option.disabled
-                                                        ? 'univer-cursor-not-allowed univer-opacity-60'
-                                                        : `
-                                                          univer-cursor-pointer
-                                                          hover:univer-bg-gray-50
-                                                          dark:hover:!univer-bg-gray-600
+                                            return (
+                                                <button
+                                                    key={optionKey}
+                                                    type="button"
+                                                    className={clsx(
                                                         `
-                                                )}
-                                                disabled={option.disabled}
-                                                onClick={() => {
-                                                    onOptionSelect?.({
-                                                        ...option,
-                                                        id: menuItem.id,
-                                                        label: menuKey,
-                                                        commandId: option.commandId,
-                                                    });
-                                                }}
-                                            >
-                                                {optionSelected && (
-                                                    <CheckMarkIcon
-                                                        className="
-                                                          univer-absolute univer-left-0 univer-size-4
-                                                          univer-text-primary-600
-                                                        "
-                                                    />
-                                                )}
-                                                <span
-                                                    className={clsx(contentClassName, optionSelected && 'univer-pl-4')}
+                                                          univer-relative univer-flex univer-min-h-8 univer-w-full
+                                                          univer-items-center univer-rounded-md univer-border-none
+                                                          univer-bg-transparent univer-px-2 univer-text-left
+                                                          univer-text-sm
+                                                          dark:!univer-text-white
+                                                        `,
+                                                        option.disabled
+                                                            ? 'univer-cursor-not-allowed univer-opacity-60'
+                                                            : `
+                                                              univer-cursor-pointer
+                                                              hover:univer-bg-gray-50
+                                                              dark:hover:!univer-bg-gray-600
+                                                            `
+                                                    )}
+                                                    disabled={option.disabled}
+                                                    onClick={() => {
+                                                        onOptionSelect?.({
+                                                            ...option,
+                                                            id: menuItem.id,
+                                                            label: menuKey,
+                                                            commandId: option.commandId,
+                                                        });
+                                                    }}
                                                 >
-                                                    <CustomLabel
-                                                        value$={option.value$}
-                                                        value={option.value}
-                                                        label={option.label}
-                                                        icon={option.icon}
-                                                        onChange={(optionValue) => {
-                                                            onOptionSelect?.({
-                                                                ...option,
-                                                                value: optionValue,
-                                                                id: menuItem.id,
-                                                                label: menuKey,
-                                                                commandId: option.commandId,
-                                                            });
-                                                        }}
-                                                    />
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                            {hasSubItemSubmenu && (
-                                <ContextMenuMenu
-                                    menuSchemas={subMenuItems}
-                                    submenuPortalContainer={submenuPortalContainer}
-                                    onOptionSelect={onOptionSelect}
-                                    maxMenuHeight={maxMenuHeight}
-                                />
-                            )}
+                                                    {optionSelected && (
+                                                        <CheckMarkIcon
+                                                            className="
+                                                              univer-absolute univer-left-0 univer-size-4
+                                                              univer-text-primary-600
+                                                            "
+                                                        />
+                                                    )}
+                                                    <span
+                                                        className={clsx(contentClassName, optionSelected && `
+                                                          univer-pl-4
+                                                        `)}
+                                                    >
+                                                        <CustomLabel
+                                                            value$={option.value$}
+                                                            value={option.value}
+                                                            label={option.label}
+                                                            icon={option.icon}
+                                                            onChange={(optionValue) => {
+                                                                onOptionSelect?.({
+                                                                    ...option,
+                                                                    value: optionValue,
+                                                                    id: menuItem.id,
+                                                                    label: menuKey,
+                                                                    commandId: option.commandId,
+                                                                });
+                                                            }}
+                                                        />
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                {hasSubItemSubmenu && (
+                                    <ContextMenuMenu
+                                        menuSchemas={subMenuItems}
+                                        submenuPortalContainer={submenuPortalContainer}
+                                        onOptionSelect={onOptionSelect}
+                                        maxMenuHeight={maxMenuHeight}
+                                    />
+                                )}
+                            </div>
                         </div>,
                         submenuPortalContainer
                     )

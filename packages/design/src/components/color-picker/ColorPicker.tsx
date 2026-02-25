@@ -103,10 +103,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
     return (
         <div
             data-u-comp="color-picker"
-            className={`
-              univer-cursor-default univer-space-y-2 univer-rounded-lg univer-bg-white
-              dark:!univer-bg-gray-700
-            `}
+            className="univer-cursor-default univer-space-y-2 univer-rounded-lg"
             onClick={(e) => e.stopPropagation()}
         >
             <MemoizedColorPresets

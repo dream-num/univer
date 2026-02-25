@@ -15,15 +15,14 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, KeyboardEventHandler, ReactNode } from 'react';
 import { ColorKit, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
 
 export interface IBaseSheetBarProps {
     label?: ReactNode;
-    children?: any[];
+    children?: unknown[];
     index?: number;
     color?: string;
     sheetId?: string;
@@ -31,19 +30,15 @@ export interface IBaseSheetBarProps {
     hidden?: BooleanNumber;
     selected?: boolean;
     menuOverlay?: ReactNode;
+    className?: string;
+    onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+    tabIndex?: number;
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { sheetId, label, color, selected } = props;
-
-    const [currentSelected, setCurrentSelected] = useState(selected);
+    const { sheetId, label, color, selected, className, onKeyDown, tabIndex } = props;
 
     const themeService = useDependency(ThemeService);
-
-    useEffect(() => {
-        // TODO: update too many times?
-        setCurrentSelected(selected);
-    }, [selected]);
 
     const getTextColor = (color: string) => {
         const darkTextColor = themeService.getColorFromTheme('gray.900');
@@ -51,24 +46,32 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         return new ColorKit(color).isDark() ? lightTextColor : darkTextColor;
     };
 
+    const currentSelected = Boolean(selected);
+    const textColor = color ? getTextColor(color) : '';
+
     return (
         <div
             data-u-comp="slide-tab-item"
             key={sheetId}
             data-id={sheetId}
+            role="tab"
+            aria-selected={currentSelected}
+            tabIndex={tabIndex ?? (currentSelected ? 0 : -1)}
+            onKeyDown={onKeyDown}
             className={clsx(`
               univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
               univer-flex-row univer-items-center univer-rounded univer-text-xs univer-transition-[colors,box-shadow]
+              focus-visible:univer-ring-2 focus-visible:univer-ring-primary-500
             `, {
-                'dark:!univer-text-white': !color || (color && !getTextColor(color)),
+                'dark:!univer-text-white': !color || (color && !textColor),
                 'univer-justify-center univer-bg-white univer-font-bold univer-text-primary-700 univer-shadow': currentSelected,
                 'dark:!univer-bg-gray-700': currentSelected && !color,
                 'univer-font-medium univer-text-gray-900 hover:univer-bg-gray-100': !currentSelected,
                 'dark:hover:!univer-bg-gray-700': !currentSelected && !color,
-            })}
+            }, className)}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',
-                color: !currentSelected && color ? getTextColor(color) : '',
+                color: !currentSelected && color ? textColor : '',
                 boxShadow:
                     currentSelected && color ? `0px 0px 8px rgba(0, 0, 0, 0.08), inset 0px -2px 0px 0px ${color}` : '',
             }}

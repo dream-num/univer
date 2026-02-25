@@ -24,12 +24,15 @@ import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonDataG
 
 export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer.menu-manager-service');
 
+export type ContextMenuQuickLayout = 'icon' | 'tile';
+
 export interface IMenuSchema {
     key: string;
     order: number;
     title?: string;
     item?: IMenuItem;
     children?: IMenuSchema[];
+    quickLayout?: ContextMenuQuickLayout;
     tiny?: boolean;
 }
 
@@ -49,6 +52,7 @@ export type MenuSchemaType = {
     order?: number;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
     title?: string;
+    quickLayout?: ContextMenuQuickLayout;
 } | {
     [key: string]: MenuSchemaType;
 };
@@ -133,6 +137,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 order: 0,
                 [ContextMenuGroup.QUICK]: {
                     order: -1,
+                    quickLayout: 'icon',
                 },
                 [ContextMenuGroup.FORMAT]: {
                     order: 0,
@@ -151,6 +156,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 order: 0,
                 [ContextMenuGroup.QUICK]: {
                     order: -1,
+                    quickLayout: 'icon',
                 },
                 [ContextMenuGroup.FORMAT]: {
                     order: 0,
@@ -167,6 +173,10 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [ContextMenuPosition.COL_HEADER]: {
                 order: 1,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                    quickLayout: 'icon',
+                },
                 [ContextMenuGroup.FORMAT]: {
                     order: 0,
                 },
@@ -182,6 +192,10 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [ContextMenuPosition.ROW_HEADER]: {
                 order: 2,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                    quickLayout: 'icon',
+                },
                 [ContextMenuGroup.FORMAT]: {
                     order: 0,
                 },
@@ -263,6 +277,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 key,
                 order: value.order,
                 title: value.title,
+                quickLayout: value.quickLayout,
             };
 
             if (value.menuItemFactory) {

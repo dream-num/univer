@@ -18,7 +18,7 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
 import type { IUniverSheetsNoteUIConfig } from '../controllers/config.schema';
-import { ICommandService, LocaleService } from '@univerjs/core';
+import { generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
@@ -60,6 +60,7 @@ export const SheetsNote = (props: { popup: IPopup<{ location: INotePopupLocation
 
         if (!note) {
             const initNote: Partial<ISheetNote> = {
+                id: generateRandomId(6),
                 width,
                 height,
                 note: '',

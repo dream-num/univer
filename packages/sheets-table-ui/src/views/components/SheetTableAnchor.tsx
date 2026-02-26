@@ -265,7 +265,9 @@ export const SheetTableAnchor = () => {
                                 updateOpenState(item.tableId, isOpen);
                             }}
                         >
-                            <MoreDownIcon />
+                            <div>
+                                <MoreDownIcon />
+                            </div>
                         </Dropdown>
                     </div>
                 );

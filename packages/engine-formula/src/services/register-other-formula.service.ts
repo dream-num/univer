@@ -122,10 +122,11 @@ export class RegisterOtherFormulaService extends Disposable {
                 },
             };
 
-            this._commandService.executeCommand(SetOtherFormulaMutation.id, params).then(() => {
+            this._commandService.executeCommand(SetOtherFormulaMutation.id, params, { onlyLocal: true }).then(() => {
                 this._commandService.executeCommand(
                     OtherFormulaMarkDirty.id,
-                    { [unitId]: { [subUnitId]: { [formulaId]: true } } }
+                    { [unitId]: { [subUnitId]: { [formulaId]: true } } },
+                    { onlyLocal: true }
                 );
             });
         };
@@ -223,7 +224,7 @@ export class RegisterOtherFormulaService extends Disposable {
             subUnitId,
             formulaIdList,
         };
-        this._commandService.executeCommand(RemoveOtherFormulaMutation.id, params);
+        this._commandService.executeCommand(RemoveOtherFormulaMutation.id, params, { onlyLocal: true });
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         formulaIdList.forEach((id) => cacheMap.delete(id));
     }
@@ -257,7 +258,8 @@ export class RegisterOtherFormulaService extends Disposable {
         cache.status = FormulaResultStatus.WAIT;
         this._commandService.executeCommand(
             OtherFormulaMarkDirty.id,
-            { [unitId]: { [subUnitId]: { [formulaId]: true } } }
+            { [unitId]: { [subUnitId]: { [formulaId]: true } } },
+            { onlyLocal: true }
         );
     }
 }

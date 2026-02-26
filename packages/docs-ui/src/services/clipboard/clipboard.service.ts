@@ -460,6 +460,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             let html = '';
             let text = '';
             const files: File[] = [];
+
+            const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const docUnitId = currentDocInstance?.getUnitId() || '';
+
             for (const clipboardItem of items) {
                 for (const type of clipboardItem.types) {
                     switch (type) {
@@ -483,11 +487,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     }
                 }
             }
-            if (!html && !text && files.length) {
-                html = await this._createImagePasteHtml(files);
+
+            if (files.length) {
+                html = await this._createImagePasteHtml(files, docUnitId);
+                text = '';
             }
 
-            return this._genDocDataFromHtmlAndText(html, text);
+            return this._genDocDataFromHtmlAndText(html, text, docUnitId);
         } catch (e) {
             return Promise.reject(e);
         }

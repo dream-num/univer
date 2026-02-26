@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: '편집',
         crop: '자르기',
         reset: '원래 크기',
+        flipH: '가로 뒤집기',
+        flipV: '세로 뒤집기',
     },
     'drawing-anchor': {
         title: '고정 위치 설정',

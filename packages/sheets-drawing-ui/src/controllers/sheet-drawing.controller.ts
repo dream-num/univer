@@ -36,6 +36,7 @@ import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/compon
 import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
 import { menuSchema } from './menu.schema';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 
 export class SheetDrawingUIController extends Disposable {
     constructor(
@@ -77,6 +78,7 @@ export class SheetDrawingUIController extends Disposable {
             DeleteDrawingsCommand,
             SetDrawingArrangeCommand,
             SaveCellImagesCommand,
+            FlipSheetDrawingCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: 'Chỉnh sửa',
         crop: 'Cắt',
         reset: 'Đặt lại kích thước',
+        flipH: 'Lật ngang',
+        flipV: 'Lật dọc',
     },
     'drawing-anchor': {
         title: 'Thuộc tính neo',

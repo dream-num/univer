@@ -49,6 +49,8 @@ const locale: typeof enUS = {
         edit: 'Редактировать',
         crop: 'Обрезать',
         reset: 'Сбросить размер',
+        flipH: 'Отразить по горизонтали',
+        flipV: 'Отразить по вертикали',
     },
     'drawing-anchor': {
         title: 'Свойства привязки',

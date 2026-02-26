@@ -49,6 +49,9 @@ const locale: typeof enUS = {
         edit: 'Éditer',
         crop: 'Rogner',
         reset: 'Réinitialiser la taille',
+        flipH: 'Retournement horizontal',
+        flipV: 'Retournement vertical',
+
     },
     'drawing-anchor': {
         title: 'Propriétés de l\'ancre',

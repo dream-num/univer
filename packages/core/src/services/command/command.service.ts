@@ -190,7 +190,7 @@ export interface IExecutionOptions {
     onlyLocal?: boolean;
     /** This command is from collaboration peers. */
     fromCollab?: boolean;
-    /** @deprecated */
+    /** This command is from snapshot load. */
     fromChangeset?: boolean;
     /**
      * This mutation should be synced to changeset but not executed locally.

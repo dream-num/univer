@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../config.schema';
@@ -403,7 +403,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _initCommandListener(): void {
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
             const { unit: workbook } = this._context;
             const { id: commandId } = command;
 
@@ -443,12 +443,12 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
             // All mutations must be executed. Using reCalculate alone will not trigger a refresh.
             if (command.type === CommandType.MUTATION) {
-                this._markUnitDirty(command);
+                this._markUnitDirty(command, options);
             }
         }));
     }
 
-    private _markUnitDirty(command: ICommandInfo) {
+    private _markUnitDirty(command: ICommandInfo, options: IExecutionOptions | undefined) {
         if (command.id.substring(0, 3) === 'doc') {
             return;
         }
@@ -471,20 +471,20 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         const cmdParams = command.params as Record<string, any>;
         const viewports = this._spreadsheetViewports(scene);
-        if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
+        if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue && !options?.fromChangeset) {
             const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
             const dirtyBounds = this._rangeToBounds([dirtyRange]);
             this._markViewportDirty(viewports, dirtyBounds);
-            (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);
+            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
         }
 
-        if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
+        if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to && !options?.fromChangeset) {
             // keep the get _cellValueToRange code to ensure the code can effect as before
             const fromRange = cmdParams.fromRange || this._cellValueToRange(cmdParams.from.value);
             const toRange = cmdParams.toRange || this._cellValueToRange(cmdParams.to.value);
             const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
             this._markViewportDirty(viewports, dirtyBounds);
-            (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);
+            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
         }
     }
 

@@ -93,7 +93,7 @@ export function isConditionFilter(filter: ITableFilterItem | undefined): filter 
     return filter.filterType === TableColumnFilterTypeEnum.condition;
 }
 
-export function isManualFilter(filter: ITableFilterItem | undefined): filter is ITableManualFilterItem {
+export function isManualTableFilter(filter: ITableFilterItem | undefined): filter is ITableManualFilterItem {
     if (!filter) {
         return false;
     }

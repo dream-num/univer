@@ -449,9 +449,10 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     if (commandInfo.id === ToggleGridlinesCommand.id) {
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
+                        const showGridlines = (commandInfo.params as IToggleGridlinesCommandParams)?.showGridlines ?? !target.worksheet.hasHiddenGridLines();
                         const eventParams: IBeforeGridlineEnableChange = {
                             ...target,
-                            enabled: Boolean((commandInfo.params as IToggleGridlinesCommandParams)?.showGridlines) ?? !target.worksheet.hasHiddenGridLines(),
+                            enabled: Boolean(showGridlines),
                         };
                         this.fireEvent(this.Event.BeforeGridlineEnableChange, eventParams);
                         // cancel this command

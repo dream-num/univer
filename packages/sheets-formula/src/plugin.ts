@@ -31,6 +31,7 @@ import {
 } from './controllers/config.schema';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaController } from './controllers/formula.controller';
+import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import { SuperTableController } from './controllers/super-table.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
@@ -38,7 +39,6 @@ import { UpdateFormulaController } from './controllers/update-formula.controller
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
-import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
 
 @DependentOn(UniverFormulaEnginePlugin)
@@ -71,7 +71,7 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     }
 }
 
-@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -99,8 +99,8 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [IDescriptionService, { useClass: DescriptionService }],
             [FormulaController],
             [FormulaRefRangeService],
-            [RegisterOtherFormulaService],
             [ArrayFormulaCellInterceptorController],
+            [ImageFormulaCellInterceptorController],
             [TriggerCalculationController],
             [UpdateFormulaController],
             [ActiveDirtyController],
@@ -126,6 +126,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaController],
             [ActiveDirtyController],
             [ArrayFormulaCellInterceptorController],
+            [ImageFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
         ]);

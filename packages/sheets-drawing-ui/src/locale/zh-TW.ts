@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: '編圖',
         },
+
+        save: {
+            title: '儲存儲存格圖片',
+            menuLabel: '儲存儲存格圖片',
+            imageCount: '圖片數量',
+            fileNameConfig: '檔案名稱',
+            useRowCol: '使用儲存格地址 (A1, B2...)',
+            useColumnValue: '使用某欄的值',
+            selectColumn: '選擇欄',
+            cancel: '取消',
+            confirm: '儲存',
+            saving: '儲存中...',
+            error: '儲存儲存格圖片失敗',
+        },
     },
     'image-popup': {
         replace: '替換',
@@ -35,12 +49,14 @@ const locale: typeof enUS = {
         edit: '編輯',
         crop: '裁切',
         reset: '重置大小',
+        flipH: '水平翻轉',
+        flipV: '垂直翻轉',
     },
     'drawing-anchor': {
         title: '錨點屬性',
         both: '與儲存格一起移動和調整大小',
         position: '移動但不調整大小與儲存格',
-        none: '不要移動或調整大小與單元格',
+        none: '不要移動或調整大小與儲存格',
     },
     'update-status': {
         exceedMaxSize: '圖片大小超過限制, 限制為{0}M',
@@ -49,9 +65,9 @@ const locale: typeof enUS = {
         invalidImage: '無效圖片',
     },
     'cell-image': {
-        pasteTitle: '粘貼為儲存格圖片',
-        pasteContent: '粘貼儲存格圖片將覆蓋儲存格中的現有內容，繼續粘貼',
-        pasteError: '此單元中不支持儲存格圖片複製粘貼',
+        pasteTitle: '貼上為儲存格圖片',
+        pasteContent: '貼上儲存格圖片將覆蓋儲存格中的現有內容，繼續貼上',
+        pasteError: '此儲存格不支援儲存格圖片複製貼上',
     },
 };
 

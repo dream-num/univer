@@ -74,7 +74,7 @@ const locale: typeof enUS = {
         },
     },
     BIN2DEC: {
-        description: '將二進制數轉換為十進制數',
+        description: '將二進位數轉換為十進位數',
         abstract: '將二進位數轉換為十進位數',
         links: [
             {
@@ -83,11 +83,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '二進制數', detail: '要轉換的二進制數。' },
+            number: { name: '二進位數', detail: '要轉換的二進位數。' },
         },
     },
     BIN2HEX: {
-        description: '將二進制數轉換為十六進制數',
+        description: '將二進位數轉換為十六進位數',
         abstract: '將二進位數轉換為十六進位數',
         links: [
             {
@@ -96,12 +96,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '二進制數', detail: '要轉換的二進制數。' },
+            number: { name: '二進位數', detail: '要轉換的二進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     BIN2OCT: {
-        description: '將二進制數轉換為八進制數',
+        description: '將二進位數轉換為八進位數',
         abstract: '將二進位數轉換為八進位數',
         links: [
             {
@@ -110,7 +110,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '二進制數', detail: '要轉換的二進制數。' },
+            number: { name: '二進位數', detail: '要轉換的二進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
@@ -215,7 +215,7 @@ const locale: typeof enUS = {
         },
     },
     DEC2BIN: {
-        description: '將十進制數轉換為二進制數',
+        description: '將十進位數轉換為二進位數',
         abstract: '將十進位數轉換為二進位數',
         links: [
             {
@@ -224,12 +224,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '十進制數', detail: '要轉換的十進制數。' },
+            number: { name: '十進位數', detail: '要轉換的十進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     DEC2HEX: {
-        description: '將十進制數轉換為十六進制數',
+        description: '將十進位數轉換為十六進位數',
         abstract: '將十進位數轉換為十六進位數',
         links: [
             {
@@ -238,12 +238,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '十進制數', detail: '要轉換的十進制數。' },
+            number: { name: '十進位數', detail: '要轉換的十進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     DEC2OCT: {
-        description: '將十進制數轉換為八進制數',
+        description: '將十進位數轉換為八進位數',
         abstract: '將十進位數轉換為八進位數',
         links: [
             {
@@ -252,7 +252,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '十進制數', detail: '要轉換的十進制數。' },
+            number: { name: '十進位數', detail: '要轉換的十進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
@@ -338,7 +338,7 @@ const locale: typeof enUS = {
         },
     },
     HEX2BIN: {
-        description: '將十六進制數轉換為二進制數',
+        description: '將十六進位數轉換為二進位數',
         abstract: '將十六進位數轉換為二進位數',
         links: [
             {
@@ -347,12 +347,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '十六進制數', detail: '要轉換的十六進制數。' },
+            number: { name: '十六進位數', detail: '要轉換的十六進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     HEX2DEC: {
-        description: '將十六進制數轉換為十進制數',
+        description: '將十六進位數轉換為十進位數',
         abstract: '將十六進位數轉換為十進位數',
         links: [
             {
@@ -361,11 +361,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '十六進制數', detail: '要轉換的十六進制數。' },
+            number: { name: '十六進位數', detail: '要轉換的十六進位數。' },
         },
     },
     HEX2OCT: {
-        description: '將十六進制數轉換為八進制數',
+        description: '將十六進位數轉換為八進位數',
         abstract: '將十六進位數轉換為八進位數',
         links: [
             {
@@ -374,7 +374,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '十六進制數', detail: '要轉換的十六進制數。' },
+            number: { name: '十六進位數', detail: '要轉換的十六進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
@@ -749,7 +749,7 @@ const locale: typeof enUS = {
         },
     },
     OCT2BIN: {
-        description: '將八進制數轉換為二進制數',
+        description: '將八進位數轉換為二進位數',
         abstract: '將八進位數轉換為二進位數',
         links: [
             {
@@ -758,12 +758,12 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '八進制數', detail: '要轉換的八進制數。' },
+            number: { name: '八進位數', detail: '要轉換的八進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     OCT2DEC: {
-        description: '將八進制數轉換為十進制數',
+        description: '將八進位數轉換為十進位數',
         abstract: '將八進位數轉換為十進位數',
         links: [
             {
@@ -772,11 +772,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '八進制數', detail: '要轉換的八進制數。' },
+            number: { name: '八進位數', detail: '要轉換的八進位數。' },
         },
     },
     OCT2HEX: {
-        description: '將八進制數轉換為十六進制數',
+        description: '將八進位數轉換為十六進位數',
         abstract: '將八進位數轉換為十六進位數',
         links: [
             {
@@ -785,7 +785,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: '八進制數', detail: '要轉換的八進制數。' },
+            number: { name: '八進位數', detail: '要轉換的八進位數。' },
             places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },

@@ -445,7 +445,7 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             number: { name: '數值', detail: '要找出其排名的數字。' },
-            ref: { name: '數位清單', detail: '數位清單的參照。會忽略 ref 中的非數值。' },
+            ref: { name: '數字清單', detail: '數字清單的參照。會忽略 ref 中的非數值。' },
             order: { name: '排列方式', detail: '指定排列數值方式的數字。0 或省略為遞減順序排序，非 0 為遞增順序排序。' },
         },
     },
@@ -460,7 +460,7 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             number1: { name: '數值 1', detail: '對應於總體樣本的第一個數值參數。 ' },
-            number2: { name: '數值 2', detail: '對應於總體樣本的 2 到 255 個數值參數。 也可以用單一數組或對某個數組的引用來代替用逗號分隔的參數。 ' },
+            number2: { name: '數值 2', detail: '對應於總體樣本的 2 到 255 個數值參數。 也可以用單一陣列或對某個陣列的引用來代替用逗號分隔的參數。 ' },
         },
     },
     STDEVP: {
@@ -474,7 +474,7 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             number1: { name: '數值 1', detail: '對應於總體的第一個數值參數。 ' },
-            number2: { name: '數值 2', detail: '對應於總體的 2 到 255 個數值參數。 也可以用單一數組或對某個數組的引用來代替用逗號分隔的參數。 ' },
+            number2: { name: '數值 2', detail: '對應於總體的 2 到 255 個數值參數。 也可以用單一陣列或對某個陣列的引用來代替用逗號分隔的參數。 ' },
         },
     },
     TDIST: {

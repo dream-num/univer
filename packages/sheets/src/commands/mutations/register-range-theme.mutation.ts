@@ -31,11 +31,11 @@ export const RegisterWorksheetRangeThemeStyleMutation: IMutation<IRegisterWorksh
     id: 'sheet.mutation.register-worksheet-range-theme-style',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, rangeThemeStyleJson, themeName } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
-        const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
+
+        const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
+        const { unitId, rangeThemeStyleJson, themeName } = params;
 
         const rangeThemeStyle = new RangeThemeStyle(themeName, rangeThemeStyleJson);
         sheetRangeThemeModel.registerRangeThemeStyle(unitId, rangeThemeStyle);

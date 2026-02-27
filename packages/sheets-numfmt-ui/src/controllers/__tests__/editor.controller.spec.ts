@@ -16,9 +16,18 @@
 
 import type { ICellDataForSheetInterceptor, Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { CellModeEnum, CellValueType, createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import {
+    CellModeEnum,
+    CellValueType,
+    createInterceptorKey,
+    ICommandService,
+    InterceptorManager,
+    IUniverInstanceService,
+    LocaleType,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { excelDateSerial } from '@univerjs/engine-formula';
 import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
-
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -96,6 +105,7 @@ describe('test editor', () => {
         expect(result!.v).toEqual(0);
         expect(result!.t).toEqual(2);
     });
+
     it('before edit with data', () => {
         const params: ISetNumfmtMutationParams = {
             unitId,
@@ -128,6 +138,44 @@ describe('test editor', () => {
         // The data format needs to be entered in the editor with data string, not with real values
         expect(result!.v).toEqual(cellData!.v);
     });
+
+    it('before edit with percent', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            values: {
+                1: {
+                    ranges: [{ startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }],
+                },
+            },
+            refMap: {
+                1: {
+                    pattern: '0.00%',
+                },
+            },
+        };
+        commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = worksheet.getCell(10, 0);
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 10,
+            col: 0,
+            origin: cellData,
+        };
+
+        expect(cellData!.v).toEqual('100.12%');
+        expect(cellData!.t).toEqual(2);
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(cellData, location);
+        // The currency  format needs to be entered in the editor with real values, not with currency symbols
+        expect(result!.v).toEqual('100.1234567%');
+        expect(result!.t).toEqual(2);
+    });
+
     it('after edit with data', () => {
         const params: ISetNumfmtMutationParams = {
             unitId,
@@ -465,7 +513,7 @@ describe('test editor', () => {
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
-        expect(result?.v).toBe(0.20833333333333334);
+        expect(result?.v).toBe(0.2083333333333333);
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
 
@@ -501,8 +549,7 @@ describe('test editor', () => {
         };
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
-
-        expect(result?.v).toBe(45691);
+        expect(result?.v).toBe(excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 1, 3))));
         expect(result?.t).toBe(CellValueType.NUMBER);
     });
 
@@ -522,6 +569,42 @@ describe('test editor', () => {
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
 
         expect(result?.v).toBe('1000,');
+    });
+
+    it('edit content 1000,1.00', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '1000,1.00' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe('1000,1.00');
+    });
+
+    it('edit content $1000', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = { v: '$1000' };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+
+        expect(result?.v).toBe(1000);
     });
 });
 

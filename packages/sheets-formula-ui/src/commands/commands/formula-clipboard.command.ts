@@ -16,7 +16,18 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
-import { PREDEFINED_HOOK_NAME, SheetPasteCommand } from '@univerjs/sheets-ui';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE, SheetPasteCommand } from '@univerjs/sheets-ui';
+
+export const SheetCopyFormulaOnlyCommand: ICommand = {
+    id: 'sheet.command.copy-formula-only',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const sheetClipboardService = accessor.get(ISheetClipboardService);
+        return sheetClipboardService.copy({
+            copyHookType: PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY,
+        });
+    },
+};
 
 export const SheetOnlyPasteFormulaCommand: ICommand = {
     id: 'sheet.command.paste-formula',
@@ -24,7 +35,7 @@ export const SheetOnlyPasteFormulaCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         return commandService.executeCommand(SheetPasteCommand.id, {
-            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+            value: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA,
         });
     },
 };

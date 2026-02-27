@@ -92,7 +92,7 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
                   univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
                 `}
                 style={{
-                    background: `linear-gradient(to right, transparent, rgb(${color}))`,
+                    background: `linear-gradient(to right, transparent, rgb(${color.join(',')}))`,
                 }}
                 onPointerDown={(e) => {
                     setIsDragging(true);

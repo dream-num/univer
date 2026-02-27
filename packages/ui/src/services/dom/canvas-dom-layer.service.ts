@@ -32,6 +32,7 @@ export interface IFloatDomLayout extends IPosition {
 export interface IFloatDom {
     position$: Observable<IFloatDomLayout>;
     id: string;
+    domId?: string; // Ensure unique id for dom element at runtime
     componentKey: string | React.ComponentType;
     onPointerMove: (evt: PointerEvent | MouseEvent) => void;
     onPointerDown: (evt: PointerEvent | MouseEvent) => void;

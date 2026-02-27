@@ -38,7 +38,7 @@ export const RegisterWorksheetRangeThemeStyleCommand: ICommand<IRegisterWorkshee
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const redoParam = {

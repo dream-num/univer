@@ -17,7 +17,6 @@
 import type { Dependency, ICommand, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertColMutationParams } from '../../../basics';
 import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InsertColMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import { SheetsSelectionsService } from '../../selections/selection.service';

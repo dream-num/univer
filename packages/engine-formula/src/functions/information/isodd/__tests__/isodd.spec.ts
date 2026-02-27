@@ -15,11 +15,10 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { Isodd } from '../isodd';
 
 describe('Test isodd function', () => {

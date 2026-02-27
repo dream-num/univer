@@ -367,3 +367,21 @@ function isEmail(url: string) {
 export function normalizeUrl(urlStr: string) {
     return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
 }
+
+/**
+ * Resolve a URL with a base URL, ensuring the path from the base URL is preserved.
+ * @param {string} url - The URL to resolve.
+ * @param {string} baseURL - The base URL to use for resolution.
+ * @returns {string} - The resolved URL.
+ */
+export function resolveWithBasePath(url: string, baseURL: string): string {
+    try {
+        const base = new URL(baseURL);
+        const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
+        const cleanedUrl = url.startsWith('/') ? url.substring(1) : url;
+        return new URL(cleanedUrl, base.origin + basePath).toString();
+    } catch (error) {
+        console.error('Error resolving URL with base URL:', error);
+        return url;
+    }
+}

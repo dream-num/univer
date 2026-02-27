@@ -146,7 +146,7 @@ export class Xnpv extends BaseFunction {
                     return false;
                 }
 
-                if (_valuesObject.isNull() || _valuesObject.isBoolean()) {
+                if (_valuesObject.isNull() || _valuesObject.isBoolean() || (_valuesObject.isString() && _valuesObject.getValue() === '')) {
                     isError = true;
                     errorObejct = ErrorValueObject.create(ErrorType.VALUE);
                     return false;

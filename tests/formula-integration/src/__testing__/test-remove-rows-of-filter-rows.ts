@@ -66,8 +66,12 @@ export async function expectRemoveRowsOfFilterRowsResultMatchesSnapshot() {
     univerInstanceService.focusUnit(workbook.getId());
     const worksheet = workbook.getActiveSheet();
 
+    await testBed.api.getFormula().onCalculationResultApplied();
+
     // remove rows 2 to 5, where the 3 to 4 rows are filtered rows
     worksheet.deleteRows(1, 4);
+
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     const resultSnapshot = workbook.save();
     const snapshotFilePath = path.resolve(snapshotRootDir, `${getTestFilePath()}-result.json`);
@@ -83,6 +87,7 @@ export async function expectRemoveRowsOfFilterRowsResultMatchesSnapshot() {
 
     // perform undo operation
     await testBed.api.undo();
+    await testBed.api.getFormula().onCalculationResultApplied();
 
     // compare the result with the snapshot
     const resultSnapshot_undo = workbook.save();

@@ -29,6 +29,7 @@ import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Hstack } from './hstack';
 import { Hyperlink } from './hyperlink';
+import { ImageFunction } from './image';
 import { Index } from './index';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
@@ -65,6 +66,7 @@ export const functionLookup = [
     [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Hstack, FUNCTION_NAMES_LOOKUP.HSTACK],
     [Hyperlink, FUNCTION_NAMES_LOOKUP.HYPERLINK],
+    [ImageFunction, FUNCTION_NAMES_LOOKUP.IMAGE],
     [Index, FUNCTION_NAMES_LOOKUP.INDEX],
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
     [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],

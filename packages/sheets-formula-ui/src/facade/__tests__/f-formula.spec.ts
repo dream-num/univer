@@ -18,7 +18,7 @@ import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { ICommandService, IConfigService } from '@univerjs/core';
-import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFormulaTestBed } from './create-formula-test-bed';
@@ -35,6 +35,7 @@ describe('Test FFormula', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationStopMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);

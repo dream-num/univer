@@ -19,9 +19,27 @@ import type { ICellDataWithSpanInfo } from '../type';
 import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
+function cleanTextNodes(node: Node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        /**
+         * Clean excel copied text nodes:
+         * \r => carriage return
+         * \n => new line
+         * \t => tab
+         * multiple spaces => indentation
+         * These will be treated as a single space in excel cell. '\r\n   ' = ' '
+         */
+        node.textContent = (node.textContent || '').replace(/\r?\n[\t ]*/g, ' ');
+        return;
+    }
+
+    node.childNodes.forEach(cleanTextNodes);
+}
+
 export default function parseToDom(rawHtml: string) {
     const template = document.createElement('body');
     template.innerHTML = rawHtml;
+    cleanTextNodes(template);
     return template;
 }
 

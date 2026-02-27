@@ -15,7 +15,7 @@
  */
 
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
+import { DependentOn, generateRandomId, IConfigService, IConfirmService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
@@ -27,8 +27,8 @@ import { MobileUIController } from './controllers/ui/ui-mobile.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
-import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
+import { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
@@ -105,6 +105,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],

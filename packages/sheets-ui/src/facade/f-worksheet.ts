@@ -21,7 +21,7 @@ import type { ISelectionStyle } from '@univerjs/sheets';
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
 import { ICommandService, toDisposable } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { IMarkSelectionService, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SetWorksheetColAutoWidthCommand, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
@@ -92,7 +92,7 @@ export interface IFWorksheetSkeletonMixin {
     getZoom(): number;
 
     /**
-     * Return visible range, sum view range of 4 viewports.
+     * Get visible range of main viewport.
      * @returns {IRange} - visible range
      * @example
      * ```ts
@@ -103,7 +103,22 @@ export interface IFWorksheetSkeletonMixin {
      * console.log(fWorksheet.getRange(visibleRange).getA1Notation());
      * ```
      */
-    getVisibleRange(): IRange;
+    getVisibleRange(): IRange | null;
+
+    /**
+     * Get visible ranges of all viewports.
+     * @returns {Record<SHEET_VIEWPORT_KEY, IRange>} - visible ranges of all viewports
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const visibleRanges = fWorksheet.getVisibleRangesOfAllViewports();
+     * console.log(visibleRanges);
+     * const mainLeftTopViewportRange = visibleRanges?.get(univerAPI.Enum.SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+     * console.log(fWorksheet.getRange(mainLeftTopViewportRange).getA1Notation());
+     * ```
+     */
+    getVisibleRangesOfAllViewports(): Map<SHEET_VIEWPORT_KEY, IRange> | null;
 
     /**
      * Scroll spreadsheet(viewMain) to cell position. Make the cell at topleft of current viewport.
@@ -367,33 +382,26 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return this._worksheet.getZoomRatio();
     }
 
-    override getVisibleRange(): IRange {
+    override getVisibleRange(): IRange | null {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
-        let range: IRange = {
-            startColumn: 0,
-            startRow: 0,
-            endColumn: 0,
-            endRow: 0,
-        };
-        if (!render) return range;
+        if (!render) return null;
         const skm = render.with(SheetSkeletonManagerService);
         const sk = skm.getCurrentSkeleton();
-        if (!sk) return range;
-        const visibleRangeMap = sk?.getVisibleRanges();
-        if (!visibleRangeMap) return range;
+        if (!sk) return null;
+        return sk.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN) as IRange;
+    }
 
-        range = sk.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN) as IRange;
-        for (const [k, r] of visibleRangeMap) {
-            if (sheetContentViewportKeys.indexOf(k) === -1) continue;
-            range.startColumn = Math.min(range.startColumn, r.startColumn);
-            range.startRow = Math.min(range.startRow, r.startRow);
-            range.endColumn = Math.max(range.endColumn, r.endColumn);
-            range.endRow = Math.max(range.endRow, r.endRow);
-        }
-
-        return range;
+    override getVisibleRangesOfAllViewports(): Map<SHEET_VIEWPORT_KEY, IRange> | null {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) return null;
+        const skm = render.with(SheetSkeletonManagerService);
+        const sk = skm.getCurrentSkeleton();
+        if (!sk) return null;
+        return sk.getVisibleRanges();
     }
 
     override scrollToCell(row: number, column: number, duration?: number): FWorksheet {

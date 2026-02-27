@@ -24,7 +24,9 @@ export class Today extends BaseFunction {
     override maxParams = 0;
 
     override calculate() {
-        const currentSerial = excelDateSerial(new Date());
+        const now = new Date();
+        const utcNow = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        const currentSerial = excelDateSerial(utcNow);
         const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
         return valueObject;
     }

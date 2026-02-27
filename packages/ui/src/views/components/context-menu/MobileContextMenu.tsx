@@ -19,23 +19,31 @@ import { ICommandService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
 import { MobileMenu } from '../../../components/menu/mobile/MobileMenu';
+import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { useDependency } from '../../../utils/di';
+
+const MOBILE_CONTEXT_MENU_HOST_ID = 'mobile-context-menu';
 
 export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const visibleRef = useRef(visible);
+    const contextMenuHostService = useDependency(IContextMenuHostService);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
     visibleRef.current = visible;
 
     useEffect(() => {
+        const hostDisposable = contextMenuHostService.registerMenu(MOBILE_CONTEXT_MENU_HOST_ID, () => {
+            setVisible(false);
+        });
+
         const disposables = contextMenuService.registerContextMenuHandler({
             handleContextMenu,
             hideContextMenu() {
-                setVisible(false);
+                handleClose();
             },
             get visible() {
                 return visibleRef.current;
@@ -49,10 +57,13 @@ export function MobileContextMenu() {
             document.removeEventListener('pointerdown', handleClose);
             document.removeEventListener('wheel', handleClose);
             disposables.dispose();
+            hostDisposable.dispose();
+            contextMenuHostService.deactivateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
         };
-    }, [contextMenuService]);
+    }, [contextMenuHostService, contextMenuService]);
 
     function handleContextMenu(event: IMouseEvent, menuType: string) {
+        contextMenuHostService.activateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
         setMenuType(menuType);
         setOffset([event.clientX, event.clientY]);
         setVisible(true);
@@ -60,6 +71,7 @@ export function MobileContextMenu() {
 
     function handleClose() {
         setVisible(false);
+        contextMenuHostService.deactivateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
     }
 
     return (

@@ -112,6 +112,12 @@ export interface IUniverSheetsUIConfig {
      * @default false
      */
     disableForceStringMark?: boolean;
+
+    /**
+     * Whether to disable the edit.
+     * @default false
+     */
+    disableEdit?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {

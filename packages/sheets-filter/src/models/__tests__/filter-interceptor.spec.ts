@@ -102,7 +102,7 @@ describe('Test "Filter Interceptor"', () => {
                     endRow: 4,
                     type: RANGE_TYPE.COLUMN,
                 },
-                direction: Direction.RIGHT,
+                direction: Direction.LEFT,
             } as IInsertColCommandParams;
             await commandService.executeCommand(InsertColCommand.id, insertColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 2, endColumn: 3, startRow: 1, endRow: 2 });
@@ -138,7 +138,7 @@ describe('Test "Filter Interceptor"', () => {
                     endRow: 0,
                     type: RANGE_TYPE.ROW,
                 },
-                direction: Direction.DOWN,
+                direction: Direction.UP,
             } as IInsertRowCommandParams;
             await commandService.executeCommand(InsertRowCommand.id, insertRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 2, endRow: 3 });

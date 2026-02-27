@@ -32,6 +32,7 @@ import {
 import enUS from '../../../locale/en-US';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
+import { SheetLazyExecuteScheduleService } from '../../../services/lazy-execute-schedule.service';
 import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
 import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
@@ -106,6 +107,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonService]);
+            injector.add([SheetLazyExecuteScheduleService]);
 
             dependencies?.forEach((d) => injector.add(d));
 

@@ -16,10 +16,8 @@
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanNumber, CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
@@ -27,11 +25,10 @@ import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
-import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Subtotal } from '../index';
 
@@ -192,12 +189,7 @@ describe('Test subtotal', () => {
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            if ((result as ErrorValueObject).isError()) {
-                return (result as ErrorValueObject).getValue();
-            } else if ((result as ArrayValueObject).isArray()) {
-                return (result as ArrayValueObject).toValue();
-            }
-            return (result as BaseValueObject).getValue();
+            return getObjectValue(result as BaseValueObject, true);
         };
     });
 
@@ -309,15 +301,15 @@ describe('Test subtotal', () => {
         });
         it('Stdev.s, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(7,A1:B2,A3:F4)');
-            expect(result).toBe(31.27335040502625);
+            expect(result).toBe(31.273350405);
         });
         it('Stdev.p, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(8,A1:B2,A3:F4)');
-            expect(result).toBe(29.668505203329676);
+            expect(result).toBe(29.6685052033);
         });
         it('sum, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(9,A1:B2,A3:F4)');
-            expect(stripErrorMargin(Number(result))).toBe(111.57);
+            expect(result).toBe(111.57);
         });
         it('Var.s, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(10,A1:B2,A3:F4)');
@@ -325,7 +317,7 @@ describe('Test subtotal', () => {
         });
         it('Var.p, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(11,A1:B2,A3:F4)');
-            expect(stripErrorMargin(Number(result))).toBe(880.220201);
+            expect(result).toBe(880.220201);
         });
     });
 
@@ -359,16 +351,16 @@ describe('Test subtotal', () => {
             expect(result).toBeCloseTo(0.16263456, 7);
 
             result = calculate('=SUBTOTAL(108,A3:F4)');
-            expect(stripErrorMargin(Number(result))).toBe(0.115);
+            expect(result).toBe(0.115);
 
             result = calculate('=SUBTOTAL(109,A3:F4)');
             expect(result).toBe(2.23);
 
             result = calculate('=SUBTOTAL(110,A3:F4)');
-            expect(stripErrorMargin(Number(result))).toBe(0.02645);
+            expect(result).toBe(0.02645);
 
             result = calculate('=SUBTOTAL(111,A3:F4)');
-            expect(stripErrorMargin(Number(result))).toBe(0.013225);
+            expect(result).toBe(0.013225);
         });
     });
 });

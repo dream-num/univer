@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Injector, Univer, Workbook } from '@univerjs/core';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { Injector, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -24,11 +24,11 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { HtmlToUSMService } from '../html-to-usm/converter';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -74,6 +74,7 @@ describe('Test clipboard', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
         sheetSkeletonManagerService = get(SheetSkeletonManagerService);
     });
 

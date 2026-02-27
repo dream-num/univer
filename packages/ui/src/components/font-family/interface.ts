@@ -14,74 +14,17 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { ICustomComponentProps } from '../../services/menu/menu';
 
 export interface IFontFamilyProps extends ICustomComponentProps<string> {
+    id: string;
+
     value: string;
+
+    disabled$?: Observable<boolean>;
 }
 
 export const FONT_FAMILY_COMPONENT = 'UI_FONT_FAMILY_COMPONENT';
 
-export interface IFontFamilyItemProps extends ICustomComponentProps<string> {
-    value: string;
-}
-
 export const FONT_FAMILY_ITEM_COMPONENT = 'UI_FONT_FAMILY_ITEM_COMPONENT';
-
-export const FONT_FAMILY_LIST = [
-    {
-        value: 'Arial',
-    },
-    {
-        value: 'Times New Roman',
-    },
-    {
-        value: 'Tahoma',
-    },
-    {
-        value: 'Verdana',
-    },
-    {
-        value: 'Microsoft YaHei',
-    },
-    {
-        value: 'SimSun',
-    },
-    {
-        value: 'SimHei',
-    },
-    {
-        value: 'Kaiti',
-    },
-    {
-        value: 'FangSong',
-    },
-    {
-        value: 'NSimSun',
-    },
-    {
-        value: 'STXinwei',
-    },
-    {
-        value: 'STXingkai',
-    },
-    {
-        value: 'STLiti',
-    },
-    // The following 3 fonts do not work, temporarily delete
-    // {
-    //     label: 'fontFamily.HanaleiFill',
-    //     style: { 'font-family': 'HanaleiFill' },
-    //     value: 'HanaleiFill',
-    // },
-    // {
-    //     label: 'fontFamily.Anton',
-    //     style: { 'font-family': 'Anton' },
-    //     value: 'Anton',
-    // },
-    // {
-    //     label: 'fontFamily.Pacifico',
-    //     style: { 'font-family': 'Pacifico' },
-    //     value: 'Pacifico',
-    // },
-];

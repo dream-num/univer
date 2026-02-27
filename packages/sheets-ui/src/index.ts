@@ -17,7 +17,6 @@
 import './global.css';
 
 export { getEditorObject } from './basics/editor/get-editor-object';
-export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteByShortKeyParams,
     type ISheetPasteParams,
@@ -59,11 +58,10 @@ export {
     ViewSheetPermissionFromContextMenuCommand,
     ViewSheetPermissionFromSheetBarCommand,
 } from './commands/commands/range-protection.command';
-export { RefillCommand } from './commands/commands/refill.command';
 export { RemoveColConfirmCommand, RemoveRowConfirmCommand } from './commands/commands/remove-row-col-confirm.command';
 export { RemoveSheetConfirmCommand } from './commands/commands/remove-sheet-confirm.command';
 export { ApplyFormatPainterCommand, SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from './commands/commands/set-format-painter.command';
-export { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from './commands/commands/set-frozen.command';
+export { SetColumnFrozenCommand, SetFirstColumnFrozenCommand, SetFirstRowFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from './commands/commands/set-frozen.command';
 export {
     type IScrollCommandParams,
     type IScrollToCellCommandParams,
@@ -89,13 +87,13 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
-export { getCellRealRange } from './common/utils';
+export { getCellRealRange, getViewportByCell } from './common/utils';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
-export { AutoFillController } from './controllers/auto-fill.controller';
-export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
+export { AutoFillUIController } from './controllers/auto-fill-ui.controller';
+export { AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { type IUniverSheetsUIConfig } from './controllers/config.schema';
@@ -106,7 +104,7 @@ export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controller
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/is-range-selector';
 export { HoverRenderController } from './controllers/hover-render.controller';
 export { menuSchema as SheetsUIMenuSchema } from './controllers/menu.schema';
-export { PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './controllers/menu/menu';
+export { COPY_SPECIAL_MENU_ID, menuClipboardDisabledObservable, PASTE_SPECIAL_MENU_ID, SheetMenuPosition } from './controllers/menu/menu';
 export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './controllers/menu/menu-util';
 export { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
@@ -118,23 +116,18 @@ export { SheetUIController } from './controllers/sheet-ui.controller';
 export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
-export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { discreteRangeToRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { matchedSelectionByRowColIndex as checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useHighlightRange } from './hooks/use-highlight-range';
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsUIPlugin } from './plugin';
-export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
-export { getAutoFillRepeatRange } from './services/auto-fill/tools';
-export { APPLY_TYPE, DATA_TYPE, type IAutoFillRule, type ICopyDataInTypeIndexInfo } from './services/auto-fill/type';
-export type { IAutoFillLocation, ICopyDataPiece, ISheetAutoFillHook } from './services/auto-fill/type';
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { type IDropdownParam, ISheetCellDropdownManagerService, SheetCellDropdownManagerService } from './services/cell-dropdown-manager.service';
 export { CellPopupManagerService } from './services/cell-popup-manager.service';
-export { getMatrixPlainText, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetClipboardService } from './services/clipboard/clipboard.service';
+export { getMatrixPlainText, ISheetClipboardService, PREDEFINED_HOOK_NAME, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardService } from './services/clipboard/clipboard.service';
 export { COPY_TYPE } from './services/clipboard/type';
-export type { ICellDataWithSpanInfo, ICopyPastePayload, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ICopyHookKeyType, ICopyHookValueType, ICopyPastePayload, IPasteHookKeyType, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
 export { getRepeatRange, mergeSetRangeValues } from './services/clipboard/utils';
 export { DragManagerService, type IDragCellPosition } from './services/drag-manager.service';
 export { EditorBridgeService, IEditorBridgeService, type IEditorBridgeServiceVisibleParam } from './services/editor-bridge.service';

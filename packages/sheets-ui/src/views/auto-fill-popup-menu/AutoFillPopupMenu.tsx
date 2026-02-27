@@ -19,14 +19,12 @@ import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } 
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
+import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
-import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
-import { APPLY_TYPE } from '../../services/auto-fill/type';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
@@ -37,7 +35,7 @@ export interface IAnchorPoint {
 
 export interface IAutoFillPopupMenuItem {
     label: string;
-    value: APPLY_TYPE;
+    value: AUTO_FILL_APPLY_TYPE;
     index: number;
     disable: boolean;
 }
@@ -56,7 +54,7 @@ export function AutoFillPopupMenu() {
     const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
     const [visible, setVisible] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
-    const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
+    const [selected, setSelected] = useState<AUTO_FILL_APPLY_TYPE>(AUTO_FILL_APPLY_TYPE.SERIES);
     const [isHovered, setHovered] = useState(false);
     const workbook = useActiveWorkbook();
     const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {

@@ -95,8 +95,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: '集計方法', detail: '使用する関数を指定する 1 ～ 19 の番号です。' },
+            options: { name: 'オプション', detail: '関数の検証範囲内の無視する値を指定する数値です。' },
+            ref1: { name: '範囲 1', detail: '集計値を求めるために複数の数値引数を受け取る関数の、最初の数値引数です。' },
+            ref2: { name: '範囲 2', detail: '集計値を求めるための数値引数 2 ～ 252 を指定します。' },
         },
     },
     ARABIC: {

@@ -297,7 +297,7 @@ describe('Test Reference', () => {
         const testTrueCases = [
             'sheet-1',
             'sheet 1',
-            'B1048577',
+            'B1048576',
             'RC',
             'RC2',
             'R5C',

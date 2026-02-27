@@ -32,8 +32,8 @@ import type {
 
 import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
-import type { InsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
-import type { InsertRangeMoveRightCommandParams } from '../commands/commands/insert-range-move-right.command';
+import type { IInsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
+import type { IInsertRangeMoveRightCommandParams } from '../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
@@ -270,11 +270,11 @@ export class MergeCellController extends Disposable {
                 return this._handleMoveRangeCommand(params, unitId, subUnitId);
             }
             case InsertRangeMoveRightCommand.id: {
-                const params = config.params as unknown as InsertRangeMoveRightCommandParams;
+                const params = config.params as unknown as IInsertRangeMoveRightCommandParams;
                 return this._handleInsertRangeMoveRightCommand(params, unitId, subUnitId);
             }
             case InsertRangeMoveDownCommand.id: {
-                const params = config.params as unknown as InsertRangeMoveDownCommandParams;
+                const params = config.params as unknown as IInsertRangeMoveDownCommandParams;
                 return this._handleInsertRangeMoveDownCommand(params, unitId, subUnitId);
             }
             case DeleteRangeMoveUpCommand.id: {
@@ -759,7 +759,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleInsertRangeMoveRightCommand(
-        config: InsertRangeMoveRightCommandParams,
+        config: IInsertRangeMoveRightCommandParams,
         unitId: string,
         subUnitId: string
     ) {
@@ -850,7 +850,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _handleInsertRangeMoveDownCommand(
-        config: InsertRangeMoveDownCommandParams,
+        config: IInsertRangeMoveDownCommandParams,
         unitId: string,
         subUnitId: string
     ) {

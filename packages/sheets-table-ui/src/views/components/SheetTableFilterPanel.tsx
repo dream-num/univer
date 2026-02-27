@@ -173,7 +173,7 @@ export function SheetTableFilterPanel() {
                 />
             </div>
             <div className="univer-z-10 univer-h-60">
-                <div className="univer-mt-3 univer-h-full univer-w-full">
+                <div className="univer-mt-3 univer-size-full">
                     {filterBy === FilterByEnum.Items
                         ? (
                             <SheetTableItemsFilterPanel

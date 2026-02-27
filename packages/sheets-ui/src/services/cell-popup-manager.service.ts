@@ -143,4 +143,43 @@ export class CellPopupManagerService extends Disposable {
         const subUnitMap = this._ensureCellPopupMap(unitId, subUnitId);
         return subUnitMap.getValue(row, col)?.[direction]?.popups || [];
     }
+
+    hidePopup(unitId: string, subUnitId: string, row: number, col: number) {
+        const subUnitMap = this._ensureCellPopupMap(unitId, subUnitId);
+        const cache = subUnitMap.getValue(row, col);
+        if (!cache) {
+            return;
+        }
+
+        // Hide horizontal popups
+        if (cache.horizontal) {
+            cache.horizontal.disposable?.dispose();
+            cache.horizontal = undefined;
+            this._change$.next({
+                unitId,
+                subUnitId,
+                row,
+                col,
+                direction: 'horizontal',
+            });
+        }
+
+        // Hide vertical popups
+        if (cache.vertical) {
+            cache.vertical.disposable?.dispose();
+            cache.vertical = undefined;
+            this._change$.next({
+                unitId,
+                subUnitId,
+                row,
+                col,
+                direction: 'vertical',
+            });
+        }
+
+        // Clear the cache if both directions are empty
+        if (!cache.horizontal && !cache.vertical) {
+            subUnitMap.realDeleteValue(row, col);
+        }
+    }
 }

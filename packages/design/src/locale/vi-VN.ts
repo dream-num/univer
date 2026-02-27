@@ -51,6 +51,16 @@ const locale: typeof enUS = {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
         },
+        GradientColorPicker: {
+            linear: 'Tuyến tính',
+            radial: 'Tỏa ra',
+            angular: 'Góc',
+            diamond: 'Hình thoi',
+            offset: 'Độ lệch',
+            angle: 'Góc',
+            flip: 'Lật',
+            delete: 'Xóa',
+        },
     },
 };
 

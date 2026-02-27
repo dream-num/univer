@@ -17,7 +17,7 @@
 import type { Nullable } from '../shared';
 import type { CellValueType, TextDirection } from '../types/enum';
 import type { IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle } from '../types/interfaces';
-import type { IRange, IUnitRange } from './typedef';
+import type { ICellData, IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { TextX } from '../docs/data-model/text-x/text-x';
@@ -161,6 +161,7 @@ export function extractOtherStyle(style?: Nullable<IStyleData>): ICellStyle {
 
 /**
  * Pick font style from cell style.
+ * Important note: Do not add attributes to this method arbitrarily.
  * @param format
  * @returns {IStyleBase} style
  */
@@ -168,7 +169,7 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     if (!format) {
         return {};
     }
-    const { ff, fs, it, bl, ul, st, ol, cl, bg } = format;
+    const { ff, fs, it, bl, ul, st, ol, cl } = format;
     const style: IStyleBase = {};
     ff && (style.ff = ff);
     fs && (style.fs = fs);
@@ -178,7 +179,6 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     st && (style.st = st);
     ol && (style.ol = ol);
     cl && (style.cl = cl);
-    bg && (style.bg = bg);
 
     return style;
 }
@@ -214,4 +214,17 @@ export function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl
 
 export function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;
+}
+
+export function getEmptyCell(): ICellData {
+    return {
+        p: null,
+        s: null,
+        v: null,
+        t: null,
+        f: null,
+        si: null,
+        ref: null,
+        xf: null,
+    };
 }

@@ -890,7 +890,7 @@ export class SheetsFilterController extends Disposable {
     private _initErrorHandling() {
         this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
             const params = command.params as IMoveRowsCommandParams;
-            const target = getSheetCommandTarget(this._univerInstanceService);
+            const target = getSheetCommandTarget(this._univerInstanceService, params);
             if (!target) return;
 
             const { subUnitId, unitId } = target;

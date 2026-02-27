@@ -96,35 +96,39 @@ export class SheetsNoteAttachmentController extends Disposable {
             }
         };
 
-        this._sheetsNoteModel.getSheetNotes(targetUnitId, targetSheetId)?.forValue((row, col, note) => {
-            handleNote(targetUnitId, targetSheetId, row, col, note);
+        this._sheetsNoteModel.getSheetNotes(targetUnitId, targetSheetId)?.forEach((note) => {
+            handleNote(targetUnitId, targetSheetId, note.row, note.col, note);
         });
 
         return this._sheetsNoteModel.change$.subscribe((change) => {
-            if (change.unitId !== targetUnitId || change.sheetId !== targetSheetId) {
+            if (change.unitId !== targetUnitId || change.subUnitId !== targetSheetId) {
                 return;
             }
             switch (change.type) {
                 case 'ref': {
-                    const { unitId, sheetId, row, col, newPosition, note } = change;
-                    const matrix = this._noteMatrix;
-                    if (!note.show) return;
+                    const { unitId, subUnitId, oldNote, newNote } = change;
+                    if (!newNote.show) return;
 
-                    const disposable = matrix.getValue(row, col);
+                    const matrix = this._noteMatrix;
+                    const { row: oldRow, col: oldCol } = oldNote!;
+                    const { row: newRow, col: newCol } = newNote;
+
+                    const disposable = matrix.getValue(oldRow, oldCol);
                     if (disposable) {
                         disposable.dispose();
-                        matrix.realDeleteValue(row, col);
+                        matrix.realDeleteValue(oldRow, oldCol);
                     }
-                    const newDisposable = this._showPopup(unitId, sheetId, newPosition.row, newPosition.col);
+                    const newDisposable = this._showPopup(unitId, subUnitId, newRow, newCol);
                     if (newDisposable) {
-                        matrix.setValue(newPosition.row, newPosition.col, newDisposable);
+                        matrix.setValue(newRow, newCol, newDisposable);
                     }
                     break;
                 }
-
                 case 'update': {
-                    const { unitId, sheetId, row, col, note } = change;
-                    handleNote(unitId, sheetId, row, col, note);
+                    const { unitId, subUnitId, oldNote, newNote } = change;
+                    const row = newNote ? newNote.row : oldNote!.row;
+                    const col = newNote ? newNote.col : oldNote!.col;
+                    handleNote(unitId, subUnitId, row, col, newNote);
                     break;
                 }
                 default:

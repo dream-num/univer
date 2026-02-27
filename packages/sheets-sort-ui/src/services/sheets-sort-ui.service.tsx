@@ -16,11 +16,11 @@
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-
 import type { ISortOption } from '@univerjs/sheets-sort';
 import {
     Disposable,
     ICommandService,
+    IConfirmService,
     Inject,
     IUniverInstanceService,
     LocaleService,
@@ -28,10 +28,8 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
-import { IConfirmService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { ExtendConfirm } from '../views/ExtendConfirm';
 

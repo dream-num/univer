@@ -15,13 +15,14 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, LocaleType } from '@univerjs/core';
+import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, LocaleType, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -128,7 +129,9 @@ describe('add-merge-command', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO);
+        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO, [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]);
         get = testBed.get;
 
         commandService = get(ICommandService);
@@ -136,10 +139,26 @@ describe('add-merge-command', () => {
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
+        commandService.registerCommand(SetSelectionsOperation);
 
         get(LocaleService).load({ zhCN, enUS });
     });
     it('test merge cell contain merge cell', async () => {
+        await commandService.executeCommand(SetSelectionsOperation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            selections: [
+                {
+                    range: {
+                        rangeType: RANGE_TYPE.NORMAL,
+                        startRow: 1,
+                        endRow: 3,
+                        startColumn: 5,
+                        endColumn: 5,
+                    },
+                },
+            ],
+        });
         expect(
             await commandService.executeCommand(AddWorksheetMergeCommand.id, {
                 unitId: 'test',

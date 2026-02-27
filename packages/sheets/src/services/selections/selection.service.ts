@@ -140,6 +140,16 @@ export class SheetsSelectionsService extends RxDisposable {
         return selectionData?.[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }
 
+    getCurrentLastSelectionPrimaryCell(): DeepReadonly<Nullable<ISelectionCell>> {
+        const current = this._currentSelectionPos;
+        if (!current) {
+            return null;
+        }
+
+        const { unitId, sheetId } = current;
+        return this._ensureWorkbookSelection(unitId).getLastSelectionPrimaryCellOfWorksheet(sheetId);
+    }
+
     addSelections(selectionsData: ISelectionWithStyle[]): void;
     addSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[]): void;
     addSelections(unitIdOrSelections: string | ISelectionWithStyle[], worksheetId?: string, selectionDatas?: ISelectionWithStyle[]): void {

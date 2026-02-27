@@ -42,6 +42,9 @@ export const FOCUSING_UNIVER_EDITOR = 'FOCUSING_UNIVER_EDITOR';
 
 export const FOCUSING_EDITOR_STANDALONE = 'FOCUSING_EDITOR_INPUT_FORMULA';
 
+/** The focusing state of the comment editor. */
+export const FOCUSING_COMMENT_EDITOR = 'FOCUSING_COMMENT_EDITOR';
+
 /** The focusing state of the editor in side panel, such as Chart Editor Panel. */
 export const FOCUSING_PANEL_EDITOR = 'FOCUSING_PANEL_EDITOR';
 
@@ -52,5 +55,10 @@ export const FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE = 'FOCUSING_UNIVER_ED
  * The focusing state of the common drawings.
  */
 export const FOCUSING_COMMON_DRAWINGS = 'FOCUSING_COMMON_DRAWINGS';
+
+/**
+ * The focusing state of the shape text editor.
+ */
+export const FOCUSING_SHAPE_TEXT_EDITOR = 'FOCUSING_SHAPE_TEXT_EDITOR';
 
 export const FORMULA_EDITOR_ACTIVATED = 'FORMULA_EDITOR_ACTIVATED';

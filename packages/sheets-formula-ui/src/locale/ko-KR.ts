@@ -114,6 +114,7 @@ const locale: typeof enUS = {
             syntax: '구문',
         },
         operation: {
+            copyFormulaOnly: '수식만 복사',
             pasteFormula: '수식 붙여넣기',
         },
     },

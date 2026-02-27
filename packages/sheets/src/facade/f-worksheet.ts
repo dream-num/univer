@@ -18,13 +18,14 @@ import type { CellValue, CustomData, ICellData, IColumnData, IColumnRange, IDisp
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, covertCellValue, Direction, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, covertCellValue, Direction, generateIntervalsByPoints, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AppendRowCommand, CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetTextWrapCommand, SetWorksheetColumnCountCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowCountCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
+import { FWorksheetPermission } from './permission/f-worksheet-permission';
 import { covertToColRange, covertToRowRange } from './utils';
 
 export interface IFacadeClearOptions {
@@ -630,6 +631,25 @@ export class FWorksheet extends FBaseInitialable {
             subUnitId: this._worksheet.getSheetId(),
         });
 
+        return this;
+    }
+
+    /**
+     * Deletes the rows specified by the given row points. Each point can be a single row index or a tuple representing a range of rows.
+     * @param {Array<number | [number, number]>} rowPoints - An array of row points to delete. Each point can be a single row index or a tuple representing a range of rows.
+     * @returns {FWorksheet} This sheet, for chaining.
+     * @example
+     * ```typescript
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Delete rows at index 2, and range from index 4 to 6 (rows 3, 5-7)
+     * fWorksheet.deleteRowsByPoints([2, [4, 6]]);
+     * ```
+     */
+    deleteRowsByPoints(rowPoints: Array<number | [number, number]>): FWorksheet {
+        const rowIntervals = generateIntervalsByPoints(rowPoints);
+        rowIntervals.reverse().forEach((interval) => {
+            this.deleteRows(interval[0], interval[1] - interval[0] + 1);
+        });
         return this;
     }
 
@@ -1240,6 +1260,25 @@ export class FWorksheet extends FBaseInitialable {
             subUnitId: this._worksheet.getSheetId(),
         });
 
+        return this;
+    }
+
+    /**
+     * Deletes the columns specified by the given column points. Each point can be a single column index or a tuple representing a range of columns.
+     * @param {Array<number | [number, number]>} columnPoints - An array of column points to delete. Each point can be a single column index or a tuple representing a range of columns.
+     * @returns {FWorksheet} This sheet, for chaining
+     * @example
+     * ```typescript
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * // Delete columns at index 2, and range from index 4 to 6 (columns C, E-G)
+     * fWorksheet.deleteColumnsByPoints([2, [4, 6]]);
+     * ```
+     */
+    deleteColumnsByPoints(columnPoints: Array<number | [number, number]>): FWorksheet {
+        const columnIntervals = generateIntervalsByPoints(columnPoints);
+        columnIntervals.reverse().forEach((interval) => {
+            this.deleteColumns(interval[0], interval[1] - interval[0] + 1);
+        });
         return this;
     }
 
@@ -2260,7 +2299,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Returns a Range corresponding to the dimensions in which data is present.
-     * This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
+     * This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumn(), Sheet.getLastRow()).
      * @returns {FRange} The range of the data in the sheet.
      * @example
      * ```ts
@@ -2273,9 +2312,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getDataRange(): FRange {
-        const lastRow = this.getLastRows();
-        const lastColumn = this.getLastColumns();
-        return this.getRange(0, 0, lastRow + 1, lastColumn + 1);
+        const { startRow, endRow, startColumn, endColumn } = this._worksheet.getDataRealRange();
+        return this.getRange(startRow, startColumn, endRow - startRow + 1, endColumn - startColumn + 1);
     }
 
     /**
@@ -2560,5 +2598,41 @@ export class FWorksheet extends FBaseInitialable {
             columnCount,
         });
         return this;
+    }
+
+    /**
+     * Get the WorksheetPermission instance for managing worksheet-level permissions.
+     * This is the new permission API that provides worksheet-specific permission control.
+     * @returns {FWorksheetPermission} - The WorksheetPermission instance.
+     * @example
+     * ```ts
+     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const permission = fWorksheet.getWorksheetPermission();
+     *
+     * // Set worksheet to read-only mode
+     * await permission.setMode('readOnly');
+     *
+     * // Check if a specific cell can be edited
+     * const canEdit = permission.canEditCell(0, 0);
+     *
+     * // Protect multiple ranges at once
+     * const range1 = fWorksheet.getRange('A1:B10');
+     * const range2 = fWorksheet.getRange('D1:E10');
+     * await permission.protectRanges([
+     *   { ranges: [range1], options: { name: 'Range 1', allowEdit: false } },
+     *   { ranges: [range2], options: { name: 'Range 2', allowEdit: false } }
+     * ]);
+     *
+     * // Subscribe to permission changes
+     * permission.permission$.subscribe(snapshot => {
+     *   console.log('Worksheet permissions changed:', snapshot);
+     * });
+     * ```
+     */
+    getWorksheetPermission(): FWorksheetPermission {
+        return this._injector.createInstance(
+            FWorksheetPermission,
+            this
+        );
     }
 }

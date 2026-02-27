@@ -17,14 +17,14 @@
 import type { IDisposable, IDrawingSearch, IPosition, IRange, ITransformState, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetFrozenMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { ISetFrozenMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
@@ -69,6 +69,9 @@ enum ScrollDirectionResponse {
     HORIZONTAL = 'HORIZONTAL',
     VERTICAL = 'VERTICAL',
 }
+
+export const SHEET_FLOAT_DOM_PREFIX = 'univer-sheet-float-dom-';
+
 export interface ICanvasFloatDomInfo {
     position$: BehaviorSubject<IFloatDomLayout>;
     dispose: IDisposable;
@@ -79,6 +82,7 @@ export interface ICanvasFloatDomInfo {
     scrollDirectionResponse?: ScrollDirectionResponse; // update float dom pos by scrolling
     domAnchor?: IDOMAnchor;
     id: string;
+    domId?: string; // Ensure unique id for dom element at runtime
 }
 
 export interface IDOMAnchor {
@@ -427,6 +431,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const initPosition = calcSheetFloatDomPosition(rect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                     const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
 
+                    const domId = `${SHEET_FLOAT_DOM_PREFIX}${generateRandomId(6)}`;
                     const info: ICanvasFloatDomInfo = {
                         dispose: disposableCollection,
                         rect,
@@ -434,11 +439,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         unitId,
                         subUnitId,
                         id: drawingId,
+                        domId,
                     };
 
                     this._canvasFloatDomService.addFloatDom({
                         position$,
                         id: drawingId,
+                        domId,
                         componentKey: floatDomParam.componentKey,
                         onPointerDown: (evt) => {
                             canvas.dispatchEvent(new PointerEvent(evt.type, evt));
@@ -552,6 +559,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 });
             } else if (commandInfo.id === SetFrozenMutation.id) {
                 const { unitId, subUnitId } = commandInfo.params as ISetFrozenMutationParams;
+                updateSheet(unitId, subUnitId);
+            } else if (commandInfo.id === SetSelectionsOperation.id) {
+                const { unitId, subUnitId } = commandInfo.params as ISetSelectionsOperationParams;
                 updateSheet(unitId, subUnitId);
             }
         }));
@@ -689,6 +699,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 width: initPosition.endX - initPosition.startX,
                 height: initPosition.endY - initPosition.startY,
             },
+            axisAlignSheetTransform: sheetTransform,
             data,
             allowTransform,
         };
@@ -773,6 +784,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
+            axisAlignSheetTransform: sheetTransform,
             transform: {
                 left: domPosFromRange.startX,
                 top: domPosFromRange.startY,
@@ -1026,6 +1038,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
+            axisAlignSheetTransform: sheetTransform,
             transform: {
                 left: headerCellPosition.startX,
                 top: headerCellPosition.startY,

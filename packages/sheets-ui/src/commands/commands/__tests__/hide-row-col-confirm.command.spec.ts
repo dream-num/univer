@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IRange, Univer } from '@univerjs/core';
-import type { IConfirmPartMethodOptions } from '@univerjs/ui';
-import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE } from '@univerjs/core';
+import type { Injector, IRange, Univer } from '@univerjs/core';
+import { ICommandService, IConfirmService, IUniverInstanceService, LocaleService, RANGE_TYPE, TestConfirmService } from '@univerjs/core';
 import {
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeMutation,
+    AddWorksheetMergeVerticalCommand,
     RemoveWorksheetMergeCommand,
     RemoveWorksheetMergeMutation,
     SetColHiddenCommand,
@@ -29,15 +32,7 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
-import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../add-worksheet-merge.command';
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../hide-row-col-confirm.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -48,26 +43,7 @@ describe('Test hide row col confirm commands', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [
-                IConfirmService,
-                {
-                    useClass: class MockConfirmService implements IConfirmService {
-                        confirmOptions$: Subject<IConfirmPartMethodOptions[]> = new Subject();
-
-                        open(params: IConfirmPartMethodOptions): IDisposable {
-                            throw new Error('Method not implemented.');
-                        }
-
-                        confirm(params: IConfirmPartMethodOptions): Promise<boolean> {
-                            return Promise.resolve(true);
-                        }
-
-                        close(id: string): void {
-                            throw new Error('Method not implemented.');
-                        }
-                    },
-                },
-            ],
+            [IConfirmService, { useClass: TestConfirmService }],
         ]);
         univer = testBed.univer;
 

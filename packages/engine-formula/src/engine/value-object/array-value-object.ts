@@ -20,10 +20,10 @@ import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
+import { CELL_INVERTED_INDEX_CACHE, DEFAULT_EMPTY_CELL_KEY } from '../../basics/inverted-index-cache';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isWildcard } from '../utils/compare';
 import { stringIsNumberPattern } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
@@ -283,7 +283,8 @@ export class ArrayValueObject extends BaseValueObject {
 
     set(row: number, column: number, value: Nullable<BaseValueObject>) {
         if (row >= this._rowCount || column >= this._columnCount) {
-            throw new Error('Exceeding array bounds.');
+            console.error('Exceeding array bounds.');
+            return;
         }
 
         this._clearCache();
@@ -640,7 +641,8 @@ export class ArrayValueObject extends BaseValueObject {
         let maxOrMinPosition: Nullable<{ row: number; column: number }>;
 
         const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
-            if (itemValue == null) {
+            // Skip the blank cells
+            if (itemValue == null || itemValue.isNull()) {
                 return true;
             }
 
@@ -1199,6 +1201,11 @@ export class ArrayValueObject extends BaseValueObject {
         return sum.divided(ddof === 0 ? count : count.minusBy(1));
     }
 
+    /**
+     * TODO: @DR-Univer
+     * This calculation method contains an error, please note.
+     * Please refer `getMedianResult` function in /engine-formula/src/basics/statistical.ts
+     */
     override median(): BaseValueObject {
         const numberArray = this.flattenPosition().numberArray;
 
@@ -1457,7 +1464,11 @@ export class ArrayValueObject extends BaseValueObject {
             } else if (valueRowCount === 1 && this._columnCount > 1) {
                 const list = (valueObject as ArrayValueObject).getArrayValue();
                 for (let c = 0; c < columnCount; c++) {
-                    valueList.push(list[0][c] as BaseValueObject);
+                    if (list[0] && list[0][c]) {
+                        valueList.push(list[0][c] as BaseValueObject);
+                    } else {
+                        valueList.push(NullValueObject.create());
+                    }
                 }
             } else {
                 return this._batchOperatorArray(valueObject, batchOperatorType, operator, isCaseSensitive);
@@ -1518,15 +1529,13 @@ export class ArrayValueObject extends BaseValueObject {
             );
 
             if (rowsInCache.length > 0) {
-                let valueInCache = false;
-
-                if (operator === compareToken.EQUALS) {
+                if (operator === compareToken.EQUALS && !(valueObject.isString() && isWildcard(valueObject.getValue() as string))) {
                     // TODO@DR-Univer: When comparing equal with two parameters, one of them is error, and the logic here is wrong
                     const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
                         unitId,
                         sheetId,
                         column + startColumn,
-                        valueObject.getValue(),
+                        valueObject.isNull() ? null : valueObject.getValue(),
                         rowsInCache
                     );
 
@@ -1542,8 +1551,6 @@ export class ArrayValueObject extends BaseValueObject {
                             }
                             result[r][column] = BooleanValueObject.create(true);
                         });
-
-                        valueInCache = true;
                     }
                 } else {
                     const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(
@@ -1574,73 +1581,50 @@ export class ArrayValueObject extends BaseValueObject {
                                 matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
                             }
 
-                            if (matchResult.isError() || (matchResult as BooleanValueObject).getValue() === true) {
-                                rowPositions.forEach((index) => {
-                                    if (index >= startRow && index <= startRow + rowCount - 1) {
-                                        if (result[index - startRow] == null) {
-                                            result[index - startRow] = [];
-                                        }
-                                        result[index - startRow][column] = matchResult;
+                            rowPositions.forEach((index) => {
+                                if (index >= startRow && index <= startRow + rowCount - 1) {
+                                    if (result[index - startRow] == null) {
+                                        result[index - startRow] = [];
                                     }
-                                });
-                            }
+                                    result[index - startRow][column] = matchResult;
+                                }
+                            });
                         });
                     }
                 }
 
-                /**
-                 * The calculation should skip the cache logic and continue only if the operator is EQUALS, value is not in cache, and the text is case insensitive.
-                 * Otherwise, the calculation should follow the cache logic.
-                 * For example:
-                 * -----------------
-                 * |   A1   |   B1  |
-                 * | Potato | TRUE  |
-                 * | Potato | TRUE  |
-                 * | Tomato | none  |
-                 * | Pickle | FALSE |
-                 * -----------------
-                 * `=IF(COUNTIFS(A$2:A5,"tomato",B$2:B5,FALSE)>0,"Ignore",IF(COUNTIFS(A$2:A5,"pickle",B$2:B5,FALSE)>0,"Bad","Good"))`
-                 */
-                if (
-                    !(
-                        operator === compareToken.EQUALS &&
-                        !valueInCache &&
-                        !isCaseSensitive
-                    )
-                ) {
-                    // handle the not in cache rows
-                    if (rowsNotInCache.length > 0) {
-                        for (const interval of rowsNotInCache) {
-                            const [start, end] = interval;
+                // handle the not in cache rows
+                if (rowsNotInCache.length > 0) {
+                    for (const interval of rowsNotInCache) {
+                        const [start, end] = interval;
 
-                            for (let r = start; r <= end; r++) {
-                                this.__batchOperatorRowValue(
-                                    valueObject,
-                                    column,
-                                    result,
-                                    batchOperatorType,
-                                    r - startRow,
-                                    unitId,
-                                    sheetId,
-                                    startRow,
-                                    startColumn,
-                                    operator,
-                                    isCaseSensitive
-                                );
-                            }
-
-                            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                        for (let r = start; r <= end; r++) {
+                            this.__batchOperatorRowValue(
+                                valueObject,
+                                column,
+                                result,
+                                batchOperatorType,
+                                r - startRow,
                                 unitId,
                                 sheetId,
-                                column + startColumn,
-                                start,
-                                end
+                                startRow,
+                                startColumn,
+                                operator,
+                                isCaseSensitive
                             );
                         }
-                    }
 
-                    return;
+                        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                            unitId,
+                            sheetId,
+                            column + startColumn,
+                            start,
+                            end
+                        );
+                    }
                 }
+
+                return;
             }
         }
 
@@ -1746,27 +1730,12 @@ export class ArrayValueObject extends BaseValueObject {
             result[r][column] = ErrorValueObject.create(ErrorType.NA);
         }
 
-        /**
-         * Inverted indexing enhances matching performance.
-         */
-        if (currentValue == null) {
-            return;
-        }
-
-        /**
-         * The blank cell are not stored in the inverted index, so skip it.
-         * If needed store it in the future. ask @DR-Univer
-         */
-        if (currentValue.isNull()) {
-            return;
-        }
-
-        if (currentValue.isError()) {
+        if (!currentValue || currentValue?.isNull()) {
             CELL_INVERTED_INDEX_CACHE.set(
                 unitId,
                 sheetId,
                 column + startColumn,
-                (currentValue as ErrorValueObject).getErrorType(),
+                DEFAULT_EMPTY_CELL_KEY,
                 r + startRow
             );
         } else {

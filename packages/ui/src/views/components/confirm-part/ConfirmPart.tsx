@@ -16,11 +16,10 @@
 
 import type { IConfirmProps } from '@univerjs/design';
 import type { IConfirmChildrenProps, IConfirmPartMethodOptions, IContextConfirmProps } from './interface';
+import { IConfirmService } from '@univerjs/core';
 import { Confirm } from '@univerjs/design';
 import { cloneElement, useEffect, useState } from 'react';
-
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
-import { IConfirmService } from '../../../services/confirm/confirm.service';
 import { useDependency } from '../../../utils/di';
 
 const ContextConfirm = (props: IContextConfirmProps) => {
@@ -66,7 +65,7 @@ const ContextConfirm = (props: IContextConfirmProps) => {
 };
 
 export function ConfirmPart() {
-    const confirmService = useDependency(IConfirmService);
+    const confirmService = useDependency(IConfirmService) as IConfirmService<IConfirmPartMethodOptions>;
 
     const [confirmOptions, setConfirmOptions] = useState<IConfirmPartMethodOptions[]>([]);
 

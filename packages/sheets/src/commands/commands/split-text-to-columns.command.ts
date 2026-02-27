@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IInsertColMutationParams, IRemoveColMutationParams } from '../../basics';
 import type { SplitDelimiterEnum } from '../../basics/split-range-text';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute } from '@univerjs/core';
 import { splitRangeText } from '../../basics/split-range-text';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
@@ -39,20 +39,11 @@ export const SplitTextToColumnsCommand = {
     id: 'sheet.command.split-text-to-columns',
     // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISplitTextToColumnsCommandParams) => {
-        const { unitId, subUnitId, range, delimiter, customDelimiter, treatMultipleDelimitersAsOne } = params;
-
-        const commandService = accessor.get(ICommandService);
-
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
 
+        const { unitId, subUnitId, worksheet } = target;
+        const { range, delimiter, customDelimiter, treatMultipleDelimitersAsOne } = params;
         const { lastRow, rs, maxLength } = splitRangeText(worksheet, range, delimiter, customDelimiter, treatMultipleDelimitersAsOne);
         const maxColumn = worksheet.getColumnCount();
         const { startColumn } = Range.transformRange(range, worksheet);
@@ -61,6 +52,8 @@ export const SplitTextToColumnsCommand = {
             return false;
         }
 
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const redoMutations = [];
         const undoMutations = [];
 

@@ -354,8 +354,20 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        this._container.style.left = `${x}px`;
-        this._container.style.top = `${y}px`;
+        // Keep the hidden editor inside the Portal subtree when possible to avoid focus-trap loops,
+        // then compensate coordinates if a transformed ancestor changes the fixed containing block.
+        this._ensureHostContainer();
+        let left = x;
+        let top = y;
+        const fixedContainer = this._container.parentElement;
+        if (fixedContainer) {
+            const rect = fixedContainer.getBoundingClientRect();
+            left -= rect.left;
+            top -= rect.top;
+        }
+
+        this._container.style.left = `${left}px`;
+        this._container.style.top = `${top}px`;
         this._container.style.zIndex = '1000';
 
         if (this.canFocusing || force) {
@@ -716,7 +728,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._initInput();
         this._initInputEvents();
 
-        document.body.appendChild(container);
+        const host = this._layoutService.rootContainerElement;
+        const hostElement = host?.isConnected ? host : document.body;
+        hostElement.appendChild(container);
     }
 
     private _registerContainer() {
@@ -751,6 +765,21 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             white-space: pre-wrap;
             user-select: text;
         `;
+    }
+
+    private _ensureHostContainer(): void {
+        // Prefer the Univer root container (often inside a Portal) so focus stays within the modal subtree.
+        const host = this._layoutService.rootContainerElement;
+        if (host?.isConnected) {
+            if (this._container.parentElement !== host) {
+                host.appendChild(this._container);
+            }
+            return;
+        }
+
+        if (this._container.parentElement !== document.body) {
+            document.body.appendChild(this._container);
+        }
     }
 
     private _getNodePosition(node: Nullable<INodeInfo>): Nullable<INodePosition> {

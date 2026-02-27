@@ -17,7 +17,6 @@
 import type { Injector, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { SetGridlinesColorMutation } from '../../mutations/set-gridlines-color.mutation';
 import { SetGridlinesColorCommand } from '../set-gridlines-color.command';
 import { createCommandTestBed } from './create-command-test-bed';

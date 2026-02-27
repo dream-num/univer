@@ -270,8 +270,11 @@ const locale = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            source: { name: 'source', detail: 'The URL path, using an "https" protocol, of the image file.' },
+            altText: { name: 'alt_text', detail: 'Alternative text that describes the image for accessibility.' },
+            sizing: { name: 'sizing', detail: 'Specifies the image dimensions.' },
+            height: { name: 'height', detail: 'The custom height of the image in pixels.' },
+            width: { name: 'width', detail: 'The custom width of the image in pixels.' },
         },
     },
     INDEX: {

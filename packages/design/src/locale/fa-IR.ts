@@ -51,6 +51,16 @@ const locale: typeof enUS = {
             cancel: 'لغو',
             confirm: 'باشه',
         },
+        GradientColorPicker: {
+            linear: 'خطی',
+            radial: 'شعاعی',
+            angular: 'زاویه‌ای',
+            diamond: 'الماسی',
+            offset: 'افست',
+            angle: 'زاویه',
+            flip: 'برگردان',
+            delete: 'حذف',
+        },
     },
 };
 

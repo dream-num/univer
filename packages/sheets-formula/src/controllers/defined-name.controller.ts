@@ -65,9 +65,11 @@ export class DefinedNameController extends Disposable {
 
     private _changeUnitListener() {
         toDisposable(
-            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
                 this._unRegisterDescriptions();
-                this._registerDescriptions();
+                if (workbook) {
+                    this._registerDescriptions();
+                }
             })
         );
     }
@@ -97,11 +99,10 @@ export class DefinedNameController extends Disposable {
     }
 
     private _registerDescription(param: ISetDefinedNameMutationParam) {
-        const { unitId, sheetId } = this._getUnitIdAndSheetId();
+        const target = this._getUnitIdAndSheetId(param);
+        if (!target) return;
 
-        if (unitId == null || sheetId == null) {
-            return;
-        }
+        const { sheetId } = target;
 
         const { name, comment, formulaOrRefString, localSheetId } = param;
         if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === sheetId)) {
@@ -141,16 +142,18 @@ export class DefinedNameController extends Disposable {
         this._preUnitId = null;
     }
 
-    private _getUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        if (workbook == null) {
-            return {};
-        }
-        const worksheet = workbook.getActiveSheet();
+    private _getUnitIdAndSheetId(params: { unitId?: string; subUnitId?: string } = {}) {
+        const { unitId, subUnitId } = params;
 
-        if (worksheet == null) {
-            return {};
-        }
+        const workbook = unitId
+            ? this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return null;
+
+        const worksheet = subUnitId
+            ? workbook.getSheetBySheetId(subUnitId)
+            : workbook.getActiveSheet(true);
+        if (!worksheet) return null;
 
         return {
             unitId: workbook.getUnitId(),
@@ -159,11 +162,10 @@ export class DefinedNameController extends Disposable {
     }
 
     private _registerDescriptions() {
-        const { unitId, sheetId } = this._getUnitIdAndSheetId();
+        const target = this._getUnitIdAndSheetId();
+        if (!target) return;
 
-        if (unitId == null || sheetId == null) {
-            return;
-        }
+        const { unitId, sheetId } = target;
 
         const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
         if (!definedNames) {
@@ -191,11 +193,10 @@ export class DefinedNameController extends Disposable {
     }
 
     private _unregisterDescriptionsForNotInSheetId() {
-        const { unitId, sheetId } = this._getUnitIdAndSheetId();
+        const target = this._getUnitIdAndSheetId();
+        if (!target) return;
 
-        if (unitId == null || sheetId == null) {
-            return;
-        }
+        const { unitId, sheetId } = target;
 
         const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
         if (!definedNames) {

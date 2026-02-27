@@ -51,7 +51,8 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
     astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
     if (astNode == null) {
-        throw new Error('astNode is null');
+        console.error('generateAstNode astNode is null');
+        return ErrorNode.create(lexerNode as ErrorType);
     }
 
     // astNode.setRefOffset(refOffsetX, refOffsetY);

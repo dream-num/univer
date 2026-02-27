@@ -19,7 +19,7 @@ import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUni
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, ObjectMatrix } from '@univerjs/core';
-import { FormulaDataModel, IDefinedNamesService, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, SetDefinedNameMutation, stripErrorMargin } from '@univerjs/engine-formula';
+import { FormulaDataModel, IDefinedNamesService, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaCalculationResultMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
@@ -48,31 +48,31 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 // Synchronous data from worker
-                if (command.id !== SetArrayFormulaDataMutation.id) {
-                    return;
-                }
+                const isSSC = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.writeArrayFormulaToSnapshot;
+                if (command.id === SetArrayFormulaDataMutation.id) {
+                    const params = command.params as ISetArrayFormulaDataMutationParams;
 
-                const params = command.params as ISetArrayFormulaDataMutationParams;
+                    if (params == null) {
+                        return;
+                    }
 
-                if (params == null) {
-                    return;
-                }
+                    const { arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded } = params;
+                    this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
+                    this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
 
-                const { arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded } = params;
-                this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
-                this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
-
-                // Note the logic should only be executed in exporting and hence shall be set once.
-                if (this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.writeArrayFormulaToSnapshot) {
-                    this._writeArrayFormulaToSnapshot(arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded);
+                    // Note the logic should only be executed in exporting and hence shall be set once.
+                    if (isSSC) {
+                        this._writeArrayFormulaToSnapshot(arrayFormulaRange, arrayFormulaCellData, arrayFormulaEmbedded);
+                    }
+                } else if (command.id === SetFormulaCalculationResultMutation.id && isSSC) {
                     this._addPrefixToFunctionSnapshot();
-                    this._addPreixToDefinedNamesFunctionSnapshot();
+                    this._addPrefixToDefinedNamesFunctionSnapshot();
                 }
             })
         );
     }
 
-    private _addPreixToDefinedNamesFunctionSnapshot() {
+    private _addPrefixToDefinedNamesFunctionSnapshot() {
         const allDefinedNames = this._definedNamesService.getAllDefinedNames();
         Object.entries(allDefinedNames).forEach(([unitId, definedNames]) => {
             definedNames && Array.from(Object.entries(definedNames)).forEach(([_, definedName]) => {
@@ -96,6 +96,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
 
     private _addPrefixToFunctionSnapshot() {
         const dataModel = this._formulaDataModel.getFormulaData();
+        const cacheMap = new Map<string, string>();
         Object.entries(dataModel).forEach(([unitId, subUnitData]) => {
             subUnitData && Array.from(Object.entries(subUnitData)).forEach(([subUnitId, formulaDataItem]) => {
                 // Convert from IObjectMatrixPrimitiveType<IRange> to IObjectMatrixPrimitiveType<ICellData>
@@ -106,13 +107,20 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                 const matrix = new ObjectMatrix(formulaDataItem);
                 matrix.forValue((row, col, value) => {
                     const functionText = value?.f;
-                    if (!functionText || functionText.length === 0) {
+                    if (value?.x != null || !functionText || functionText.length === 0) {
+                        return;
+                    }
+
+                    if (cacheMap.has(functionText)) {
+                        const cachedFormula = cacheMap.get(functionText)!;
+                        cellValue.setValue(row, col, { xf: cachedFormula });
                         return;
                     }
 
                     const newFormula = this._lexerTreeBuilder.getNewFormulaWithPrefix(functionText, this._functionService.hasExecutor.bind(this._functionService));
                     if (newFormula) {
                         cellValue.setValue(row, col, { xf: newFormula });
+                        cacheMap.set(functionText, newFormula);
                     }
                 });
 
@@ -127,6 +135,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                 });
             });
         });
+        cacheMap.clear();
     }
 
     private _writeArrayFormulaToSnapshot(arrayFormulaRange: IArrayFormulaRangeType, arrayFormulaCellData: IArrayFormulaUnitCellType, arrayFormulaEmbedded: IArrayFormulaEmbeddedMap) {

@@ -57,9 +57,7 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsNumfmtCellContentController],
         ]);
-    }
 
-    override onRendered(): void {
         [
             AddDecimalCommand,
             SubtractDecimalCommand,

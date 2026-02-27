@@ -15,22 +15,33 @@
  */
 
 import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction, UnitObject } from '@univerjs/protocol';
+import type { IAuthzIoService } from './type';
 import { ObjectScope, UnitRole, UniverType } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
 import { generateRandomId } from '../../shared/tools';
 import { IResourceManagerService } from '../resource-manager/type';
-import { UserManagerService } from '../user-manager/user-manager.service';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
 
-import type { IAuthzIoService } from './type';
+import { UserManagerService } from '../user-manager/user-manager.service';
+
+/**
+ * Do not use the mock implementation in a production environment as it is a minimal version.
+ */
+interface IPermissionData {
+    objectType: UnitObject;
+    name: string;
+    unitID: string;
+    strategies: Array<{ action: UnitAction; role: UnitRole }>;
+    selectRangeObject?: ICreateRequest_SelectRangeObject;
+}
 
 /**
  * Do not use the mock implementation in a production environment as it is a minimal version.
  */
 export class AuthzIoLocalService implements IAuthzIoService {
-    private _permissionMap: Map<string, ICreateRequest_SelectRangeObject & { objectType: UnitObject }> = new Map([]);
-
-    // private _sheetPermissionPointMap: Map<string, { action: UnitAction; allowed: boolean }[]> = new Map();
+    private _permissionMap: Map<string, IPermissionData> = new Map([]);
+    // Store explicit permission overrides: key is "objectID:action", value is the allowed state
+    private _permissionOverrides: Map<string, boolean> = new Map();
 
     constructor(
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
@@ -63,7 +74,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
                     const v = this._permissionMap.get(k);
                     r[k] = v!;
                     return r;
-                }, {} as Record<string, ICreateRequest_SelectRangeObject & { objectType: UnitObject }>);
+                }, {} as Record<string, IPermissionData>);
                 return JSON.stringify(obj);
             },
             parseJson: (json: string) => {
@@ -83,111 +94,152 @@ export class AuthzIoLocalService implements IAuthzIoService {
     }
 
     async create(config: ICreateRequest): Promise<string> {
-        return generateRandomId(8);
+        const objectID = generateRandomId(8);
+        const { objectType, selectRangeObject, worksheetObject } = config;
+        const rangeObject = selectRangeObject || worksheetObject;
+
+        const permissionData: IPermissionData = {
+            objectType,
+            unitID: rangeObject?.unitID || '',
+            name: rangeObject?.name || '',
+            strategies: [
+                // 默认策略：Owner 和 Editor 拥有所有权限
+                { action: 6, role: UnitRole.Owner },
+                { action: 16, role: UnitRole.Owner },
+                { action: 17, role: UnitRole.Owner },
+                { action: 18, role: UnitRole.Owner },
+                { action: 19, role: UnitRole.Owner },
+                { action: 33, role: UnitRole.Owner },
+                { action: 34, role: UnitRole.Owner },
+                { action: 35, role: UnitRole.Owner },
+                { action: 36, role: UnitRole.Owner },
+                { action: 37, role: UnitRole.Owner },
+                { action: 38, role: UnitRole.Owner },
+                { action: 39, role: UnitRole.Owner },
+                { action: 40, role: UnitRole.Owner },
+            ],
+            selectRangeObject,
+        };
+
+        this._permissionMap.set(objectID, permissionData);
+        return objectID;
     }
 
-    async allowed(_config: IAllowedRequest): Promise<IActionInfo[]> {
-        // Because this is a mockService for handling permissions, we will not write real logic in it. We will only return an empty array to ensure that the permissions originally set by the user are not modified.
-        // If you want to achieve persistence of permissions, you can modify the logic here.
-        return Promise.resolve([]);
-    }
+    async allowed(config: IAllowedRequest): Promise<IActionInfo[]> {
+        const { objectID, actions } = config;
+        const permissionData = this._permissionMap.get(objectID);
 
-    async batchAllowed(_config: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
-        return Promise.resolve([]);
-    }
+        if (!permissionData) {
+            const result = actions.map((action) => ({
+                action,
+                allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor),
+            }));
+            return result;
+        }
 
-    // eslint-disable-next-line max-lines-per-function
-    async list(config: IListPermPointRequest): Promise<IPermissionPoint[]> {
-        const result: IPermissionPoint[] = [];
-        config.objectIDs.forEach((objectID) => {
-            const rule = this._permissionMap.get(objectID);
-            if (rule) {
-                const item = {
-                    objectID,
-                    unitID: config.unitID,
-                    objectType: rule!.objectType,
-                    name: rule!.name,
-                    shareOn: false,
-                    shareRole: UnitRole.Owner,
-                    shareScope: -1,
-                    scope: {
-                        read: ObjectScope.AllCollaborator,
-                        edit: ObjectScope.AllCollaborator,
-                    },
-                    creator: createDefaultUser(UnitRole.Owner),
-                    strategies: [
-                        {
-                            action: 6,
-                            role: 1,
-                        },
-                        {
-                            action: 16,
-                            role: 1,
-                        },
-                        {
-                            action: 17,
-                            role: 1,
-                        },
-                        {
-                            action: 18,
-                            role: 1,
-                        },
-                        {
-                            action: 19,
-                            role: 1,
-                        },
-                        {
-                            action: 33,
-                            role: 1,
-                        },
-                        {
-                            action: 34,
-                            role: 1,
-                        },
-                        {
-                            action: 35,
-                            role: 1,
-                        },
-                        {
-                            action: 36,
-                            role: 1,
-                        },
-                        {
-                            action: 37,
-                            role: 1,
-                        },
-                        {
-                            action: 38,
-                            role: 1,
-                        },
-                        {
-                            action: 39,
-                            role: 1,
-                        },
-                        {
-                            action: 40,
-                            role: 1,
-                        },
-                    ],
-                    actions: config.actions.map((a) => {
-                        return { action: a, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor) };
-                    }),
-                };
-                result.push(item);
+        const result = actions.map((action) => {
+            // Check if there's an explicit override first
+            const overrideKey = `${objectID}:${action}`;
+            if (this._permissionOverrides.has(overrideKey)) {
+                return { action, allowed: this._permissionOverrides.get(overrideKey)! };
             }
+
+            // Otherwise, check strategies
+            const strategy = permissionData.strategies.find((s) => s.action === action);
+            if (!strategy) {
+                // No strategy, use default: Owner and Editor are allowed
+                return { action, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor) };
+            }
+
+            // Has strategy, only check the specified role (no fallback)
+            return {
+                action,
+                allowed: this._getRole(strategy.role),
+            };
         });
         return result;
     }
 
+    async batchAllowed(configs: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
+        const results = await Promise.all(configs.map((config) => this.allowed(config)));
+        const result = configs.map((config, index) => ({
+            unitID: config.unitID,
+            objectID: config.objectID,
+            actions: results[index],
+        }));
+        return result;
+    }
+
+    async list(config: IListPermPointRequest): Promise<IPermissionPoint[]> {
+        const result: IPermissionPoint[] = [];
+
+        const defaultStrategies = [
+            { action: 6, role: UnitRole.Owner },
+            { action: 16, role: UnitRole.Owner },
+            { action: 17, role: UnitRole.Owner },
+            { action: 18, role: UnitRole.Owner },
+            { action: 19, role: UnitRole.Owner },
+            { action: 33, role: UnitRole.Owner },
+            { action: 34, role: UnitRole.Owner },
+            { action: 35, role: UnitRole.Owner },
+            { action: 36, role: UnitRole.Owner },
+            { action: 37, role: UnitRole.Owner },
+            { action: 38, role: UnitRole.Owner },
+            { action: 39, role: UnitRole.Owner },
+            { action: 40, role: UnitRole.Owner },
+        ];
+
+        config.objectIDs.forEach((objectID) => {
+            const rule = this._permissionMap.get(objectID);
+            const strategies = rule?.strategies || defaultStrategies;
+            const item = {
+                objectID,
+                unitID: config.unitID,
+                objectType: rule?.objectType || (3 as UnitObject), // 默认 SelectRange = 3
+                name: rule?.name || '',
+                shareOn: false,
+                shareRole: UnitRole.Owner,
+                shareScope: -1,
+                scope: {
+                    read: ObjectScope.AllCollaborator,
+                    edit: ObjectScope.AllCollaborator,
+                },
+                creator: createDefaultUser(UnitRole.Owner),
+                strategies: strategies.map((s) => ({ action: s.action, role: s.role })),
+                actions: config.actions.map((a) => {
+                    // Check for override first
+                    const overrideKey = `${objectID}:${a}`;
+                    if (this._permissionOverrides.has(overrideKey)) {
+                        return { action: a, allowed: this._permissionOverrides.get(overrideKey)! };
+                    }
+
+                    const strategy = strategies.find((s) => s.action === a);
+                    if (!strategy) {
+                        // No strategy, default is Owner/Editor allowed
+                        const allowed = this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor);
+                        return { action: a, allowed };
+                    }
+                    // Has strategy, only check specified role
+                    return { action: a, allowed: this._getRole(strategy.role) };
+                }),
+            };
+            result.push(item);
+        });
+
+        return result;
+    }
+
     async listCollaborators(): Promise<ICollaborator[]> {
-        return [];
+        const result: ICollaborator[] = [];
+        return result;
     }
 
     async listRoles(): Promise<{ roles: IUnitRoleKV[]; actions: UnitAction[] }> {
-        return {
-            roles: [],
-            actions: [],
+        const result = {
+            roles: [] as IUnitRoleKV[],
+            actions: [] as UnitAction[],
         };
+        return result;
     }
 
     async deleteCollaborator(): Promise<void> {
@@ -195,14 +247,63 @@ export class AuthzIoLocalService implements IAuthzIoService {
     }
 
     async update(config: IUpdatePermPointRequest): Promise<void> {
-        // const { objectID, strategies } = config;
-        // const actions = strategies.map((s) => {
-        //     return {
-        //         action: s.action,
-        //         allowed: s.role === UnitRole.Editor || s.role === UnitRole.Owner,
-        //     };
-        // });
-        // this._sheetPermissionPointMap.set(objectID, actions);
+        const { objectID, strategies } = config;
+        const permissionData = this._permissionMap.get(objectID);
+
+        if (permissionData && strategies) {
+            permissionData.strategies = strategies.map((s) => ({
+                action: s.action,
+                role: s.role,
+            }));
+            this._permissionMap.set(objectID, permissionData);
+
+            // Automatically set overrides: when strategy role is Reader, it means "deny" for Owner/Editor
+            strategies.forEach((s) => {
+                if (s.role === UnitRole.Reader) {
+                    // Reader role means deny for Owner/Editor users
+                    this.setPermissionOverride(objectID, s.action, false);
+                } else if (s.role === UnitRole.Owner || s.role === UnitRole.Editor) {
+                    // Clear override, let strategy handle it
+                    this.clearPermissionOverride(objectID, s.action);
+                }
+            });
+        }
+    }
+
+    /**
+     * Set an explicit permission override for a specific action on an object.
+     * This override takes precedence over strategies.
+     * @param objectID - The permission object ID
+     * @param action - The action number
+     * @param allowed - Whether the action is allowed
+     */
+    setPermissionOverride(objectID: string, action: number, allowed: boolean): void {
+        const key = `${objectID}:${action}`;
+        this._permissionOverrides.set(key, allowed);
+    }
+
+    /**
+     * Clear a specific permission override.
+     * @param objectID - The permission object ID
+     * @param action - The action number
+     */
+    clearPermissionOverride(objectID: string, action: number): void {
+        const key = `${objectID}:${action}`;
+        this._permissionOverrides.delete(key);
+    }
+
+    /**
+     * Clear all permission overrides for an object.
+     * @param objectID - The permission object ID
+     */
+    clearAllOverrides(objectID: string): void {
+        const keysToDelete: string[] = [];
+        this._permissionOverrides.forEach((_, key) => {
+            if (key.startsWith(`${objectID}:`)) {
+                keysToDelete.push(key);
+            }
+        });
+        keysToDelete.forEach((key) => this._permissionOverrides.delete(key));
     }
 
     async updateCollaborator(): Promise<void> {

@@ -114,6 +114,7 @@ const locale: typeof enUS = {
             syntax: 'SYNTAXE',
         },
         operation: {
+            copyFormulaOnly: 'Copier uniquement la formule',
             pasteFormula: 'Coller la formule',
         },
     },

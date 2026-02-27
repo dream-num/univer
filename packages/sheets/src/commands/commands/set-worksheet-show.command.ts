@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
-
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import {
     SetWorksheetActiveOperation,
@@ -36,22 +35,15 @@ export const SetWorksheetShowCommand: ICommand = {
     id: 'sheet.command.set-worksheet-show',
 
     handler: (accessor: IAccessor, params: ISetWorksheetShowCommandParams) => {
-        const { unitId, subUnitId } = params;
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
+
+        const { unitId, subUnitId, worksheet } = target;
+        const hidden = worksheet.getConfig().hidden;
+        if (hidden === BooleanNumber.FALSE) return false;
 
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
-
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
-        const hidden = worksheet.getConfig().hidden;
-        if (hidden === BooleanNumber.FALSE) return false;
 
         const redoMutationParams: ISetWorksheetHideMutationParams = {
             unitId,

@@ -175,7 +175,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                     workbookTypes: [WorkbookCommentPermission],
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
-                }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }]);
+                }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }], unitId, subUnitId);
 
                 if (!commentPermission) {
                     return;

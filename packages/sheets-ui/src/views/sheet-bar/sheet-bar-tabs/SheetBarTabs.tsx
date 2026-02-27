@@ -16,12 +16,18 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
-import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck, Quantity } from '@univerjs/core';
-import { DropdownLegacy } from '@univerjs/design';
+import {
+    ICommandService,
+    IConfirmService,
+    IPermissionService,
+    LocaleService,
+    nameCharacterCheck,
+    Quantity,
+} from '@univerjs/core';
 import { LockIcon } from '@univerjs/icons';
-
 import {
     InsertSheetMutation,
     RangeProtectionRuleModel,
@@ -37,22 +43,68 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarItem } from './SheetBarItem';
+import { SheetBarTabsContextMenu } from './SheetBarTabsContextMenu';
 import { SlideTabBar } from './utils/slide-tab-bar';
+
+const SCROLL_SHADOW_NONE = '';
+const SCROLL_SHADOW_LEFT = 'inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
+const SCROLL_SHADOW_RIGHT = 'inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
+const SCROLL_SHADOW_BOTH = 'inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
+
+interface IContextMenuAnchorRect {
+    left: number;
+    top: number;
+    bottom: number;
+}
+
+function getScrollShadow(state: IScrollState) {
+    const { leftEnd, rightEnd } = state;
+
+    if (leftEnd && rightEnd) {
+        return SCROLL_SHADOW_NONE;
+    }
+
+    if (leftEnd) {
+        return SCROLL_SHADOW_RIGHT;
+    }
+
+    if (rightEnd) {
+        return SCROLL_SHADOW_LEFT;
+    }
+
+    return SCROLL_SHADOW_BOTH;
+}
+
+function shouldRefreshSheetTabs(commandInfo: ICommandInfo) {
+    switch (commandInfo.id) {
+        case SetTabColorMutation.id:
+        case SetWorksheetHideMutation.id:
+        case RemoveSheetMutation.id:
+        case SetWorksheetNameMutation.id:
+        case InsertSheetMutation.id:
+        case SetWorksheetOrderMutation.id:
+        case SetWorksheetActiveOperation.id:
+            return true;
+        default:
+            return false;
+    }
+}
 
 export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
-    const [activeKey, setActiveKey] = useState('');
-    const [boxShadow, setBoxShadow] = useState('');
-    const [visible, setVisible] = useState(false);
-    const [offset, setOffset] = useState([0, 0]);
-    const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
+    const [activeSheetId, setActiveSheetId] = useState('');
+    const [scrollShadow, setScrollShadow] = useState('');
+    const [contextMenuVisible, setContextMenuVisible] = useState(false);
+    const [contextMenuAnchorRect, setContextMenuAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
+
+    const slideTabBarRef = useRef<SlideTabBar | null>(null);
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
     const commandService = useDependency(ICommandService);
@@ -62,69 +114,425 @@ export function SheetBarTabs() {
     const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
-    const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
-
-    const workbook = useActiveWorkbook()!;
     const permissionService = useDependency(IPermissionService);
 
-    const updateSheetItems = useCallback(() => {
-        const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';
-        setActiveKey(currentSubUnitId);
+    const workbook = useActiveWorkbook()!;
+    const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
+    const config = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
+    const showContextMenu = config?.contextMenu ?? true;
 
-        const sheets = workbook.getSheets();
+    const getActiveTabRect = useCallback((): IContextMenuAnchorRect | null => {
+        const activeTabRect = slideTabBarRef.current?.getActiveItem()?.getSlideTabItem().getBoundingClientRect();
+        if (!activeTabRect) {
+            return null;
+        }
+
+        return {
+            left: activeTabRect.left,
+            top: activeTabRect.top,
+            bottom: activeTabRect.bottom,
+        };
+    }, []);
+
+    const focusTabEditor = useCallback(() => {
+        // There is an asynchronous operation in endSelection, which will trigger blur immediately after focus,
+        // so it must be wrapped with setTimeout.
+        setTimeout(() => {
+            const activeSlideTab = slideTabBarRef.current?.getActiveItem();
+            if (!activeSlideTab) {
+                return;
+            }
+
+            activeSlideTab.focus();
+            activeSlideTab.selectAll();
+        }, 0);
+    }, []);
+
+    const openSheetNameErrorDialog = useCallback((id: string, description: string) => {
+        confirmService.open({
+            id,
+            title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
+            children: { title: description },
+            cancelText: localeService.t('button.cancel'),
+            confirmText: localeService.t('button.confirm'),
+            onClose() {
+                focusTabEditor();
+                confirmService.close(id);
+            },
+            onConfirm() {
+                focusTabEditor();
+                confirmService.close(id);
+            },
+        });
+    }, [confirmService, focusTabEditor, localeService]);
+
+    const nameEmptyCheck = useCallback((name: string) => {
+        if (name.trim() !== '') {
+            return false;
+        }
+
+        openSheetNameErrorDialog('sheetNameEmptyAlert', localeService.t('sheetConfig.sheetNameCannotIsEmptyError'));
+        return true;
+    }, [localeService, openSheetNameErrorDialog]);
+
+    const sheetNameSpecCharCheck = useCallback((name: string) => {
+        if (nameCharacterCheck(name)) {
+            return false;
+        }
+
+        openSheetNameErrorDialog('sheetNameSpecCharAlert', localeService.t('sheetConfig.sheetNameSpecCharError'));
+        return true;
+    }, [localeService, openSheetNameErrorDialog]);
+
+    const nameRepeatCheck = useCallback((name: string) => {
+        const currentSheetName = workbook.getActiveSheet()?.getName();
+        if (currentSheetName === name) {
+            return false;
+        }
+
+        const checked = workbook.checkSheetName(name);
+        if (!checked) {
+            return false;
+        }
+
+        const id = 'sheetNameRepeatAlert';
+        confirmService.open({
+            id,
+            title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
+            children: { title: localeService.t('sheetConfig.sheetNameAlreadyExistsError') },
+            cancelText: localeService.t('button.cancel'),
+            confirmText: localeService.t('button.confirm'),
+            onClose() {
+                confirmService.close(id);
+                focusTabEditor();
+            },
+            onConfirm() {
+                confirmService.close(id);
+                focusTabEditor();
+            },
+        });
+
+        return true;
+    }, [confirmService, focusTabEditor, localeService, workbook]);
+
+    const canRenameActiveSheet = useCallback(() => {
+        const unitId = workbook.getUnitId();
         const activeSheet = workbook.getActiveSheet();
-        const sheetListItems = sheets
+        if (!activeSheet) {
+            return false;
+        }
+
+        const subUnitId = activeSheet.getSheetId();
+        const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+        const hasSelectionRule = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+
+        if (worksheetRule || hasSelectionRule) {
+            return permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
+        }
+
+        return permissionService.getPermissionPoint(new WorkbookRenameSheetPermission(unitId).id)?.value ?? false;
+    }, [permissionService, rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
+
+    const updateSheetItems = useCallback(() => {
+        const activeSheet = workbook.getActiveSheet();
+        const currentSubUnitId = activeSheet?.getSheetId() ?? '';
+
+        const sheetListItems = workbook
+            .getSheets()
             .filter((sheet) => !sheet.isSheetHidden())
             .map((sheet, index) => {
                 const worksheetRule = worksheetProtectionRuleModel.getRule(workbook.getUnitId(), sheet.getSheetId());
                 const hasSelectionRule = rangeProtectionRuleModel.getSubunitRuleList(workbook.getUnitId(), sheet.getSheetId()).length > 0;
-                const hasProtect = worksheetRule?.permissionId || hasSelectionRule;
-                const name = hasProtect
-                    ? (
-                        <>
-                            <LockIcon />
-                            <span className="univer-outline-none">{sheet.getName()}</span>
-                        </>
-                    )
-                    : <span className="univer-outline-none">{sheet.getName()}</span>;
+                const hasProtection = Boolean(worksheetRule?.permissionId || hasSelectionRule);
 
                 return {
                     sheetId: sheet.getSheetId(),
-                    label: name,
+                    label: hasProtection
+                        ? (
+                            <>
+                                <LockIcon className="univer-shrink-0" />
+                                <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
+                            </>
+                        )
+                        : <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>,
                     index,
                     selected: activeSheet === sheet,
                     color: sheet.getTabColor() ?? undefined,
-                };
+                } satisfies IBaseSheetBarProps;
             });
 
         setSheetList(sheetListItems);
-        setActiveKey(currentSubUnitId);
+        setActiveSheetId(currentSubUnitId);
     }, [rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
+
+    const setTabEditor = useCallback(() => {
+        slideTabBarRef.current?.getActiveItem()?.setEditor();
+    }, []);
+
+    const syncScrollState = useCallback((state: IScrollState) => {
+        setScrollShadow(getScrollShadow(state));
+    }, []);
+
+    const syncScrollButtonState = useCallback((slideTabBar: SlideTabBar) => {
+        const scrollX = slideTabBar.calculateActiveTabItemScrollX();
+        if (scrollX) {
+            const scrollbar = slideTabBar.getScrollbar();
+            scrollbar.scrollX(scrollbar.getScrollX() + scrollX);
+        }
+
+        sheetBarService.setScroll({
+            leftEnd: slideTabBar.isLeftEnd(),
+            rightEnd: slideTabBar.isRightEnd(),
+        });
+    }, [sheetBarService]);
+
+    const observeResize = useCallback((slideTabBar: SlideTabBar) => {
+        const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
+        if (!slideTabBarContainer) {
+            return undefined;
+        }
+
+        const observer = new ResizeObserver(() => {
+            syncScrollButtonState(slideTabBar);
+        });
+
+        observer.observe(slideTabBarContainer);
+        return () => observer.disconnect();
+    }, [syncScrollButtonState]);
+
+    const openContextMenu = useCallback((anchorRect: IContextMenuAnchorRect) => {
+        if (!showContextMenu) {
+            return;
+        }
+
+        if (editorBridgeService?.isForceKeepVisible()) {
+            return;
+        }
+
+        setContextMenuAnchorRect(anchorRect);
+        setContextMenuVisible(true);
+    }, [editorBridgeService, showContextMenu]);
+
+    const onContextMenuVisibleChange = useCallback((visible: boolean) => {
+        if (!visible) {
+            setContextMenuVisible(false);
+            return;
+        }
+
+        const activeTabRect = getActiveTabRect();
+        if (!activeTabRect) {
+            return;
+        }
+
+        openContextMenu(activeTabRect);
+    }, [getActiveTabRect, openContextMenu]);
+
+    const onContextMenuCommandSelect = useCallback((commandId: string, value?: string | number) => {
+        commandService.executeCommand(commandId, {
+            value,
+            subUnitId: activeSheetId,
+        });
+        setContextMenuVisible(false);
+    }, [activeSheetId, commandService]);
+
+    useEffect(() => {
+        if (!contextMenuVisible) {
+            return;
+        }
+
+        const handleResize = () => {
+            const activeTabRect = getActiveTabRect();
+            if (!activeTabRect) {
+                return;
+            }
+
+            setContextMenuAnchorRect(activeTabRect);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [contextMenuVisible, getActiveTabRect]);
+
+    const onTabListContextMenu = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+        event.preventDefault();
+
+        const triggerItem = (event.target as HTMLElement).closest<HTMLElement>('[data-u-comp=slide-tab-item]');
+        const targetSheetId = triggerItem?.dataset.id;
+
+        if (!targetSheetId || !triggerItem) {
+            return;
+        }
+
+        const triggerRect = triggerItem.getBoundingClientRect();
+        const anchorRect = {
+            left: triggerRect.left,
+            top: triggerRect.top,
+            bottom: triggerRect.bottom,
+        };
+
+        if (targetSheetId === activeSheetId) {
+            openContextMenu(anchorRect);
+            return;
+        }
+
+        commandService
+            .executeCommand(SetWorksheetActiveOperation.id, {
+                unitId: workbook.getUnitId(),
+                subUnitId: targetSheetId,
+            })
+            .finally(() => {
+                openContextMenu(anchorRect);
+            });
+    }, [activeSheetId, commandService, openContextMenu, workbook]);
+
+    const onTabListKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('[contenteditable=true]')) {
+            return;
+        }
+
+        const currentTab = target.closest<HTMLElement>('[data-u-comp=slide-tab-item]');
+        const currentSheetId = currentTab?.dataset.id;
+        if (!currentSheetId) {
+            return;
+        }
+
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                unitId: workbook.getUnitId(),
+                subUnitId: currentSheetId,
+            });
+            return;
+        }
+
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+            return;
+        }
+
+        const tabItems = Array.from(
+            slideTabBarContainerRef.current?.querySelectorAll<HTMLElement>('[data-u-comp=slide-tab-item]') ?? []
+        );
+        const currentIndex = tabItems.findIndex((tabItem) => tabItem.dataset.id === currentSheetId);
+        if (currentIndex < 0) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const nextIndex = event.key === 'ArrowRight'
+            ? Math.min(tabItems.length - 1, currentIndex + 1)
+            : Math.max(0, currentIndex - 1);
+        const nextTab = tabItems[nextIndex];
+        const nextSheetId = nextTab?.dataset.id;
+        if (!nextTab || !nextSheetId) {
+            return;
+        }
+
+        nextTab.focus();
+        commandService.executeCommand(SetWorksheetActiveOperation.id, {
+            unitId: workbook.getUnitId(),
+            subUnitId: nextSheetId,
+        });
+    }, [commandService, workbook]);
+
+    const initializeSlideTabBar = useCallback(() => {
+        const slideTabBar = new SlideTabBar({
+            slideTabBarSelector: '[data-u-comp=slide-tab-bar]',
+            slideTabBarItemSelector: '[data-u-comp=slide-tab-item]',
+            slideTabBarItemAutoSort: true,
+            slideTabBarContainer: slideTabBarContainerRef.current,
+            currentIndex: 0,
+            onChangeName: (subUnitId: string, worksheetName: string) => {
+                if (workbook.getSheetBySheetId(subUnitId)?.getName() === worksheetName) {
+                    updateSheetItems();
+                    return;
+                }
+
+                commandService.executeCommand(SetWorksheetNameCommand.id, {
+                    subUnitId,
+                    name: worksheetName,
+                });
+            },
+            onSlideEnd: async (event: Event, order: number) => {
+                await commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
+            },
+            onChangeTab: (_event: MouseEvent, subUnitId: string) => {
+                // Do not use SetWorksheetActivateCommand, otherwise activation timing may be incorrect.
+                void commandService
+                    .executeCommand(SetWorksheetActiveOperation.id, {
+                        subUnitId,
+                        unitId: workbook.getUnitId(),
+                    });
+            },
+            onScroll: (state: IScrollState) => {
+                sheetBarService.setScroll(state);
+            },
+            onNameCheckAlert: (name: string) => {
+                return nameEmptyCheck(name) || sheetNameSpecCharCheck(name) || nameRepeatCheck(name);
+            },
+            onNameChangeCheck: canRenameActiveSheet,
+        });
+
+        slideTabBarRef.current = slideTabBar;
+
+        return {
+            slideTabBar,
+            disconnectResizeObserver: observeResize(slideTabBar),
+        };
+    }, [
+        canRenameActiveSheet,
+        commandService,
+        getActiveTabRect,
+        nameEmptyCheck,
+        nameRepeatCheck,
+        observeResize,
+        openContextMenu,
+        sheetBarService,
+        sheetNameSpecCharCheck,
+        updateSheetItems,
+        workbook,
+    ]);
 
     useEffect(() => {
         updateSheetItems();
-        const { slideTabBar, disconnectResizeObserver } = setupSlideTabBarInit();
-        const disposable = setupStatusUpdate();
-        const subscribeList = [
-            setupSubscribeScroll(),
-            setupSubscribeScrollX(),
-            setupSubscribeRenameId(),
-            // When adding a sheet, it no longer slides, which has been uniformly handled in setupSlideTabBarUpdate
-        ];
+
+        const { slideTabBar, disconnectResizeObserver } = initializeSlideTabBar();
+        const commandDisposable = commandService.onCommandExecuted((commandInfo) => {
+            if (shouldRefreshSheetTabs(commandInfo)) {
+                updateSheetItems();
+            }
+        });
+
+        const scrollSubscription = sheetBarService.scroll$.subscribe(syncScrollState);
+        const scrollXSubscription = sheetBarService.scrollX$.subscribe((x: number) => {
+            slideTabBarRef.current?.flipPage(x);
+        });
+        const renameSubscription = sheetBarService.renameId$.subscribe(() => {
+            setTabEditor();
+        });
 
         return () => {
-            disposable.dispose();
+            commandDisposable.dispose();
             slideTabBar.destroy();
-            subscribeList.forEach((subscribe) => subscribe.unsubscribe());
-            disconnectResizeObserver && disconnectResizeObserver();
+            slideTabBarRef.current = null;
+            scrollSubscription.unsubscribe();
+            scrollXSubscription.unsubscribe();
+            renameSubscription.unsubscribe();
+            disconnectResizeObserver?.();
         };
-    }, [resetOrder, workbook]);
+    }, [commandService, initializeSlideTabBar, resetOrder, setTabEditor, sheetBarService, syncScrollState, updateSheetItems, workbook]);
 
     useEffect(() => {
-        if (sheetList.length > 0) {
-            setupSlideTabBarUpdate();
+        if (!sheetList.length) {
+            return;
         }
-    }, [sheetList]);
+
+        const currentIndex = sheetList.findIndex((item) => item.sheetId === activeSheetId);
+        slideTabBarRef.current?.update(currentIndex >= 0 ? currentIndex : 0);
+    }, [activeSheetId, sheetList]);
 
     useEffect(() => {
         const subscription = merge(
@@ -137,313 +545,48 @@ export function SheetBarTabs() {
         return () => {
             subscription.unsubscribe();
         };
-    }, [worksheetProtectionRuleModel, updateSheetItems]);
+    }, [rangeProtectionRuleModel, updateSheetItems, worksheetProtectionRuleModel]);
 
-    const setupSlideTabBarInit = () => {
-        const slideTabBar = new SlideTabBar({
-            slideTabBarSelector: '[data-u-comp=slide-tab-bar]',
-            slideTabBarItemSelector: '[data-u-comp=slide-tab-item]',
-            slideTabBarItemAutoSort: true,
-            slideTabBarContainer: slideTabBarContainerRef.current,
-            currentIndex: 0,
-            onChangeName: (subUnitId: string, worksheetName: string) => {
-                commandService.executeCommand(SetWorksheetNameCommand.id, {
-                    subUnitId,
-                    name: worksheetName,
-                });
-            },
-            onSlideEnd: async (event: Event, order: number) => {
-                const res = await commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
-            },
-            onChangeTab: (event: MouseEvent, subUnitId: string) => {
-                // Do not use SetWorksheetActivateCommand, otherwise the sheet will not be switched before the menu pops up, resulting in incorrect menu position.
-                commandService
-                    .executeCommand(SetWorksheetActiveOperation.id, {
-                        subUnitId,
-                        unitId: workbook.getUnitId(),
-                    })
-                    .then(() => {
-                        // right click to show menu
-                        if (event.button === 2) {
-                            onVisibleChange(true);
-                        }
-                    });
-            },
-            onScroll: (state: IScrollState) => {
-                sheetBarService.setScroll(state);
-            },
-            onNameCheckAlert: (text: string) => {
-                return nameEmptyCheck(text) || sheetNameSpecCharCheck(text) || nameRepeatCheck(text);
-            },
-            onNameChangeCheck: () => {
-                const unitId = workbook.getUnitId();
-                const worksheet = workbook?.getActiveSheet();
-                if (!worksheet) {
-                    throw new Error('No active sheet found');
-                }
-
-                const subUnitId = worksheet.getSheetId();
-                const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                const selectionRule = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
-                if (worksheetRule || selectionRule) {
-                    return permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
-                } else {
-                    return permissionService.getPermissionPoint(new WorkbookRenameSheetPermission(unitId).id)?.value ?? false;
-                }
-            },
-        });
-
-        slideTabBarRef.current.slideTabBar = slideTabBar;
-
-        // FIXME@Dushusir: First time asynchronous rendering will cause flickering problems
-        const disconnectResizeObserver = resizeInit(slideTabBar);
-
-        return { slideTabBar, disconnectResizeObserver };
-    };
-
-    const config = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
-    const showContextMenu = config?.contextMenu ?? true;
-
-    // TODO@Dushusir: the following callback functions should be wrapped by `useCallback`.
-
-    const nameEmptyCheck = (name: string) => {
-        if (name.trim() === '') {
-            const id = 'sheetNameEmptyAlert';
-            confirmService.open({
-                id,
-                title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
-                children: { title: localeService.t('sheetConfig.sheetNameCannotIsEmptyError') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
-                onClose() {
-                    focusTabEditor();
-                    confirmService.close(id);
-                },
-                onConfirm() {
-                    focusTabEditor();
-                    confirmService.close(id);
-                },
-            });
-
-            return true;
+    useEffect(() => {
+        if (!showContextMenu && contextMenuVisible) {
+            setContextMenuVisible(false);
         }
-        return false;
-    };
-
-    const sheetNameSpecCharCheck = (name: string) => {
-        if (!nameCharacterCheck(name)) {
-            const id = 'sheetNameSpecCharAlert';
-            confirmService.open({
-                id,
-                title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
-                children: { title: localeService.t('sheetConfig.sheetNameSpecCharError') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
-                onClose() {
-                    focusTabEditor();
-                    confirmService.close(id);
-                },
-                onConfirm() {
-                    focusTabEditor();
-                    confirmService.close(id);
-                },
-            });
-
-            return true;
-        }
-        return false;
-    };
-
-    const nameRepeatCheck = (name: string) => {
-        const worksheet = workbook.getActiveSheet();
-        const currenSheetName = worksheet?.getName();
-        // TODO@Dushusir: no need trigger save
-        if (currenSheetName === name) return false;
-
-        const checked = workbook.checkSheetName(name);
-
-        if (checked) {
-            const id = 'sheetNameRepeatAlert';
-            confirmService.open({
-                id,
-                title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
-                children: { title: localeService.t('sheetConfig.sheetNameAlreadyExistsError') },
-                cancelText: localeService.t('button.cancel'),
-                confirmText: localeService.t('button.confirm'),
-                onClose() {
-                    confirmService.close(id);
-                    focusTabEditor();
-                },
-                onConfirm() {
-                    confirmService.close(id);
-                    focusTabEditor();
-                },
-            });
-        }
-
-        return checked;
-    };
-
-    const focusTabEditor = () => {
-        // FIXME@Dushusir: too strongly coupled
-        // selectionRenderService.endSelection();
-
-        // There is an asynchronous operation in endSelection, which will trigger blur immediately after focus, so it must be wrapped with setTimeout.
-        setTimeout(() => {
-            const activeSlideTab = slideTabBarRef.current.slideTabBar?.getActiveItem();
-            if (activeSlideTab) {
-                activeSlideTab.focus();
-                activeSlideTab.selectAll();
-            }
-        }, 0);
-    };
-
-    const setTabEditor = () => {
-        slideTabBarRef.current.slideTabBar?.getActiveItem()?.setEditor();
-    };
-
-    const setupSlideTabBarUpdate = () => {
-        const currentIndex = sheetList.findIndex((item) => item.selected);
-        slideTabBarRef.current.slideTabBar?.update(currentIndex);
-    };
-
-    const setupStatusUpdate = () =>
-        commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
-            switch (commandInfo.id) {
-                case SetTabColorMutation.id:
-                case SetWorksheetHideMutation.id:
-                case RemoveSheetMutation.id:
-                case SetWorksheetNameMutation.id:
-                case InsertSheetMutation.id:
-                case SetWorksheetOrderMutation.id:
-                case SetWorksheetActiveOperation.id:
-                    updateSheetItems();
-                    break;
-                default:
-                    break;
-            }
-        });
-
-    const setupSubscribeScroll = () =>
-        sheetBarService.scroll$.subscribe((state: IScrollState) => {
-            updateScrollButtonState(state);
-        });
-
-    const setupSubscribeScrollX = () =>
-        sheetBarService.scrollX$.subscribe((x: number) => {
-            slideTabBarRef.current.slideTabBar?.flipPage(x);
-        });
-
-    const setupSubscribeRenameId = () =>
-        sheetBarService.renameId$.subscribe(() => {
-            setTabEditor();
-        });
-
-    const updateScrollButtonState = (state: IScrollState) => {
-        const { leftEnd, rightEnd } = state;
-        // box-shadow: inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2);
-        let boxShadow = '';
-        if (leftEnd && rightEnd) {
-            boxShadow = '';
-        } else if (leftEnd && !rightEnd) {
-            boxShadow = 'inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
-        } else if (!leftEnd && rightEnd) {
-            boxShadow = 'inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
-        } else if (!leftEnd && !rightEnd) {
-            boxShadow = 'inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
-        }
-
-        setBoxShadow(boxShadow);
-    };
-
-    const buttonScroll = (slideTabBar: SlideTabBar) => {
-        // If the active sheet needs to display the statistics column, it will trigger a resize, which will cover the activeTabItem. You need to slide a little distance to display the active tab.
-        const scrollX = slideTabBar.calculateActiveTabItemScrollX();
-        if (scrollX) {
-            const scrollBar = slideTabBar.getScrollbar();
-            scrollBar.scrollX(scrollBar.getScrollX() + scrollX);
-        }
-
-        sheetBarService.setScroll({
-            leftEnd: slideTabBar.isLeftEnd(),
-            rightEnd: slideTabBar.isRightEnd(),
-        });
-    };
-
-    const resizeInit = (slideTabBar: SlideTabBar) => {
-        // Target element
-        const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
-        if (!slideTabBarContainer) return;
-
-        // Create a ResizeObserver
-        const observer = new ResizeObserver(() => {
-            buttonScroll(slideTabBar);
-        });
-
-        // Start the observer
-        observer.observe(slideTabBarContainer);
-
-        // Return the cleanup function that disconnects the observer
-        return () => observer.disconnect();
-    };
-
-    const onVisibleChange = (visible: boolean) => {
-        if (!showContextMenu) return;
-
-        if (editorBridgeService?.isForceKeepVisible()) {
-            return;
-        }
-
-        if (visible) {
-            const { left: containerLeft } = slideTabBarContainerRef.current?.getBoundingClientRect() ?? {};
-            // current active tab position
-            const { left: activeTabLeft } =
-                slideTabBarRef.current.slideTabBar?.getActiveItem()?.getSlideTabItem().getBoundingClientRect() ?? {};
-
-            if (containerLeft !== undefined && activeTabLeft !== undefined) {
-                setOffset([activeTabLeft - containerLeft, 0]);
-            }
-        }
-        setVisible(visible);
-    };
+    }, [contextMenuVisible, showContextMenu]);
 
     return (
-        <DropdownLegacy
-            className="univer-select-none"
-            visible={visible}
-            align={{ offset }}
-            trigger={['contextMenu']}
-            overlay={(
-                <UIMenu
-                    menuType={ContextMenuPosition.FOOTER_TABS}
-                    onOptionSelect={(params) => {
-                        const { label: id, value, commandId } = params;
-                        commandService.executeCommand(commandId ?? id as string, { value, subUnitId: activeKey });
-                        setVisible(false);
-                    }}
-                />
-            )}
-            onVisibleChange={onVisibleChange}
+        <SheetBarTabsContextMenu
+            showContextMenu={showContextMenu}
+            visible={contextMenuVisible}
+            anchorRect={contextMenuAnchorRect}
+            onVisibleChange={onContextMenuVisibleChange}
+            onCommandSelect={onContextMenuCommandSelect}
         >
             <div
                 className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 ref={slideTabBarContainerRef}
-                onDragStart={(e) => e.preventDefault()}
-                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(event) => event.preventDefault()}
+                onContextMenu={onTabListContextMenu}
             >
                 <div
                     data-u-comp="slide-tab-bar"
+                    role="tablist"
+                    aria-label="Sheet tabs"
+                    onKeyDown={onTabListKeyDown}
                     className={`
                       univer-flex univer-select-none univer-flex-row univer-items-center univer-overflow-hidden
                       univer-px-1.5 univer-py-1
                     `}
-                    style={{ boxShadow }}
+                    style={{ boxShadow: scrollShadow }}
                 >
                     {sheetList.map((item) => (
-                        <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />
+                        <SheetBarItem
+                            key={item.sheetId}
+                            {...item}
+                            selected={activeSheetId === item.sheetId}
+                        />
                     ))}
                 </div>
             </div>
-        </DropdownLegacy>
+        </SheetBarTabsContextMenu>
     );
 }

@@ -15,12 +15,13 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
+import { COPY_SPECIAL_MENU_ID, PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import { RibbonFormulasGroup } from '@univerjs/ui';
-import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
+import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import {
+    CopyFormulaOnlyMenuItemFactory,
     InsertAVERAGEFunctionMenuItemFactory,
     InsertCOUNTFunctionMenuItemFactory,
     InsertMAXFunctionMenuItemFactory,
@@ -57,6 +58,12 @@ export const menuSchema: MenuSchemaType = {
         [MoreFunctionsOperation.id]: {
             order: 0,
             menuItemFactory: MoreFunctionsMenuItemFactory,
+        },
+    },
+    [COPY_SPECIAL_MENU_ID]: {
+        [SheetCopyFormulaOnlyCommand.id]: {
+            order: 0,
+            menuItemFactory: CopyFormulaOnlyMenuItemFactory,
         },
     },
     [PASTE_SPECIAL_MENU_ID]: {

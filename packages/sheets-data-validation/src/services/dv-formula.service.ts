@@ -15,12 +15,13 @@
  */
 
 import type { ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
+import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/engine-formula';
 import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
 import { shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
+import { DataValidationListCacheService } from './dv-list-cache.service';
 
 type RuleId = string;
 type UnitId = string;
@@ -34,7 +35,8 @@ export class DataValidationFormulaService extends Disposable {
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService
+        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService,
+        @Inject(DataValidationListCacheService) private readonly _listCacheService: DataValidationListCacheService
     ) {
         super();
         this._initFormulaResultHandler();
@@ -52,12 +54,15 @@ export class DataValidationFormulaService extends Disposable {
                     const results = unitMap[subUnitId];
                     const formulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
                     results.forEach((result) => {
-                        if (formulaMap.get(result.extra?.ruleId)) {
-                            const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
+                        const ruleId = result.extra?.ruleId;
+                        if (ruleId && formulaMap.get(ruleId)) {
+                            const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
                             if (rule) {
+                                 // Mark list cache dirty when formula result changes
+                                this._listCacheService.markRuleDirty(unitId, subUnitId, ruleId);
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }
-                        };
+                        }
                     });
                 }
             }
@@ -84,7 +89,7 @@ export class DataValidationFormulaService extends Disposable {
 
     private _registerSingleFormula(unitId: string, subUnitId: string, formula: string, ruleId: string) {
         const ranges = [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }];
-        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula, ranges, { ruleId });
+        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula, ranges, { ruleId }, OtherFormulaBizType.DATA_VALIDATION, ruleId);
     }
 
     addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {

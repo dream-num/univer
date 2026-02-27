@@ -49,8 +49,7 @@ export class SheetsNoteRefRangeController extends Disposable {
                     params: {
                         unitId,
                         sheetId: subUnitId,
-                        row,
-                        col,
+                        noteId: note.id,
                     },
                 }],
                 undos: [{
@@ -72,8 +71,7 @@ export class SheetsNoteRefRangeController extends Disposable {
                 params: {
                     unitId,
                     sheetId: subUnitId,
-                    row,
-                    col,
+                    noteId: note.id,
                     newPosition: {
                         row: resultRange.startRow,
                         col: resultRange.startColumn,
@@ -86,8 +84,7 @@ export class SheetsNoteRefRangeController extends Disposable {
                 params: {
                     unitId,
                     sheetId: subUnitId,
-                    row: resultRange.startRow,
-                    col: resultRange.startColumn,
+                    noteId: note.id,
                     newPosition: {
                         row,
                         col,
@@ -156,13 +153,10 @@ export class SheetsNoteRefRangeController extends Disposable {
     private _initData() {
         const unitNotes = this._sheetsNoteModel.getNotes();
         for (const [unitId, unitNote] of unitNotes) {
-            for (const [sheetId, matrix] of unitNote) {
-                matrix.forValue((row: number, col: number, value: ISheetNote) => {
-                    if (value) {
-                        this._register(unitId, sheetId, value, row, col);
-                        this._watch(unitId, sheetId, value, row, col);
-                    }
-                    return true;
+            for (const [subUnitId, notes] of unitNote) {
+                notes.forEach((note) => {
+                    this._register(unitId, subUnitId, note, note.row, note.col);
+                    this._watch(unitId, subUnitId, note, note.row, note.col);
                 });
             }
         }
@@ -173,29 +167,34 @@ export class SheetsNoteRefRangeController extends Disposable {
             this._sheetsNoteModel.change$.subscribe((option) => {
                 switch (option.type) {
                     case 'update': {
-                        const { unitId, sheetId, row, col, note } = option;
-                        const id = this._getIdWithUnitId(unitId, sheetId, row, col);
-                        if (note) {
+                        const { unitId, subUnitId, oldNote, newNote } = option;
+                        const row = newNote ? newNote.row : oldNote!.row;
+                        const col = newNote ? newNote.col : oldNote!.col;
+                        const id = this._getIdWithUnitId(unitId, subUnitId, row, col);
+                        if (newNote) {
                             if (!this._disposableMap.has(id)) {
-                                this._register(unitId, sheetId, note, row, col);
-                                this._watch(unitId, sheetId, note, row, col);
+                                this._register(unitId, subUnitId, newNote, row, col);
+                                this._watch(unitId, subUnitId, newNote, row, col);
                             }
                         } else {
-                            this._unregister(unitId, sheetId, row, col);
-                            this._unwatch(unitId, sheetId, row, col);
+                            this._unregister(unitId, subUnitId, row, col);
+                            this._unwatch(unitId, subUnitId, row, col);
                         }
                         break;
                     }
                     case 'ref': {
-                        const { unitId, sheetId, row, col, newPosition, note, silent } = option;
-                        this._unregister(unitId, sheetId, row, col);
+                        const { unitId, subUnitId, oldNote, newNote, silent } = option;
+                        const { row: oldRow, col: oldCol } = oldNote!;
+                        const { row: newRow, col: newCol } = newNote;
+
+                        this._unregister(unitId, subUnitId, oldRow, oldCol);
 
                         if (!silent) {
-                            this._unwatch(unitId, sheetId, row, col);
-                            this._watch(unitId, sheetId, note, newPosition.row, newPosition.col);
+                            this._unwatch(unitId, subUnitId, oldRow, oldCol);
+                            this._watch(unitId, subUnitId, newNote, newRow, newCol);
                         }
 
-                        this._register(unitId, sheetId, note, newPosition.row, newPosition.col);
+                        this._register(unitId, subUnitId, newNote, newRow, newCol);
                         break;
                     }
                 }

@@ -16,13 +16,12 @@
 
 import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
-
 import type { IDrawInfo } from '../../extension';
 import type { BorderCache, BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { BorderStyleTypes, Range } from '@univerjs/core';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
-import { drawDiagonalineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
+import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 
@@ -64,15 +63,16 @@ export class Border extends SheetExtension {
         ) {
             return;
         }
-        ctx.save();
 
+        const { border } = stylesCache;
+        if (!border) return;
+
+        ctx.save();
         // this would cause the dashed line ([1, 1]) style to be drawn incorrectly.(in zoom 100%)
         // but without this, lines looks thicker than before.
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const precisionScale = this._getScale(ctx.getScale());
-        const { border } = stylesCache;
-        if (!border) return;
         const renderBorderContext = {
             ctx,
             precisionScale,
@@ -85,7 +85,7 @@ export class Border extends SheetExtension {
         ctx.beginPath();
         viewRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                const borderConfig = border!.getValue(row, col);
+                const borderConfig = border.getValue(row, col);
                 if (borderConfig) {
                     this.renderBorderByCell(renderBorderContext, row, col, borderConfig);
                 }
@@ -146,7 +146,7 @@ export class Border extends SheetExtension {
             ctx.setLineWidthByPrecision(lineWidth);
             ctx.strokeStyle = color || COLOR_BLACK_RGB;
 
-            drawDiagonalineByBorderType(ctx, style, type, {
+            drawDiagonalLineByBorderType(ctx, style, type, {
                 startX,
                 startY,
                 endX,
@@ -157,20 +157,25 @@ export class Border extends SheetExtension {
                 continue;
             }
 
-            drawLineByBorderType(ctx, type, (lineWidth - 1) / 2 / precisionScale, {
+            const lineWidthBuffer = (lineWidth - 1) / 2 / precisionScale;
+
+            drawLineByBorderType(ctx, type, lineWidthBuffer, {
                 startX,
                 startY,
                 endX,
                 endY,
             });
 
-            if (style === BorderStyleTypes.DOUBLE) {
-                drawLineByBorderType(ctx, type, (lineWidth - 1) / 2 / precisionScale, {
-                    startX: startX + 2,
-                    startY: startY + 2,
-                    endX: endX - 2,
-                    endY: endY - 2,
-                });
+            if (
+                style === BorderStyleTypes.DOUBLE &&
+                (
+                    type === BORDER_LTRB.LEFT ||
+                    type === BORDER_LTRB.RIGHT ||
+                    type === BORDER_LTRB.TOP ||
+                    type === BORDER_LTRB.BOTTOM
+                )
+            ) {
+                this._renderDoubleBorder({ renderBorderContext, row, col, type, lineWidth, startX, startY, endX, endY });
             }
         }
     }
@@ -205,6 +210,283 @@ export class Border extends SheetExtension {
             });
         });
         return isDraw;
+    }
+
+    // eslint-disable-next-line
+    private _renderDoubleBorder({
+        renderBorderContext,
+        row,
+        col,
+        type,
+        lineWidth,
+        startX,
+        startY,
+        endX,
+        endY,
+    }: {
+        renderBorderContext: IRenderBorderContext;
+        row: number;
+        col: number;
+        type: BORDER_LTRB;
+        lineWidth: number;
+        startX: number;
+        startY: number;
+        endX: number;
+        endY: number;
+    }) {
+        const { ctx, precisionScale, spreadsheetSkeleton } = renderBorderContext;
+        const borderCache = spreadsheetSkeleton.stylesCache.border!;
+        const lineWidthBuffer = (lineWidth - 1) / 2 / precisionScale;
+        const defaultOffset = lineWidth / 2;
+
+        const clearMiddleLine = (rect: {
+            startX: number;
+            startY: number;
+            endX: number;
+            endY: number;
+        }) => {
+            ctx.save();
+            ctx.lineCap = 'round';
+            ctx.globalCompositeOperation = 'destination-out';
+            drawLineByBorderType(ctx, type, lineWidthBuffer, rect);
+            ctx.restore();
+        };
+
+        const drawOuterLine = (offset: {
+            startXOffset: number;
+            startYOffset: number;
+            endXOffset: number;
+            endYOffset: number;
+        }) => {
+            const { startXOffset, startYOffset, endXOffset, endYOffset } = offset;
+            drawLineByBorderType(ctx, type, lineWidthBuffer, {
+                startX: startX - startXOffset,
+                startY: startY - startYOffset,
+                endX: endX + endXOffset,
+                endY: endY + endYOffset,
+            });
+        };
+
+        const drawInnerLine = (offset: {
+            startXOffset: number;
+            startYOffset: number;
+            endXOffset: number;
+            endYOffset: number;
+        }) => {
+            const { startXOffset, startYOffset, endXOffset, endYOffset } = offset;
+            drawLineByBorderType(ctx, type, lineWidthBuffer, {
+                startX: startX + startXOffset,
+                startY: startY + startYOffset,
+                endX: endX - endXOffset,
+                endY: endY - endYOffset,
+            });
+        };
+
+        const leftCellBorder = this._getSpecificCellBorder(borderCache, row, col - 1);
+        const rightCellBorder = this._getSpecificCellBorder(borderCache, row, col + 1);
+        const topCellBorder = this._getSpecificCellBorder(borderCache, row - 1, col);
+        const bottomCellBorder = this._getSpecificCellBorder(borderCache, row + 1, col);
+
+        const clearLine = {
+            startX,
+            startY,
+            endX,
+            endY,
+        };
+        const innerLineOffsets = {
+            startXOffset: defaultOffset,
+            startYOffset: defaultOffset,
+            endXOffset: defaultOffset,
+            endYOffset: defaultOffset,
+        };
+        const outerLineOffsets = {
+            startXOffset: defaultOffset,
+            startYOffset: defaultOffset,
+            endXOffset: defaultOffset,
+            endYOffset: defaultOffset,
+        };
+
+        if (type === BORDER_LTRB.LEFT || type === BORDER_LTRB.RIGHT) {
+            if (topCellBorder.bottom && topCellBorder.bottom.style !== BorderStyleTypes.DOUBLE) {
+                outerLineOffsets.startYOffset = 0;
+                innerLineOffsets.startYOffset = 0;
+            } else {
+                const leftTopCellBorder = this._getSpecificCellBorder(borderCache, row - 1, col - 1);
+                const rightTopCellBorder = this._getSpecificCellBorder(borderCache, row - 1, col + 1);
+
+                if (
+                    (
+                        type === BORDER_LTRB.LEFT &&
+                        (leftCellBorder.top?.style === BorderStyleTypes.DOUBLE || leftTopCellBorder.bottom?.style === BorderStyleTypes.DOUBLE)
+                    ) ||
+                    (
+                        type === BORDER_LTRB.RIGHT &&
+                        (rightCellBorder.top?.style === BorderStyleTypes.DOUBLE || rightTopCellBorder.bottom?.style === BorderStyleTypes.DOUBLE)
+                    )
+                ) {
+                    outerLineOffsets.startYOffset = -defaultOffset;
+                } else if (
+                    (type === BORDER_LTRB.LEFT && leftTopCellBorder.bottom && leftTopCellBorder.bottom.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_LTRB.RIGHT && rightTopCellBorder.bottom && rightTopCellBorder.bottom.style !== BorderStyleTypes.DOUBLE)
+                ) {
+                    outerLineOffsets.startYOffset = 0;
+                } else {
+                    outerLineOffsets.startYOffset = defaultOffset;
+                }
+
+                innerLineOffsets.startYOffset = defaultOffset;
+            }
+
+            if (bottomCellBorder.top && bottomCellBorder.top.style !== BorderStyleTypes.DOUBLE) {
+                outerLineOffsets.endYOffset = 0;
+                innerLineOffsets.endYOffset = 0;
+            } else {
+                const leftBottomCellBorder = this._getSpecificCellBorder(borderCache, row + 1, col - 1);
+                const rightBottomCellBorder = this._getSpecificCellBorder(borderCache, row + 1, col + 1);
+
+                if (
+                    (
+                        type === BORDER_LTRB.LEFT &&
+                        (leftCellBorder.bottom?.style === BorderStyleTypes.DOUBLE || leftBottomCellBorder.top?.style === BorderStyleTypes.DOUBLE)
+                    ) ||
+                    (
+                        type === BORDER_LTRB.RIGHT &&
+                        (rightCellBorder.bottom?.style === BorderStyleTypes.DOUBLE || rightBottomCellBorder.top?.style === BorderStyleTypes.DOUBLE)
+                    )
+                ) {
+                    outerLineOffsets.endYOffset = -defaultOffset;
+                } else if (
+                    (type === BORDER_LTRB.LEFT && leftBottomCellBorder.top && leftBottomCellBorder.top.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_LTRB.RIGHT && rightBottomCellBorder.top && rightBottomCellBorder.top.style !== BorderStyleTypes.DOUBLE)
+                ) {
+                    outerLineOffsets.endYOffset = 0;
+                } else {
+                    outerLineOffsets.endYOffset = defaultOffset;
+                }
+
+                innerLineOffsets.endYOffset = defaultOffset;
+            }
+
+            clearLine.startY = startY - defaultOffset;
+            clearLine.endY = endY + defaultOffset;
+            clearMiddleLine(clearLine);
+
+            if (
+                (type === BORDER_LTRB.LEFT && !leftCellBorder.right) ||
+                (type === BORDER_LTRB.RIGHT && !rightCellBorder.left)
+            ) {
+                drawOuterLine(outerLineOffsets);
+            }
+
+            drawInnerLine(innerLineOffsets);
+        } else if (type === BORDER_LTRB.TOP || type === BORDER_LTRB.BOTTOM) {
+            if (leftCellBorder.right && leftCellBorder.right.style !== BorderStyleTypes.DOUBLE) {
+                outerLineOffsets.startXOffset = 0;
+                innerLineOffsets.startXOffset = 0;
+            } else {
+                const topLeftCellBorder = this._getSpecificCellBorder(borderCache, row - 1, col - 1);
+                const bottomLeftCellBorder = this._getSpecificCellBorder(borderCache, row + 1, col - 1);
+
+                if (
+                    (
+                        type === BORDER_LTRB.TOP &&
+                        (topCellBorder.left?.style === BorderStyleTypes.DOUBLE || topLeftCellBorder.right?.style === BorderStyleTypes.DOUBLE)
+                    ) ||
+                    (
+                        type === BORDER_LTRB.BOTTOM &&
+                        (bottomCellBorder.left?.style === BorderStyleTypes.DOUBLE || bottomLeftCellBorder.right?.style === BorderStyleTypes.DOUBLE)
+                    )
+                ) {
+                    outerLineOffsets.startXOffset = -defaultOffset;
+                } else if (
+                    (type === BORDER_LTRB.TOP && topLeftCellBorder.right && topLeftCellBorder.right.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_LTRB.BOTTOM && bottomLeftCellBorder.right && bottomLeftCellBorder.right.style !== BorderStyleTypes.DOUBLE)
+                ) {
+                    outerLineOffsets.startXOffset = 0;
+                } else {
+                    outerLineOffsets.startXOffset = defaultOffset;
+                }
+
+                innerLineOffsets.startXOffset = defaultOffset;
+            }
+
+            if (rightCellBorder.left && rightCellBorder.left.style !== BorderStyleTypes.DOUBLE) {
+                outerLineOffsets.endXOffset = 0;
+                innerLineOffsets.endXOffset = 0;
+            } else {
+                const topRightCellBorder = this._getSpecificCellBorder(borderCache, row - 1, col + 1);
+                const bottomRightCellBorder = this._getSpecificCellBorder(borderCache, row + 1, col + 1);
+
+                if (
+                    (
+                        type === BORDER_LTRB.TOP &&
+                        (topCellBorder.right?.style === BorderStyleTypes.DOUBLE || topRightCellBorder.left?.style === BorderStyleTypes.DOUBLE)
+                    ) ||
+                    (
+                        type === BORDER_LTRB.BOTTOM &&
+                        (bottomCellBorder.right?.style === BorderStyleTypes.DOUBLE || bottomRightCellBorder.left?.style === BorderStyleTypes.DOUBLE)
+                    )
+                ) {
+                    outerLineOffsets.endXOffset = -defaultOffset;
+                } else if (
+                    (type === BORDER_LTRB.TOP && topRightCellBorder.left && topRightCellBorder.left.style !== BorderStyleTypes.DOUBLE) ||
+                    (type === BORDER_LTRB.BOTTOM && bottomRightCellBorder.left && bottomRightCellBorder.left.style !== BorderStyleTypes.DOUBLE)
+                ) {
+                    outerLineOffsets.endXOffset = 0;
+                } else {
+                    outerLineOffsets.endXOffset = defaultOffset;
+                }
+
+                innerLineOffsets.endXOffset = defaultOffset;
+            }
+
+            clearLine.startX = startX - defaultOffset;
+            clearLine.endX = endX + defaultOffset;
+            clearMiddleLine(clearLine);
+
+            if (
+                (type === BORDER_LTRB.TOP && !topCellBorder.bottom) ||
+                (type === BORDER_LTRB.BOTTOM && !bottomCellBorder.top)
+            ) {
+                drawOuterLine(outerLineOffsets);
+            }
+
+            drawInnerLine(innerLineOffsets);
+        }
+    }
+
+    private _getSpecificCellBorder(borderCache: ObjectMatrix<BorderCache>, row: number, col: number): Record<string, BorderCacheItem | null> {
+        const cellBorder = borderCache.getValue(row, col);
+
+        let left = null;
+        let right = null;
+        let top = null;
+        let bottom = null;
+
+        if (cellBorder) {
+            if (cellBorder[BORDER_LTRB.LEFT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.LEFT], 'type')) {
+                left = cellBorder[BORDER_LTRB.LEFT] as BorderCacheItem;
+            }
+
+            if (cellBorder[BORDER_LTRB.RIGHT] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.RIGHT], 'type')) {
+                right = cellBorder[BORDER_LTRB.RIGHT] as BorderCacheItem;
+            }
+
+            if (cellBorder[BORDER_LTRB.TOP] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.TOP], 'type')) {
+                top = cellBorder[BORDER_LTRB.TOP] as BorderCacheItem;
+            }
+
+            if (cellBorder[BORDER_LTRB.BOTTOM] && Object.prototype.hasOwnProperty.call(cellBorder[BORDER_LTRB.BOTTOM], 'type')) {
+                bottom = cellBorder[BORDER_LTRB.BOTTOM] as BorderCacheItem;
+            }
+        }
+
+        return {
+            left,
+            right,
+            top,
+            bottom,
+        };
     }
 }
 

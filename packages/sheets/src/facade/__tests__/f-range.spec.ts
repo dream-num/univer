@@ -18,7 +18,7 @@
 
 import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { HorizontalAlign, ICommandService, IUniverInstanceService, LifecycleStages, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, IConfirmService, IUniverInstanceService, LifecycleStages, TestConfirmService, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
@@ -41,7 +41,9 @@ describe('Test FRange', () => {
     ) => Nullable<IStyleData>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
+        const testBed = createFacadeTestBed(undefined, [
+            [IConfirmService, { useClass: TestConfirmService }],
+        ]);
         get = testBed.get;
 
         univerAPI = testBed.univerAPI;

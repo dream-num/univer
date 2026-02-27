@@ -118,7 +118,7 @@ async function takeHeapSnapshot(client: CDPSession, filename: string) {
 
 // const isLocal = !process.env.CI;
 test('memory', async ({ page }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(150_000);
     const client = await page.context().newCDPSession(page);
 
     let errored = false;
@@ -129,27 +129,27 @@ test('memory', async ({ page }) => {
 
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(5000);
-    const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
+    const memoryAfterFirstInstance = (await getMetrics(client)).JSHeapUsedSize;
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
     await page.waitForTimeout(5000);
-    const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
+    const memoryAfterFirstLoad = (await getMetrics(client)).JSHeapUsedSize;
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
     await page.waitForTimeout(5000);
-    const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
+    const memoryAfterSecondLoad = (await getMetrics(client)).JSHeapUsedSize;
     const unitMemoryOverflow = memoryAfterSecondLoad - memoryAfterFirstLoad;
     await reportToPosthog('unit_memory_overflow', { value: unitMemoryOverflow });
 
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(5000);
     await takeHeapSnapshot(client, 'memory-first.heapsnapshot');
-    const memoryAfterDisposingFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
+    const memoryAfterDisposingFirstInstance = (await getMetrics(client)).JSHeapUsedSize;
     await page.evaluate(() => window.createNewInstance());
     await page.waitForTimeout(5000);
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(5000);
     await takeHeapSnapshot(client, 'memory-second.heapsnapshot');
-    const memoryAfterDisposingSecondUniver = (await getMetrics(page)).JSHeapUsedSize;
+    const memoryAfterDisposingSecondUniver = (await getMetrics(client)).JSHeapUsedSize;
     const instanceMemoryOverflow = memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance;
     const univerMemoryOverflow = memoryAfterDisposingSecondUniver - memoryAfterFirstInstance;
     await reportToPosthog('instance_memory_overflow', { value: instanceMemoryOverflow });

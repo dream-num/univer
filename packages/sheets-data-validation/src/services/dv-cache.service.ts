@@ -38,8 +38,8 @@ export class DataValidationCacheService extends Disposable {
     }
 
     private _initDirtyRanges() {
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetRangeValuesMutation.id) {
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo, options) => {
+            if (commandInfo.id === SetRangeValuesMutation.id && !options?.onlyLocal) {
                 const { cellValue, unitId, subUnitId } = commandInfo.params as ISetRangeValuesMutationParams;
                 if (cellValue) {
                     const range = new ObjectMatrix(cellValue).getDataRange();

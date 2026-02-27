@@ -39,7 +39,8 @@ export class LambdaNode extends BaseAstNode {
         token: string,
         private _lambdaId: string,
         private _interpreter: Interpreter,
-        private _lambdaPrivacyVarKeys: string[]
+        private _lambdaPrivacyVarKeys: string[],
+        private _runtimeService: IFormulaRuntimeService
     ) {
         super(token);
     }
@@ -72,6 +73,8 @@ export class LambdaNode extends BaseAstNode {
             const childrenCount = children.length;
             this.setValue(children[childrenCount - 1].getValue());
         }
+
+        this._runtimeService.setUnitArrayFormulaEmbeddedMap();
     }
 
     // override async executeAsync() {
@@ -139,7 +142,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
-        return new LambdaNode(param.getToken(), lambdaId, this._interpreter, [...currentLambdaPrivacyVar.keys()]);
+        return new LambdaNode(param.getToken(), lambdaId, this._interpreter, [...currentLambdaPrivacyVar.keys()], this._runtimeService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

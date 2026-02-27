@@ -20,12 +20,12 @@ import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
     IInsertColCommandParams,
+    IInsertRangeMoveDownCommandParams,
+    IInsertRangeMoveRightCommandParams,
     IInsertRowCommandParams,
     IMoveColsCommandParams,
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
-    InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommandParams,
     IRemoveRowColCommandParams,
     IRemoveSheetCommandParams,
     ISetWorksheetNameCommandParams,
@@ -72,10 +72,10 @@ export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo
             result = handleRefInsertCol(command as ICommandInfo<IInsertColCommandParams>);
             break;
         case InsertRangeMoveRightCommand.id:
-            result = handleRefInsertRangeMoveRight(command as ICommandInfo<InsertRangeMoveRightCommandParams>, workbook);
+            result = handleRefInsertRangeMoveRight(command as ICommandInfo<IInsertRangeMoveRightCommandParams>, workbook);
             break;
         case InsertRangeMoveDownCommand.id:
-            result = handleRefInsertRangeMoveDown(command as ICommandInfo<InsertRangeMoveDownCommandParams>, workbook);
+            result = handleRefInsertRangeMoveDown(command as ICommandInfo<IInsertRangeMoveDownCommandParams>, workbook);
             break;
         case RemoveRowCommand.id:
             result = handleRefRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>, workbook);
@@ -238,7 +238,7 @@ function handleRefInsertCol(command: ICommandInfo<IInsertColCommandParams>) {
     };
 }
 
-function handleRefInsertRangeMoveRight(command: ICommandInfo<InsertRangeMoveRightCommandParams>, workbook: Workbook) {
+function handleRefInsertRangeMoveRight(command: ICommandInfo<IInsertRangeMoveRightCommandParams>, workbook: Workbook) {
     const { params } = command;
     if (!params) return null;
 
@@ -253,7 +253,7 @@ function handleRefInsertRangeMoveRight(command: ICommandInfo<InsertRangeMoveRigh
     };
 }
 
-function handleRefInsertRangeMoveDown(command: ICommandInfo<InsertRangeMoveDownCommandParams>, workbook: Workbook) {
+function handleRefInsertRangeMoveDown(command: ICommandInfo<IInsertRangeMoveDownCommandParams>, workbook: Workbook) {
     const { params } = command;
     if (!params) return null;
 

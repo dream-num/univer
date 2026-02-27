@@ -23,13 +23,13 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import { ISheetClipboardService } from '../clipboard.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+import { ISheetClipboardService } from '../clipboard.service';
 import { clipboardTestBed } from './clipboard-test-bed';
 import { plainTextByNotepad } from './constant';
 
@@ -79,6 +79,7 @@ describe('Test clipboard', () => {
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
 
         sheetSkeletonManagerService = get(SheetSkeletonManagerService);
         sheetClipboardService = get(ISheetClipboardService);

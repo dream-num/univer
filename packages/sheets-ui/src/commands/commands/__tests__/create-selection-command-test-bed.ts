@@ -26,6 +26,8 @@ import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-ma
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
     SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../set-frozen.command';
@@ -183,6 +185,8 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         SetSelectionFrozenCommand,
         SetRowFrozenCommand,
         SetColumnFrozenCommand,
+        SetFirstRowFrozenCommand,
+        SetFirstColumnFrozenCommand,
         CancelFrozenCommand,
         SetSelectionsOperation,
         SetFrozenMutation,

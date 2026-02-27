@@ -232,17 +232,24 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         );
     }
 
-    private async _remoteCall(channelName: string, method: string, args?: any): Promise<any> {
-        await this._whenReady();
+    private _remoteCall(channelName: string, method: string, args?: any): Promise<any> {
+        // Fast path: if the channel is already initialized, execute synchronously
+        // to avoid yielding to the microtask queue. This prevents race conditions
+        // where mutable args (e.g. snapshots) could be modified before serialization.
+        if (this._initialized.getValue()) {
+            return this._doRemoteCall(channelName, method, args);
+        }
 
+        return this._whenReady().then(() => this._doRemoteCall(channelName, method, args));
+    }
+
+    private _doRemoteCall(channelName: string, method: string, args?: any): Promise<any> {
         const sequence = ++this._lastRequestCounter;
         const type = RequestType.CALL;
         const request: IRPCRequest = { seq: sequence, type, channelName, method, args };
         const client = this;
 
         return new Promise((resolve, reject) => {
-            // We trigger remote calling in this Promise's callback and deal
-            // with response here as well.
             const responseHandler: IResponseHandler = {
                 handle(response: IRPCResponse) {
                     switch (response.type) {
@@ -268,7 +275,8 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     private _remoteSubscribe(channelName: string, method: string, args?: any): Observable<any> {
         return new Observable((subscriber) => {
             let sequence: number = -1;
-            this._whenReady().then(() => {
+
+            const doSubscribe = () => {
                 sequence = ++this._lastRequestCounter;
                 const type = RequestType.SUBSCRIBE;
                 const request: IRPCRequest = { seq: sequence, type, channelName, method, args };
@@ -293,7 +301,15 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
 
                 this._pendingRequests.set(sequence, responseHandler);
                 this._sendRequest(request);
-            });
+            };
+
+            // Fast path: if the channel is already initialized, execute synchronously
+            // to avoid yielding to the microtask queue.
+            if (this._initialized.getValue()) {
+                doSubscribe();
+            } else {
+                this._whenReady().then(doSubscribe);
+            }
 
             return () => {
                 if (sequence === -1) {
@@ -316,7 +332,8 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     }
 
     private _onMessage(response: IRPCResponse): void {
-        switch (response.type) {
+        const { type: responseType, seq } = response;
+        switch (responseType) {
             case ResponseType.INITIALIZE:
                 this._initialized.next(true);
                 break;
@@ -324,9 +341,12 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
             case ResponseType.CALL_FAILURE:
             case ResponseType.SUBSCRIBE_NEXT:
             case ResponseType.SUBSCRIBE_COMPLETE:
-            case ResponseType.SUBSCRIBE_ERROR:
-                this._pendingRequests.get(response.seq)?.handle(response);
+            case ResponseType.SUBSCRIBE_ERROR: {
+                const { _pendingRequests } = this;
+                _pendingRequests.get(seq)?.handle(response);
+                responseType !== ResponseType.SUBSCRIBE_NEXT && _pendingRequests.delete(seq);
                 break;
+            }
         }
     }
 }

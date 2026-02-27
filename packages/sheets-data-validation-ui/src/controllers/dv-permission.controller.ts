@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
+import type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '@univerjs/sheets-data-validation';
@@ -34,21 +34,23 @@ export class DataValidationPermissionController extends Disposable {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 if (command.id === AddSheetDataValidationCommand.id) {
+                    const { unitId, subUnitId, rule: { ranges } } = command.params as IAddSheetDataValidationCommandParams;
                     const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
-                    });
+                    }, ranges, unitId, subUnitId);
                     if (!permission) {
                         this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }
                 }
                 if (command.id === UpdateSheetDataValidationRangeCommand.id) {
+                    const { unitId, subUnitId, ranges } = command.params as IUpdateSheetDataValidationRangeCommandParams;
                     const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
-                    }, (command.params as IUpdateSheetDataValidationRangeCommandParams).ranges);
+                    }, ranges, unitId, subUnitId);
                     if (!permission) {
                         this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }

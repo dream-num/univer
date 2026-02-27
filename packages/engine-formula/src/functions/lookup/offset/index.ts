@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Offset extends BaseFunction {
     override minParams = 3;
@@ -138,34 +141,51 @@ export class Offset extends BaseFunction {
         const heightArray = expandArrayValueObject(maxRowLength, maxColumnLength, _height, ErrorValueObject.create(ErrorType.NA));
         const widthArray = expandArrayValueObject(maxRowLength, maxColumnLength, _width, ErrorValueObject.create(ErrorType.NA));
 
-        return rowsArray.mapValue((rowsValue, rowIndex, columnIndex) => {
+        const multiAreaValue: MultiAreaValue[][] = [];
+
+        rowsArray.iterator((rowsValue, rowIndex, columnIndex) => {
             const columnsValue = columnsArray.get(rowIndex, columnIndex) as BaseValueObject;
             const heightValue = heightArray.get(rowIndex, columnIndex) as BaseValueObject;
             const widthValue = widthArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            multiAreaValue[rowIndex] = multiAreaValue[rowIndex] || [];
+
+            if (rowsValue == null) {
+                multiAreaValue[rowIndex][columnIndex] = ErrorValueObject.create(ErrorType.NA);
+                return;
+            }
+
             if (rowsValue.isError()) {
-                return rowsValue;
+                multiAreaValue[rowIndex][columnIndex] = rowsValue as ErrorValueObject;
+                return;
             }
 
             if (columnsValue.isError()) {
-                return columnsValue;
+                multiAreaValue[rowIndex][columnIndex] = columnsValue as ErrorValueObject;
+                return;
             }
 
             if (heightValue.isError()) {
-                return heightValue;
+                multiAreaValue[rowIndex][columnIndex] = heightValue as ErrorValueObject;
+                return;
             }
 
             if (widthValue.isError()) {
-                return widthValue;
+                multiAreaValue[rowIndex][columnIndex] = widthValue as ErrorValueObject;
+                return;
             }
 
             // Ensure that the callback function returns a BaseValueObject
-            return this._handleSingleObject(reference as BaseReferenceObject, rowsValue, columnsValue, heightValue, widthValue, true) as BaseValueObject;
+            const result = this._handleSingleObject(reference as BaseReferenceObject, rowsValue, columnsValue, heightValue, widthValue) as BaseReferenceObject | ErrorValueObject;
+
+            multiAreaValue[rowIndex][columnIndex] = result;
         });
+
+        return new MultiAreaReferenceObject('', multiAreaValue);
     }
 
     // eslint-disable-next-line
-    private _handleSingleObject(reference: BaseReferenceObject, rowsValue: BaseValueObject, columnsValue: BaseValueObject, heightValue: BaseValueObject, widthValue: BaseValueObject, isReportError = false) {
+    private _handleSingleObject(reference: BaseReferenceObject, rowsValue: BaseValueObject, columnsValue: BaseValueObject, heightValue: BaseValueObject, widthValue: BaseValueObject) {
         const { startRow: referenceStartRow, startColumn: referenceStartColumn } = reference.getRangePosition();
 
         let _rowsValue = rowsValue;
@@ -198,8 +218,7 @@ export class Offset extends BaseFunction {
         const targetRow = referenceStartRow + rowOffset;
         const targetColumn = referenceStartColumn + columnOffset;
 
-        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
-        if (targetRow < 0 || targetColumn < 0) {
+        if (targetRow < 0 || targetColumn < 0 || targetRow >= MAX_ROW_COUNT || targetColumn >= MAX_COLUMN_COUNT) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
@@ -217,13 +236,8 @@ export class Offset extends BaseFunction {
         const targetRowWithHeight = heightCount > 0 ? targetRow + heightCount - 1 : targetRow + heightCount + 1;
         const targetColumnWithWidth = widthCount > 0 ? targetColumn + widthCount - 1 : targetColumn + widthCount + 1;
 
-        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
-        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0) {
+        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0 || targetRowWithHeight >= MAX_ROW_COUNT || targetColumnWithWidth >= MAX_COLUMN_COUNT) {
             return ErrorValueObject.create(ErrorType.REF);
-        }
-
-        if (isReportError) {
-            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const startRow = targetRow < targetRowWithHeight ? targetRow : targetRowWithHeight;

@@ -18,6 +18,7 @@ import type { compareToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
@@ -25,6 +26,7 @@ import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { IFunctionService } from '../../services/function.service';
+import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
@@ -35,7 +37,8 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 export class OperatorNode extends BaseAstNode {
     constructor(
         operatorString: string,
-        private _functionExecutor: BaseFunction
+        private _functionExecutor: BaseFunction,
+        private _runtimeService: IFormulaRuntimeService
     ) {
         super(operatorString);
     }
@@ -79,17 +82,40 @@ export class OperatorNode extends BaseAstNode {
             object2 = (object2 as BaseReferenceObject).toArrayValueObject();
         }
 
-        this.setValue(
-            this._functionExecutor.calculate(
-                object1 as BaseValueObject,
-                object2 as BaseValueObject
-            ) as FunctionVariantType
-        );
+        const result = this._functionExecutor.calculate(
+            object1 as BaseValueObject,
+            object2 as BaseValueObject
+        ) as FunctionVariantType;
+
+        this._setEmbeddedArrayFormulaToResult(result);
+
+        this.setValue(result);
+    }
+
+    /**
+     * If it contains an array formula, set the current cell to the cache and send itself as a ref outward
+     */
+    private _setEmbeddedArrayFormulaToResult(result: FunctionVariantType) {
+        if (!result.isArray()) {
+            return;
+        }
+
+        const rowCount = (result as ArrayValueObject).getRowCount();
+        const colCount = (result as ArrayValueObject).getColumnCount();
+
+        if (rowCount <= 1 && colCount <= 1) {
+            return;
+        }
+
+        this._runtimeService.setUnitArrayFormulaEmbeddedMap();
     }
 }
 
 export class OperatorNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+    constructor(
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService
+    ) {
         super();
     }
 
@@ -121,7 +147,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new OperatorNode(tokenTrim, functionExecutor);
+        return new OperatorNode(tokenTrim, functionExecutor, this._runtimeService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

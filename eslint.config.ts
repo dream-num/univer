@@ -24,6 +24,7 @@ export default antfu(
         },
         regexp: false,
         react: true,
+        pnpm: false,
         yaml: {
             overrides: {
                 'yaml/indent': ['error', 4, { indicatorValueIndent: 2 }],

@@ -1,9 +1,9 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.11.0",
+    "version": "0.15.5",
     "private": true,
-    "packageManager": "pnpm@10.20.0",
+    "packageManager": "pnpm@10.30.2",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -45,38 +45,38 @@
         "release": "release-it"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "^6.2.0",
-        "@commitlint/cli": "^20.1.0",
-        "@commitlint/config-conventional": "^20.0.0",
-        "@eslint-react/eslint-plugin": "^2.3.1",
-        "@playwright/test": "^1.56.1",
+        "@antfu/eslint-config": "^7.2.0",
+        "@commitlint/cli": "^20.4.2",
+        "@commitlint/config-conventional": "^20.4.2",
+        "@eslint-react/eslint-plugin": "^2.8.1",
+        "@playwright/test": "^1.57.0",
         "@release-it-plugins/workspaces": "^5.0.3",
-        "@release-it/conventional-changelog": "^10.0.1",
+        "@release-it/conventional-changelog": "^10.0.5",
         "@types/fs-extra": "^11.0.4",
-        "@types/node": "^24.10.0",
-        "@types/react": "19.2.2",
-        "@types/react-dom": "19.2.2",
+        "@types/node": "^25.3.0",
+        "@types/react": "19.2.14",
+        "@types/react-dom": "19.2.3",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@vitejs/plugin-react": "^5.1.0",
-        "eslint": "9.39.1",
-        "eslint-plugin-format": "^1.0.2",
+        "@vitejs/plugin-react": "^5.1.4",
+        "eslint": "9.39.2",
+        "eslint-plugin-format": "^1.4.0",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "7.0.1",
-        "eslint-plugin-react-refresh": "^0.4.24",
-        "fs-extra": "^11.3.2",
+        "eslint-plugin-react-refresh": "^0.5.2",
+        "fs-extra": "^11.3.3",
         "husky": "^9.1.7",
-        "lint-staged": "^16.2.6",
-        "posthog-node": "^5.11.0",
-        "react": "19.2.0",
-        "react-dom": "19.2.0",
-        "release-it": "^19.0.5",
+        "lint-staged": "^16.2.7",
+        "posthog-node": "^5.25.0",
+        "react": "19.2.4",
+        "react-dom": "19.2.4",
+        "release-it": "^19.2.4",
         "serve": "^14.2.5",
         "tailwindcss": "3.4.18",
-        "tsx": "^4.20.6",
-        "turbo": "^2.6.0",
+        "tsx": "^4.21.0",
+        "turbo": "^2.8.10",
         "typescript": "^5.9.3",
-        "vitest": "^3.2.4"
+        "vitest": "^4.0.18"
     },
     "pnpm": {
         "onlyBuiltDependencies": [
@@ -84,10 +84,10 @@
         ]
     },
     "resolutions": {
-        "@types/react": "19.2.2",
-        "@types/react-dom": "19.2.2",
-        "react": "19.2.0",
-        "react-dom": "19.2.0"
+        "@types/react": "19.2.14",
+        "@types/react-dom": "19.2.3",
+        "react": "19.2.4",
+        "react-dom": "19.2.4"
     },
     "lint-staged": {
         "*": "eslint --fix"

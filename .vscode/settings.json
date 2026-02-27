@@ -57,5 +57,7 @@
 
     "editor.quickSuggestions": {
         "strings": "on"
-    }
+    },
+
+    "vitest.maximumConfigs": 80
 }

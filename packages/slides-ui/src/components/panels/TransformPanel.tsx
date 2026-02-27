@@ -181,117 +181,56 @@ export default function TransformPanel(props: IProps) {
 
     return (
         <div
-            className={clsx('univer-relative univer-bottom-0 univer-mt-5 univer-w-full', borderTopClassName)}
+            className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', borderTopClassName)}
         >
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div
-                    className={`
-                      univer-w-full univer-text-left univer-text-gray-600
-                      dark:!univer-text-gray-200
-                    `}
-                >
-                    <div>{localeService.t('image-panel.transform.title')}</div>
+            <header
+                className={`
+                  univer-text-gray-600
+                  dark:!univer-text-gray-200
+                `}
+            >
+                <div>{localeService.t('image-panel.transform.title')}</div>
+            </header>
+
+            <div
+                className={`
+                  univer-grid univer-grid-cols-3 univer-gap-2
+                  [&>div]:univer-grid [&>div]:univer-gap-2
+                `}
+            >
+                <div>
+                    <span>{localeService.t('image-panel.transform.width')}</span>
+                    <InputNumber
+                        min={1}
+                        value={width}
+                        onChange={(val) => { handleWidthChange(val); }}
+                    />
+                </div>
+                <div>
+                    <span>{localeService.t('image-panel.transform.height')}</span>
+                    <InputNumber
+                        min={1}
+                        value={height}
+                        onChange={(val) => { handleHeightChange(val); }}
+                    />
                 </div>
             </div>
             <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div className="univer-w-1/3">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                {localeService.t('image-panel.transform.width')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                <InputNumber
-                                    className="univer-w-11/12"
-                                    min={1}
-                                    value={width}
-                                    onChange={(val) => { handleWidthChange(val); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-panel.transform.x')}</span>
+                    <InputNumber min={0} precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
                 </div>
-                <div className="univer-w-1/3">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                {localeService.t('image-panel.transform.height')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                <InputNumber
-                                    className="univer-w-11/12"
-                                    min={1}
-                                    value={height}
-                                    onChange={(val) => { handleHeightChange(val); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-panel.transform.y')}</span>
+                    <InputNumber min={0} precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
                 </div>
-            </div>
-            <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                <div className="univer-w-1/3">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                {localeService.t('image-panel.transform.x')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                <InputNumber
-                                    className="univer-w-11/12"
-                                    precision={1}
-                                    min={0}
-                                    value={xPosition}
-                                    onChange={(val) => { handleXChange(val); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
-                </div>
-                <div className="univer-w-1/3">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                {localeService.t('image-panel.transform.y')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                <InputNumber
-                                    className="univer-w-11/12"
-                                    precision={1}
-                                    min={0}
-                                    value={yPosition}
-                                    onChange={(val) => { handleYChange(val); }}
-                                />
-                            </div>
-                        </div>
-                    </label>
-                </div>
-                <div className="univer-w-1/3">
-                    <label>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                {localeService.t('image-panel.transform.rotate')}
-                            </div>
-                        </div>
-                        <div className="univer-relative univer-mt-2.5 univer-flex univer-h-full">
-                            <div className="univer-w-full">
-                                <InputNumber
-                                    className="univer-w-11/12"
-                                    precision={1}
-                                    value={rotation}
-                                    onChange={handleChangeRotation}
-                                />
-                            </div>
-                        </div>
-                    </label>
+                <div>
+                    <span>{localeService.t('image-panel.transform.rotate')}</span>
+                    <InputNumber
+                        precision={1}
+                        value={rotation}
+                        onChange={handleChangeRotation}
+                    />
                 </div>
             </div>
         </div>

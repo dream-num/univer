@@ -31,15 +31,14 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, SheetRowFilteredService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, RegisterOtherFormulaService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import {
     RefRangeService,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationListCacheService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
 
@@ -130,6 +129,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             ([
                 // data validation
                 [DataValidationCacheService],
+                [DataValidationListCacheService],
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
                 [RegisterOtherFormulaService],

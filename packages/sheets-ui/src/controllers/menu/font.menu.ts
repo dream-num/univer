@@ -19,6 +19,7 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     DEFAULT_STYLES,
     EDITOR_ACTIVATED,
+    FOCUSING_SHAPE_TEXT_EDITOR,
     FOCUSING_SHEET,
     ICommandService,
     IContextService,
@@ -85,7 +86,7 @@ function updateFontSizeValue(accessor: IAccessor, defaultValue: number) {
             if (
                 (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
             ) {
                 updateSheetEditor();
             }

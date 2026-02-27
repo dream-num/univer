@@ -51,6 +51,16 @@ const locale: typeof enUS = {
             cancel: '取消',
             confirm: '确定',
         },
+        GradientColorPicker: {
+            linear: '线性',
+            radial: '径向',
+            angular: '角向',
+            diamond: '菱形',
+            offset: '偏移',
+            angle: '角度',
+            flip: '翻转',
+            delete: '删除',
+        },
     },
 };
 

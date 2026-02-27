@@ -18,7 +18,7 @@ import type { ICommandInfo, Workbook } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { ICommandService } from '@univerjs/core';
-import { borderRightClassName, clsx } from '@univerjs/design';
+import { borderRightClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -42,9 +42,11 @@ export function MobileSheetBar() {
 
 function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const { workbook } = props;
+
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState('');
     const tabMapRef = useRef<Map<string, HTMLElement | null>>(new Map());
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const commandService = useDependency(ICommandService);
 
@@ -69,8 +71,12 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
 
         if (tabMapRef.current.has(currentSubUnitId)) {
             const element = tabMapRef.current.get(currentSubUnitId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (element && containerRef.current) {
+                const containerWidth = containerRef.current.clientWidth;
+                const elementWidth = element.clientWidth;
+                const elementLeft = element.offsetLeft;
+                const scrollLeft = elementLeft - (containerWidth - elementWidth) / 2;
+                containerRef.current.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
             }
         }
 
@@ -79,12 +85,12 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
 
     useEffect(() => updateSheetItems(), [updateSheetItems]);
 
-    const onTabClick = useCallback((sheetId: string) => {
+    const handleClick = useCallback((sheetId: string) => {
         commandService.executeCommand(SetWorksheetActiveOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: sheetId,
         } as ISetWorksheetActiveOperationParams);
-    }, [commandService, workbook]);
+    }, [workbook]);
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
@@ -103,36 +109,62 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
         });
 
         return () => disposable.dispose();
-    }, [commandService, updateSheetItems]);
+    }, [updateSheetItems]);
 
     return (
         <div
-            className={`
-              univer-h-8 univer-w-full univer-overflow-x-scroll univer-bg-gray-100
-              dark:!univer-bg-gray-900
-            `}
+            ref={containerRef}
+            className={clsx(
+                `
+                  univer-h-10 univer-w-full univer-overflow-x-auto univer-overflow-y-hidden univer-border-b
+                  univer-border-gray-200 univer-bg-gradient-to-b univer-from-gray-50 univer-to-gray-100
+                  dark:!univer-border-gray-700 dark:!univer-from-gray-800 dark:!univer-to-gray-900
+                `,
+                scrollbarClassName
+            )}
+            role="tablist"
+            aria-label="Sheet tabs"
         >
-            <div className="univer-flex univer-h-8 univer-flex-nowrap univer-items-center">
+            <div className="univer-flex univer-h-full univer-flex-nowrap univer-items-center">
                 {sheetList.map((sheet) => (
                     <div
                         ref={(element) => {
                             tabMapRef.current.set(sheet.sheetId!, element);
                         }}
-                        className={clsx(
-                            `
-                              univer-box-border univer-h-full univer-min-w-12 univer-max-w-[120px] univer-shrink-0
-                              univer-flex-nowrap univer-items-center univer-truncate univer-px-1 univer-py-0.5
-                              univer-text-center univer-text-xs univer-leading-7
-                            `,
-                            borderRightClassName,
-                            {
-                                'univer-bg-white univer-text-primary-600 dark:!univer-bg-slate-600': sheet.sheetId === activeKey,
-                            }
-                        )}
+                        className={clsx(`
+                          univer-relative univer-box-border univer-flex univer-h-full univer-max-w-36 univer-shrink-0
+                          univer-cursor-pointer univer-select-none univer-items-center univer-justify-center
+                          univer-truncate univer-px-1 univer-py-0.5 univer-text-sm univer-font-medium univer-leading-6
+                          univer-transition-all
+                        `, borderRightClassName, {
+                            'univer-bg-white univer-text-blue-600 dark:!univer-bg-gray-700 dark:!univer-text-blue-400': sheet.sheetId === activeKey,
+                            'univer-text-gray-600 hover:univer-bg-gray-50 active:univer-bg-gray-100 dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-700': sheet.sheetId !== activeKey,
+                        })}
                         key={sheet.sheetId}
-                        onClick={() => onTabClick(sheet.sheetId!)}
+                        role="tab"
+                        aria-selected={sheet.sheetId === activeKey}
+                        aria-controls={`sheet-${sheet.sheetId}`}
+                        tabIndex={sheet.sheetId === activeKey ? 0 : -1}
+                        onClick={() => handleClick(sheet.sheetId!)}
                     >
-                        {sheet.label}
+                        {/* Sheet Label */}
+                        <span className="univer-truncate">{sheet.label}</span>
+
+                        {/* Active Indicator */}
+                        {sheet.sheetId === activeKey && (
+                            <div
+                                className={clsx(`
+                                  univer-absolute univer-left-0 univer-right-0 univer-top-0 univer-h-1
+                                  univer-bg-blue-600 univer-transition-all
+                                  dark:!univer-bg-blue-400
+                                `
+                                )}
+                                style={sheet.color
+                                    ? { backgroundColor: sheet.color }
+                                    : undefined}
+                                aria-hidden="true"
+                            />
+                        )}
                     </div>
                 ))}
             </div>

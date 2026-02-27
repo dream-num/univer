@@ -18,8 +18,8 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { getMedianResult } from '../../../basics/statistical';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Median extends BaseFunction {
@@ -91,21 +91,6 @@ export class Median extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return this._getResult(values.sort((a, b) => a - b));
-    }
-
-    private _getResult(values: number[]): BaseValueObject {
-        const n = values.length;
-
-        let result: number;
-
-        if (n % 2 === 0) {
-            const mid = n / 2;
-            result = (values[mid - 1] + values[mid]) / 2;
-        } else {
-            result = values[Math.floor(n / 2)];
-        }
-
-        return NumberValueObject.create(result);
+        return getMedianResult(values);
     }
 }

@@ -27,6 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import {
     AddSheetDataValidationCommand,
     ClearRangeDataValidationCommand,
@@ -47,9 +48,10 @@ import { SheetDataValidationModel } from './models/sheet-data-validation-model';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
+import { DataValidationListCacheService } from './services/dv-list-cache.service';
 import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 
-@DependentOn(UniverDataValidationPlugin)
+@DependentOn(UniverSheetsFormulaPlugin, UniverDataValidationPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
     static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -74,6 +76,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     override onStarting() {
         ([
             [DataValidationCacheService],
+            [DataValidationListCacheService],
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],
             [SheetsDataValidationValidatorService],

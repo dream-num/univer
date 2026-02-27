@@ -210,15 +210,13 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
         tooltip: 'sheet.numfmt.title',
         type: MenuItemType.SELECTOR,
         slot: true,
-        selections: [
-            {
-                label: {
-                    name: OPTIONS_KEY,
-                    hoverable: false,
-                    selectable: false,
-                },
+        selections: [{
+            label: {
+                name: OPTIONS_KEY,
+                hoverable: false,
+                selectable: false,
             },
-        ],
+        }],
         value$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),

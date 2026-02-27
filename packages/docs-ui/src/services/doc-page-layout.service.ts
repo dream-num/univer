@@ -28,6 +28,8 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
     }
 
     calculatePagePosition() {
+        if (this._disposed) return;
+
         const docObject = neoGetDocObject(this._context);
         const docDataModel = this._context.unit;
         const zoomRatio = docDataModel.getSettings()?.zoomRatio ?? 1;

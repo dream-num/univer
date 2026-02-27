@@ -18,8 +18,10 @@ import type { StorybookConfig } from '@storybook/react-webpack5';
 import type { StoriesEntry } from 'storybook/internal/types';
 import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-
+import { pathToFileURL } from 'node:url';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
+
+const __dirname = pathToFileURL(new URL('.', import.meta.url).pathname).pathname;
 
 const tsconfigPathsPlugin = new TsconfigPathsPlugin({
     configFile: resolve(__dirname, '../tsconfig.storybook.json'),

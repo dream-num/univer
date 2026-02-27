@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { CellValueType, IConfigService, Inject, InterceptorEffectEnum, isRealNum, isTextFormat, numfmt, RxDisposable } from '@univerjs/core';
+import { CellValueType, getNumfmtParseValueFilter, IConfigService, Inject, InterceptorEffectEnum, isRealNum, isTextFormat, RxDisposable } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
@@ -70,7 +70,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                          */
                         if (
                             (cell?.t === CellValueType.FORCE_STRING || cell?.t === CellValueType.STRING) &&
-                            (isRealNum(cellRaw.v) || (typeof cellRaw.v === 'string' && numfmt.parseNumber(cellRaw.v)))
+                            (isRealNum(cellRaw.v) || (typeof cellRaw.v === 'string' && getNumfmtParseValueFilter(cellRaw.v)))
                         ) {
                             // If the cell is in text format, follow the logic of number format
                             const cellStyle = pos.workbook.getStyles().get(cellRaw.s);

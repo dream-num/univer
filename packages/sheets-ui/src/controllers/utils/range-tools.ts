@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-import { ObjectMatrix } from '@univerjs/core';
-
-export interface IDiscreteRange {
-    rows: number[];
-    cols: number[];
-}
-
-export function discreteRangeToRange(discreteRange: IDiscreteRange): IRange {
-    const { rows, cols } = discreteRange;
-    return {
-        startRow: rows[0],
-        endRow: rows[rows.length - 1],
-        startColumn: cols[0],
-        endColumn: cols[cols.length - 1],
-    };
-}
+import type { IRange } from '@univerjs/core';
+import type { IDiscreteRange } from '@univerjs/sheets';
 
 export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
     ranges: IRange[];
@@ -67,24 +52,4 @@ export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
             }
         ),
     };
-}
-
-export function generateNullCellValueRowCol(range: IDiscreteRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
-    range.forEach((r) => {
-        const { rows, cols } = r;
-        rows.forEach((i) => {
-            cols.forEach((j) => {
-                cellValue.setValue(i, j, {
-                    v: null,
-                    p: null,
-                    f: null,
-                    si: null,
-                    custom: null,
-                });
-            });
-        });
-    });
-
-    return cellValue.getData();
 }

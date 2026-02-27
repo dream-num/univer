@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
-import { LocaleType, numfmt } from '@univerjs/core';
+import { getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
 
@@ -352,22 +352,10 @@ export function stringIsNumberPattern(input: string) {
         };
     }
 
-    const numberPattern = numfmt.parseNumber(_input);
+    const parseData = getNumfmtParseValueFilter(_input);
 
-    if (numberPattern && numberPattern.z) {
-        return setNumberPatternCache(_input, numberPattern.v as number, numberPattern.z as string);
-    }
-
-    const datePattern = numfmt.parseDate(_input);
-
-    if (datePattern && datePattern.z) {
-        return setNumberPatternCache(_input, datePattern.v as number, datePattern.z as string);
-    }
-
-    const timePattern = numfmt.parseTime(_input);
-
-    if (timePattern && timePattern.z) {
-        return setNumberPatternCache(_input, timePattern.v as number, timePattern.z as string);
+    if (parseData && parseData.z) {
+        return setNumberPatternCache(_input, parseData.v as number, parseData.z as string);
     }
 
     return {

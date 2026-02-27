@@ -395,7 +395,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
                         ed: body.dataStream.length - 2,
                         ts: {
                             cl: {
-                                rgb: this._themeService.getColorFromTheme('gray.600'),
+                                rgb: this._themeService.getColorFromTheme('gray.300'),
                             },
                         },
                     },

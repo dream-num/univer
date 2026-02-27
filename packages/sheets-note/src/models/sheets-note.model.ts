@@ -16,10 +16,13 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { Disposable, ObjectMatrix } from '@univerjs/core';
+import { Disposable, generateRandomId } from '@univerjs/core';
 import { filter, map, Subject } from 'rxjs';
 
 export interface ISheetNote {
+    id: string;
+    row: number;
+    col: number;
     width: number;
     height: number;
     note: string;
@@ -28,144 +31,176 @@ export interface ISheetNote {
 
 export type ISheetNoteChange = {
     unitId: string;
-    sheetId: string;
-    row: number;
-    col: number;
+    subUnitId: string;
+    oldNote: Nullable<ISheetNote>;
     silent?: boolean;
 } & ({
     type: 'update';
-    note: Nullable<ISheetNote>;
-    oldNote: Nullable<ISheetNote>;
+    newNote: Nullable<ISheetNote>;
 } | {
     type: 'ref';
-    newPosition: {
-        row: number;
-        col: number;
-    };
-    note: ISheetNote;
+    newNote: ISheetNote;
 });
 
 export class SheetsNoteModel extends Disposable {
-    private _noteMatrix = new Map<string, Map<string, ObjectMatrix<ISheetNote>>>();
+    private _notesMap: Map<string, Map<string, Map<string, ISheetNote>>> = new Map();
     private readonly _change$ = new Subject<ISheetNoteChange>();
     readonly change$ = this._change$.asObservable();
 
-    private _ensureNoteMatrix(unitId: string, sheetId: string): ObjectMatrix<ISheetNote> {
-        let unitMap = this._noteMatrix.get(unitId);
+    private _ensureNotesMap(unitId: string, subUnitId: string): Map<string, ISheetNote> {
+        let unitMap = this._notesMap.get(unitId);
         if (!unitMap) {
             unitMap = new Map();
-            this._noteMatrix.set(unitId, unitMap);
+            this._notesMap.set(unitId, unitMap);
         }
 
-        let matrix = unitMap.get(sheetId);
-        if (!matrix) {
-            matrix = new ObjectMatrix<ISheetNote>();
-            unitMap.set(sheetId, matrix);
+        let subUnitMap = unitMap.get(subUnitId);
+        if (!subUnitMap) {
+            subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
         }
 
-        return matrix;
+        return subUnitMap;
     }
 
-    getSheetShowNotes$(unitId: string, sheetId: string) {
+    private _getNoteByPosition(unitId: string, subUnitId: string, row: number, col: number): Nullable<ISheetNote> {
+        const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
+
+        for (const [_, note] of subUnitMap) {
+            if (note.row === row && note.col === col) {
+                return note;
+            }
+        }
+    }
+
+    private _getNoteById(unitId: string, subUnitId: string, id: string): Nullable<ISheetNote> {
+        const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
+        return subUnitMap.get(id);
+    }
+
+    private _getNoteByParams(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number }): Nullable<ISheetNote> {
+        const { noteId, row, col } = params;
+
+        if (noteId) {
+            return this._getNoteById(unitId, subUnitId, noteId);
+        }
+
+        if (row !== undefined && col !== undefined) {
+            return this._getNoteByPosition(unitId, subUnitId, row, col);
+        }
+
+        return null;
+    }
+
+    getSheetShowNotes$(unitId: string, subUnitId: string) {
         return this._change$.pipe(
-            filter(({ unitId: u, sheetId: s }) => u === unitId && s === sheetId),
+            filter(({ unitId: u, subUnitId: s }) => u === unitId && s === subUnitId),
             map(() => {
-                const matrix = this._ensureNoteMatrix(unitId, sheetId);
+                const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
                 const notes: { loc: ISheetLocationBase; note: ISheetNote }[] = [];
 
-                matrix.forValue((row, col, note) => {
+                for (const [_, note] of subUnitMap) {
                     if (note.show) {
-                        notes.push({ loc: { row, col, unitId, subUnitId: sheetId }, note });
+                        notes.push({ loc: { row: note.row, col: note.col, unitId, subUnitId }, note });
                     }
-                });
+                }
 
                 return notes;
             })
         );
     }
 
-    getCellNoteChange$(unitId: string, sheetId: string, row: number, col: number) {
+    getCellNoteChange$(unitId: string, subUnitId: string, row: number, col: number) {
         return this._change$.pipe(
-            filter(({ unitId: u, sheetId: s, row: r, col: c }) => u === unitId && s === sheetId && r === row && c === col),
-            map(({ note }) => note)
+            filter(({ unitId: u, subUnitId: s, oldNote }) => {
+                if (u !== unitId || s !== subUnitId || !oldNote) {
+                    return false;
+                }
+                return oldNote.row === row && oldNote.col === col;
+            }),
+            map((newNote) => newNote)
         );
     }
 
-    updateNote(unitId: string, sheetId: string, row: number, col: number, note: ISheetNote, silent?: boolean): void {
-        const matrix = this._ensureNoteMatrix(unitId, sheetId);
-        const oldNote = matrix.getValue(row, col);
-        matrix.setValue(row, col, note);
-        this._change$.next({ unitId, sheetId, row, col, type: 'update', note, oldNote, silent });
+    updateNote(unitId: string, subUnitId: string, row: number, col: number, note: Partial<ISheetNote>, silent?: boolean): void {
+        const oldNote = this._getNoteByParams(unitId, subUnitId, { noteId: note?.id, row, col });
+        const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
+        const newNote = {
+            ...note,
+            id: oldNote?.id || note.id || generateRandomId(6),
+            row,
+            col,
+        } as ISheetNote;
+        subUnitMap.set(newNote.id, newNote);
+
+        this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote, silent });
     }
 
-    removeNote(unitId: string, sheetId: string, row: number, col: number, silent?: boolean): void {
-        const matrix = this._ensureNoteMatrix(unitId, sheetId);
-        const oldNote = matrix.getValue(row, col);
-        matrix.realDeleteValue(row, col);
-        this._change$.next({ unitId, sheetId, row, col, type: 'update', note: null, oldNote, silent });
-    }
+    removeNote(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number; silent?: boolean }): void {
+        const { noteId, row, col, silent } = params;
+        const oldNote = this._getNoteByParams(unitId, subUnitId, { noteId, row, col });
 
-    toggleNotePopup(unitId: string, sheetId: string, row: number, col: number, silent?: boolean): void {
-        const matrix = this._ensureNoteMatrix(unitId, sheetId);
-        const note = matrix.getValue(row, col);
-        if (note) {
-            note.show = !note.show;
-            const newNote = { ...note, show: note.show };
-            matrix.setValue(row, col, newNote);
-            this._change$.next({
-                unitId,
-                sheetId,
-                row,
-                col,
-                type: 'update',
-                note: newNote,
-                oldNote: note,
-                silent,
-            });
+        if (!oldNote) {
+            return;
         }
+
+        const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
+        subUnitMap.delete(oldNote.id);
+
+        this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote: null, silent });
     }
 
-    updateNotePosition(unitId: string, sheetId: string, row: number, col: number, newRow: number, newCol: number, silent?: boolean): void {
-        const matrix = this._ensureNoteMatrix(unitId, sheetId);
-        const note = matrix.getValue(row, col);
-        if (note) {
-            matrix.realDeleteValue(row, col);
-            matrix.setValue(newRow, newCol, note);
-            this._change$.next({
-                unitId,
-                sheetId,
-                row,
-                col,
-                type: 'ref',
-                newPosition: { row: newRow, col: newCol },
-                note,
-                silent,
-            });
+    toggleNotePopup(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number; silent?: boolean }): void {
+        const { noteId, row, col, silent } = params;
+        const oldNote = this._getNoteByParams(unitId, subUnitId, { noteId, row, col });
+
+        if (!oldNote) {
+            return;
         }
+
+        const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
+        const newNote = { ...oldNote, show: !oldNote.show };
+        subUnitMap.set(newNote.id, newNote);
+
+        this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote, silent });
     }
 
-    getNote(unitId: string, sheetId: string, row: number, col: number): Nullable<ISheetNote> {
-        const matrix = this._ensureNoteMatrix(unitId, sheetId);
-        return matrix.getValue(row, col);
-    }
+    updateNotePosition(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number; newRow: number; newCol: number; silent?: boolean }): void {
+        const { noteId, row, col, newRow, newCol, silent } = params;
+        const oldNote = this._getNoteByParams(unitId, subUnitId, { noteId, row, col });
 
-    getUnitNotes(unitId: string): Map<string, ObjectMatrix<ISheetNote>> | undefined {
-        return this._noteMatrix.get(unitId);
-    }
-
-    getSheetNotes(unitId: string, sheetId: string): ObjectMatrix<ISheetNote> | undefined {
-        const unitMap = this._noteMatrix.get(unitId);
-        if (!unitMap) {
-            return undefined;
+        if (!oldNote) {
+            return;
         }
-        return unitMap.get(sheetId);
+
+        const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
+        const newNote = { ...oldNote, row: newRow, col: newCol };
+        subUnitMap.set(newNote.id, newNote);
+
+        this._change$.next({ unitId, subUnitId, oldNote, type: 'ref', newNote, silent });
+    }
+
+    getNote(unitId: string, subUnitId: string, params: { noteId?: string; row?: number; col?: number }): Nullable<ISheetNote> {
+        return this._getNoteByParams(unitId, subUnitId, params);
     }
 
     getNotes() {
-        return this._noteMatrix;
+        return this._notesMap;
+    }
+
+    getUnitNotes(unitId: string): Map<string, Map<string, ISheetNote>> | undefined {
+        return this._notesMap.get(unitId);
+    }
+
+    getSheetNotes(unitId: string, subUnitId: string): Map<string, ISheetNote> | undefined {
+        const unitMap = this._notesMap.get(unitId);
+        if (!unitMap) {
+            return undefined;
+        }
+        return unitMap.get(subUnitId);
     }
 
     deleteUnitNotes(unitId: string): void {
-        this._noteMatrix.delete(unitId);
+        this._notesMap.delete(unitId);
     }
 }

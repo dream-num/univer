@@ -16,7 +16,7 @@
 
 /* eslint-disable antfu/consistent-list-newline */
 import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { LocaleType, numfmt } from '@univerjs/core';
+import { getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {
@@ -94,7 +94,7 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
     }
 
     // Formatting Numbers
-    const parsedValue = numfmt.parseValue(normalStr);
+    const parsedValue = getNumfmtParseValueFilter(normalStr);
 
     return parsedValue == null ? str : normalStr;
 }
@@ -160,7 +160,7 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
                 const endIndex = node.endIndex + totalOffset + 1;
                 _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
             } else if (node.nodeType !== sequenceNodeType.ARRAY) {
-                const parsedValue = numfmt.parseValue(token);
+                const parsedValue = getNumfmtParseValueFilter(token);
 
                 if (parsedValue == null) {
                     const startIndex = node.startIndex + totalOffset + 1;

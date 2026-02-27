@@ -163,10 +163,14 @@ export class ConditionalFormattingViewModel extends Disposable {
     })();
 
     override dispose(): void {
+        this.clearCache();
+        super.dispose();
+    }
+
+    clearCache() {
         this._calculateUnitManagers.clear();
         this._cellCache.clear();
         this._rTreeManager.clear();
-        super.dispose();
     }
 
     private _handleCustomFormulasSeparately() {

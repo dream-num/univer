@@ -16,7 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
+import { getNumfmtParseValueFilter, isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -82,8 +82,18 @@ export class Text extends BaseFunction {
                 textValueNumber = 0;
             }
 
-            if (textValue.isString() && isRealNum(textValueNumber)) {
-                textValueNumber = Number(textValueNumber);
+            if (textValue.isString()) {
+                if (isRealNum(textValueNumber)) {
+                    textValueNumber = Number(textValueNumber);
+                } else {
+                    // The text parameter needs to check if it can be converted to a number format. If convertible, format it as the converted number.
+                    // The format text does not need this check and is processed directly as a string.
+                    const parsedValue = getNumfmtParseValueFilter(`${textValueNumber}`);
+
+                    if (parsedValue && parsedValue.v != null && typeof parsedValue.v === 'number') {
+                        textValueNumber = parsedValue.v;
+                    }
+                }
             }
 
             if (formatTextValue.isNull()) {

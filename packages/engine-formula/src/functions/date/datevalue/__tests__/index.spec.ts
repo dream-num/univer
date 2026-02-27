@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { excelDateSerial } from '../../../../basics/date';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -32,9 +33,9 @@ describe('Test datevalue function', () => {
             const result = testFunction.calculate(dateText);
             expect(getObjectValue(result)).toStrictEqual(43832);
 
-            const dateText2 = StringValueObject.create('5-Jul');
+            const dateText2 = StringValueObject.create('5-Jul'); // 7.5 of current year
             const result2 = testFunction.calculate(dateText2);
-            expect(getObjectValue(result2)).toStrictEqual(45843); // NOTE: this should be updated annually
+            expect(getObjectValue(result2)).toStrictEqual(excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 6, 5))));
 
             const dateText3 = StringValueObject.create('2020-01-02 13:14:15');
             const result3 = testFunction.calculate(dateText3);

@@ -24,11 +24,11 @@ export const DeleteWorksheetRangeThemeStyleMutation: IMutation<IWorksheetRangeTh
     id: 'sheet.mutation.remove-worksheet-range-theme-style',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, range, themeName } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
-        const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
+
+        const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
+        const { unitId, subUnitId, range, themeName } = params;
 
         sheetRangeThemeModel.removeRangeThemeRule(themeName, { range, unitId, subUnitId });
         return true;

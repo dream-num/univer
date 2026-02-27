@@ -15,10 +15,11 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets';
 import { Disposable, generateRandomId, Inject, Range, Rectangle } from '@univerjs/core';
+import { AUTO_FILL_APPLY_TYPE, AutoFillTools, IAutoFillService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 
 export class SheetsHyperLinkAutoFillController extends Disposable {
@@ -35,7 +36,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
 
         // eslint-disable-next-line max-lines-per-function
-        const generalApplyFunc = (location: IAutoFillLocation, applyType: APPLY_TYPE) => {
+        const generalApplyFunc = (location: IAutoFillLocation, applyType: AUTO_FILL_APPLY_TYPE) => {
             const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
 
             const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
@@ -45,7 +46,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
                 row: vSourceRange.startRow,
                 col: vSourceRange.startColumn,
             };
-            const repeats = getAutoFillRepeatRange(vSourceRange, vTargetRange);
+            const repeats = AutoFillTools.getAutoFillRepeatRange(vSourceRange, vTargetRange);
             const redos: IMutationInfo[] = [];
             const undos: IMutationInfo[] = [];
 
@@ -99,7 +100,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
                             },
                         });
                     }
-                    if ((APPLY_TYPE.COPY === applyType || APPLY_TYPE.SERIES === applyType) && link) {
+                    if ((AUTO_FILL_APPLY_TYPE.COPY === applyType || AUTO_FILL_APPLY_TYPE.SERIES === applyType) && link) {
                         redos.push({
                             id: AddHyperLinkMutation.id,
                             params: {
@@ -143,9 +144,9 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
             id: SHEET_HYPER_LINK_UI_PLUGIN,
             onFillData: (location, direction, applyType) => {
                 if (
-                    applyType === APPLY_TYPE.COPY ||
-                    applyType === APPLY_TYPE.ONLY_FORMAT ||
-                    applyType === APPLY_TYPE.SERIES
+                    applyType === AUTO_FILL_APPLY_TYPE.COPY ||
+                    applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT ||
+                    applyType === AUTO_FILL_APPLY_TYPE.SERIES
                 ) {
                     return generalApplyFunc(location, applyType);
                 }

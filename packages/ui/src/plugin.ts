@@ -15,7 +15,7 @@
  */
 
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { DependentOn, generateRandomId, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
+import { DependentOn, generateRandomId, IConfigService, IConfirmService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
@@ -27,12 +27,13 @@ import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
-import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
+import { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
@@ -49,6 +50,7 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -102,9 +104,11 @@ export class UniverUIPlugin extends Plugin {
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
+            [IRibbonService, { useClass: DesktopRibbonService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
@@ -119,6 +123,7 @@ export class UniverUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
+            [IFontService, { useClass: FontService }],
             [CanvasFloatDomService],
             [IUIController, {
                 useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),

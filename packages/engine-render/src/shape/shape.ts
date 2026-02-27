@@ -371,6 +371,10 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         return this;
     }
 
+    getPropByKey<K extends keyof T>(key: K): T[K] {
+        return (this as IKeyValue)[`_${String(key)}`] as T[K];
+    }
+
     override toJson() {
         const props: IKeyValue = {};
         SHAPE_OBJECT_ARRAY.forEach((key) => {

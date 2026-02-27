@@ -14,5 +14,10 @@
  * limitations under the License.
  */
 
+export { useEditor } from './use-editor';
+export { useEditorClickOutside } from './use-editor-click-outside';
+export { useIsFocusing } from './use-is-focusing';
 export { type IKeyboardEventConfig, useKeyboardEvent } from './use-keyboard-event';
+export { useLeftAndRightArrow } from './use-left-and-right-arrow';
+export { useOnChange } from './use-on-change';
 export { useResize } from './use-resize';

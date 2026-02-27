@@ -15,12 +15,9 @@
  */
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
-import { ErrorType } from '../../../basics/error-type';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { getArrayValuesByAggregateIgnoreOptions, getLargeResult } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Large extends BaseFunction {
@@ -29,7 +26,7 @@ export class Large extends BaseFunction {
     override maxParams = 2;
 
     override calculate(array: BaseValueObject, k: BaseValueObject): BaseValueObject {
-        const arrayValues = this._getValues(array);
+        const arrayValues = getArrayValuesByAggregateIgnoreOptions(array);
 
         if (k.isArray()) {
             const resultArray = (k as ArrayValueObject).mapValue((kObject) => this._handleSingleObject(arrayValues, kObject));
@@ -45,8 +42,8 @@ export class Large extends BaseFunction {
     }
 
     private _handleSingleObject(array: number[] | ErrorValueObject, k: BaseValueObject): BaseValueObject {
-        if (array instanceof ErrorValueObject) {
-            return array;
+        if (!Array.isArray(array)) {
+            return array as ErrorValueObject;
         }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(k);
@@ -56,50 +53,8 @@ export class Large extends BaseFunction {
         }
 
         const [kObject] = variants as BaseValueObject[];
+        const kValue = +kObject.getValue();
 
-        let kValue = +kObject.getValue();
-
-        if (kValue < 1 || kValue > array.length) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        kValue = Math.ceil(kValue);
-
-        return NumberValueObject.create(array[kValue - 1]);
-    }
-
-    private _getValues(array: BaseValueObject): number[] | ErrorValueObject {
-        const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
-        const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
-
-        const values: number[] = [];
-
-        for (let r = 0; r < rowCount; r++) {
-            for (let c = 0; c < columnCount; c++) {
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
-
-                if (valueObject.isError()) {
-                    return valueObject as ErrorValueObject;
-                }
-
-                if (valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
-                    continue;
-                }
-
-                const value = valueObject.getValue();
-
-                if (!isRealNum(value)) {
-                    continue;
-                }
-
-                values.push(+value);
-            }
-        }
-
-        if (values.length === 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        return values.sort((a, b) => b - a);
+        return getLargeResult(array, kValue);
     }
 }

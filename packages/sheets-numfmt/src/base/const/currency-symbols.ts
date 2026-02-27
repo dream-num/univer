@@ -58,6 +58,7 @@ export const localeCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.KO_KR, '₩'],
     [LocaleType.ES_ES, '€'],
     [LocaleType.CA_ES, '€'],
+    [LocaleType.SK_SK, '€'],
 ]);
 
 /**
@@ -69,6 +70,7 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
         case LocaleType.CA_ES:
         case LocaleType.ES_ES:
         case LocaleType.FR_FR:
+        case LocaleType.SK_SK:
             return {
                 icon: 'EuroIcon',
                 symbol: localeCurrencySymbolMap.get(locale) || '€',

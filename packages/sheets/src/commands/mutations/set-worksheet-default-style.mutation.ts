@@ -28,15 +28,11 @@ export const SetWorksheetDefaultStyleMutation: IMutation<ISetWorksheetDefaultSty
     id: 'sheet.mutation.set-worksheet-default-style',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { defaultStyle } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { worksheet } = target;
-        if (!worksheet) {
-            return false;
-        }
+        const { defaultStyle } = params;
         worksheet.setDefaultCellStyle(defaultStyle);
         return true;
     },

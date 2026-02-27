@@ -15,20 +15,21 @@
  */
 
 import type { IMouseEvent } from '@univerjs/engine-render';
+import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
-import { Popup } from '@univerjs/design';
-import { useEffect, useRef, useState } from 'react';
-import { Menu } from '../../../components/menu/desktop/Menu';
 
+import { useEffect, useRef, useState } from 'react';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { useDependency, useInjector } from '../../../utils/di';
+import { AnchoredContextMenu } from './AnchoredContextMenu';
+
+const DESKTOP_CONTEXT_MENU_HOST_ID = 'desktop-context-menu';
 
 export function DesktopContextMenu() {
-    const contentRef = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
-    const [offset, setOffset] = useState<[number, number]>([0, 0]);
+    const [anchorRect, setAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
     const visibleRef = useRef(visible);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
@@ -39,25 +40,14 @@ export function DesktopContextMenu() {
         const disposables = contextMenuService.registerContextMenuHandler({
             handleContextMenu,
             hideContextMenu() {
-                setVisible(false);
+                handleClose();
             },
             get visible() {
                 return visibleRef.current;
             },
         });
 
-        function handleClickOutside(event: MouseEvent) {
-            if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
-                handleClose();
-            }
-        }
-
-        document.addEventListener('pointerdown', handleClickOutside);
-        document.addEventListener('wheel', handleClose);
-
         return () => {
-            document.removeEventListener('pointerdown', handleClickOutside);
-            document.removeEventListener('wheel', handleClose);
             disposables.dispose();
         };
     }, [contextMenuService]);
@@ -67,7 +57,11 @@ export function DesktopContextMenu() {
         setVisible(false);
         requestAnimationFrame(() => {
             setMenuType(menuType);
-            setOffset([event.clientX, event.clientY]);
+            setAnchorRect({
+                left: event.clientX,
+                top: event.clientY,
+                bottom: event.clientY,
+            });
             setVisible(true);
         });
     }
@@ -77,26 +71,24 @@ export function DesktopContextMenu() {
     }
 
     return (
-        <Popup visible={visible} offset={offset}>
-            <section ref={contentRef}>
-                {menuType && (
-                    <Menu
-                        menuType={menuType}
-                        onOptionSelect={(params) => {
-                            const { label: id, commandId, value } = params;
+        <AnchoredContextMenu
+            hostId={DESKTOP_CONTEXT_MENU_HOST_ID}
+            visible={visible}
+            anchorRect={anchorRect}
+            menuType={menuType}
+            onRequestClose={handleClose}
+            onOptionSelect={(params) => {
+                const { label: id, commandId, value } = params;
 
-                            if (commandService) {
-                                commandService.executeCommand(commandId ?? id as string, { value });
-                            }
+                if (commandService) {
+                    commandService.executeCommand(commandId ?? id as string, { value });
+                }
 
-                            const layoutService = injector.get(ILayoutService);
-                            layoutService.focus();
+                const layoutService = injector.get(ILayoutService);
+                layoutService.focus();
 
-                            setVisible(false);
-                        }}
-                    />
-                )}
-            </section>
-        </Popup>
+                handleClose();
+            }}
+        />
     );
 }

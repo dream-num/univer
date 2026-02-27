@@ -16,6 +16,7 @@
 
 import { FEnum } from '@univerjs/core/facade';
 import { SheetSkeletonChangeType, SheetValueChangeType, SplitDelimiterEnum } from '@univerjs/sheets';
+import { RangePermissionPoint, UnitRole, WorkbookPermissionPoint, WorksheetPermissionPoint } from './permission';
 
 /**
  * @ignore
@@ -37,6 +38,26 @@ export interface IFSheetsEnum {
      * Split delimiter types.
      */
     SplitDelimiterType: typeof SplitDelimiterEnum;
+
+    /**
+     * Unit roles.
+     */
+    UnitRole: typeof UnitRole;
+
+    /**
+     * Workbook permission points.
+     */
+    WorkbookPermissionPoint: typeof WorkbookPermissionPoint;
+
+    /**
+     * Worksheet permission points.
+     */
+    WorksheetPermissionPoint: typeof WorksheetPermissionPoint;
+
+    /**
+     * Range permission points.
+     */
+    RangePermissionPoint: typeof RangePermissionPoint;
 }
 
 export class FSheetsEnum implements IFSheetsEnum {
@@ -50,6 +71,22 @@ export class FSheetsEnum implements IFSheetsEnum {
 
     get SplitDelimiterType(): typeof SplitDelimiterEnum {
         return SplitDelimiterEnum;
+    }
+
+    get UnitRole(): typeof UnitRole {
+        return UnitRole;
+    }
+
+    get WorkbookPermissionPoint(): typeof WorkbookPermissionPoint {
+        return WorkbookPermissionPoint;
+    }
+
+    get WorksheetPermissionPoint(): typeof WorksheetPermissionPoint {
+        return WorksheetPermissionPoint;
+    }
+
+    get RangePermissionPoint(): typeof RangePermissionPoint {
+        return RangePermissionPoint;
     }
 }
 

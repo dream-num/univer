@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isLegalUrl, normalizeUrl } from '../url';
+import { isLegalUrl, normalizeUrl, resolveWithBasePath } from '../url';
 
 describe('Test url utils', () => {
     it('should return true on legal url', () => {
@@ -35,5 +35,27 @@ describe('Test url utils', () => {
         expect(normalizeUrl('univer.ai')).toEqual('https://univer.ai');
         expect(normalizeUrl('https://univer.ai')).toEqual('https://univer.ai');
         expect(normalizeUrl('zhang@univer.ai')).toEqual('mailto://zhang@univer.ai');
+    });
+
+    it('should resolve url with base path', () => {
+        expect(resolveWithBasePath('/universer-api/strean/file/dowload?file_id-2008162633680711718', 'http://univer.examples.com.cn:9080/univer/')).toEqual(
+            'http://univer.examples.com.cn:9080/univer/universer-api/strean/file/dowload?file_id-2008162633680711718'
+        );
+
+        expect(resolveWithBasePath('universer-api/strean/file/dowload?file_id-2008162633680711718', 'http://univer.examples.com.cn:9080/univer/')).toEqual(
+            'http://univer.examples.com.cn:9080/univer/universer-api/strean/file/dowload?file_id-2008162633680711718'
+        );
+
+        expect(resolveWithBasePath('/universer-api/strean/file/dowload?file_id-2008162633680711718', 'http://univer.examples.com.cn:9080/univer')).toEqual(
+            'http://univer.examples.com.cn:9080/univer/universer-api/strean/file/dowload?file_id-2008162633680711718'
+        );
+
+        expect(resolveWithBasePath('https://univer.examples.com.cn/file/2007806045355209235/univer-New%20Sheet.xlsx', 'http://univer.examples.com.cn:9080/univer/')).toEqual(
+            'https://univer.examples.com.cn/file/2007806045355209235/univer-New%20Sheet.xlsx'
+        );
+
+        expect(resolveWithBasePath('/universer-api/strean/file/dowload?file_id-2008162633680711718', 'http://univer.examples.com.cn:9080/')).toEqual(
+            'http://univer.examples.com.cn:9080/universer-api/strean/file/dowload?file_id-2008162633680711718'
+        );
     });
 });

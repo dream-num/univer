@@ -27,13 +27,6 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from '../commands/commands/add-worksheet-merge.command';
-import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
@@ -55,7 +48,6 @@ import {
 import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
-import { RefillCommand } from '../commands/commands/refill.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import {
@@ -65,6 +57,8 @@ import {
 } from '../commands/commands/set-format-painter.command';
 import {
     SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../commands/commands/set-frozen.command';
@@ -95,6 +89,7 @@ import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
+import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../components/menu-item-frozen';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { CellPopup } from '../views/cell-popup';
 import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
@@ -186,6 +181,7 @@ export class SheetUIController extends Disposable {
 
         // init custom components
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
+        this.disposeWithMe(componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
@@ -194,13 +190,8 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register('HideGridlinesDoubleIcon', HideGridlinesDoubleIcon));
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCommands(): void {
         [
-            AddWorksheetMergeAllCommand,
-            AddWorksheetMergeCommand,
-            AddWorksheetMergeHorizontalCommand,
-            AddWorksheetMergeVerticalCommand,
             ChangeZoomRatioCommand,
             ExpandSelectionCommand,
             MoveSelectionCommand,
@@ -244,19 +235,18 @@ export class SheetUIController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
+            SetFirstRowFrozenCommand,
+            SetFirstColumnFrozenCommand,
             ScrollToRangeOperation,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,
             ShowMenuListCommand,
-            RefillCommand,
             InsertRangeMoveDownConfirmCommand,
             DeleteRangeMoveUpConfirmCommand,
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
             SidebarDefinedNameOperation,
-            AutoFillCommand,
-            AutoClearContentCommand,
 
             // permission
             SheetPermissionOpenPanelOperation,

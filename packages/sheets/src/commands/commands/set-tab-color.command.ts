@@ -16,12 +16,12 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetTabColorMutationParams } from '../mutations/set-tab-color.mutation';
-
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { SetTabColorMutation, SetTabColorUndoMutationFactory } from '../mutations/set-tab-color.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface ISetTabColorCommandParams {
+export interface ISetTabColorCommandParams extends Partial<ISheetCommandSharedParams> {
     value: string;
 }
 
@@ -33,7 +33,7 @@ export const SetTabColorCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;

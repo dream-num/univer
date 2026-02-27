@@ -16,16 +16,12 @@
 
 import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, IConfigService, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { convertTextRotation, fixLineWidthByScale, getCurrentTypeOfRenderer, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
-import { ILayoutService, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
-import { SHEET_FOOTER_BAR_HEIGHT } from '../../views/sheet-container/SheetContainer';
 import { IEditorBridgeService } from '../editor-bridge.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ICellEditorManagerService } from './cell-editor-manager.service';
@@ -76,7 +72,6 @@ export class SheetCellEditorResizeService extends Disposable {
         return this._renderer?.engine;
     }
 
-    // eslint-disable-next-line complexity
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
@@ -103,9 +98,8 @@ export class SheetCellEditorResizeService extends Disposable {
         if (!info || info.actualWidth <= 0) return;
         let { actualWidth, actualHeight } = info;
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
-        actualWidth = actualWidth + (paddingData.l ?? 0) + (paddingData.r ?? 0);
-        actualHeight = actualHeight + (paddingData.t ?? 0) + (paddingData.b ?? 0);
-
+        actualWidth = actualWidth + (paddingData.l ?? 0) * scaleX + (paddingData.r ?? 0) * scaleX;
+        actualHeight = actualHeight + (paddingData.t ?? 0) * scaleY + (paddingData.b ?? 0) * scaleY;
         let editorWidth = endX - startX;
         let editorHeight = endY - startY;
         if (editorWidth < actualWidth) {
@@ -136,9 +130,8 @@ export class SheetCellEditorResizeService extends Disposable {
         } else {
             offsetLeft = paddingData.l || 0;
         }
-
-        offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
-        offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
+        offsetTop = Math.max(offsetTop, paddingData.t || 0);
+        offsetLeft = Math.max(offsetLeft, paddingData.l || 0);
         documentDataModel.updateDocumentDataMargin({
             t: offsetTop,
             l: offsetLeft,
@@ -180,7 +173,7 @@ export class SheetCellEditorResizeService extends Disposable {
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-            documentDataModel?.updateDocumentDataPageSize(endX - startX);
+            documentDataModel?.updateDocumentDataPageSize((endX - startX) / scaleX);
             documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
             documentSkeleton.calculate();
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
@@ -236,39 +229,26 @@ export class SheetCellEditorResizeService extends Disposable {
 
         // We should take the scale into account when canvas is scaled by CSS.
         const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
-        const { width } = canvasClientRect; // real width affected by scale
+        const { width, height } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;
         const { startX, startY, endX } = position;
         const enginWidth = engine.width;
 
-        const footerBarHeight = (
-            (this._configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY)?.footer ?? true)
-            &&
-            (this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.footer ?? true)
-        )
-            ? SHEET_FOOTER_BAR_HEIGHT
-            : 0;
+        const maxHeight = height - startY - EDITOR_BORDER_SIZE * 2;
 
-        const clientHeight =
-            document.body.clientHeight -
-            startY -
-            footerBarHeight -
-            canvasOffset.top -
-            EDITOR_BORDER_SIZE * 2;
-
-        let clientWidth = width - startX;
-
+        let maxWidth = width - startX;
         if (horizontalAlign === HorizontalAlign.CENTER) {
             const rightGap = enginWidth - endX;
             const leftGap = startX;
-            clientWidth = (endX - startX) + Math.min(leftGap, rightGap) * 2;
+            maxWidth = (endX - startX) + Math.min(leftGap, rightGap) * 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            clientWidth = endX;
+            maxWidth = endX;
         }
+        maxWidth = maxWidth - EDITOR_BORDER_SIZE * 2;
 
         return {
-            height: clientHeight,
-            width: clientWidth - EDITOR_BORDER_SIZE,
+            height: maxHeight,
+            width: maxWidth,
             scaleAdjust,
         };
     }

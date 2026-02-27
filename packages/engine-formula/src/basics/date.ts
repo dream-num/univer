@@ -23,6 +23,8 @@ export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
 export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
 export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
 
+const perDayMilliseconds = 24 * 60 * 60 * 1000;
+
 /**
  * Excel stores dates as sequential serial numbers so they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
  *
@@ -31,19 +33,17 @@ export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
  * 1900.2.29 Date Serial 61
  * 1900.3.1 Date Serial 61
  * 1901.1.1 Date Serial 367
- * @param date
- * @returns
  */
 export function excelDateSerial(date: Date): number {
-    const baseDate = new Date(Date.UTC(1900, 0, 1)); // January 1, 1900, UTC
-    const leapDayDate = new Date(Date.UTC(1900, 1, 28)); // February 28, 1900, UTC
-    const dateInUTC = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const baseDateTime = Date.UTC(1900, 0, 1); // January 1, 1900, UTC
+    const leapDayDateTime = Date.UTC(1900, 1, 28); // February 28, 1900, UTC
+    const dateTime = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()); // Input date at UTC
 
     // Calculate the difference in days between the base date and the input date
-    let dayDifference = (dateInUTC - baseDate.getTime()) / (1000 * 3600 * 24);
+    let dayDifference = (dateTime - baseDateTime) / perDayMilliseconds;
 
     // If the date is later than February 28, 1900, the day difference needs to be adjusted to account for Excel errors
-    if (dateInUTC > leapDayDate.getTime()) {
+    if (dateTime > leapDayDateTime) {
         dayDifference += 1;
     }
 
@@ -52,19 +52,17 @@ export function excelDateSerial(date: Date): number {
 
 /**
  * Time serial number with date
- * @param date
- * @returns
  */
 export function excelDateTimeSerial(date: Date): number {
-    const baseDate = new Date(Date.UTC(1900, 0, 1, 0, 0, 0)); // January 1, 1900, UTC at midnight
-    const leapDayDate = new Date(Date.UTC(1900, 1, 28, 0, 0, 0)); // February 28, 1900, UTC at midnight
+    const baseDateTime = Date.UTC(1900, 0, 1, 0, 0, 0); // January 1, 1900, UTC at midnight
+    const leapDayDateTime = Date.UTC(1900, 1, 28, 0, 0, 0); // February 28, 1900, UTC at midnight
+    const dateTime = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()); // Input date at UTC midnight
 
     // Calculate the difference in milliseconds between the input date and the base date
-    const diffMilliseconds = date.getTime() - baseDate.getTime();
-    let dayDifference = diffMilliseconds / (1000 * 3600 * 24);
+    let dayDifference = (dateTime - baseDateTime) / perDayMilliseconds;
 
     // Adjusting for the Excel leap year bug
-    if (date > leapDayDate) {
+    if (dateTime > leapDayDateTime) {
         dayDifference += 1;
     }
 
@@ -72,28 +70,27 @@ export function excelDateTimeSerial(date: Date): number {
 }
 
 export function excelSerialToDate(serial: number): Date {
-    const baseDate = new Date(Date.UTC(1900, 0, 1)); // January 1, 1900, UTC
-    const leapDayDate = new Date(Date.UTC(1900, 1, 28)); // February 28, 1900, UTC
+    const baseDateTime = Date.UTC(1900, 0, 1); // January 1, 1900, UTC
+    const leapDayDateTime = Date.UTC(1900, 1, 28); // February 28, 1900, UTC
 
     let dayDifference = Math.floor(serial) - 1; // Adjust for Excel serial number starting from 1
 
     // If the serial number corresponds to a date later than February 28, 1900, adjust the day difference
-    if (dayDifference > (leapDayDate.getTime() - baseDate.getTime()) / (1000 * 3600 * 24)) {
+    if (dayDifference > (leapDayDateTime - baseDateTime) / perDayMilliseconds) {
         dayDifference -= 1;
     }
 
-    const resultDate = new Date(baseDate.getTime() + dayDifference * (1000 * 3600 * 24));
-    return resultDate;
+    return new Date(baseDateTime + dayDifference * perDayMilliseconds);
 }
 
 export function excelSerialToDateTime(serial: number): Date {
-    const baseDate = new Date(Date.UTC(1900, 0, 1, 0, 0, 0)); // January 1, 1900, UTC
-    const leapDayDate = new Date(Date.UTC(1900, 1, 28, 0, 0, 0)); // February 28, 1900, UTC
+    const baseDateTime = Date.UTC(1900, 0, 1, 0, 0, 0); // January 1, 1900, UTC at midnight
+    const leapDayDateTime = Date.UTC(1900, 1, 28, 0, 0, 0); // February 28, 1900, UTC at midnight
 
     let dayDifference = serial - 1; // Adjust for Excel serial number starting from 1
 
     // If the serial number corresponds to a date later than February 28, 1900, adjust the day difference
-    if (dayDifference > (leapDayDate.getTime() - baseDate.getTime()) / (1000 * 3600 * 24)) {
+    if (dayDifference > (leapDayDateTime - baseDateTime) / perDayMilliseconds) {
         dayDifference -= 1;
     }
 
@@ -101,8 +98,7 @@ export function excelSerialToDateTime(serial: number): Date {
         dayDifference = serial;
     }
 
-    const resultDate = new Date(baseDate.getTime() + dayDifference * (1000 * 3600 * 24));
-    return resultDate;
+    return new Date(baseDateTime + dayDifference * perDayMilliseconds);
 }
 
 export function formatDateDefault(date: Date): string {
@@ -125,8 +121,6 @@ export function formatDateDefault(date: Date): string {
  * Validate date string
  *
  * TODO @Dushusir: Internationalization and more format support, can be reused when editing and saving cells, like "2020年1月1日"
- * @param dateStr
- * @returns
  */
 export function isValidDateStr(dateStr: string): boolean {
     // Regular expression to validate date format
@@ -158,10 +152,6 @@ export function isValidDateStr(dateStr: string): boolean {
 
 export function parseFormattedDate(value: string) {
     return numfmt.parseDate(value);
-}
-
-export function parseFormattedValue(value: string) {
-    return numfmt.parseValue(value);
 }
 
 export function parseFormattedTime(value: string) {
@@ -339,14 +329,14 @@ export function getWeekDayByDateSerialNumber(dateSerialNumber: number): number {
 
     let date = excelSerialToDate(dateSerialNumber);
 
-    const dateTime = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getTime();
-    const leapDayDateTime = new Date(Date.UTC(1900, 1, 28)).getTime(); // February 28, 1900, UTC
+    const leapDayDateTime = Date.UTC(1900, 1, 28); // February 28, 1900, UTC
+    const dateTime = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 
     if (!isDate19000229 && dateTime <= leapDayDateTime) {
-        date = new Date(dateTime - 24 * 3600 * 1000);
+        date = new Date(dateTime - perDayMilliseconds);
     }
 
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getUTCDay();
+    return date.getUTCDay();
 }
 
 interface ITwoDateDaysType {

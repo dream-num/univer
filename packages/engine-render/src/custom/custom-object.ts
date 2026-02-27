@@ -54,7 +54,8 @@ export class CustomObject extends BaseObject {
             }
         }
 
-        const m = this.transform.getMatrix();
+        // When inside a group with baseBound, use the mapped render matrix
+        const m = this._getGroupBoundRenderMatrix() ?? this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         this._render(mainCtx);

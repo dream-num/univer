@@ -19,6 +19,11 @@ import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
+/**
+ * Convert ungroup params back to group params (used for undo of ungroup).
+ * Children keep their absolute positions; the group's baseBound (chOff/chExt)
+ * is set to match the computed bounding box.
+ */
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
     const newGroupParams: IDrawingGroupUpdateParam[] = [];
 
@@ -27,6 +32,7 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
         const { unitId, subUnitId, drawingId: groupId } = parent;
         const groupTransform = getGroupState(0, 0, children.map((o) => o.transform || {}));
 
+        // Children keep their absolute positions (Excel-like model)
         const newChildren = children.map((drawing) => {
             const transform = drawing.transform || { left: 0, top: 0 };
             const { unitId, subUnitId, drawingId } = drawing;
@@ -36,8 +42,6 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
                 drawingId,
                 transform: {
                     ...transform,
-                    left: transform.left! - groupTransform.left,
-                    top: transform.top! - groupTransform.top,
                 },
                 groupId,
             };
@@ -49,6 +53,12 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             transform: groupTransform,
+            groupBaseBound: {
+                left: groupTransform.left,
+                top: groupTransform.top,
+                width: groupTransform.width,
+                height: groupTransform.height,
+            },
         } as IDrawingParam;
 
         newGroupParams.push({
@@ -60,6 +70,11 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
     return newGroupParams;
 }
 
+/**
+ * Convert group params to ungroup params (used for undo of group).
+ * Computes children's absolute positions from the group's baseBound (chOff/chExt)
+ * and the group's current transform.
+ */
 export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
     const newGroupParams: IDrawingGroupUpdateParam[] = [];
 
@@ -69,10 +84,24 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
         if (groupTransform == null) {
             return;
         }
+
+        // Use groupBaseBound (chOff/chExt) or fall back to group transform as baseBound
+        const baseBound = parent.groupBaseBound || {
+            left: groupTransform.left || 0,
+            top: groupTransform.top || 0,
+            width: groupTransform.width || 0,
+            height: groupTransform.height || 0,
+        };
+
         const newChildren = children.map((object) => {
             const { transform } = object;
             const { unitId, subUnitId, drawingId } = object;
-            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
+            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, {
+                left: baseBound.left || 0,
+                top: baseBound.top || 0,
+                width: baseBound.width || 0,
+                height: baseBound.height || 0,
+            });
             return {
                 unitId,
                 subUnitId,

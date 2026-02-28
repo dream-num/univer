@@ -23,7 +23,6 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { InsertFunctionCommand } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {

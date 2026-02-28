@@ -45,6 +45,7 @@ import { SheetDrawingPrintingController } from './controllers/sheet-drawing-prin
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
+import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
@@ -85,6 +86,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetCellImageController],
             [SheetCellImageAutofillController],
             [SheetCellImageCopyPasteController],
+            [IBatchSaveImagesService, { useClass: BatchSaveImagesService }],
         ]);
 
         touchDependencies(this._injector, [

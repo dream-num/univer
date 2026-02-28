@@ -33,6 +33,7 @@ import {
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
@@ -147,6 +148,7 @@ describe('Test inverted index cache', () => {
         commandService = get(ICommandService);
 
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationStopMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);
@@ -201,7 +203,7 @@ describe('Test inverted index cache', () => {
             ...functions
         );
 
-        formulaEngine.executeCalculation();
+        commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
         await formulaEngine.onCalculationEnd();
 
         getCellValue = (row: number, column: number) => {

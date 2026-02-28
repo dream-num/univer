@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { isAllFormatInTextRuns } from '../range';
 import type { IDocumentBody } from '../../types/interfaces';
+import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../types/enum';
+import { isAllFormatInTextRuns } from '../range';
 
 describe('Test isAllFormatInTextRuns', () => {
     it('should return true when all content is bold', () => {

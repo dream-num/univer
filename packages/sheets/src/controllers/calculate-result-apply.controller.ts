@@ -16,9 +16,8 @@
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, sequenceExecute } from '@univerjs/core';
 import { handleNumfmtInCell, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 
 export class CalculateResultApplyController extends Disposable {
@@ -80,11 +79,14 @@ export class CalculateResultApplyController extends Disposable {
                     }
                 }
 
-                const result = redoMutationsInfo.every((m) =>
-                    this._commandService.executeCommand(m.id, m.params, {
+                const result = sequenceExecute(
+                    redoMutationsInfo,
+                    this._commandService,
+                    {
                         onlyLocal: true,
                         fromFormula: true,
-                    })
+                        applyFormulaCalculationResult: true,
+                    }
                 );
                 return result;
             })

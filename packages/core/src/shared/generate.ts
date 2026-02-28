@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { CellValue } from '../sheets/typedef';
+import type { Nullable } from './types';
+
 /**
  * Determine whether it is a pure number, "12" and "12e+3" are both true
  * @param val The number or string to be judged
  * @returns Result
  */
-export function isRealNum(val: string | number | boolean): boolean {
+export function isRealNum(val: Nullable<CellValue>): boolean {
     if (val === null || val === undefined) {
         return false;
     }

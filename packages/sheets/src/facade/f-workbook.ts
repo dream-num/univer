@@ -16,7 +16,7 @@
 
 import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IStyleData, IWorkbookData, IWorksheetData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IInsertSheetCommandParams, IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
 import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
@@ -26,6 +26,7 @@ import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
+import { FWorkbookPermission } from './permission/f-workbook-permission';
 
 /**
  * Facade API object bounded to a workbook. It provides a set of methods to interact with the workbook.
@@ -222,9 +223,9 @@ export class FWorkbook extends FBaseInitialable {
      * console.log(newSheetWithData);
      * ```
      */
-    create(name: string, rows: number, columns: number, options?: Pick<IInsertSheetCommandParams, 'index' | 'sheet'>): FWorksheet {
+    create(name: string, rows: number, columns: number, options?: { index?: number; sheet?: Partial<IWorksheetData> }): FWorksheet {
         const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
-        newSheet.name = name;
+        newSheet.name = this._workbook.uniqueSheetName(name);
         newSheet.rowCount = rows;
         newSheet.columnCount = columns;
         newSheet.id = options?.sheet?.id;
@@ -352,9 +353,9 @@ export class FWorkbook extends FBaseInitialable {
      * console.log(newSheetWithData);
      * ```
      */
-    insertSheet(sheetName?: string, options?: Pick<IInsertSheetCommandParams, 'index' | 'sheet'>): FWorksheet {
+    insertSheet(sheetName?: string, options?: { index?: number; sheet?: Partial<IWorksheetData> }): FWorksheet {
         const newSheet: Partial<IWorksheetData> = mergeWorksheetSnapshotWithDefault(Tools.deepClone(options?.sheet ?? {}));
-        newSheet.name = sheetName;
+        newSheet.name = this._workbook.uniqueSheetName(sheetName);
         newSheet.id = options?.sheet?.id;
 
         const newSheetIndex = options?.index ?? this._workbook.getSheets().length;
@@ -802,6 +803,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Get the PermissionInstance.
      * @returns {FPermission} - The PermissionInstance.
+     * @deprecated Use `getWorkbookPermission()` instead for the new permission API
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -811,6 +813,35 @@ export class FWorkbook extends FBaseInitialable {
      */
     getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
+    }
+
+    /**
+     * Get the WorkbookPermission instance for managing workbook-level permissions.
+     * This is the new permission API that provides a more intuitive and type-safe interface.
+     * @returns {FWorkbookPermission} - The WorkbookPermission instance.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const permission = fWorkbook.getWorkbookPermission();
+     *
+     * // Set workbook to read-only mode
+     * await permission.setMode('viewer');
+     *
+     * // Add a collaborator
+     * await permission.addCollaborator({
+     *   userId: 'user123',
+     *   name: 'John Doe',
+     *   role: 'editor'
+     * });
+     *
+     * // Subscribe to permission changes
+     * permission.permission$.subscribe(snapshot => {
+     *   console.log('Permissions changed:', snapshot);
+     * });
+     * ```
+     */
+    getWorkbookPermission(): FWorkbookPermission {
+        return this._injector.createInstance(FWorkbookPermission, this._workbook.getUnitId());
     }
 
     /**

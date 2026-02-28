@@ -136,7 +136,7 @@ const IconGroupList = forwardRef<HTMLDivElement, IIconGroupListProps>((props, re
                                     >
                                         <a
                                             className={`
-                                              univer-cursor-pointer univer-rounded
+                                              univer-flex univer-cursor-pointer univer-rounded
                                               hover:univer-bg-gray-100
                                               dark:hover:!univer-bg-gray-700
                                             `}

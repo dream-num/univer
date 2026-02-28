@@ -24,17 +24,17 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
       "colSpan": 1,
       "p": {
         "body": {
-          "dataStream": "                    background color                 
+          "dataStream": " background color  
 ",
           "paragraphs": [
             {
-              "startIndex": 53,
+              "startIndex": 19,
             },
           ],
           "textRuns": [
             {
-              "ed": 37,
-              "st": 36,
+              "ed": 18,
+              "st": 17,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -83,7 +83,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
         "tb": 1,
         "vt": 2,
       },
-      "v": "                    background color                 ",
+      "v": " background color  ",
     },
     "2": {
       "colSpan": 1,
@@ -532,17 +532,17 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
       "colSpan": 1,
       "p": {
         "body": {
-          "dataStream": "                    U                    N                    I                    V                    ER                                         UP                                         UP                                         UP                                     
+          "dataStream": " U N I V ER   UP   UP   UP   
 ",
           "paragraphs": [
             {
-              "startIndex": 272,
+              "startIndex": 29,
             },
           ],
           "textRuns": [
             {
-              "ed": 21,
-              "st": 20,
+              "ed": 2,
+              "st": 1,
               "ts": {
                 "cl": {
                   "rgb": "rgb(166,201,236)",
@@ -552,8 +552,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 42,
-              "st": 41,
+              "ed": 4,
+              "st": 3,
               "ts": {
                 "cl": {
                   "rgb": "rgb(64,64,64)",
@@ -563,8 +563,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 63,
-              "st": 62,
+              "ed": 6,
+              "st": 5,
               "ts": {
                 "cl": {
                   "rgb": "rgb(166,166,166)",
@@ -574,8 +574,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 84,
-              "st": 83,
+              "ed": 8,
+              "st": 7,
               "ts": {
                 "cl": {
                   "rgb": "rgb(131,226,142)",
@@ -585,8 +585,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 106,
-              "st": 104,
+              "ed": 11,
+              "st": 9,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -596,8 +596,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 127,
-              "st": 126,
+              "ed": 13,
+              "st": 12,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -607,8 +607,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 149,
-              "st": 147,
+              "ed": 16,
+              "st": 14,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -619,8 +619,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 170,
-              "st": 169,
+              "ed": 18,
+              "st": 17,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -630,8 +630,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 192,
-              "st": 190,
+              "ed": 21,
+              "st": 19,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -642,8 +642,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 213,
-              "st": 212,
+              "ed": 23,
+              "st": 22,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -653,8 +653,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 235,
-              "st": 233,
+              "ed": 26,
+              "st": 24,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -667,8 +667,8 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
               },
             },
             {
-              "ed": 256,
-              "st": 255,
+              "ed": 28,
+              "st": 27,
               "ts": {
                 "cl": {
                   "rgb": "rgb(0,0,0)",
@@ -714,7 +714,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
         "tb": 1,
         "vt": 2,
       },
-      "v": "                    U                    N                    I                    V                    ER                                         UP                                         UP                                         UP                                     ",
+      "v": " U N I V ER   UP   UP   UP   ",
     },
     "1": {
       "colSpan": 1,
@@ -886,7 +886,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
         "tb": 3,
         "vt": 2,
       },
-      "v": "                    text wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap                ",
+      "v": " text wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap ",
     },
     "2": {
       "colSpan": 1,
@@ -1041,7 +1041,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
         "tb": 1,
         "vt": 2,
       },
-      "v": "                    text wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap                ",
+      "v": " text wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap wrap ",
     },
     "2": {
       "colSpan": undefined,
@@ -2941,7 +2941,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "bl": 1,
         "vt": 3,
       },
-      "v": "                    bold                ",
+      "v": " bold ",
     },
     "1": {
       "colSpan": 1,
@@ -2952,7 +2952,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 3,
       },
-      "v": "                    background color                ",
+      "v": " background color ",
     },
     "2": {
       "colSpan": 1,
@@ -2992,7 +2992,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "s": {
         "vt": 3,
       },
-      "v": "                    merge cell with border & style                ",
+      "v": " merge cell with border & style ",
     },
     "7": {
       "colSpan": 1,
@@ -3027,7 +3027,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "it": 1,
         "vt": 3,
       },
-      "v": "                    italic                ",
+      "v": " italic ",
     },
     "1": {
       "colSpan": 1,
@@ -3142,7 +3142,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 3,
         "vt": 3,
       },
-      "v": "                    horizontal Aligment                ",
+      "v": " horizontal Aligment ",
     },
     "2": {
       "colSpan": 1,
@@ -3269,7 +3269,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 3,
         "vt": 3,
       },
-      "v": "                    1.11E+09                ",
+      "v": " 1.11E+09 ",
     },
   },
   "11": {
@@ -3277,17 +3277,17 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
-          "dataStream": "                    UNIVER UP UP UP                
+          "dataStream": " UNIVER UP UP UP 
 ",
           "paragraphs": [
             {
-              "startIndex": 51,
+              "startIndex": 17,
             },
           ],
           "textRuns": [
             {
-              "ed": 21,
-              "st": 20,
+              "ed": 2,
+              "st": 1,
               "ts": {
                 "bl": 1,
                 "ff": "Arial",
@@ -3295,16 +3295,16 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 22,
-              "st": 21,
+              "ed": 3,
+              "st": 2,
               "ts": {
                 "ff": "Arial",
                 "fs": 17,
               },
             },
             {
-              "ed": 24,
-              "st": 22,
+              "ed": 5,
+              "st": 3,
               "ts": {
                 "ff": "Arial",
                 "fs": 17,
@@ -3312,16 +3312,16 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 25,
-              "st": 24,
+              "ed": 6,
+              "st": 5,
               "ts": {
                 "ff": "Arial",
                 "fs": 17,
               },
             },
             {
-              "ed": 26,
-              "st": 25,
+              "ed": 7,
+              "st": 6,
               "ts": {
                 "cl": {
                   "rgb": "rgb(74,134,232)",
@@ -3331,24 +3331,24 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 27,
-              "st": 26,
+              "ed": 8,
+              "st": 7,
               "ts": {
                 "ff": "Arial",
                 "fs": 17,
               },
             },
             {
-              "ed": 30,
-              "st": 27,
+              "ed": 11,
+              "st": 8,
               "ts": {
                 "ff": "Arial",
                 "fs": 10,
               },
             },
             {
-              "ed": 32,
-              "st": 30,
+              "ed": 13,
+              "st": 11,
               "ts": {
                 "ff": "Arial",
                 "fs": 10,
@@ -3358,8 +3358,8 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 35,
-              "st": 32,
+              "ed": 16,
+              "st": 13,
               "ts": {
                 "ff": "Arial",
                 "fs": 10,
@@ -3393,7 +3393,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "s": {
         "vt": 3,
       },
-      "v": "                    UNIVER UP UP UP                ",
+      "v": " UNIVER UP UP UP ",
     },
     "1": {
       "colSpan": 1,
@@ -3484,7 +3484,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "tb": 3,
         "vt": 3,
       },
-      "v": "                    text wrap wrap wrap wrap wrap wrap wrap wrap wrap                ",
+      "v": " text wrap wrap wrap wrap wrap wrap wrap wrap wrap ",
     },
     "2": {
       "colSpan": 1,
@@ -3564,11 +3564,11 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
-          "dataStream": "                                            text wrap wrap wrap wrap wrap wrap wrap wrap wrap                                    
+          "dataStream": "  text wrap wrap wrap wrap wrap wrap wrap wrap wrap  
 ",
           "paragraphs": [
             {
-              "startIndex": 129,
+              "startIndex": 53,
             },
           ],
           "textRuns": [],
@@ -3607,7 +3607,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 3,
       },
-      "v": "                                            text wrap wrap wrap wrap wrap wrap wrap wrap wrap                                    ",
+      "v": "  text wrap wrap wrap wrap wrap wrap wrap wrap wrap  ",
     },
     "2": {
       "colSpan": 1,
@@ -3690,7 +3690,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "tb": 2,
         "vt": 3,
       },
-      "v": "                    text wrap wrap wrap wrap wrap wrap wrap wrap wrap                ",
+      "v": " text wrap wrap wrap wrap wrap wrap wrap wrap wrap ",
     },
     "2": {
       "colSpan": 1,
@@ -3857,7 +3857,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 3,
       },
-      "v": "                    underline                ",
+      "v": " underline ",
     },
     "1": {
       "colSpan": 1,
@@ -3879,7 +3879,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 3,
       },
-      "v": "                    border line                ",
+      "v": " border line ",
     },
     "2": {
       "colSpan": 1,
@@ -3950,7 +3950,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "it": 1,
         "vt": 2,
       },
-      "v": "                    univer                ",
+      "v": " univer ",
     },
     "7": {
       "colSpan": undefined,
@@ -3998,7 +3998,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 3,
         "vt": 3,
       },
-      "v": "                    2024/1/1                ",
+      "v": " 2024/1/1 ",
     },
   },
   "3": {
@@ -4011,7 +4011,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 3,
       },
-      "v": "                    strike through                ",
+      "v": " strike through ",
     },
     "1": {
       "colSpan": 1,
@@ -4102,7 +4102,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "fs": 17,
         "vt": 3,
       },
-      "v": "                    font size                ",
+      "v": " font size ",
     },
     "1": {
       "colSpan": 1,
@@ -4124,11 +4124,11 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
-          "dataStream": "                                                                                
+          "dataStream": "    
 ",
           "paragraphs": [
             {
-              "startIndex": 80,
+              "startIndex": 4,
             },
           ],
           "textRuns": [],
@@ -4159,7 +4159,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "s": {
         "vt": 3,
       },
-      "v": "                                                                                ",
+      "v": "    ",
     },
     "4": {
       "colSpan": 1,
@@ -4189,17 +4189,17 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
-          "dataStream": "                                            univer                                    
+          "dataStream": "  univer  
 ",
           "paragraphs": [
             {
-              "startIndex": 86,
+              "startIndex": 10,
             },
           ],
           "textRuns": [
             {
-              "ed": 44,
-              "st": 20,
+              "ed": 2,
+              "st": 1,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -4209,8 +4209,8 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 50,
-              "st": 44,
+              "ed": 8,
+              "st": 2,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -4220,8 +4220,8 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 70,
-              "st": 50,
+              "ed": 9,
+              "st": 8,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -4281,7 +4281,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "it": 1,
         "vt": 2,
       },
-      "v": "                                            univer                                    ",
+      "v": "  univer  ",
     },
     "7": {
       "colSpan": 1,
@@ -4306,7 +4306,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 3,
         "vt": 3,
       },
-      "v": "                    $1.00                ",
+      "v": " $1.00 ",
     },
   },
   "5": {
@@ -4319,7 +4319,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 3,
       },
-      "v": "                    font color                ",
+      "v": " font color ",
     },
     "1": {
       "colSpan": 1,
@@ -4434,7 +4434,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ff": "Impact",
         "vt": 3,
       },
-      "v": "                    font family                ",
+      "v": " font family ",
     },
     "1": {
       "colSpan": 1,
@@ -4538,7 +4538,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 3,
         "vt": 3,
       },
-      "v": "                    5%                ",
+      "v": " 5% ",
     },
   },
   "7": {
@@ -4668,11 +4668,11 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 2,
       "p": {
         "body": {
-          "dataStream": "                                                                                
+          "dataStream": "    
 ",
           "paragraphs": [
             {
-              "startIndex": 80,
+              "startIndex": 4,
             },
           ],
           "textRuns": [],
@@ -4703,7 +4703,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "s": {
         "vt": 3,
       },
-      "v": "                                                                                ",
+      "v": "    ",
     },
     "4": {
       "colSpan": undefined,
@@ -4733,17 +4733,17 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 2,
       "p": {
         "body": {
-          "dataStream": "                                            univer                                    
+          "dataStream": "  univer  
 ",
           "paragraphs": [
             {
-              "startIndex": 86,
+              "startIndex": 10,
             },
           ],
           "textRuns": [
             {
-              "ed": 44,
-              "st": 20,
+              "ed": 2,
+              "st": 1,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -4754,8 +4754,8 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 50,
-              "st": 44,
+              "ed": 8,
+              "st": 2,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -4766,8 +4766,8 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
               },
             },
             {
-              "ed": 70,
-              "st": 50,
+              "ed": 9,
+              "st": 8,
               "ts": {
                 "bl": 1,
                 "cl": {
@@ -4832,7 +4832,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         },
         "vt": 2,
       },
-      "v": "                                            univer                                    ",
+      "v": "  univer  ",
     },
     "7": {
       "colSpan": undefined,
@@ -4884,7 +4884,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 3,
         "vt": 3,
       },
-      "v": "                    32.32                ",
+      "v": " 32.32 ",
     },
   },
   "9": {
@@ -4903,7 +4903,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
         "ht": 2,
         "vt": 3,
       },
-      "v": "                    horizontal Aligment                ",
+      "v": " horizontal Aligment ",
     },
     "2": {
       "colSpan": 1,

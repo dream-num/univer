@@ -19,6 +19,7 @@ import { Acos } from './acos';
 import { Acosh } from './acosh';
 import { Acot } from './acot';
 import { Acoth } from './acoth';
+import { Aggregate } from './aggregate';
 import { Arabic } from './arabic';
 import { Asin } from './asin';
 import { Asinh } from './asinh';
@@ -102,6 +103,7 @@ export const functionMath = [
     [Acosh, FUNCTION_NAMES_MATH.ACOSH],
     [Acot, FUNCTION_NAMES_MATH.ACOT],
     [Acoth, FUNCTION_NAMES_MATH.ACOTH],
+    [Aggregate, FUNCTION_NAMES_MATH.AGGREGATE],
     [Arabic, FUNCTION_NAMES_MATH.ARABIC],
     [Asin, FUNCTION_NAMES_MATH.ASIN],
     [Asinh, FUNCTION_NAMES_MATH.ASINH],

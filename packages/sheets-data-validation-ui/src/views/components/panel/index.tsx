@@ -36,7 +36,7 @@ export const DataValidationPanel = () => {
     if (!workbook || !worksheet) return null;
 
     return (
-        activeRule && activeRule.subUnitId === worksheet.getSheetId()
+        activeRule && (activeRule.subUnitId === worksheet.getSheetId() || activeRule.subUnitId === dataValidationPanelService.getFocusFormulaEditorActiveRuleSubUnitId())
             ? <DataValidationDetail key={activeRule.rule.uid} />
             : <DataValidationList workbook={workbook} />
     );

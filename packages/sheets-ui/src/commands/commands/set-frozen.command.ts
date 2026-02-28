@@ -18,7 +18,6 @@ import type { ICommand } from '@univerjs/core';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
@@ -26,6 +25,8 @@ export enum SetSelectionFrozenType {
     RowColumn = 0,
     Row = 1,
     Column = 2,
+    FirstRow = 3,
+    FirstColumn = 4,
 }
 
 export interface ISetSelectionFrozenCommandParams {
@@ -35,6 +36,7 @@ export interface ISetSelectionFrozenCommandParams {
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selection-frozen',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params) => {
         const { type } = params || {};
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -49,40 +51,63 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         if (!selections) {
             return false;
         }
-        const currentSelection = selections[selections?.length - 1];
-        const { range } = currentSelection;
 
         const renderManagerSrv = accessor.get(IRenderManagerService);
         const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
-
         const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollState() || {};
+
         let startRow;
         let startColumn;
         let freezedRowCount;
         let freezedColCount;
-        const { startRow: selectRow, startColumn: selectColumn, rangeType } = range;
-        // Frozen to Row
-        if (rangeType === RANGE_TYPE.ROW || type === SetSelectionFrozenType.Row) {
-            startRow = selectRow;
-            freezedRowCount = selectRow - sheetViewStartRow;
+
+        if (type === SetSelectionFrozenType.FirstRow) {
+            startRow = sheetViewStartRow + 1; ;
+            freezedRowCount = 1;
             startColumn = -1;
             freezedColCount = 0;
-            // Frozen to Column
-        } else if (rangeType === RANGE_TYPE.COLUMN || type === SetSelectionFrozenType.Column) {
+        } else if (type === SetSelectionFrozenType.FirstColumn) {
             startRow = -1;
             freezedRowCount = 0;
-            startColumn = selectColumn;
-            freezedColCount = selectColumn - sheetViewStartColumn;
-            // Frozen to Range
-        } else if (rangeType === RANGE_TYPE.NORMAL) {
-            startRow = selectRow;
-            freezedRowCount = selectRow - sheetViewStartRow;
-            startColumn = selectColumn;
-            freezedColCount = selectColumn - sheetViewStartColumn;
-            // Unexpected value
+            startColumn = sheetViewStartColumn + 1;
+            freezedColCount = 1;
         } else {
-            return false;
+            const currentSelection = selections[selections?.length - 1];
+            const { primary, range } = currentSelection;
+            let selectRow = primary?.startRow ?? range.startRow;
+            if (selectRow === 0) {
+                selectRow = 1;
+            }
+            let selectColumn = primary?.startColumn ?? range.startColumn;
+            if (selectColumn === 0) {
+                selectColumn = 1;
+            }
+            const rangeType = range.rangeType;
+
+            if (rangeType === RANGE_TYPE.ROW || type === SetSelectionFrozenType.Row) {
+                // Frozen to Row
+                startRow = selectRow;
+                freezedRowCount = selectRow - sheetViewStartRow;
+                startColumn = -1;
+                freezedColCount = 0;
+            } else if (rangeType === RANGE_TYPE.COLUMN || type === SetSelectionFrozenType.Column) {
+                // Frozen to Column
+                startRow = -1;
+                freezedRowCount = 0;
+                startColumn = selectColumn;
+                freezedColCount = selectColumn - sheetViewStartColumn;
+            } else if (rangeType === RANGE_TYPE.NORMAL) {
+                // Frozen to Range
+                startRow = selectRow;
+                freezedRowCount = selectRow - sheetViewStartRow;
+                startColumn = selectColumn;
+                freezedColCount = selectColumn - sheetViewStartColumn;
+            } else {
+                // Unexpected value
+                return false;
+            }
         }
+
         const redoMutationParams: ISetFrozenMutationParams = {
             unitId,
             subUnitId,
@@ -126,6 +151,32 @@ export const SetColumnFrozenCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         commandService.executeCommand(SetSelectionFrozenCommand.id, {
             type: SetSelectionFrozenType.Column,
+        });
+
+        return true;
+    },
+};
+
+export const SetFirstRowFrozenCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-first-row-frozen',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
+            type: SetSelectionFrozenType.FirstRow,
+        });
+
+        return true;
+    },
+};
+
+export const SetFirstColumnFrozenCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-first-column-frozen',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
+            type: SetSelectionFrozenType.FirstColumn,
         });
 
         return true;

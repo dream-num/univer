@@ -15,9 +15,8 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, InsertRangeMoveDownCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
 
 export const InsertRangeMoveDownConfirmCommand: ICommand = {
     type: CommandType.COMMAND,

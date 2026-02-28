@@ -25,9 +25,9 @@ import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
+import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
@@ -50,8 +50,8 @@ export class DrawingPopupMenuController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._create(workbook));
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._dispose(workbook));
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
 
         this._setupLoadingStatus();
@@ -81,6 +81,7 @@ export class DrawingPopupMenuController extends RxDisposable {
 
         const unitId = workbook.getUnitId();
         this._renderManagerService.removeRender(unitId);
+        this._initImagePopupMenu.delete(unitId);
     }
 
     private _create(workbook: Nullable<Workbook>) {
@@ -143,7 +144,7 @@ export class DrawingPopupMenuController extends RxDisposable {
             }
 
             const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
-                    // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
+            // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
             const data = (drawingParam as ISheetFloatDom).data as Record<string, boolean>;
             if (data && data.disablePopup) {
                 return;
@@ -203,6 +204,20 @@ export class DrawingPopupMenuController extends RxDisposable {
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
+            },
+            {
+                label: 'image-popup.flipH',
+                index: 2,
+                commandId: FlipSheetDrawingCommand.id,
+                commandParams: { unitId, flipH: true, drawings: [{ unitId, subUnitId, drawingId }] },
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
+            },
+            {
+                label: 'image-popup.flipV',
+                index: 2,
+                commandId: FlipSheetDrawingCommand.id,
+                commandParams: { unitId, flipV: true, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {

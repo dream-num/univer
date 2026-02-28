@@ -166,7 +166,7 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
 
     return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
         <FloatDomSingle
-            id={layer[0]}
+            id={layer[1].domId ?? layer[0]}
             layer={layer[1]}
             key={layer[0]}
         />

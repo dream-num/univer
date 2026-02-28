@@ -15,7 +15,7 @@
  */
 
 import type { ISheetHyperLink } from '@univerjs/sheets-hyper-link';
-import type React from 'react';
+import type * as React from 'react';
 import { Disposable } from '@univerjs/core';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 

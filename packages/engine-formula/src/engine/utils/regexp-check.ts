@@ -694,23 +694,24 @@ function isSafeRegExp(regExp: RegExp, options?: IOptions): boolean {
         let _depth = depth;
 
         if (token.type === CharTypes.REPETITION) {
-            _depth++;
-            count++;
-
-            if (_depth > 1) {
+            if (depth > 0 && (token.min === 0 || token.max === Infinity)) {
                 return false;
+            };
+
+            if (isDangerousRepetition(token)) {
+                count++;
+
+                if (count > limit) {
+                    return false;
+                }
             }
 
-            if (count > limit) {
-                return false;
-            }
+            _depth = depth + 1;
         }
 
         if (token.options) {
             for (const option of token.options) {
-                const result = validateToken({ stack: option }, _depth);
-
-                if (!result) {
+                if (!validateToken({ stack: option }, _depth)) {
                     return false;
                 }
             }
@@ -723,9 +724,7 @@ function isSafeRegExp(regExp: RegExp, options?: IOptions): boolean {
         }
 
         for (const item of stack) {
-            const result = validateToken(item, _depth);
-
-            if (!result) {
+            if (!validateToken(item, _depth)) {
                 return false;
             }
         }
@@ -734,4 +733,25 @@ function isSafeRegExp(regExp: RegExp, options?: IOptions): boolean {
     };
 
     return validateToken(tokens, 0);
+}
+
+function isDangerousRepetition(token: IToken): boolean {
+    const stack = token.stack || (token.value && (token.value as IToken).stack);
+    if (!stack) return false;
+    return containsBacktracking(stack);
+}
+
+function containsBacktracking(stack: IToken[]): boolean {
+    for (const t of stack) {
+        if (t.options && t.options.length > 0) {
+            return true;
+        }
+
+        const subStack = t.stack || (t.value && (t.value as IToken).stack);
+
+        if (subStack && containsBacktracking(subStack)) {
+            return true;
+        }
+    }
+    return false;
 }

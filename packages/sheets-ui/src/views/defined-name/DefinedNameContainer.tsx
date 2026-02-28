@@ -35,18 +35,16 @@ import { DefinedNameInput } from './DefinedNameInput';
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
 
-    if (workbook == null) {
-        return;
-    }
-
-    const unitId = workbook.getUnitId();
-
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const unitId = workbook?.getUnitId();
     const getDefinedNameMap = () => {
+        if (!unitId) {
+            return [];
+        }
         const definedNameMap = definedNamesService.getDefinedNameMap(unitId);
         if (definedNameMap) {
             return Array.from(Object.values(definedNameMap));
@@ -55,11 +53,13 @@ export const DefinedNameContainer = () => {
     };
 
     const [editState, setEditState] = useState(false);
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(getDefinedNameMap());
+    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>([]);
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
     const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
 
     useEffect(() => {
+        setDefinedNames(getDefinedNameMap());
+
         const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
             setDefinedNames(getDefinedNameMap());
         });
@@ -68,6 +68,10 @@ export const DefinedNameContainer = () => {
             definedNamesSubscription.unsubscribe();
         };
     }, []);
+
+    if (!workbook || !unitId) {
+        return;
+    }
 
     const insertConfirm = (param: IDefinedNamesServiceParam) => {
         const { name, formulaOrRefString, comment, localSheetId, hidden } = param;
@@ -93,6 +97,7 @@ export const DefinedNameContainer = () => {
     }
 
     function handleDeleteConfirm(id: string) {
+        if (!unitId) return;
         const item = definedNamesService.getValueById(unitId, id);
         commandService.executeCommand(RemoveDefinedNameCommand.id, { ...item, unitId });
         setDeleteConformKey(null);

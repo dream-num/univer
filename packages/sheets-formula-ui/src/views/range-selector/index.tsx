@@ -270,7 +270,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const handleOpenModal = useEvent(() => {
         blurEditor();
-        setRangeSelectorRanges(parseRanges(editor?.getDocumentDataModel().getPlainText() ?? ''));
+        setRangeSelectorRanges(parseRanges(editor?.getDocumentDataModel()!.getPlainText() ?? ''));
         setPopupVisible(true);
     });
 
@@ -294,12 +294,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 setRangeSelectorRanges([]);
                 setPopupVisible(false);
             },
-            getValue: () => editor?.getDocumentDataModel().getPlainText() ?? '',
+            getValue: () => editor?.getDocumentDataModel()!.getPlainText() ?? '',
         };
     }, [blurEditor, editor, editorService, selectorRef, sequenceNodesRef]);
 
     useEffect(() => {
-        onVerify?.(verifyRange(sequenceNodes), editor?.getDocumentDataModel().getPlainText() ?? '');
+        onVerify?.(verifyRange(sequenceNodes), editor?.getDocumentDataModel()!.getPlainText() ?? '');
     }, [sequenceNodes]);
 
     useEffect(() => {

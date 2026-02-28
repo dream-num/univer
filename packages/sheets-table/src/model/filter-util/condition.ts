@@ -130,7 +130,6 @@ function getNumberCellValue(sheet: Worksheet, row: number, col: number) {
         return null;
     }
     if (typeof v === 'string' && t === CellValueType.NUMBER) {
-        // use this way to instead of numfmt.parseNumber(v as string).v as number;
         return Number(sheet.getCellRaw(row, col)!.v);
     }
     return Number(v);

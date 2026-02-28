@@ -15,9 +15,11 @@
  */
 
 import type { IOperation, Workbook } from '@univerjs/core';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
 
-import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import { CommandType, ICommandService, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
@@ -27,6 +29,13 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
         if (!params) {
             return false;
         }
+
+        const configService = accessor.get(IConfigService);
+        const disableEdit = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.disableEdit;
+        if (disableEdit && params.visible) {
+            return false;
+        }
+
         const { unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);

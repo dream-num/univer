@@ -312,6 +312,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             inputRef.current?.focus();
         }
 
+        const incrementDisabled = disabled || (max !== undefined && internalValue !== null && internalValue >= max);
+        const decrementDisabled = disabled || (min !== undefined && internalValue !== null && internalValue <= min);
+
         return (
             <div className={clsx('univer-inline-block', className)}>
                 <div className="univer-relative univer-w-full">
@@ -342,38 +345,60 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                 controlsClassName
                             )}
                         >
-                            <button
-                                className={`
-                                  univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
-                                  univer-items-center univer-justify-center univer-border-none univer-bg-transparent
-                                  univer-p-0 univer-transition-colors
-                                  hover:univer-bg-gray-100
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-600
-                                `}
-                                type="button"
+                            <span
+                                className={clsx(
+                                    `
+                                      univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
+                                      univer-items-center univer-justify-center univer-border-none univer-bg-transparent
+                                      univer-p-0 univer-transition-colors
+                                      hover:univer-bg-gray-100
+                                      dark:!univer-text-white
+                                      dark:hover:!univer-bg-gray-600
+                                    `,
+                                    incrementDisabled && 'univer-cursor-not-allowed univer-opacity-60'
+                                )}
+                                role="button"
                                 aria-label="increment"
+                                aria-disabled={incrementDisabled}
                                 tabIndex={-1}
-                                disabled={disabled || (max !== undefined && internalValue !== null && internalValue >= max)}
-                                onClick={() => handleClick(true)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                    if (incrementDisabled) {
+                                        return;
+                                    }
+
+                                    handleClick(true);
+                                }}
                             >
                                 +
-                            </button>
-                            <button
-                                className={`
-                                  univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
-                                  univer-items-center univer-justify-center univer-border-none univer-bg-transparent
-                                  univer-p-0 univer-transition-colors
-                                  hover:univer-bg-gray-100
-                                  dark:!univer-text-white dark:hover:!univer-bg-gray-600
-                                `}
-                                type="button"
+                            </span>
+                            <span
+                                className={clsx(
+                                    `
+                                      univer-box-border univer-flex univer-h-1/2 univer-w-5 univer-cursor-pointer
+                                      univer-items-center univer-justify-center univer-border-none univer-bg-transparent
+                                      univer-p-0 univer-transition-colors
+                                      hover:univer-bg-gray-100
+                                      dark:!univer-text-white
+                                      dark:hover:!univer-bg-gray-600
+                                    `,
+                                    decrementDisabled && 'univer-cursor-not-allowed univer-opacity-60'
+                                )}
+                                role="button"
                                 aria-label="decrement"
+                                aria-disabled={decrementDisabled}
                                 tabIndex={-1}
-                                disabled={disabled || (min !== undefined && internalValue !== null && internalValue <= min)}
-                                onClick={() => handleClick(false)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                    if (decrementDisabled) {
+                                        return;
+                                    }
+
+                                    handleClick(false);
+                                }}
                             >
                                 -
-                            </button>
+                            </span>
                         </div>
                     )}
                 </div>

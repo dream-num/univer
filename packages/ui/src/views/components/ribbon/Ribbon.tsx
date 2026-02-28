@@ -15,18 +15,18 @@
  */
 
 import type { ComponentType } from 'react';
-import type { Observable } from 'rxjs';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { IUniverInstanceService, LocaleService, throttle } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, divideXClassName, Dropdown, HoverCard } from '@univerjs/design';
-import { DatabaseIcon, EyeIcon, FunctionIcon, HomeIcon, InsertIcon, MoreDownIcon, MoreFunctionIcon } from '@univerjs/icons';
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest } from 'rxjs';
-import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
+import { LocaleService, throttle } from '@univerjs/core';
+import { borderBottomClassName, clsx, divideXClassName, Dropdown } from '@univerjs/design';
+import { MoreFunctionIcon } from '@univerjs/icons';
+import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { RibbonPosition } from '../../../services/menu/types';
+import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
+import { ClassicMenu } from './ribbon-menu/ClassicMenu';
+import { DefaultMenu } from './ribbon-menu/DefaultMenu';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
 
@@ -36,34 +36,11 @@ interface IRibbonProps {
     headerMenu?: boolean;
 }
 
-const iconMap = {
-    [RibbonPosition.START]: HomeIcon,
-    [RibbonPosition.INSERT]: InsertIcon,
-    [RibbonPosition.FORMULAS]: FunctionIcon,
-    [RibbonPosition.DATA]: DatabaseIcon,
-    [RibbonPosition.VIEW]: EyeIcon,
-    [RibbonPosition.OTHERS]: MoreFunctionIcon,
-};
-
 export function Ribbon(props: IRibbonProps) {
     const { ribbonType, headerMenuComponents, headerMenu = true } = props;
 
-    const menuManagerService = useDependency(IMenuManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
+    const ribbonService = useDependency(IRibbonService);
     const localeService = useDependency(LocaleService);
-    const [menuChangedTimes, setMenuChangedTimes] = useState(0);
-
-    const focusedUnit = useObservable(univerInstanceService.focused$);
-
-    useEffect(() => {
-        const subscription = menuManagerService.menuChanged$.subscribe(() => {
-            setMenuChangedTimes((prev) => prev + 1);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
 
     const containerRef = useRef<HTMLDivElement>(null!);
     const toolbarItemRefs = useRef<Record<string, {
@@ -74,100 +51,30 @@ export function Ribbon(props: IRibbonProps) {
         itemOrder: number;
     }>>({});
 
-    const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
-    const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
-    const [groupSelectorVisible, setGroupSelectorVisible] = useState(false);
-    const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
-    const [fakeToolbarVisible, setFakeToolbarVisible] = useState(false);
+    const ribbonData = useObservable(ribbonService.ribbon$, []);
+    const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
+    const collapsedIds = useObservable(ribbonService.collapsedIds$, []);
+    const fakeToolbarVisible = useObservable(ribbonService.fakeToolbarVisible$, false);
+
+    const ribbon = useMemo(() => {
+        if (ribbonType === 'simple') {
+            const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
+            ribbonData.forEach((group) => {
+                group.children?.forEach((item) => {
+                    simpleRibbon[0].children?.push(item);
+                });
+            });
+
+            return simpleRibbon;
+        }
+
+        return ribbonData;
+    }, [ribbonType, ribbonData]);
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
         toolbarItemRefs.current = {};
-        setActivatedTab(group.key);
-        setGroupSelectorVisible(false);
+        ribbonService.setActivatedTab(group.key);
     }, []);
-
-    // process menu changes
-    useEffect(() => {
-        const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
-
-        // Collect all hidden$ Observables and their corresponding paths
-        const hiddenObservableMap: Observable<boolean>[] = [];
-        const hiddenKeyMap: string[] = [];
-        for (const group of ribbon) {
-            if (group.children) {
-                for (const item of group.children) {
-                    if (item.children) {
-                        for (const child of item.children) {
-                            if (child.item?.hidden$) {
-                                hiddenObservableMap.push(child.item.hidden$);
-                                hiddenKeyMap.push(`${group.key}/${item.key}/${child.key}`);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Only get the current value once, not continuously subscribe
-        combineLatest(hiddenObservableMap)
-            .subscribe((hiddenMap) => {
-                const newRibbon: IMenuSchema[] = [];
-
-                const hiddenPathMap = hiddenMap.map((hidden, index) => {
-                    if (hidden) {
-                        return hiddenKeyMap[index];
-                    }
-                    return null;
-                }).filter((item) => !!item) as string[];
-
-                for (const group of ribbon) {
-                    const newGroup: IMenuSchema = { ...group, children: [] };
-
-                    if (group.children?.length) {
-                        for (const item of group.children) {
-                            const newItem: IMenuSchema = { ...item, children: [] };
-                            let shouldAddItem = true;
-
-                            if (item.children?.length) {
-                                for (const child of item.children) {
-                                    const path = `${group.key}/${item.key}/${child.key}`;
-
-                                    if (!hiddenPathMap.includes(path)) {
-                                        newItem.children?.push(child);
-                                    }
-                                }
-
-                                if (newItem.children?.every((child) => child.children?.length === 0)) {
-                                    shouldAddItem = false;
-                                }
-                            }
-
-                            if (shouldAddItem) {
-                                newGroup.children?.push(newItem);
-                            }
-                        }
-                    }
-
-                    if (newGroup.children?.length && newGroup.children.every((item) => item.children?.length)) {
-                        newRibbon.push(newGroup);
-                    }
-                }
-
-                if (ribbonType === 'simple') {
-                    const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
-                    newRibbon.forEach((group) => {
-                        group.children?.forEach((item) => {
-                            simpleRibbon[0].children?.push(item);
-                        });
-                    });
-
-                    setRibbon(simpleRibbon);
-                } else {
-                    setRibbon(newRibbon);
-                }
-            })
-            .unsubscribe();
-    }, [menuChangedTimes, focusedUnit]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -204,7 +111,7 @@ export function Ribbon(props: IRibbonProps) {
         let timer: number | null = null;
         const observer = new ResizeObserver(throttle((entries) => {
             for (const entry of entries) {
-                setFakeToolbarVisible(true);
+                ribbonService.setFakeToolbarVisible(true);
 
                 timer = requestAnimationFrame(() => {
                     const { width: avaliableWidth } = entry.contentRect;
@@ -229,12 +136,12 @@ export function Ribbon(props: IRibbonProps) {
                         }
                     }
 
-                    setCollapsedIds(newCollapsedIds);
+                    ribbonService.setCollapsedIds(newCollapsedIds);
 
-                    setFakeToolbarVisible(false);
+                    ribbonService.setFakeToolbarVisible(false);
                 });
             }
-        }, 100));
+        }, 10));
 
         observer.observe(containerRef.current);
 
@@ -286,8 +193,21 @@ export function Ribbon(props: IRibbonProps) {
 
     return (
         <>
-            {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
-                <header className={clsx('univer-relative univer-h-11 univer-select-none', borderBottomClassName)}>
+            <div
+                data-u-comp="ribbon-header-menu"
+                className={clsx('univer-relative univer-select-none', {
+                    'univer-h-9': ribbonType === 'classic' || (headerMenuComponents && headerMenuComponents.size > 0),
+                })}
+            >
+                {ribbonType === 'classic' && ribbon.length > 1 && (
+                    <ClassicMenu
+                        ribbon={ribbon}
+                        activatedTab={activatedTab}
+                        onSelectTab={handleSelectTab}
+                    />
+                )}
+
+                {headerMenu && (headerMenuComponents && headerMenuComponents.size > 0) && (
                     <div
                         className={`
                           univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
@@ -299,100 +219,35 @@ export function Ribbon(props: IRibbonProps) {
                     >
                         <ComponentContainer components={headerMenuComponents} />
                     </div>
-                </header>
-            )}
+                )}
+            </div>
 
             <div
                 className={clsx(`
                   univer-box-border univer-grid univer-h-10 univer-grid-flow-col univer-items-center univer-px-3
+                  univer-text-sm
                 `, {
-                    'univer-grid-cols-[auto,1fr]': ribbon.length > 1,
+                    'univer-grid-cols-[1fr] univer-justify-center': ribbonType === 'classic',
+                    'univer-grid-cols-[auto,1fr]': ribbon.length > 1 && ribbonType !== 'classic',
                     'univer-grid-cols-none': ribbon.length === 1,
                 }, borderBottomClassName)}
             >
-                {/* <search className="univer-mr-1 univer-w-20">
-                    <Input />
-                </search> */}
-
-                {ribbon.length > 1 && (
-                    <HoverCard
-                        className="univer-max-w-96 !univer-rounded-xl"
-                        align="start"
-                        open={groupSelectorVisible}
-                        overlay={(
-                            <div className="univer-grid univer-gap-1 univer-px-2 univer-py-1">
-                                {ribbon.map((group) => {
-                                    const Icon = iconMap[group.key as RibbonPosition];
-
-                                    return (
-                                        <a
-                                            key={group.key}
-                                            data-u-comp="ribbon-group-btn"
-                                            className={`
-                                              univer-box-border univer-flex univer-cursor-pointer univer-items-center
-                                              univer-gap-2.5 univer-rounded-lg univer-px-2 univer-py-1.5
-                                              hover:univer-bg-gray-100
-                                              dark:hover:!univer-bg-gray-700
-                                            `}
-                                            onClick={() => handleSelectTab(group)}
-                                        >
-                                            <span
-                                                className={clsx(`
-                                                  univer-box-border univer-flex univer-size-9 univer-flex-shrink-0
-                                                  univer-items-center univer-justify-center univer-rounded-lg
-                                                `, borderClassName)}
-                                            >
-                                                <Icon
-                                                    className={`
-                                                      univer-text-gray-500
-                                                      dark:!univer-text-gray-300
-                                                    `}
-                                                />
-                                            </span>
-                                            <span className="univer-flex univer-flex-col">
-                                                <strong
-                                                    className={`
-                                                      univer-text-sm univer-font-semibold univer-text-gray-800
-                                                      dark:!univer-text-gray-200
-                                                    `}
-                                                >
-                                                    {localeService.t(group.key)}
-                                                </strong>
-                                                <span className="univer-text-xs univer-text-gray-400">
-                                                    {localeService.t(`${group.key}Desc`)}
-                                                </span>
-                                            </span>
-                                        </a>
-                                    );
-                                })}
-                            </div>
-                        )}
-                        onOpenChange={setGroupSelectorVisible}
-                    >
-                        <a
-                            className={`
-                              univer-mr-2 univer-flex univer-h-7 univer-cursor-pointer univer-items-center
-                              univer-gap-1.5 univer-whitespace-nowrap !univer-rounded-full univer-bg-gray-700
-                              univer-pl-3 univer-pr-2 univer-text-sm univer-text-white
-                              dark:!univer-bg-gray-200 dark:!univer-text-gray-800
-                            `}
-                            onClick={() => setGroupSelectorVisible(true)}
-                        >
-                            {localeService.t(activatedTab)}
-                            <MoreDownIcon
-                                className={`
-                                  univer-text-gray-200
-                                  dark:!univer-text-gray-500
-                                `}
-                            />
-                        </a>
-                    </HoverCard>
+                {ribbonType === 'default' && ribbon.length > 1 && (
+                    <DefaultMenu
+                        ribbon={ribbon}
+                        activatedTab={activatedTab}
+                        onSelectTab={handleSelectTab}
+                    />
                 )}
 
                 <div
                     data-u-comp="ribbon-toolbar"
                     ref={containerRef}
-                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName)}
+                    className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
+                        'univer-justify-center': ribbonType === 'classic',
+                    })}
+                    role="toolbar"
+                    aria-label={localeService.t(activatedTab)}
                 >
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <Fragment key={groupItem.key}>
@@ -415,11 +270,12 @@ export function Ribbon(props: IRibbonProps) {
                         >
                             <Dropdown
                                 collisionPadding={{ right: 12, left: 12 }}
+                                onOpenAutoFocus={(e) => e.preventDefault()}
                                 overlay={(
                                     <div
                                         className={`
-                                          univer-box-border univer-grid
-                                          univer-max-w-[var(--radix-popper-available-width)] univer-gap-2 univer-p-2
+                                          univer-box-border univer-grid univer-max-w-[--radix-popper-available-width]
+                                          univer-gap-2 univer-p-2
                                         `}
                                     >
                                         {activeGroup.hiddenGroups.map((groupItem) => (
@@ -441,9 +297,14 @@ export function Ribbon(props: IRibbonProps) {
                                     </div>
                                 )}
                             >
-                                <a className={toolbarButtonClassName} type="button">
+                                <button
+                                    type="button"
+                                    className={toolbarButtonClassName}
+                                    aria-label={localeService.t('ribbon.more')}
+                                    aria-haspopup="true"
+                                >
                                     <MoreFunctionIcon />
-                                </a>
+                                </button>
                             </Dropdown>
                         </div>
                     )}

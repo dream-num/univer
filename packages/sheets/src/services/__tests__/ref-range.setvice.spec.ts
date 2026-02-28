@@ -17,7 +17,6 @@
 import type { Injector, IRange, Univer, Workbook, Worksheet } from '@univerjs/core';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';

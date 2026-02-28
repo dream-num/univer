@@ -311,7 +311,7 @@ export const tailwindcssPreset = (): Linter.Config => {
                 group: 'newLine',
                 lineBreakStyle,
             }],
-            'better-tailwindcss/no-unregistered-classes': 'off',
+            'better-tailwindcss/no-unknown-classes': 'off',
             'better-tailwindcss/no-conflicting-classes': 'off',
         },
     };

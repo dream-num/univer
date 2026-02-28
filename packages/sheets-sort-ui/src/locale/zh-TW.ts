@@ -31,8 +31,8 @@ const locale: typeof enUS = {
         error: {
             'merge-size': '所選區域的合併儲存格的大小不一致，無法排序。 ',
             empty: '所選區域無內容，無法排序。 ',
-            single: '所選區域只有一行，無法排序。 ',
-            'formula-array': '所選區域含數組公式，無法排序。 ',
+            single: '所選區域只有一列，無法排序。 ',
+            'formula-array': '所選區域含陣列公式，無法排序。 ',
         },
         dialog: {
             'sort-reminder': '排序提醒',

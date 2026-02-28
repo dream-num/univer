@@ -112,7 +112,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
         <div className="univer-relative univer-mb-3 univer-pl-[30px]" onMouseLeave={() => setShowReply(false)} onMouseEnter={() => setShowReply(true)}>
             <div
                 className={`
-                  univer-absolute univer-left-0 univer-top-0 univer-h-6 univer-w-6 univer-rounded-full univer-bg-cover
+                  univer-absolute univer-left-0 univer-top-0 univer-size-6 univer-rounded-full univer-bg-cover
                   univer-bg-center univer-bg-no-repeat
                 `}
                 style={{
@@ -133,9 +133,9 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         ? (
                                             <div
                                                 className={`
-                                                  univer-ml-1 univer-inline-flex univer-h-6 univer-w-6
-                                                  univer-cursor-pointer univer-items-center univer-justify-center
-                                                  univer-rounded-sm univer-text-base
+                                                  univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
+                                                  univer-items-center univer-justify-center univer-rounded-sm
+                                                  univer-text-base
                                                   hover:univer-bg-gray-50
                                                 `}
                                                 onClick={() => onReply(user)}
@@ -181,7 +181,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                     >
                                         <div
                                             className={`
-                                              univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                              univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                               univer-items-center univer-justify-center univer-rounded-sm
                                               univer-text-base
                                               hover:univer-bg-gray-50
@@ -416,8 +416,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
                         <div
                             className={clsx(`
-                              univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
-                              univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
+                              univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer univer-items-center
+                              univer-justify-center univer-rounded-[3px] univer-text-base
                               hover:univer-bg-gray-50
                               dark:hover:!univer-bg-gray-800
                             `, {
@@ -431,7 +431,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             ? (
                                 <div
                                     className={`
-                                      univer-ml-1 univer-inline-flex univer-h-6 univer-w-6 univer-cursor-pointer
+                                      univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                       univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
                                       hover:univer-bg-gray-50
                                       dark:hover:!univer-bg-gray-800

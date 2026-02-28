@@ -21,7 +21,7 @@ import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
-import { transformToDrawingPosition } from '../../basics/transform-position';
+import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
 
@@ -70,6 +70,7 @@ export const MoveDrawingsCommand: ICommand = {
                 ...drawing,
                 transform: newTransform,
                 sheetTransform: transformToDrawingPosition(newTransform, selectionRenderService),
+                axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, selectionRenderService),
             } as ISheetDrawing;
         }).filter((drawing) => drawing != null) as ISheetDrawing[];
 

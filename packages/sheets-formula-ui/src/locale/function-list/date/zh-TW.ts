@@ -57,7 +57,7 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            dateText: { name: '日期文本', detail: '表示 Excel 日期格式的日期的文本，或對包含表示 Excel 日期格式的日期的文本的單元格的引用。 例如，「1/30/2008」或「30-Jan-2008」是表示日期的引號內的文字字串。 \n使用 Microsoft Excel for Windows 中的預設日期系統， date_text 參數必須表示 1900 年 1 月 1 日至 9999 年 12 月 31 日的日期。 DATEVALUE 函數回傳 #VALUE！ 如果 date_text 參數的值超出此範圍，則為 error 值。 \n如果省略參數 date_text 中的年份部分，則 DATEVALUE 函數會使用電腦內建時鐘的目前年份。 參數 date_text 中的時間資訊將被忽略。 ' },
+            dateText: { name: '日期文字', detail: '表示 Excel 日期格式的日期的文字，或對包含表示 Excel 日期格式的日期的文字的儲存格的引用。 例如，「1/30/2008」或「30-Jan-2008」是表示日期的引號內的文字字串。 \n使用 Microsoft Excel for Windows 中的預設日期系統， date_text 參數必須表示 1900 年 1 月 1 日至 9999 年 12 月 31 日的日期。 DATEVALUE 函數回傳 #VALUE！ 如果 date_text 參數的值超出此範圍，則為 error 值。 \n如果省略參數 date_text 中的年份部分，則 DATEVALUE 函數會使用電腦內建時鐘的目前年份。 參數 date_text 中的時間資訊將被忽略。 ' },
         },
     },
     DAY: {
@@ -387,8 +387,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            startDate: { name: '开始日期', detail: '代表開始日期的日期。' },
-            endDate: { name: '结束日期', detail: '代表結束日期的日期。' },
+            startDate: { name: '開始日期', detail: '代表開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '代表結束日期的日期。' },
             basis: { name: '基礎類型', detail: '要使用的日計數基礎類型。' },
         },
     },

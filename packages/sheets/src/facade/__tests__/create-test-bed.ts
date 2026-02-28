@@ -38,6 +38,7 @@ import {
     RangeProtectionRuleModel,
     RefRangeService,
     SheetInterceptorService,
+    SheetLazyExecuteScheduleService,
     SheetPermissionInitController,
     SheetSkeletonService,
     SheetsSelectionsService,
@@ -113,6 +114,7 @@ class RenderManagerServiceTestBed extends RenderManagerService {
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -148,6 +150,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([SheetPermissionInitController]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([SheetLazyExecuteScheduleService]);
 
             dependencies?.forEach((d) => injector.add(d));
 

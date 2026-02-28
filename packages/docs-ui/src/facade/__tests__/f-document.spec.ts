@@ -21,7 +21,6 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { InsertCommand } from '@univerjs/docs-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from './create-test-bed';
-
 import '@univerjs/docs-ui/facade';
 
 describe('Test FDocument', () => {

@@ -61,16 +61,6 @@ export interface IEventObserver<T> extends Partial<RxObserver<[T, EventState]>> 
 export class EventSubject<T> extends Subject<[T, EventState]> {
     private _sortedObservers: IEventObserver<T>[] = [];
 
-    /** @deprecated Use `subscribeEvent` instead. */
-    override subscribe(): Subscription {
-        throw new Error('[EventSubject]: please use `subscribeEvent` instead of `subscribe` method for `EventSubject`.');
-    }
-
-    /** @deprecated Use `emitEvent` instead. */
-    override next() {
-        throw new Error('[EventSubject]: please use `emitEvent` instead of `next` method for `EventSubject`.');
-    }
-
     override unsubscribe(): void {
         super.unsubscribe();
         this._sortedObservers.length = 0;

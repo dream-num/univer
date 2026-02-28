@@ -58,12 +58,14 @@ const transformDocument2TextNodesInParagraph = (doc: IDocumentBody) => {
 };
 
 export const transformDocument2TextNodes = (doc: IDocumentBody) => {
+    if (!doc) {
+        return [];
+    }
     const { paragraphs = [] } = doc;
-    let lastIndex = 0;
 
-    return paragraphs.map((paragraph) => {
+    return paragraphs.map((paragraph, index) => {
+        const lastIndex = index === 0 ? 0 : paragraphs[index - 1].startIndex + 1;
         const body = getBodySlice(doc, lastIndex, paragraph.startIndex);
-        lastIndex = paragraph.startIndex + 1;
         return transformDocument2TextNodesInParagraph(body);
     });
 };

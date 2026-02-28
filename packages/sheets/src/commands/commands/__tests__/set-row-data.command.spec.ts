@@ -16,7 +16,6 @@
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type { ISetRowDataCommandParams } from '../set-row-data.command';
-
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetRowDataMutation } from '../../mutations/set-row-data.mutation';

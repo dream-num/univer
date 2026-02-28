@@ -89,6 +89,8 @@ export abstract class SingleUnitUIController extends Disposable {
                     }, STEADY_TIMEOUT);
                 }, 300);
             } catch (error) {
+                clearTimeout(this._steadyTimeout);
+                clearTimeout(this._renderTimeout);
                 if (error instanceof LifecycleUnreachableError) {
                     return;
                 }

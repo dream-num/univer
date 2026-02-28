@@ -122,6 +122,7 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 
 const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
+const currencySymbols = new Set(['$', '¥', '₽', '₫', 'NT$', '€', '₩', '﷼']);
 
 /**
  * Get the numfmt parse value, and filter out the parse error.
@@ -131,7 +132,7 @@ export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | nul
 
     if (!parseData) return null;
 
-    const { v, z } = parseData;
+    const { z } = parseData;
 
     if (z) {
         /**
@@ -152,8 +153,18 @@ export const getNumfmtParseValueFilter = (value: string): numfmt.ParseData | nul
          * Verify by formatting back to string
          * '1000,' => '#,##0,' ----- error
          * '1000,1.00' => '#,##0.00' ----- error
+         * '$1000' => '$#,##0' ----- true
          */
-        if (z.includes('#,##0') && numfmt.format(z, v) !== value) return null;
+        if (z.includes('#,##0')) {
+            if (/[.,]$/.test(value)) return null;
+
+            const normalized = value.replace(new RegExp(`^[${[...currencySymbols].join('')}]+`), '').trim();
+
+            if (normalized.includes(',')) {
+                const validGrouping = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/.test(normalized);
+                if (!validGrouping) return null;
+            }
+        }
     }
 
     return parseData;

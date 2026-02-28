@@ -60,10 +60,12 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
             const rectWidth = rectWithOffset.right - rectWithOffset.left;
 
             const isInHiddenRect = hiddenRects.some((hiddenRect) => {
-                return rectWithOffset.top >= (hiddenRect.top - (0.5 * rectHeight)) &&
-                    rectWithOffset.bottom <= (hiddenRect.bottom + (0.5 * rectHeight)) &&
-                    rectWithOffset.left >= (hiddenRect.left - (0.5 * rectWidth)) &&
-                    rectWithOffset.right <= (hiddenRect.right + (0.5 * rectWidth));
+                const bufferY = Math.min(0.5 * rectHeight, 10);
+                const bufferX = Math.min(0.5 * rectWidth, 10);
+                return rectWithOffset.top >= (hiddenRect.top - bufferY) &&
+                    rectWithOffset.bottom <= (hiddenRect.bottom + bufferY) &&
+                    rectWithOffset.left >= (hiddenRect.left - bufferX) &&
+                    rectWithOffset.right <= (hiddenRect.right + bufferX);
             });
 
             if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right || isInHiddenRect) {

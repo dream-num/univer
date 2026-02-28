@@ -18,7 +18,7 @@ import type { ICellData, IInterceptor, IObjectMatrixPrimitiveType, IRange, ISele
 import type { ISelectionWithStyle } from '../../../basics/selection';
 
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
-import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
+import { RANGE_TYPE, Rectangle, selectionToArray, Tools } from '@univerjs/core';
 import { IgnoreRangeThemeInterceptorKey, RangeThemeInterceptorId } from '../../../services/sheet-interceptor/interceptor-const';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 
@@ -272,6 +272,24 @@ export function copyRangeStyles(
             cellValue[row][column] = { s: cell.s };
         }
     }
+
+    for (const row in cellValue) {
+        for (const col in cellValue[row]) {
+            const cell = cellValue[row][col];
+            if (cell.s && typeof cell.s === 'object' && Tools.isEmptyObject(cell.s)) {
+                delete cell.s;
+            }
+
+            if (Tools.isEmptyObject(cell)) {
+                delete cellValue[row][col];
+            }
+        }
+
+        if (Tools.isEmptyObject(cellValue[row])) {
+            delete cellValue[row];
+        }
+    }
+
     return cellValue;
 }
 

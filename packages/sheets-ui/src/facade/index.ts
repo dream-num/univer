@@ -21,8 +21,9 @@ import './f-permission';
 import './f-sheet-hooks';
 import './f-event';
 
-export type * from './f-event';
+export * from './f-enum';
 
+export type * from './f-event';
 export type * from './f-permission';
 export { type IFComponentKey, transformComponentKey } from './f-range';
 export type * from './f-sheet-hooks';

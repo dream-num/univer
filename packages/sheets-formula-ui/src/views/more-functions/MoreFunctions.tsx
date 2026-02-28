@@ -87,6 +87,7 @@ export function MoreFunctions() {
                 )}
                 {selectFunction && !!workbook && (
                     <Button
+                        disabled={!functionInfo}
                         variant="primary"
                         onClick={handleConfirm}
                         className="univer-mb-5 univer-ml-4 univer-mr-0 univer-mt-0"

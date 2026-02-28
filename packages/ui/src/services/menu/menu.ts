@@ -61,7 +61,7 @@ interface IMenuItemBase<V> {
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
-    params?: any;
+    params?: any | Function;
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
 }

@@ -31,6 +31,7 @@ import {
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
@@ -92,7 +93,6 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         },
                         4: {
                             f: '=IF(B8<>"","Trip #"&1+SUBSTITUTE(LOOKUP(2,1/($C$4:$C7<>""),$C$4:$C7),"Trip #",""),"")',
-                            v: 'Trip #3',
                             t: 1,
                         },
                     },
@@ -124,7 +124,7 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
     };
 };
 
-describe('Test inverted index cache', () => {
+describe('Test inverted index cache 4', () => {
     let get: Injector['get'];
     let worksheet: Worksheet;
     let formulaEngine: FFormula;
@@ -141,6 +141,7 @@ describe('Test inverted index cache', () => {
         commandService = get(ICommandService);
 
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationStopMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);
@@ -197,7 +198,7 @@ describe('Test inverted index cache', () => {
             ...functions
         );
 
-        formulaEngine.executeCalculation();
+        commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
         await formulaEngine.onCalculationEnd();
 
         getCellValue = (row: number, column: number) => {

@@ -21,10 +21,19 @@ import { IContextMenuService, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
-    const { prefix, suffix, value, onChange, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER } = props;
+    const {
+        prefix,
+        suffix,
+        value,
+        min = Number.MIN_SAFE_INTEGER,
+        max = Number.MAX_SAFE_INTEGER,
+        disabled$,
+        onChange,
+    } = props;
 
     const localeService = useDependency(LocaleService);
     const contextMenuService = useDependency(IContextMenuService);
+    const [disabled, setDisabled] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
 
     const handleChange = (value: number | null) => {
@@ -37,6 +46,18 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
         setInputValue(inputValue);
         onChange(inputValue);
     };
+
+    useEffect(() => {
+        if (!disabled$) {
+            return;
+        }
+        const subscription = disabled$.subscribe((value) => {
+            setDisabled(value);
+        });
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     useEffect(() => {
         if (!contextMenuService.visible) {
@@ -70,6 +91,7 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
                     precision={0}
                     min={min}
                     max={max}
+                    disabled={disabled}
                     onPressEnter={handlePressEnter}
                     onChange={handleChange}
                 />

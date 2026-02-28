@@ -19,7 +19,6 @@ import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetNumfmtMutation } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt/controllers/numfmt-cell-content.controller.js';
-
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from './test.util';
 

@@ -127,7 +127,7 @@ describe('ColorSpectrum', () => {
 
     it('should call onChange when color changes by pointer', () => {
         const { container } = render(<TestComponent onChange={onChange} />);
-        const spectrum = container.querySelector('[data-u-comp="color-picker-spectrum" > canvas]');
+        const spectrum = container.querySelector('[data-u-comp="color-picker-spectrum"] > canvas');
         if (spectrum) {
             spectrum.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 50 }));
             expect(onChange).toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('ColorInput', () => {
     }
 
     it('should call onChange when color input changes', () => {
-        const { container } = render(<TestComponent onChange={onChange} />);
+        const { container } = render(<TestComponent onChange={onChange} alpha={1} format="hex" />);
         const inputs = container.querySelectorAll('input[type="text"]') as unknown as HTMLInputElement[];
 
         const [rInput, gInput, bInput] = inputs;

@@ -69,9 +69,7 @@ export interface ITinyMenuGroupProps {
 export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
     return (
         <div
-            className={`
-              univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-pl-0 univer-pr-0
-            `}
+            className="univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-px-0"
         >
             {items.map((item) => {
                 const ele = (

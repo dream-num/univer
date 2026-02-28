@@ -23,7 +23,17 @@ export const configSymbol = Symbol(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY);
 export interface IUniverSheetsDataValidationUIConfig {
     menu?: MenuConfig;
 
+    /**
+     * Whether to show the edit button in the dropdown list of data validation
+     * @default true
+     */
     showEditOnDropdown?: boolean;
+
+    /**
+     * Whether to show the search box in the dropdown list of data validation
+     * @default true
+     */
+    showSearchOnDropdown?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsDataValidationUIConfig = {};

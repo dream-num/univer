@@ -213,6 +213,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
+        const commandValue = value ?? typeof params === 'function' ? params() : params;
+
         return (
             <ToolbarButton
                 data-u-command={id}
@@ -220,7 +222,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 noIcon={!icon}
                 active={activated}
                 disabled={disabled}
-                onClick={() => executeCommand(props.commandId ?? props.id, value ?? params)}
+                onClick={() => executeCommand(props.commandId ?? props.id, commandValue)}
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {isCustomComponent

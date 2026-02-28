@@ -128,12 +128,12 @@ describe('Test regexextract function', () => {
             expect(getObjectValue(result)).toStrictEqual('0104');
 
             text = StringValueObject.create('The total is 123.45 or € 987.65');
-            regularExpression = StringValueObject.create('[€]\d{1,3}(,\d{3})*(.\d{2})?');
+            regularExpression = StringValueObject.create('[€]\\d{1,3}(,\\d{3})*(.\\d{2})?');
             result = testFunction.calculate(text, regularExpression);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
 
             text = StringValueObject.create('Visit our website at https://www.example.com');
-            regularExpression = StringValueObject.create('https?://[^\s]+');
+            regularExpression = StringValueObject.create('https?://[^\\s]+');
             result = testFunction.calculate(text, regularExpression);
             expect(getObjectValue(result)).toStrictEqual('https://www.example.com');
         });

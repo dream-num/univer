@@ -21,6 +21,7 @@ import { createIdentifier, Disposable } from '@univerjs/core';
 export interface IDirtyConversionManagerParams {
     commandId: string;
     getDirtyData: (command: ICommandInfo) => {
+        forceCalculation?: boolean;
         dirtyRanges?: IUnitRange[];
         dirtyNameMap?: IDirtyUnitSheetNameMap;
         dirtyDefinedNameMap?: IDirtyUnitSheetDefinedNameMap;

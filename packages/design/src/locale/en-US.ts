@@ -49,6 +49,16 @@ const locale = {
             cancel: 'cancel',
             confirm: 'ok',
         },
+        GradientColorPicker: {
+            linear: 'Linear',
+            radial: 'Radial',
+            angular: 'Angular',
+            diamond: 'Diamond',
+            offset: 'Offset',
+            angle: 'Angle',
+            flip: 'Flip',
+            delete: 'Delete',
+        },
     },
 };
 

@@ -44,7 +44,9 @@ export class UnionNode extends BaseAstNode {
         const rightNode = rightChild.getValue();
 
         if (leftNode == null || rightNode == null) {
-            throw new Error('leftNode and rightNode');
+            console.error('UnionNode execute leftNode or rightNode is null');
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
+            return;
         }
 
         let result: FunctionVariantType;

@@ -570,8 +570,8 @@ export class BaseFunction {
     }
 
     createReferenceObject(reference: BaseReferenceObject, range: IRange) {
-        const unitId = reference.getForcedUnitId();
-        const sheetId = reference.getForcedSheetId() || '';
+        const unitId = reference.getForcedUnitId() || reference.getDefaultUnitId() || '';
+        const sheetId = reference.getForcedSheetId() || reference.getDefaultUnitId() || '';
         const sheetName = reference.getForcedSheetName();
 
         const gridRangeName = {
@@ -604,10 +604,23 @@ export class BaseFunction {
 
         object.setDefaultUnitId(this.unitId);
         object.setDefaultSheetId(this.subUnitId);
+
+        const forceUnitId = reference.getUnitId();
+        if (forceUnitId != null) {
+            object.setForcedUnitIdDirect(forceUnitId);
+        }
+
+        const forceSheetId = reference.getForcedSheetId();
+        if (forceSheetId != null) {
+            object.setForcedSheetIdDirect(forceSheetId);
+        }
+
+        object.setForcedSheetName(reference.getForcedSheetName());
+
         object.setUnitData(reference.getUnitData());
         object.setRuntimeData(reference.getRuntimeData());
         object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
-        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
+        object.setUnitStylesData(reference.getUnitStylesData());
 
         return object;
     }

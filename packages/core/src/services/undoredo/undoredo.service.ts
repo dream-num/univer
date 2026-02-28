@@ -262,8 +262,11 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const undoStack = this._getUndoStackForFocused();
         const element = undoStack.pop();
         if (element) {
-            const redoStack = this._getRedoStackForFocused();
-            redoStack.push(element);
+            // Only push to redo stack if redoMutations is not empty
+            if (element.redoMutations.length > 0) {
+                const redoStack = this._getRedoStackForFocused();
+                redoStack.push(element);
+            }
             this._updateStatus();
         }
     }

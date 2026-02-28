@@ -110,15 +110,17 @@ Univer proporciona una amplia gama de funciones para hojas de cálculo, document
 
 Univer soporta múltiples idiomas, incluyendo:
 
+- `ca-ES`
+- `en-US`
+- `es-ES`
+- `fa-IR`
+- `ja-JP`
+- `ko-KR`
+- `ru-RU`
+- `sk-SK`
+- `vi-VN`
 - `zh-CN`
 - `zh-TW`
-- `en-US`
-- `ru-RU`
-- `vi-VN`
-- `fa-IR`
-- `ko-KR`
-- `es-ES`
-- `ca-ES`
 
 `zh-CN` y `en-US` son soportados oficialmente, los demás son contribuciones de la comunidad.
 

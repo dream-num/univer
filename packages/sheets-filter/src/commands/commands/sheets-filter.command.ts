@@ -142,9 +142,15 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
         if (!lastSelection) return false;
 
         const startRange = lastSelection.range;
-        const targetFilterRange = isSingleCellSelection(lastSelection)
-            ? expandToContinuousRange(startRange, { left: true, right: true, up: true, down: true }, currentWorksheet)
-            : startRange;
+        const targetFilterRange =
+            // If the selection is a single cell, we should expand it to a continuous range in all directions.
+            isSingleCellSelection(lastSelection)
+                ? expandToContinuousRange(startRange, { left: true, right: true, up: true, down: true }, currentWorksheet)
+                // If the selection is only a single row, we should expand it downwards.
+                : startRange.startRow === startRange.endRow
+                    ? expandToContinuousRange(startRange, { down: true }, currentWorksheet)
+                    // Otherwise, we just use the selected range.
+                    : startRange;
 
         return commandService.executeCommand(SetSheetFilterRangeCommand.id, {
             unitId,

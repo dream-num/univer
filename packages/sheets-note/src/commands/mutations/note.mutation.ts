@@ -42,8 +42,9 @@ export const UpdateNoteMutation: IMutation<IUpdateNoteMutationParams> = {
 export interface IRemoveNoteMutationParams {
     unitId: string;
     sheetId: string;
-    row: number;
-    col: number;
+    noteId?: string;
+    row?: number;
+    col?: number;
     silent?: boolean;
 }
 
@@ -51,9 +52,9 @@ export const RemoveNoteMutation: IMutation<IRemoveNoteMutationParams> = {
     id: 'sheet.mutation.remove-note',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: IRemoveNoteMutationParams) => {
-        const { unitId, sheetId, row, col, silent } = params;
+        const { unitId, sheetId, noteId, row, col, silent } = params;
         const sheetsNoteModel = accessor.get(SheetsNoteModel);
-        sheetsNoteModel.removeNote(unitId, sheetId, row, col, silent);
+        sheetsNoteModel.removeNote(unitId, sheetId, { noteId, row, col, silent });
         return true;
     },
 };
@@ -61,8 +62,9 @@ export const RemoveNoteMutation: IMutation<IRemoveNoteMutationParams> = {
 export interface IToggleNotePopupMutationParams {
     unitId: string;
     sheetId: string;
-    row: number;
-    col: number;
+    noteId?: string;
+    row?: number;
+    col?: number;
     silent?: boolean;
 }
 
@@ -70,9 +72,9 @@ export const ToggleNotePopupMutation: IMutation<IToggleNotePopupMutationParams> 
     id: 'sheet.mutation.toggle-note-popup',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: IToggleNotePopupMutationParams) => {
-        const { unitId, sheetId, row, col, silent } = params;
+        const { unitId, sheetId, noteId, row, col, silent } = params;
         const sheetsNoteModel = accessor.get(SheetsNoteModel);
-        sheetsNoteModel.toggleNotePopup(unitId, sheetId, row, col, silent);
+        sheetsNoteModel.toggleNotePopup(unitId, sheetId, { noteId, row, col, silent });
         return true;
     },
 };
@@ -80,8 +82,9 @@ export const ToggleNotePopupMutation: IMutation<IToggleNotePopupMutationParams> 
 export interface IUpdateNotePositionMutationParams {
     unitId: string;
     sheetId: string;
-    row: number;
-    col: number;
+    noteId?: string;
+    row?: number;
+    col?: number;
     newPosition: {
         row: number;
         col: number;
@@ -93,9 +96,9 @@ export const UpdateNotePositionMutation: IMutation<IUpdateNotePositionMutationPa
     id: 'sheet.mutation.update-note-position',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: IUpdateNotePositionMutationParams) => {
-        const { unitId, sheetId, row, col, newPosition, silent } = params;
+        const { unitId, sheetId, noteId, row, col, newPosition, silent } = params;
         const sheetsNoteModel = accessor.get(SheetsNoteModel);
-        sheetsNoteModel.updateNotePosition(unitId, sheetId, row, col, newPosition.row, newPosition.col, silent);
+        sheetsNoteModel.updateNotePosition(unitId, sheetId, { noteId, row, col, newRow: newPosition.row, newCol: newPosition.col, silent });
         return true;
     },
 };

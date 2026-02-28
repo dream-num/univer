@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { CellValueType, Disposable, IConfigService, Inject, isRealNum, isTextFormat, LocaleService, numfmt } from '@univerjs/core';
+import { CellValueType, Disposable, getNumfmtParseValueFilter, IConfigService, Inject, isRealNum, isTextFormat, LocaleService } from '@univerjs/core';
 import { IZenZoneService } from '@univerjs/ui';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -81,7 +81,7 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                  */
                 if (
                     (cellData.t === CellValueType.FORCE_STRING || cellData.t === CellValueType.STRING) &&
-                    (isRealNum(cellData.v) || (typeof cellData.v === 'string' && numfmt.parseNumber(cellData.v)))
+                    (isRealNum(cellData.v) || (typeof cellData.v === 'string' && getNumfmtParseValueFilter(cellData.v)))
                 ) {
                     // If the user has disabled the force string alert, do not show it
                     if (this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.disableForceStringAlert) {

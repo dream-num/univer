@@ -15,10 +15,11 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { ISuperTable } from '../../basics/common';
+
 import type { ISuperTableOptionParam } from '../../services/super-table.service';
+import { CommandType } from '@univerjs/core';
+import { ISuperTableService } from '../../services/super-table.service';
 
 export interface ISetSuperTableMutationSearchParam {
     unitId: string;
@@ -35,17 +36,32 @@ export interface ISetSuperTableMutationParam extends ISetSuperTableMutationSearc
 export const SetSuperTableMutation: IMutation<ISetSuperTableMutationParam> = {
     id: 'formula.mutation.set-super-table',
     type: CommandType.MUTATION,
-    handler: () => true,
+    handler: (accessor, params) => {
+        const { unitId, tableName, reference } = params;
+        const superTableService = accessor.get(ISuperTableService);
+        superTableService.registerTable(unitId, tableName, reference);
+        return true;
+    },
 };
 
 export const RemoveSuperTableMutation: IMutation<ISetSuperTableMutationSearchParam> = {
     id: 'formula.mutation.remove-super-table',
     type: CommandType.MUTATION,
-    handler: () => true,
+    handler: (accessor, params) => {
+        const { unitId, tableName } = params;
+        const superTableService = accessor.get(ISuperTableService);
+        superTableService.remove(unitId, tableName);
+        return true;
+    },
 };
 
 export const SetSuperTableOptionMutation: IMutation<ISuperTableOptionParam> = {
     id: 'formula.mutation.set-super-table-option',
     type: CommandType.MUTATION,
-    handler: () => true,
+    handler: (accessor, params) => {
+        const { tableOption, tableOptionType } = params;
+        const superTableService = accessor.get(ISuperTableService);
+        superTableService.registerTableOptionMap(tableOption, tableOptionType);
+        return true;
+    },
 };

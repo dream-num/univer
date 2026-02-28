@@ -20,6 +20,7 @@ export { SetDrawingAlignOperation } from './commands/operations/drawing-align.op
 export { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
 export type { IUniverDrawingUIConfig } from './controllers/config.schema';
+export { getCurrentUnitInfo, insertGroupObject } from './controllers/utils';
 export { UniverDrawingUIPlugin } from './plugin';
 export { DrawingRenderService } from './services/drawing-render.service';
 export { getUpdateParams } from './utils/get-update-params';

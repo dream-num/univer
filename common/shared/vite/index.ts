@@ -214,6 +214,8 @@ export async function build(options?: IBuildOptions) {
         define: {
             'process.env.NODE_ENV': JSON.stringify('production'),
             'process.env.BUILD_TIMESTAMP': JSON.stringify(Math.floor(Date.now() / 1000)),
+            // for ws package to avoid optional dependency issue
+            'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
         },
         plugins: [
             trimClassNamePlugin(),

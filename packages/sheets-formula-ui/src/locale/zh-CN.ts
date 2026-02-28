@@ -118,6 +118,7 @@ const locale: typeof enUS = {
         },
 
         operation: {
+            copyFormulaOnly: '仅复制公式',
             pasteFormula: '仅粘贴公式',
         },
     },

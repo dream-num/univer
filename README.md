@@ -110,15 +110,17 @@ Univer provides a wide range of features for spreadsheets, documents and present
 
 Univer supports multiple languages, including:
 
+- `ca-ES`
+- `en-US`
+- `es-ES`
+- `fa-IR`
+- `ja-JP`
+- `ko-KR`
+- `ru-RU`
+- `sk-SK`
+- `vi-VN`
 - `zh-CN`
 - `zh-TW`
-- `en-US`
-- `ru-RU`
-- `vi-VN`
-- `fa-IR`
-- `ko-KR`
-- `es-ES`
-- `ca-ES`
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 

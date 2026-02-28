@@ -28,6 +28,20 @@ const locale: typeof enUS = {
         panel: {
             title: '이미지 편집',
         },
+
+        save: {
+            title: '셀 이미지 저장',
+            menuLabel: '셀 이미지 저장',
+            imageCount: '이미지 수',
+            fileNameConfig: '파일 이름',
+            useRowCol: '셀 주소 사용 (A1, B2...)',
+            useColumnValue: '열 값 사용',
+            selectColumn: '열 선택',
+            cancel: '취소',
+            confirm: '저장',
+            saving: '저장 중...',
+            error: '셀 이미지 저장 실패',
+        },
     },
     'image-popup': {
         replace: '바꾸기',
@@ -35,6 +49,8 @@ const locale: typeof enUS = {
         edit: '편집',
         crop: '자르기',
         reset: '원래 크기',
+        flipH: '가로 뒤집기',
+        flipV: '세로 뒤집기',
     },
     'drawing-anchor': {
         title: '고정 위치 설정',

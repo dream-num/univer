@@ -49,7 +49,6 @@ import {
     COMMON_LABEL_COMPONENT,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
-    FONT_FAMILY_LIST,
     FONT_SIZE_COMPONENT,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
@@ -567,12 +566,16 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
         label: FONT_FAMILY_COMPONENT,
-        selections: FONT_FAMILY_LIST.map((item) => ({
+        selections: [{
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
+                hoverable: false,
+                selectable: false,
+                props: {
+                    id: SetInlineFormatFontFamilyCommand.id,
+                },
             },
-            value: item.value,
-        })),
+        }],
         // disabled$: getCurrentSheetDisabled$(accessor),
         value$: new Observable((subscriber) => {
             const defaultValue = DEFAULT_STYLES.ff;

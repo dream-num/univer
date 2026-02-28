@@ -113,6 +113,7 @@ const locale = {
             syntax: 'SYNTAX',
         },
         operation: {
+            copyFormulaOnly: 'Copy Formula Only',
             pasteFormula: 'Paste Formula',
         },
     },

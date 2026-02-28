@@ -21,7 +21,7 @@ import { ArrangeTypeEnum, DrawingTypeEnum, generateRandomId, ICommandService, Im
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
+import { RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand, transformToAxisAlignPosition } from '@univerjs/sheets-drawing-ui';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'>, ICellOverGridPosition, IRotationSkewFlipTransform, Required<ISize> {
@@ -104,6 +104,7 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
             skewX,
             skewY,
         },
+        axisAlignSheetTransform: transformToAxisAlignPosition(transform, selectionRenderService)!,
     };
 }
 
@@ -132,6 +133,20 @@ export class FOverGridImageBuilder {
             rowOffset: 0,
             width: 0,
             height: 0,
+            axisAlignSheetTransform: {
+                from: {
+                    column: 0,
+                    columnOffset: 0,
+                    row: 0,
+                    rowOffset: 0,
+                },
+                to: {
+                    column: 0,
+                    columnOffset: 0,
+                    row: 0,
+                    rowOffset: 0,
+                },
+            },
         };
     }
 
@@ -170,6 +185,22 @@ export class FOverGridImageBuilder {
 
         if (image.sheetTransform == null) {
             image.sheetTransform = {
+                from: {
+                    column: 0,
+                    columnOffset: 0,
+                    row: 0,
+                    rowOffset: 0,
+                },
+                to: {
+                    column: 0,
+                    columnOffset: 0,
+                    row: 0,
+                    rowOffset: 0,
+                },
+            };
+        }
+        if (image.axisAlignSheetTransform == null) {
+            image.axisAlignSheetTransform = {
                 from: {
                     column: 0,
                     columnOffset: 0,
@@ -867,6 +898,17 @@ export class FOverGridImage extends FBase {
     setRotate(angle: number): boolean {
         this._image.sheetTransform.angle = angle;
         this._image.transform && (this._image.transform.angle = angle);
+        if (this._image.transform) {
+            const renderManagerService = this._injector.get(IRenderManagerService);
+            const render = renderManagerService.getRenderById(this._image.unitId);
+            if (!render) {
+                throw new Error(`Render Unit with unitId ${this._image.unitId} not found`);
+            }
+            const selectionRenderService = render.with(ISheetSelectionRenderService);
+
+            this._image.axisAlignSheetTransform && (this._image.axisAlignSheetTransform = transformToAxisAlignPosition(this._image.transform, selectionRenderService)!);
+        }
+
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 

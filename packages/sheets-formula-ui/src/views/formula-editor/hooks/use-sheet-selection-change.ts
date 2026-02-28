@@ -21,7 +21,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { RefObject } from 'react';
 import type { IRefSelection } from './use-highlight';
-import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -91,7 +91,7 @@ export const useSheetSelectionChange = (
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     // eslint-disable-next-line complexity
-    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean) => {
+    const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
         const ctx = prepareSelectionChangeContext({ editor, lexerTreeBuilder });
         if (!ctx) return;
         const { nodeIndex, updatingRefIndex, sequenceNodes, offset } = ctx;
@@ -147,7 +147,8 @@ export const useSheetSelectionChange = (
             }
         } else {
             const orderedSelections = [...selections];
-            if (updatingRefIndex !== -1) {
+            // 当 isCtrlAddMode 为 true 时，跳过 updatingRefIndex 的逻辑，不调整选区顺序
+            if (!isCtrlAddMode && updatingRefIndex !== -1) {
                 const last = orderedSelections.pop();
                 last && orderedSelections.splice(updatingRefIndex, 0, last);
             }
@@ -224,13 +225,23 @@ export const useSheetSelectionChange = (
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
+            let prevSelectionsCount = 0;
 
             const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
                 if (isFirst) {
                     isFirst = false;
+                    prevSelectionsCount = selections.length;
                     return;
                 }
-                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd);
+
+                // 通过比较选区数量判断是否是 ctrl 添加模式
+                const isCtrlAddMode = selections.length > prevSelectionsCount;
+
+                if (isEnd) {
+                    prevSelectionsCount = selections.length;
+                }
+
+                onSelectionsChange(selections.map((i) => i.rangeWithCoord), isEnd, isCtrlAddMode);
             };
 
             const disposableCollection = new DisposableCollection();
@@ -313,12 +324,23 @@ export const useSheetSelectionChange = (
                 if (params.selections.length) {
                     const last = params.selections[params.selections.length - 1];
                     if (last) {
+                        const { range, primary } = last;
+                        // When in formula editor, if the current cell is a merged cell, only set the main cell of the merged cell as the selection.
+                        if ((primary?.isMergedMainCell || primary?.isMerged) && Rectangle.contains(primary, range)) {
+                            range.startRow = primary.startRow;
+                            range.endRow = primary.startRow;
+                            range.startColumn = primary.startColumn;
+                            range.endColumn = primary.startColumn;
+                        }
+                        range.unitId = params.unitId;
+                        range.sheetId = params.subUnitId;
+
                         const isAdd = isSelectingRef.current === FormulaSelectingType.NEED_ADD;
                         const selections: IRange[] = (refSelectionsRenderService?.getSelectionDataWithStyle() ?? []).map((i) => i.rangeWithCoord);
                         if (isAdd) {
-                            selections.push(last.range);
+                            selections.push(range);
                         } else {
-                            selections[selections.length - 1] = last.range;
+                            selections[selections.length - 1] = range;
                         }
                         onSelectionsChange(selections, true);
                     }

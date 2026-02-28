@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem, MenuSchemaType } from '@univerjs/ui';
-import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
+import { MenuItemType, RibbonOthersGroup } from '@univerjs/ui';
 import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
 import { OpenRecordPanelOperation } from '../commands/operations/operation';
 import { ActionRecorderService } from '../services/action-recorder.service';
@@ -67,9 +67,9 @@ export function ReplayLocalRecordOnActiveMenuItemFactory(): IMenuButtonItem {
 }
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.OTHERS]: {
+    [RibbonOthersGroup.OTHERS]: {
         [RECORD_MENU_ITEM_ID]: {
-            order: 2,
+            order: 1,
             menuItemFactory: RecordMenuItemFactory,
             [OpenRecordPanelOperation.id]: {
                 order: 1,

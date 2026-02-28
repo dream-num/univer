@@ -115,6 +115,11 @@ export const hsvToHex = (h: number, s: number, v: number): string => {
     return rgbToHex(r, g, b);
 };
 
+export const hsvToRgba = (h: number, s: number, v: number, a: number): string => {
+    const [r, g, b] = hsvToRgb(h, s, v);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
 export const parseRgba = (rgba: string): [number, number, number, number] => {
     const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d*\.?\d+))?\)/);
     if (!match) throw new Error('Invalid RGBA string');

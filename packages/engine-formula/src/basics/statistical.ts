@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import type { ICellData, IObjectArrayPrimitiveType, IRowData, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
+import type { FormulaDataModel } from '../models/formula-data.model';
+import { BooleanNumber, isRealNum } from '@univerjs/core';
+import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
+import { NumberValueObject } from '../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_MATH } from '../functions/math/function-names';
 import { erf, erfcINV } from './engineering';
 import { ErrorType } from './error-type';
 import { calculateCombin, calculateFactorial, calculateMmult, inverseMatrixByLUD, inverseMatrixByUSV, matrixTranspose } from './math';
@@ -1074,3 +1081,505 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
         XTXInverse,
     };
 }
+
+//#region Aggregate functions
+
+/**
+ * Parse aggregate data references into multi-area refs and normal refs, currently only used in functions like SUBTOTAL and AGGREGATE.
+ * If there is any invalid reference, return isError as true.
+ */
+export function parseAggregateDataRefs(refs: FunctionVariantType[]) {
+    const multiAreaRefs: MultiAreaReferenceObject[] = [];
+    const normalRefs: BaseReferenceObject[] = [];
+
+    let isError = false;
+
+    for (let i = 0; i < refs.length; i++) {
+        const ref = refs[i];
+
+        if (ref.isReferenceObject()) {
+            if ((ref as BaseReferenceObject).isMultiArea()) {
+                multiAreaRefs.push(ref as MultiAreaReferenceObject);
+            } else {
+                normalRefs.push(ref as BaseReferenceObject);
+            }
+        } else {
+            isError = true;
+            break;
+        }
+    }
+
+    return {
+        isError,
+        multiAreaRefs,
+        normalRefs,
+    };
+}
+
+export enum AggregateFunctionType {
+    AVERAGE = 'AVERAGE',
+    COUNT = 'COUNT',
+    COUNTA = 'COUNTA',
+    MAX = 'MAX',
+    MIN = 'MIN',
+    PRODUCT = 'PRODUCT',
+    STDEV = 'STDEV',
+    STDEV_S = 'STDEV.S',
+    STDEVP = 'STDEVP',
+    STDEV_P = 'STDEV.P',
+    SUM = 'SUM',
+    VAR = 'VAR',
+    VAR_S = 'VAR.S',
+    VARP = 'VARP',
+    VAR_P = 'VAR.P',
+    MEDIAN = 'MEDIAN',
+    MODE_SNGL = 'MODE.SNGL',
+    // LARGE = 'LARGE',
+    // SMALL = 'SMALL',
+    // PERCENTILE_EXC = 'PERCENTILE.EXC',
+    // PERCENTILE_INC = 'PERCENTILE.INC',
+    // QUARTILE_EXC = 'QUARTILE.EXC',
+    // QUARTILE_INC = 'QUARTILE.INC',
+}
+
+// Check if the row is hidden
+function isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number): boolean {
+    const row = rowData[rowIndex];
+    if (!row) {
+        return false;
+    }
+    return row.hd === BooleanNumber.TRUE;
+}
+
+// Check if the cell is a nested SUBTOTAL or AGGREGATE result
+function isNestedAggregateOrSubtotal(
+    cellData: ObjectMatrix<ICellData>,
+    rowIndex: number,
+    columnIndex: number,
+    sheetId: string,
+    unitId: string,
+    formulaDataModel: FormulaDataModel
+): boolean {
+    const cellValue = cellData.getValue(rowIndex, columnIndex);
+    if (cellValue?.f || cellValue?.si) {
+        const formulaString = formulaDataModel.getFormulaStringByCell(rowIndex, columnIndex, sheetId, unitId);
+        // match 'SUBTOTAL(' or 'AGGREGATE(' for simple check
+        if (formulaString && (formulaString.indexOf(`${FUNCTION_NAMES_MATH.SUBTOTAL}(`) > -1 || formulaString.indexOf(`${FUNCTION_NAMES_MATH.AGGREGATE}(`) > -1)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export type modeSnglValueCountMapType = Record<number, {
+    count: number;
+    order: number;
+}>;
+
+export function getModeSnglResult(valueCountMap: modeSnglValueCountMapType, valueMaxCount: number): BaseValueObject {
+    const result = Object.entries(valueCountMap)
+        .filter(([_, { count }]) => count === valueMaxCount)
+        .sort((a, b) => a[1].order - b[1].order)
+        .map(([value]) => +value);
+
+    return NumberValueObject.create(result[0]);
+}
+
+export interface IAggregateIgnoreOptions {
+    ignoreRowHidden: boolean; // whether to ignore hidden rows
+    ignoreErrorValues: boolean; // whether to ignore error values
+    ignoreNested: boolean; // whether to ignore nested SUBTOTAL or AGGREGATE results
+}
+
+// eslint-disable-next-line max-lines-per-function,complexity
+export function getAggregateResult(
+    options: {
+        type: AggregateFunctionType; // type of aggregate function
+        formulaDataModel: FormulaDataModel;
+    } & IAggregateIgnoreOptions,
+    refs: BaseReferenceObject[]
+): BaseValueObject {
+    const { type, ignoreRowHidden, ignoreErrorValues, ignoreNested, formulaDataModel } = options;
+    const valueObjects: BaseValueObject[] = [];
+
+    let count = 0;
+    let counta = 0;
+    let sum = 0;
+    let n = 0;
+    let max = 0;
+    let min = 0;
+    let product = 1;
+
+    const valueCountMap: modeSnglValueCountMapType = {};
+    let valueMaxCount = 1;
+    let valueCountOrder = 0;
+
+    for (let i = 0; i < refs.length; i++) {
+        const ref = refs[i];
+
+        const filteredOutRows = ref.getFilteredOutRows();
+        const rowData = ref.getRowData();
+        const unitId = ref.getUnitId();
+        const sheetId = ref.getSheetId();
+        const unitData = ref.getUnitData();
+        const cellData = unitData[unitId]?.[sheetId]?.cellData;
+
+        let errorValueObject: Nullable<BaseValueObject>;
+
+        ref.iterator((valueObject, rowIndex, columnIndex) => {
+            // Filtered rows are always excluded.
+            if (filteredOutRows.includes(rowIndex)) {
+                return true; // continue
+            }
+
+            if (ignoreRowHidden && isRowHidden(rowData, rowIndex)) {
+                return true; // continue
+            }
+
+            if (ignoreNested && isNestedAggregateOrSubtotal(cellData, rowIndex, columnIndex, sheetId, unitId, formulaDataModel)) {
+                return true; // continue
+            }
+
+            // COUNT function only counts number cells.
+            if (type === AggregateFunctionType.COUNT) {
+                if (valueObject?.isNumber()) count++;
+                return true; // continue
+            }
+
+            // COUNTA function counts all non-blank cells.
+            if (type === AggregateFunctionType.COUNTA) {
+                if (valueObject !== null && valueObject !== undefined && !valueObject.isNull()) counta++;
+                return true; // continue
+            }
+
+            if (valueObject?.isError()) {
+                if (ignoreErrorValues) return true; // continue
+                // If the value is error, return directly.
+                errorValueObject = valueObject;
+                return false; // break
+            }
+
+            // 'test', ' ',  blank cell, TRUE and FALSE are ignored
+            if (!valueObject || valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
+                return true; // continue
+            }
+
+            let value = valueObject.getValue();
+
+            if (!isRealNum(value)) {
+                return true; // continue
+            }
+
+            value = +value;
+            n++;
+
+            if (type === AggregateFunctionType.MAX) {
+                max = n === 1 ? value : Math.max(max, value);
+                return true; // continue
+            }
+
+            if (type === AggregateFunctionType.MIN) {
+                min = n === 1 ? value : Math.min(min, value);
+                return true; // continue
+            }
+
+            if (type === AggregateFunctionType.MODE_SNGL) {
+                if (!valueCountMap[value]) {
+                    valueCountMap[value] = { count: 1, order: valueCountOrder++ };
+                } else {
+                    valueCountMap[value].count++;
+                    if (valueCountMap[value].count > valueMaxCount) {
+                        valueMaxCount = valueCountMap[value].count;
+                    }
+                }
+                return true; // continue
+            }
+
+            sum += value;
+            product *= value;
+            valueObjects.push(valueObject);
+        });
+
+        if (errorValueObject?.isError()) {
+            return errorValueObject;
+        }
+    }
+
+    switch (type) {
+        case AggregateFunctionType.AVERAGE:
+            if (n === 0) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            return NumberValueObject.create(sum / n);
+        case AggregateFunctionType.COUNT:
+            return NumberValueObject.create(count);
+        case AggregateFunctionType.COUNTA:
+            return NumberValueObject.create(counta);
+        case AggregateFunctionType.MAX:
+            return NumberValueObject.create(max);
+        case AggregateFunctionType.MIN:
+            return NumberValueObject.create(min);
+        case AggregateFunctionType.PRODUCT:
+            return NumberValueObject.create(n === 0 ? 0 : product);
+        case AggregateFunctionType.STDEV:
+        case AggregateFunctionType.STDEV_S:
+            if (n < 2) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            return createNewArray([valueObjects], 1, n).std(1);
+        case AggregateFunctionType.STDEVP:
+        case AggregateFunctionType.STDEV_P:
+            if (n === 0) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            return createNewArray([valueObjects], 1, n).std();
+        case AggregateFunctionType.SUM:
+            return NumberValueObject.create(sum);
+        case AggregateFunctionType.VAR:
+        case AggregateFunctionType.VAR_S:
+            if (n < 2) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            return createNewArray([valueObjects], 1, n).var(1);
+        case AggregateFunctionType.VARP:
+        case AggregateFunctionType.VAR_P:
+            if (n === 0) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            return createNewArray([valueObjects], 1, n).var();
+        case AggregateFunctionType.MEDIAN:
+            if (n === 0) return ErrorValueObject.create(ErrorType.NUM);
+            return getMedianResult(valueObjects.map((vo) => +vo.getValue()));
+        case AggregateFunctionType.MODE_SNGL:
+            if (valueCountOrder === 0 || valueMaxCount === 1) return ErrorValueObject.create(ErrorType.NA);
+            return getModeSnglResult(valueCountMap, valueMaxCount);
+        default:
+            return ErrorValueObject.create(ErrorType.VALUE);
+    }
+}
+
+// eslint-disable-next-line max-lines-per-function,complexity
+export function getArrayValuesByAggregateIgnoreOptions(
+    array: FunctionVariantType,
+    options?: IAggregateIgnoreOptions,
+    formulaDataModel?: FormulaDataModel
+): number[] | ErrorValueObject {
+    const { ignoreRowHidden = false, ignoreErrorValues = false, ignoreNested = false } = options ?? {};
+    const values: number[] = [];
+
+    if (array.isReferenceObject()) {
+        const filteredOutRows = (array as BaseReferenceObject).getFilteredOutRows();
+        const rowData = (array as BaseReferenceObject).getRowData();
+        const unitId = (array as BaseReferenceObject).getUnitId();
+        const sheetId = (array as BaseReferenceObject).getSheetId();
+        const unitData = (array as BaseReferenceObject).getUnitData();
+        const cellData = unitData[unitId]?.[sheetId]?.cellData;
+
+        let errorValueObject: Nullable<BaseValueObject>;
+
+        (array as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
+            // Filtered rows are always excluded.
+            if (filteredOutRows.includes(rowIndex)) {
+                return true; // continue
+            }
+
+            if (ignoreRowHidden && isRowHidden(rowData, rowIndex)) {
+                return true; // continue
+            }
+
+            if (valueObject?.isError()) {
+                if (ignoreErrorValues) return true; // continue
+                // If the value is error, return directly.
+                errorValueObject = valueObject;
+                return false; // break
+            }
+
+            if (ignoreNested && formulaDataModel && isNestedAggregateOrSubtotal(cellData, rowIndex, columnIndex, sheetId, unitId, formulaDataModel)) {
+                return true; // continue
+            }
+
+            if (!valueObject || valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
+                return true; // continue
+            }
+
+            const value = valueObject.getValue();
+
+            if (!isRealNum(value)) {
+                return true; // continue
+            }
+
+            values.push(+value);
+        });
+
+        if (errorValueObject) {
+            return errorValueObject as ErrorValueObject;
+        }
+    } else {
+        const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+        const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+        for (let r = 0; r < rowCount; r++) {
+            for (let c = 0; c < columnCount; c++) {
+                const valueObject = (array.isArray() ? (array as ArrayValueObject).get(r, c) : array) as BaseValueObject;
+
+                if (valueObject.isError()) {
+                    if (ignoreErrorValues) continue;
+                    return valueObject as ErrorValueObject;
+                }
+
+                if (!valueObject || valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
+                    continue;
+                }
+
+                const value = valueObject.getValue();
+
+                if (!isRealNum(value)) {
+                    continue;
+                }
+
+                values.push(+value);
+            }
+        }
+    }
+
+    if (values.length === 0) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    return values;
+}
+
+// MEDIAN(array): returns the median of the given numbers.
+export function getMedianResult(array: number[]): BaseValueObject {
+    const n = array.length;
+
+    array.sort((a, b) => a - b);
+
+    let result: number;
+
+    if (n % 2 === 0) {
+        const mid = n / 2;
+        result = (array[mid - 1] + array[mid]) / 2;
+    } else {
+        result = array[Math.floor(n / 2)];
+    }
+
+    return NumberValueObject.create(result);
+}
+
+// LARGE(array, k): returns the k-th largest value in a data set.
+export function getLargeResult(array: number[], k: number): BaseValueObject {
+    if (k < 1 || k > array.length) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    array.sort((a, b) => b - a);
+
+    const _k = Math.ceil(k);
+
+    return NumberValueObject.create(array[_k - 1]);
+}
+
+// SMALL(array, k): returns the k-th smallest value in a data set.
+export function getSmallResult(array: number[], k: number): BaseValueObject {
+    if (k < 1 || k > array.length) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    array.sort((a, b) => a - b);
+
+    const _k = Math.floor(k);
+
+    return NumberValueObject.create(array[_k - 1]);
+}
+
+// PERCENTILE.INC(array, k): returns the k-th percentile of values in a range, where k is in the range 0..1, inclusive.
+export function getPercentileIncResult(array: number[], k: number): BaseValueObject {
+    const n = array.length;
+
+    if (k < 0 || k > 1) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    array.sort((a, b) => a - b);
+
+    const kIndex = k * (n - 1);
+    const integerPart = Math.floor(kIndex);
+    const fractionPart = kIndex - integerPart;
+
+    if (fractionPart === 0) {
+        return NumberValueObject.create(array[integerPart]);
+    }
+
+    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+
+    return NumberValueObject.create(result);
+}
+
+// PERCENTILE.EXC(array, k): returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive.
+export function getPercentileExcResult(array: number[], k: number): BaseValueObject {
+    const n = array.length;
+
+    if (k < 1 / (n + 1) || k > 1 - 1 / (n + 1)) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    array.sort((a, b) => a - b);
+
+    const kIndex = k * (n + 1) - 1;
+    const integerPart = Math.floor(kIndex);
+    const fractionPart = kIndex - integerPart;
+
+    if (fractionPart === 0) {
+        return NumberValueObject.create(array[integerPart]);
+    }
+
+    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+
+    return NumberValueObject.create(result);
+}
+
+// QUARTILE.INC(array, quart): returns the quartile of a data set, based on percentile values from 0..1, inclusive.
+export function getQuartileIncResult(array: number[], quart: number): BaseValueObject {
+    const n = array.length;
+
+    if (quart < 0 || quart > 4) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    array.sort((a, b) => a - b);
+
+    const k = quart / 4;
+    const kIndex = k * (n - 1);
+    const integerPart = Math.floor(kIndex);
+    const fractionPart = kIndex - integerPart;
+
+    if (fractionPart === 0) {
+        return NumberValueObject.create(array[integerPart]);
+    }
+
+    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+
+    return NumberValueObject.create(result);
+}
+
+// QUARTILE.EXC(array, quart): returns the quartile of a data set, based on percentile values from 0..1, exclusive.
+export function getQuartileExcResult(array: number[], quart: number): BaseValueObject {
+    const n = array.length;
+
+    if (quart <= 0 || quart >= 4) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    array.sort((a, b) => a - b);
+
+    const k = quart / 4;
+
+    if (k < 1 / (n + 1) || k > 1 - 1 / (n + 1)) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    const kIndex = k * (n + 1) - 1;
+    const integerPart = Math.floor(kIndex);
+    const fractionPart = kIndex - integerPart;
+
+    if (fractionPart === 0) {
+        return NumberValueObject.create(array[integerPart]);
+    }
+
+    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+
+    return NumberValueObject.create(result);
+}
+
+//#endregion

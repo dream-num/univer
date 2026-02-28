@@ -20,7 +20,7 @@ import type { ISetSheetTableParams, ITableFilterItem } from '@univerjs/sheets-ta
 import type { IFilterByValueWithTreeItem, ITableFilterItemList } from '../types';
 import { cellToRange, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { isConditionFilter, isManualFilter, SetSheetTableFilterCommand, SheetTableService, TableManager } from '@univerjs/sheets-table';
+import { isConditionFilter, isManualTableFilter, SetSheetTableFilterCommand, SheetTableService, TableManager } from '@univerjs/sheets-table';
 import { FilterByEnum } from '../types';
 
 interface ISheetTableFilterPanelProps {
@@ -103,7 +103,7 @@ export class SheetsTableUiService extends Disposable {
         const checkedItems: string[] = [];
         if (table) {
             const filter = table.getTableFilterColumn(columnIndex);
-            if (filter && isManualFilter(filter)) {
+            if (filter && isManualTableFilter(filter)) {
                 checkedItems.push(...filter.values);
             }
         }

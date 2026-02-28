@@ -118,7 +118,7 @@ export class Irr extends BaseFunction {
                 return false;
             }
 
-            if (_valueOject.isNull() || _valueOject.isBoolean()) {
+            if (_valueOject.isNull() || _valueOject.isBoolean() || (_valueOject.isString() && _valueOject.getValue() === '')) {
                 return true;
             }
 

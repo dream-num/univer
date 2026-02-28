@@ -56,8 +56,6 @@ export class SpanModel extends Disposable {
 
     private _rangeMap: LRUMap<string, number[]> = new LRUMap<string, number[]>(50000);
 
-    private _skeletonCache: LRUMap<string, number[]> = new LRUMap<string, number[]>(50000); ;
-
     constructor(mergeData: IRange[]) {
         super();
         this._init(mergeData.concat());
@@ -75,7 +73,6 @@ export class SpanModel extends Disposable {
         this._hasAll = false;
         this._allIndex = -1;
         this._rangeMap.clear();
-        this._skeletonCache.clear();
         this._hasColumn = false;
         this._hasRow = false;
     }
@@ -220,68 +217,8 @@ export class SpanModel extends Disposable {
         return ranges;
     }
 
-    /**
-     * @deprecated sigificant performance impact, use _getCellMergeInfo instead.
-     * @param startRow
-     * @param startColumn
-     * @param endRow
-     * @param endColumn
-     */
-    public getMergedCellRangeForSkeleton(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        // copy from packages\engine-render\src\components\sheets\sheet-skeleton.ts  _getMergeCells
-        const cacheDataMerge: IRange[] = [];
-        const mergeData = this._mergeData;
-        const key = `${startRow}-${startColumn}-${endRow}-${endColumn}`;
-
-        if (this._skeletonCache.has(key)) {
-            return this._getSkeletonRangeFromCache(key);
-        }
-        const indexes: number[] = [];
-
-        for (let i = 0; i < mergeData.length; i++) {
-            const {
-                startRow: mergeStartRow,
-                endRow: mergeEndRow,
-                startColumn: mergeStartColumn,
-                endColumn: mergeEndColumn,
-            } = mergeData[i];
-            for (let r = startRow; r <= endRow; r++) {
-                let isBreak = false;
-                for (let c = startColumn; c <= endColumn; c++) {
-                    if (r >= mergeStartRow && r <= mergeEndRow && c >= mergeStartColumn && c <= mergeEndColumn) {
-                        cacheDataMerge.push({
-                            startRow: mergeStartRow,
-                            endRow: mergeEndRow,
-                            startColumn: mergeStartColumn,
-                            endColumn: mergeEndColumn,
-                        });
-                        indexes.push(i);
-                        isBreak = true;
-                        break;
-                    }
-                }
-                if (isBreak) {
-                    break;
-                }
-            }
-        }
-        this._skeletonCache.set(key, indexes);
-        return cacheDataMerge;
-    }
-
     private _getRangeFromCache(key: string) {
         const indexes = this._rangeMap.get(key) || [];
-        const ranges: IRange[] = [];
-        for (const index of indexes) {
-            ranges.push({
-                ...this._mergeData[index],
-            });
-        }
-        return ranges;
-    }
-
-    private _getSkeletonRangeFromCache(key: string) {
-        const indexes = this._skeletonCache.get(key) || [];
         const ranges: IRange[] = [];
         for (const index of indexes) {
             ranges.push({

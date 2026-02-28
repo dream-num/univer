@@ -49,7 +49,9 @@ export class PrefixNode extends BaseAstNode {
         let value = children[0].getValue();
         let result: FunctionVariantType;
         if (value == null) {
-            throw new Error('object is null');
+            console.error('PrefixNode execute value is null');
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
+            return;
         }
 
         if (this._operatorString === prefixToken.MINUS) {

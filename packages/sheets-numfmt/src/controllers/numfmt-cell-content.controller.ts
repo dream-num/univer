@@ -92,6 +92,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
             case LocaleType.ES_ES:
             case LocaleType.CA_ES:
                 return 'es';
+            case LocaleType.SK_SK:
+                return 'sk';
             case LocaleType.EN_US:
             case LocaleType.FA_IR:
             default: {

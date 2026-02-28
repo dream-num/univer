@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IAccessor, IMutation } from '@univerjs/core';
-
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../basics/interfaces/mutation-interface';
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export const AddMergeUndoMutationFactory = (
     accessor: IAccessor,
     params: IAddWorksheetMergeMutationParams
 ): IRemoveWorksheetMergeMutationParams => {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
+    const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+    if (!target) {
+        throw new Error('Workbook or worksheet is null error!');
     }
 
     return {
@@ -44,24 +39,21 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
     id: 'sheet.mutation.add-worksheet-merge',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: IAddWorksheetMergeMutationParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
+        const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) {
+            throw new Error('Workbook or worksheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) return false;
-
+        const { worksheet } = target;
         const config = worksheet.getConfig()!;
         const mergeConfigData = config.mergeData;
         const mergeAppendData = params.ranges;
+
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }
-        worksheet.getSpanModel().rebuild(mergeConfigData);
 
+        worksheet.getSpanModel().rebuild(mergeConfigData);
         return true;
     },
 };

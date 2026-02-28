@@ -42,6 +42,7 @@ export { requestImmediateMacroTask } from './common/request-immediate-macro-task
 export { type ISequenceExecuteResult, sequence, sequenceAsync } from './common/sequence';
 export { mergeSets } from './common/set';
 export { UnitModel, type UnitType, UniverInstanceType } from './common/unit';
+export { resolveWithBasePath } from './common/url';
 export * from './docs/data-model';
 export { JSON1, JSONX } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
@@ -79,6 +80,7 @@ export { EventState, EventSubject, fromEventSubject, type IEventObserver } from 
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export {
+    COMMAND_LOG_EXECUTION_CONFIG_KEY,
     type CommandListener,
     CommandService,
     CommandType,
@@ -98,10 +100,13 @@ export {
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
 export { ConfigService } from './services/config/config.service';
+export { IConfirmService, TestConfirmService } from './services/confirm/confirm.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
+export { IImageIoService, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
+export type { IImageIoServiceParam } from './services/image-io/image-io.service';
+export { IURLImageService } from './services/image-io/url-image.service';
 export { type ICreateUnitOptions, IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService, LifecycleUnreachableError } from './services/lifecycle/lifecycle.service';
@@ -148,6 +153,7 @@ export { afterTime, bufferDebounceTime, convertObservableToBehaviorSubject, from
 export { textDiff } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
+export * from './sheets/clone';
 export { Range } from './sheets/range';
 export { getCellCoordByIndexSimple, getCellPositionByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
@@ -167,11 +173,11 @@ export {
     DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY,
     mergeWorksheetSnapshotWithDefault,
 } from './sheets/sheet-snapshot-utils';
-
 export { Styles } from './sheets/styles';
+
 export * from './sheets/typedef';
 export type { IPosition } from './sheets/typedef';
-export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export { addLinkToDocumentModel, getEmptyCell, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';

@@ -30,16 +30,7 @@ export const useHighlightRange = (ranges: IRange[] = []) => {
                 stroke: '#49B811',
                 widgets: {},
             },
-            primary: {
-                startColumn: range.startColumn,
-                endColumn: range.endColumn,
-                startRow: range.startRow,
-                endRow: range.endRow,
-                actualRow: range.startRow,
-                actualColumn: range.startColumn,
-                isMerged: false,
-                isMergedMainCell: false,
-            },
+            primary: null,
         }));
         return () => {
             ids.forEach((id) => {

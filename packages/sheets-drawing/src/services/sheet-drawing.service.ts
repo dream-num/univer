@@ -43,6 +43,10 @@ export interface ISheetDrawingPosition extends IRotationSkewFlipTransform, IShee
 
 export interface ISheetDrawingBase {
     sheetTransform: ISheetDrawingPosition;
+    /**
+     * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
+     */
+    axisAlignSheetTransform: ISheetDrawingPosition;
     anchorType?: SheetDrawingAnchorType;
 }
 
@@ -61,18 +65,22 @@ export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
     data?: Serializable;
     allowTransform?: boolean;
+     /**
+     * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
+     */
+    axisAlignSheetTransform: ISheetDrawingPosition;
 }
 
 // TODO@wzhudev: this shouldn't be here. It should be in the sheets package
-export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase {}
+export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase { }
 
 export type ISheetDrawing = ISheetImage | ISheetShape | ISheetFloatDom;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type ISheetUpdateDrawing = OptionalField<ISheetImage | ISheetShape, 'sheetTransform'>;
 
-export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> {}
+export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> { }
 
-export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> {}
+export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> { }
 
 export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('sheets-drawing.sheet-drawing.service');

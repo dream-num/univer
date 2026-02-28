@@ -106,7 +106,7 @@ export class FSheetsNoteRangeMixin extends FRange implements IFSheetsNoteRange {
 
     override getNote(): Nullable<ISheetNote> {
         const model = this._injector.get(SheetsNoteModel);
-        return model.getNote(this.getUnitId(), this.getSheetId(), this.getRow(), this.getColumn());
+        return model.getNote(this.getUnitId(), this.getSheetId(), { row: this.getRow(), col: this.getColumn() });
     }
 }
 

@@ -263,8 +263,11 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            source: { name: 'ソース', detail: '"https" プロトコルを使用した画像ファイルの URL パス。' },
+            altText: { name: '代替テキスト', detail: 'アクセシビリティのために画像を説明する代替テキスト。' },
+            sizing: { name: 'サイズ', detail: '画像の寸法を指定します。' },
+            height: { name: '高さ', detail: '画像のカスタムの高さ (ピクセル単位)。' },
+            width: { name: '幅', detail: '画像のカスタム幅 (ピクセル単位)。' },
         },
     },
     INDEX: {

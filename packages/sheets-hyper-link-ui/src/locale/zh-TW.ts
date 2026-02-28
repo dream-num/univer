@@ -26,7 +26,7 @@ const locale: typeof enUS = {
             type: '類型',
             link: '連結',
             linkPlaceholder: '輸入連結位址',
-            range: '單元格',
+            range: '儲存格',
             worksheet: '工作表',
             definedName: '定義的名稱',
             ok: '確認',

@@ -41,7 +41,7 @@ import { getInsertRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface InsertRangeMoveDownCommandParams {
+export interface IInsertRangeMoveDownCommandParams {
     range: IRange;
 }
 
@@ -51,10 +51,10 @@ export const InsertRangeMoveDownCommandId = 'sheet.command.insert-range-move-dow
  */
 export const InsertRangeMoveDownCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.insert-range-move-down',
+    id: InsertRangeMoveDownCommandId,
 
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params?: InsertRangeMoveDownCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IInsertRangeMoveDownCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -151,7 +151,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: InsertRangeMoveDownCommand.id,
-            params: { range } as InsertRangeMoveDownCommandParams,
+            params: { range } as IInsertRangeMoveDownCommandParams,
         });
         redoMutations.push(...sheetInterceptor.redos);
         redoMutations.push(followSelectionOperation(range, workbook, worksheet));
@@ -165,7 +165,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         if (result) {
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: InsertRangeMoveDownCommand.id,
-                params: { range } as InsertRangeMoveDownCommandParams,
+                params: { range } as IInsertRangeMoveDownCommandParams,
             });
             sequenceExecute(afterInterceptors.redos, commandService);
             undoMutations.push(...afterInterceptors.undos);

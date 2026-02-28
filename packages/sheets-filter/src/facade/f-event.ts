@@ -162,41 +162,49 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         const commandService = injector.get(ICommandService);
 
         // Register filter criteria set event handlers
-        this.registerEventHandler(
-            this.Event.SheetBeforeRangeFilter,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
-                    this._beforeRangeFilter(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetBeforeRangeFilter,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
+                        this._beforeRangeFilter(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetBeforeRangeFilterClear,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
-                    this._beforeRangeFilterClear();
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetBeforeRangeFilterClear,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
+                        this._beforeRangeFilterClear();
+                    }
+                })
+            )
         );
 
         // Register filter criteria execution event handlers
-        this.registerEventHandler(
-            this.Event.SheetRangeFiltered,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
-                    this._onRangeFiltered(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetRangeFiltered,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === SetSheetsFilterCriteriaCommand.id) {
+                        this._onRangeFiltered(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetRangeFilterCleared,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
-                    this._onRangeFilterCleared();
-                }
-            })
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetRangeFilterCleared,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === ClearSheetsFilterCriteriaCommand.id) {
+                        this._onRangeFilterCleared();
+                    }
+                })
+            )
         );
     }
 

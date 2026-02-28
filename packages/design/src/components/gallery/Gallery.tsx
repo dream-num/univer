@@ -73,6 +73,22 @@ export function Gallery(props: IGalleryProps) {
         }
     }, [open]);
 
+    // wheel
+    useEffect(() => {
+        if (!open) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const step = -e.deltaY * 0.001;
+            setZoomLevel((prev) => Math.min(Math.max(0.5, prev + step), 2));
+        };
+
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        return () => {
+            window.removeEventListener('wheel', handleWheel);
+        };
+    }, [open]);
+
     if (!open && !isVisible) return null;
 
     function handleToggleZoom(ratio: number | 'reset') {

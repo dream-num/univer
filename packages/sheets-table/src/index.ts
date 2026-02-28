@@ -26,7 +26,7 @@ export type { ISetSheetTableParams } from '../src/commands/mutations/set-table-f
 export { SheetsTableController } from '../src/controllers/sheets-table.controller';
 export { TableManager } from '../src/model/table-manager';
 export { SheetTableService } from '../src/services/table-service';
-export { isConditionFilter, isManualFilter } from '../src/util';
+export { isConditionFilter, isManualTableFilter } from '../src/util';
 export type { IAddSheetTableCommandParams } from './commands/commands/add-sheet-table.command';
 export type { IAddTableThemeCommandParams } from './commands/commands/add-table-theme.command';
 export { AddTableThemeCommand } from './commands/commands/add-table-theme.command';

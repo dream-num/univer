@@ -61,15 +61,6 @@ export function toDisposable(v: DisposableLike): IDisposable {
     return v as IDisposable;
 }
 
-/**
- * @deprecated use toDisposable instead
- */
-export function fromObservable(subscription: Subscription) {
-    return toDisposable(() => {
-        subscription.unsubscribe();
-    });
-}
-
 export class DisposableCollection implements IDisposable {
     private readonly _disposables = new Set<IDisposable>();
 

@@ -182,10 +182,10 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
-        const list = validator.getListWithColor(rule);
+        const colorMap = validator.getListWithColorMap(rule);
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
-        const activeItem = list.find((i) => i.label === valueStr);
+        const activeColor = colorMap[valueStr];
         let { tb, vt, ht, pd } = style || {};
         tb = tb ?? WrapStrategy.WRAP;
         vt = vt ?? VerticalAlign.BOTTOM;
@@ -271,7 +271,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             Rect.drawWith(ctx as UniverRenderingContext, {
                 width: rectWidth,
                 height: rectHeight,
-                fill: activeItem?.color || DROP_DOWN_DEFAULT_COLOR,
+                fill: activeColor || DROP_DOWN_DEFAULT_COLOR,
                 radius: RADIUS_BG,
             });
             ctx.save();

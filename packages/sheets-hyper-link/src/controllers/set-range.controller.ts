@@ -98,7 +98,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     const selection = this._selectionManagerService.getCurrentLastSelection();
-                    const target = getSheetCommandTarget(this._univerInstanceService);
+                    const target = getSheetCommandTarget(this._univerInstanceService, command.params);
                     if (selection && target) {
                         const { unitId, subUnitId } = target;
                         Range.foreach(selection.range, (row, col) => {

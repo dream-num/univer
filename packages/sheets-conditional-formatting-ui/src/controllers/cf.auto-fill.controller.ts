@@ -15,12 +15,12 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets';
 import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
+import { AUTO_FILL_APPLY_TYPE, AutoFillTools, createTopMatrixFromMatrix, findAllRectangle, IAutoFillService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingAutoFillController extends Disposable {
     constructor(
@@ -160,7 +160,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 col: vSourceRange.startColumn,
             };
 
-            const repeats = getAutoFillRepeatRange(vSourceRange, vTargetRange);
+            const repeats = AutoFillTools.getAutoFillRepeatRange(vSourceRange, vTargetRange);
             repeats.forEach((repeat) => {
                 loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange, matrixMap, mapFunc);
             });
@@ -197,7 +197,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         const hook: ISheetAutoFillHook = {
             id: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
             onFillData: (location, direction, applyType) => {
-                if (applyType === APPLY_TYPE.COPY || applyType === APPLY_TYPE.ONLY_FORMAT || applyType === APPLY_TYPE.SERIES) {
+                if (applyType === AUTO_FILL_APPLY_TYPE.COPY || applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT || applyType === AUTO_FILL_APPLY_TYPE.SERIES) {
                     const { source, target } = location;
                     return generalApplyFunc(source, target);
                 }

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, IColorStyle, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, IColorStyle, Nullable, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
     composeStyles,
     DEFAULT_STYLES,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
+    FOCUSING_COMMON_DRAWINGS,
+    FOCUSING_SHAPE_TEXT_EDITOR,
     FOCUSING_SHEET,
     FontItalic,
     FontWeight,
@@ -35,10 +36,9 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
-    CancelFrozenCommand,
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
     ResetBackgroundColorCommand,
@@ -76,14 +76,11 @@ import {
     CutCommand,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
-    FONT_FAMILY_LIST,
-    FONT_SIZE_COMPONENT,
-    FONT_SIZE_LIST,
     getMenuHiddenObservable,
     IClipboardInterfaceService,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatestWith, map, Observable } from 'rxjs';
+import { combineLatest, combineLatestWith, map, Observable, startWith } from 'rxjs';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -98,18 +95,18 @@ import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
-    SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
 import { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
-import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../../commands/commands/set-frozen.command';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
+import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
+import { getFontStyleAtCursor } from './utils';
 
 export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'ROW_HEADER_CONTEXT_MENU',
@@ -178,7 +175,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
                     if (textRun == null) {
@@ -247,7 +244,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
                     if (textRun == null) return;
@@ -300,7 +297,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
                     if (textRun == null) return;
@@ -363,7 +360,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
                     contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    (contextService.getContextValue(FOCUSING_SHEET) || contextService.getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
 
@@ -397,24 +394,34 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = DEFAULT_STYLES.ff;
+    const disabled$ = getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    }, true);
 
     return {
         id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
-        label: FONT_FAMILY_COMPONENT,
-        selections: FONT_FAMILY_LIST.map((item) => ({
+        label: {
+            name: FONT_FAMILY_COMPONENT,
+            props: {
+                id: SetRangeFontFamilyCommand.id,
+                disabled$,
+            },
+        },
+        selections: [{
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
+                hoverable: false,
+                selectable: false,
+                props: {
+                    id: SetRangeFontFamilyCommand.id,
+                },
             },
-            value: item.value,
-        })),
-
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }],
+        disabled$,
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             const updateSheet = () => {
                 let ff = defaultValue;
@@ -439,75 +446,17 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     updateSheet();
                 }
-            });
-
-            updateSheet();
-            return disposable.dispose;
-        })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
-    const commandService = accessor.get(ICommandService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SheetsSelectionsService);
-    const contextService = accessor.get(IContextService);
-
-    const defaultValue = DEFAULT_STYLES.fs;
-    const disabled$ = getCurrentRangeDisable$(accessor, {
-        workbookTypes: [WorkbookEditablePermission],
-        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
-        rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, true);
-
-    return {
-        id: SetRangeFontSizeCommand.id,
-        type: MenuItemType.SELECTOR,
-        tooltip: 'toolbar.fontSize',
-        label: {
-            name: FONT_SIZE_COMPONENT,
-            props: {
-                min: 1,
-                max: 400,
-                disabled$,
-            },
-        },
-        selections: FONT_SIZE_LIST,
-        disabled$,
-        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
-            const updateSheet = () => {
-                let fs = defaultValue;
-                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
-                if (primary != null) {
-                    const style = worksheet.getComposedCellStyle(primary.startRow, primary.startColumn);
-                    if (style.fs) {
-                        fs = style.fs;
-                    }
-                }
-                subscriber.next(fs);
-            };
-
-            const updateSheetEditor = () => {
-                const textRun = getFontStyleAtCursor(accessor);
-                if (textRun != null) {
-                    const fs = textRun.ts?.fs ?? defaultValue;
-                    subscriber.next(fs);
-                }
-            };
-
-            const disposable = commandService.onCommandExecuted((c) => {
-                const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    updateSheet();
-                }
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                    accessor.get(IContextService).getContextValue(EDITOR_ACTIVATED) &&
+                    (accessor.get(IContextService).getContextValue(FOCUSING_SHEET) || accessor.get(IContextService).getContextValue(FOCUSING_SHAPE_TEXT_EDITOR))
                 ) {
-                    updateSheetEditor();
+                    const textRun = getFontStyleAtCursor(accessor);
+                    if (textRun != null) {
+                        const ff = (textRun.ts?.ff ?? defaultValue);
+                        subscriber.next(ff);
+                    }
                 }
             });
 
@@ -638,7 +587,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             subscriber.next(defaultValue);
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -710,7 +662,10 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -782,7 +737,10 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -854,7 +812,10 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -944,7 +905,10 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: combineLatest([
+            getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+            accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),
+        ]).pipe(map(([hidden, focusingDrawing]) => hidden || focusingDrawing)),
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
@@ -956,9 +920,20 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 // #region - copy cut paste
 // TODO@wzhudev: maybe we should move these menu factory to @univerjs/ui
 
-function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
-    const clipboardDisabled$: Observable<boolean> = new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard));
-    return clipboardDisabled$;
+export function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
+    return new Observable((subscriber) => {
+        const clipboardInterfaceService = injector.get(IClipboardInterfaceService);
+        const supportClipboard = clipboardInterfaceService.supportClipboard;
+
+        const sheetClipboardService = injector.get(ISheetClipboardService);
+        const subscription = sheetClipboardService.copyContentCache().lastCopyId$.subscribe((lastCopyId) => {
+            subscriber.next(!supportClipboard && !lastCopyId);
+        });
+
+        subscriber.next(!supportClipboard);
+
+        return () => subscription.unsubscribe();
+    });
 }
 
 export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -982,11 +957,12 @@ export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: SheetCutCommand.name,
         commandId: CutCommand.id,
         type: MenuItemType.BUTTON,
-        title: 'contextMenu.cut',
+        title: 'rightClick.cut',
+        icon: 'CutIcon',
         disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
+            workbookTypes: [WorkbookCopyPermission, WorkbookEditablePermission],
             worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint],
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -1011,6 +987,19 @@ export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
+// Right click menu - Copy Special
+export const COPY_SPECIAL_MENU_ID = 'sheet.menu.copy-special';
+export function CopySpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: COPY_SPECIAL_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'CopyDoubleIcon',
+        title: 'rightClick.copySpecial',
+        hidden$: getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),
+    };
+}
+
+// Right click menu - Paste Special
 export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
 export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -1095,6 +1084,8 @@ export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuBut
     };
 }
 
+//#endregion
+
 export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetWorksheetRowIsAutoHeightCommand.id,
@@ -1121,74 +1112,6 @@ export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export const SHEET_FROZEN_MENU_ID = 'sheet.menu.sheet-frozen';
-
-export function SheetFrozenMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    return {
-        id: SHEET_FROZEN_MENU_ID,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.freeze',
-        icon: 'FreezeToSelectedIcon',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export const SHEET_FROZEN_HEADER_MENU_ID = 'sheet.header-menu.sheet-frozen';
-
-export function SheetFrozenHeaderMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    return {
-        id: SHEET_FROZEN_HEADER_MENU_ID,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.freeze',
-        icon: 'FreezeToSelectedIcon',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function FrozenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: SetSelectionFrozenCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.freeze',
-        icon: 'FreezeToSelectedIcon',
-        // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function FrozenRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: SetRowFrozenCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.freezeRow',
-        icon: 'FreezeRowIcon',
-        // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function FrozenColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: SetColumnFrozenCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.freezeCol',
-        icon: 'FreezeColumnIcon',
-        // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function CancelFrozenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: CancelFrozenCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.cancelFreeze',
-        icon: 'CancelFreezeIcon',
-        // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -1393,21 +1316,4 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
     };
-}
-
-function getFontStyleAtCursor(accessor: IAccessor) {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textSelectionService = accessor.get(DocSelectionManagerService);
-
-    const editorDataModel = univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-    const activeTextRange = textSelectionService.getActiveTextRange();
-
-    if (editorDataModel == null || activeTextRange == null) return null;
-
-    const textRuns = editorDataModel.getBody()?.textRuns;
-    if (textRuns == null) return;
-
-    const { startOffset } = activeTextRange;
-    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset <= ed);
-    return textRun;
 }

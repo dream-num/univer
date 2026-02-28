@@ -357,18 +357,34 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         if (visibleEndColumn === -1 || visibleEndRow === -1) return;
 
-        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._drawingRange);
-        for (const mergeRange of mergeRanges) {
-            this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
-                mergeRange,
-            });
-        }
+        const mergeVisibleRanges: IRange[] = [];
+        let mergeVisibleRangeStartRow = visibleStartRow;
 
         // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
         const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
         const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
         for (let r = visibleStartRow; r <= visibleEndRow; r++) {
-            if (this.worksheet.getRowVisible(r) === false) continue;
+            if (this.worksheet.getRowVisible(r) === false) {
+                if (mergeVisibleRangeStartRow < r) {
+                    mergeVisibleRanges.push({
+                        startRow: mergeVisibleRangeStartRow,
+                        endRow: r - 1,
+                        startColumn: visibleStartColumn,
+                        endColumn: visibleEndColumn,
+                    });
+                }
+                mergeVisibleRangeStartRow = r + 1;
+                continue;
+            };
+
+            if (r === visibleEndRow) {
+                mergeVisibleRanges.push({
+                    startRow: mergeVisibleRangeStartRow,
+                    endRow: r,
+                    startColumn: visibleStartColumn,
+                    endColumn: visibleEndColumn,
+                });
+            }
 
             for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
                 this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: true, border: true } });
@@ -384,6 +400,17 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             for (let c = visibleEndColumn + 1; c < expandEndCol; c++) {
                 this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
             }
+        }
+
+        const mergeRanges: IRange[] = [];
+        for (const mergeVisibleRange of mergeVisibleRanges) {
+            const mergeRangeInVisible = this.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
+            mergeRanges.push(...mergeRangeInVisible);
+        }
+        for (const mergeRange of mergeRanges) {
+            this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
+                mergeRange,
+            });
         }
 
         return this;
@@ -1215,11 +1242,24 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         // viewBound contains header, so need to subtract the header height and margin
         const startRow = searchArray(rowHeightAccumulation, Math.round(viewBound.top) - this.columnHeaderHeightAndMarginTop);
-        const endRow = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
-        const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
-        const endColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
 
-        // If the get range is used for printing, the endRow and endColumn do not need to minus 1.
+        const endY = Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop;
+        let endRow = searchArray(rowHeightAccumulation, endY);
+        // If the endY is exactly on the boundary, need to minus 1 to get the correct endRow.
+        if (endRow < lenOfRowData && rowHeightAccumulation[endRow - 1] === endY) {
+            endRow -= 1;
+        }
+
+        const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
+
+        const endX = Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft;
+        let endColumn = searchArray(columnWidthAccumulation, endX);
+        // If the endX is exactly on the boundary, need to minus 1 to get the correct endColumn.
+        if (endColumn < lenOfColData && columnWidthAccumulation[endColumn - 1] === endX) {
+            endColumn -= 1;
+        }
+
+        // If the get range is used for visible range, the endRow and endColumn need to minus 1.
         if (isPrinting) {
             return {
                 startRow,
@@ -1255,7 +1295,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             };
         }
 
-        return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
+        return this.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
     }
 
     override resetCache(): void {
@@ -1458,6 +1498,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
+        if (!cell && Object.keys(style).length === 0) return;
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
@@ -1696,7 +1737,13 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         return null;
     }
     const { pages } = skeletonData;
+    if (!pages || pages.length === 0) {
+        return null;
+    }
     const lastPage = pages[pages.length - 1];
+    if (!lastPage) {
+        return null;
+    }
     const { width, height } = lastPage;
 
     if (angle === 0) {

@@ -553,8 +553,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor } = spreadsheetSkeleton;
-        const mergeCellRanges = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(rowColumnSegment);
+        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor, worksheet } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
@@ -605,8 +604,32 @@ export class Spreadsheet extends SheetComponent {
         ctx.closePathByEnv();
         ctx.stroke();
 
+        const mergeVisibleRanges: IRange[] = [];
+        let mergeVisibleRangeStartRow = startRow;
+
         //#region draw horizontal lines
         for (let r = rowStart; r <= rowEnd; r++) {
+            if (worksheet.getRowVisible(r) === false) {
+                if (mergeVisibleRangeStartRow < r) {
+                    mergeVisibleRanges.push({
+                        startRow: mergeVisibleRangeStartRow,
+                        endRow: r - 1,
+                        startColumn,
+                        endColumn,
+                    });
+                    mergeVisibleRangeStartRow = r + 1;
+                } else if (mergeVisibleRangeStartRow === r) {
+                    mergeVisibleRangeStartRow = r + 1;
+                }
+            } else if (r === endRow && mergeVisibleRangeStartRow <= r) {
+                mergeVisibleRanges.push({
+                    startRow: mergeVisibleRangeStartRow,
+                    endRow: r,
+                    startColumn,
+                    endColumn,
+                });
+            }
+
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
@@ -633,6 +656,11 @@ export class Spreadsheet extends SheetComponent {
         //#endregion
 
         // clear line of merge cell
+        const mergeCellRanges: IRange[] = [];
+        for (const mergeVisibleRange of mergeVisibleRanges) {
+            const mergeRangeInVisible = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(mergeVisibleRange);
+            mergeCellRanges.push(...mergeRangeInVisible);
+        }
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges);
 
         // clear line of overflow cell

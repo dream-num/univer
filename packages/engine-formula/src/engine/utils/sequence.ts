@@ -24,6 +24,7 @@ export enum sequenceNodeType {
     REFERENCE,
     ARRAY,
     DEFINED_NAME,
+    TABLE,
 }
 
 export interface ISequenceNode {

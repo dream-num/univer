@@ -17,7 +17,6 @@
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { IUniverInstanceService, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -201,20 +200,6 @@ describe('Test formula data model', () => {
                 };
 
                 const result = {
-                    1: {
-                        3: {
-                            f: '=SUM(A2)',
-                            si: 'OSPtzm',
-                        },
-                    },
-                    2: {
-                        3: {
-                            f: '=SUM(A2)',
-                            si: 'OSPtzm',
-                            x: 0,
-                            y: 1,
-                        },
-                    },
                     3: {
                         3: null,
                     },

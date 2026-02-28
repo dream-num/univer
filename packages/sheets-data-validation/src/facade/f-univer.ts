@@ -86,223 +86,239 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 
-        this.registerEventHandler(
-            this.Event.SheetDataValidationChanged,
-            () => {
-                if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
-                const sheetDataValidationModel = injector.get(SheetDataValidationModel);
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetDataValidationChanged,
+                () => {
+                    if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
+                    const sheetDataValidationModel = injector.get(SheetDataValidationModel);
 
-                return sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
-                    const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
-                    const target = this.getSheetTarget(unitId, subUnitId);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
+                    return sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
+                        const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
+                        const target = this.getSheetTarget(unitId, subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
 
-                    const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
-                    this.fireEvent(this.Event.SheetDataValidationChanged, {
-                        origin: ruleChange,
-                        worksheet,
-                        workbook,
-                        changeType: type,
-                        oldRule,
-                        rule: fRule,
+                        const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
+                        this.fireEvent(this.Event.SheetDataValidationChanged, {
+                            origin: ruleChange,
+                            worksheet,
+                            workbook,
+                            changeType: type,
+                            oldRule,
+                            rule: fRule,
+                        });
                     });
-                });
-            }
+                }
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.SheetDataValidatorStatusChanged,
-            () => {
-                if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
-                const sheetDataValidationModel = injector.get(SheetDataValidationModel);
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.SheetDataValidatorStatusChanged,
+                () => {
+                    if (!injector.has(SheetDataValidationModel)) return { dispose: () => {} } as IDisposable;
+                    const sheetDataValidationModel = injector.get(SheetDataValidationModel);
 
-                return sheetDataValidationModel.validStatusChange$.subscribe((statusChange) => {
-                    const { unitId, subUnitId, ruleId, status, row, col } = statusChange;
-                    const target = this.getSheetTarget(unitId, subUnitId);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
-                    const rule = worksheet.getDataValidation(ruleId);
-                    if (!rule) {
-                        return;
-                    }
-                    this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
-                        workbook,
-                        worksheet,
-                        row,
-                        column: col,
-                        rule,
-                        status,
+                    return sheetDataValidationModel.validStatusChange$.subscribe((statusChange) => {
+                        const { unitId, subUnitId, ruleId, status, row, col } = statusChange;
+                        const target = this.getSheetTarget(unitId, subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const rule = worksheet.getDataValidation(ruleId);
+                        if (!rule) {
+                            return;
+                        }
+                        this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
+                            workbook,
+                            worksheet,
+                            row,
+                            column: col,
+                            rule,
+                            status,
+                        });
                     });
-                });
-            }
+                }
+            )
         );
 
         // Register handlers for before command events
-        this.registerEventHandler(
-            this.Event.BeforeSheetDataValidationAdd,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === AddSheetDataValidationCommand.id) {
-                    const params = commandInfo.params as IAddSheetDataValidationCommandParams;
-                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
-                    if (!target) {
-                        return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDataValidationAdd,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === AddSheetDataValidationCommand.id) {
+                        const params = commandInfo.params as IAddSheetDataValidationCommandParams;
+                        const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const eventParams: IBeforeSheetDataValidationAddEvent = {
+                            worksheet,
+                            workbook,
+                            rule: params.rule,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetDataValidationAdd, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                    const { workbook, worksheet } = target;
-                    const eventParams: IBeforeSheetDataValidationAddEvent = {
-                        worksheet,
-                        workbook,
-                        rule: params.rule,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetDataValidationAdd, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetDataValidationCriteriaUpdate,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === UpdateSheetDataValidationSettingCommand.id) {
-                    const params = commandInfo.params as IUpdateSheetDataValidationSettingCommandParams;
-                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
-                    if (!target) {
-                        return;
-                    }
-                    const { workbook, worksheet } = target;
-                    const rule = worksheet.getDataValidation(params.ruleId);
-                    if (!rule) {
-                        return;
-                    }
-                    const eventParams: IBeforeSheetDataValidationCriteriaUpdateEvent = {
-                        worksheet,
-                        workbook,
-                        rule,
-                        ruleId: params.ruleId,
-                        newCriteria: params.setting,
-                    };
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDataValidationCriteriaUpdate,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === UpdateSheetDataValidationSettingCommand.id) {
+                        const params = commandInfo.params as IUpdateSheetDataValidationSettingCommandParams;
+                        const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const rule = worksheet.getDataValidation(params.ruleId);
+                        if (!rule) {
+                            return;
+                        }
+                        const eventParams: IBeforeSheetDataValidationCriteriaUpdateEvent = {
+                            worksheet,
+                            workbook,
+                            rule,
+                            ruleId: params.ruleId,
+                            newCriteria: params.setting,
+                        };
 
-                    this.fireEvent(this.Event.BeforeSheetDataValidationCriteriaUpdate, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                        this.fireEvent(this.Event.BeforeSheetDataValidationCriteriaUpdate, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetDataValidationRangeUpdate,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === UpdateSheetDataValidationRangeCommand.id) {
-                    const params = commandInfo.params as IUpdateSheetDataValidationRangeCommandParams;
-                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
-                    if (!target) {
-                        return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDataValidationRangeUpdate,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === UpdateSheetDataValidationRangeCommand.id) {
+                        const params = commandInfo.params as IUpdateSheetDataValidationRangeCommandParams;
+                        const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const rule = worksheet.getDataValidation(params.ruleId);
+                        if (!rule) {
+                            return;
+                        }
+                        const eventParams: IBeforeSheetDataValidationRangeUpdateEvent = {
+                            worksheet,
+                            workbook,
+                            rule,
+                            ruleId: params.ruleId,
+                            newRanges: params.ranges,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetDataValidationRangeUpdate, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                    const { workbook, worksheet } = target;
-                    const rule = worksheet.getDataValidation(params.ruleId);
-                    if (!rule) {
-                        return;
-                    }
-                    const eventParams: IBeforeSheetDataValidationRangeUpdateEvent = {
-                        worksheet,
-                        workbook,
-                        rule,
-                        ruleId: params.ruleId,
-                        newRanges: params.ranges,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetDataValidationRangeUpdate, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetDataValidationOptionsUpdate,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === UpdateSheetDataValidationOptionsCommand.id) {
-                    const params = commandInfo.params as IUpdateSheetDataValidationOptionsCommandParams;
-                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
-                    if (!target) {
-                        return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDataValidationOptionsUpdate,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === UpdateSheetDataValidationOptionsCommand.id) {
+                        const params = commandInfo.params as IUpdateSheetDataValidationOptionsCommandParams;
+                        const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const rule = worksheet.getDataValidation(params.ruleId);
+                        if (!rule) {
+                            return;
+                        }
+                        const eventParams: IBeforeSheetDataValidationOptionsUpdateEvent = {
+                            worksheet,
+                            workbook,
+                            rule,
+                            ruleId: params.ruleId,
+                            newOptions: params.options,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetDataValidationOptionsUpdate, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                    const { workbook, worksheet } = target;
-                    const rule = worksheet.getDataValidation(params.ruleId);
-                    if (!rule) {
-                        return;
-                    }
-                    const eventParams: IBeforeSheetDataValidationOptionsUpdateEvent = {
-                        worksheet,
-                        workbook,
-                        rule,
-                        ruleId: params.ruleId,
-                        newOptions: params.options,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetDataValidationOptionsUpdate, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetDataValidationDelete,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === RemoveSheetDataValidationCommand.id) {
-                    const params = commandInfo.params as IRemoveSheetDataValidationCommandParams;
-                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
-                    if (!target) {
-                        return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDataValidationDelete,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === RemoveSheetDataValidationCommand.id) {
+                        const params = commandInfo.params as IRemoveSheetDataValidationCommandParams;
+                        const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const rule = worksheet.getDataValidation(params.ruleId);
+                        if (!rule) {
+                            return;
+                        }
+                        const eventParams: IBeforeSheetDataValidationDeleteEvent = {
+                            worksheet,
+                            workbook,
+                            rule,
+                            ruleId: params.ruleId,
+                        };
+                        this.fireEvent(this.Event.BeforeSheetDataValidationDelete, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                    const { workbook, worksheet } = target;
-                    const rule = worksheet.getDataValidation(params.ruleId);
-                    if (!rule) {
-                        return;
-                    }
-                    const eventParams: IBeforeSheetDataValidationDeleteEvent = {
-                        worksheet,
-                        workbook,
-                        rule,
-                        ruleId: params.ruleId,
-                    };
-                    this.fireEvent(this.Event.BeforeSheetDataValidationDelete, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeSheetDataValidationDeleteAll,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id === RemoveSheetAllDataValidationCommand.id) {
-                    const params = commandInfo.params as IRemoveSheetAllDataValidationCommandParams;
-                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
-                    if (!target) {
-                        return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeSheetDataValidationDeleteAll,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id === RemoveSheetAllDataValidationCommand.id) {
+                        const params = commandInfo.params as IRemoveSheetAllDataValidationCommandParams;
+                        const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                        if (!target) {
+                            return;
+                        }
+                        const { workbook, worksheet } = target;
+                        const eventParams: IBeforeSheetDataValidationDeleteAllEvent = {
+                            worksheet,
+                            workbook,
+                            rules: worksheet.getDataValidations(),
+                        };
+                        this.fireEvent(this.Event.BeforeSheetDataValidationDeleteAll, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                    const { workbook, worksheet } = target;
-                    const eventParams: IBeforeSheetDataValidationDeleteAllEvent = {
-                        worksheet,
-                        workbook,
-                        rules: worksheet.getDataValidations(),
-                    };
-                    this.fireEvent(this.Event.BeforeSheetDataValidationDeleteAll, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                }
-            })
+                })
+            )
         );
     }
 }

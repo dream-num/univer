@@ -17,7 +17,7 @@
 import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHAPE_TEXT_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, merge, of } from 'rxjs';
 import { debounceTime, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
@@ -117,8 +117,13 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
         shareReplay(1)
     );
 
-    const observable = combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$]).pipe(
-        switchMap(([_, workbook, visible, formulaEditorFocus]) => {
+    const focusingShapeTextEditor$ = contextService.subscribeContextValue$(FOCUSING_SHAPE_TEXT_EDITOR).pipe(
+        startWith(false),
+        shareReplay(1)
+    );
+
+    const observable = combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$, focusingShapeTextEditor$]).pipe(
+        switchMap(([_, workbook, visible, formulaEditorFocus, focusingShapeTextEditor]) => {
             if (
                 !workbook ||
                 (visible?.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit) ||
@@ -142,7 +147,7 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
 
                     return combineLatest([selectionManagerService.selectionMoveEnd$, focusedOnDrawing$]).pipe(
                         switchMap(([selection, focusOnDrawings]) => {
-                            if (focusOnDrawings) {
+                            if (focusOnDrawings && !focusingShapeTextEditor) {
                                 return of(true);
                             }
 

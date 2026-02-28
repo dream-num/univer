@@ -15,9 +15,8 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand, getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
-import { IConfirmService } from '@univerjs/ui';
 
 export const DeleteRangeMoveLeftConfirmCommand: ICommand = {
     type: CommandType.COMMAND,

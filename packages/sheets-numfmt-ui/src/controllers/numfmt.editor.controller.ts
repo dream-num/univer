@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IDocumentBody, IRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,
@@ -99,6 +99,10 @@ export class NumfmtEditorController extends Disposable {
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(BEFORE_CELL_EDIT, {
                     handler: (value, context, next) => {
+                        /**
+                         * This value is get by `worksheet.getCell()`, it has been processed by cell content interceptor, and used to display in cell render, so it should be the final value after all the processing of number format.
+                         * But the editor has different requirement for different number format type, so we need to get the raw cell value and number format value to determine the final value for editor.
+                         */
                         const row = context.row;
                         const col = context.col;
                         const numfmtCell = this._numfmtService.getValue(
@@ -110,17 +114,34 @@ export class NumfmtEditorController extends Disposable {
                         if (numfmtCell) {
                             const type = getPatternType(numfmtCell.pattern);
                             switch (type) {
+                                /**
+                                 * For scientific, currency, grouped and number format, the editor should display the raw number value without format, unlike the cell render which display the formatted value.
+                                 */
                                 case 'scientific':
                                 case 'currency':
                                 case 'grouped':
                                 case 'number': {
-                                    const cell = context.worksheet.getCellRaw(row, col);
-                                    if (cell?.t === CellValueType.NUMBER && cell?.v !== undefined && cell.v !== null && isRealNum(cell.v)) {
+                                    const cell: Nullable<ICellData> = { ...context.worksheet.getCellRaw(row, col) };
+                                    if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
                                         cell.v = stripErrorMargin(Number(cell.v));
                                     }
                                     return next && next(cell);
                                 }
-                                case 'percent':
+                                /**
+                                 * For percent format, the editor should display the full percent value, unlike the cell render which display the limited decimal places.
+                                 * e.g. { v: 1.001234567, t: 2, s: { n: { pattern: '0.00%' } } } should display as '100.12%' in cell render, but when edit this cell, the editor should display '100.1234567%' rather than '100.12%'.
+                                 * If the editor also display '100.12%', will lose precision when before edit.
+                                 */
+                                case 'percent': {
+                                    const cell: Nullable<ICellData> = { ...context.worksheet.getCellRaw(row, col) };
+                                    if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
+                                        cell.v = `${stripErrorMargin(Number(cell.v) * 100)}%`;
+                                    }
+                                    return next && next(cell);
+                                }
+                                /**
+                                 * For date, time and datetime format, the editor should display the formatted value like the cell render.
+                                 */
                                 case 'date':
                                 case 'time':
                                 case 'datetime':
@@ -146,7 +167,7 @@ export class NumfmtEditorController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-                    // eslint-disable-next-line complexity
+                    // eslint-disable-next-line max-lines-per-function,complexity
                     handler: (value, context, next) => {
                         if (!value?.v && !value?.p) {
                             return next(value);
@@ -206,7 +227,11 @@ export class NumfmtEditorController extends Disposable {
                                 });
                             }
 
-                            if (numfmtInfo.z) {
+                            /**
+                             * Only when the content has number format pattern but the current cell has no pattern, or the pattern type is different, need to update the number format.
+                             * Different currency symbols also should not be updated in Excel.
+                             */
+                            if (numfmtInfo.z && (!currentNumfmtValue?.pattern || getPatternType(numfmtInfo.z) !== getPatternType(currentNumfmtValue.pattern))) {
                                 this._collectEffectMutation.add(
                                     context.unitId,
                                     context.subUnitId,
@@ -218,7 +243,7 @@ export class NumfmtEditorController extends Disposable {
                                 );
                             }
 
-                            const v = Number(numfmtInfo.v);
+                            const v = stripErrorMargin(Number(numfmtInfo.v), 16);
 
                             return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                         }

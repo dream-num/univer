@@ -869,7 +869,7 @@ export class DocDrawingTransformerController extends Disposable {
             top,
             height,
             strokeWidth: 2,
-            stroke: getColor(COLORS.darkGray, 1),
+            stroke: getColor(COLORS.darkgray, 1),
             evented: false,
         });
 

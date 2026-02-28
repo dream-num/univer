@@ -14,37 +14,31 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import type { IAccessor, IMutation } from '@univerjs/core';
-
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../basics/interfaces/mutation-interface';
+import { CommandType, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export const RemoveMergeUndoMutationFactory = (
     accessor: IAccessor,
     params: IRemoveWorksheetMergeMutationParams
 ): IAddWorksheetMergeMutationParams => {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
+    const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+    if (!target) {
+        throw new Error('Workbook or worksheet is null error!');
     }
 
-    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-    if (worksheet == null) {
-        throw new Error('worksheet is null error!');
-    }
+    const { worksheet } = target;
     const config = worksheet.getConfig();
     const mergeConfigData = config.mergeData;
     const mergeRemoveData = params.ranges;
     const ranges = [];
+
     for (let j = 0; j < mergeRemoveData.length; j++) {
         for (let i = mergeConfigData.length - 1; i >= 0; i--) {
             const configMerge = mergeConfigData[i];
             const removeMerge = mergeRemoveData[j];
+
             if (Rectangle.intersects(configMerge, removeMerge)) {
                 ranges.push(mergeConfigData[i]);
             }
@@ -62,27 +56,27 @@ export const RemoveWorksheetMergeMutation: IMutation<IRemoveWorksheetMergeMutati
     id: 'sheet.mutation.remove-worksheet-merge',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: IRemoveWorksheetMergeMutationParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
+        const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) {
+            throw new Error('Workbook or worksheet is null error!');
         }
 
-        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) return false;
+        const { worksheet } = target;
         const config = worksheet.getConfig();
         const mergeConfigData = config.mergeData;
         const mergeRemoveData = params.ranges;
+
         for (let j = 0; j < mergeRemoveData.length; j++) {
             for (let i = mergeConfigData.length - 1; i >= 0; i--) {
                 const configMerge = mergeConfigData[i];
                 const removeMerge = mergeRemoveData[j];
+
                 if (Rectangle.intersects(configMerge, removeMerge)) {
                     mergeConfigData.splice(i, 1);
                 }
             }
         }
+
         // update merge data cache
         worksheet.getSpanModel().rebuild(mergeConfigData);
         return true;

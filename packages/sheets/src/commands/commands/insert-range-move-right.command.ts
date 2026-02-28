@@ -41,7 +41,7 @@ import { getInsertRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface InsertRangeMoveRightCommandParams {
+export interface IInsertRangeMoveRightCommandParams {
     range: IRange;
 }
 export const InsertRangeMoveRightCommandId = 'sheet.command.insert-range-move-right';
@@ -53,7 +53,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
     id: InsertRangeMoveRightCommandId,
 
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params?: InsertRangeMoveRightCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IInsertRangeMoveRightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -151,7 +151,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({
             id: InsertRangeMoveRightCommand.id,
-            params: { range } as InsertRangeMoveRightCommandParams,
+            params: { range } as IInsertRangeMoveRightCommandParams,
         });
         redoMutations.push(...sheetInterceptor.redos);
         redoMutations.push(followSelectionOperation(range, workbook, worksheet));
@@ -165,7 +165,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
         if (result.result) {
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: InsertRangeMoveRightCommand.id,
-                params: { range } as InsertRangeMoveRightCommandParams,
+                params: { range } as IInsertRangeMoveRightCommandParams,
             });
             sequenceExecute(afterInterceptors.redos, commandService);
             undoMutations.push(...afterInterceptors.undos);

@@ -30,7 +30,7 @@ import { SheetsSelectionsService } from '../../services/selections/selection.ser
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
-interface IClearSelectionContentCommandParams {
+export interface IClearSelectionContentCommandParams {
     unitId?: string;
     subUnitId?: string;
     ranges?: IRange[];

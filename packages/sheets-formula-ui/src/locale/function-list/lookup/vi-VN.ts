@@ -260,17 +260,20 @@ const locale: typeof enUS = {
         },
     },
     IMAGE: {
-        description: 'Returns an image from a given source',
-        abstract: 'Returns an image from a given source',
+        description: 'Trả về hình ảnh từ một nguồn nhất định.',
+        abstract: 'Trả về hình ảnh từ một nguồn nhất định.',
         links: [
             {
-                title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/image-function-7e112975-5e52-4f2a-b9da-1d913d51f5d5',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            source: { name: 'nguồn', detail: 'Đường dẫn URL sử dụng giao thức "https" của tệp hình ảnh. Bắt buộc.' },
+            altText: { name: 'văn bản thay thế', detail: 'Văn bản thay thế mô tả hình ảnh cho khả năng truy nhập.' },
+            sizing: { name: 'định cỡ', detail: 'Chỉ định kích thước hình ảnh.' },
+            height: { name: 'chiều cao', detail: 'Chiều cao tùy chỉnh của hình ảnh tính bằng pixel.' },
+            width: { name: 'độ rộng', detail: 'Chiều rộng tùy chỉnh của hình ảnh tính bằng pixel.' },
         },
     },
     INDEX: {

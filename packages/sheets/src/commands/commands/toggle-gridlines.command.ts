@@ -32,9 +32,8 @@ export const ToggleGridlinesCommand: ICommand = {
     handler: (accessor: IAccessor, params?: IToggleGridlinesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { worksheet } = target;

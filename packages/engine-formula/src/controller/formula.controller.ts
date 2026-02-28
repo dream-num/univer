@@ -25,12 +25,24 @@ import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-for
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
 import {
+    SetCellFormulaDependencyCalculationMutation,
+    SetCellFormulaDependencyCalculationResultMutation,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
+    SetFormulaDependencyCalculationMutation,
+    SetFormulaDependencyCalculationResultMutation,
+    SetFormulaStringBatchCalculationMutation,
+    SetFormulaStringBatchCalculationResultMutation,
+    SetQueryFormulaDependencyAllMutation,
+    SetQueryFormulaDependencyAllResultMutation,
+    SetQueryFormulaDependencyMutation,
+    SetQueryFormulaDependencyResultMutation,
+    SetTriggerFormulaCalculationStartMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
+import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
 import { functionArray } from '../functions/array/function-map';
@@ -73,10 +85,23 @@ export class FormulaController extends Disposable {
         [
             SetFormulaDataMutation,
             SetArrayFormulaDataMutation,
+            SetImageFormulaDataMutation,
             SetFormulaCalculationStartMutation,
+            SetTriggerFormulaCalculationStartMutation,
+            SetFormulaStringBatchCalculationMutation,
+            SetFormulaStringBatchCalculationResultMutation,
+            SetQueryFormulaDependencyMutation,
+            SetQueryFormulaDependencyResultMutation,
             SetFormulaCalculationStopMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
+            SetQueryFormulaDependencyAllMutation,
+            SetQueryFormulaDependencyAllResultMutation,
+
+            SetFormulaDependencyCalculationMutation,
+            SetFormulaDependencyCalculationResultMutation,
+            SetCellFormulaDependencyCalculationMutation,
+            SetCellFormulaDependencyCalculationResultMutation,
 
             SetDefinedNameMutation,
             RemoveDefinedNameMutation,

@@ -15,7 +15,6 @@
  */
 
 import type {
-    BooleanNumber,
     ICellData,
     IColumnData,
     IObjectArrayPrimitiveType,
@@ -27,6 +26,8 @@ import type {
     ObjectMatrix,
     Styles,
 } from '@univerjs/core';
+import type { sequenceNodeType } from '../engine/utils/sequence';
+import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -123,7 +124,18 @@ export interface IFeatureDirtyRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IRange[] }>;
 }
 
-export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType {}
+export interface IRuntimeImageFormulaDataType extends IImageFormulaInfo {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
+}
+
+export interface IUnitImageFormulaDataType {
+    [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<Nullable<IImageFormulaInfo>> }>;
+}
+
+export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType { }
 
 export interface IFormulaData {
     [unitId: string]: Nullable<{ [sheetId: string]: Nullable<IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> }>;
@@ -133,6 +145,19 @@ export interface IFormulaIdMap {
     f: string;
     r: number;
     c: number;
+}
+
+export interface IFormulaStringMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<string[]> }>;
+}
+
+export interface IFormulaExecuteResultItem {
+    value: Nullable<number | string | boolean | Array<Array<number | string | boolean | null>>>;
+    formula: string;
+}
+
+export interface IFormulaExecuteResultMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaExecuteResultItem[]> }>;
 }
 
 export interface IFormulaIdMapData {
@@ -163,7 +188,6 @@ export interface IOtherFormulaDataItem {
 
 export interface ISuperTable {
     sheetId: string;
-    hasCustomTitle: BooleanNumber;
     titleMap: Map<string, number>;
     range: IRange;
 }
@@ -173,6 +197,7 @@ export enum TableOptionType {
     DATA = '#Data',
     HEADERS = '#Headers',
     TOTALS = '#Totals',
+    THIS_ROW = '#This Row',
 }
 
 export interface IUnitExcludedCell {
@@ -199,10 +224,18 @@ export interface IFormulaDatasetConfig {
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
     maxIteration?: number;
+    isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters
 }
 
 export enum ConcatenateType {
     FRONT,
     BACK,
+}
+
+export interface IExprTreeNode {
+    value: string;
+    children: IExprTreeNode[];
+    startIndex: number;
+    type?: sequenceNodeType;
 }

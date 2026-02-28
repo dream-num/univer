@@ -15,9 +15,9 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, LocaleService } from '@univerjs/core';
-import { IConfirmService, IMessageService } from '@univerjs/ui';
+import { CommandType, IConfirmService, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import { IMessageService } from '@univerjs/ui';
 
 import { IFindReplaceService } from '../../services/find-replace.service';
 

@@ -25,7 +25,9 @@ export enum LocaleType {
     ZH_TW = 'zhTW',
     VI_VN = 'viVN',
     FA_IR = 'faIR',
+    JA_JP = 'jaJP',
     KO_KR = 'koKR',
     ES_ES = 'esES',
     CA_ES = 'caES',
+    SK_SK = 'skSK',
 }

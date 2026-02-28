@@ -29,10 +29,8 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
-
 import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
-
 import {
     Disposable,
     ICommandService,
@@ -44,13 +42,13 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaCalculationStartMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
     RemoveSheetMutation,
     SetBorderCommand,
+    SetRangeCustomMetadataCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
     SheetInterceptorService,
@@ -115,9 +113,12 @@ export class UpdateFormulaController extends Disposable {
 
                     if (
                         (options && options.onlyLocal === true) ||
+                        (options && options.syncOnly === true) ||
+                        (options && options.fromChangeset === true) ||
                         params.trigger === SetStyleCommand.id ||
                         params.trigger === SetBorderCommand.id ||
-                        params.trigger === ClearSelectionFormatCommand.id
+                        params.trigger === ClearSelectionFormatCommand.id ||
+                        params.trigger === SetRangeCustomMetadataCommand.id
                     ) {
                         return;
                     }
@@ -158,7 +159,7 @@ export class UpdateFormulaController extends Disposable {
             {
                 unitId,
                 subUnitId: sheetId,
-                cellValue: formulaDataToCellData(newSheetFormulaData),
+                cellValue: formulaDataToCellData(newSheetFormulaData, cellValue),
             },
             {
                 onlyLocal: true,
@@ -169,6 +170,9 @@ export class UpdateFormulaController extends Disposable {
         // update formula model
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+
+        // update image formula data
+        this._formulaDataModel.updateImageFormulaData(unitId, sheetId, cellValue);
 
         // TODO@Dushusir: When the amount of data is large, the communication overhead is high. The main thread and the worker update their own models to reduce the communication overhead.
         this._commandService.executeCommand(
@@ -270,7 +274,7 @@ export class UpdateFormulaController extends Disposable {
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
         const params = this._getDirtyDataByCalculationMode(calculationMode);
 
-        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
+        this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, { onlyLocal: true });
     }
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {

@@ -197,7 +197,7 @@ function drawDiagonalDoubleLineByBorderType(ctx: UniverRenderingContext, type: B
     ctx.stroke();
 }
 
-export function drawDiagonalineByBorderType(ctx: UniverRenderingContext, style: BorderStyleTypes, type: BORDER_LTRB, position: IPosition) {
+export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, style: BorderStyleTypes, type: BORDER_LTRB, position: IPosition) {
     if (style === BorderStyleTypes.DOUBLE && (type === BORDER_LTRB.TL_BR || type === BORDER_LTRB.BL_TR)) {
         drawDiagonalDoubleLineByBorderType(ctx, type, position);
     } else {

@@ -16,7 +16,6 @@
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -244,13 +243,13 @@ describe('Test offset', () => {
         it('Rows is array value object, positive and negative numbers', async () => {
             const result = await calculate('=OFFSET(A1,B1:C1,1)');
 
-            expect(result).toStrictEqual([[ErrorType.VALUE, ErrorType.REF]]);
+            expect(result).toStrictEqual([[0, ErrorType.REF]]);
         });
 
         it('Rows is array value object, Columns is array value object', async () => {
             const result = await calculate('=OFFSET(A1,A1:B1,A1:A2,1,1)');
 
-            expect(result).toStrictEqual([[ErrorType.VALUE, ErrorType.VALUE], [ErrorType.VALUE, ErrorType.VALUE]]);
+            expect(result).toStrictEqual([[0, 0], [0, 0]]);
         });
 
         it('Rows is array value object, Columns is array value object, ref error', async () => {

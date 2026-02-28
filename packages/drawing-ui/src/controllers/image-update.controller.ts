@@ -29,6 +29,7 @@ import {
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
+import { bufferTime, filter, map } from 'rxjs';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { DrawingRenderService } from '../services/drawing-render.service';
 import { getCurrentUnitInfo } from './utils';
@@ -157,9 +158,26 @@ export class ImageUpdateController extends Disposable {
 
     private _drawingAddListener() {
         this.disposeWithMe(
-            this._drawingManagerService.add$.subscribe((params) => {
-                this._insertImages(params);
-            })
+            this._drawingManagerService.add$
+                .pipe(
+                    bufferTime(33),
+                    filter((batches) => batches.length > 0),
+
+                    map((batches) => batches.flat()),
+
+                    map((items) => {
+                        const map = new Map<string, IDrawingSearch>();
+                        for (const it of items) {
+                            map.set(`${it.unitId}|${it.subUnitId}|${it.drawingId}`, it);
+                        }
+                        return [...map.values()];
+                    }),
+
+                    filter((items) => items.length > 0)
+                )
+                .subscribe((uniqueParams) => {
+                    void this._insertImages(uniqueParams);
+                })
         );
     }
 

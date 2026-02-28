@@ -80,13 +80,13 @@ export class SheetsHyperLinkPopupController extends Disposable {
             workbookTypes: [WorkbookViewPermission],
             worksheetTypes: [WorksheetViewPermission],
             rangeTypes: [RangeProtectionPermissionViewPoint],
-        }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+        }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }], unitId, subUnitId);
 
         let editPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+        }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }], unitId, subUnitId);
 
         // Check if the cell is a hyperlink formula, if it is, we don't allow editing
         const cell = worksheet.getCellRaw(currentRow, currentCol);

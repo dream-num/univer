@@ -90,9 +90,18 @@ describe('Test regexmatch function', () => {
         });
 
         it('More test', () => {
-            const text = StringValueObject.create('13912345678');
-            const regularExpression = StringValueObject.create('^1[3456789]\\d{9}$');
-            const result = testFunction.calculate(text, regularExpression);
+            let text = StringValueObject.create('13912345678');
+            let regularExpression = StringValueObject.create('^1[3456789]\\d{9}$');
+            let result = testFunction.calculate(text, regularExpression);
+            expect(getObjectValue(result)).toStrictEqual(true);
+
+            text = StringValueObject.create('abcdefghi');
+            regularExpression = StringValueObject.create('(\\w{1,2}){2}');
+            result = testFunction.calculate(text, regularExpression);
+            expect(getObjectValue(result)).toStrictEqual(true);
+
+            regularExpression = StringValueObject.create('(\\w{1,2})(\\w{1,2})');
+            result = testFunction.calculate(text, regularExpression); ;
             expect(getObjectValue(result)).toStrictEqual(true);
         });
     });

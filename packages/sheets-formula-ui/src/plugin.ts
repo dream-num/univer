@@ -17,7 +17,6 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFormulaUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
@@ -34,6 +33,7 @@ import { FormulaEditorShowController } from './controllers/formula-editor-show.c
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
+import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { GlobalRangeSelectorService } from './services/range-selector.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
@@ -44,7 +44,7 @@ import { GlobalRangeSelector } from './views/range-selector/global';
 /**
  * The configuration of the formula UI plugin.
  */
-@DependentOn(UniverFormulaEnginePlugin, UniverSheetsFormulaPlugin)
+@DependentOn(UniverSheetsFormulaPlugin)
 export class UniverSheetsFormulaUIPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -79,6 +79,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
             [FormulaReorderController],
+            [ImageFormulaRenderController],
         ]);
 
         this._initUIPart();
@@ -104,6 +105,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaUIController], // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
             [FormulaClipboardController],
             [FormulaRenderManagerController],
+            [ImageFormulaRenderController],
         ]);
     }
 

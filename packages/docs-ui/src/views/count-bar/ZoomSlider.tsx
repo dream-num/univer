@@ -16,8 +16,8 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { Slider, useDependency, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Slider, useDependency } from '@univerjs/ui';
+import { useCallback, useEffect, useState } from 'react';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
@@ -26,8 +26,8 @@ const DOC_ZOOM_RANGE = [10, 400];
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), []);
-    const documentDataModel = useObservable(currentDoc$);
+    const [documentDataModel, setDocumentDataModel] = useState<DocumentDataModel | null>(null);
+    const [zoom, setZoom] = useState<number>(100);
 
     const getCurrentZoom = useCallback(() => {
         if (!documentDataModel) return 100;
@@ -36,11 +36,22 @@ export function ZoomSlider() {
         return Math.round(currentZoom);
     }, [documentDataModel]);
 
-    const [zoom, setZoom] = useState(() => getCurrentZoom());
+    useEffect(() => {
+        const currentDoc$ = univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+
+        const subscription = currentDoc$.subscribe((doc) => {
+            if (doc) {
+                setDocumentDataModel(doc);
+                setZoom(getCurrentZoom());
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [univerInstanceService, getCurrentZoom]);
 
     useEffect(() => {
-        setZoom(getCurrentZoom());
-
         const disposable = commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetDocZoomRatioOperation.id) {
                 const currentZoom = getCurrentZoom();

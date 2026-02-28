@@ -18,7 +18,13 @@ import type { FormatType } from '@univerjs/sheets';
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { getPatternPreview, getPatternType, localeCurrencySymbolMap, SetNumfmtCommand, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import {
+    getPatternPreview,
+    getPatternType,
+    localeCurrencySymbolMap,
+    SetNumfmtCommand,
+    SheetsNumfmtCellContentController,
+} from '@univerjs/sheets-numfmt';
 import { ILayoutService, useDependency } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
@@ -27,7 +33,7 @@ import { MENU_OPTIONS } from '../../controllers/menu';
 export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';
 
-export const MoreNumfmtType = (props: { value?: string }) => {
+export function MoreNumfmtType(props: { value?: string }) {
     const { value } = props;
     const localeService = useDependency(LocaleService);
     const text = value ?? localeService.t('sheet.numfmt.general');
@@ -35,7 +41,7 @@ export const MoreNumfmtType = (props: { value?: string }) => {
     return <span className="univer-text-sm">{text}</span>;
 };
 
-export const Options = () => {
+export function Options() {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const layoutService = useDependency(ILayoutService);
@@ -66,7 +72,8 @@ export const Options = () => {
         const currencySymbol = localeCurrencySymbolMap.get(localeService.getCurrentLocale()) as string;
         return MENU_OPTIONS(currencySymbol);
     }, [localeService]);
-    const handleOnclick = (index: number) => {
+
+    const handleClick = (index: number) => {
         if (index === 0) {
             setNumfmt(null);
         } else if (index === menuOptions.length - 1) {
@@ -87,22 +94,26 @@ export const Options = () => {
                 if (item === '|') {
                     return <Separator key={index} />;
                 }
+
                 return (
                     <div
                         key={index}
                         className={`
-                          univer-flex univer-h-7 univer-items-center univer-justify-between univer-gap-6 univer-rounded
-                          univer-px-2 univer-text-sm
+                          univer-flex univer-h-7 univer-cursor-default univer-items-center univer-justify-between
+                          univer-gap-6 univer-rounded univer-px-2 univer-text-sm
                           hover:univer-bg-gray-100
                           dark:hover:!univer-bg-gray-700
                         `}
-                        onClick={() => {
-                            handleOnclick(index);
-                        }}
+                        onClick={() => handleClick(index)}
                     >
                         <span>{localeService.t(item.label)}</span>
 
-                        <span className="univer-text-xs univer-text-gray-500">
+                        <span
+                            className={`
+                              univer-text-xs univer-text-gray-500
+                              dark:!univer-text-gray-400
+                            `}
+                        >
                             {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, sheetsNumfmtCellContentController.locale).result.trim() : ''}
                         </span>
                     </div>

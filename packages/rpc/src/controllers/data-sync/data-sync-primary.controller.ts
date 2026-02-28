@@ -120,7 +120,7 @@ export class DataSyncPrimaryController extends RxDisposable {
                 // do not sync mutations those are not meant to be synced
                 this._syncingMutations.has(id)
             ) {
-                this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo });
+                this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo }, options);
             }
         }));
     }

@@ -16,7 +16,6 @@
 
 import type { ICommandInfo, IMutationInfo, IRange } from '@univerjs/core';
 import type { IRemoveSheetMutationParams } from '../../../basics';
-
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../commands/commands/insert-row-col.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../../commands/commands/remove-row-col.command';
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
@@ -1182,7 +1181,7 @@ describe('test ref-range move', () => {
             const result = handleInsertRowCommon(info, targetRange);
 
             expect(result).toEqual([{
-                startRow: 8,
+                startRow: 5,
                 endRow: 13, // 10 + (7 - 5 + 1)
                 startColumn: 2,
                 endColumn: 8,
@@ -1312,7 +1311,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual([{
                 startRow: 2,
                 endRow: 8,
-                startColumn: 8, // 5 + (7 - 5 + 1)
+                startColumn: 5,
                 endColumn: 13, // 10 + (7 - 5 + 1)
             }]);
         });

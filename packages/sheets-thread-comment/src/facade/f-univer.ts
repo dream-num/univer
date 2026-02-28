@@ -15,10 +15,12 @@
  */
 
 import type { IDisposable, Injector } from '@univerjs/core';
+import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
 import { CanceledError, ICommandService, RichTextValue } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
 
@@ -75,231 +77,246 @@ export interface IFUniverCommentMixin {
  * @ignore
  */
 export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin {
+    private _getTargetSheet(params: { unitId?: string; subUnitId?: string } = {}): {
+        workbook: FWorkbook;
+        worksheet: FWorksheet;
+    } | null {
+        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+        if (!workbook) return null;
+        const worksheet = params.subUnitId ? workbook.getSheetBySheetId(params.subUnitId) : workbook.getActiveSheet();
+        if (!worksheet) return null;
+
+        return {
+            workbook,
+            worksheet,
+        };
+    }
+
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
+
         // After command events
-        this.registerEventHandler(
-            this.Event.CommentAdded,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== AddCommentCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CommentAdded,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== AddCommentCommand.id) return;
 
-                const addParams = commandInfo.params as IAddCommentCommandParams;
-                const { comment } = addParams;
-                const threadComment = worksheet.getRange(comment.ref).getComment();
-                if (threadComment) {
-                    this.fireEvent(this.Event.CommentAdded, {
-                        workbook,
-                        worksheet,
-                        row: threadComment.getRange()?.getRow() ?? 0,
-                        col: threadComment.getRange()?.getColumn() ?? 0,
-                        comment: threadComment,
-                    });
-                }
-            })
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { comment } = commandInfo.params as IAddCommentCommandParams;
+                    const threadComment = worksheet.getCommentById(comment.id);
+
+                    if (threadComment) {
+                        this.fireEvent(this.Event.CommentAdded, {
+                            workbook,
+                            worksheet,
+                            row: threadComment.getRange()?.getRow() ?? 0,
+                            col: threadComment.getRange()?.getColumn() ?? 0,
+                            comment: threadComment,
+                        });
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.CommentUpdated,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== UpdateCommentCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CommentUpdated,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== UpdateCommentCommand.id) return;
 
-                const updateParams = commandInfo.params as IUpdateCommentCommandParams;
-                const { commentId } = updateParams.payload;
-                const threadComment = worksheet.getCommentById(commentId);
-                if (threadComment) {
-                    this.fireEvent(this.Event.CommentUpdated, {
-                        workbook,
-                        worksheet,
-                        row: threadComment.getRange()?.getRow() ?? 0,
-                        col: threadComment.getRange()?.getColumn() ?? 0,
-                        comment: threadComment,
-                    });
-                }
-            })
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { payload } = commandInfo.params as IUpdateCommentCommandParams;
+                    const threadComment = worksheet.getCommentById(payload.commentId);
+
+                    if (threadComment) {
+                        this.fireEvent(this.Event.CommentUpdated, {
+                            workbook,
+                            worksheet,
+                            row: threadComment.getRange()?.getRow() ?? 0,
+                            col: threadComment.getRange()?.getColumn() ?? 0,
+                            comment: threadComment,
+                        });
+                    }
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.CommentDeleted,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CommentDeleted,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
 
-                const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
-                const { commentId } = deleteParams;
-                this.fireEvent(this.Event.CommentDeleted, {
-                    workbook,
-                    worksheet,
-                    commentId,
-                });
-            })
-        );
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
 
-        this.registerEventHandler(
-            this.Event.CommentResolved,
-            () => commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== ResolveCommentCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+                    const { workbook, worksheet } = target;
+                    const { commentId } = commandInfo.params as IDeleteCommentCommandParams;
 
-                const resolveParams = commandInfo.params as IResolveCommentCommandParams;
-                const { commentId, resolved } = resolveParams;
-                const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
-                if (threadComment) {
-                    this.fireEvent(this.Event.CommentResolved, {
+                    this.fireEvent(this.Event.CommentDeleted, {
                         workbook,
                         worksheet,
-                        row: threadComment.getRange()!.getRow() ?? 0,
-                        col: threadComment.getRange()!.getColumn() ?? 0,
-                        comment: threadComment,
-                        resolved,
+                        commentId,
                     });
-                }
-            })
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.CommentResolved,
+                () => commandService.onCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== ResolveCommentCommand.id) return;
+
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { commentId, resolved } = commandInfo.params as IResolveCommentCommandParams;
+                    const threadComment = worksheet.getCommentById(commentId);
+
+                    if (threadComment) {
+                        this.fireEvent(this.Event.CommentResolved, {
+                            workbook,
+                            worksheet,
+                            row: threadComment.getRange()?.getRow() ?? 0,
+                            col: threadComment.getRange()?.getColumn() ?? 0,
+                            comment: threadComment,
+                            resolved,
+                        });
+                    }
+                })
+            )
         );
 
         // Before command events
-        this.registerEventHandler(
-            this.Event.BeforeCommentAdd,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== AddCommentCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeCommentAdd,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== AddCommentCommand.id) return;
 
-                const addParams = commandInfo.params as IAddCommentCommandParams;
-                const { comment } = addParams;
-                const activeRange = worksheet.getActiveRange();
-                if (!activeRange) return;
-                const eventParams: IBeforeSheetCommentAddEvent = {
-                    workbook,
-                    worksheet,
-                    row: activeRange.getRow() ?? 0,
-                    col: activeRange.getColumn() ?? 0,
-                    comment: FTheadCommentItem.create(comment),
-                };
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
 
-                this.fireEvent(this.Event.BeforeCommentAdd, eventParams);
-                if (eventParams.cancel) {
-                    throw new CanceledError();
-                }
-            })
-        );
+                    const { workbook, worksheet } = target;
+                    const { comment } = commandInfo.params as IAddCommentCommandParams;
+                    const { range } = deserializeRangeWithSheet(comment.ref);
 
-        this.registerEventHandler(
-            this.Event.BeforeCommentUpdate,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== UpdateCommentCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
-
-                const updateParams = commandInfo.params as IUpdateCommentCommandParams;
-                const { commentId, text } = updateParams.payload;
-                const threadComment = worksheet.getCommentById(commentId);
-                if (threadComment) {
-                    const eventParams: IBeforeSheetCommentUpdateEvent = {
+                    const eventParams: IBeforeSheetCommentAddEvent = {
                         workbook,
                         worksheet,
-                        row: threadComment.getRange()?.getRow() ?? 0,
-                        col: threadComment.getRange()?.getColumn() ?? 0,
-                        comment: threadComment,
-                        newContent: RichTextValue.createByBody(text),
+                        row: range.startRow,
+                        col: range.startColumn,
+                        comment: FTheadCommentItem.create(comment),
                     };
-                    this.fireEvent(this.Event.BeforeCommentUpdate, eventParams);
+
+                    this.fireEvent(this.Event.BeforeCommentAdd, eventParams);
                     if (eventParams.cancel) {
                         throw new CanceledError();
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeCommentDelete,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeCommentUpdate,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== UpdateCommentCommand.id) return;
 
-                const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
-                const { commentId } = deleteParams;
-                const threadComment = worksheet.getCommentById(commentId);
-                if (threadComment) {
-                    const eventParams: IBeforeSheetCommentDeleteEvent = {
-                        workbook,
-                        worksheet,
-                        row: threadComment.getRange()?.getRow() ?? 0,
-                        col: threadComment.getRange()?.getColumn() ?? 0,
-                        comment: threadComment,
-                    };
-                    this.fireEvent(this.Event.BeforeCommentDelete, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { payload } = commandInfo.params as IUpdateCommentCommandParams;
+                    const threadComment = worksheet.getCommentById(payload.commentId);
+
+                    if (threadComment) {
+                        const eventParams: IBeforeSheetCommentUpdateEvent = {
+                            workbook,
+                            worksheet,
+                            row: threadComment.getRange()?.getRow() ?? 0,
+                            col: threadComment.getRange()?.getColumn() ?? 0,
+                            comment: threadComment,
+                            newContent: RichTextValue.createByBody(payload.text),
+                        };
+                        this.fireEvent(this.Event.BeforeCommentUpdate, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
         );
 
-        this.registerEventHandler(
-            this.Event.BeforeCommentResolve,
-            () => commandService.beforeCommandExecuted((commandInfo) => {
-                if (commandInfo.id !== ResolveCommentCommand.id) return;
-                const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
-                if (!params) return;
-                const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
-                if (!workbook) return;
-                const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
-                if (!worksheet) return;
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeCommentDelete,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== DeleteCommentCommand.id && commandInfo.id !== DeleteCommentTreeCommand.id) return;
 
-                const resolveParams = commandInfo.params as IResolveCommentCommandParams;
-                const { commentId, resolved } = resolveParams;
-                const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
-                if (threadComment) {
-                    const eventParams: ISheetCommentResolveEvent = {
-                        workbook,
-                        worksheet,
-                        row: threadComment.getRange()!.getRow() ?? 0,
-                        col: threadComment.getRange()!.getColumn() ?? 0,
-                        comment: threadComment,
-                        resolved,
-                    };
-                    this.fireEvent(this.Event.BeforeCommentResolve, eventParams);
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { commentId } = commandInfo.params as IDeleteCommentCommandParams;
+                    const threadComment = worksheet.getCommentById(commentId);
+
+                    if (threadComment) {
+                        const eventParams: IBeforeSheetCommentDeleteEvent = {
+                            workbook,
+                            worksheet,
+                            row: threadComment.getRange()?.getRow() ?? 0,
+                            col: threadComment.getRange()?.getColumn() ?? 0,
+                            comment: threadComment,
+                        };
+                        this.fireEvent(this.Event.BeforeCommentDelete, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
                     }
-                }
-            })
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            this.registerEventHandler(
+                this.Event.BeforeCommentResolve,
+                () => commandService.beforeCommandExecuted((commandInfo) => {
+                    if (commandInfo.id !== ResolveCommentCommand.id) return;
+
+                    const target = this._getTargetSheet(commandInfo.params);
+                    if (!target) return;
+
+                    const { workbook, worksheet } = target;
+                    const { commentId, resolved } = commandInfo.params as IResolveCommentCommandParams;
+                    const threadComment = worksheet.getCommentById(commentId);
+
+                    if (threadComment) {
+                        const eventParams: ISheetCommentResolveEvent = {
+                            workbook,
+                            worksheet,
+                            row: threadComment.getRange()!.getRow() ?? 0,
+                            col: threadComment.getRange()!.getColumn() ?? 0,
+                            comment: threadComment,
+                            resolved,
+                        };
+                        this.fireEvent(this.Event.BeforeCommentResolve, eventParams);
+                        if (eventParams.cancel) {
+                            throw new CanceledError();
+                        }
+                    }
+                })
+            )
         );
     }
 

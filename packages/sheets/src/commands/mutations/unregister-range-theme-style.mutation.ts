@@ -28,11 +28,11 @@ export const UnregisterWorksheetRangeThemeStyleMutation: IMutation<IUnregisterWo
     id: 'sheet.mutation.unregister-worksheet-range-theme-style',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, themeName } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
-        const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
+
+        const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
+        const { unitId, themeName } = params;
 
         sheetRangeThemeModel.unregisterRangeThemeStyle(unitId, themeName);
         return true;

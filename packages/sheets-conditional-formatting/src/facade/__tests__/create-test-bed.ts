@@ -33,7 +33,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, SheetRowFilteredService } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, ISheetRowFilteredService, LexerTreeBuilder, RegisterOtherFormulaService, SheetRowFilteredService } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RefRangeService,
@@ -150,6 +150,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [ConditionalFormattingFormulaService],
                 [ConditionalFormattingRuleModel],
                 [ConditionalFormattingViewModel],
+                [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => {

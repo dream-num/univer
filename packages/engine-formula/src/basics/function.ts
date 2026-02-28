@@ -121,6 +121,11 @@ export enum FunctionType {
       * Defined name
       */
     DefinedName,
+
+    /**
+     * Super Table name
+     */
+    Table,
 }
 
 export interface IFunctionParam {

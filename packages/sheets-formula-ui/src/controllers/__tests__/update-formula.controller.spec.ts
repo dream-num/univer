@@ -16,7 +16,7 @@
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
+import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRangeMoveDownCommandParams, IInsertRangeMoveRightCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import type { ISetRowHiddenCommandParams } from '@univerjs/sheets/commands/commands/set-row-visible.command.js';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
@@ -639,19 +639,19 @@ describe('Test update formula ', () => {
             expect(values).toStrictEqual([
                 [null],
                 [null],
-                [{ f: '=A1', t: 2, v: 1 }],
-                [{ f: '=A2', t: 2, v: 2 }],
-                [{ f: '=A3', t: 2, v: 3 }],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ f: '=A1' }],
+                [{ f: '=A2' }],
+                [{ f: '=A3' }],
+                [{ f: '=A4' }],
             ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(0, 1, 5, 1, sheetId);
             expect(valuesUndo).toStrictEqual([
-                [{ f: '=A1', t: 2, v: 1 }],
-                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
-                [{ si: 'W8Hdfc', t: 2, v: 3 }],
-                [{ si: 'W8Hdfc', t: 2, v: 4 }],
+                [{ f: '=A1' }],
+                [{ f: '=A2', si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc' }],
                 [null],
                 [null],
             ]);
@@ -661,10 +661,10 @@ describe('Test update formula ', () => {
             expect(valuesRedo).toStrictEqual([
                 [null],
                 [null],
-                [{ f: '=A1', t: 2, v: 1 }],
-                [{ f: '=A2', t: 2, v: 2 }],
-                [{ f: '=A3', t: 2, v: 3 }],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ f: '=A1' }],
+                [{ f: '=A2' }],
+                [{ f: '=A3' }],
+                [{ f: '=A4' }],
             ]);
         });
 
@@ -696,12 +696,12 @@ describe('Test update formula ', () => {
 
             expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
             const values1 = getValues(1, 3, 1, 3, sheetId);
-            expect(values1).toStrictEqual([[{ f: '=A2', t: 2, v: 2 }]]);
+            expect(values1).toStrictEqual([[{ f: '=A2' }]]);
             const values2 = getValues(1, 1, 3, 1, sheetId);
             expect(values2).toStrictEqual([
                 [null],
-                [{ f: '=A3', t: 2, v: 3 }],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ f: '=A3' }],
+                [{ f: '=A4' }],
             ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -709,19 +709,19 @@ describe('Test update formula ', () => {
             expect(valuesUndo1).toStrictEqual([[null]]);
             const valuesUndo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesUndo2).toStrictEqual([
-                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
-                [{ si: 'W8Hdfc', t: 2, v: 3 }],
-                [{ si: 'W8Hdfc', t: 2, v: 4 }],
+                [{ f: '=A2', si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc' }],
             ]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo1 = getValues(1, 3, 1, 3, sheetId);
-            expect(valuesRedo1).toStrictEqual([[{ f: '=A2', t: 2, v: 2 }]]);
+            expect(valuesRedo1).toStrictEqual([[{ f: '=A2' }]]);
             const valuesRedo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesRedo2).toStrictEqual([
                 [null],
-                [{ f: '=A3', t: 2, v: 3 }],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ f: '=A3' }],
+                [{ f: '=A4' }],
             ]);
         });
 
@@ -753,7 +753,7 @@ describe('Test update formula ', () => {
 
             expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
             const values1 = getValues(2, 3, 2, 3, sheetId);
-            expect(values1).toStrictEqual([[{ f: '=A3', t: 2, v: 3 }]]);
+            expect(values1).toStrictEqual([[{ f: '=A3' }]]);
             const values2 = getValues(1, 1, 3, 1, sheetId);
             expect(values2).toStrictEqual([
                 [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
@@ -767,13 +767,13 @@ describe('Test update formula ', () => {
             const valuesUndo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesUndo2).toStrictEqual([
                 [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
-                [{ si: 'W8Hdfc', t: 2, v: 3 }],
+                [{ si: 'W8Hdfc' }],
                 [{ si: 'W8Hdfc', t: 2, v: 4 }],
             ]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo1 = getValues(2, 3, 2, 3, sheetId);
-            expect(valuesRedo1).toStrictEqual([[{ f: '=A3', t: 2, v: 3 }]]);
+            expect(valuesRedo1).toStrictEqual([[{ f: '=A3' }]]);
             const valuesRedo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesRedo2).toStrictEqual([
                 [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
@@ -810,30 +810,30 @@ describe('Test update formula ', () => {
 
             expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
             const values1 = getValues(1, 3, 2, 3, sheetId);
-            expect(values1).toStrictEqual([[{ f: '=A2', t: 2, v: 2 }], [{ f: '=A3', t: 2, v: 3 }]]);
+            expect(values1).toStrictEqual([[{ f: '=A2' }], [{ f: '=A3' }]]);
             const values2 = getValues(1, 1, 3, 1, sheetId);
             expect(values2).toStrictEqual([
                 [null],
                 [null],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ f: '=A4' }],
             ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(1, 1, 3, 1, sheetId);
             expect(valuesUndo).toStrictEqual([
-                [{ f: '=A2', si: 'W8Hdfc', t: 2, v: 2 }],
-                [{ si: 'W8Hdfc', t: 2, v: 3 }],
-                [{ si: 'W8Hdfc', t: 2, v: 4 }],
+                [{ f: '=A2', si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc' }],
+                [{ si: 'W8Hdfc' }],
             ]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo1 = getValues(1, 3, 2, 3, sheetId);
-            expect(valuesRedo1).toStrictEqual([[{ f: '=A2', t: 2, v: 2 }], [{ f: '=A3', t: 2, v: 3 }]]);
+            expect(valuesRedo1).toStrictEqual([[{ f: '=A2' }], [{ f: '=A3' }]]);
             const valuesRedo2 = getValues(1, 1, 3, 1, sheetId);
             expect(valuesRedo2).toStrictEqual([
                 [null],
                 [null],
-                [{ f: '=A4', t: 2, v: 4 }],
+                [{ f: '=A4' }],
             ]);
         });
 
@@ -858,25 +858,25 @@ describe('Test update formula ', () => {
             expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
             const values = getValues(18, 1, 20, 2);
             expect(values).toStrictEqual([
-                [null, { f: '=SUM(A19)', t: 2, v: 1 }],
-                [null, { f: '=SUM(A20)', t: 2, v: 2 }],
-                [null, { f: '=SUM(A21)', t: 2, v: 3 }],
+                [null, { f: '=SUM(A19)' }],
+                [null, { f: '=SUM(A20)' }],
+                [null, { f: '=SUM(A21)' }],
             ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(18, 1, 20, 2);
             expect(valuesUndo).toStrictEqual([
-                [{ f: '=SUM(A19)', t: 2, v: 1 }, null],
-                [{ f: '=SUM(A20)', si: 'id1', t: 2, v: 2 }, null],
-                [{ si: 'id1', t: 2, v: 3 }, null],
+                [{ f: '=SUM(A19)' }, null],
+                [{ f: '=SUM(A20)', si: 'id1' }, null],
+                [{ si: 'id1' }, null],
             ]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(18, 1, 20, 2);
             expect(valuesRedo).toStrictEqual([
-                [null, { f: '=SUM(A19)', t: 2, v: 1 }],
-                [null, { f: '=SUM(A20)', t: 2, v: 2 }],
-                [null, { f: '=SUM(A21)', t: 2, v: 3 }],
+                [null, { f: '=SUM(A19)' }],
+                [null, { f: '=SUM(A20)' }],
+                [null, { f: '=SUM(A21)' }],
             ]);
         });
 
@@ -1586,52 +1586,21 @@ describe('Test update formula ', () => {
             const values = getValues(21, 0, 21, 4);
 
             // Ignore the calculation results and only verify the offset information
-            expect(values).toStrictEqual([[{
-                f: '=OFFSET(#REF!,1,1)',
-                v: 0,
-                t: 2,
-            }, {
-                f: '=OFFSET(#REF!,1,1)',
-                v: 1,
-                t: 2,
-            }, {
-                f: '=OFFSET(A1,1,1)',
-                v: 1,
-                t: 2,
-            }, null, null]]);
+            expect(values).toStrictEqual([
+                [{ f: '=OFFSET(#REF!,1,1)' }, { f: '=OFFSET(#REF!,1,1)' }, { f: '=OFFSET(A1,1,1)' }, null, null],
+            ]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(21, 0, 21, 4);
-            expect(valuesUndo).toStrictEqual([[null, null, {
-                f: '=OFFSET(A1,1,1)',
-                v: 0,
-                t: 2,
-            }, {
-                f: '=OFFSET(B1,1,1)',
-                si: 'id2',
-                v: 1,
-                t: 2,
-            }, {
-                si: 'id2',
-                v: 1,
-                t: 2,
-            }]]);
+            expect(valuesUndo).toStrictEqual([
+                [null, null, { f: '=OFFSET(A1,1,1)' }, { f: '=OFFSET(B1,1,1)', si: 'id2' }, { si: 'id2' }],
+            ]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(21, 0, 21, 4);
-            expect(valuesRedo).toStrictEqual([[{
-                f: '=OFFSET(#REF!,1,1)',
-                v: 0,
-                t: 2,
-            }, {
-                f: '=OFFSET(#REF!,1,1)',
-                v: 1,
-                t: 2,
-            }, {
-                f: '=OFFSET(A1,1,1)',
-                v: 1,
-                t: 2,
-            }, null, null]]);
+            expect(valuesRedo).toStrictEqual([
+                [{ f: '=OFFSET(#REF!,1,1)' }, { f: '=OFFSET(#REF!,1,1)' }, { f: '=OFFSET(A1,1,1)' }, null, null],
+            ]);
         });
 
         it('Remove column, removed column contains formula', async () => {
@@ -1802,7 +1771,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move down, value on the top', async () => {
-            const params: InsertRangeMoveDownCommandParams = {
+            const params: IInsertRangeMoveDownCommandParams = {
                 range: {
                     startRow: 1,
                     startColumn: 2,
@@ -1826,7 +1795,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move down, value on the bottom', async () => {
-            const params: InsertRangeMoveDownCommandParams = {
+            const params: IInsertRangeMoveDownCommandParams = {
                 range: {
                     startRow: 4,
                     startColumn: 2,
@@ -1850,7 +1819,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move down, update reference', async () => {
-            const params: InsertRangeMoveDownCommandParams = {
+            const params: IInsertRangeMoveDownCommandParams = {
                 range: {
                     startRow: 1,
                     startColumn: 0,
@@ -1874,7 +1843,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move right, value on the left', async () => {
-            const params: InsertRangeMoveRightCommandParams = {
+            const params: IInsertRangeMoveRightCommandParams = {
                 range: {
                     startRow: 2,
                     startColumn: 1,
@@ -1898,7 +1867,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move right, value on the right', async () => {
-            const params: InsertRangeMoveRightCommandParams = {
+            const params: IInsertRangeMoveRightCommandParams = {
                 range: {
                     startRow: 5,
                     startColumn: 1,
@@ -1922,7 +1891,7 @@ describe('Test update formula ', () => {
         });
 
         it('Insert move right, update reference', async () => {
-            const params: InsertRangeMoveRightCommandParams = {
+            const params: IInsertRangeMoveRightCommandParams = {
                 range: {
                     startRow: 0,
                     startColumn: 1,

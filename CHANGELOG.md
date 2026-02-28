@@ -1,5 +1,34 @@
 # Changelog
 
+# [0.16.0](https://github.com/dream-num/univer/compare/v0.15.5...v0.16.0) (2026-02-28)
+
+
+### Bug Fixes
+
+* dropdown data validation dark background ([#6599](https://github.com/dream-num/univer/issues/6599)) ([ae86ede](https://github.com/dream-num/univer/commit/ae86edeb21eeeaf60cb188bfb9c9148af7d4ee2a))
+* fix font support detection ([#6607](https://github.com/dream-num/univer/issues/6607)) ([a3ad609](https://github.com/dream-num/univer/commit/a3ad609d79ab106153620b721bd20fa6a9049835))
+* fix the calculation of the maximum height and width of the editor ([#6615](https://github.com/dream-num/univer/issues/6615)) ([b40ae2a](https://github.com/dream-num/univer/commit/b40ae2aef47b5ca8487fdfd42fa9b765f8aba9ff))
+* fix the issue of document float images failing to render ([#6616](https://github.com/dream-num/univer/issues/6616)) ([f6af790](https://github.com/dream-num/univer/commit/f6af79062b815caea51962ccb094dc16f1f6c0ff))
+* fix the issue when editing percent number format cells ([#6605](https://github.com/dream-num/univer/issues/6605)) ([c1b9d9f](https://github.com/dream-num/univer/commit/c1b9d9fc803e60857b649e1b874ef56ef17e30fd))
+* font family label ([#6585](https://github.com/dream-num/univer/issues/6585)) ([d7870ac](https://github.com/dream-num/univer/commit/d7870ac064dd4405d13c8a2f5acc2fe9f56ae145))
+* **formula:** from changeset initialize data ([#6600](https://github.com/dream-num/univer/issues/6600)) ([0c67388](https://github.com/dream-num/univer/commit/0c673886e7e5d36708bf4e11bc1208e0ecddef4d))
+* **formula:** other formula to local ([#6624](https://github.com/dream-num/univer/issues/6624)) ([06e8cbd](https://github.com/dream-num/univer/commit/06e8cbd3f84f9640479cd64b1af36a44c0aca645))
+* **matrix:** infinite loop ([#6612](https://github.com/dream-num/univer/issues/6612)) ([da0edfe](https://github.com/dream-num/univer/commit/da0edfebfcb18c53176828f5a3b00be7fa94dcd0))
+* **note:** optimize the generation of IDs when add note for the first time ([#6619](https://github.com/dream-num/univer/issues/6619)) ([6bd5519](https://github.com/dream-num/univer/commit/6bd5519b3ccc7a0ebfd808656b2cb66c2219777b))
+* optimize rendering performance for worksheet with a large number of merged cells ([#6611](https://github.com/dream-num/univer/issues/6611)) ([d52729a](https://github.com/dream-num/univer/commit/d52729a14bb4c7e022945abc0e900876a39585c1))
+* **row:** auto height is zero ([#6601](https://github.com/dream-num/univer/issues/6601)) ([c2379e5](https://github.com/dream-num/univer/commit/c2379e5a355f4fb9379eadaffb3bcdf28c3fdb88))
+* **rpc:** async error ([#6602](https://github.com/dream-num/univer/issues/6602)) ([f5afdfe](https://github.com/dream-num/univer/commit/f5afdfe0616626829af36803588dde316e9a4273))
+* **sheets-table:** wrap MoreDownIcon in a div for better layout control ([#6621](https://github.com/dream-num/univer/issues/6621)) ([7bbe836](https://github.com/dream-num/univer/commit/7bbe8363a023ad314a25a5307bedfe27415c1a7f))
+* **snapshot:** changeset apply ([#6623](https://github.com/dream-num/univer/issues/6623)) ([a9c4743](https://github.com/dream-num/univer/commit/a9c4743d37e57015cd82e5bf0aff67323442c5fd))
+
+
+### Features
+
+* add context menu host service and refactor context menu components ([#6614](https://github.com/dream-num/univer/issues/6614)) ([35d57b2](https://github.com/dream-num/univer/commit/35d57b2cd70cb85b914b07b83810686c5e0ef9ca))
+* **design & ui:** enhance message handling and UI ([#6606](https://github.com/dream-num/univer/issues/6606)) ([8eda03a](https://github.com/dream-num/univer/commit/8eda03ab344373170065babb17f80f7441664019))
+* **docs:** active color on icon color or bg toolbar ([#6608](https://github.com/dream-num/univer/issues/6608)) ([d7e74d4](https://github.com/dream-num/univer/commit/d7e74d4929fdf5451dde8718daae46a2a0fdfc80))
+* **img:** support img flip ([#6590](https://github.com/dream-num/univer/issues/6590)) ([31e6cd6](https://github.com/dream-num/univer/commit/31e6cd65187ba18354e4525389401c262afdb023))
+
 ## [0.15.5](https://github.com/dream-num/univer/compare/v0.15.4...v0.15.5) (2026-02-11)
 
 

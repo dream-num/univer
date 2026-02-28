@@ -746,6 +746,11 @@ describe('lexer nodeMaker test', () => {
             result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
             expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
         });
+
+        it('suffix %', () => {
+            const node = lexerTreeBuilder.treeBuilder('=((10-9)%)%') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"%","st":8,"ed":8,"children":[{"token":"%","st":6,"ed":6,"children":["10","9","-"]}]}]}');
+        });
     });
 
     describe('bad cases from users', () => {

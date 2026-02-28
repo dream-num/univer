@@ -31,7 +31,7 @@ export { Confirm, type IConfirmProps } from './components/confirm/Confirm';
 export { DatePicker } from './components/date-picker/DatePicker';
 export { DateRangePicker } from './components/date-range-picker';
 export { Dialog, type IDialogProps } from './components/dialog/Dialog';
-export { DraggableList, type IDraggableListProps, ReactGridLayout } from './components/draggable-list';
+export { DraggableList, type IDraggableListProps } from './components/draggable-list';
 export { DropdownMenu, type IDropdownMenuProps } from './components/dropdown-menu/DropdownMenu';
 export { Dropdown, type IDropdownProps } from './components/dropdown/Dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
@@ -82,6 +82,3 @@ export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
 export { resizeObserverCtor } from './helper/resize-observer';
-
-/** @deprecated Only for compatibility with versions before 0.7.0, will be removed in future versions */
-export { defaultTheme, greenTheme } from '@univerjs/themes';

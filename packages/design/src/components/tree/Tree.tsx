@@ -16,13 +16,12 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import { DropdownIcon } from '@univerjs/icons';
-import VirtualList from 'rc-virtual-list';
 import { useEffect, useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Checkbox } from '../checkbox/Checkbox';
 import { Tooltip } from '../tooltip/Tooltip';
+import { VirtualList } from '../virtual-list';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
-import './index.css';
 
 export enum TreeSelectionMode {
     ONLY_LEAF_NODE,
@@ -143,18 +142,19 @@ export function Tree(props: ITreeProps) {
         return (
             <div
                 key={key}
-                className={clsx('univer-tree-list-item', treeNodeClassName)}
+                className={clsx('univer-relative univer-text-[13px]', treeNodeClassName)}
                 style={{ paddingLeft: `${level * 20}px` }}
             >
                 <div
-                    className={clsx('univer-tree-list-item-content', {
-                        'univer-tree-list-item-content-selected': selected,
-                    })}
+                    className="univer-relative univer-my-1 univer-flex univer-w-full univer-items-center"
                 >
                     {treeItem.children && treeItem.children.length > 0 && (
                         <span
-                            className={clsx('univer-tree-icon', {
-                                'univer-tree-icon-expand': expended,
+                            className={clsx(`
+                              univer-absolute univer-left-[-16px] univer-top-1/2 univer-flex univer--translate-y-1/2
+                              univer-items-center univer-justify-center univer-text-[8px]
+                            `, {
+                                'univer-rotate-[-90deg]': !expended,
                             })}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -172,7 +172,10 @@ export function Tree(props: ITreeProps) {
                         }}
                     />
                     <div
-                        className="univer-tree-list-item-title"
+                        className="
+                          univer-mx-1 univer-inline-block univer-h-full univer-shrink univer-overflow-hidden
+                          univer-text-ellipsis univer-whitespace-nowrap
+                        "
                         onClick={(e) => {
                             e.stopPropagation();
                             handleExpendItem(treeItem);
@@ -192,8 +195,13 @@ export function Tree(props: ITreeProps) {
     }
 
     return (
-        <section className="univer-tree">
-            <div className="univer-tree-list" style={style}>
+        <section
+            className="
+              univer-relative univer-select-none univer-text-gray-900
+              dark:!univer-text-white
+            "
+        >
+            <div className="univer-m-0 univer-h-full univer-list-none univer-p-0" style={style}>
                 <VirtualList
                     data={flatData}
                     itemKey={(item) => item.key}

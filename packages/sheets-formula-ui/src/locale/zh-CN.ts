@@ -40,12 +40,7 @@ const locale: typeof enUS = {
     formula: {
         insert: {
             tooltip: '函数',
-            sum: '求和',
-            average: '平均值',
-            count: '计数',
-            max: '最大值',
-            min: '最小值',
-            more: '更多函数...',
+            common: '常用函数',
         },
         functionList: {
             ...financial,

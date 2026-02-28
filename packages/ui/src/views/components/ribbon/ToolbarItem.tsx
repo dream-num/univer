@@ -36,7 +36,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
     const layoutService = useDependency(ILayoutService);
     const componentManager = useDependency(ComponentManager);
 
-    const { value, hidden, disabled, activated } = useToolbarItemStatus(props);
+    const { value, hidden, disabled, activated, selectionsValue } = useToolbarItemStatus(props);
 
     const executeCommand = (commandId: string, params?: Record<string, unknown>) => {
         layoutService.focus();
@@ -57,6 +57,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
             });
         }
     }, [selections]);
+
     const options = useObservable(selections$) as IValueOption[];
 
     const icon$ = useMemo(() => {
@@ -132,7 +133,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         <CustomLabel
                             icon={iconToDisplay}
                             title={title!}
-                            value={value}
+                            value={selectionsValue ?? value}
                             label={label}
                             onChange={handleSelectionsValueChange}
                         />

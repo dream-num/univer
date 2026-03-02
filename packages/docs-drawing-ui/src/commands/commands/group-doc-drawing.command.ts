@@ -15,12 +15,12 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 
 /**
@@ -36,6 +36,8 @@ export const GroupDocDrawingCommand: ICommand = {
 
         if (!params) return false;
 
+        // if the subunit is not a doc type, return false
+
         const unitIds: string[] = [];
         params.forEach(({ parent, children }) => {
             unitIds.push(parent.unitId);
@@ -45,9 +47,9 @@ export const GroupDocDrawingCommand: ICommand = {
         });
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const jsonOp = docDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
+        // const jsonOp = docDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
 
-        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
+        // const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         // const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP });
 

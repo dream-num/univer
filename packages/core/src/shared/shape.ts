@@ -34,6 +34,13 @@ export interface ISrcRect extends IOffset {
     bottom?: number;
 }
 
+export interface IGroupBaseBound {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
 export interface IAbsoluteTransform extends ISize, IOffset, IScale {}
 
 export interface IRectXYWH {

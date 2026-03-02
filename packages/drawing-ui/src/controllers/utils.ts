@@ -19,7 +19,7 @@ import type { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Group } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group } from '@univerjs/engine-render';
 
 export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService) {
     const groupParam = drawingManagerService.getDrawingByParam(objectParam);
@@ -39,7 +39,7 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
         return;
     }
 
-    const group = new Group(groupKey);
+    const group = new DrawingGroupObject(groupKey);
 
     scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 

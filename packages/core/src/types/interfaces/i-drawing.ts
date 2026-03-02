@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform } from '../../shared/shape';
+import type { IAbsoluteTransform, IGroupBaseBound } from '../../shared/shape';
 import type { Nullable } from '../../shared/types';
 import type { BooleanNumber } from '../enum/text-style';
 
@@ -124,6 +124,11 @@ export interface IDrawingParam extends IDrawingSearch {
     isMultiTransform?: BooleanNumber;
     groupId?: string;
     allowTransform?: boolean;
+    /**
+     * The base bound of the group, used to calculate the relative position of children in the group.
+     * It is only used when drawingType is DRAWING_GROUP.
+     */
+    groupBaseBound?: Nullable<IGroupBaseBound>;
 }
 
 // #endregion

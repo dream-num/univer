@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { getUpdateParams } from '../utils/get-update-params';
@@ -229,11 +229,14 @@ export class DrawingUpdateController extends Disposable {
         }
 
         const groupKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-        const group = new Group(groupKey);
+        const group = new DrawingGroupObject(groupKey);
 
         scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
         group.addObjects(...objects);
+        if (parent.groupBaseBound) {
+            group.setBaseBound(parent.groupBaseBound);
+        }
         // group.reCalculateObjects();
         parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top });
 

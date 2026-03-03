@@ -886,9 +886,6 @@ importers:
       '@univerjs/icons':
         specifier: ^1.1.1
         version: 1.1.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@univerjs/themes':
-        specifier: workspace:*
-        version: link:../themes
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

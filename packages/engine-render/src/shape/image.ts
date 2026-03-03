@@ -54,6 +54,8 @@ export class Image extends Shape<IImageProps> {
 
     override objectType = ObjectType.IMAGE;
 
+    override isDrawingObject: boolean = true;
+
     constructor(id: string, config: IImageProps) {
         super(id, config);
         this._props = {
@@ -383,26 +385,26 @@ export class Image extends Shape<IImageProps> {
 
     override isHit(coord: Vector2) {
         // Build the same effective transform used in render():
+        // Must use realBound to match render() method's coordinate system
         // [m[0], m[1], m[2], m[3], centerX, centerY]
 
         const realBound = this.getRealBound();
-        const { left: realLeft, top: realTop } = realBound;
-        const centerX = realLeft + this.width / 2;
-        const centerY = realTop + this.height / 2;
+        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
+        const centerX = realLeft + realWidth / 2;
+        const centerY = realTop + realHeight / 2;
         const m = this.transform.getMatrix();
-        // const centerX = this.left + this.width / 2;
-        // const centerY = this.top + this.height / 2;
         const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
 
         // Account for parent group transforms if applicable
+        // This handles multi-level nesting and parent flipX/flipY transformations
         const parent = this.getParent();
         const effectiveTransform = this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP
             ? parent.ancestorTransform.multiply(renderTransform)
             : renderTransform;
 
         const oCoord = effectiveTransform.invert().applyPoint(coord);
-        const halfWidth = this.width / 2;
-        const halfHeight = this.height / 2;
+        const halfWidth = realWidth / 2;
+        const halfHeight = realHeight / 2;
         if (
             oCoord.x >= -halfWidth - this.strokeWidth / 2 &&
             oCoord.x <= halfWidth + this.strokeWidth / 2 &&

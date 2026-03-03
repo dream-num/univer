@@ -45,7 +45,11 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
 
     group.addObject(object);
 
-    const { transform } = groupParam;
+    const { transform, groupBaseBound } = groupParam;
+
+    if (groupBaseBound) {
+        group.setBaseBound(groupBaseBound);
+    }
 
     transform && group.transformByState(
         {

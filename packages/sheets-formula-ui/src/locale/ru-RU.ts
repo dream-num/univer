@@ -40,12 +40,7 @@ const locale: typeof enUS = {
     formula: {
         insert: {
             tooltip: 'Функции',
-            sum: 'СУММ',
-            average: 'СРЗНАЧ',
-            count: 'СЧЁТ',
-            max: 'МАКС',
-            min: 'МИН',
-            more: 'Другие функции...',
+            common: 'Часто используемые функции',
         },
         functionList: {
             ...financial,

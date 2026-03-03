@@ -15,8 +15,9 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IMenuItem } from '@univerjs/ui';
+import type { IMenuItem, IValueOption } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
+import { FunctionType } from '@univerjs/engine-formula';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -26,6 +27,7 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
+import { IDescriptionService } from '@univerjs/sheets-formula';
 import { getCurrentRangeDisable$, menuClipboardDisabledObservable } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map } from 'rxjs';
@@ -33,160 +35,90 @@ import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../co
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
-/** @deprecated */
-export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
+    const commonFunctions = ['SUMIF', 'SUM', 'AVERAGE', 'IF', 'COUNT', 'SIN', 'MAX'];
+    let selections: IValueOption[] = commonFunctions.map((name) => ({
+        label: {
+            name,
+            selectable: false,
+        },
+        value: name,
+    }));
+
+    try {
+        const descriptionService = accessor.get(IDescriptionService);
+        const filtered = commonFunctions.filter((name) => Boolean(descriptionService.getFunctionInfo(name)));
+        if (filtered.length > 0) {
+            selections = filtered.map((name) => ({
+                label: {
+                    name,
+                    selectable: false,
+                },
+                value: name,
+            }));
+        }
+    } catch {
+        // Fallback to static common list.
+    }
+
     return {
-        id: InsertFunctionOperation.id,
-        icon: 'FunctionIcon',
+        id: `${InsertFunctionOperation.id}.common`,
+        commandId: InsertFunctionOperation.id,
+        title: 'formula.insert.common',
         tooltip: 'formula.insert.tooltip',
+        icon: 'FunctionIcon',
         type: MenuItemType.SELECTOR,
-        selections: [
-            {
+        selections,
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+function createInsertFunctionCategoryMenuItemFactory(functionType: FunctionType, categoryKey: string, icon?: string) {
+    return function insertFunctionCategoryMenuItemFactory(accessor: IAccessor): IMenuItem {
+        let selections: IValueOption[] = [];
+
+        try {
+            const descriptionService = accessor.get(IDescriptionService);
+            selections = descriptionService.getSearchListByType(functionType).map(({ name }) => ({
                 label: {
-                    name: 'SUM',
+                    name,
                     selectable: false,
                 },
-                value: 'SUM',
-                icon: 'SumIcon',
-            },
-            {
-                label: {
-                    name: 'AVERAGE',
-                    selectable: false,
-                },
-                value: 'AVERAGE',
-                icon: 'AvgIcon',
-            },
-            {
-                label: {
-                    name: 'COUNT',
-                    selectable: false,
-                },
-                value: 'COUNT',
-                icon: 'CntIcon',
-            },
-            {
-                label: {
-                    name: 'MAX',
-                    selectable: false,
-                },
-                value: 'MAX',
-                icon: 'MaxIcon',
-            },
-            {
-                label: {
-                    name: 'MIN',
-                    selectable: false,
-                },
-                value: 'MIN',
-                icon: 'MinIcon',
-            },
-        ],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+                value: name,
+            }));
+        } catch {
+            selections = [];
+        }
+
+        return {
+            id: `${InsertFunctionOperation.id}.${categoryKey}`,
+            commandId: InsertFunctionOperation.id,
+            title: `formula.functionType.${categoryKey}`,
+            tooltip: 'formula.insert.tooltip',
+            icon,
+            type: MenuItemType.SELECTOR,
+            selections,
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        };
     };
 }
 
-// SUM
-export function InsertSUMFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertFunctionOperation.id,
-        title: 'SUM',
-        icon: 'SumIcon',
-        type: MenuItemType.BUTTON,
-        params: {
-            value: 'SUM',
-        },
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
-    };
-}
+export const InsertFinancialFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Financial, 'financial');
+export const InsertLogicalFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Logical, 'logical');
+export const InsertTextFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Text, 'text');
+export const InsertDateFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Date, 'date');
+export const InsertLookupFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Lookup, 'lookup');
+export const InsertMathFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Math, 'math');
+export const InsertStatisticalFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Statistical, 'statistical');
+export const InsertEngineeringFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Engineering, 'engineering');
+export const InsertInformationFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Information, 'information');
+export const InsertDatabaseFunctionMenuItemFactory = createInsertFunctionCategoryMenuItemFactory(FunctionType.Database, 'database');
 
-// COUNT
-export function InsertCOUNTFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertFunctionOperation.id,
-        title: 'COUNT',
-        icon: 'CntIcon',
-        type: MenuItemType.BUTTON,
-        params: {
-            value: 'COUNT',
-        },
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
-    };
-}
-
-// AVERAGE
-export function InsertAVERAGEFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertFunctionOperation.id,
-        title: 'AVERAGE',
-        icon: 'AvgIcon',
-        type: MenuItemType.BUTTON,
-        params: {
-            value: 'AVERAGE',
-        },
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
-    };
-}
-
-// MAX
-export function InsertMAXFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertFunctionOperation.id,
-        title: 'MAX',
-        icon: 'MaxIcon',
-        type: MenuItemType.BUTTON,
-        params: {
-            value: 'MAX',
-        },
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
-    };
-}
-
-// MIN
-export function InsertMINFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertFunctionOperation.id,
-        title: 'MIN',
-        icon: 'MinIcon',
-        type: MenuItemType.BUTTON,
-        params: {
-            value: 'MIN',
-        },
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
-    };
-}
-
-// More Functions
-export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
+// All Functions entry displayed at the bottom of category dropdowns.
+export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
-        title: 'formula.insert.more',
+        title: 'formula.moreFunctions.allFunctions',
         tooltip: 'formula.insert.tooltip',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

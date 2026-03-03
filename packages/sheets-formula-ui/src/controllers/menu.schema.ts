@@ -21,43 +21,111 @@ import { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from '../co
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import {
+    AllFunctionsMenuItemFactory,
     CopyFormulaOnlyMenuItemFactory,
-    InsertAVERAGEFunctionMenuItemFactory,
-    InsertCOUNTFunctionMenuItemFactory,
-    InsertMAXFunctionMenuItemFactory,
-    InsertMINFunctionMenuItemFactory,
-    InsertSUMFunctionMenuItemFactory,
-    MoreFunctionsMenuItemFactory,
+    InsertCommonFunctionMenuItemFactory,
+    InsertDatabaseFunctionMenuItemFactory,
+    InsertDateFunctionMenuItemFactory,
+    InsertEngineeringFunctionMenuItemFactory,
+    InsertFinancialFunctionMenuItemFactory,
+    InsertInformationFunctionMenuItemFactory,
+    InsertLogicalFunctionMenuItemFactory,
+    InsertLookupFunctionMenuItemFactory,
+    InsertMathFunctionMenuItemFactory,
+    InsertStatisticalFunctionMenuItemFactory,
+    InsertTextFunctionMenuItemFactory,
     PasteFormulaMenuItemFactory,
 } from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonFormulasGroup.BASIC]: {
-        [`${InsertFunctionOperation.id}.sum`]: {
+        [`${InsertFunctionOperation.id}.common`]: {
             order: 0,
-            menuItemFactory: InsertSUMFunctionMenuItemFactory,
+            menuItemFactory: InsertCommonFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
         },
-        [`${InsertFunctionOperation.id}.count`]: {
+        [`${InsertFunctionOperation.id}.financial`]: {
             order: 1,
-            menuItemFactory: InsertCOUNTFunctionMenuItemFactory,
+            menuItemFactory: InsertFinancialFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
         },
-        [`${InsertFunctionOperation.id}.average`]: {
+        [`${InsertFunctionOperation.id}.logical`]: {
             order: 2,
-            menuItemFactory: InsertAVERAGEFunctionMenuItemFactory,
+            menuItemFactory: InsertLogicalFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
         },
-        [`${InsertFunctionOperation.id}.max`]: {
+        [`${InsertFunctionOperation.id}.text`]: {
             order: 3,
-            menuItemFactory: InsertMAXFunctionMenuItemFactory,
+            menuItemFactory: InsertTextFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
         },
-        [`${InsertFunctionOperation.id}.min`]: {
+        [`${InsertFunctionOperation.id}.date`]: {
             order: 4,
-            menuItemFactory: InsertMINFunctionMenuItemFactory,
+            menuItemFactory: InsertDateFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
         },
-    },
-    [RibbonFormulasGroup.OTHERS]: {
-        [MoreFunctionsOperation.id]: {
-            order: 0,
-            menuItemFactory: MoreFunctionsMenuItemFactory,
+        [`${InsertFunctionOperation.id}.lookup`]: {
+            order: 5,
+            menuItemFactory: InsertLookupFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
+        },
+        [`${InsertFunctionOperation.id}.math`]: {
+            order: 6,
+            menuItemFactory: InsertMathFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
+        },
+        [`${InsertFunctionOperation.id}.statistical`]: {
+            order: 7,
+            menuItemFactory: InsertStatisticalFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
+        },
+        [`${InsertFunctionOperation.id}.engineering`]: {
+            order: 8,
+            menuItemFactory: InsertEngineeringFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
+        },
+        [`${InsertFunctionOperation.id}.information`]: {
+            order: 9,
+            menuItemFactory: InsertInformationFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
+        },
+        [`${InsertFunctionOperation.id}.database`]: {
+            order: 10,
+            menuItemFactory: InsertDatabaseFunctionMenuItemFactory,
+            [MoreFunctionsOperation.id]: {
+                order: 0,
+                menuItemFactory: AllFunctionsMenuItemFactory,
+            },
         },
     },
     [COPY_SPECIAL_MENU_ID]: {

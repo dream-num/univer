@@ -39,12 +39,7 @@ const locale = {
     formula: {
         insert: {
             tooltip: 'Functions',
-            sum: 'SUM',
-            average: 'AVERAGE',
-            count: 'COUNT',
-            max: 'MAX',
-            min: 'MIN',
-            more: 'More Functions...',
+            common: 'Common Functions',
         },
         functionList: {
             ...financial,

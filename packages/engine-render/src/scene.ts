@@ -999,8 +999,8 @@ export class Scene extends Disposable {
         const objectLength = objectOrder.length;
 
         for (let i = 0; i < objectLength; i++) {
-            const o = objectOrder[i];
-            if (!o.visible || !o.evented || o.classType === RENDER_CLASS_TYPE.GROUP) {
+            const testObject = objectOrder[i];
+            if (!testObject.visible || !testObject.evented || (testObject.isInGroup && testObject.parent?.classType === RENDER_CLASS_TYPE.GROUP && testObject.isDrawingObject)) {
                 continue;
             }
             const svCoord = vecFromSheetContent;
@@ -1009,23 +1009,23 @@ export class Scene extends Disposable {
             //     svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
             // }
 
-            if (o.isHit(svCoord)) {
-                if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    const pickedObject = (o as SceneViewer).pick(svCoord);
+            if (testObject.isHit(svCoord)) {
+                if (testObject.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                    const pickedObject = (testObject as SceneViewer).pick(svCoord);
                     if (pickedObject) {
                         isPickedObject = pickedObject;
                     } else {
-                        isPickedObject = (o as SceneViewer).getActiveSubScene();
+                        isPickedObject = (testObject as SceneViewer).getActiveSubScene();
                     }
                 } else {
-                    isPickedObject = o;
+                    isPickedObject = testObject;
                 }
                 break;
             } else if (
-                o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER &&
-                (o as SceneViewer).allowSelectedClipElement()
+                testObject.classType === RENDER_CLASS_TYPE.SCENE_VIEWER &&
+                (testObject as SceneViewer).allowSelectedClipElement()
             ) {
-                const pickedObject = (o as SceneViewer).pick(svCoord);
+                const pickedObject = (testObject as SceneViewer).pick(svCoord);
                 if (pickedObject) {
                     isPickedObject = pickedObject;
                     break;
@@ -1042,16 +1042,16 @@ export class Scene extends Disposable {
 
     // triggerKeyDown(evt: IKeyboardEvent) {
     //     this.onKeyDown$.emitEvent(evt);
-        // if (this._parent instanceof SceneViewer) {
-        //     this._parent?.triggerKeyDown(evt);
-        // }
+    // if (this._parent instanceof SceneViewer) {
+    //     this._parent?.triggerKeyDown(evt);
+    // }
     // }
 
     // triggerKeyUp(evt: IKeyboardEvent) {
     //     this.onKeyUp$.emitEvent(evt);
-        // if (this._parent instanceof SceneViewer) {
-        //     this._parent?.triggerKeyUp(evt);
-        // }
+    // if (this._parent instanceof SceneViewer) {
+    //     this._parent?.triggerKeyUp(evt);
+    // }
     // }
 
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {

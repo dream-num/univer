@@ -17,7 +17,7 @@
 import type { IGroupBaseBound } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
-import { getDrawingGroupState } from './basics';
+import { getDrawingGroupState, RENDER_CLASS_TYPE, Transform } from './basics';
 import { Group } from './group';
 
 export class DrawingGroupObject extends Group {
@@ -53,6 +53,28 @@ export class DrawingGroupObject extends Group {
         return { ...this._baseBound };
     }
 
+    /**
+     * Override ancestorTransform to use the same render transform as render(),
+     * which uses [m[0], m[1], m[2], m[3], centerX, centerY] from realBound
+     * instead of the standard transform translation.
+     * This ensures children (e.g., Image.isHit) that compose with
+     * parent.ancestorTransform get the correct coordinate space.
+     */
+    override get ancestorTransform(): Transform {
+        const realBound = this.getRealBound();
+        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
+        const m = this.transform.getMatrix();
+        const centerX = realLeft + realWidth / 2;
+        const centerY = realTop + realHeight / 2;
+        const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
+
+        const parent = this.getParent();
+        if (this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP) {
+            return parent.ancestorTransform.multiply(renderTransform);
+        }
+        return renderTransform;
+    }
+
     override getState() {
         return getDrawingGroupState(this.left, this.top, this._objects.map((o) => o.getState()));
     }
@@ -80,32 +102,45 @@ export class DrawingGroupObject extends Group {
     }
 
     override isHit(coord: Vector2): boolean {
-        return super.isHit(coord);
-        // const realBound = this.getRealBound();
-        // const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
-        // const centerX = realLeft + realWidth / 2;
-        // const centerY = realTop + realHeight / 2;
-        // const m = this.transform.getMatrix();
-        // const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
+        // Build the same render transform used in render():
+        // [m[0], m[1], m[2], m[3], centerX, centerY]
+        const realBound = this.getRealBound();
+        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
+        const m = this.transform.getMatrix();
+        const centerX = realLeft + realWidth / 2;
+        const centerY = realTop + realHeight / 2;
+        const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
 
-        // // Account for parent group transforms if applicable
-        // const parent = this.getParent();
-        // const effectiveTransform = this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP
-        //     ? parent.ancestorTransform.multiply(renderTransform)
-        //     : renderTransform;
+        // Account for parent group transforms if applicable
+        const parent = this.getParent();
+        const effectiveTransform = this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP
+            ? parent.ancestorTransform.multiply(renderTransform)
+            : renderTransform;
 
-        // const oCoord = effectiveTransform.invert().applyPoint(coord);
-        // const halfWidth = realWidth / 2;
-        // const halfHeight = realHeight / 2;
+        // Transform world coord to group's local space (center-based)
+        const oCoord = effectiveTransform.invert().applyPoint(coord);
+        const halfWidth = realWidth / 2;
+        const halfHeight = realHeight / 2;
 
-        // if (
-        //     oCoord.x >= -halfWidth &&
-        //     oCoord.x <= halfWidth &&
-        //     oCoord.y >= -halfHeight &&
-        //     oCoord.y <= halfHeight
-        // ) {
-        //     return true;
-        // }
-        // return false;
+        // Check group bounding box first
+        if (
+            oCoord.x < -halfWidth ||
+            oCoord.x > halfWidth ||
+            oCoord.y < -halfHeight ||
+            oCoord.y > halfHeight
+        ) {
+            return false;
+        }
+
+        // Check children - pass world coord since children compose with parent.ancestorTransform
+        const objects = this.getObjectsByOrder();
+        for (let i = 0; i < objects.length; i++) {
+            const object = objects[i];
+            if (object.isHit(coord)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

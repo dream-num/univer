@@ -59,6 +59,7 @@ export enum ObjectType {
 export abstract class BaseObject extends Disposable {
     groupKey?: string;
     isInGroup: boolean = false;
+    isDrawingObject: boolean = false;
 
     objectType: ObjectType = ObjectType.UNKNOWN;
 
@@ -625,16 +626,16 @@ export abstract class BaseObject extends Disposable {
             realLeft = realBound.left - parentBound.left - parentBound.width / 2;
             realTop = realBound.top - parentBound.top - parentBound.height / 2;
 
-                // const isParentFlipX = this.parent?.flipX;
-                // const isParentFlipY = this.parent?.flipY;
-                // const parentCenterX = parentBound.left + parentBound.width / 2;
-                // const parentCenterY = parentBound.top + parentBound.height / 2;
-                // if (isParentFlipX) {
-                //     realLeft = 2 * parentCenterX - realLeft;
-                // }
-                // if (isParentFlipY) {
-                //     realTop = 2 * parentCenterY - realTop;
-                // }
+            // const isParentFlipX = this.parent?.flipX;
+            // const isParentFlipY = this.parent?.flipY;
+            // const parentCenterX = parentBound.left + parentBound.width / 2;
+            // const parentCenterY = parentBound.top + parentBound.height / 2;
+            // if (isParentFlipX) {
+            //     realLeft = 2 * parentCenterX - realLeft;
+            // }
+            // if (isParentFlipY) {
+            //     realTop = 2 * parentCenterY - realTop;
+            // }
         }
         return {
             left: realLeft,

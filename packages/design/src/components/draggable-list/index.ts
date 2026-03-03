@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { DraggableList, ReactGridLayout } from './DraggableList';
+export { DraggableList } from './DraggableList';
 export type { IDraggableListProps } from './DraggableList';

@@ -17,7 +17,7 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IConditionFormattingRule, IDeleteCfCommandParams, IMoveCfCommandParams } from '@univerjs/sheets-conditional-formatting';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { clsx, ReactGridLayout, Select, Tooltip } from '@univerjs/design';
+import { clsx, DraggableList, Select, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SequenceIcon } from '@univerjs/icons';
 import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
@@ -34,8 +34,8 @@ import {
     SetConditionalRuleMutation,
 } from '@univerjs/sheets-conditional-formatting';
 import { useHighlightRange } from '@univerjs/sheets-ui';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useMemo, useState } from 'react';
 import { debounceTime, Observable } from 'rxjs';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { Preview } from '../../preview';
@@ -104,7 +104,6 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
     }
 };
 
-let defaultWidth = 0;
 export const RuleList = (props: IRuleListProps) => {
     const { onClick } = props;
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
@@ -113,7 +112,6 @@ export const RuleList = (props: IRuleListProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);
-    const sidebarService = useDependency(ISidebarService);
 
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
@@ -129,9 +127,7 @@ export const RuleList = (props: IRuleListProps) => {
     const [currentRuleRanges, setCurrentRuleRanges] = useState<IRange[]>([]);
     const [selectValue, setSelectValue] = useState('2');
     const [fetchRuleListId, setFetchRuleListId] = useState(0);
-    const [draggingId, setDraggingId] = useState<number>(-1);
-    const [layoutWidth, setLayoutWidth] = useState(defaultWidth);
-    const layoutContainerRef = useRef<HTMLDivElement>(null);
+    const [draggingId, setDraggingId] = useState<string>('');
 
     const selectOption = [
         { label: localeService.t('sheet.cf.panel.workSheet'), value: '2' },
@@ -206,46 +202,6 @@ export const RuleList = (props: IRuleListProps) => {
         return () => dispose.unsubscribe();
     }, [conditionalFormattingRuleModel]);
 
-    useEffect(() => {
-        // Because univer-sidebar contains animations, accurate width values can not be obtained in real time。
-        // Also set a global width as the default width to avoid a gap before the first calculation.
-        const getWidth = () => {
-            // 8 is padding-left
-            const width = Math.max(0, (layoutContainerRef.current?.getBoundingClientRect().width ?? 0) - 8);
-            defaultWidth = width;
-            return width;
-        };
-        const observer = new Observable((subscribe) => {
-            const targetElement = sidebarService.getContainer();
-            if (targetElement) {
-                let time = setTimeout(() => {
-                    subscribe.next(undefined);
-                }, 150);
-                const clearTime = () => {
-                    time && clearTimeout(time);
-                    time = null as any;
-                };
-                const handle: any = (e: TransitionEvent) => {
-                    if (e.propertyName === 'width') {
-                        clearTime();
-                        subscribe.next(undefined);
-                    }
-                };
-                targetElement.addEventListener('transitionend', handle);
-                return () => {
-                    clearTime();
-                    targetElement.removeEventListener('transitionend', handle);
-                };
-            }
-        });
-        const subscription = observer.pipe(debounceTime(16)).subscribe(() => {
-            setLayoutWidth(getWidth());
-        });
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
-
     const handleDelete = (rule: IConditionFormattingRule) => {
         const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
         const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
@@ -256,11 +212,12 @@ export const RuleList = (props: IRuleListProps) => {
     };
 
     const handleDragStart = (_layout: unknown, from: { y: number }) => {
-        setDraggingId(from.y);
+        const dragRule = ruleListByPermissionCheck[from.y];
+        setDraggingId(dragRule?.cfId ?? '');
     };
 
     const handleDragStop = (_layout: unknown, from: { y: number }, to: { y: number }) => {
-        setDraggingId(-1);
+        setDraggingId('');
         const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
         const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
         if (!unitId || !subUnitId) {
@@ -268,11 +225,14 @@ export const RuleList = (props: IRuleListProps) => {
         }
 
         const getSaveIndex = (index: number) => {
-            const length = ruleList.length;
+            const length = ruleListByPermissionCheck.length;
             return Math.min(length - 1, Math.max(0, index));
         };
-        const cfId = ruleList[getSaveIndex(from.y)].cfId;
-        const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
+        const cfId = ruleListByPermissionCheck[getSaveIndex(from.y)]?.cfId;
+        const targetCfId = ruleListByPermissionCheck[getSaveIndex(to.y)]?.cfId;
+        if (!cfId || !targetCfId) {
+            return;
+        }
         if (cfId !== targetCfId) {
             commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommandParams);
         }
@@ -302,8 +262,6 @@ export const RuleList = (props: IRuleListProps) => {
         });
     }, [ruleList]);
 
-    const layout = ruleListByPermissionCheck.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
-
     const isHasAllRuleEditPermission = useMemo(() => {
         const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
@@ -316,7 +274,11 @@ export const RuleList = (props: IRuleListProps) => {
 
     return (
         <div>
-            <div className="univer-flex univer-items-center univer-justify-between univer-gap-2 univer-text-sm">
+            <div
+                className="
+                  univer-mb-2 univer-flex univer-items-center univer-justify-between univer-gap-2 univer-text-sm
+                "
+            >
                 <div className="univer-flex univer-items-center univer-gap-2">
                     {conditionalFormattingI18nController.tWithReactNode(
                         'sheet.cf.panel.managerRuleSelect',
@@ -328,7 +290,7 @@ export const RuleList = (props: IRuleListProps) => {
                         />
                     ).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
-                <div className="univer-flex univer-justify-end">
+                <div className="univer-flex univer-justify-end univer-space-x-2">
                     <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
                         <a
                             className="univer-size-5 univer-cursor-pointer"
@@ -358,97 +320,83 @@ export const RuleList = (props: IRuleListProps) => {
 
             </div>
 
-            <div ref={layoutContainerRef}>
-                {layoutWidth > 0 && (
-                    <ReactGridLayout
-                        className={`
-                          [&_.react-grid-item]:univer-transition-none
-                          [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
-                        `}
-                        draggableHandle=".draggableHandle"
-                        layout={layout}
-                        cols={12}
-                        rowHeight={60}
-                        width={layoutWidth}
-                        margin={[0, 10]}
-                        onDragStop={handleDragStop}
-                        onDragStart={handleDragStart}
-                    >
-                        {ruleListByPermissionCheck?.map((rule, index) => {
-                            return (
-                                <div key={`${rule.cfId}`}>
-                                    <div
-                                        className={clsx(`
-                                          univer-group univer-relative univer-flex univer-items-center
-                                          univer-justify-between univer-rounded univer-py-2 univer-pl-5 univer-pr-8
-                                          hover:univer-bg-gray-100
-                                          dark:hover:!univer-bg-gray-700
-                                        `, {
-                                            'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === index,
-                                        })}
-                                        onMouseMove={() => {
-                                            rule.ranges !== currentRuleRanges && setCurrentRuleRanges(rule.ranges);
-                                        }}
-                                        onMouseLeave={() => setCurrentRuleRanges([])}
-                                        onClick={() => {
-                                            onClick(rule);
-                                        }}
-                                    >
-                                        <div
-                                            className={clsx(`
-                                              univer-absolute univer-left-0 univer-hidden univer-size-5
-                                              univer-cursor-grab univer-items-center univer-justify-center
-                                              univer-rounded
-                                              group-hover:univer-flex
-                                            `, 'draggableHandle')}
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <SequenceIcon />
-                                        </div>
-                                        <div
-                                            className={`
-                                              univer-min-w-0 univer-max-w-full univer-flex-shrink univer-overflow-hidden
-                                            `}
-                                        >
-                                            <div
-                                                className={`
-                                                  univer-text-sm univer-text-gray-900
-                                                  dark:!univer-text-white
-                                                `}
-                                            >
-                                                {getRuleDescribe(rule, localeService)}
-                                            </div>
-                                            <div className="univer-text-xs univer-text-gray-400">
-                                                {rule.ranges.map((range) => serializeRange(range)).join(',')}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <Preview rule={rule.rule} />
-                                        </div>
-                                        <div
-                                            className={clsx(`
-                                              univer-absolute univer-right-1 univer-hidden univer-size-6
-                                              univer-cursor-pointer univer-items-center univer-justify-center
-                                              univer-rounded
-                                              group-hover:univer-flex
-                                              hover:univer-bg-gray-200
-                                            `, {
-                                                'univer-flex univer-items-center univer-justify-center': draggingId === index,
-                                            })}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(rule);
-                                                setCurrentRuleRanges([]);
-                                            }}
-                                        >
-                                            <DeleteIcon />
-                                        </div>
-                                    </div>
+            <div>
+                <DraggableList
+                    className="univer-w-full"
+                    draggableHandle=".draggableHandle"
+                    list={ruleListByPermissionCheck}
+                    onListChange={() => undefined}
+                    idKey="cfId"
+                    rowHeight={60}
+                    margin={[0, 10]}
+                    onDragStop={handleDragStop}
+                    onDragStart={handleDragStart}
+                    itemRender={(rule) => (
+                        <div
+                            className={clsx(`
+                              univer-group univer-relative univer-flex univer-items-center univer-justify-between
+                              univer-rounded univer-py-2 univer-pl-5 univer-pr-8
+                              hover:univer-bg-gray-100
+                              dark:hover:!univer-bg-gray-700
+                            `, {
+                                'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === rule.cfId,
+                            })}
+                            onMouseMove={() => {
+                                rule.ranges !== currentRuleRanges && setCurrentRuleRanges(rule.ranges);
+                            }}
+                            onMouseLeave={() => setCurrentRuleRanges([])}
+                            onClick={() => {
+                                onClick(rule);
+                            }}
+                        >
+                            <div
+                                className={clsx(`
+                                  univer-absolute univer-left-0 univer-hidden univer-size-5 univer-cursor-grab
+                                  univer-items-center univer-justify-center univer-rounded
+                                  group-hover:univer-flex
+                                `, 'draggableHandle')}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <SequenceIcon />
+                            </div>
+                            <div
+                                className="univer-min-w-0 univer-max-w-full univer-flex-shrink univer-overflow-hidden"
+                            >
+                                <div
+                                    className={`
+                                      univer-text-sm univer-text-gray-900
+                                      dark:!univer-text-white
+                                    `}
+                                >
+                                    {getRuleDescribe(rule, localeService)}
                                 </div>
-                            );
-                        })}
-                    </ReactGridLayout>
-                ) }
+                                <div className="univer-text-xs univer-text-gray-400">
+                                    {rule.ranges.map((range) => serializeRange(range)).join(',')}
+                                </div>
+                            </div>
+                            <div>
+                                <Preview rule={rule.rule} />
+                            </div>
+                            <div
+                                className={clsx(`
+                                  univer-absolute univer-right-1 univer-hidden univer-size-6 univer-cursor-pointer
+                                  univer-items-center univer-justify-center univer-rounded univer-text-red-500
+                                  group-hover:univer-flex
+                                  hover:univer-bg-gray-200
+                                `, {
+                                    'univer-flex univer-items-center univer-justify-center': draggingId === rule.cfId,
+                                })}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(rule);
+                                    setCurrentRuleRanges([]);
+                                }}
+                            >
+                                <DeleteIcon />
+                            </div>
+                        </div>
+                    )}
+                />
             </div>
         </div>
     );

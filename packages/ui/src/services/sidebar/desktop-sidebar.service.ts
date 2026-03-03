@@ -44,6 +44,9 @@ export class DesktopSidebarService implements ISidebarService {
         };
 
         this.sidebarOptions$.next(this._sidebarOptions);
+        requestAnimationFrame(() => {
+            this._sidebarOptions.onOpen && this._sidebarOptions.onOpen();
+        });
 
         return toDisposable(() => {
             this.close();

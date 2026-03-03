@@ -1,7 +1,6 @@
 packages:
     - common/*
     - examples
-    - mockdata
     - packages/*
     - tests/*
 publicHoistPattern:

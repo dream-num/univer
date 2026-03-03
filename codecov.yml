@@ -11,3 +11,257 @@ coverage:
                 if_ci_failed: error
                 informational: false
                 only_pulls: false
+
+comment:
+    layout: 'header, diff, components'
+
+component_management:
+    default_rules:
+        statuses:
+            - type: project
+              target: auto
+    individual_components:
+        - component_id: pkg_action_recorder
+          name: '@univerjs/action-recorder'
+          paths:
+              - packages/action-recorder/**
+        - component_id: pkg_core
+          name: '@univerjs/core'
+          paths:
+              - packages/core/**
+        - component_id: pkg_data_validation
+          name: '@univerjs/data-validation'
+          paths:
+              - packages/data-validation/**
+        - component_id: pkg_design
+          name: '@univerjs/design'
+          paths:
+              - packages/design/**
+        - component_id: pkg_docs
+          name: '@univerjs/docs'
+          paths:
+              - packages/docs/**
+        - component_id: pkg_docs_drawing
+          name: '@univerjs/docs-drawing'
+          paths:
+              - packages/docs-drawing/**
+        - component_id: pkg_docs_drawing_ui
+          name: '@univerjs/docs-drawing-ui'
+          paths:
+              - packages/docs-drawing-ui/**
+        - component_id: pkg_docs_hyper_link
+          name: '@univerjs/docs-hyper-link'
+          paths:
+              - packages/docs-hyper-link/**
+        - component_id: pkg_docs_hyper_link_ui
+          name: '@univerjs/docs-hyper-link-ui'
+          paths:
+              - packages/docs-hyper-link-ui/**
+        - component_id: pkg_docs_mention_ui
+          name: '@univerjs/docs-mention-ui'
+          paths:
+              - packages/docs-mention-ui/**
+        - component_id: pkg_docs_quick_insert_ui
+          name: '@univerjs/docs-quick-insert-ui'
+          paths:
+              - packages/docs-quick-insert-ui/**
+        - component_id: pkg_docs_thread_comment_ui
+          name: '@univerjs/docs-thread-comment-ui'
+          paths:
+              - packages/docs-thread-comment-ui/**
+        - component_id: pkg_docs_ui
+          name: '@univerjs/docs-ui'
+          paths:
+              - packages/docs-ui/**
+        - component_id: pkg_drawing
+          name: '@univerjs/drawing'
+          paths:
+              - packages/drawing/**
+        - component_id: pkg_drawing_ui
+          name: '@univerjs/drawing-ui'
+          paths:
+              - packages/drawing-ui/**
+        - component_id: pkg_engine_formula
+          name: '@univerjs/engine-formula'
+          paths:
+              - packages/engine-formula/**
+        - component_id: pkg_engine_render
+          name: '@univerjs/engine-render'
+          paths:
+              - packages/engine-render/**
+        - component_id: pkg_find_replace
+          name: '@univerjs/find-replace'
+          paths:
+              - packages/find-replace/**
+        - component_id: pkg_network
+          name: '@univerjs/network'
+          paths:
+              - packages/network/**
+        - component_id: pkg_presets
+          name: packages/presets
+          paths:
+              - packages/presets/**
+        - component_id: pkg_rpc
+          name: '@univerjs/rpc'
+          paths:
+              - packages/rpc/**
+        - component_id: pkg_rpc_node
+          name: '@univerjs/rpc-node'
+          paths:
+              - packages/rpc-node/**
+        - component_id: pkg_sheets
+          name: '@univerjs/sheets'
+          paths:
+              - packages/sheets/**
+        - component_id: pkg_sheets_conditional_formatting
+          name: '@univerjs/sheets-conditional-formatting'
+          paths:
+              - packages/sheets-conditional-formatting/**
+        - component_id: pkg_sheets_conditional_formatting_ui
+          name: '@univerjs/sheets-conditional-formatting-ui'
+          paths:
+              - packages/sheets-conditional-formatting-ui/**
+        - component_id: pkg_sheets_crosshair_highlight
+          name: '@univerjs/sheets-crosshair-highlight'
+          paths:
+              - packages/sheets-crosshair-highlight/**
+        - component_id: pkg_sheets_data_validation
+          name: '@univerjs/sheets-data-validation'
+          paths:
+              - packages/sheets-data-validation/**
+        - component_id: pkg_sheets_data_validation_ui
+          name: '@univerjs/sheets-data-validation-ui'
+          paths:
+              - packages/sheets-data-validation-ui/**
+        - component_id: pkg_sheets_drawing
+          name: '@univerjs/sheets-drawing'
+          paths:
+              - packages/sheets-drawing/**
+        - component_id: pkg_sheets_drawing_ui
+          name: '@univerjs/sheets-drawing-ui'
+          paths:
+              - packages/sheets-drawing-ui/**
+        - component_id: pkg_sheets_filter
+          name: '@univerjs/sheets-filter'
+          paths:
+              - packages/sheets-filter/**
+        - component_id: pkg_sheets_filter_ui
+          name: '@univerjs/sheets-filter-ui'
+          paths:
+              - packages/sheets-filter-ui/**
+        - component_id: pkg_sheets_find_replace
+          name: '@univerjs/sheets-find-replace'
+          paths:
+              - packages/sheets-find-replace/**
+        - component_id: pkg_sheets_formula
+          name: '@univerjs/sheets-formula'
+          paths:
+              - packages/sheets-formula/**
+        - component_id: pkg_sheets_formula_ui
+          name: '@univerjs/sheets-formula-ui'
+          paths:
+              - packages/sheets-formula-ui/**
+        - component_id: pkg_sheets_graphics
+          name: '@univerjs/sheets-graphics'
+          paths:
+              - packages/sheets-graphics/**
+        - component_id: pkg_sheets_hyper_link
+          name: '@univerjs/sheets-hyper-link'
+          paths:
+              - packages/sheets-hyper-link/**
+        - component_id: pkg_sheets_hyper_link_ui
+          name: '@univerjs/sheets-hyper-link-ui'
+          paths:
+              - packages/sheets-hyper-link-ui/**
+        - component_id: pkg_sheets_note
+          name: '@univerjs/sheets-note'
+          paths:
+              - packages/sheets-note/**
+        - component_id: pkg_sheets_note_ui
+          name: '@univerjs/sheets-note-ui'
+          paths:
+              - packages/sheets-note-ui/**
+        - component_id: pkg_sheets_numfmt
+          name: '@univerjs/sheets-numfmt'
+          paths:
+              - packages/sheets-numfmt/**
+        - component_id: pkg_sheets_numfmt_ui
+          name: '@univerjs/sheets-numfmt-ui'
+          paths:
+              - packages/sheets-numfmt-ui/**
+        - component_id: pkg_sheets_sort
+          name: '@univerjs/sheets-sort'
+          paths:
+              - packages/sheets-sort/**
+        - component_id: pkg_sheets_sort_ui
+          name: '@univerjs/sheets-sort-ui'
+          paths:
+              - packages/sheets-sort-ui/**
+        - component_id: pkg_sheets_table
+          name: '@univerjs/sheets-table'
+          paths:
+              - packages/sheets-table/**
+        - component_id: pkg_sheets_table_ui
+          name: '@univerjs/sheets-table-ui'
+          paths:
+              - packages/sheets-table-ui/**
+        - component_id: pkg_sheets_thread_comment
+          name: '@univerjs/sheets-thread-comment'
+          paths:
+              - packages/sheets-thread-comment/**
+        - component_id: pkg_sheets_thread_comment_ui
+          name: '@univerjs/sheets-thread-comment-ui'
+          paths:
+              - packages/sheets-thread-comment-ui/**
+        - component_id: pkg_sheets_ui
+          name: '@univerjs/sheets-ui'
+          paths:
+              - packages/sheets-ui/**
+        - component_id: pkg_sheets_zen_editor
+          name: '@univerjs/sheets-zen-editor'
+          paths:
+              - packages/sheets-zen-editor/**
+        - component_id: pkg_slides
+          name: '@univerjs/slides'
+          paths:
+              - packages/slides/**
+        - component_id: pkg_slides_ui
+          name: '@univerjs/slides-ui'
+          paths:
+              - packages/slides-ui/**
+        - component_id: pkg_telemetry
+          name: '@univerjs/telemetry'
+          paths:
+              - packages/telemetry/**
+        - component_id: pkg_themes
+          name: '@univerjs/themes'
+          paths:
+              - packages/themes/**
+        - component_id: pkg_thread_comment
+          name: '@univerjs/thread-comment'
+          paths:
+              - packages/thread-comment/**
+        - component_id: pkg_thread_comment_ui
+          name: '@univerjs/thread-comment-ui'
+          paths:
+              - packages/thread-comment-ui/**
+        - component_id: pkg_ui
+          name: '@univerjs/ui'
+          paths:
+              - packages/ui/**
+        - component_id: pkg_ui_adapter_vue3
+          name: '@univerjs/ui-adapter-vue3'
+          paths:
+              - packages/ui-adapter-vue3/**
+        - component_id: pkg_ui_adapter_web_component
+          name: '@univerjs/ui-adapter-web-component'
+          paths:
+              - packages/ui-adapter-web-component/**
+        - component_id: pkg_uniscript
+          name: '@univerjs/uniscript'
+          paths:
+              - packages/uniscript/**
+        - component_id: pkg_watermark
+          name: '@univerjs/watermark'
+          paths:
+              - packages/watermark/**

@@ -30,7 +30,7 @@ To better assist you, we recommend:
 
 ### Install dependencies
 
-Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
+Univer requires Node.js >= 20. We recommend using nvm or fnm to switch between different versions of Node.js.
 
 ```shell
 git clone https://github.com/dream-num/univer
@@ -41,7 +41,6 @@ npm i -g pnpm
 
 # install dependencies
 pnpm install
-
 ```
 
 ### Start dev server
@@ -60,12 +59,12 @@ The structure of the repository is as follows:
 
 ```txt
 .
-├── common/ shared configuration and utilities
-├── docs/ documentation
-├── e2e/ e2e test cases
-├── examples/ demos running on the web
-├── mockdata/ mock data for development
-├── packages/ Univer core and plugins
+|- common/ shared configuration and utilities
+  |- mockdata/ mock data for development
+|- docs/ documentation
+|- e2e/ e2e test cases
+|- examples/ demos running on the web
+|- packages/ Univer core and plugins
 ```
 
 The file structure of a plugin should be organized as follows:

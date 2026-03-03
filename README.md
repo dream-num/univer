@@ -18,6 +18,9 @@ An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets Across 
 [![][github-forks-shield]][github-forks-link]
 [![][github-issues-shield]][github-issues-link]
 [![][codecov-shield]][codecov-link]
+[![][codecov-core-shield]][codecov-link]
+[![][codecov-ui-shield]][codecov-link]
+[![][codecov-sheets-shield]][codecov-link]
 [![][codefactor-shield]][codefactor-link]
 [![][discord-shield]][discord-link]
 
@@ -231,6 +234,9 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [github-issues-link]: https://github.com/dream-num/univer/issues
 [github-issues-shield]: https://img.shields.io/github/issues/dream-num/univer?style=flat-square
 [codecov-shield]: https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&style=flat-square
+[codecov-core-shield]: https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&component=pkg_core&style=flat-square&label=coverage-core
+[codecov-ui-shield]: https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&component=pkg_ui&style=flat-square&label=coverage-ui
+[codecov-sheets-shield]: https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&component=pkg_sheets&style=flat-square&label=coverage-sheets
 [codecov-link]: https://codecov.io/gh/dream-num/univer
 [codefactor-shield]: https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat-square
 [codefactor-link]: https://www.codefactor.io/repository/github/dream-num/univer/overview/dev

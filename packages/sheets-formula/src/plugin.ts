@@ -131,6 +131,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ImageFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
+            [FormulaAutoFillController],
         ]);
 
         // There is no rendering in the nodejs environment, so initialize it here
@@ -145,7 +146,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         touchDependencies(this._injector, [
             [DefinedNameController],
             [SuperTableController],
-            [FormulaAutoFillController],
         ]);
 
         // Wait for rendering to complete before initializing formula calculation

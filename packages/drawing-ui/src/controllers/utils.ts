@@ -27,6 +27,7 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
         return;
     }
 
+   
     const groupKey = getDrawingShapeKeyByDrawingSearch(objectParam);
     const groupObject = scene.getObject(groupKey);
 
@@ -35,6 +36,12 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     }
 
     if (groupObject != null) {
+        const objects = groupObject.getObjects();
+        for(const obj of objects) {
+            if (obj.oKey === object.oKey) {
+                return;
+            }
+        }
         groupObject.addObject(object);
         return;
     }
@@ -56,6 +63,8 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
             left: transform.left,
             top: transform.top,
             angle: transform.angle,
+            width: transform.width,
+            height: transform.height,
         }
     );
 }

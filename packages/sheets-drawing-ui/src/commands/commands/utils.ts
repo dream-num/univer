@@ -36,8 +36,8 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
                 drawingId,
                 transform: {
                     ...transform,
-                    left: transform.left! - groupTransform.left,
-                    top: transform.top! - groupTransform.top,
+                    left: transform.left!,
+                    top: transform.top!,
                 },
                 groupId,
             };
@@ -48,6 +48,7 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
             subUnitId,
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            groupBaseBound: { ...parent.groupBaseBound },
             transform: groupTransform,
         } as IDrawingParam;
 

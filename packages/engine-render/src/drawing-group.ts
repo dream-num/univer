@@ -19,8 +19,11 @@ import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
 import { getDrawingGroupState, RENDER_CLASS_TYPE, Transform } from './basics';
 import { Group } from './group';
+import { BaseObject } from './base-object';
 
 export class DrawingGroupObject extends Group {
+
+    protected override _selfSizeMode: boolean = true;
     /**
      * Corresponds to chOff (child offset) and chExt (child extent) in OOXML.
      * Describes the coordinate space of children within this group.
@@ -99,6 +102,12 @@ export class DrawingGroupObject extends Group {
         }
 
         ctx.restore();
+    }
+
+    override addObjects(...objects: BaseObject[]) {
+        for (const object of objects) {
+            this.addObject(object);
+        }
     }
 
     override isHit(coord: Vector2): boolean {

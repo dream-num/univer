@@ -80,8 +80,8 @@ export function transformObjectOutOfGroup(child: ITransformState, parent: ITrans
     const groupCenterX = groupLeft + groupOriginWidth / 2;
     const groupCenterY = groupTop + groupOriginHeight / 2;
 
-    const objectX = left + groupLeft;
-    const objectY = top + groupTop;
+    const objectX = left;
+    const objectY = top;
 
     const objectCenterX = objectX + width / 2;
     const objectCenterY = objectY + height / 2;

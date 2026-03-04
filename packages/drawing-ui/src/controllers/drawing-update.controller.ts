@@ -238,7 +238,7 @@ export class DrawingUpdateController extends Disposable {
             group.setBaseBound(parent.groupBaseBound);
         }
         // group.reCalculateObjects();
-        parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top });
+        parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top, width: parent.transform.width, height: parent.transform.height, angle: parent.transform.angle });
 
         transformer.clearSelectedObjects();
         transformer.setSelectedControl(group);

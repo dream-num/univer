@@ -121,10 +121,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         }
 
         dependencies.forEach((dependency) => j.add(dependency));
-
-        touchDependencies(this._injector, [
-            [FormulaAutoFillController],
-        ]);
     }
 
     override onReady(): void {
@@ -135,6 +131,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ImageFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
+            [FormulaAutoFillController],
         ]);
 
         // There is no rendering in the nodejs environment, so initialize it here

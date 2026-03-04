@@ -16,9 +16,9 @@
 
 export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
 export { QuickSumCommand } from './commands/commands/quick-sum.command';
-
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './controllers/config.schema';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
+export { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 export { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
@@ -26,7 +26,6 @@ export { UpdateFormulaController } from './controllers/update-formula.controller
 export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './plugin';
 export { DescriptionService, IDescriptionService } from './services/description.service';
 export type { ISearchItem, ISearchItemWithType } from './services/description.service';
-
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export type { IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams } from './services/register-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';

@@ -21,6 +21,9 @@ import { Disposable, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
+const DEFAULT_ROW_HEADER_WIDTH = 15;
+const DEFAULT_COL_HEADER_HEIGTH = 15;
+
 export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -58,8 +61,8 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
         if (!worksheet) return;
 
         scene?.transformByState({
-            width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
-            height: columnHeaderHeightAndMarginTop + rowTotalHeight,
+            width: (rowHeaderWidthAndMarginLeft || DEFAULT_ROW_HEADER_WIDTH) + columnTotalWidth,
+            height: (columnHeaderHeightAndMarginTop || DEFAULT_COL_HEADER_HEIGTH) + rowTotalHeight,
         });
     }
 }

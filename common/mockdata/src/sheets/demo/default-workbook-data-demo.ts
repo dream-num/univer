@@ -24286,6 +24286,36 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             rightToLeft: BooleanNumber.FALSE,
         },
+        'sheet-0012': {
+            id: 'sheet-0012',
+            cellData: {
+                0: {
+                    19: {
+                        v: 'Division of Project',
+                    },
+                },
+                79: {
+                    0: {
+                        v: 'A Schedule of Items',
+                    },
+                },
+            },
+            name: 'hide header',
+            hidden: BooleanNumber.FALSE,
+            columnCount: 20,
+            rowCount: 80,
+            zoomRatio: 1,
+            showGridlines: 1,
+            rowHeader: {
+                width: 46,
+                hidden: BooleanNumber.TRUE,
+            },
+            columnHeader: {
+                height: 20,
+                hidden: BooleanNumber.TRUE,
+            },
+            rightToLeft: BooleanNumber.FALSE,
+        },
         // 'sheet-0011': {
         //     id: 'sheet-0011',
         //     name: 'sheet11',

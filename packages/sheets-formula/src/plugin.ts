@@ -121,6 +121,10 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         }
 
         dependencies.forEach((dependency) => j.add(dependency));
+
+        touchDependencies(this._injector, [
+            [FormulaAutoFillController],
+        ]);
     }
 
     override onReady(): void {
@@ -145,7 +149,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         touchDependencies(this._injector, [
             [DefinedNameController],
             [SuperTableController],
-            [FormulaAutoFillController],
         ]);
 
         // Wait for rendering to complete before initializing formula calculation

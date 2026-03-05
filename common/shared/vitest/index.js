@@ -29,6 +29,7 @@ function createConfig(options) {
                 reporter: ['html', 'json'],
                 provider: 'custom',
                 customProviderModule: require.resolve('@vitest/coverage-istanbul'),
+                include: ['src/**/*.{ts,tsx}'],
                 exclude: [
                     'coverage/**',
                     'dist/**',

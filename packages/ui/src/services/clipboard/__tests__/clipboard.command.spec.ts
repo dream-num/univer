@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IAccessor, IContextService } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from '../clipboard.command';
@@ -34,13 +35,16 @@ describe('clipboard commands', () => {
     });
 
     it('should return fixed command behavior and short key name', async () => {
-        expect(CopyCommand.preconditions()).toBe(false);
-        expect(CutCommand.preconditions()).toBe(false);
-        expect(PasteCommand.preconditions()).toBe(false);
+        const contextService = {} as IContextService;
+        const accessor = {} as IAccessor;
 
-        expect(CopyCommand.handler()).toBe(true);
-        await expect(CutCommand.handler()).resolves.toBe(true);
-        expect(PasteCommand.handler()).toBe(true);
+        expect(CopyCommand.preconditions!(contextService)).toBe(false);
+        expect(CutCommand.preconditions!(contextService)).toBe(false);
+        expect(PasteCommand.preconditions!(contextService)).toBe(false);
+
+        expect(CopyCommand.handler(accessor)).toBe(true);
+        await expect(CutCommand.handler(accessor)).resolves.toBe(true);
+        expect(PasteCommand.handler(accessor)).toBe(true);
 
         expect(SheetPasteShortKeyCommandName).toBe('sheet.command.paste-by-short-key');
     });

@@ -47,7 +47,7 @@ describe('ToggleShortcutPanelOperation', () => {
     it('should close shortcut panel and sidebar when panel is open', () => {
         const { accessor, shortcutPanelService, sidebarService } = createAccessor(true);
 
-        expect(ToggleShortcutPanelOperation.handler!(accessor)).toBe(true);
+        expect(ToggleShortcutPanelOperation.handler!(accessor, {})).toBe(true);
         expect(shortcutPanelService.close).toHaveBeenCalledOnce();
         expect(sidebarService.close).toHaveBeenCalledOnce();
         expect(sidebarService.open).not.toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe('ToggleShortcutPanelOperation', () => {
     it('should open shortcut panel and sidebar when panel is closed', () => {
         const { accessor, shortcutPanelService, sidebarService } = createAccessor(false);
 
-        expect(ToggleShortcutPanelOperation.handler!(accessor)).toBe(true);
+        expect(ToggleShortcutPanelOperation.handler!(accessor, {})).toBe(true);
         expect(shortcutPanelService.open).toHaveBeenCalledOnce();
         expect(sidebarService.open).toHaveBeenCalledWith({
             header: { title: 'shortcut-panel.title' },

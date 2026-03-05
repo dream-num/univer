@@ -950,23 +950,23 @@ export class ArrayValueObject extends BaseValueObject {
         // return NumberValueObject.create(1).divided(this);
     }
 
-    override plus(valueObject: BaseValueObject): BaseValueObject {
+    override plus(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.PLUS);
     }
 
-    override minus(valueObject: BaseValueObject): BaseValueObject {
+    override minus(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.MINUS);
     }
 
-    override multiply(valueObject: BaseValueObject): BaseValueObject {
+    override multiply(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.MULTIPLY);
     }
 
-    override divided(valueObject: BaseValueObject): BaseValueObject {
+    override divided(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.DIVIDED);
     }
 
-    override mod(valueObject: BaseValueObject): BaseValueObject {
+    override mod(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.MOD);
     }
 
@@ -979,15 +979,15 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive?: boolean): BaseValueObject {
+    override compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive?: boolean): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator, isCaseSensitive);
     }
 
-    override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
+    override concatenateFront(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_FRONT);
     }
 
-    override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
+    override concatenateBack(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
     }
 
@@ -1006,7 +1006,7 @@ export class ArrayValueObject extends BaseValueObject {
         return this.mapValue(wrappedCallbackFn);
     }
 
-    override mapValue(callbackFn: callbackMapFnType): BaseValueObject {
+    override mapValue(callbackFn: callbackMapFnType): ArrayValueObject {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
@@ -1035,7 +1035,7 @@ export class ArrayValueObject extends BaseValueObject {
         return this._createNewArray(result, rowCount, columnCount);
     }
 
-    override pow(valueObject: BaseValueObject): BaseValueObject {
+    override pow(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.POW);
     }
 
@@ -1179,7 +1179,7 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override atan2(valueObject: BaseValueObject): BaseValueObject {
+    override atan2(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.ATAN2);
     }
 
@@ -1336,7 +1336,7 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override round(valueObject: BaseValueObject): BaseValueObject {
+    override round(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.ROUND);
     }
 
@@ -1349,7 +1349,7 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override floor(valueObject: BaseValueObject): BaseValueObject {
+    override floor(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.FLOOR);
     }
 
@@ -1362,7 +1362,7 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override ceil(valueObject: BaseValueObject): BaseValueObject {
+    override ceil(valueObject: BaseValueObject): ArrayValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CEIL);
     }
 
@@ -1440,7 +1440,7 @@ export class ArrayValueObject extends BaseValueObject {
         batchOperatorType: BatchOperatorType,
         operator?: compareToken,
         isCaseSensitive?: boolean
-    ): BaseValueObject {
+    ): ArrayValueObject {
         const valueList: BaseValueObject[] = [];
 
         let rowCount = this._rowCount;
@@ -1755,7 +1755,7 @@ export class ArrayValueObject extends BaseValueObject {
         batchOperatorType: BatchOperatorType,
         operator?: compareToken,
         isCaseSensitive?: boolean
-    ) {
+    ): ArrayValueObject {
         let rowCount = (valueObject as ArrayValueObject).getRowCount();
         let columnCount = (valueObject as ArrayValueObject).getColumnCount();
 
@@ -1970,7 +1970,9 @@ export class ValueObjectFactory {
             if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
                 return createBooleanValueObjectByRawValue(rawValue);
             }
-            if (isRealNum(rawValue)) {
+
+            // "000123456" should be treated as string, not number, but "123456" should be treated as number
+            if (isRealNum(rawValue) && Number(rawValue).toString() === rawValue.trim()) {
                 return NumberValueObject.create(Number(rawValue));
             }
 

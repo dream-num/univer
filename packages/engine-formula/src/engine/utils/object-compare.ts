@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { compareToken } from '../../basics/token';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import { ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { compareToken } from '../../basics/token';
+import { ValueObjectFactory } from '../value-object/array-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 
@@ -66,15 +66,23 @@ export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueOb
 
 /**
  * Find the Boolean intersection of two ArrayValueObjects
- * @param valueObject1
- * @param valueObject2
  */
-export function booleanObjectIntersection(valueObject1: BaseValueObject, valueObject2: BaseValueObject) {
-    const maxRowLength = Math.max(valueObject1.isArray() ? (valueObject1 as ArrayValueObject).getRowCount() : 1, valueObject2.isArray() ? (valueObject2 as ArrayValueObject).getRowCount() : 1);
-    const maxColumnLength = Math.max(valueObject1.isArray() ? (valueObject1 as ArrayValueObject).getColumnCount() : 1, valueObject2.isArray() ? (valueObject2 as ArrayValueObject).getColumnCount() : 1);
+export function booleanObjectIntersection(valueObject1: ArrayValueObject, valueObject2: ArrayValueObject): ArrayValueObject {
+    const valueObject1RowCount = valueObject1.getRowCount();
+    const valueObject1ColumnCount = valueObject1.getColumnCount();
+    const valueObject2RowCount = valueObject2.getRowCount();
+    const valueObject2ColumnCount = valueObject2.getColumnCount();
 
-    const valueObject1Array = expandArrayValueObject(maxRowLength, maxColumnLength, valueObject1);
-    const valueObject2Array = expandArrayValueObject(maxRowLength, maxColumnLength, valueObject2);
+    let valueObject1Array = valueObject1;
+    let valueObject2Array = valueObject2;
+
+    if (valueObject1RowCount !== valueObject2RowCount || valueObject1ColumnCount !== valueObject2ColumnCount) {
+        const maxRowLength = Math.max(valueObject1RowCount, valueObject2RowCount);
+        const maxColumnLength = Math.max(valueObject1ColumnCount, valueObject2ColumnCount);
+
+        valueObject1Array = expandArrayValueObject(maxRowLength, maxColumnLength, valueObject1);
+        valueObject2Array = expandArrayValueObject(maxRowLength, maxColumnLength, valueObject2);
+    }
 
     return valueObject1Array.mapValue((valueObject1, rowIndex, columnIndex) => {
         const valueObject2 = valueObject2Array.get(rowIndex, columnIndex);

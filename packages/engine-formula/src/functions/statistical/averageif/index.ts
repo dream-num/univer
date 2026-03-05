@@ -57,10 +57,10 @@ export class Averageif extends BaseFunction {
     private _handleSingleObject(range: FunctionVariantType, criteria: BaseValueObject, averageRange?: FunctionVariantType): BaseValueObject {
         const _range = (range as BaseReferenceObject).toArrayValueObject();
 
-        let resultArrayObject = valueObjectCompare(_range, criteria);
+        let resultArrayObject = valueObjectCompare(_range, criteria) as ArrayValueObject;
 
         // When comparing non-numbers and numbers, it does not take the result
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteria);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject, _range, criteria);
 
         const rangeRowCount = _range.getRowCount();
         const rangeColumnCount = _range.getColumnCount();
@@ -87,7 +87,7 @@ export class Averageif extends BaseFunction {
             }
         }
 
-        const picked = _averageRange.pick(resultArrayObject as ArrayValueObject);
+        const picked = _averageRange.pick(resultArrayObject);
         const sum = picked.sum();
         const count = picked.count();
         return sum.divided(count);

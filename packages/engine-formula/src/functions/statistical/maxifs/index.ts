@@ -18,7 +18,7 @@ import type { FunctionVariantType } from '../../../engine/reference-object/base-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { getBooleanResults, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
+import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -53,21 +53,12 @@ export class Maxifs extends BaseFunction {
             return expandArrayValueObject(criteriaMaxRowLength, criteriaMaxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        const booleanResults = getBooleanResults(_variants, criteriaMaxRowLength, criteriaMaxColumnLength, true);
-
-        return this._aggregateResults(_maxRange as BaseValueObject, booleanResults);
-    }
-
-    private _aggregateResults(maxRange: BaseValueObject, booleanResults: BaseValueObject[][]): BaseValueObject {
-        const results = booleanResults.map((row) => {
-            return row.map((booleanResult) => {
-                const picked = (maxRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
-                if (picked.getColumnCount() === 0) {
-                    return ArrayValueObject.create('0');
-                }
-
-                return picked.max();
-            });
+        const results = getPairedRangeAndCriteriaResult(_variants, {
+            formulaName: 'MAXIFS',
+            maxRowLength: criteriaMaxRowLength,
+            maxColumnLength: criteriaMaxColumnLength,
+            isNumberSensitive: true,
+            targetRange: _maxRange as ArrayValueObject,
         });
 
         if (results.length === 1 && results[0].length === 1) {

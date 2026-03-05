@@ -15,10 +15,9 @@
  */
 
 import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { getBooleanResults, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
+import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -53,16 +52,12 @@ export class Sumifs extends BaseFunction {
             return expandArrayValueObject(criteriaMaxRowLength, criteriaMaxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        const booleanResults = getBooleanResults(_variants, criteriaMaxRowLength, criteriaMaxColumnLength, true);
-
-        return this._aggregateResults(_sumRange as BaseValueObject, booleanResults);
-    }
-
-    private _aggregateResults(sumRange: BaseValueObject, booleanResults: BaseValueObject[][]): BaseValueObject {
-        const results = booleanResults.map((row) => {
-            return row.map((booleanResult) => {
-                return (sumRange as ArrayValueObject).pick(booleanResult as ArrayValueObject).sum();
-            });
+        const results = getPairedRangeAndCriteriaResult(_variants, {
+            formulaName: 'SUMIFS',
+            maxRowLength: criteriaMaxRowLength,
+            maxColumnLength: criteriaMaxColumnLength,
+            isNumberSensitive: true,
+            targetRange: _sumRange as ArrayValueObject,
         });
 
         if (results.length === 1 && results[0].length === 1) {

@@ -28,6 +28,21 @@ import {
 } from '../cell';
 
 describe('cell utils', () => {
+    it('should handle div wrapper and mixed text nodes when converting dom', () => {
+        const wrapped = document.createElement('div');
+        wrapped.innerHTML = '<div><span style="font-weight:bold">A</span></div>';
+        const wrappedData = handleDomToJson(wrapped);
+        expect(typeof wrappedData).toBe('object');
+
+        const mixed = document.createElement('div');
+        const text = document.createTextNode('mixed-text');
+        mixed.appendChild(text);
+        mixed.appendChild(document.createElement('span'));
+
+        const mixedData = handleDomToJson(mixed);
+        expect(typeof mixedData).toBe('object');
+    });
+
     it('should convert simple dom nodes to plain string', () => {
         const empty = document.createElement('div');
         empty.textContent = 'plain';
@@ -114,6 +129,54 @@ describe('cell utils', () => {
         expect(largeStyle.ht).toBe(3);
     });
 
+    it('should parse additional style branches and clean empty border objects', () => {
+        const style = handleStringToStyle(
+            undefined,
+            [
+                'font-weight:normal',
+                'font-style:normal',
+                'text-decoration-line:line-through',
+                'text-decoration-color:#112233',
+                'text-decoration-style:3',
+                'text-decoration-line:overline',
+                'text-decoration-color:#445566',
+                'text-decoration-style:2',
+                'text-decoration:overline solid',
+                'vertical-align:top',
+                'vertical-align:middle',
+                'vertical-align:bottom',
+                'vertical-align:baseline',
+                'text-align:left',
+                'text-align:justify',
+                'text-align:inherit',
+                'text-break:overflow',
+                'white-space:normal',
+                'white-space:clip',
+                'border-color:rgb(1,1,1) rgb(2,2,2) rgb(3,3,3) rgb(4,4,4)',
+                'border-width:1px 2px 3px 4px',
+                'border-style:solid dashed dotted double',
+                'border-top:1px solid #123456',
+                'border-left:1px solid #654321',
+                'border-right:1px solid #abcdef',
+                '--data-rotate:(-12deg)',
+            ].join(';')
+        );
+
+        expect(style.bl).toBe(0);
+        expect(style.it).toBe(0);
+        expect(style.st?.s).toBe(1);
+        expect(style.ol?.s).toBe(1);
+        expect(style.vt).toBe(3);
+        expect(style.va).toBeDefined();
+        expect(style.ht).toBe(0);
+        expect(style.tb).toBe(2);
+        expect(style.bd).toBeDefined();
+        expect(style.tr).toEqual({ a: -12 });
+
+        const borderNone = handleStringToStyle(undefined, 'border:none;');
+        expect(borderNone.bd).toBeUndefined();
+    });
+
     it('should split span text with newline handling', () => {
         expect(splitSpanText('')).toEqual(['']);
         expect(splitSpanText('a\nb')).toEqual(['a', '\r\nb']);
@@ -127,6 +190,12 @@ describe('cell utils', () => {
         );
         expect(widths.length).toBe(4);
         expect(widths[0]).toBe(100);
+    });
+
+    it('should parse table colgroup width fallback and empty row groups', () => {
+        const widths = handleTableColgroup('<table><colgroup><col/></colgroup><tr><td>A</td></tr></table>');
+        expect(widths).toEqual([72]);
+        expect(handleTableRowGroup('<table></table>')).toEqual([]);
     });
 
     it('should parse table row heights', () => {
@@ -148,11 +217,26 @@ describe('cell utils', () => {
         expect(table[1][0]).toEqual({ mc: null });
     });
 
+    it('should handle empty and irregular tables', () => {
+        expect(handelTableToJson('<table></table>')).toEqual([]);
+
+        const irregular = handelTableToJson(
+            '<table><tr><td>A</td></tr><tr><td>B</td><td>C</td></tr></table>'
+        );
+        expect(irregular.length).toBe(2);
+        expect(irregular[1][0].v).toBe('B');
+    });
+
     it('should parse plain text grid and drop broken rows', () => {
         const plain = handlePlainToJson('A\tB\nC\tD\nE');
         expect(plain.length).toBe(2);
         expect(plain[0][0].v).toBe('A');
         expect(plain[1][1].m).toBe('D');
+    });
+
+    it('should map empty plain cells to null', () => {
+        const plain = handlePlainToJson('A\t\nB\tC');
+        expect(plain[0][1]).toBeNull();
     });
 
     it('should extract merge ranges and normalize merged placeholder cells', () => {
@@ -204,5 +288,24 @@ describe('cell utils', () => {
 
     it('should return undefined when excel html has no style block', () => {
         expect(handelExcelToJson('<html><table><tr><td>A</td></tr></table></html>')).toBeUndefined();
+    });
+
+    it('should handle excel html with style but no row and irregular columns', () => {
+        expect(handelExcelToJson('<html><style>.x{font-weight:bold;}</style><table></table></html>')).toEqual([]);
+
+        const irregular = handelExcelToJson(`
+            <html>
+                <style>
+                    .x { font-weight: bold; }
+                </style>
+                <table>
+                    <tr><td class=\"x\">A</td></tr>
+                    <tr><td>B</td><td>C</td></tr>
+                </table>
+            </html>
+        `);
+
+        expect(irregular?.[0][0].v).toBe('A');
+        expect(irregular?.[1][0].v).toBe('B');
     });
 });

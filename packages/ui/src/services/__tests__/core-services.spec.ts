@@ -74,12 +74,13 @@ describe('MenuManagerService', () => {
         const historyMenu = service.getMenuByPositionKey(RibbonStartGroup.HISTORY);
         const flatHistory = service.getFlatMenuByPositionKey(RibbonStartGroup.HISTORY);
         const customRoot = service.getMenuByPositionKey('customRoot');
+        const mergedCustomItem = flatHistory.find((item) => item.item?.id === 'customItem');
 
         expect(changed).toHaveBeenCalled();
         expect(invoke).toHaveBeenCalled();
         expect(historyMenu.length).toBeGreaterThan(0);
         expect(flatHistory.length).toBeGreaterThanOrEqual(historyMenu.length);
-        expect(historyMenu[0].children?.[0].item?.tooltip).toBe('tooltip-from-config');
+        expect(mergedCustomItem?.item?.tooltip).toBe('tooltip-from-config');
         expect(customRoot.length).toBe(1);
 
         const complete = vi.fn();

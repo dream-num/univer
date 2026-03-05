@@ -669,6 +669,9 @@ importers:
       monaco-editor:
         specifier: 0.55.1
         version: 0.55.1
+      opentype.js:
+        specifier: ^1.3.4
+        version: 1.3.4
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -710,8 +713,8 @@ importers:
         specifier: ^1.6.3
         version: 1.6.3
       fs-extra:
-        specifier: ^11.3.3
-        version: 11.3.3
+        specifier: ^11.3.4
+        version: 11.3.4
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -1460,13 +1463,10 @@ importers:
       franc-min:
         specifier: ^6.2.0
         version: 6.2.0
-      opentype.js:
-        specifier: ^1.3.4
-        version: 1.3.4
     devDependencies:
       '@types/opentype.js':
-        specifier: ^1.3.8
-        version: 1.3.8
+        specifier: ^1.3.9
+        version: 1.3.9
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1485,6 +1485,10 @@ importers:
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+    optionalDependencies:
+      opentype.js:
+        specifier: ^1.3.4
+        version: 1.3.4
 
   packages/find-replace:
     dependencies:
@@ -5864,8 +5868,8 @@ packages:
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
-  '@types/opentype.js@1.3.8':
-    resolution: {integrity: sha512-H6qeTp03jrknklSn4bpT1/9+1xCAEIU2CnjcWPkicJy8A1SKuthanbvoHYMiv79/2W3Xn1XE4gfSJFzt2U3JSw==}
+  '@types/opentype.js@1.3.9':
+    resolution: {integrity: sha512-KOGywvDPncA4/tTWV5xKNhjpsoSSAHIx3mHOhL5l3XX+c6Xu2dQnHvGs7mRNQsQRte1EqmQ0cPQQ8Z14lkv+yw==}
 
   '@types/parse-path@7.1.0':
     resolution: {integrity: sha512-EULJ8LApcVEPbrfND0cRQqutIOdiIgJ1Mgrhpy755r14xMohPTEpkV/k28SJvuOs9bHRFW8x+KeDAEPiGQPB9Q==}
@@ -13727,7 +13731,7 @@ snapshots:
 
   '@types/normalize-package-data@2.4.4': {}
 
-  '@types/opentype.js@1.3.8': {}
+  '@types/opentype.js@1.3.9': {}
 
   '@types/parse-path@7.1.0':
     dependencies:

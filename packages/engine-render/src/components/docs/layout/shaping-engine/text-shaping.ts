@@ -15,10 +15,7 @@
  */
 
 import type { IDocumentBody, IStyleBase, Nullable } from '@univerjs/core';
-import type Opentype from 'opentype.js';
 import { BooleanNumber } from '@univerjs/core';
-// @ts-ignore
-import { parse } from 'opentype.js/dist/opentype.module';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
 import { EMOJI_REG } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';
@@ -32,25 +29,101 @@ interface IBoundingBox {
 
 }
 
+interface IOpenTypeGlyph {
+    index: number;
+    advanceWidth?: number;
+    getBoundingBox(): IBoundingBox;
+}
+
+interface IOpenTypeFont {
+    unitsPerEm: number;
+    ascender: number;
+    descender: number;
+    stringToGlyphs(content: string): IOpenTypeGlyph[];
+    getKerningValue(leftGlyph: IOpenTypeGlyph, rightGlyph: IOpenTypeGlyph): number;
+}
+
+type OpenTypeParse = (buffer: ArrayBuffer) => IOpenTypeFont;
+interface IOpenTypeModule { parse?: OpenTypeParse }
+
+let openTypeParser: Nullable<OpenTypeParse> = null;
+let openTypeParserPromise: Nullable<Promise<Nullable<OpenTypeParse>>> = null;
+
+function getOpenTypeParser(): Nullable<OpenTypeParse> {
+    if (openTypeParser) {
+        return openTypeParser;
+    }
+
+    // Trigger async lazy-loading so this works in browser runtimes too.
+    void loadOpenTypeParser();
+
+    return null;
+}
+
+function loadOpenTypeParser(): Promise<Nullable<OpenTypeParse>> {
+    if (openTypeParserPromise) {
+        return openTypeParserPromise;
+    }
+
+    // @ts-expect-error No need to be able to specify the type here since we check the shape of the module in the promise resolution.
+    openTypeParserPromise = import('opentype.js/dist/opentype.module')
+        .then((mod) => {
+            const parse = (mod as IOpenTypeModule).parse;
+            openTypeParser = typeof parse === 'function' ? parse : null;
+
+            return openTypeParser;
+        })
+        .catch(() => {
+            openTypeParser = null;
+
+            return null;
+        });
+
+    return openTypeParserPromise;
+}
+
 export interface IOpenTypeGlyphInfo {
     char: string;
     start: number;
     end: number;
-    glyph: Nullable<Opentype.Glyph>;
-    font: Nullable<Opentype.Font>;
+    glyph: Nullable<IOpenTypeGlyph>;
+    font: Nullable<IOpenTypeFont>;
     kerning: number;
     boundingBox: Nullable<IBoundingBox>;
 }
 
-const fontCache = new Map<string, Opentype.Font>();
+const fontCache = new Map<string, IOpenTypeFont>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
+
+function createFallbackGlyphInfos(content: string, charPosition: number): IOpenTypeGlyphInfo[] {
+    const chars = content.match(/[\s\S]/gu) ?? [];
+    const fallback: IOpenTypeGlyphInfo[] = [];
+    let startIndex = 0;
+
+    for (const char of chars) {
+        fallback.push({
+            char,
+            start: startIndex + charPosition,
+            end: startIndex + charPosition + char.length,
+            glyph: null,
+            font: null,
+            kerning: 0,
+            boundingBox: null,
+        });
+
+        startIndex += char.length;
+    }
+
+    return fallback;
+}
 
 function shapeChunk(
     content: string,
     charPosition: number,
     used: Set<string>,
     families: string[],
-    style: IStyleBase
+    style: IStyleBase,
+    parseFont: OpenTypeParse
 ): IOpenTypeGlyphInfo[] {
     let fi = 0;
     let fontFamily = families[fi];
@@ -61,15 +134,7 @@ function shapeChunk(
     }
 
     if (!fontFamily) {
-        return [{
-            char: content,
-            start: charPosition,
-            end: charPosition + content.length,
-            glyph: null,
-            font: null,
-            kerning: 0,
-            boundingBox: null,
-        }];
+        return createFallbackGlyphInfos(content, charPosition);
     }
 
     used.add(fontFamily);
@@ -82,7 +147,7 @@ function shapeChunk(
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
-        font = parse(fontBuffer) as Opentype.Font;
+        font = parseFont(fontBuffer);
         fontCache.set(fontInfo.fullName, font);
     }
 
@@ -126,7 +191,7 @@ function shapeChunk(
                     gi++;
                 } while (acc < emojiMatch[0].length);
 
-                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families, style));
+                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families, style, parseFont));
 
                 continue;
             } else {
@@ -140,7 +205,7 @@ function shapeChunk(
                     nextChar = chars[gi + 1];
                 }
 
-                results.push(...shapeChunk(content.slice(start, startIndex + chars[gi].length), charPosition + start, used, families, style));
+                results.push(...shapeChunk(content.slice(start, startIndex + chars[gi].length), charPosition + start, used, families, style, parseFont));
             }
         }
 
@@ -185,6 +250,11 @@ export function textShape(body: IDocumentBody) {
         return [];
     }
 
+    const parseFont = getOpenTypeParser();
+    if (!parseFont) {
+        return [];
+    }
+
     const key = JSON.stringify(body);
 
     if (glyphCache.has(key)) {
@@ -204,7 +274,7 @@ export function textShape(body: IDocumentBody) {
 
         fontFamilies = fontLibrary.getValidFontFamilies(fontFamilies);
 
-        glyphs.push(...shapeChunk(content, charPosition, new Set(), fontFamilies, style));
+        glyphs.push(...shapeChunk(content, charPosition, new Set(), fontFamilies, style, parseFont));
 
         charPosition += content.length;
     }

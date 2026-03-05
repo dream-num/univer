@@ -30,6 +30,7 @@ import {
     PLUGIN_CONFIG_KEY_REMOTE,
 } from './controllers/config.schema';
 import { DefinedNameController } from './controllers/defined-name.controller';
+import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import { SuperTableController } from './controllers/super-table.controller';
@@ -107,6 +108,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [DefinedNameController],
             [UpdateDefinedNameController],
             [SuperTableController],
+            [FormulaAutoFillController],
         ];
 
         // If the plugin do not execute formula, it should delegate a remote proxy.
@@ -129,6 +131,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ImageFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
+            [FormulaAutoFillController],
         ]);
 
         // There is no rendering in the nodejs environment, so initialize it here

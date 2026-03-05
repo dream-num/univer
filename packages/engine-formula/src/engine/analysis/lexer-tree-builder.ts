@@ -75,6 +75,8 @@ export class LexerTreeBuilder extends Disposable {
 
     private _bracketState: bracketType[] = []; // ()
 
+    private _openBracketNormalIndexStack: number[] = [];
+
     private _squareBracketState: number = 0;
 
     private _bracesState = 0; // {}
@@ -1042,6 +1044,26 @@ export class LexerTreeBuilder extends Disposable {
         this._bracketState.pop();
     }
 
+    private _openBracketNormalIndex() {
+        this._openBracketNormalIndexStack.push(this._currentLexerNode.getChildren().length - 1);
+    }
+
+    private _getNodesByCurrentBracketNormalIndex() {
+        const openIndex = this._openBracketNormalIndexStack.pop();
+
+        if (openIndex === undefined) {
+            return [];
+        }
+
+        const children = this._currentLexerNode.getChildren();
+        if (children.length === 0) {
+            return [];
+        }
+
+        const nodes = children.splice(openIndex);
+        return nodes;
+    }
+
     private _openSquareBracket() {
         this._squareBracketState += 1;
     }
@@ -1526,6 +1548,7 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     this._pushNodeToChildren(currentString);
                     this._openBracket(bracketType.NORMAL);
+                    this._openBracketNormalIndex();
                     this._resetSegment();
                 }
             } else if (
@@ -1831,6 +1854,9 @@ export class LexerTreeBuilder extends Disposable {
                 const lastChildNode = this._getLastChildCurrent();
                 if (lastChildNode instanceof LexerNode) {
                     lastChildNode.changeToParent(subLexerNode);
+                } else if (lastChildNode === matchToken.CLOSE_BRACKET) {
+                    const nodes = this._getNodesByCurrentBracketNormalIndex();
+                    subLexerNode.getChildren().push(...nodes);
                 } else if (lastChildNode !== false) {
                     subLexerNode.getChildren().push(lastChildNode);
                     this._removeLastChild();

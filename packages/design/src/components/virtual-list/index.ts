@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { DraggableList } from './DraggableList';
-export type { IDraggableListProps } from './DraggableList';
+export { type IVirtualListProps, VirtualList } from './VirtualList';

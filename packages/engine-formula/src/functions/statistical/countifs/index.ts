@@ -18,10 +18,9 @@ import type { FunctionVariantType } from '../../../engine/reference-object/base-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { getBooleanResults, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
+import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Countifs extends BaseFunction {
@@ -53,16 +52,11 @@ export class Countifs extends BaseFunction {
             return expandArrayValueObject(criteriaMaxRowLength, criteriaMaxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        const booleanResults = getBooleanResults(_variants, criteriaMaxRowLength, criteriaMaxColumnLength, true);
-
-        return this._aggregateResults(booleanResults);
-    }
-
-    private _aggregateResults(booleanResults: BaseValueObject[][]): BaseValueObject {
-        const results = booleanResults.map((row) => {
-            return row.map((booleanResult) => {
-                return countTrueValue(booleanResult as ArrayValueObject);
-            });
+        const results = getPairedRangeAndCriteriaResult(_variants, {
+            formulaName: 'COUNTIFS',
+            maxRowLength: criteriaMaxRowLength,
+            maxColumnLength: criteriaMaxColumnLength,
+            isNumberSensitive: true,
         });
 
         if (results.length === 1 && results[0].length === 1) {
@@ -79,14 +73,4 @@ export class Countifs extends BaseFunction {
             column: this.column,
         });
     }
-}
-
-export function countTrueValue(array: ArrayValueObject) {
-    let count = 0;
-    array.iterator((value) => {
-        if (value?.isBoolean() && value.getValue() === true) {
-            count++;
-        }
-    });
-    return NumberValueObject.create(count);
 }

@@ -188,11 +188,11 @@ export function parsePairedRangeAndCriteria(
     targetRange?: FunctionVariantType
 ): {
     isError: boolean;
-    errorObject: Nullable<ErrorValueObject>;
+    errorObject: ErrorValueObject | null;
     rangeIsDifferentSize: boolean;
     criteriaMaxRowLength: number;
     criteriaMaxColumnLength: number;
-    targetRange: Nullable<BaseValueObject>;
+    targetRange: ArrayValueObject | null;
     variants: BaseValueObject[];
 } {
     /**
@@ -211,7 +211,7 @@ export function parsePairedRangeAndCriteria(
         };
     }
 
-    let _targetRange: Nullable<BaseValueObject> = null;
+    let _targetRange: ArrayValueObject | null = null;
     let targetRangeRowCount = -1;
     let targetRangeColumnCount = -1;
 
@@ -310,53 +310,125 @@ export function baseValueObjectToArrayValueObject(valueObject: BaseValueObject):
     return ArrayValueObject.createByArray([[valueObject.getValue()]]);
 }
 
-export function getBooleanResults(variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number, isNumberSensitive: boolean = false) {
-    const booleanResults: BaseValueObject[][] = [];
+/**
+ * Get the paired range and criteria result for COUNTIFS, SUMIFS, etc.
+ */
+// eslint-disable-next-line max-lines-per-function
+export function getPairedRangeAndCriteriaResult(
+    variants: BaseValueObject[],
+    params: {
+        formulaName: string;
+        maxRowLength: number;
+        maxColumnLength: number;
+        isNumberSensitive?: boolean;
+        targetRange?: ArrayValueObject;
+    }
+) {
+    const { formulaName, maxRowLength, maxColumnLength, isNumberSensitive = false, targetRange } = params;
+
+    // Align all criteria values to the same dimension as the maximum criteria range.
+    const rangeAndCriteriaArrays: Array<{
+        range: ArrayValueObject;
+        criteriaArray: ArrayValueObject;
+    }> = [];
 
     for (let i = 0; i < variants.length; i++) {
         if (i % 2 === 1) continue;
 
-        const range = variants[i];
+        const range = variants[i] as ArrayValueObject;
         const criteria = variants[i + 1];
         const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, ErrorValueObject.create(ErrorType.NA));
 
-        criteriaArray.iterator((criteriaValueObject, rowIndex, columnIndex) => {
-            if (!criteriaValueObject) {
-                return;
-            }
-
-            // range must be an ArrayValueObject, criteria must be a BaseValueObject
-            let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
-
-            // When comparing non-numbers and numbers, countifs does not take the result
-            if (isNumberSensitive) {
-                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaValueObject);
-            }
-
-            if (booleanResults[rowIndex] === undefined) {
-                booleanResults[rowIndex] = [];
-            }
-
-            if (booleanResults[rowIndex][columnIndex] === undefined) {
-                booleanResults[rowIndex][columnIndex] = resultArrayObject;
-                return;
-            }
-
-            booleanResults[rowIndex][columnIndex] = booleanObjectIntersection(booleanResults[rowIndex][columnIndex], resultArrayObject);
+        rangeAndCriteriaArrays.push({
+            range,
+            criteriaArray,
         });
     }
 
-    return booleanResults;
+    if (rangeAndCriteriaArrays.length === 0) return [];
+
+    const results: BaseValueObject[][] = [];
+
+    /**
+     * Iterate through all criteria values for each dimension, calculate the comparison result with the corresponding range, and then calculate the Boolean intersection of all comparison results as the final result for that dimension criteria value.
+     * Then calculate this dimension criteria value's result.
+     * This avoiding store the all dimension comparison result in memory and then calculating all dimension criteria value's result, which may cause memory overflow when the range is large and there are multiple dimension criteria.
+     * For example, `=COUNTIFS(Q$3:Q$10002,C$3:C$5002,R$3:R$10002,L6)`.
+     */
+    rangeAndCriteriaArrays[0].criteriaArray.iterator((_, rowIndex, columnIndex) => {
+        let finalCompareResult: ArrayValueObject | undefined;
+
+        for (let i = 0; i < rangeAndCriteriaArrays.length; i++) {
+            const { range, criteriaArray } = rangeAndCriteriaArrays[i];
+            const criteriaValueObject = criteriaArray.get(rowIndex, columnIndex);
+
+            if (!criteriaValueObject) {
+                continue;
+            }
+
+            // range must be an ArrayValueObject, criteria must be a BaseValueObject
+            let compareResult = valueObjectCompare(range, criteriaValueObject) as ArrayValueObject;
+
+            // When comparing non-numbers and numbers, countifs does not take the result
+            if (isNumberSensitive) {
+                compareResult = filterSameValueObjectResult(compareResult, range, criteriaValueObject);
+            }
+
+            if (finalCompareResult === undefined) {
+                finalCompareResult = compareResult;
+                continue;
+            }
+
+            finalCompareResult = booleanObjectIntersection(finalCompareResult, compareResult);
+        }
+
+        let result: BaseValueObject | undefined;
+
+        if (formulaName === 'COUNTIFS') {
+            let count = 0;
+            (finalCompareResult as ArrayValueObject).iterator((value) => {
+                if (value?.isBoolean() && value.getValue() === true) {
+                    count++;
+                }
+            });
+            result = NumberValueObject.create(count);
+        } else if (formulaName === 'SUMIFS') {
+            result = targetRange!.pick(finalCompareResult as ArrayValueObject).sum();
+        } else if (formulaName === 'AVERAGEIFS') {
+            const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
+            const sum = picked.sum();
+            const count = picked.count();
+            result = sum.divided(count);
+        } else if (formulaName === 'MAXIFS') {
+            const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
+            if (picked.getColumnCount() === 0) {
+                result = ArrayValueObject.create('0');
+            } else {
+                result = picked.max();
+            }
+        } else if (formulaName === 'MINIFS') {
+            const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
+            if (picked.getColumnCount() === 0) {
+                result = ArrayValueObject.create('0');
+            } else {
+                result = picked.min();
+            }
+        }
+
+        if (!results[rowIndex]) {
+            results[rowIndex] = [];
+        }
+
+        results[rowIndex][columnIndex] = result as BaseValueObject;
+    });
+
+    return results;
 }
 
 /**
- * Two valueObjects of the same type can be compared
- * @param array
- * @param range
- * @param criteria
- * @returns
+ * Two ArrayValueObject of the same type can be compared
  */
-export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject) {
+export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject): ArrayValueObject {
     const [operator, criteriaObject] = findCompareToken(`${criteria.getValue()}`);
 
     return array.mapValue((valueObject, r, c) => {

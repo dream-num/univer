@@ -40,12 +40,7 @@ const locale: typeof enUS = {
     formula: {
         insert: {
             tooltip: 'Hàm',
-            sum: 'Tổng',
-            average: 'Giá trị trung bình',
-            count: 'Đếm',
-            max: 'Giá trị lớn nhất',
-            min: 'Giá trị nhỏ nhất',
-            more: 'Thêm hàm...',
+            common: 'Hàm thường dùng',
         },
         functionList: {
             ...financial,

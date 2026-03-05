@@ -112,7 +112,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
     return (
         <div>
             <div onMouseDown={(e) => { e.stopPropagation(); }}>
-                <div className="univer-flex univer-items-center univer-justify-between">
+                <div className="univer-mb-2 univer-flex univer-items-center univer-justify-between">
                     <Checkbox checked={hasTitle} onChange={(value) => setTitle(!!value)}>
                         {localeService.t('sheets-sort.dialog.first-row-check')}
                     </Checkbox>
@@ -153,10 +153,6 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                     }}
                 >
                     <DraggableList
-                        className={`
-                          [&_.react-grid-item]:univer-transition-none
-                          [&_.react-grid-placeholder]:univer-rounded [&_.react-grid-placeholder]:!univer-bg-gray-200
-                        `}
                         list={dragList}
                         onListChange={setList}
                         idKey="id"

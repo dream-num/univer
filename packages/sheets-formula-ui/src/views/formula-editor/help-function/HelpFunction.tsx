@@ -134,11 +134,13 @@ export function HelpFunction(props: IHelpFunctionProps) {
                     >
                         <div
                             className={clsx(`
-                              univer-wrap-anywhere univer-box-border univer-flex univer-items-center
-                              univer-justify-between univer-px-4 univer-py-3 univer-text-xs univer-font-medium
-                              univer-text-gray-900
+                              univer-box-border univer-flex univer-items-center univer-justify-between univer-px-4
+                              univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900
                               dark:!univer-text-white
                             `, borderTopClassName)}
+                            style={{
+                                overflowWrap: 'anywhere',
+                            }}
                         >
                             <Help
                                 prefix={functionInfo.functionName}

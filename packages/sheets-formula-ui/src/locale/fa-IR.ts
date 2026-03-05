@@ -40,12 +40,7 @@ const locale: typeof enUS = {
     formula: {
         insert: {
             tooltip: 'توابع',
-            sum: 'SUM',
-            average: 'AVERAGE',
-            count: 'COUNT',
-            max: 'MAX',
-            min: 'MIN',
-            more: 'توابع بیشتر...',
+            common: 'توابع پرکاربرد',
         },
         functionList: {
             ...financial,

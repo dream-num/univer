@@ -109,6 +109,9 @@ describe('Dialog', () => {
 
         const closeBtn = (document.querySelector('.univer-sr-only') as HTMLElement | null)?.parentElement as HTMLElement | null;
         expect(closeBtn).toBeInTheDocument();
+        if (!closeBtn) {
+            throw new Error('Close button should exist');
+        }
         closeBtn.click();
         expect(onOpenChange).toHaveBeenCalledWith(false);
         expect(onClose).toHaveBeenCalled();

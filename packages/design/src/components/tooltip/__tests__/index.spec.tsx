@@ -37,7 +37,7 @@ function createRect(left: number, top: number, width: number, height: number): D
 
 describe('Tooltip', () => {
     beforeEach(() => {
-        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect() {
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
             if (this.getAttribute('role') === 'tooltip') {
                 return createRect(0, 0, 120, 40);
             }
@@ -189,7 +189,7 @@ describe('Tooltip', () => {
 
     it('should execute left-placement recompute branch on scroll', async () => {
         vi.restoreAllMocks();
-        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect() {
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
             if (this.getAttribute('role') === 'tooltip') {
                 return createRect(0, 0, 80, 30);
             }

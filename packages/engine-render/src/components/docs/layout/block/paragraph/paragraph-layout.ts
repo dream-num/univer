@@ -55,6 +55,7 @@ export function dealWidthParagraph(
         viewModel,
         paragraphNode,
         sectionBreakConfig
+        // true
     );
 
     // Step 2: Line Breaking.

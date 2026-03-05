@@ -17,6 +17,7 @@
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
+import { RibbonStartGroup } from '../../services/menu/types';
 import { ErrorController } from '../error/error.controller';
 import { menuSchema } from '../menus/menu.schema';
 import { ShortcutPanelMenuItemFactory } from '../shortcut-display/menu';
@@ -86,8 +87,9 @@ describe('shortcut-display controllers', () => {
 
 describe('menu schema and ui token', () => {
     it('should expose static menu schema entries', () => {
-        const history = menuSchema['ribbon.start.history'] as any;
-        const others = menuSchema['ribbon.start.others'] as any;
+        const groupedSchema = menuSchema as Record<RibbonStartGroup.HISTORY | RibbonStartGroup.OTHERS, Record<string, unknown>>;
+        const history = groupedSchema[RibbonStartGroup.HISTORY];
+        const others = groupedSchema[RibbonStartGroup.OTHERS];
 
         expect(history).toBeDefined();
         expect(others).toBeDefined();

@@ -57,10 +57,10 @@ export class Sumif extends BaseFunction {
     private _handleSingleObject(range: FunctionVariantType, criteria: BaseValueObject, sumRange?: FunctionVariantType): BaseValueObject {
         const _range = (range as BaseReferenceObject).toArrayValueObject();
 
-        let resultArrayObject = valueObjectCompare(_range, criteria);
+        let resultArrayObject = valueObjectCompare(_range, criteria) as ArrayValueObject;
 
         // When comparing non-numbers and numbers, it does not take the result
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteria);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject, _range, criteria);
 
         const rangeRowCount = _range.getRowCount();
         const rangeColumnCount = _range.getColumnCount();
@@ -87,6 +87,6 @@ export class Sumif extends BaseFunction {
             }
         }
 
-        return _sumRange.pick(resultArrayObject as ArrayValueObject).sum();
+        return _sumRange.pick(resultArrayObject).sum();
     }
 }

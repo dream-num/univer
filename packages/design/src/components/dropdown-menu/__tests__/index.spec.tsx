@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '../DropdownMenu';
 import '@testing-library/jest-dom/vitest';
 
@@ -108,5 +108,54 @@ describe('DropdownMenu', () => {
             </DropdownMenu>
         );
         expect(container).toMatchSnapshot();
+    });
+
+    it('should invoke onSelect callbacks for item/checkbox/radio', () => {
+        const onItemSelect = vi.fn();
+        const onCheckboxSelect = vi.fn();
+        const onRadioSelect = vi.fn();
+
+        const items = [
+            { type: 'item' as const, children: 'Run', onSelect: onItemSelect },
+            { type: 'checkbox' as const, value: 'c1', label: 'Check', checked: false, onSelect: onCheckboxSelect },
+            {
+                type: 'radio' as const,
+                value: 'a',
+                onSelect: onRadioSelect,
+                options: [{ label: 'A', value: 'a' }, { label: 'B', value: 'b' }],
+            },
+        ];
+
+        const { getByText } = render(
+            <DropdownMenu open items={items}>
+                <button type="button">Trigger</button>
+            </DropdownMenu>
+        );
+
+        fireEvent.click(getByText('Run'));
+        fireEvent.click(getByText('Check'));
+        fireEvent.click(getByText('B'));
+
+        expect(onItemSelect).toHaveBeenCalled();
+        expect(onCheckboxSelect).toHaveBeenCalledWith('c1');
+        expect(onRadioSelect).toHaveBeenCalledWith('b');
+    });
+
+    it('should throw when radio option misses value', () => {
+        const badItems = [
+            {
+                type: 'radio' as const,
+                value: 'a',
+                options: [{ label: 'Missing Value' }],
+            },
+        ];
+
+        expect(() =>
+            render(
+                <DropdownMenu open items={badItems}>
+                    <button type="button">Trigger</button>
+                </DropdownMenu>
+            )
+        ).toThrow('[DropdownMenu]: `value` is required');
     });
 });

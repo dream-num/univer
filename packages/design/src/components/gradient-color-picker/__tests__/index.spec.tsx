@@ -159,4 +159,78 @@ describe('GradientColorPicker', () => {
         expect(calledValue.stops.length).toBe(3);
         expect(calledValue.stops.some((s) => s.offset === 50)).toBe(true);
     });
+
+    it('should ignore null offset change from offset input', () => {
+        const onChange = vi.fn();
+        const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
+        const inputs = container.querySelectorAll('input');
+        const offsetInput = inputs[0] as HTMLInputElement;
+
+        fireEvent.change(offsetInput, { target: { value: '' } });
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('should update stop color via nested color picker presets', () => {
+        const onChange = vi.fn();
+        const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
+
+        const presetButton = container.querySelector('[data-u-comp="color-picker-presets"] button') as HTMLButtonElement;
+        expect(presetButton).toBeTruthy();
+        fireEvent.click(presetButton);
+
+        expect(onChange).toHaveBeenCalled();
+        const next = onChange.mock.calls[0][0] as IGradientValue;
+        expect(next.stops[0].color).toMatch(/^#/);
+    });
+
+    it('should support radial/angular/diamond and fallback preview background', () => {
+        const { container, rerender } = render(<GradientColorPicker value={{ ...defaultValue, type: 'radial' }} />);
+        const preview = container.querySelector('.univer-h-32') as HTMLDivElement;
+        expect(preview.style.background).toContain('radial-gradient');
+
+        rerender(<GradientColorPicker value={{ ...defaultValue, type: 'angular' }} />);
+        expect((container.querySelector('.univer-h-32') as HTMLDivElement).style.background).toContain('conic-gradient');
+
+        rerender(<GradientColorPicker value={{ ...defaultValue, type: 'diamond' }} />);
+        expect((container.querySelector('.univer-h-32') as HTMLDivElement).style.background).toContain('radial-gradient');
+
+        rerender(<GradientColorPicker value={{ ...defaultValue, type: 'unexpected' as unknown as IGradientValue['type'] }} />);
+        expect((container.querySelector('.univer-h-32') as HTMLDivElement).style.background).toContain('linear-gradient');
+    });
+
+    it('should drag a stop and emit new offset', () => {
+        const onChange = vi.fn();
+        const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
+        const bar = container.querySelector('.univer-cursor-crosshair') as HTMLDivElement;
+        const stop = container.querySelector('.univer-absolute.univer-rounded-full.univer-border-2') as HTMLDivElement;
+
+        bar.getBoundingClientRect = vi.fn(() => ({
+            left: 0,
+            width: 100,
+            top: 0,
+            height: 10,
+            bottom: 10,
+            right: 100,
+            x: 0,
+            y: 0,
+            toJSON: () => {},
+        }));
+
+        fireEvent.pointerDown(stop, { clientX: 0 });
+        fireEvent.pointerMove(window, { clientX: 60 });
+        fireEvent.pointerUp(window);
+
+        expect(onChange).toHaveBeenCalled();
+        const values = onChange.mock.calls.map((call) => call[0] as IGradientValue);
+        expect(values.some((v) => v.stops[0].offset === 60)).toBe(true);
+    });
+
+    it('should not remove stop when there are only two stops', () => {
+        const onChange = vi.fn();
+        const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
+        const deleteButton = container.querySelector('.univer-border-red-500') as HTMLButtonElement;
+        expect(deleteButton).toBeDisabled();
+        fireEvent.click(deleteButton);
+        expect(onChange).not.toHaveBeenCalled();
+    });
 });

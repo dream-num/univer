@@ -74,14 +74,31 @@ export function getDrawingGroupState(parentLeft: number, parentTop: number, obje
     };
 }
 export function transformObjectOutOfGroup(child: ITransformState, parent: ITransformState, groupOriginWidth: number, groupOriginHeight: number) {
-    const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = child;
-    const { left: groupLeft = 0, top: groupTop = 0, angle: groupAngle = 0 } = parent;
+    const { left = 0, top = 0, width = 0, height = 0, angle = 0, } = child;
+    const { left: groupLeft = 0, top: groupTop = 0, angle: groupAngle = 0, flipX: groupFlipX = false, flipY: groupFlipY = false } = parent;
 
     const groupCenterX = groupLeft + groupOriginWidth / 2;
     const groupCenterY = groupTop + groupOriginHeight / 2;
 
-    const objectX = left;
-    const objectY = top;
+    let flipX = child.flipX || false;
+    let flipY = child.flipY || false;
+
+    let objectX = left;
+    let objectY = top;
+
+    if (groupFlipX) {
+        const objectCenterX = objectX + width / 2;
+        const mirroredCenterX = 2 * groupCenterX - objectCenterX;
+        objectX = mirroredCenterX - width / 2;
+        flipX = !flipX;
+    }
+
+    if (groupFlipY) {
+        const objectCenterY = objectY + height / 2;
+        const mirroredCenterY = 2 * groupCenterY - objectCenterY;
+        objectY = mirroredCenterY - height / 2;
+        flipY = !flipY;
+    }
 
     const objectCenterX = objectX + width / 2;
     const objectCenterY = objectY + height / 2;
@@ -92,6 +109,8 @@ export function transformObjectOutOfGroup(child: ITransformState, parent: ITrans
         left: finalPoint.x,
         top: finalPoint.y,
         angle: groupAngle + angle,
+        flipX: flipX,
+        flipY: flipY,
     };
 }
 

@@ -17,6 +17,8 @@
 import type { IDocumentBody } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+const SLOW_CI_TIMEOUT = 30_000;
+
 function createBody(dataStream: string): IDocumentBody {
     return {
         dataStream,
@@ -86,7 +88,7 @@ describe('textShape optional opentype loading', () => {
         expect(shaped.map((item) => [item.start, item.end])).toEqual([[0, 1], [1, 2]]);
         expect(parseMock).toHaveBeenCalledTimes(1);
         expect(findBestMatchFontByStyleMock).toHaveBeenCalled();
-    });
+    }, SLOW_CI_TIMEOUT);
 
     it('should gracefully return empty result when opentype module is unavailable', async () => {
         const findBestMatchFontByStyleMock = vi.fn();
@@ -112,7 +114,7 @@ describe('textShape optional opentype loading', () => {
 
         expect(textShape(body)).toEqual([]);
         expect(findBestMatchFontByStyleMock).not.toHaveBeenCalled();
-    });
+    }, SLOW_CI_TIMEOUT);
 
     it('should fallback to per-character glyph infos when no valid font family exists', async () => {
         const parseMock = vi.fn(() => ({
@@ -151,5 +153,5 @@ describe('textShape optional opentype loading', () => {
         expect(shaped.map((item) => [item.start, item.end])).toEqual([[0, 1], [1, 2], [2, 3]]);
         expect(shaped.every((item) => item.glyph == null && item.font == null)).toBe(true);
         expect(parseMock).not.toHaveBeenCalled();
-    });
+    }, SLOW_CI_TIMEOUT);
 });

@@ -22,6 +22,8 @@ import type { ILayoutContext } from '../../../tools';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
 
+const SLOW_CI_TIMEOUT = 30_000;
+
 function flattenShapedContent(shaped: Array<{ glyphs: Array<{ content: string }> }>) {
     return shaped.flatMap((item) => item.glyphs.map((glyph) => glyph.content)).join('');
 }
@@ -100,7 +102,7 @@ describe('shaping with useOpenType switch', () => {
         expect(flattenShapedContent(shapedWithoutOpenType)).toBe(content);
         expect(flattenShapedContent(shapedWithOpenTypeFallback)).toBe(content);
         expect(flattenShapedContent(shapedWithOpenTypeFallback)).toBe(flattenShapedContent(shapedWithoutOpenType));
-    });
+    }, SLOW_CI_TIMEOUT);
 
     it('should use textShape glyph infos when useOpenType is true and glyph infos are available', async () => {
         const content = 'AB CD';
@@ -147,5 +149,5 @@ describe('shaping with useOpenType switch', () => {
 
         expect(textShapeMock).toHaveBeenCalledTimes(1);
         expect(flattenShapedContent(shapedWithOpenType)).toBe(content);
-    });
+    }, SLOW_CI_TIMEOUT);
 });

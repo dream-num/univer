@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import type { MenuItemConfig } from '../../services/menu/menu';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { mergeMenuConfigs } from '../menu-merge-configs';
+
+type MenuItemConfigWithReactiveState = MenuItemConfig & {
+    hidden$?: Observable<boolean>;
+    disabled$?: Observable<boolean>;
+    activated$?: Observable<boolean>;
+};
 
 describe('mergeMenuConfigs', () => {
     it('should return base config when additional config is null', () => {
@@ -52,9 +59,9 @@ describe('mergeMenuConfigs', () => {
     });
 
     it('should create reactive observables when base config has no reactive properties', async () => {
-        const base = {} as MenuItemConfig;
+        const base = {} as MenuItemConfigWithReactiveState;
 
-        const merged = mergeMenuConfigs(base, {
+        const merged = mergeMenuConfigs<MenuItemConfigWithReactiveState>(base, {
             hidden: true,
             disabled: false,
             activated: true,
@@ -70,9 +77,9 @@ describe('mergeMenuConfigs', () => {
             hidden$: of(false),
             disabled$: of(true),
             activated$: of(false),
-        } as MenuItemConfig;
+        } as MenuItemConfigWithReactiveState;
 
-        const merged = mergeMenuConfigs(base, {
+        const merged = mergeMenuConfigs<MenuItemConfigWithReactiveState>(base, {
             hidden: true,
             disabled: false,
             activated: true,

@@ -37,7 +37,7 @@ export const FontSize = (props: IFontSizeProps) => {
         e.stopPropagation();
 
         if (e.code === 'Enter') {
-            onChange(realValue.toString());
+            onChange(realValue);
         }
     }
 

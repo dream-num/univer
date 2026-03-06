@@ -14,6 +14,7 @@ permissions:
 
 jobs:
     e2e-test:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         env:

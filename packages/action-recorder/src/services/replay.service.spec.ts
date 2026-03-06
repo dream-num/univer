@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/first */
-
+import { MessageType } from '@univerjs/design';
 import { describe, expect, it, vi } from 'vitest';
+import { ActionReplayService, ReplayMode } from './replay.service';
 
 vi.mock('@univerjs/core', async () => {
     const actual = await vi.importActual<typeof import('@univerjs/core')>('@univerjs/core');
@@ -25,9 +25,6 @@ vi.mock('@univerjs/core', async () => {
         awaitTime: vi.fn(async () => undefined),
     };
 });
-
-import { MessageType } from '@univerjs/design';
-import { ActionReplayService, ReplayMode } from './replay.service';
 
 describe('ActionReplayService', () => {
     it('should replay local json with success/failure branches', async () => {

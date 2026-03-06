@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/first */
-
 import { describe, expect, it, vi } from 'vitest';
+import { CROSSHAIR_HIGHLIGHT_COLORS } from '../../services/crosshair.service';
+import { CrosshairOverlay } from './CrosshairHighlight';
 
 const mocked = vi.hoisted(() => ({
     useDependency: vi.fn(),
@@ -54,9 +54,6 @@ vi.mock('react', async () => {
         useCallback: <T extends (...args: never[]) => unknown>(fn: T) => fn,
     };
 });
-
-import { CROSSHAIR_HIGHLIGHT_COLORS } from '../../services/crosshair.service';
-import { CrosshairOverlay } from './CrosshairHighlight';
 
 describe('CrosshairOverlay', () => {
     it('should render color cells and trigger onChange', () => {

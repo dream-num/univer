@@ -28,7 +28,7 @@ import type {
     IUnitRowData,
 } from '../basics/common';
 
-import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
+import type { IUniverEngineFormulaConfig } from '../controllers/config.schema';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { IFormulaDependencyTreeFullJson, IFormulaDependencyTreeJson, IFormulaDependentsAndInRangeResults } from '../engine/dependency/dependency-tree';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
@@ -47,7 +47,7 @@ import {
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
+import { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';

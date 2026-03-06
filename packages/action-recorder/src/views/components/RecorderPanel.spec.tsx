@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/first */
-
+import { ICommandService } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
+import { CloseRecordPanelOperation } from '../../commands/operations/operation';
+import { RecorderPanel } from './RecorderPanel';
 
 const mocked = vi.hoisted(() => ({
     useDependency: vi.fn(),
@@ -43,11 +45,6 @@ vi.mock('react', async () => {
         },
     };
 });
-
-import { ICommandService } from '@univerjs/core';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
-import { CloseRecordPanelOperation } from '../../commands/operations/operation';
-import { RecorderPanel } from './RecorderPanel';
 
 function getButtonsFromPanel(panelElement: {
     props: { children: Array<{ props: Record<string, unknown> }> };

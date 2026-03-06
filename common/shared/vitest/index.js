@@ -20,6 +20,7 @@ function createConfig(options) {
     return defineConfig(mergeConfig({
         test: {
             testTimeout: 30_000,
+            hookTimeout: 30_000,
             css: {
                 modules: {
                     classNameStrategy: 'non-scoped',

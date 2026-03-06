@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/first */
-
+import { MenuItemType } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('@univerjs/ui', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/ui')>('@univerjs/ui');
-    return {
-        ...actual,
-        getMenuHiddenObservable: vi.fn(() => of(false)),
-    };
-});
-
-import { MenuItemType } from '@univerjs/ui';
 import {
     CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT,
     CrosshairHighlightMenuItemFactory,
@@ -43,6 +32,14 @@ import {
     SetCrosshairHighlightColorOperation,
     ToggleCrosshairHighlightOperation,
 } from './operation';
+
+vi.mock('@univerjs/ui', async () => {
+    const actual = await vi.importActual<typeof import('@univerjs/ui')>('@univerjs/ui');
+    return {
+        ...actual,
+        getMenuHiddenObservable: vi.fn(() => of(false)),
+    };
+});
 
 describe('crosshair operations/menu/service', () => {
     it('should handle service state changes and dispose', () => {

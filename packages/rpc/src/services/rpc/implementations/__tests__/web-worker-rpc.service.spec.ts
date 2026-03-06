@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/first */
-
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createWebWorkerMessagePortOnMain, createWebWorkerMessagePortOnWorker } from '../web-worker-rpc.service';
 
 vi.mock('rxjs', async () => {
     const actual = await vi.importActual<typeof import('rxjs')>('rxjs');
@@ -25,8 +24,6 @@ vi.mock('rxjs', async () => {
         shareReplay: () => (source: unknown) => source,
     };
 });
-
-import { createWebWorkerMessagePortOnMain, createWebWorkerMessagePortOnWorker } from '../web-worker-rpc.service';
 
 describe('web-worker-rpc.service', () => {
     afterEach(() => {

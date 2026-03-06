@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/first */
-
+import { RANGE_TYPE } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SheetCrosshairHighlightRenderController } from './crosshair-highlight.render-controller';
 
 const mockShapes: Array<{ dispose: ReturnType<typeof vi.fn>; props: Record<string, unknown> }> = [];
 
@@ -45,9 +45,6 @@ vi.mock('./crosshair-highlight-shape', () => ({
         }
     },
 }));
-
-import { RANGE_TYPE } from '@univerjs/core';
-import { SheetCrosshairHighlightRenderController } from './crosshair-highlight.render-controller';
 
 describe('SheetCrosshairHighlightRenderController', () => {
     it('should react to selections, render shapes and clear on disable', async () => {

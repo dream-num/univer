@@ -15,17 +15,17 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverEngineFormulaConfig } from './controller/config.schema';
+import type { IUniverEngineFormulaConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
 import pkg from '../package.json';
-import { CalculateController } from './controller/calculate.controller';
-import { ComputingStatusReporterController } from './controller/computing-status.controller';
-import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
-import { FormulaController } from './controller/formula.controller';
-import { SetDependencyController } from './controller/set-dependency.controller';
-import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
-import { SetOtherFormulaController } from './controller/set-other-formula.controller';
-// import { SetSuperTableController } from './controller/set-super-table.controller';
+import { CalculateController } from './controllers/calculate.controller';
+import { ComputingStatusReporterController } from './controllers/computing-status.controller';
+import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { FormulaController } from './controllers/formula.controller';
+import { SetDependencyController } from './controllers/set-dependency.controller';
+import { SetFeatureCalculationController } from './controllers/set-feature-calculation.controller';
+import { SetOtherFormulaController } from './controllers/set-other-formula.controller';
+// import { SetSuperTableController } from './controllers/set-super-table.controller';
 import { Lexer } from './engine/analysis/lexer';
 import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from './engine/analysis/parser';

@@ -87,7 +87,7 @@ export function getDrawingGroupState(parentLeft: number, parentTop: number, obje
  * @param groupOriginHeight - The original height of the group (used to compute group center)
  * @param baseBound - Optional. The group's baseBound (chOff/chExt). If provided, child coordinates
  *                    are mapped from this space to the parent's actual bound space before transforming.
- * 
+ *
  * @example
  * // in excel, the group off & ext is the real position and size of the group, and the child position is relative to the group chOff/chExt. For example:
  * ```xml
@@ -173,7 +173,6 @@ export function transformObjectOutOfGroup(
         flipY,
     };
 }
-
 
 /**
  * Get the rendered position and size of an object based on the group's baseBound and the parent's bound.

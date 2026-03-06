@@ -15,14 +15,13 @@
  */
 
 import type { IGroupBaseBound } from '@univerjs/core';
+import type { BaseObject } from './base-object';
 import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
 import { getDrawingGroupState, RENDER_CLASS_TYPE, Transform } from './basics';
 import { Group } from './group';
-import { BaseObject } from './base-object';
 
 export class DrawingGroupObject extends Group {
-
     protected override _selfSizeMode: boolean = true;
     /**
      * Corresponds to chOff (child offset) and chExt (child extent) in OOXML.

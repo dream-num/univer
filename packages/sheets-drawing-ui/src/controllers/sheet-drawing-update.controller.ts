@@ -595,10 +595,9 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     axisAlignSheetTransform: { ...axisAlignSheetTransform },
                 };
 
+                // if (newDrawing.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
 
-                if (newDrawing.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
-
-                }
+                // }
 
                 drawings.push(newDrawing);
             });

@@ -53,6 +53,12 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             transform: groupTransform,
+            groupBaseBound: {
+                left: groupTransform.left,
+                top: groupTransform.top,
+                width: groupTransform.width,
+                height: groupTransform.height,
+            },
         } as IDrawingParam;
 
         const children = focusDrawings.map((drawing) => {
@@ -64,8 +70,8 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                 drawingId,
                 transform: {
                     ...transform,
-                    left: transform.left! - groupTransform.left,
-                    top: transform.top! - groupTransform.top,
+                    // left: transform.left! - groupTransform.left,
+                    // top: transform.top! - groupTransform.top,
                 },
                 groupId,
             };
@@ -82,7 +88,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             return;
         }
 
-        const { unitId, subUnitId, drawingId, transform: groupTransform = { width: 0, height: 0 } } = param;
+        const { unitId, subUnitId, drawingId, transform: groupTransform = { width: 0, height: 0 }, groupBaseBound } = param;
 
         if (groupTransform == null) {
             return;
@@ -97,7 +103,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
         const children = objects.map((object) => {
             const { transform } = object;
             const { unitId, subUnitId, drawingId } = object;
-            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
+            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0, groupBaseBound);
             return {
                 unitId,
                 subUnitId,

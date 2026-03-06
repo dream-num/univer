@@ -38,6 +38,7 @@ export { DEFAULT_PADDING_DATA } from './components/sheets/sheet.render-skeleton'
 export * from './context';
 export type { IUniverEngineRenderConfig } from './controllers/config.schema';
 export * from './custom';
+export { DrawingGroupObject } from './drawing-group';
 export * from './engine';
 export * from './group';
 export * from './layer';

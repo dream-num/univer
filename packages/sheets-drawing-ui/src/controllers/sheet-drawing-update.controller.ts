@@ -115,7 +115,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-        this._updateImageListener();
+        this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
@@ -553,9 +553,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _updateImageListener() {
+    private _updateDrawingListener() {
         this.disposeWithMe(this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<ISheetDrawing>[] = [];
+
+            const groupChildParams: IDrawingParam[] = [];
 
             if (params.length === 0) {
                 return;
@@ -593,6 +595,10 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     axisAlignSheetTransform: { ...axisAlignSheetTransform },
                 };
 
+                // if (newDrawing.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+
+                // }
+
                 drawings.push(newDrawing);
             });
 
@@ -605,7 +611,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _getSheetTransformByParam(param: IDrawingParam): Nullable<{
+    private _getSheetTransformByParam(param: IDrawingParam, isCreate: boolean): Nullable<{
         sheetTransform: ISheetDrawingPosition;
         axisAlignSheetTransform: ISheetDrawingPosition;
     }> {
@@ -615,12 +621,17 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
         const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-        if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
+        let sheetDrawingTransform = sheetDrawing?.transform;
+        if (isCreate) {
+            sheetDrawingTransform = {};
+        }
+
+        if (!isCreate && (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId)) {
             return null;
         }
-        const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+        const sheetTransform = transformToDrawingPosition({ ...sheetDrawingTransform, ...transform }, this._selectionRenderService);
 
-        const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+        const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawingTransform, ...transform }, this._selectionRenderService);
 
         if (sheetTransform == null || axisAlignSheetTransform == null) {
             return null;
@@ -632,11 +643,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             const grpParams = [];
             for (const param of params) {
-                const sheetTransform = this._getSheetTransformByParam(param.parent);
+                const grpSheetTransform = this._getSheetTransformByParam(param.parent, true);
 
                 const children = [];
                 for (const child of param.children) {
-                    const childSheetTransformInfo = this._getSheetTransformByParam(child);
+                    const childSheetTransformInfo = this._getSheetTransformByParam(child, false);
                     if (childSheetTransformInfo != null) {
                         children.push({
                             ...child,
@@ -647,7 +658,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 }
 
                 const grpParam = {
-                    parent: { ...param.parent, sheetTransform },
+                    parent: { ...param.parent, sheetTransform: grpSheetTransform?.sheetTransform, axisAlignSheetTransform: grpSheetTransform?.axisAlignSheetTransform },
                     children,
 
                 };
@@ -666,11 +677,12 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 const { children } = param;
                 const childParams = [];
                 for (const child of children) {
-                    const childSheetTransform = this._getSheetTransformByParam(child);
+                    const childSheetTransform = this._getSheetTransformByParam(child, false);
                     if (childSheetTransform != null) {
                         childParams.push({
                             ...child,
-                            sheetTransform: childSheetTransform,
+                            sheetTransform: childSheetTransform.sheetTransform,
+                            axisAlignSheetTransform: childSheetTransform.axisAlignSheetTransform,
                         });
                     }
                 }

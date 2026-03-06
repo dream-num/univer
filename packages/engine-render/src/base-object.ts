@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
+import type { IGroupBaseBound, IKeyValue, ITransformState, Nullable } from '@univerjs/core';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
@@ -25,6 +25,7 @@ import type { Engine } from './engine';
 import type { Layer } from './layer';
 import type { Scene } from './scene';
 import { Disposable, EventSubject } from '@univerjs/core';
+import { getRenderTransformBaseOnParentBound } from './basics';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
@@ -58,6 +59,7 @@ export enum ObjectType {
 export abstract class BaseObject extends Disposable {
     groupKey?: string;
     isInGroup: boolean = false;
+    isDrawingObject: boolean = false;
 
     objectType: ObjectType = ObjectType.UNKNOWN;
 
@@ -600,6 +602,46 @@ export abstract class BaseObject extends Disposable {
             skewY: this.skewY,
             flipX: this.flipX,
             flipY: this.flipY,
+        };
+    }
+
+    getRealBound(): IGroupBaseBound {
+        let { width: realWidth, height: realHeight, left: realLeft, top: realTop } = this;
+        let baseBound;
+        if (this.isInGroup && this.parent?.classType === RENDER_CLASS_TYPE.GROUP && this.parent?.getBaseBound) {
+            baseBound = this.parent.getBaseBound();
+        }
+        if (baseBound) {
+            const parentState = this.getParent();
+            const parentBound = {
+                top: parentState.top || 0,
+                left: parentState.left,
+                width: parentState.width || 0,
+                height: parentState.height || 0,
+            };
+            const realBound = getRenderTransformBaseOnParentBound(baseBound, parentBound, { width: realWidth, height: realHeight, left: realLeft, top: realTop });
+
+            realWidth = realBound.width;
+            realHeight = realBound.height;
+            realLeft = realBound.left - parentBound.left - parentBound.width / 2;
+            realTop = realBound.top - parentBound.top - parentBound.height / 2;
+
+            // const isParentFlipX = this.parent?.flipX;
+            // const isParentFlipY = this.parent?.flipY;
+            // const parentCenterX = parentBound.left + parentBound.width / 2;
+            // const parentCenterY = parentBound.top + parentBound.height / 2;
+            // if (isParentFlipX) {
+            //     realLeft = 2 * parentCenterX - realLeft;
+            // }
+            // if (isParentFlipY) {
+            //     realTop = 2 * parentCenterY - realTop;
+            // }
+        }
+        return {
+            left: realLeft,
+            top: realTop,
+            width: realWidth,
+            height: realHeight,
         };
     }
 

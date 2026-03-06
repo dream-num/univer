@@ -36,8 +36,8 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
                 drawingId,
                 transform: {
                     ...transform,
-                    left: transform.left! - groupTransform.left,
-                    top: transform.top! - groupTransform.top,
+                    left: transform.left!,
+                    top: transform.top!,
                 },
                 groupId,
             };
@@ -48,6 +48,7 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
             subUnitId,
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            groupBaseBound: { ...parent.groupBaseBound },
             transform: groupTransform,
         } as IDrawingParam;
 
@@ -72,7 +73,7 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
         const newChildren = children.map((object) => {
             const { transform } = object;
             const { unitId, subUnitId, drawingId } = object;
-            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
+            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0, parent.groupBaseBound);
             return {
                 unitId,
                 subUnitId,

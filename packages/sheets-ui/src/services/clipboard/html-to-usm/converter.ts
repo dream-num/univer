@@ -102,6 +102,8 @@ export class HtmlToUSMService {
 
     private _dom: HTMLElement | null = null;
 
+    private _plainTextData: string[][] = [];
+
     private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
 
     constructor(props: IHtmlToUSMServiceProps) {
@@ -109,8 +111,13 @@ export class HtmlToUSMService {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    convert(html: string): IUniverSheetCopyDataModel {
+    convert(html: string, plainText?: string): IUniverSheetCopyDataModel {
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
+
+        if (plainText) {
+            this._plainTextData = this._parsePlainTextData(plainText);
+        }
+
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
             this._afterProcessRules = [...pastePlugin.afterProcessRules];
@@ -394,7 +401,7 @@ export class HtmlToUSMService {
                 }
 
                 // Determine whether it is rich text based on whether there are html tags
-                const { cellText, cellRichStyle } = this._getCellTextAndRichText(cell, cellStyle, skeleton);
+                const { cellText, cellRichStyle } = this._getCellTextAndRichText(cell, cellStyle, skeleton, rowIndex, colSetValueIndex);
 
                 const cellValue = {
                     rowSpan,
@@ -465,7 +472,54 @@ export class HtmlToUSMService {
         }
     }
 
-    private _getCellTextAndRichText(cell: Element, styleStr: string, skeleton?: SpreadsheetSkeleton) {
+    private _getCellTextAndRichText(cell: Element, styleStr: string, skeleton?: SpreadsheetSkeleton, rowIndex?: number, colIndex?: number) {
+        const cellTextRaw = cell.textContent?.trim() || '';
+
+        /**
+         * Handle numbers in Excel that cannot be displayed due to insufficient column width (displayed as #######)
+         * When Excel cell column width is insufficient to display a number, ####### is copied instead of the actual value
+         * Attempt to get the real value from plain text clipboard data
+         *
+         * Distinguish between two cases:
+         * 1. Insufficient column width: HTML is #######, plain text is real value → restore to real value
+         * 2. Content itself is #######: both HTML and plain text are ####### → keep #######
+         *
+         * For restored numeric values, thousand separator and other formats should be preserved
+         */
+        if (/^#+$/.test(cellTextRaw)) {
+            if (rowIndex !== undefined && colIndex !== undefined && this._plainTextData.length > 0) {
+                const plainValue = this._plainTextData[rowIndex]?.[colIndex];
+                // Only consider it as a column width issue if the plain text value is not #######
+                if (plainValue !== undefined && plainValue !== '' && !/^#+$/.test(plainValue)) {
+                    const trimmedValue = plainValue.trim();
+
+                    // Check if it is a number (including thousand separators, decimal points, minus signs, etc.)
+                    const numericMatch = trimmedValue.match(/^(-?[\d,]+\.?\d*)$/);
+
+                    if (numericMatch) {
+                        // It is a number with thousand separators, need to preserve format
+                        // Keep the original string (with thousand separators) to avoid losing user format
+                        return {
+                            cellText: trimmedValue,
+                            cellRichStyle: undefined,
+                        };
+                    }
+
+                    // Not a number, return original value directly
+                    return {
+                        cellText: plainValue,
+                        cellRichStyle: undefined,
+                    };
+                }
+            }
+
+            // If plain text is also #######, it means the cell content itself is #######, keep it as is
+            return {
+                cellText: cellTextRaw,
+                cellRichStyle: undefined,
+            };
+        }
+
         /**
          * mso-spacerun:yes is used to force spaces in html copied from excel.
          * if the remaining text is a number or parse to a number, return the remaining text directly.
@@ -633,10 +687,34 @@ export class HtmlToUSMService {
         }
     }
 
+    /**
+     * Parse plain text data into a 2D array
+     * When Excel copies, plain text uses tab (\t) to separate columns and newline (\n) to separate rows
+     * @param plainText Plain text content
+     * @returns A 2D array where each element represents a cell value
+     */
+    private _parsePlainTextData(plainText: string): string[][] {
+        if (!plainText) return [];
+
+        const rows: string[][] = [];
+        const lines = plainText.split(/\r?\n/);
+
+        for (const line of lines) {
+            if (line.trim() === '') continue;
+
+            // Use tab to split columns
+            const cells = line.split('\t');
+            rows.push(cells);
+        }
+
+        return rows;
+    }
+
     dispose() {
         this._dom = null;
         this._styleCache.clear();
         this._styleMap.clear();
+        this._plainTextData = [];
     }
 }
 

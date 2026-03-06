@@ -181,7 +181,7 @@ describe('rpc.service edge cases', () => {
         stream.unsubscribe();
 
         (client as unknown as { _disposed: boolean })._disposed = true;
-        await expect(channel.call('disposed')).rejects.toBeUndefined();
+        await expect(channel.call('disposed')).rejects.toThrow('[ChannelClient]: client is disposed!');
         expect(() => channel.subscribe('disposed$')).toThrow('[ChannelClient]: client is disposed!');
         client.dispose();
     });

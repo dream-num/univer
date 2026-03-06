@@ -128,5 +128,6 @@ FEnum.extend(FWatermarkEnum);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverWatermarkMixin { }
+    // eslint-disable-next-line ts/naming-convention
     interface FEnum extends FWatermarkEnum { }
 }

@@ -50,6 +50,7 @@ export class DataSyncReplicaController extends Disposable {
 
         this._injector.add([
             IRemoteSyncService,
+            // eslint-disable-next-line react/no-unnecessary-use-prefix
             { useFactory: () => toModule<IRemoteSyncService>(this._rpcChannelService.requestChannel(RemoteSyncServiceName)) },
         ]);
         this._remoteSyncService = this._injector.get(IRemoteSyncService);

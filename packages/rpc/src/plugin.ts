@@ -91,6 +91,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
             [
                 IRPCChannelService,
                 {
+                    // eslint-disable-next-line react/no-unnecessary-use-prefix
                     useFactory: () => new ChannelService(messageProtocol),
                 },
             ],
@@ -136,6 +137,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
                 [
                     IRPCChannelService,
                     {
+                        // eslint-disable-next-line react/no-unnecessary-use-prefix
                         useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
                     },
                 ],

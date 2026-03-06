@@ -68,6 +68,7 @@ export class UniverRPCNodeMainPlugin extends Plugin {
 
         const dependencies: Dependency[] = [
             [IRPCChannelService, {
+                // eslint-disable-next-line react/no-unnecessary-use-prefix
                 useFactory: () => new ChannelService(messageProtocol),
             }],
             [DataSyncPrimaryController],
@@ -119,6 +120,7 @@ export class UniverRPCNodeWorkerPlugin extends Plugin {
         ([
             [DataSyncReplicaController],
             [IRPCChannelService, {
+                // eslint-disable-next-line react/no-unnecessary-use-prefix
                 useFactory: () => new ChannelService(createNodeWorkerMessageProtocol()),
             }],
             [IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }],

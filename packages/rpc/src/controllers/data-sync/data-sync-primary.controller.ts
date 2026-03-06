@@ -82,6 +82,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         // to call the worker
         this._injector.add([
             IRemoteInstanceService,
+            // eslint-disable-next-line react/no-unnecessary-use-prefix
             { useFactory: () => toModule<IRemoteInstanceService>(this._rpcChannelService.requestChannel(RemoteInstanceServiceName)) },
         ]);
         this._remoteInstanceService = this._injector.get(IRemoteInstanceService);

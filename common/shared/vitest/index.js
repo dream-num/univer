@@ -52,6 +52,8 @@ function createConfig(options) {
                     '**/*.stories.tsx',
                     '**/__testing__/**',
                     '**/*/tailwind.config.ts',
+                    'packages/slides/**',
+                    'packages/slides-ui/**',
                 ],
             },
         },

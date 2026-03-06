@@ -21,15 +21,16 @@ import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import type { IObjectMatrixPrimitiveType } from './object-matrix';
 import type { Nullable } from './types';
 import { isCellV, isICellData, RANGE_TYPE } from '../sheets/typedef';
+import { THEME_COLORS } from '../types/const/theme-color-map';
 import {
     BaselineOffset,
     BorderStyleTypes,
     HorizontalAlign,
     TextDirection,
+    ThemeColors,
     VerticalAlign,
     WrapStrategy,
 } from '../types/enum';
-import { ColorBuilder } from './color/color';
 import { ColorKit } from './color/color-kit';
 import { DEFAULT_NUMBER_FORMAT, getNumfmtParseValueFilter } from './numfmt';
 import { ObjectMatrix } from './object-matrix';
@@ -151,8 +152,11 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
             return new ColorKit(color.rgb).toHexString();
         }
 
-        if (color.th) {
-            return new ColorBuilder().setThemeColor(color.th).asThemeColor().asRgbColor().getCssString();
+        if (color.th != null) {
+            const themeColor = THEME_COLORS[ThemeColors.OFFICE]?.[color.th];
+            if (themeColor) {
+                return new ColorKit(themeColor).toRgbString();
+            }
         }
     }
 

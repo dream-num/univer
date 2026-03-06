@@ -78,7 +78,7 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
         const newChildren = children.map((object) => {
             const { transform } = object;
             const { unitId, subUnitId, drawingId } = object;
-            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
+            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0, parent.groupBaseBound);
             return {
                 unitId,
                 subUnitId,

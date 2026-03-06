@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
+import type { IGroupBaseBound, ITransformState, Nullable } from '@univerjs/core';
 import { offsetRotationAxis } from './offset-rotation-axis';
 import { Vector2 } from './vector2';
 
@@ -73,9 +73,62 @@ export function getDrawingGroupState(parentLeft: number, parentTop: number, obje
         scaleY: 1,
     };
 }
-export function transformObjectOutOfGroup(child: ITransformState, parent: ITransformState, groupOriginWidth: number, groupOriginHeight: number) {
-    const { left = 0, top = 0, width = 0, height = 0, angle = 0, } = child;
+
+/**
+ * Transform a child object out of a group, computing its absolute position, angle, and flip state.
+ *
+ * When a DrawingGroup has a baseBound (chOff/chExt in OOXML), children store their positions
+ * in the baseBound coordinate space. This method first maps the child's position from baseBound
+ * space to the actual parent bound space, then applies group flip mirroring and rotation.
+ *
+ * @param child - The child's transform state (position in baseBound space if baseBound is provided)
+ * @param parent - The parent group's transform state (absolute position, angle, flip)
+ * @param groupOriginWidth - The original width of the group (used to compute group center)
+ * @param groupOriginHeight - The original height of the group (used to compute group center)
+ * @param baseBound - Optional. The group's baseBound (chOff/chExt). If provided, child coordinates
+ *                    are mapped from this space to the parent's actual bound space before transforming.
+ * 
+ * @example
+ * // in excel, the group off & ext is the real position and size of the group, and the child position is relative to the group chOff/chExt. For example:
+ * ```xml
+ *   <a:xfrm>
+ *        <a:off x="1212850" y="889000"/>
+ *        <a:ext cx="6813550" cy="4883150"/>
+ *        <a:chOff x="1212850" y="889000"/>
+ *        <a:chExt cx="6813550" cy="4883150"/>
+ *    </a:xfrm>
+ * ```
+ */
+export function transformObjectOutOfGroup(
+    child: ITransformState,
+    parent: ITransformState,
+    groupOriginWidth: number,
+    groupOriginHeight: number,
+    baseBound: Nullable<IGroupBaseBound>
+) {
+    const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = child;
     const { left: groupLeft = 0, top: groupTop = 0, angle: groupAngle = 0, flipX: groupFlipX = false, flipY: groupFlipY = false } = parent;
+
+    // Map child position from baseBound space to actual parent bound space
+    let mappedLeft = left;
+    let mappedTop = top;
+    let mappedWidth = width;
+    let mappedHeight = height;
+
+    if (baseBound && baseBound.width > 0 && baseBound.height > 0) {
+        const parentBound: IGroupBaseBound = {
+            left: groupLeft,
+            top: groupTop,
+            width: groupOriginWidth,
+            height: groupOriginHeight,
+        };
+        const objectBound: IGroupBaseBound = { left, top, width, height };
+        const mapped = getRenderTransformBaseOnParentBound(baseBound, parentBound, objectBound);
+        mappedLeft = mapped.left;
+        mappedTop = mapped.top;
+        mappedWidth = mapped.width;
+        mappedHeight = mapped.height;
+    }
 
     const groupCenterX = groupLeft + groupOriginWidth / 2;
     const groupCenterY = groupTop + groupOriginHeight / 2;
@@ -83,36 +136,44 @@ export function transformObjectOutOfGroup(child: ITransformState, parent: ITrans
     let flipX = child.flipX || false;
     let flipY = child.flipY || false;
 
-    let objectX = left;
-    let objectY = top;
+    let objectX = mappedLeft;
+    let objectY = mappedTop;
 
     if (groupFlipX) {
-        const objectCenterX = objectX + width / 2;
+        const objectCenterX = objectX + mappedWidth / 2;
         const mirroredCenterX = 2 * groupCenterX - objectCenterX;
-        objectX = mirroredCenterX - width / 2;
+        objectX = mirroredCenterX - mappedWidth / 2;
         flipX = !flipX;
     }
 
     if (groupFlipY) {
-        const objectCenterY = objectY + height / 2;
+        const objectCenterY = objectY + mappedHeight / 2;
         const mirroredCenterY = 2 * groupCenterY - objectCenterY;
-        objectY = mirroredCenterY - height / 2;
+        objectY = mirroredCenterY - mappedHeight / 2;
         flipY = !flipY;
     }
 
-    const objectCenterX = objectX + width / 2;
-    const objectCenterY = objectY + height / 2;
+    const objectCenterX = objectX + mappedWidth / 2;
+    const objectCenterY = objectY + mappedHeight / 2;
 
-    const finalPoint = offsetRotationAxis(new Vector2(groupCenterX, groupCenterY), groupAngle, new Vector2(objectX, objectY), new Vector2(objectCenterX, objectCenterY));
+    const finalPoint = offsetRotationAxis(
+        new Vector2(groupCenterX, groupCenterY),
+        groupAngle,
+        new Vector2(objectX, objectY),
+        new Vector2(objectCenterX, objectCenterY)
+    );
 
     return {
         left: finalPoint.x,
         top: finalPoint.y,
+        width: mappedWidth,
+        height: mappedHeight,
         angle: groupAngle + angle,
-        flipX: flipX,
-        flipY: flipY,
+        flipX,
+        flipY,
     };
 }
+
 
 /**
  * Get the rendered position and size of an object based on the group's baseBound and the parent's bound.

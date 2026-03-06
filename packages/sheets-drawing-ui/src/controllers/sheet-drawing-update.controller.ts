@@ -115,7 +115,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-        this._updateImageListener();
+        this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
@@ -553,9 +553,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _updateImageListener() {
+    private _updateDrawingListener() {
         this.disposeWithMe(this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<ISheetDrawing>[] = [];
+
+            const groupChildParams: IDrawingParam[] = [];
 
             if (params.length === 0) {
                 return;
@@ -592,6 +594,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     sheetTransform: { ...sheetTransform },
                     axisAlignSheetTransform: { ...axisAlignSheetTransform },
                 };
+
+
+                if (newDrawing.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+
+                }
 
                 drawings.push(newDrawing);
             });

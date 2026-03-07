@@ -47,7 +47,7 @@ describe('plugin version check', () => {
 
         const univer = new Univer();
         expect(() => univer.registerPlugin(MismatchVersionPlugin)).toThrowError(
-            /plugin "@univerjs\/mismatch-version-plugin" version mismatch/
+            /package "@univerjs\/mismatch-version-plugin" version mismatch/
         );
     });
 });

@@ -16,7 +16,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^7.2.0
-        version: 7.2.0(@eslint-react/eslint-plugin@2.8.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.27)(eslint-plugin-format@1.5.0(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-refresh@0.5.2(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 7.2.0(@eslint-react/eslint-plugin@2.8.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.27)(eslint-plugin-format@1.5.0(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-refresh@0.5.2(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@commitlint/cli':
         specifier: ^20.4.3
         version: 20.4.3(@types/node@25.3.5)(typescript@5.9.3)
@@ -102,14 +102,14 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       turbo:
-        specifier: ^2.8.13
-        version: 2.8.13
+        specifier: ^2.8.14
+        version: 2.8.14
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   common/debugger:
     dependencies:
@@ -170,7 +170,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vue:
         specifier: ^3.5.27
         version: 3.5.27(typescript@5.9.3)
@@ -381,7 +381,7 @@ importers:
         version: 6.2.2
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -772,7 +772,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/core:
     dependencies:
@@ -836,7 +836,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/data-validation:
     dependencies:
@@ -864,7 +864,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/design:
     dependencies:
@@ -952,7 +952,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs:
     dependencies:
@@ -977,7 +977,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-drawing:
     dependencies:
@@ -999,7 +999,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-drawing-ui:
     dependencies:
@@ -1054,7 +1054,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-hyper-link:
     dependencies:
@@ -1073,7 +1073,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -1125,7 +1125,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-mention-ui:
     dependencies:
@@ -1168,7 +1168,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-quick-insert-ui:
     dependencies:
@@ -1229,7 +1229,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -1281,7 +1281,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/docs-ui:
     dependencies:
@@ -1339,7 +1339,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/drawing:
     dependencies:
@@ -1364,7 +1364,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/drawing-ui:
     dependencies:
@@ -1410,7 +1410,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/engine-formula:
     dependencies:
@@ -1441,7 +1441,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/engine-render:
     dependencies:
@@ -1484,7 +1484,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/find-replace:
     dependencies:
@@ -1527,7 +1527,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/network:
     dependencies:
@@ -1549,7 +1549,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/rpc:
     dependencies:
@@ -1571,7 +1571,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/rpc-node:
     dependencies:
@@ -1596,7 +1596,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets:
     dependencies:
@@ -1633,7 +1633,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -1667,7 +1667,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -1728,7 +1728,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-crosshair-highlight:
     dependencies:
@@ -1777,7 +1777,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-data-validation:
     dependencies:
@@ -1814,7 +1814,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-data-validation-ui:
     dependencies:
@@ -1878,7 +1878,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-drawing:
     dependencies:
@@ -1903,7 +1903,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-drawing-ui:
     dependencies:
@@ -1964,7 +1964,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-filter:
     dependencies:
@@ -1998,7 +1998,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-filter-ui:
     dependencies:
@@ -2056,7 +2056,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-find-replace:
     dependencies:
@@ -2090,7 +2090,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-formula:
     dependencies:
@@ -2127,7 +2127,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-formula-ui:
     dependencies:
@@ -2188,7 +2188,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-graphics:
     dependencies:
@@ -2213,7 +2213,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-hyper-link:
     dependencies:
@@ -2244,7 +2244,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-hyper-link-ui:
     dependencies:
@@ -2311,7 +2311,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-note:
     dependencies:
@@ -2336,7 +2336,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-note-ui:
     dependencies:
@@ -2388,7 +2388,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-numfmt:
     dependencies:
@@ -2416,7 +2416,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-numfmt-ui:
     dependencies:
@@ -2471,7 +2471,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-sort:
     dependencies:
@@ -2496,7 +2496,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-sort-ui:
     dependencies:
@@ -2551,7 +2551,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-table:
     dependencies:
@@ -2579,7 +2579,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-table-ui:
     dependencies:
@@ -2640,7 +2640,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-thread-comment:
     dependencies:
@@ -2671,7 +2671,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-thread-comment-ui:
     dependencies:
@@ -2729,7 +2729,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-ui:
     dependencies:
@@ -2793,7 +2793,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -2848,7 +2848,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/slides:
     dependencies:
@@ -2870,7 +2870,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/slides-ui:
     dependencies:
@@ -2925,7 +2925,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/telemetry:
     dependencies:
@@ -2944,7 +2944,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/themes:
     devDependencies:
@@ -2975,7 +2975,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/thread-comment-ui:
     dependencies:
@@ -3021,7 +3021,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/ui:
     dependencies:
@@ -3079,7 +3079,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/ui-adapter-vue3:
     dependencies:
@@ -3101,7 +3101,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vue:
         specifier: ^3.5.27
         version: 3.5.27(typescript@5.9.3)
@@ -3129,7 +3129,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/uniscript:
     dependencies:
@@ -3175,7 +3175,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/watermark:
     dependencies:
@@ -3200,7 +3200,7 @@ importers:
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   tests/formula-integration:
     dependencies:
@@ -3252,7 +3252,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 
@@ -10572,38 +10572,38 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  turbo-darwin-64@2.8.13:
-    resolution: {integrity: sha512-PmOvodQNiOj77+Zwoqku70vwVjKzL34RTNxxoARjp5RU5FOj/CGiC6vcDQhNtFPUOWSAaogHF5qIka9TBhX4XA==}
+  turbo-darwin-64@2.8.14:
+    resolution: {integrity: sha512-9sFi7n2lLfEsGWi5OEoA/eTtQU2BPKtzSYKqufMtDeRmqMT9vKjbv9gJCRkllSVE9BOXA0qXC3diyX8V8rKIKw==}
     cpu: [x64]
     os: [darwin]
 
-  turbo-darwin-arm64@2.8.13:
-    resolution: {integrity: sha512-kI+anKcLIM4L8h+NsM7mtAUpElkCOxv5LgiQVQR8BASyDFfc8Efj5kCk3cqxuxOvIqx0sLfCX7atrHQ2kwuNJQ==}
+  turbo-darwin-arm64@2.8.14:
+    resolution: {integrity: sha512-aS4yJuy6A1PCLws+PJpZP0qCURG8Y5iVx13z/WAbKyeDTY6W6PiGgcEllSaeLGxyn++382ztN/EZH85n2zZ6VQ==}
     cpu: [arm64]
     os: [darwin]
 
-  turbo-linux-64@2.8.13:
-    resolution: {integrity: sha512-j29KnQhHyzdzgCykBFeBqUPS4Wj7lWMnZ8CHqytlYDap4Jy70l4RNG46pOL9+lGu6DepK2s1rE86zQfo0IOdPw==}
+  turbo-linux-64@2.8.14:
+    resolution: {integrity: sha512-XC6wPUDJkakjhNLaS0NrHDMiujRVjH+naEAwvKLArgqRaFkNxjmyNDRM4eu3soMMFmjym6NTxYaF74rvET+Orw==}
     cpu: [x64]
     os: [linux]
 
-  turbo-linux-arm64@2.8.13:
-    resolution: {integrity: sha512-OEl1YocXGZDRDh28doOUn49QwNe82kXljO1HXApjU0LapkDiGpfl3jkAlPKxEkGDSYWc8MH5Ll8S16Rf5tEBYg==}
+  turbo-linux-arm64@2.8.14:
+    resolution: {integrity: sha512-ChfE7isyVNjZrVSPDwcfqcHLG/FuIBbOFxnt1FM8vSuBGzHAs8AlTdwFNIxlEMJfZ8Ad9mdMxdmsCUPIWiQ6cg==}
     cpu: [arm64]
     os: [linux]
 
-  turbo-windows-64@2.8.13:
-    resolution: {integrity: sha512-717bVk1+Pn2Jody7OmWludhEirEe0okoj1NpRbSm5kVZz/yNN/jfjbxWC6ilimXMz7xoMT3IDfQFJsFR3PMANA==}
+  turbo-windows-64@2.8.14:
+    resolution: {integrity: sha512-FTbIeQL1ycLFW2t9uQNMy+bRSzi3Xhwun/e7ZhFBdM+U0VZxxrtfYEBM9CHOejlfqomk6Jh7aRz0sJoqYn39Hg==}
     cpu: [x64]
     os: [win32]
 
-  turbo-windows-arm64@2.8.13:
-    resolution: {integrity: sha512-R819HShLIT0Wj6zWVnIsYvSNtRNj1q9VIyaUz0P24SMcLCbQZIm1sV09F4SDbg+KCCumqD2lcaR2UViQ8SnUJA==}
+  turbo-windows-arm64@2.8.14:
+    resolution: {integrity: sha512-KgZX12cTyhY030qS7ieT8zRkhZZE2VWJasDFVUSVVn17nR7IShpv68/7j5UqJNeRLIGF1XPK0phsP5V5yw3how==}
     cpu: [arm64]
     os: [win32]
 
-  turbo@2.8.13:
-    resolution: {integrity: sha512-nyM99hwFB9/DHaFyKEqatdayGjsMNYsQ/XBNO6MITc7roncZetKb97MpHxWf3uiU+LB9c9HUlU3Jp2Ixei2k1A==}
+  turbo@2.8.14:
+    resolution: {integrity: sha512-UCTxeMNYT1cKaHiIFdLCQ7ulI+jw5i5uOnJOrRXsgUD7G3+OjlUjwVd7JfeVt2McWSVGjYA3EVW/v1FSsJ5DtA==}
     hasBin: true
 
   type-check@0.3.2:
@@ -11133,7 +11133,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@antfu/eslint-config@7.2.0(@eslint-react/eslint-plugin@2.8.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.27)(eslint-plugin-format@1.5.0(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-refresh@0.5.2(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@antfu/eslint-config@7.2.0(@eslint-react/eslint-plugin@2.8.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.27)(eslint-plugin-format@1.5.0(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-refresh@0.5.2(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 0.11.0
@@ -11142,7 +11142,7 @@ snapshots:
       '@stylistic/eslint-plugin': 5.7.1(eslint@9.39.2(jiti@2.6.1))
       '@typescript-eslint/eslint-plugin': 8.54.0(@typescript-eslint/parser@8.56.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       '@typescript-eslint/parser': 8.56.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@vitest/eslint-plugin': 1.6.6(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/eslint-plugin': 1.6.6(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       ansis: 4.2.0
       cac: 6.7.14
       eslint: 9.39.2(jiti@2.6.1)
@@ -13953,18 +13953,18 @@ snapshots:
       magicast: 0.5.1
       obug: 2.1.1
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.6.6(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/eslint-plugin@1.6.6(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)(vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@typescript-eslint/scope-manager': 8.54.0
       '@typescript-eslint/utils': 8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint: 9.39.2(jiti@2.6.1)
     optionalDependencies:
       typescript: 5.9.3
-      vitest: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -19274,32 +19274,32 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  turbo-darwin-64@2.8.13:
+  turbo-darwin-64@2.8.14:
     optional: true
 
-  turbo-darwin-arm64@2.8.13:
+  turbo-darwin-arm64@2.8.14:
     optional: true
 
-  turbo-linux-64@2.8.13:
+  turbo-linux-64@2.8.14:
     optional: true
 
-  turbo-linux-arm64@2.8.13:
+  turbo-linux-arm64@2.8.14:
     optional: true
 
-  turbo-windows-64@2.8.13:
+  turbo-windows-64@2.8.14:
     optional: true
 
-  turbo-windows-arm64@2.8.13:
+  turbo-windows-arm64@2.8.14:
     optional: true
 
-  turbo@2.8.13:
+  turbo@2.8.14:
     optionalDependencies:
-      turbo-darwin-64: 2.8.13
-      turbo-darwin-arm64: 2.8.13
-      turbo-linux-64: 2.8.13
-      turbo-linux-arm64: 2.8.13
-      turbo-windows-64: 2.8.13
-      turbo-windows-arm64: 2.8.13
+      turbo-darwin-64: 2.8.14
+      turbo-darwin-arm64: 2.8.14
+      turbo-linux-64: 2.8.14
+      turbo-linux-arm64: 2.8.14
+      turbo-windows-64: 2.8.14
+      turbo-windows-arm64: 2.8.14
 
   type-check@0.3.2:
     dependencies:
@@ -19533,7 +19533,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
       '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))

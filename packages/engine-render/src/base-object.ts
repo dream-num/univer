@@ -885,6 +885,84 @@ export abstract class BaseObject extends Disposable {
         this._makeDirtyMix();
     }
 
+    /**
+     * When this object is inside a Group with a baseBound (chOff/chExt in OOXML),
+     * compute a mapped render matrix that maps the object's position from the baseBound
+     * coordinate space to the group's local coordinate space.
+     *
+     * @returns The mapped render matrix, or null if not inside a group with baseBound.
+     */
+    protected _getGroupBoundRenderMatrix(): number[] | null {
+        const parent = this._parent;
+        if (!this.isInGroup || !parent || parent.classType !== RENDER_CLASS_TYPE.GROUP) {
+            return null;
+        }
+
+        if (typeof parent.hasBaseBound !== 'function' || !parent.hasBaseBound()) {
+            return null;
+        }
+
+        const baseBound = parent.getBaseBound();
+        const groupWidth: number = parent.width;
+        const groupHeight: number = parent.height;
+
+        const sx = baseBound.width > 0 ? groupWidth / baseBound.width : 1;
+        const sy = baseBound.height > 0 ? groupHeight / baseBound.height : 1;
+
+        // Map position from baseBound space to group-local space
+        const mappedLeft = (this.left - baseBound.left) * sx;
+        const mappedTop = (this.top - baseBound.top) * sy;
+
+        // Build the render transform with mapped position and accumulated scale
+        const mappedTransform = Transform.create().composeMatrix({
+            left: mappedLeft + this.strokeWidth / 2,
+            top: mappedTop + this.strokeWidth / 2,
+            scaleX: this.scaleX * sx,
+            scaleY: this.scaleY * sy,
+            angle: this.angle,
+            skewX: this.skewX,
+            skewY: this.skewY,
+            flipX: this.flipX,
+            flipY: this.flipY,
+        });
+
+        // Apply center rotation the same way as the normal transform getter
+        const cx = (this.width * sx + this.strokeWidth) / 2;
+        const cy = (this.height * sy + this.strokeWidth) / 2;
+        if (this.angle !== 0) {
+            mappedTransform.rotate(-this.angle);
+            mappedTransform.translate(cx, cy);
+            mappedTransform.rotate(this.angle);
+            mappedTransform.translate(-cx, -cy);
+        }
+
+        return mappedTransform.getMatrix();
+    }
+
+    /**
+     * Get the baseBound scale factors from the parent group, if applicable.
+     * Returns { sx, sy } or null if not inside a group with baseBound.
+     */
+    protected _getGroupBoundScale(): { sx: number; sy: number } | null {
+        const parent = this._parent;
+        if (!this.isInGroup || !parent || parent.classType !== RENDER_CLASS_TYPE.GROUP) {
+            return null;
+        }
+
+        if (typeof parent.hasBaseBound !== 'function' || !parent.hasBaseBound()) {
+            return null;
+        }
+
+        const baseBound = parent.getBaseBound();
+        const groupWidth: number = parent.width;
+        const groupHeight: number = parent.height;
+
+        return {
+            sx: baseBound.width > 0 ? groupWidth / baseBound.width : 1,
+            sy: baseBound.height > 0 ? groupHeight / baseBound.height : 1,
+        };
+    }
+
     private _makeDirtyMix() {
         if (this.debounceParentDirty) {
             this.makeDirty(true);

@@ -284,19 +284,20 @@ export class Image extends Shape<IImageProps> {
             }
         }
 
-        const m = this.transform.getMatrix();
         mainCtx.save();
-        // if (this.flipX || this.flipY) {
-        //     const centerX = this.left + this.width / 2;
-        //     const centerY = this.top + this.height / 2;
-        //    mainCtx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
-        // }else {
 
-        //     mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        // }
-        const centerX = this.left + this.width / 2;
-        const centerY = this.top + this.height / 2;
-        mainCtx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
+        // When inside a group with baseBound, use the mapped render matrix
+        const groupBoundMatrix = this._getGroupBoundRenderMatrix();
+        if (groupBoundMatrix) {
+            const { centerX, centerY } = this._getGroupBoundImageCenter();
+            mainCtx.transform(groupBoundMatrix[0], groupBoundMatrix[1], groupBoundMatrix[2], groupBoundMatrix[3], centerX, centerY);
+        } else {
+            const m = this.transform.getMatrix();
+            const centerX = this.left + this.width / 2;
+            const centerY = this.top + this.height / 2;
+            mainCtx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
+        }
+
         if (this.opacity !== 1) {
             mainCtx.globalAlpha = this.opacity;
         }
@@ -319,6 +320,25 @@ export class Image extends Shape<IImageProps> {
         } else {
             ctx.drawImage(this._native, -this.width / 2, -this.height / 2, this.width, this.height);
         }
+    }
+
+    /**
+     * Compute the center coordinates for image rendering when inside a group with baseBound.
+     */
+    private _getGroupBoundImageCenter(): { centerX: number; centerY: number } {
+        const groupScale = this._getGroupBoundScale();
+        const sx = groupScale?.sx ?? 1;
+        const sy = groupScale?.sy ?? 1;
+        const parent = this.getParent();
+        const baseBound = (parent && typeof parent.getBaseBound === 'function') ? parent.getBaseBound() : { left: 0, top: 0 };
+        const mappedLeft = (this.left - baseBound.left) * sx;
+        const mappedTop = (this.top - baseBound.top) * sy;
+        const mappedWidth = this.width * sx;
+        const mappedHeight = this.height * sy;
+        return {
+            centerX: mappedLeft + mappedWidth / 2,
+            centerY: mappedTop + mappedHeight / 2,
+        };
     }
 
     private _init(): void {

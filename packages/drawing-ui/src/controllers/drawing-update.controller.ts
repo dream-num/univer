@@ -215,8 +215,7 @@ export class DrawingUpdateController extends Disposable {
             } else {
                 object.transformByState(transform);
             }
-
-            // const group = object?.ancestorGroup;
+             // const group = object?.ancestorGroup;
             // if (group != null && objects.includes(group) === false) {
             //     objects.push(group);
             // } else if (object != null && objects.includes(object) === false) {
@@ -234,8 +233,27 @@ export class DrawingUpdateController extends Disposable {
         scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
         group.addObjects(...objects);
-        // group.reCalculateObjects();
-        parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top });
+
+        // Set baseBound (chOff/chExt in OOXML) - defines the child coordinate space
+        if (parent.groupBaseBound) {
+            group.setBaseBound({
+                left: parent.groupBaseBound.left || 0,
+                top: parent.groupBaseBound.top || 0,
+                width: parent.groupBaseBound.width || 0,
+                height: parent.groupBaseBound.height || 0,
+            });
+        }
+
+        // Set group's own transform (off/ext in OOXML)
+        if (parent.transform) {
+            group.transformByState({
+                left: parent.transform.left,
+                top: parent.transform.top,
+                width: parent.transform.width,
+                height: parent.transform.height,
+                angle: parent.transform.angle,
+            });
+        }
 
         transformer.clearSelectedObjects();
         transformer.setSelectedControl(group);
@@ -312,10 +330,6 @@ export class DrawingUpdateController extends Disposable {
         children.forEach((drawing) => {
             const drawingKey = getDrawingShapeKeyByDrawingSearch(drawing);
             const object = scene.getObjectIncludeInGroup(drawingKey);
-
-            if (object == null) {
-                return true;
-            }
 
             if (object == null) {
                 return;

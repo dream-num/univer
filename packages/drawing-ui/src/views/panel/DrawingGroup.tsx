@@ -53,6 +53,12 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             drawingId: groupId,
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             transform: groupTransform,
+            groupBaseBound: {
+                left: groupTransform.left,
+                top: groupTransform.top,
+                width: groupTransform.width,
+                height: groupTransform.height,
+            },
         } as IDrawingParam;
 
         const children = focusDrawings.map((drawing) => {
@@ -64,8 +70,6 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                 drawingId,
                 transform: {
                     ...transform,
-                    left: transform.left! - groupTransform.left,
-                    top: transform.top! - groupTransform.top,
                 },
                 groupId,
             };
@@ -94,10 +98,24 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             return;
         }
 
+        // Use groupBaseBound (chOff/chExt) to map children from baseBound space to absolute positions
+        const baseBound = param.groupBaseBound || {
+            left: groupTransform.left || 0,
+            top: groupTransform.top || 0,
+            width: groupTransform.width || 0,
+            height: groupTransform.height || 0,
+        };
+
         const children = objects.map((object) => {
             const { transform } = object;
             const { unitId, subUnitId, drawingId } = object;
-            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
+            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, {
+                left: baseBound.left || 0,
+                top: baseBound.top || 0,
+                width: baseBound.width || 0,
+                height: baseBound.height || 0,
+            });
+
             return {
                 unitId,
                 subUnitId,

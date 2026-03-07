@@ -36,6 +36,8 @@ export interface ISrcRect extends IOffset {
 
 export interface IAbsoluteTransform extends ISize, IOffset, IScale {}
 
+export interface IGroupBaseBound extends IOffset, ISize {}
+
 export interface IRectXYWH {
     x: number;
     y: number;

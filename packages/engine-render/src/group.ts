@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { CURSOR_TYPE } from './basics/const';
+import type { IGroupBaseBound } from './basics/group-transform';
 
 import type { IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
@@ -28,6 +29,19 @@ import { isString } from './basics/tools';
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];
     private _selfSizeMode = false;
+
+    /**
+     * Corresponds to chOff (child offset) and chExt (child extent) in OOXML.
+     * Describes the coordinate space of children within this group.
+     * Children store their absolute positions in this coordinate space.
+     * When rendering, positions are mapped from baseBound space to the group's current transform.
+     */
+    private _baseBound: IGroupBaseBound = {
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+    };
 
     constructor(key?: string, ...objects: BaseObject[]) {
         super(key);
@@ -102,6 +116,32 @@ export class Group extends BaseObject {
 
     closeSelfSizeMode() {
         this._selfSizeMode = false;
+    }
+
+    /**
+     * Set the baseBound (chOff/chExt in OOXML) for this group.
+     * This defines the coordinate space of children within the group.
+     * When set, the group automatically enters selfSizeMode so its dimensions
+     * are tracked independently of children.
+     */
+    setBaseBound(bound: IGroupBaseBound) {
+        this._baseBound = { ...bound };
+        // When baseBound is set, the group manages its own dimensions
+        this._selfSizeMode = true;
+    }
+
+    /**
+     * Get the baseBound (chOff/chExt in OOXML) for this group.
+     */
+    getBaseBound(): IGroupBaseBound {
+        return { ...this._baseBound };
+    }
+
+    /**
+     * Check if a valid baseBound is set (non-zero dimensions).
+     */
+    hasBaseBound(): boolean {
+        return this._baseBound.width > 0 && this._baseBound.height > 0;
     }
 
     reCalculateObjects() {
@@ -204,7 +244,10 @@ export class Group extends BaseObject {
     }
 
     private _transformObject(object: BaseObject, groupWidth: number, groupHeight: number) {
-        const transform = transformObjectOutOfGroup(object.getState(), this.getState(), groupWidth, groupHeight);
+        const baseBound = this.hasBaseBound()
+            ? this._baseBound
+            : { left: 0, top: 0, width: groupWidth, height: groupHeight };
+        const transform = transformObjectOutOfGroup(object.getState(), this.getState(), baseBound);
         if (object.classType === RENDER_CLASS_TYPE.GROUP) {
             object.transformByState({
                 left: transform.left,
@@ -232,8 +275,17 @@ export class Group extends BaseObject {
 
     override render(ctx: UniverRenderingContext, bounds: IViewportInfo) {
         ctx.save();
-        const m = this.transform.getMatrix();
-        ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+
+        // When this group is a child of another group with baseBound,
+        // use the mapped render matrix instead of the raw transform.
+        const groupBoundMatrix = this._getGroupBoundRenderMatrix();
+        if (groupBoundMatrix) {
+            ctx.transform(groupBoundMatrix[0], groupBoundMatrix[1], groupBoundMatrix[2], groupBoundMatrix[3], groupBoundMatrix[4], groupBoundMatrix[5]);
+        } else {
+            const m = this.transform.getMatrix();
+            ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        }
+
         const objects = this.getObjectsByOrder();
 
         for (let i = 0; i < objects.length; i++) {

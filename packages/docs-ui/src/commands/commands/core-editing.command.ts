@@ -25,8 +25,8 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, ICommandService, IPermissionService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocumentEditablePermission, RichTextEditingMutation } from '@univerjs/docs';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getRichTextEditPath } from '../util';
 
@@ -53,10 +53,17 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const { range, segmentId, body, unitId, cursorOffset } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const permissionService = accessor.get(IPermissionService);
 
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
+            return false;
+        }
+
+        // Check if document is editable (using permission system)
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
             return false;
         }
 
@@ -223,9 +230,16 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const permissionService = accessor.get(IPermissionService);
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
         if (docDataModel == null) {
+            return false;
+        }
+
+        // Check if document is editable (using permission system)
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
             return false;
         }
 

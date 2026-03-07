@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellWithCoord, IDocumentData, IRange, ISelectionCell } from '../../types/interfaces';
+import type { ICellData, ICellWithCoord, IRange, ISelectionCell } from '../../sheets/typedef';
+import type { IDocumentData } from '../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { RANGE_TYPE } from '../../sheets/typedef';
+import {
+    RANGE_TYPE,
+} from '../../sheets/typedef';
 import { BorderStyleTypes, ThemeColorType } from '../../types/enum';
 import {
     BaselineOffset,
@@ -252,10 +255,12 @@ describe('Test common', () => {
         const cell = { v: 'text', p: null, f: null } as ICellData;
         expect(covertCellValue(cell)).toBe(cell);
 
-        expect(covertCellValues([
+        const mixedValues = [
             [1, '=A1'],
             ['2%', null],
-        ], { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 } as IRange)).toEqual({
+        ] as unknown as Parameters<typeof covertCellValues>[0];
+
+        expect(covertCellValues(mixedValues, { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 } as IRange)).toEqual({
             0: {
                 0: { v: 1, p: null, f: null },
                 1: { f: '=A1', v: null, p: null },

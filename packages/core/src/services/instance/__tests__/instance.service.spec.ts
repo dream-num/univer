@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '../../../sheets/workbook';
+import type { IWorkbookData } from '../../../sheets/typedef';
+import type { Workbook } from '../../../sheets/workbook';
 import type { IDocumentData } from '../../../types/interfaces/i-document-data';
 import type { ISlideData } from '../../../types/interfaces/i-slide-data';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -64,8 +65,8 @@ function createSlideData(id = 'slide-unit'): Partial<ISlideData> {
     return {
         id,
         title: 'Slide',
-        body: { pages: [] },
-    } as Partial<ISlideData>;
+        body: { pages: {}, pageOrder: [] },
+    };
 }
 
 describe('UniverInstanceService', () => {

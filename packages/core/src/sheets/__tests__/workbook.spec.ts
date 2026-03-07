@@ -19,6 +19,7 @@ import type { IWorkbookData } from '../typedef';
 import type { Workbook } from '../workbook';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../types/enum';
+import { LocaleType } from '../../types/enum/locale-type';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test workbook', () => {
@@ -110,6 +111,7 @@ describe('Test workbook', () => {
             const customData: IWorkbookData = {
                 id: 'book-hidden',
                 appVersion: '3.0.0-alpha',
+                locale: LocaleType.EN_US,
                 name: 'Hidden Test',
                 styles: {},
                 sheetOrder: ['s1', 's2'],
@@ -117,7 +119,7 @@ describe('Test workbook', () => {
                     s1: { id: 's1', name: 'Hidden', hidden: BooleanNumber.TRUE },
                     s2: { id: 's2', name: 'Visible' },
                 },
-            } as IWorkbookData;
+            };
 
             const hiddenTestBed = createCoreTestBed(customData);
             const hiddenWorkbook = hiddenTestBed.sheet;

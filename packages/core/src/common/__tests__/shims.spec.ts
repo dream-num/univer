@@ -106,7 +106,7 @@ describe('installShims', () => {
 
         expect([1, 2, 3, 2].findLastIndex((value) => value === 2)).toBe(3);
         expect([1, 2, 3, 2].findLast((value) => value === 2)).toBe(2);
-        expect(() => Array.prototype.findLastIndex.call([1], null)).toThrowError(/callback must be a function/);
+        expect(() => Array.prototype.findLastIndex.call([1], null as never)).toThrowError(/callback must be a function/);
     });
 
     it('should install string at polyfill', () => {

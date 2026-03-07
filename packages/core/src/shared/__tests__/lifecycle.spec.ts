@@ -24,6 +24,12 @@ class TestDisposable extends Disposable {
     }
 }
 
+class TestRxDisposable extends RxDisposable {
+    getDispose$() {
+        return this.dispose$;
+    }
+}
+
 describe('lifecycle helpers', () => {
     afterEach(() => {
         vi.restoreAllMocks();
@@ -66,9 +72,9 @@ describe('lifecycle helpers', () => {
         expect(child.dispose).toHaveBeenCalledTimes(1);
         expect(() => disposable.assertUsable()).toThrowError(/disposed/);
 
-        const rxDisposable = new RxDisposable();
+        const rxDisposable = new TestRxDisposable();
         const completed = vi.fn();
-        rxDisposable.dispose$.subscribe({ complete: completed });
+        rxDisposable.getDispose$().subscribe({ complete: completed });
         rxDisposable.dispose();
         expect(completed).toHaveBeenCalledTimes(1);
     });

@@ -388,7 +388,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     };
 }
 
-export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string, string | undefined> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -420,6 +420,23 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                     id: SetRangeFontFamilyCommand.id,
                 },
             },
+            value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable<string>((subscriber) => {
+                let ff = defaultValue;
+
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
+                if (primary != null) {
+                    const cell = worksheet.getCellStyle(primary.startRow, primary.startColumn);
+                    const defaultStyle = worksheet.getDefaultCellStyleInternal();
+                    const rowStyle = worksheet.getRowStyle(primary.startRow);
+                    const colStyle = worksheet.getColumnStyle(primary.startColumn);
+                    const style = composeStyles(defaultStyle, rowStyle, colStyle, cell);
+                    if (style.ff) {
+                        ff = style.ff;
+                    }
+                }
+
+                subscriber.next(ff);
+            })),
         }],
         disabled$,
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {

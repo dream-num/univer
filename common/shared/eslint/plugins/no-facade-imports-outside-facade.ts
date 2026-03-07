@@ -1,12 +1,48 @@
 /* eslint-disable header/header */
 import path from 'node:path';
 
+function normalizePath(filePath) {
+    return filePath.split(path.sep).join('/');
+}
+
+function shouldIgnoreFile(normalizedFilePath, ignorePaths) {
+    return ignorePaths.some((ignorePath) => {
+        if (typeof ignorePath !== 'string') {
+            return false;
+        }
+
+        const normalizedIgnorePath = normalizePath(ignorePath).replace(/^\.\//, '');
+
+        if (!normalizedIgnorePath) {
+            return false;
+        }
+
+        return normalizedFilePath === normalizedIgnorePath
+            || normalizedFilePath.endsWith(`/${normalizedIgnorePath}`)
+            || normalizedFilePath.includes(normalizedIgnorePath);
+    });
+}
+
 export default {
     meta: {
         type: 'problem',
         docs: {
             description: 'Disallow imports containing facade in non-facade files',
         },
+        schema: [
+            {
+                type: 'object',
+                properties: {
+                    ignore: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                        },
+                    },
+                },
+                additionalProperties: false,
+            },
+        ],
         messages: {
             noFacadeImports: 'Imports containing "facade" are not allowed in non-facade files: "{{importPath}}"',
         },
@@ -14,7 +50,13 @@ export default {
 
     create(context) {
         const filename = context.getFilename();
-        const normalizedPath = filename.split(path.sep).join('/');
+        const normalizedPath = normalizePath(filename);
+        const [ruleOptions = {}] = context.options;
+        const ignorePaths = Array.isArray(ruleOptions.ignore) ? ruleOptions.ignore : [];
+
+        if (shouldIgnoreFile(normalizedPath, ignorePaths)) {
+            return {};
+        }
 
         const isInPackages = normalizedPath.includes('/packages/');
         const isInFacade = normalizedPath.includes('/facade/');
@@ -31,10 +73,10 @@ export default {
 
         const parentDir = parentDirMatch[1];
         const packagePrefix = parentDir === 'univer'
-            ? '@univerjs/' :
-            parentDir === 'univer-pro'
-                ? '@univerjs-pro/' :
-                null;
+            ? '@univerjs/'
+            : parentDir === 'univer-pro'
+                ? '@univerjs-pro/'
+                : null;
 
         if (!packagePrefix) {
             return {};

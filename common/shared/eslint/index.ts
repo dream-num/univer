@@ -235,7 +235,11 @@ export const typescriptPreset = (): Linter.Config => {
  *
  * @returns ESLint configuration object for Univer source files
  */
-export const univerSourcePreset = (): Linter.Config => {
+export const univerSourcePreset = (options: {
+    noFacadeImportsOutsideFacade?: {
+        ignore?: string[];
+    };
+} = {}): Linter.Config => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
@@ -245,7 +249,9 @@ export const univerSourcePreset = (): Linter.Config => {
         ],
         rules: {
             'univer/no-self-package-imports': 'error',
-            'univer/no-facade-imports-outside-facade': 'error',
+            'univer/no-facade-imports-outside-facade': ['error', {
+                ignore: options.noFacadeImportsOutsideFacade?.ignore ?? [],
+            }],
         },
         languageOptions: {
             parser: typescriptParser,

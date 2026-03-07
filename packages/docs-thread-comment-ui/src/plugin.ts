@@ -19,6 +19,7 @@ import type { IUniverDocsThreadCommentUIConfig } from './controllers/config.sche
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import pkg from '../package.json';
 import { PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocThreadCommentSelectionController } from './controllers/doc-thread-comment-selection.controller';
@@ -29,6 +30,8 @@ import { DocThreadCommentService } from './services/doc-thread-comment.service';
 @DependentOn(UniverThreadCommentUIPlugin)
 export class UniverDocsThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(

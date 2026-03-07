@@ -41,7 +41,11 @@ export default antfu(
     headerPreset(),
     penetratingPreset(),
     typescriptPreset(),
-    univerSourcePreset(),
+    univerSourcePreset({
+        noFacadeImportsOutsideFacade: {
+            ignore: ['packages/uniscript/src/services/script-execution.service.ts'],
+        },
+    }),
     facadePreset(),
     noBarrelImportPreset(),
     tailwindcssPreset(),

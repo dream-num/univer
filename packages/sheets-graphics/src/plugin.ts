@@ -16,16 +16,16 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsGraphicsConfig } from './controllers/config.schema';
-
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import pkg from '../package.json';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetGraphicsRenderController } from './controllers/graphics-render.controller';
 
-const PLUGIN_NAME = 'UNIVER_SHEET_DRAWING_PLUGIN';
-
 export class UniverSheetsGraphicsPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_SHEET_DRAWING_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsGraphicsConfig> = defaultPluginConfig,

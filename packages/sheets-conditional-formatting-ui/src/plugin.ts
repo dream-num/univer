@@ -29,6 +29,7 @@ import {
 } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import pkg from '../package.json';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
@@ -37,7 +38,6 @@ import { AddNumberCfCommand } from './commands/commands/add-number-cf.command';
 import { AddRankCfCommand } from './commands/commands/add-rank-cf.command';
 import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
 import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
-
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
@@ -57,6 +57,8 @@ import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY
 @DependentOn(UniverSheetsConditionalFormattingPlugin, UniverSheetsFormulaPlugin)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_UI_PLUGIN`;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

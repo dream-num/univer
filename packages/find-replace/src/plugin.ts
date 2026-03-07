@@ -17,14 +17,15 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverFindReplaceConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import pkg from '../package.json';
 import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
-const PLUGIN_NAME = 'UNIVER_FIND_REPLACE_PLUGIN';
-
 export class UniverFindReplacePlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_FIND_REPLACE_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverFindReplaceConfig> = defaultPluginConfig,

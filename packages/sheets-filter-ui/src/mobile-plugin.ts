@@ -17,18 +17,18 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIMobileController } from './controllers/sheets-filter-ui-mobile.controller';
 
-const NAME = 'SHEET_FILTER_UI_PLUGIN';
-
 @DependentOn(UniverSheetsFilterPlugin)
 export class UniverSheetsFilterMobileUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
-    static override pluginName = NAME;
+    static override pluginName = 'SHEET_FILTER_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig> = defaultPluginConfig,

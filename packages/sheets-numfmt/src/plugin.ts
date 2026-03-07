@@ -17,6 +17,7 @@
 import type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import pkg from '../package.json';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/plugin-name';
 import { AddDecimalCommand } from './commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from './commands/commands/set-currency.command';
@@ -29,6 +30,8 @@ import { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-con
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsNumfmtPlugin extends Plugin {
     static override pluginName = SHEET_NUMFMT_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

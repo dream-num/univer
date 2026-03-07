@@ -15,8 +15,8 @@
  */
 
 import type { Injector, IPageElement, Nullable, PageElementType } from '@univerjs/core';
-import { Registry } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
+import { Registry } from '@univerjs/core';
 
 export abstract class ObjectAdaptor {
     zIndex = 0;

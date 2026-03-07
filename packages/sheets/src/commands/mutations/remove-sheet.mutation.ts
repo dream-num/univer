@@ -15,12 +15,11 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
-
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 /**

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Observable, shareReplay } from 'rxjs';
-
 import type { IMessageProtocol } from '../rpc.service';
+import { Observable, shareReplay } from 'rxjs';
 
 /**
  * Generate an `IMessageProtocol` on the web worker.

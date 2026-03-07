@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable, IPosition, Nullable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ICellEditorManagerParam extends Partial<IPosition> {

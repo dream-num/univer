@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverThreadCommentConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import pkg from '../package.json';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
 import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -27,6 +28,8 @@ import { TC_PLUGIN_NAME } from './types/const';
 
 export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(

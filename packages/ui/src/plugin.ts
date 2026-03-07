@@ -17,6 +17,7 @@
 import type { IUniverUIConfig } from './controllers/config.schema';
 import { DependentOn, generateRandomId, IConfigService, IConfirmService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import pkg from '../package.json';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -59,8 +60,6 @@ import { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.s
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 
-export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
-
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 
 /**
@@ -68,7 +67,9 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
  */
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverUIPlugin extends Plugin {
-    static override pluginName = UNIVER_UI_PLUGIN_NAME;
+    static override pluginName = 'UNIVER_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverUIConfig> = defaultPluginConfig,

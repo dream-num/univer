@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType } from '@univerjs/core';
 import type { IRange, IUnitRangeName } from '@univerjs/core';
-
+import { AbsoluteRefType } from '@univerjs/core';
 import { handleRefStringInfo } from './reference';
 
 const $relativeRegex = /[\[\]]/g;

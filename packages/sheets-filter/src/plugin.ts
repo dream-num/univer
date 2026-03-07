@@ -16,17 +16,19 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFilterConfig } from './controllers/config.schema';
-
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SheetsFilterFormulaService } from './services/sheet-filter-formula.service';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
-import { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 
 export class UniverSheetsFilterPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = SHEET_FILTER_SNAPSHOT_ID;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterConfig> = defaultPluginConfig,

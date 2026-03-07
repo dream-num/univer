@@ -25,9 +25,9 @@ import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
+import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
-import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();

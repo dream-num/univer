@@ -19,6 +19,7 @@ import type { IUniverSheetsTableUIConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
+import pkg from '../package.json';
 import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
 import { PLUGIN_NAME } from './const';
@@ -35,6 +36,8 @@ import { SheetsTableUiService } from './services/sheets-table-ui-service';
 @DependentOn(UniverSheetsTablePlugin)
 export class UniverSheetsTableUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

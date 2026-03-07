@@ -22,6 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
+import pkg from '../package.json';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -95,6 +96,8 @@ import { IStatusBarService, StatusBarService } from './services/status-bar.servi
 @DependentOn(UniverSheetsPlugin, UniverMobileUIPlugin)
 export class UniverSheetsMobileUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     /** @ignore */

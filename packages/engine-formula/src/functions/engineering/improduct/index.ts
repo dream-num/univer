@@ -15,14 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { isRealNum } from '@univerjs/core';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { isRealNum } from '@univerjs/core';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Improduct extends BaseFunction {
     override minParams = 1;

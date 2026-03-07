@@ -33,6 +33,7 @@ import {
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
+import pkg from '../package.json';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
@@ -144,6 +145,8 @@ import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(

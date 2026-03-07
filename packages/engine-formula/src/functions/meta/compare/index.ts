@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { compareToken } from '../../../basics/token';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { compareToken } from '../../../basics/token';
 import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {

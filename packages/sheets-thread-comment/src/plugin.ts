@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
+import pkg from '../package.json';
 import { defaultPluginConfig } from './controllers/config.schema';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentResourceController } from './controllers/sheets-thread-comment-resource.controller';
@@ -27,6 +28,8 @@ import { SHEET_THREAD_COMMENT_BASE } from './types/const';
 @DependentOn(UniverThreadCommentPlugin)
 export class UniverSheetsThreadCommentPlugin extends Plugin {
     static override pluginName = SHEET_THREAD_COMMENT_BASE;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

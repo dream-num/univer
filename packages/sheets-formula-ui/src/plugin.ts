@@ -21,6 +21,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, ComponentManager, connectInjector, IUIPartsService } from '@univerjs/ui';
+import pkg from '../package.json';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginConfig,
@@ -46,6 +47,8 @@ import { GlobalRangeSelector } from './views/range-selector/global';
 @DependentOn(UniverSheetsFormulaPlugin)
 export class UniverSheetsFormulaUIPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

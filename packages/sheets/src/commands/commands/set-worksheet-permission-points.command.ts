@@ -15,8 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService } from '@univerjs/core';
 import type { IWorksheetProtectionPointRule } from '../../services/permission/type';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { SetWorksheetPermissionPointsMutation } from '../mutations/set-worksheet-permission-points.mutation';
 
 export interface ISetWorksheetPermissionPointsCommandParams {

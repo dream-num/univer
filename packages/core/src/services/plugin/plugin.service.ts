@@ -17,6 +17,7 @@
 import type { Ctor, IDisposable } from '../../common/di';
 import type { UnitType } from '../../common/unit';
 import { skip } from 'rxjs';
+import pkg from '../../../package.json';
 import { Inject, Injector } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
 import { Disposable } from '../../shared/lifecycle';
@@ -31,6 +32,8 @@ export const DependentOnSymbol = Symbol('DependentOn');
 export type PluginCtor<T extends Plugin = Plugin> = Ctor<T> & {
     type: UnitType;
     pluginName: string;
+    packageName: string;
+    version: string;
     [DependentOnSymbol]?: PluginCtor[];
 };
 
@@ -39,6 +42,8 @@ export type PluginCtor<T extends Plugin = Plugin> = Ctor<T> & {
  */
 export abstract class Plugin extends Disposable {
     static pluginName: string;
+    static packageName = pkg.name;
+    static version = pkg.version;
 
     static type: UnitType = UniverInstanceType.UNIVER_UNKNOWN;
 
@@ -183,7 +188,7 @@ export class PluginService implements IDisposable {
     }
 
     private _assertPluginValid(ctor: PluginCtor<Plugin>): void {
-        const { type, pluginName } = ctor;
+        const { type, pluginName, packageName, version } = ctor;
 
         if (type === UniverInstanceType.UNRECOGNIZED) {
             throw new Error(`[PluginService]: invalid plugin type for ${ctor.name}. Please assign a "type" to your plugin.`);
@@ -191,6 +196,14 @@ export class PluginService implements IDisposable {
 
         if (!pluginName) {
             throw new Error(`[PluginService]: no plugin name for ${ctor.name}. Please assign a "pluginName" to your plugin.`);
+        }
+
+        if (version && version !== Plugin.version) {
+            throw new Error(
+                `[PluginService]: package "${packageName ?? 'UNKNOWN'}" version mismatch. `
+                + `Plugin version is "${version}" but @univerjs/core version is "${Plugin.version}". `
+                + 'Please make sure all @univerjs packages use the same version.'
+            );
         }
 
         if (this._seenPlugins.has(pluginName)) {

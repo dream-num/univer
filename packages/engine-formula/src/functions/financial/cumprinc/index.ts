@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { calculateFV, calculatePMT } from '../../../basics/financial';
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { calculateFV, calculatePMT } from '../../../basics/financial';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 
 export class Cumprinc extends BaseFunction {
     override minParams = 6;

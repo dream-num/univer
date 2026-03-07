@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IZenEditorManagerService {
     position$: Observable<Nullable<DOMRect>>;

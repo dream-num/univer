@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
+import pkg from '../package.json';
 import { CalculateController } from './controller/calculate.controller';
 import { ComputingStatusReporterController } from './controller/computing-status.controller';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
@@ -59,10 +60,10 @@ import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtim
 import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 
-const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
-
 export class UniverFormulaEnginePlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_ENGINE_FORMULA_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         protected readonly _config: Partial<IUniverEngineFormulaConfig> = defaultPluginConfig,

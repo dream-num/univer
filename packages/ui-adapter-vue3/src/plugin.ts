@@ -19,6 +19,7 @@ import type { defineComponent } from 'vue';
 import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
 import { h, render } from 'vue';
+import pkg from '../package.json';
 
 /**
  * The plugin that allows Univer to use Vue 3 components as UI components.
@@ -26,6 +27,8 @@ import { h, render } from 'vue';
 @DependentOn(UniverUIPlugin)
 export class UniverVue3AdapterPlugin extends Plugin {
     static override pluginName = 'UNIVER_UI_ADAPTER_VUE3_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config = {},

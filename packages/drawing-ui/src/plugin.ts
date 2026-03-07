@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDrawingUIConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import pkg from '../package.json';
 import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
@@ -24,10 +25,10 @@ import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
 import { DrawingRenderService } from './services/drawing-render.service';
 
-const PLUGIN_NAME = 'UNIVER_DRAWING_UI_PLUGIN';
-
 export class UniverDrawingUIPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_DRAWING_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverDrawingUIConfig> = defaultPluginConfig,

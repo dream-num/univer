@@ -22,6 +22,9 @@ import sortKeys from 'sort-keys';
 import localPkg from '../package.json';
 import { peerDepsMap } from './data';
 
+type StringMap = Record<string, string>;
+type PeerDepValue = (typeof peerDepsMap)[keyof typeof peerDepsMap] & { optional?: boolean };
+
 function filterPackageName(packageName: string): string {
     if (packageName.startsWith('@univerjs/')) {
         return packageName.split('/').slice(0, 2).join('/');
@@ -37,10 +40,11 @@ export function cleanupPkgPlugin(): Plugin {
     const __pkg = path.resolve(process.cwd(), 'package.json');
     const pkg = fs.readJSONSync(__pkg);
     const isPro = pkg.name.startsWith('@univerjs-pro');
+    const localDevDependencies = localPkg.devDependencies as StringMap;
 
-    const peerDeps = {};
-    const deps = {};
-    const optionalDeps = {};
+    const peerDeps: StringMap = {};
+    const deps: StringMap = {};
+    const optionalDeps: StringMap = {};
 
     return {
         name: 'cleanup-pkg',
@@ -48,10 +52,10 @@ export function cleanupPkgPlugin(): Plugin {
         apply: 'build',
 
         resolveId(source) {
-            if (source in peerDepsMap) {
-                const value = peerDepsMap[source];
+            if (Object.prototype.hasOwnProperty.call(peerDepsMap, source)) {
+                const value = peerDepsMap[source as keyof typeof peerDepsMap] as PeerDepValue;
                 if (!(value.version in peerDepsMap)) {
-                    if ('optional' in value) {
+                    if (value.optional) {
                         optionalDeps[value.name] = value.version;
                     } else {
                         peerDeps[value.name] = value.version;
@@ -63,7 +67,10 @@ export function cleanupPkgPlugin(): Plugin {
                     if (name === '@univerjs/protocol' && isPro) {
                         deps[name] = 'workspace:*';
                     } else {
-                        deps[name] = localPkg.devDependencies[name];
+                        const dependencyVersion = localDevDependencies[name];
+                        if (dependencyVersion) {
+                            deps[name] = dependencyVersion;
+                        }
                     }
                 } else if (name !== pkg.name) {
                     const name = filterPackageName(source);
@@ -139,13 +146,20 @@ export function cleanupPkgPlugin(): Plugin {
                         if (key === '@univerjs/protocol' && isPro) {
                             pkg.devDependencies[key] = 'workspace:*';
                         } else {
-                            pkg.devDependencies[key] = localPkg.devDependencies[key];
+                            const dependencyVersion = localDevDependencies[key];
+                            if (dependencyVersion) {
+                                pkg.devDependencies[key] = dependencyVersion;
+                            }
                         }
                     }
                 }
             }
 
-            fs.writeJSONSync(__pkg, pkg, { spaces: 4, EOL: '\n' });
+            // Write package.json atomically to avoid concurrent readers seeing partial JSON content.
+            const tempPkgPath = `${__pkg}.${process.pid}.${Date.now()}.tmp`;
+            const pkgContent = `${JSON.stringify(pkg, null, 4)}\n`;
+            fs.writeFileSync(tempPkgPath, pkgContent, 'utf8');
+            fs.moveSync(tempPkgPath, __pkg, { overwrite: true });
         },
     };
 };

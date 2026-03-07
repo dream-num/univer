@@ -18,18 +18,17 @@ import type { Dependency } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
+import pkg from '../package.json';
 import { defaultPluginConfig, SLIDES_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 // import { DocSelectionManagerService } from '@univerjs/docs';
 // import { CanvasView } from './views/render';
 
 export interface IUniverSlidesConfig {}
 
-const DEFAULT_SLIDE_PLUGIN_DATA = {};
-
-const PLUGIN_NAME = 'slides';
-
 export class UniverSlidesPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_SLIDES_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     private _canvasEngine: Engine | null = null;

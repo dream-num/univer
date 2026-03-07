@@ -15,12 +15,12 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Imreal extends BaseFunction {
     override minParams = 1;

@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import pkg from '../package.json';
 import { ActiveWorksheetController } from './controllers/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
@@ -52,11 +53,11 @@ import { SheetsSelectionsService } from './services/selections/selection.service
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from './skeleton/skeleton.service';
 
-const PLUGIN_NAME = 'SHEET_PLUGIN';
-
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'SHEET_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

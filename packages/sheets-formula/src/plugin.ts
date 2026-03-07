@@ -20,6 +20,7 @@ import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, merge, Plugin
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import pkg from '../package.json';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
@@ -45,6 +46,8 @@ import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRe
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     static override pluginName = 'SHEET_FORMULA_REMOTE_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
@@ -75,6 +78,8 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

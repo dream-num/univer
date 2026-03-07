@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDataValidationConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import pkg from '../package.json';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 import { DATA_VALIDATION_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
@@ -24,10 +25,10 @@ import { DataValidationResourceController } from './controllers/dv-resource.cont
 import { DataValidationModel } from './models/data-validation-model';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
 
-const PLUGIN_NAME = 'UNIVER_DATA_VALIDATION_PLUGIN';
-
 export class UniverDataValidationPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_DATA_VALIDATION_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

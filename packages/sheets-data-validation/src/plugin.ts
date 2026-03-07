@@ -28,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import pkg from '../package.json';
 import {
     AddSheetDataValidationCommand,
     ClearRangeDataValidationCommand,
@@ -54,6 +55,8 @@ import { SheetsDataValidationValidatorService } from './services/dv-validator-se
 @DependentOn(UniverSheetsFormulaPlugin, UniverDataValidationPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
     static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

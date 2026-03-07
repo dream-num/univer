@@ -26,16 +26,17 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_SORT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 
-const NAME = 'SHEET_SORT_UI_PLUGIN';
-
 @DependentOn(UniverSheetsSortPlugin)
 export class UniverSheetsSortUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
-    static override pluginName = NAME;
+    static override pluginName = 'SHEET_SORT_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsSortUIConfig> = defaultPluginConfig,

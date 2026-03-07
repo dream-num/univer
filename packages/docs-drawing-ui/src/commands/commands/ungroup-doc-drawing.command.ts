@@ -15,13 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-} from '@univerjs/core';
-
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
+import { CommandType } from '@univerjs/core';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 
 /**
@@ -31,8 +26,6 @@ export const UngroupDocDrawingCommand: ICommand = {
     id: 'doc.command.ungroup-doc-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IDrawingGroupUpdateParam[]) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
         const docDrawingService = accessor.get(IDocDrawingService);
 
         if (!params) return false;

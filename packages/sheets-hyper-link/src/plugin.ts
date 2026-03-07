@@ -17,6 +17,7 @@
 import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
@@ -31,6 +32,8 @@ import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsHyperLinkPlugin extends Plugin {
     static override pluginName = SHEET_HYPER_LINK_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

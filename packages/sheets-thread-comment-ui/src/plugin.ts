@@ -19,6 +19,7 @@ import type { IUniverSheetsThreadCommentUIConfig } from './controllers/config.sc
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import pkg from '../package.json';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
@@ -32,6 +33,8 @@ import { SHEETS_THREAD_COMMENT } from './types/const';
 @DependentOn(UniverThreadCommentUIPlugin, UniverSheetsThreadCommentPlugin)
 export class UniverSheetsThreadCommentUIPlugin extends Plugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

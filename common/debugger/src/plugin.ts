@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
+import pkg from '../package.json';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
@@ -25,6 +26,8 @@ import { UniverWatermarkMenuController } from './controllers/watermark.menu.cont
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'UNIVER_DEBUGGER_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     private _debuggerController!: DebuggerController;
 

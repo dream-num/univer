@@ -15,4 +15,4 @@
  */
 
 export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from './Tree';
-export { mergeTreeSelected, findSubTreeFromPath, findNodePathFromTree, filterLeafNode } from './util';
+export { filterLeafNode, findNodePathFromTree, findSubTreeFromPath, mergeTreeSelected } from './util';

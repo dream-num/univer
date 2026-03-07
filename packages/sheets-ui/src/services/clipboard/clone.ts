@@ -15,8 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { cloneValue } from '@univerjs/core';
 import type { ICellDataWithSpanInfo } from './type';
+import { cloneValue } from '@univerjs/core';
 
 /**
  * Fast clone for ICellDataWithSpanInfo. Optimized for the known structure.

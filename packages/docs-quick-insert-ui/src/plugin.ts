@@ -23,18 +23,19 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
+import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocQuickInsertMenuController } from './controllers/doc-quick-insert-menu.controller';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 import { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
 import { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
 
-const PLUGIN_NAME = 'DOC_QUICK_INSERT_UI_PLUGIN';
-
 @DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingUIPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
 export class UniverDocsQuickInsertUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'DOC_QUICK_INSERT_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverDocsQuickInsertUIConfig> = defaultPluginConfig,

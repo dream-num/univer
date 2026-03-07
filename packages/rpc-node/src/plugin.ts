@@ -32,10 +32,13 @@ import {
     WebWorkerRemoteInstanceService,
 } from '@univerjs/rpc';
 import { Observable, shareReplay } from 'rxjs';
+import pkg from '../package.json';
 import { defaultPluginMainThreadConfig, defaultPluginWorkerThreadConfig, PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './controllers/config.schema';
 
 export class UniverRPCNodeMainPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_NODE_MAIN_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     private _child: ChildProcess | null = null;
 
@@ -83,8 +86,7 @@ export class UniverRPCNodeMainPlugin extends Plugin {
         if (this._child) {
             try {
                 this._child.kill();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to kill child process:', e);
             }
             this._child = null;
@@ -94,6 +96,8 @@ export class UniverRPCNodeMainPlugin extends Plugin {
 
 export class UniverRPCNodeWorkerPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_NODE_WORKER_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverRPCNodeWorkerThreadConfig> = defaultPluginWorkerThreadConfig,

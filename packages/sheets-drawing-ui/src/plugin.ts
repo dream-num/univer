@@ -32,6 +32,7 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetCellImageHoverRenderController } from './controllers/render-controllers/sheet-celll-image-hover.render-controller';
@@ -48,12 +49,12 @@ import { SheetDrawingUIController } from './controllers/sheet-drawing.controller
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
-const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
-
 @DependentOn(UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'SHEET_IMAGE_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsDrawingUIConfig> = defaultPluginConfig,

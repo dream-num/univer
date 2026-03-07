@@ -16,8 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
-
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { ZenEditorController } from './controllers/zen-editor.controller';
@@ -25,6 +25,8 @@ import { IZenEditorManagerService, ZenEditorManagerService } from './services/ze
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'SHEET_ZEN_EDITOR_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

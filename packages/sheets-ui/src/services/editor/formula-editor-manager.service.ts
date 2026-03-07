@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IFormulaEditorManagerService {

@@ -16,20 +16,20 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsSortConfig } from './controllers/config.schema';
-
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_SORT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
 
-const NAME = 'SHEET_SORT_PLUGIN';
-
 @DependentOn(UniverSheetsPlugin, UniverFormulaEnginePlugin)
 export class UniverSheetsSortPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
-    static override pluginName = NAME;
+    static override pluginName = 'SHEET_SORT_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsSortConfig> = defaultPluginConfig,

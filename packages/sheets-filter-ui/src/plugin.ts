@@ -29,13 +29,12 @@ import {
 } from '@univerjs/core';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME } from './worker/generate-filter-values.service';
-
-const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
 /**
  * The plugin for the desktop version of the sheets filter UI. Its type is {@link UniverInstanceType.UNIVER_SHEET}.
@@ -43,7 +42,9 @@ const NAME = 'SHEET_FILTER_UI_PLUGIN';
 @DependentOn(UniverSheetsFilterPlugin)
 export class UniverSheetsFilterUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
-    static override pluginName = NAME;
+    static override pluginName = 'SHEET_FILTER_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig> = defaultPluginConfig,

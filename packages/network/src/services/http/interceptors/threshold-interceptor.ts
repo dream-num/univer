@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs';
 import type { Nullable } from '@univerjs/core';
-import { remove } from '@univerjs/core';
 import type { HTTPInterceptorFnFactory } from '../interceptor';
+import { remove } from '@univerjs/core';
+import { Observable } from 'rxjs';
 
 export interface IThresholdInterceptorFactoryParams {
     maxParallel?: number;

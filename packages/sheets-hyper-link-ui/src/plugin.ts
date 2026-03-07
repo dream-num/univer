@@ -20,6 +20,7 @@ import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverIns
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
+import pkg from '../package.json';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
@@ -36,6 +37,8 @@ import { SHEET_HYPER_LINK_UI_PLUGIN } from './types/const';
 @DependentOn(UniverSheetsHyperLinkPlugin, UniverDocsUIPlugin)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override pluginName: string = SHEET_HYPER_LINK_UI_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

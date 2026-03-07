@@ -17,6 +17,7 @@
 import type { IComponent } from '@univerjs/ui';
 import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
+import pkg from '../package.json';
 
 /**
  * The plugin that allows Univer to use web components as UI components.
@@ -24,6 +25,8 @@ import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
 @DependentOn(UniverUIPlugin)
 export class UniverWebComponentAdapterPlugin extends Plugin {
     static override pluginName = 'UNIVER_UI_ADAPTER_WEB_COMPONENT_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config = {},

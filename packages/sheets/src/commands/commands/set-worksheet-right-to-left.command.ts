@@ -15,9 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-
 import type { ISetWorksheetRightToLeftMutationParams } from '../mutations/set-worksheet-right-to-left.mutation';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import {
     SetWorksheetRightToLeftMutation,
     SetWorksheetRightToLeftUndoMutationFactory,

@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsNoteConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import pkg from '../package.json';
 import { PLUGIN_NAME } from './const';
 import { defaultPluginConfig, SHEETS_NOTE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsNoteRefRangeController } from './controllers/sheets-note-ref-range.controller';
@@ -28,6 +29,8 @@ import { SheetsNoteModel } from './models/sheets-note.model';
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsNotePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

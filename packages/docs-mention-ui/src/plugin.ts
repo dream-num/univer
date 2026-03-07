@@ -17,6 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
 import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
@@ -26,6 +27,8 @@ import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 
 export class UniverDocsMentionUIPlugin extends Plugin {
     static override pluginName = DOC_MENTION_UI_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Tools } from '@univerjs/core';
 import type { Engine, UniverRenderingContext } from '@univerjs/engine-render';
+import { Tools } from '@univerjs/core';
 import { Layer } from '@univerjs/engine-render';
 
 export class SelectionLayer extends Layer {

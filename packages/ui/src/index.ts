@@ -49,7 +49,7 @@ export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { UniverMobileUIPlugin } from './mobile-plugin';
-export { DISABLE_AUTO_FOCUS_KEY, UNIVER_UI_PLUGIN_NAME, UniverUIPlugin } from './plugin';
+export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export {
     BrowserClipboardService,

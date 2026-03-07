@@ -20,6 +20,7 @@ import type {
     IUniverRPCWorkerThreadConfig,
 } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import pkg from '../package.json';
 import {
     defaultPluginMainThreadConfig,
     defaultPluginWorkerThreadConfig,
@@ -46,6 +47,8 @@ import {
  */
 export class UniverRPCMainThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_MAIN_THREAD_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     private _internalWorker: Worker | null = null;
 
@@ -107,6 +110,8 @@ export class UniverRPCMainThreadPlugin extends Plugin {
  */
 export class UniverRPCWorkerThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_WORKER_THREAD_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverRPCWorkerThreadConfig> = defaultPluginWorkerThreadConfig,

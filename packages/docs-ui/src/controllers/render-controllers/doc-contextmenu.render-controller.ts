@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -24,8 +26,6 @@ import {
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
-import type { Workbook } from '@univerjs/core';
-import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
 const SKIP_UNIT_IDS = [
     DEFAULT_EMPTY_DOCUMENT_VALUE,

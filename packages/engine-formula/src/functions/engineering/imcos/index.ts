@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { isRealNum } from '@univerjs/core';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Imcos extends BaseFunction {
     override minParams = 1;

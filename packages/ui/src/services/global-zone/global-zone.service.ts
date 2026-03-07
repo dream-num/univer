@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
 import type { Subject } from 'rxjs';
+import { createIdentifier } from '@univerjs/core';
 
 export const IGlobalZoneService = createIdentifier<IGlobalZoneService>('univer.global-zone-service');
 

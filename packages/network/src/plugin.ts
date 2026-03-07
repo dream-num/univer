@@ -16,6 +16,7 @@
 
 import type { IUniverNetworkConfig } from './controllers/config.schema';
 import { IConfigService, ILogService, Inject, Injector, LookUp, merge, mergeOverrideWithDependencies, Plugin, Quantity, registerDependencies } from '@univerjs/core';
+import pkg from '../package.json';
 import { defaultPluginConfig, NETWORK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { HTTPService } from './services/http/http.service';
 import { FetchHTTPImplementation } from './services/http/implementations/fetch';
@@ -27,6 +28,8 @@ import { XHRHTTPImplementation } from './services/http/implementations/xhr';
  */
 export class UniverNetworkPlugin extends Plugin {
     static override pluginName = 'UNIVER_NETWORK_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverNetworkConfig> = defaultPluginConfig,

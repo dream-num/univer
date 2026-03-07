@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs';
-import type { HTTPRequest } from '../request';
-import { HTTPEventType, HTTPResponse } from '../response';
 import type { HTTPHandlerFn } from '../interceptor';
+import type { HTTPRequest } from '../request';
+import { Observable } from 'rxjs';
+import { HTTPEventType, HTTPResponse } from '../response';
 
 const createDefaultFetchCheck = (time = 300) => {
     const noop = () => { };

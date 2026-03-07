@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { remove } from '../../common/array';
-
-import { toDisposable } from '../lifecycle';
 import type { IDisposable } from '../../common/di';
+import { remove } from '../../common/array';
+import { toDisposable } from '../lifecycle';
 
 const NEWER = Symbol('newer');
 const OLDER = Symbol('older');

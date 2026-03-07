@@ -1,12 +1,28 @@
 /* eslint-disable header/header */
+import type { Rule } from 'eslint';
 import path from 'node:path';
 
-function normalizePath(filePath) {
+interface IRuleOptions { ignore?: unknown[] }
+
+function getImportSourceValue(node: Rule.Node): string | null {
+    if (!('source' in node)) {
+        return null;
+    }
+
+    const source = (node as { source?: { value?: unknown } }).source;
+    if (!source || typeof source.value !== 'string') {
+        return null;
+    }
+
+    return source.value;
+}
+
+function normalizePath(filePath: string): string {
     return filePath.split(path.sep).join('/');
 }
 
-function shouldIgnoreFile(normalizedFilePath, ignorePaths) {
-    return ignorePaths.some((ignorePath) => {
+function shouldIgnoreFile(normalizedFilePath: string, ignorePaths: readonly unknown[]): boolean {
+    return ignorePaths.some((ignorePath: unknown) => {
         if (typeof ignorePath !== 'string') {
             return false;
         }
@@ -23,7 +39,7 @@ function shouldIgnoreFile(normalizedFilePath, ignorePaths) {
     });
 }
 
-export default {
+const rule: Rule.RuleModule = {
     meta: {
         type: 'problem',
         docs: {
@@ -51,7 +67,7 @@ export default {
     create(context) {
         const filename = context.getFilename();
         const normalizedPath = normalizePath(filename);
-        const [ruleOptions = {}] = context.options;
+        const [ruleOptions = {} as IRuleOptions] = context.options as [IRuleOptions?];
         const ignorePaths = Array.isArray(ruleOptions.ignore) ? ruleOptions.ignore : [];
 
         if (shouldIgnoreFile(normalizedPath, ignorePaths)) {
@@ -71,23 +87,12 @@ export default {
             return {};
         }
 
-        const parentDir = parentDirMatch[1];
-        const packagePrefix = parentDir === 'univer'
-            ? '@univerjs/'
-            : parentDir === 'univer-pro'
-                ? '@univerjs-pro/'
-                : null;
-
-        if (!packagePrefix) {
-            return {};
-        }
-
         return {
-            ImportDeclaration(node) {
-                const importPath = node.source.value;
+            ImportDeclaration(node: Rule.Node) {
+                const importPath = getImportSourceValue(node);
 
                 // Check if the import path contains 'facade'
-                if (importPath.includes('facade')) {
+                if (importPath?.includes('facade')) {
                     context.report({
                         node,
                         messageId: 'noFacadeImports',
@@ -95,21 +100,19 @@ export default {
                     });
                 }
             },
-            ExportNamedDeclaration(node) {
-                if (node.source) {
-                    const exportPath = node.source.value;
-                    if (exportPath.includes('facade')) {
-                        context.report({
-                            node,
-                            messageId: 'noFacadeImports',
-                            data: { importPath: exportPath },
-                        });
-                    }
+            ExportNamedDeclaration(node: Rule.Node) {
+                const exportPath = getImportSourceValue(node);
+                if (exportPath?.includes('facade')) {
+                    context.report({
+                        node,
+                        messageId: 'noFacadeImports',
+                        data: { importPath: exportPath },
+                    });
                 }
             },
-            ExportAllDeclaration(node) {
-                const exportPath = node.source.value;
-                if (exportPath.includes('facade')) {
+            ExportAllDeclaration(node: Rule.Node) {
+                const exportPath = getImportSourceValue(node);
+                if (exportPath?.includes('facade')) {
                     context.report({
                         node,
                         messageId: 'noFacadeImports',
@@ -120,3 +123,5 @@ export default {
         };
     },
 };
+
+export default rule;

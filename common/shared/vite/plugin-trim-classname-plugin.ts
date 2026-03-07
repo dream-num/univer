@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-export function trimClassNamePlugin() {
+import type { Plugin } from 'vite';
+
+export function trimClassNamePlugin(): Plugin {
     return {
         name: 'vite-plugin-trim-classname',
-        transform(code, id) {
+        transform(code: string, id: string) {
             if (id.endsWith('.tsx')) {
                 const transformedCode = code.replace(
                     /className: `([^`}]+)`/g,
-                    (match, classNameValue) => {
+                    (_match: string, classNameValue: string) => {
                         const cleanedClassName = classNameValue
                             .replace(/\n/g, ' ')
                             .replace(/\s{2,}/g, ' ')
@@ -30,7 +32,7 @@ export function trimClassNamePlugin() {
                     }
                 ).replace(
                     /clsx\(`([^`}]+)`/g,
-                    (match, classNameValue) => {
+                    (_match: string, classNameValue: string) => {
                         const cleanedClassName = classNameValue
                             .replace(/\n/g, ' ')
                             .replace(/\s{2,}/g, ' ')

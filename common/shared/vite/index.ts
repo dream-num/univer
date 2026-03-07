@@ -219,8 +219,8 @@ export async function build(options?: IBuildOptions) {
         },
         plugins: [
             trimClassNamePlugin(),
-            react(),
-            vue(),
+            react({}),
+            vue({}),
             autoDetectedExternalPlugin(),
             vitePluginExternal({
                 nodeBuiltins: true,

@@ -1,0 +1,19 @@
+{
+    "extends": "./tsconfigs/base.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "skipLibCheck": true
+    },
+    "include": [
+        "bin/**/*.ts",
+        "esbuild/**/*.ts",
+        "eslint/**/*.ts",
+        "eslint/**/*.d.ts",
+        "tailwind/**/*.ts",
+        "vite/**/*.ts",
+        "vitest/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

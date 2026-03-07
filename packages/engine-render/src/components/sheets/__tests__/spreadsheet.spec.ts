@@ -59,9 +59,6 @@ function createSpreadsheetMock() {
     spreadsheet.draw = Spreadsheet.prototype.draw.bind(spreadsheet);
     spreadsheet._draw = vi.fn();
     spreadsheet.makeDirty = Spreadsheet.prototype.makeDirty.bind(spreadsheet);
-    spreadsheet._clearRectangle = Spreadsheet.prototype._clearRectangle.bind(spreadsheet);
-    spreadsheet._drawAuxiliary = Spreadsheet.prototype._drawAuxiliary.bind(spreadsheet);
-    spreadsheet._applyCache = Spreadsheet.prototype._applyCache.bind(spreadsheet);
     return spreadsheet;
 }
 

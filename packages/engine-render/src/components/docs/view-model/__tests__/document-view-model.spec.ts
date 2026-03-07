@@ -34,11 +34,11 @@ function createDocumentDataModel(overrides?: {
         customRanges: [],
         customDecorations: [],
         tables: [],
-        ...(overrides?.body ?? {}),
+        ...overrides?.body,
     };
     const snapshot = {
         tableSource: {},
-        ...(overrides?.snapshot ?? {}),
+        ...overrides?.snapshot,
     };
 
     return {

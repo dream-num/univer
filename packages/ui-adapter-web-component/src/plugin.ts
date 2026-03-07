@@ -53,7 +53,9 @@ export class UniverWebComponentAdapterPlugin extends Plugin {
 
 export function WebComponentComponentWrapper(options: {
     component: CustomElementConstructor;
-    props?: Record<string, any>;
+    props?: {
+        name?: string;
+    };
     reactUtils: typeof ComponentManager.prototype.reactUtils;
 }) {
     const { component, props, reactUtils } = options;

@@ -49,6 +49,17 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
+    const overrideTokens = new Set(dependencies?.map((dependency) => Array.isArray(dependency) ? dependency[0] : dependency));
+
+    const addDependency = (dependency: Dependency) => {
+        const token = Array.isArray(dependency) ? dependency[0] : dependency;
+
+        if (overrideTokens.has(token)) {
+            return;
+        }
+
+        injector.add(dependency);
+    };
 
     /**
      * This plugin hooks into Sheet's DI system to expose API to test scripts
@@ -66,23 +77,23 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onStarting(): void {
             const injector = this._injector;
-            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
-            injector.add([SheetsSelectionsService]);
-            injector.add([LexerTreeBuilder]);
-            injector.add([DocSelectionManagerService]);
-            injector.add([IFormulaPromptService, { useClass: FormulaPromptService }]);
-            injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
-            injector.add([IEditorService, { useClass: EditorService }]);
-            injector.add([SheetSkeletonManagerService]);
-            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            injector.add([SheetInterceptorService]);
-            injector.add([WorksheetPermissionService]);
-            injector.add([WorksheetProtectionPointModel]);
-            injector.add([WorkbookPermissionService]);
-            injector.add([RangeProtectionRuleModel]);
-            injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
-            injector.add([WorksheetProtectionRuleModel]);
-            injector.add([IRefSelectionsService, { useClass: RefSelectionsService }]);
+            addDependency([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
+            addDependency([SheetsSelectionsService]);
+            addDependency([LexerTreeBuilder]);
+            addDependency([DocSelectionManagerService]);
+            addDependency([IFormulaPromptService, { useClass: FormulaPromptService }]);
+            addDependency([IEditorBridgeService, { useClass: EditorBridgeService }]);
+            addDependency([IEditorService, { useClass: EditorService }]);
+            addDependency([SheetSkeletonManagerService]);
+            addDependency([IRenderManagerService, { useClass: RenderManagerService }]);
+            addDependency([SheetInterceptorService]);
+            addDependency([WorksheetPermissionService]);
+            addDependency([WorksheetProtectionPointModel]);
+            addDependency([WorkbookPermissionService]);
+            addDependency([RangeProtectionRuleModel]);
+            addDependency([IAuthzIoService, { useClass: AuthzIoLocalService }]);
+            addDependency([WorksheetProtectionRuleModel]);
+            addDependency([IRefSelectionsService, { useClass: RefSelectionsService }]);
 
             dependencies?.forEach((d) => injector.add(d));
 

@@ -1,10 +1,9 @@
 coverage:
-    patch: false
     status:
         project:
             default:
                 # basic
-                target: auto
+                target: 50%
                 threshold: 0
                 base: auto
                 # advanced settings

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MultipleSelect } from '../MultipleSelect';
 import { Select } from '../Select';
@@ -110,5 +110,27 @@ describe('MultipleSelect', () => {
                 expect(handleChange).not.toHaveBeenCalled();
             }
         }
+    });
+
+    it('should remove badge value when close icon is clicked', () => {
+        const handleChange = vi.fn();
+        render(<MultipleSelect value={['1', '2']} options={options} onChange={handleChange} />);
+
+        const closeButtons = screen.getAllByLabelText('Close badge');
+        fireEvent.click(closeButtons[0]);
+        expect(handleChange).toHaveBeenCalledWith(['2']);
+    });
+
+    it('should support borderless and disabled visual classes', () => {
+        const { container, rerender } = render(<MultipleSelect value={['1']} options={options} onChange={() => {}} />);
+        const trigger = container.querySelector('[data-u-comp="multiple-select"]') as HTMLDivElement;
+
+        expect(trigger).toHaveClass('univer-cursor-pointer', { exact: false });
+
+        rerender(<MultipleSelect value={['1']} options={options} onChange={() => {}} borderless />);
+        expect((container.querySelector('[data-u-comp="multiple-select"]') as HTMLDivElement).className).toContain('univer-border-transparent');
+
+        rerender(<MultipleSelect value={['1']} options={options} onChange={() => {}} disabled />);
+        expect((container.querySelector('[data-u-comp="multiple-select"]') as HTMLDivElement).className).toContain('univer-cursor-not-allowed');
     });
 });

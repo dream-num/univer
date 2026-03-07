@@ -17,7 +17,7 @@
 import type { CommandListener, DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, ILanguagePack, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages, LocaleType } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
-import { CanceledError, ColorBuilder, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleService, LocaleService, ParagraphStyleBuilder, ParagraphStyleValue, RedoCommand, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue, ThemeService, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { CanceledError, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleService, LocaleService, ParagraphStyleBuilder, ParagraphStyleValue, RedoCommand, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue, ThemeService, toDisposable, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { FBlob } from './f-blob';
 import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
@@ -520,19 +520,6 @@ export class FUniver extends Disposable {
      */
     newBlob(): FBlob {
         return this._injector.createInstance(FBlob);
-    }
-
-    /**
-     * Create a new color.
-     * @returns {ColorBuilder} The new color instance
-     * @example
-     * ```ts
-     * const color = univerAPI.newColor();
-     * ```
-     * @deprecated
-     */
-    newColor(): ColorBuilder {
-        return new ColorBuilder();
     }
 
     /**

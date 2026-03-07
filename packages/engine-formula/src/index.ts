@@ -87,8 +87,8 @@ export { type ISetImageFormulaDataMutationParams, SetImageFormulaDataMutation } 
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export type { ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from './commands/mutations/set-super-table.mutation';
-export { CalculateController } from './controller/calculate.controller';
-export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, type IUniverEngineFormulaConfig } from './controller/config.schema';
+export { CalculateController } from './controllers/calculate.controller';
+export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, type IUniverEngineFormulaConfig } from './controllers/config.schema';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';

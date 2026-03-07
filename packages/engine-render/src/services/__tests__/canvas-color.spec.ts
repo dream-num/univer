@@ -17,7 +17,8 @@
 import type { Injector } from '@univerjs/core';
 import { ThemeService } from '@univerjs/core';
 import { ICanvasColorService } from '@univerjs/engine-render';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CanvasColorService, DumbCanvasColorService, hexToRgb, rgbToHex } from '../canvas-color.service';
 import { createCanvasColorTestBed } from './create-canvas-color-test-bed';
 
 describe('Test Canvas Color', () => {
@@ -90,5 +91,42 @@ describe('Test Canvas Color', () => {
         themeService.setDarkMode(true);
         const invertedColor2 = canvasColorService.getRenderColor(color);
         expect(invertedColor2).toEqual('#333333ff');
+    });
+
+    it('test color parser and formatter', () => {
+        expect(hexToRgb('#abc')).toEqual([170, 187, 204]);
+        expect(hexToRgb('#112233')).toEqual([17, 34, 51]);
+        expect(hexToRgb('#abcd')).toEqual([170, 187, 204]);
+        expect(rgbToHex([10.2, 255.4, 0.49] as any)).toBe('#0aff00');
+    });
+
+    it('test dumb service', () => {
+        const service = new DumbCanvasColorService();
+        expect(service.getRenderColor('rgb(1,2,3)')).toBe('rgb(1,2,3)');
+    });
+
+    it('test theme token cache and illegal color branch', () => {
+        const themed = new CanvasColorService({
+            darkMode: true,
+            isValidThemeColor: (color: string) => color === 'primary.500',
+            getColorFromTheme: () => '#123456',
+        } as any);
+        expect(themed.getRenderColor('primary.500')).toBe('#123456');
+
+        const service = new CanvasColorService({
+            darkMode: true,
+            isValidThemeColor: () => false,
+            getColorFromTheme: () => '#000000',
+        } as any);
+
+        const invert = vi.fn(() => [1, 2, 3]);
+        (service as any)._invertAlgo = invert;
+        expect(service.getRenderColor('#ffffff')).toBe('#010203');
+        expect(service.getRenderColor('#ffffff')).toBe('#010203');
+        expect(invert).toHaveBeenCalledTimes(1);
+
+        (service as any)._invertAlgo = () => [9, 8, 7];
+        expect(service.getRenderColor('red')).toBe('rgba(9,8,7, 1)');
+        expect(() => service.getRenderColor('not-a-color-token')).toThrow(/illegal color/);
     });
 });

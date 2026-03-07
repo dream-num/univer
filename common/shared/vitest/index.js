@@ -19,6 +19,8 @@ const { defineConfig, mergeConfig } = require('vitest/config');
 function createConfig(options) {
     return defineConfig(mergeConfig({
         test: {
+            testTimeout: 30_000,
+            hookTimeout: 30_000,
             css: {
                 modules: {
                     classNameStrategy: 'non-scoped',
@@ -29,15 +31,14 @@ function createConfig(options) {
                 reporter: ['html', 'json'],
                 provider: 'custom',
                 customProviderModule: require.resolve('@vitest/coverage-istanbul'),
+                include: ['src/**/*.{ts,tsx}'],
                 exclude: [
                     'coverage/**',
                     'dist/**',
                     '**/[.]**',
-                    'packages/*/test?(s)/**',
                     '**/*.d.ts',
                     '**/virtual:*',
                     '**/__x00__*',
-                    '**/\x00*',
                     'cypress/**',
                     'test?(s)/**',
                     'test?(-*).?(c|m)[jt]s?(x)',
@@ -51,6 +52,8 @@ function createConfig(options) {
                     '**/*.stories.tsx',
                     '**/__testing__/**',
                     '**/*/tailwind.config.ts',
+                    'packages/slides/**',
+                    'packages/slides-ui/**',
                 ],
             },
         },

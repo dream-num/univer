@@ -29,14 +29,14 @@ export interface ITelemetryService {
      * @param token
      * @param options
      */
-    init: (options?: Record<string, any>) => void;
+    init: (options?: object) => void;
     /**
      * Identify the user.
      * @param id
      * @param params
      * @returns
      */
-    identify: (id: string, params?: Record<string, any>) => void;
+    identify: (id: string, params?: object) => void;
     /**
      * Reset the user.
      */
@@ -46,7 +46,7 @@ export interface ITelemetryService {
      * @param eventName
      * @param params
      */
-    capture: (eventName: string, params?: Record<string, any>) => void;
+    capture: (eventName: string, params?: object) => void;
     /**
      * Start the timer.
      * @param functionName
@@ -64,7 +64,7 @@ export interface ITelemetryService {
     trackPerformance: (params: {
         duration: number;
         functionName: string;
-        [prop: string]: any;
+        [prop: string]: unknown;
     }) => void;
     /**
      * Track the page view.

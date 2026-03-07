@@ -15,7 +15,7 @@
  */
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Gallery } from '../Gallery';
 import '@testing-library/jest-dom/vitest';
 
@@ -30,6 +30,9 @@ afterEach(() => {
 });
 
 describe('Gallery', () => {
+    beforeEach(() => {
+        vi.useRealTimers();
+    });
     it('does not render when open is false', () => {
         render(<Gallery images={images} open={false} />);
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -91,14 +94,49 @@ describe('Gallery', () => {
 
     it('can switch images using the pager', () => {
         render(<Gallery images={images} open={true} />);
-        // You may need to adjust this selector depending on your Pager implementation
-        // For example, if there is a button with aria-label="Next page"
-        const nextButton = screen.queryByLabelText(/next/i) || screen.queryByTestId('pager-right-arrow');
-        if (nextButton) {
-            fireEvent.click(nextButton);
-            const img = screen.getByRole('img');
-            expect(img).toHaveAttribute('src', images[1]);
-            expect(img).toHaveAttribute('alt', 'Image 2 of 3');
+        const nextButton = document.querySelector('[data-u-comp="pager-right-arrow"]') as HTMLButtonElement;
+        fireEvent.click(nextButton);
+        const img = screen.getByRole('img');
+        expect(img).toHaveAttribute('src', images[1]);
+        expect(img).toHaveAttribute('alt', 'Image 2 of 3');
+    });
+
+    it('should zoom with wheel event and keep value in range', () => {
+        render(<Gallery images={images} open={true} />);
+        const img = screen.getByRole('img');
+        const getScale = () => Number.parseFloat((img.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? '1'));
+
+        fireEvent.wheel(window, { deltaY: -300 });
+        expect(img.style.transform).toContain('scale(');
+
+        const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
+        const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
+        for (let i = 0; i < 8; i++) {
+            fireEvent.click(zoomInBtn);
         }
+        const atUpperBound = getScale();
+        fireEvent.click(zoomInBtn);
+        expect(getScale()).toBe(atUpperBound);
+        expect(getScale()).toBeLessThanOrEqual(2);
+
+        for (let i = 0; i < 12; i++) {
+            fireEvent.click(zoomOutBtn);
+        }
+        const atLowerBound = getScale();
+        fireEvent.click(zoomOutBtn);
+        expect(getScale()).toBe(atLowerBound);
+        expect(getScale()).toBeGreaterThanOrEqual(0.5);
+    });
+
+    it('should schedule close animation timer when closing', () => {
+        const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+        const { rerender } = render(<Gallery images={images} open={true} />);
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+        rerender(<Gallery images={images} open={false} />);
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+        expect(timeoutSpy).toHaveBeenCalled();
+        expect(timeoutSpy.mock.calls.some(([, delay]) => delay === 150)).toBe(true);
     });
 });

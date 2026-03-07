@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
-import { Tree } from '../Tree';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Tree, TreeSelectionMode } from '../Tree';
 import { findNodeFromPath, findNodePathFromTree, findSubTreeFromPath, isIntermediated, mergeTreeSelected } from '../util';
 
 afterEach(cleanup);
@@ -98,5 +98,60 @@ describe('Tree', () => {
         );
 
         expect(container);
+    });
+
+    it('should call onChange for checkbox and onExpend for node title click', () => {
+        const onChange = vi.fn();
+        const onExpend = vi.fn();
+        const { getByText, container } = render(
+            <Tree
+                data={data}
+                onChange={onChange}
+                onExpend={onExpend}
+                defaultExpandAll
+            />
+        );
+
+        const nodeTitle = getByText('node 0');
+        fireEvent.click(nodeTitle);
+        expect(onExpend).toHaveBeenCalledWith('0');
+
+        const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        fireEvent.click(checkbox);
+        expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ key: '0' }));
+    });
+
+    it('should avoid onExpend for parent in ONLY_LEAF_NODE mode and allow leaf', () => {
+        const onExpend = vi.fn();
+        const { getByText } = render(
+            <Tree
+                data={data}
+                selectionMode={TreeSelectionMode.ONLY_LEAF_NODE}
+                onExpend={onExpend}
+                defaultExpandAll
+            />
+        );
+
+        fireEvent.click(getByText('node 0'));
+        fireEvent.click(getByText('node 0'));
+        expect(onExpend).not.toHaveBeenCalledWith('0');
+
+        fireEvent.click(getByText('node 0-0'));
+        expect(onExpend).toHaveBeenCalledWith('0-0');
+    });
+
+    it('should derive selected node set from valueGroup and cached finder', () => {
+        const cache = new Map<string, string[]>();
+        const { container } = render(
+            <Tree
+                data={data}
+                valueGroup={['0-0']}
+                defaultCache={cache}
+                defaultExpandAll
+            />
+        );
+
+        const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
+        expect(checkboxes.some((checkbox) => checkbox.checked)).toBe(true);
     });
 });

@@ -42,9 +42,9 @@ export class UniverVue3AdapterPlugin extends Plugin {
         const { createElement, useEffect, useRef } = this._componentManager.reactUtils;
 
         this._componentManager.setHandler('vue3', (component: IComponent['component']) => {
-            return (props: Record<string, any>) => createElement(VueComponentWrapper, {
+            return (props: Record<string, unknown>) => createElement(VueComponentWrapper, {
                 component,
-                props: Object.keys(props).reduce<Record<string, any>>((acc, key) => {
+                props: Object.keys(props).reduce<Record<string, unknown>>((acc, key) => {
                     if (key !== 'key') {
                         acc[key] = props[key];
                     }
@@ -58,7 +58,7 @@ export class UniverVue3AdapterPlugin extends Plugin {
 
 export function VueComponentWrapper(options: {
     component: ReturnType<typeof defineComponent>;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     reactUtils: typeof ComponentManager.prototype.reactUtils;
 }) {
     const { component, props, reactUtils } = options;

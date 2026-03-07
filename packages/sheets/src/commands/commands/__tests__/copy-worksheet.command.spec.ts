@@ -15,10 +15,13 @@
  */
 
 import type { Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ICommandService, IConfigService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
+import { SheetLazyExecuteScheduleService } from '../../../services/lazy-execute-schedule.service';
+import { CopyWorksheetEndMutation } from '../../mutations/copy-worksheet-end.mutation';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../../mutations/remove-sheet.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -43,6 +46,7 @@ describe('Test copy worksheet commands', () => {
         commandService.registerCommand(InsertSheetMutation);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetWorksheetActiveOperation);
+        commandService.registerCommand(CopyWorksheetEndMutation);
         commandService.registerCommand(SetWorksheetActivateCommand);
         commandService.registerCommand(RemoveSheetCommand);
         commandService.registerCommand(RemoveSheetMutation);
@@ -117,6 +121,50 @@ describe('Test copy worksheet commands', () => {
                 workbook.addWorksheet('sheet1-copy', 0, { name: 'Sheet1 (Copy)' });
 
                 expect(getCopyUniqueSheetName(workbook, localeService, name)).toBe('Sheet1 (Copy2)');
+            });
+
+            it('split large sheet copy should schedule remaining mutations and disable redo', async () => {
+                const sourceWorkbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const sourceSheet = sourceWorkbook.getActiveSheet();
+                sourceSheet.getCellMatrix().setValue(1, 0, { v: 'B1' });
+                expect(sourceSheet.getConfig().cellData[1]).toBeDefined();
+
+                const configService = get(IConfigService);
+                configService.setConfig(SHEETS_PLUGIN_CONFIG_KEY, {
+                    largeSheetOperation: {
+                        largeSheetCellCountThreshold: 1,
+                        batchSize: 2,
+                    },
+                });
+
+                const scheduleService = get(SheetLazyExecuteScheduleService);
+                const scheduleSpy = vi.spyOn(scheduleService, 'scheduleMutations');
+                const syncSpy = vi.spyOn(commandService, 'syncExecuteCommand');
+
+                expect(
+                    await commandService.executeCommand(CopySheetCommand.id, {
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
+                    })
+                ).toBeTruthy();
+
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                expect(workbook.getSheetSize()).toBe(2);
+                expect(scheduleSpy).toHaveBeenCalledTimes(1);
+
+                const [, copiedSheetId, scheduledMutations] = scheduleSpy.mock.calls[0] as unknown as [string, string, Array<{ id: string }>];
+                expect(copiedSheetId).toBeTruthy();
+                expect(scheduledMutations.length).toBeGreaterThan(0);
+
+                const syncOnlyCalls = syncSpy.mock.calls.filter(([, , options]) => Boolean(options?.syncOnly));
+                expect(syncOnlyCalls.length).toBeGreaterThan(0);
+                expect(syncOnlyCalls.some(([id]) => id === CopyWorksheetEndMutation.id)).toBeTruthy();
+
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(workbook.getSheetSize()).toBe(1);
+                // split mode writes empty redoMutations
+                expect(await commandService.executeCommand(RedoCommand.id)).toBe(false);
+                expect(workbook.getSheetSize()).toBe(1);
             });
         });
     });

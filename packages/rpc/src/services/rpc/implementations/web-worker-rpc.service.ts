@@ -19,13 +19,14 @@ import { Observable, shareReplay } from 'rxjs';
 
 /**
  * Generate an `IMessageProtocol` on the web worker.
+ * @returns A protocol wrapper around worker global messaging APIs.
  */
 export function createWebWorkerMessagePortOnWorker(): IMessageProtocol {
     return {
         send(message: unknown): void {
             postMessage(message);
         },
-        onMessage: new Observable<any>((subscriber) => {
+        onMessage: new Observable<unknown>((subscriber) => {
             const handler = (event: MessageEvent) => {
                 subscriber.next(event.data);
             };
@@ -38,14 +39,14 @@ export function createWebWorkerMessagePortOnWorker(): IMessageProtocol {
 /**
  * Generate an `IMessageProtocol` on the main thread side.
  * @param worker The Web Worker object
- * @returns
+ * @returns A protocol wrapper around the given worker messaging APIs.
  */
 export function createWebWorkerMessagePortOnMain(worker: Worker): IMessageProtocol {
     return {
         send(message) {
             worker.postMessage(message);
         },
-        onMessage: new Observable<any>((subscriber) => {
+        onMessage: new Observable<unknown>((subscriber) => {
             const handler = (event: MessageEvent) => {
                 subscriber.next(event.data);
             };

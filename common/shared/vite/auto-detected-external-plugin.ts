@@ -19,7 +19,7 @@ import { peerDepsMap } from './data';
 import { convertLibNameFromPackageName } from './utils';
 
 export function autoDetectedExternalPlugin(): Plugin {
-    const globals = {};
+    const globals: Record<string, string> = {};
     let hasCss = false;
 
     return {
@@ -33,8 +33,9 @@ export function autoDetectedExternalPlugin(): Plugin {
                 return null;
             }
 
-            if (source in peerDepsMap) {
-                globals[source] = peerDepsMap[source].global;
+            if (Object.prototype.hasOwnProperty.call(peerDepsMap, source)) {
+                const dep = peerDepsMap[source as keyof typeof peerDepsMap];
+                globals[source] = dep.global;
 
                 return { id: source, external: true };
             } else if (source.startsWith('@univerjs')) {

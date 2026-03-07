@@ -134,13 +134,13 @@ export function shaping(
 
     const paragraphBody = prepareParagraphBody(viewModel.getBody()!, endIndex);
 
-    // const now = +new Date();
     let glyphInfos: IOpenTypeGlyphInfo[] = [];
+    let useOpenTypeGlyphShaping = false;
 
     if (useOpenType) {
         glyphInfos = textShape(paragraphBody);
+        useOpenTypeGlyphShaping = glyphInfos.length > 0;
     }
-    // console.log('Text Shaping Time:', +new Date() - now);
 
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
@@ -168,7 +168,7 @@ export function shaping(
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
-        if (fontLibrary.isReady && useOpenType) {
+        if (fontLibrary.isReady && useOpenTypeGlyphShaping) {
             const glyphInfosInWord = [];
 
             let i = 0;

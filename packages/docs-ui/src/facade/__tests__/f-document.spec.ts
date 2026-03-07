@@ -45,6 +45,7 @@ describe('Test FDocument', () => {
             getSnapshot: () => ({
                 id: 'test',
                 title: 'Test Document',
+                documentStyle: {},
                 body: {
                     dataStream: 'Hello,\r\n',
                 },

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ClearRangeCfCommand, ClearWorksheetCfCommand } from '@univerjs/sheets-conditional-formatting';
@@ -40,23 +41,27 @@ describe('OpenConditionalFormattingOperator', () => {
             executeCommand: vi.fn(),
         };
 
-        const accessor = {
-            get(token: unknown) {
-                if (token === ConditionalFormattingPanelController) {
-                    return controller;
-                }
+        const get: IAccessor['get'] = ((token: unknown) => {
+            if (token === ConditionalFormattingPanelController) {
+                return controller;
+            }
 
-                if (token === SheetsSelectionsService) {
-                    return selectionManagerService;
-                }
+            if (token === SheetsSelectionsService) {
+                return selectionManagerService;
+            }
 
-                if (token === ICommandService) {
-                    return commandService;
-                }
+            if (token === ICommandService) {
+                return commandService;
+            }
 
-                throw new Error('Unknown dependency');
-            },
-        } as { get(token: unknown): unknown };
+            throw new Error('Unknown dependency');
+        }) as IAccessor['get'];
+        const has: IAccessor['has'] = (() => false) as IAccessor['has'];
+
+        const accessor: IAccessor = {
+            get,
+            has,
+        };
 
         return { accessor, controller, commandService };
     }

@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IUniverInstanceService } from '@univerjs/core';
-import type { ISidebarService } from '@univerjs/ui';
+import type { IDataValidationRule, IUniverInstanceService, Nullable, UnitModel } from '@univerjs/core';
+import type { ISidebarMethodOptions, ISidebarService } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DATA_VALIDATION_PANEL } from '../../commands/operations/data-validation.operation';
 import { DataValidationPanelService } from '../data-validation-panel.service';
 
+type SidebarOptions = ISidebarMethodOptions;
+type UniverInstanceServiceStub = Pick<IUniverInstanceService, 'getCurrentTypeOfUnit$'>;
+type SidebarServiceStub = Pick<ISidebarService, 'sidebarOptions$'>;
+
 describe('DataValidationPanelService', () => {
     let sheet$ = new Subject<unknown>();
-    let sidebarOptions$ = new BehaviorSubject<{ id?: string; visible: boolean }>({ visible: true });
+    let sidebarOptions$ = new BehaviorSubject<SidebarOptions>({ visible: true });
 
     beforeEach(() => {
         vi.useFakeTimers();
         sheet$ = new Subject();
-        sidebarOptions$ = new BehaviorSubject({ visible: true });
+        sidebarOptions$ = new BehaviorSubject<SidebarOptions>({ visible: true });
     });
 
     afterEach(() => {
@@ -36,20 +41,25 @@ describe('DataValidationPanelService', () => {
     });
 
     function createService() {
+        const univerInstanceService: UniverInstanceServiceStub = {
+            getCurrentTypeOfUnit$<T extends UnitModel<object, number>>(): Observable<Nullable<T>> {
+                return sheet$.asObservable() as Observable<Nullable<T>>;
+            },
+        };
+        const sidebarService: SidebarServiceStub = {
+            sidebarOptions$,
+        };
+
         return new DataValidationPanelService(
-            {
-                getCurrentTypeOfUnit$: () => sheet$.asObservable(),
-            } as IUniverInstanceService,
-            {
-                sidebarOptions$,
-            } as ISidebarService
+            univerInstanceService as unknown as IUniverInstanceService,
+            sidebarService as unknown as ISidebarService
         );
     }
 
     it('tracks open state, active rules, and runs close disposables exactly once', () => {
         const service = createService();
         const openStates: boolean[] = [];
-        const activeRules: Array<{ unitId: string; subUnitId: string; rule: IDataValidationRule } | undefined> = [];
+        const activeRules: Array<Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }>> = [];
         const disposeSpy = vi.fn();
 
         const openSub = service.open$.subscribe((value) => openStates.push(value));

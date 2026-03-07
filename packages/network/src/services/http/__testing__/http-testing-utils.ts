@@ -19,7 +19,7 @@
 
 import type { Observer } from 'rxjs';
 import type { HTTPRequest } from '../request';
-import type { HTTPEvent, HTTPResponse, HTTPResponseError } from '../response';
+import type { HTTPEvent, HTTPResponseError } from '../response';
 import { Disposable, Injector } from '@univerjs/core';
 import { Observable, Subject } from 'rxjs';
 import { HTTPService } from '../http.service';
@@ -82,7 +82,7 @@ export interface IMockHTTPHandler {
     /**
      * Emit a response event to the observer.
      */
-    emitResponse<T>(response: HTTPResponse<T>): void;
+    emitResponse<T>(response: HTTPEvent<T>): void;
 
     /**
      * Emit an error event to the observer.

@@ -43,7 +43,7 @@ describe('EditDocDrawingOperation', () => {
             },
         } as IAccessor;
 
-        expect(EditDocDrawingOperation.handler(accessor)).toBe(false);
+        expect(EditDocDrawingOperation.handler(accessor, null as unknown as IDrawingSearch)).toBe(false);
         expect(drawingManagerService.focusDrawing).not.toHaveBeenCalled();
         expect(commandService.executeCommand).not.toHaveBeenCalled();
     });

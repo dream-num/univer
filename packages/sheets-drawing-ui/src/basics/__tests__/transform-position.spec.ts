@@ -30,6 +30,8 @@ describe('transform-position', () => {
 
     it('clips drawing transforms to the current sheet bounds', () => {
         vi.mocked(convertPositionSheetOverGridToAbsolute).mockReturnValue({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
             left: 90,
             top: 75,
             width: 20,

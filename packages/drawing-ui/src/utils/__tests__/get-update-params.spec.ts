@@ -43,7 +43,7 @@ describe('getUpdateParams', () => {
                 width: 8,
                 height: 9,
             },
-        } as Image;
+        } as unknown as Image;
 
         const drawingManagerService = {
             getDrawingOKey: (oKey: string) => {

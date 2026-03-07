@@ -14,35 +14,99 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
-import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import type { DocumentDataModel, ICommandService, IDocumentData } from '@univerjs/core';
 import { InsertCommand } from '@univerjs/docs-ui';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { createTestBed } from './create-test-bed';
-import '@univerjs/docs-ui/facade';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { FDocument } from '../f-document';
 
 describe('Test FDocument', () => {
-    let get: Injector['get'];
-    let commandService: ICommandService;
-    let univerAPI: FUniver;
+    let commandService: Pick<ICommandService, 'executeCommand'>;
+    let resourceManagerService: { getResourcesByType: ReturnType<typeof vi.fn> };
+    let univerInstanceService: { focusUnit: ReturnType<typeof vi.fn> };
+    let renderManagerService: { getRenderById: ReturnType<typeof vi.fn> };
+    let documentDataModel: Pick<DocumentDataModel, 'getUnitId' | 'getSnapshot'>;
+    let document: FDocument;
 
     beforeEach(() => {
-        const testBed = createTestBed();
-        get = testBed.get;
-        univerAPI = testBed.univerAPI;
-
-        commandService = get(ICommandService);
-        commandService.registerCommand(InsertCommand);
-        commandService.registerCommand(RichTextEditingMutation);
+        commandService = {
+            executeCommand: vi.fn().mockResolvedValue(true),
+        };
+        resourceManagerService = {
+            getResourcesByType: vi.fn(() => []),
+        };
+        univerInstanceService = {
+            focusUnit: vi.fn(),
+        };
+        renderManagerService = {
+            getRenderById: vi.fn(),
+        };
+        documentDataModel = {
+            getUnitId: () => 'test',
+            getSnapshot: () => ({
+                id: 'test',
+                title: 'Test Document',
+                body: {
+                    dataStream: 'Hello,\r\n',
+                },
+            }),
+        };
+        document = new FDocument(
+            documentDataModel as DocumentDataModel,
+            {} as never,
+            univerInstanceService as never,
+            commandService as ICommandService,
+            resourceManagerService as never,
+            renderManagerService as never
+        );
     });
 
-    it('Document appendText', async () => {
-        const activeDoc = univerAPI.getActiveDocument()!;
-        expect(await activeDoc.appendText('Univer')).toBeTruthy();
+    it('appends text by executing the insert command at the tail of the body', async () => {
+        await expect(document.appendText('Univer')).resolves.toBe(true);
 
-        const dataStream = activeDoc.getSnapshot().body!.dataStream;
-        expect(dataStream.substring(0, dataStream.length - 2)).toEqual('Hello,Univer');
+        expect(commandService.executeCommand).toHaveBeenCalledWith(InsertCommand.id, {
+            unitId: 'test',
+            body: {
+                dataStream: 'Univer',
+            },
+            range: {
+                startOffset: 6,
+                endOffset: 6,
+                collapsed: true,
+                segmentId: '',
+            },
+            segmentId: '',
+        });
+    });
+
+    it('throws when appending text to a document without a body', () => {
+        const emptyDocument = new FDocument(
+            {
+                getUnitId: () => 'test',
+                getSnapshot: () => ({ id: 'test' } as IDocumentData),
+            } as DocumentDataModel,
+            {} as never,
+            univerInstanceService as never,
+            commandService as ICommandService,
+            resourceManagerService as never,
+            renderManagerService as never
+        );
+
+        expect(() => emptyDocument.appendText('Univer')).toThrowError('The document body is empty');
+    });
+
+    it('includes current document resources in snapshots', () => {
+        resourceManagerService.getResourcesByType.mockReturnValue([
+            {
+                name: 'test-resource',
+                data: '{"value":1}',
+            },
+        ]);
+
+        expect(document.getSnapshot().resources).toEqual([
+            {
+                name: 'test-resource',
+                data: '{"value":1}',
+            },
+        ]);
     });
 });

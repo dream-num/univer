@@ -14,21 +14,60 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, IWorkbookData } from '@univerjs/core';
 import type { ITestBed } from './util';
-import { Direction, ICommandService } from '@univerjs/core';
+import { Direction, ICommandService, LocaleType } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
 import { createCommandTestBed } from './util';
 
 const MoveRangeCommandId = 'sheet.command.move-range';
+
+function createMultiSheetWorkbookData(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'Sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 1,
+                        },
+                    },
+                },
+            },
+            sheet2: {
+                id: 'sheet2',
+                name: 'Sheet2',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 2,
+                        },
+                    },
+                },
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: ['sheet1', 'sheet2'],
+        styles: {},
+    };
+}
 
 describe('FormulaRefRangeService', () => {
     let testBed: ITestBed;
 
     beforeEach(() => {
         testBed = createCommandTestBed();
+    });
+
+    afterEach(() => {
+        testBed.univer.dispose();
     });
 
     it('transform formula string with move range', () => {
@@ -85,6 +124,64 @@ describe('FormulaRefRangeService', () => {
         );
 
         expect(resFormula).toBe('=SUM(A1:A10)');
+    });
+
+    it('only transforms references on the current sheet', () => {
+        testBed.univer.dispose();
+        testBed = createCommandTestBed(createMultiSheetWorkbookData());
+
+        const formulaRefRangeService = testBed.get(FormulaRefRangeService);
+        const resFormula = formulaRefRangeService.transformFormulaByEffectCommand(
+            'test',
+            'sheet1',
+            '=SUM(Sheet2!A1)+SUM(A1)',
+            {
+                id: MoveRangeCommandId,
+                params: {
+                    fromRange: {
+                        startRow: 0,
+                        endRow: 1,
+                        startColumn: 0,
+                        endColumn: 1,
+                    },
+                    toRange: {
+                        startRow: 2,
+                        endRow: 2,
+                        startColumn: 1,
+                        endColumn: 1,
+                    },
+                },
+            }
+        );
+
+        expect(resFormula).toBe('=SUM(Sheet2!A1)+SUM(B3)');
+    });
+
+    it('throws when the referenced sheet cannot be resolved', () => {
+        const formulaRefRangeService = testBed.get(FormulaRefRangeService);
+
+        expect(() => formulaRefRangeService.transformFormulaByEffectCommand(
+            'test',
+            'sheet1',
+            '=SUM(Sheet2!A1)',
+            {
+                id: MoveRangeCommandId,
+                params: {
+                    fromRange: {
+                        startRow: 0,
+                        endRow: 1,
+                        startColumn: 0,
+                        endColumn: 1,
+                    },
+                    toRange: {
+                        startRow: 2,
+                        endRow: 2,
+                        startColumn: 1,
+                        endColumn: 1,
+                    },
+                },
+            }
+        )).toThrowError('Sheet not found');
     });
 
     it('transform range formula string with move range', async () => {
@@ -297,5 +394,63 @@ describe('FormulaRefRangeService', () => {
                 },
             ]
         );
+    });
+
+    it('stops listening for range changes after registerFormula is disposed', async () => {
+        const formulaRefRangeService = testBed.get(FormulaRefRangeService);
+        const updatedFormulas: string[] = [];
+
+        const disposable = formulaRefRangeService.registerFormula(
+            'test',
+            'sheet1',
+            '=SUM(A1)',
+            (formula) => {
+                updatedFormulas.push(formula);
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            }
+        );
+
+        await testBed.get(ICommandService).executeCommand(
+            MoveRangeCommand.id,
+            {
+                fromRange: {
+                    startRow: 0,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 1,
+                },
+                toRange: {
+                    startRow: 2,
+                    endRow: 2,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
+            }
+        );
+
+        disposable.dispose();
+
+        await testBed.get(ICommandService).executeCommand(
+            MoveRangeCommand.id,
+            {
+                fromRange: {
+                    startRow: 0,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 1,
+                },
+                toRange: {
+                    startRow: 2,
+                    endRow: 2,
+                    startColumn: 1,
+                    endColumn: 1,
+                },
+            }
+        );
+
+        expect(updatedFormulas).toEqual(['=SUM(B3)']);
     });
 });

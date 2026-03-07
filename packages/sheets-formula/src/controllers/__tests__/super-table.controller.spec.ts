@@ -19,6 +19,7 @@ import type { ISuperTable } from '@univerjs/engine-formula';
 import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { ICommandService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { FunctionType, ISuperTableService, RemoveSuperTableMutation, serializeRangeWithSheet, SetSuperTableMutation, SuperTableService } from '@univerjs/engine-formula';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
@@ -149,5 +150,42 @@ describe('SuperTableController', () => {
         });
 
         expect(descriptionService.hasDescription('TABLE_MUTATION')).toBe(false);
+    });
+
+    it('should ignore collaborative sheet switches and skip unknown mutation targets', async () => {
+        testBed = createControllerTestBed();
+
+        const injector = testBed.injector;
+        const commandService = injector.get(ICommandService);
+        const descriptionService = injector.get(IDescriptionService);
+        const superTableService = injector.get(ISuperTableService);
+
+        commandService.registerCommand(SetWorksheetActiveOperation);
+        commandService.registerCommand(SetSuperTableMutation);
+        injector.get(SuperTableController);
+
+        superTableService.registerTable('test', 'TABLE_ONE', createSuperTableReference('sheet1'));
+
+        await commandService.executeCommand(
+            SetWorksheetActiveOperation.id,
+            {
+                unitId: 'test',
+                subUnitId: 'sheet2',
+            },
+            {
+                fromCollab: true,
+            }
+        );
+
+        expect(descriptionService.hasDescription('TABLE_ONE')).toBe(true);
+
+        await commandService.executeCommand(SetSuperTableMutation.id, {
+            unitId: 'missing-unit',
+            subUnitId: 'sheet1',
+            tableName: 'UNKNOWN_TABLE',
+            reference: createSuperTableReference('sheet1'),
+        });
+
+        expect(descriptionService.hasDescription('UNKNOWN_TABLE')).toBe(false);
     });
 });

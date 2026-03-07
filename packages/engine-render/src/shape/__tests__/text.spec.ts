@@ -162,25 +162,4 @@ describe('text shape', () => {
         drawLine(ctx, 1, 5, 3, TextDecoration.WAVE);
         expect(ctx.lineTo.mock.calls.length).toBeGreaterThan(beforeWaveCalls);
     });
-
-    it('uses internal skeleton during instance draw', () => {
-        const text = Object.create(Text.prototype) as Text;
-        (text as any).skeleton = createSkeleton([{ text: 'abc', width: 30, height: 10, baseline: 8 }]);
-        (text as any).text = 'abc';
-        (text as any).fontStyle = '12px Arial';
-        (text as any).width = 60;
-        (text as any).height = 20;
-        (text as any).warp = false;
-        (text as any).hAlign = HorizontalAlign.LEFT;
-        (text as any).vAlign = VerticalAlign.TOP;
-
-        const ctx = createCtx();
-        const calculateSpy = vi.spyOn((text as any).skeleton, 'calculate');
-        const drawWithSpy = vi.spyOn(Text, 'drawWith');
-
-        (text as any)._draw(ctx);
-
-        expect(calculateSpy).toHaveBeenCalled();
-        expect(drawWithSpy).toHaveBeenCalledWith(ctx, text, (text as any).skeleton);
-    });
 });

@@ -15,11 +15,11 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsFilterUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIMobileController } from './controllers/sheets-filter-ui-mobile.controller';
 

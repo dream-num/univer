@@ -18,11 +18,11 @@ import { Disposable, Inject } from '@univerjs/core';
 import { CommentIcon } from '@univerjs/icons';
 import { THREAD_COMMENT_PANEL } from '@univerjs/thread-comment-ui';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { AddCommentShortcut } from '../menu/menu';
+import { menuSchema } from '../menu/schema';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
-import { AddCommentShortcut } from './menu';
-import { menuSchema } from './menu.schema';
 
 export class SheetsThreadCommentController extends Disposable {
     constructor(

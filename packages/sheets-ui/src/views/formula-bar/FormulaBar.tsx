@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -44,8 +44,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetsUIPart } from '../../consts/ui-name';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';

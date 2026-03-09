@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsSortUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsSortUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_SORT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_SORT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 

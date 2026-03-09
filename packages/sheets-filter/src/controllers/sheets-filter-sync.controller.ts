@@ -15,12 +15,12 @@
  */
 
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IRemoveColMutationParams } from '@univerjs/sheets';
-import type { IUniverSheetsFilterConfig } from './config.schema';
+import type { IUniverSheetsFilterConfig } from '../config/config';
 import { Disposable, DisposableCollection, ICommandService, IConfigService, Inject, sequenceExecute } from '@univerjs/core';
 import { InsertColMutation, MoveColsMutation, RemoveColMutation } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { ReCalcSheetsFilterMutation, SetSheetsFilterCriteriaMutation } from '../commands/mutations/sheets-filter.mutation';
-import { SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './config.schema';
+import { SHEETS_FILTER_PLUGIN_CONFIG_KEY } from '../config/config';
 import { SheetsFilterController } from './sheets-filter.controller';
 
 const sheetsFilterOnlyLocalMutationIds = [

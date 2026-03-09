@@ -33,10 +33,9 @@ export { Menu as UIMenu } from './components/menu/desktop/Menu';
 export { Menu as DesktopMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
+export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
-export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { ErrorController } from './controllers/error/error.controller';
-export { menuSchema as UIMenuSchema } from './controllers/menus/menu.schema';
 export {
     CopyShortcutItem,
     CutShortcutItem,
@@ -48,6 +47,7 @@ export { ShortcutPanelController } from './controllers/shortcut-display/shortcut
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+export { menuSchema as UIMenuSchema } from './menu/schema';
 export { UniverMobileUIPlugin } from './mobile-plugin';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -106,7 +106,7 @@ export {
     RibbonStartGroup,
     RibbonViewGroup,
 } from './services/menu/types';
-export { MockMessageService } from './services/message/__testing__/mock-message.service.ts';
+export { MockMessageService } from './services/message/__testing__/mock-message.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
 export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';

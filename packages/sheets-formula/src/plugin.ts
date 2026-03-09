@@ -15,21 +15,21 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
+import type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
-import { ActiveDirtyController } from './controllers/active-dirty.controller';
-import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
 import {
     defaultPluginBaseConfig,
     defaultPluginRemoteConfig,
     PLUGIN_CONFIG_KEY_BASE,
     PLUGIN_CONFIG_KEY_REMOTE,
-} from './controllers/config.schema';
+} from './config/config';
+import { ActiveDirtyController } from './controllers/active-dirty.controller';
+import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaController } from './controllers/formula.controller';

@@ -27,7 +27,7 @@ import { AddDocCommentComment } from '../../commands/commands/add-doc-comment.co
 import { DeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
 import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
-import { shouldDisableAddComment } from '../../controllers/menu';
+import { shouldDisableAddComment } from '../../menu/menu';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 
 export const DocThreadCommentPanel = () => {

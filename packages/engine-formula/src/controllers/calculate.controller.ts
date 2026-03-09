@@ -40,10 +40,10 @@ import {
     SetQueryFormulaDependencyResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
+import { DEFAULT_CYCLE_REFERENCE_COUNT } from '../config/config';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
-import { DEFAULT_CYCLE_REFERENCE_COUNT } from './config.schema';
 
 export class CalculateController extends Disposable {
     constructor(

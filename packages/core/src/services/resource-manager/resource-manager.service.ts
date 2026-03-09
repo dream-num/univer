@@ -15,8 +15,7 @@
  */
 
 import type { UniverInstanceType } from '../../common/unit';
-import type { IResources } from '../resource-manager/type';
-import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
+import type { IResourceHook, IResourceManagerService, IResourceName, IResources } from './type';
 import { Subject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';

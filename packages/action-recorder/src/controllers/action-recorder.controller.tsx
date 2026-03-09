@@ -79,9 +79,9 @@ import {
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
 import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
+import { menuSchema } from '../menu/action-recorder.menu';
 import { ActionRecorderService } from '../services/action-recorder.service';
 import { RecorderPanel } from '../views/components/RecorderPanel';
-import { menuSchema } from './action-recorder.menu';
 
 export class ActionRecorderController extends Disposable {
     constructor(

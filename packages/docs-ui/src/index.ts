@@ -16,7 +16,6 @@
 
 import './global.css';
 
-export { DocAutoFormatService } from '../../docs-ui/src/services/doc-auto-format.service';
 export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
@@ -85,8 +84,8 @@ export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.c
 export { SetParagraphNamedStyleCommand } from './commands/commands/set-heading.command';
 export { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
-
 export { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
+
 export type {
     IDocTableDeleteColumnsCommandParams,
     IDocTableDeleteRowsCommandParams,
@@ -110,23 +109,24 @@ export {
 } from './commands/commands/table/doc-table-insert.command';
 export type { IDocTableTabCommandParams } from './commands/commands/table/doc-table-tab.command';
 export { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
-
 export { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from './commands/commands/table/table';
+
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
 export { type IMoveCursorOperationParams, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
-export type { IUniverDocsUIConfig } from './controllers/config.schema';
+export type { IUniverDocsUIConfig } from './config/config';
 export { DocUIController } from './controllers/doc-ui.controller';
-export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
-
 export * from './services';
+
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
+export { DocAutoFormatService } from './services/doc-auto-format.service';
 export { DocEventManagerService } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';

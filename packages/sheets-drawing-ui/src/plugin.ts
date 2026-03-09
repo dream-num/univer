@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDrawingUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsDrawingUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -33,8 +33,7 @@ import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetCellImageHoverRenderController } from './controllers/render-controllers/sheet-celll-image-hover.render-controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
@@ -46,6 +45,7 @@ import { SheetDrawingPrintingController } from './controllers/sheet-drawing-prin
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
+import { DrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
 import { BatchSaveImagesService, IBatchSaveImagesService } from './services/batch-save-images.service';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 

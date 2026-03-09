@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
-import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
 
 import {
@@ -40,7 +40,7 @@ import {
     IFunctionService,
     isReferenceStrings,
 } from '@univerjs/engine-formula';
-import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
 

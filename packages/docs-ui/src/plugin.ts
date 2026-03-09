@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsUIConfig } from './controllers/config.schema';
+import type { IUniverDocsUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -95,8 +95,8 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { AppUIController } from './controllers';
-import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';

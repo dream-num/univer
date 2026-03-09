@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsTableUIConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsTableUIConfig } from '../../config/config';
 import { cellToRange, ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, Input } from '@univerjs/design';
 import { DeleteIcon, GridOutlineIcon, MoreDownIcon, PaintBucketDoubleIcon, RenameIcon } from '@univerjs/icons';
@@ -23,8 +23,8 @@ import { DeleteSheetTableCommand, SetSheetTableCommand, TableManager } from '@un
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { openRangeSelector } from '../../commands/operations/open-table-selector.operation';
+import { SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SHEET_TABLE_THEME_PANEL, SHEET_TABLE_THEME_PANEL_ID } from '../../const';
-import { SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { SheetTableAnchorController } from '../../controllers/sheet-table-anchor.controller';
 import { SheetTableThemeUIController } from '../../controllers/sheet-table-theme-ui.controller';
 

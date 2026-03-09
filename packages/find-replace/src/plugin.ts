@@ -15,10 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverFindReplaceConfig } from './controllers/config.schema';
+import type { IUniverFindReplaceConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
-import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './config/config';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 

@@ -17,7 +17,7 @@
 import './global.css';
 
 export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
-export type { IUniverSheetsThreadCommentUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsThreadCommentUIConfig } from './config/config';
 export { UniverSheetsThreadCommentUIPlugin } from './plugin';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { SHEETS_THREAD_COMMENT } from './types/const';

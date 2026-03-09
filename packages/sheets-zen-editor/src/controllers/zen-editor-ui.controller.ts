@@ -18,8 +18,8 @@ import { Disposable, ICommandService } from '@univerjs/core';
 import { IMenuManagerService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
+import { menuSchema } from '../menu/schema';
 import { ZEN_EDITOR_COMPONENT, ZenEditor } from '../views/zen-editor';
-import { menuSchema } from './menu.schema';
 import { ZenEditorCancelShortcut, ZenEditorConfirmShortcut } from './shortcuts/zen-editor.shortcut';
 
 export class ZenEditorUIController extends Disposable {

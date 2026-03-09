@@ -15,10 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
+import type { IUniverDocsMentionUIConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
-import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
 import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
 import { DocMentionPopupService } from './services/doc-mention-popup.service';

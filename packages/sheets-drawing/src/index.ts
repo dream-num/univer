@@ -15,7 +15,7 @@
  */
 
 export { DrawingApplyType, type ISetDrawingApplyMutationParams, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
-export type { IUniverSheetsDrawingConfig } from './controllers/config.schema';
+export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';

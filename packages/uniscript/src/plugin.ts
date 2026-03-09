@@ -15,10 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverUniscriptConfig } from './controllers/config.schema';
+import type { IUniverUniscriptConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
-import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './config/config';
 import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';

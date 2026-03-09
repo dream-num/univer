@@ -22,9 +22,9 @@ import { AddConditionalRuleMutation } from '../../../commands/mutations/add-cond
 import { DeleteConditionalRuleMutation } from '../../../commands/mutations/delete-conditional-rule.mutation';
 import { MoveConditionalRuleMutation } from '../../../commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from '../../../commands/mutations/set-conditional-rule.mutation';
-import { ConditionalFormattingRuleModel } from '../../../models/conditional-formatting-rule-model';
 import { ConditionalFormattingFormulaService } from '../../../services/conditional-formatting-formula.service';
 import { ConditionalFormattingService } from '../../../services/conditional-formatting.service';
+import { ConditionalFormattingRuleModel } from '../../conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../../conditional-formatting-view-model';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({

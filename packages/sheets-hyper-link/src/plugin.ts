@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
+import type { IUniverSheetsHyperLinkConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';

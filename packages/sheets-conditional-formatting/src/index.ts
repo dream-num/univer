@@ -38,7 +38,7 @@ export {
 } from './commands/mutations/move-conditional-rule.mutation';
 export type { ISetConditionalRuleMutationParams } from './commands/mutations/set-conditional-rule.mutation';
 export { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from './commands/mutations/set-conditional-rule.mutation';
-export type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
+export type { IUniverSheetsConditionalFormattingConfig } from './config/config';
 export * from './models/calculate-unit-v2/utils';
 export * from './models/conditional-formatting-rule-model';
 export * from './models/conditional-formatting-view-model';

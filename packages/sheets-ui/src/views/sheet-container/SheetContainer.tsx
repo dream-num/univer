@@ -15,12 +15,12 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { useActiveWorkbook } from '../../components/hook';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';

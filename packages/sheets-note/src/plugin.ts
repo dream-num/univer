@@ -15,12 +15,12 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsNoteConfig } from './controllers/config.schema';
+import type { IUniverSheetsNoteConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_NOTE_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
-import { defaultPluginConfig, SHEETS_NOTE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsNoteRefRangeController } from './controllers/sheets-note-ref-range.controller';
 import { SheetsNoteResourceController } from './controllers/sheets-note-resource.controller';
 import { SheetsNoteController } from './controllers/sheets.note.controller';

@@ -15,12 +15,12 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverEngineFormulaConfig } from './controllers/config.schema';
+import type { IUniverEngineFormulaConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
 import pkg from '../package.json';
+import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
 import { CalculateController } from './controllers/calculate.controller';
 import { ComputingStatusReporterController } from './controllers/computing-status.controller';
-import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { FormulaController } from './controllers/formula.controller';
 import { SetDependencyController } from './controllers/set-dependency.controller';
 import { SetFeatureCalculationController } from './controllers/set-feature-calculation.controller';

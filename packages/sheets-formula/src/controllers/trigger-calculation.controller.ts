@@ -25,7 +25,7 @@ import type {
     ISetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
@@ -48,7 +48,7 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
-import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 
 /**
  * This interface is for the progress bar to display the calculation progress.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type { IUniverNetworkConfig } from './controllers/config.schema';
+export type { IUniverNetworkConfig } from './config/config';
 export { UniverNetworkPlugin } from './plugin';
 export { HTTPHeaders } from './services/http/headers';
 export { type HTTPResponseType, HTTPStatusCode } from './services/http/http';

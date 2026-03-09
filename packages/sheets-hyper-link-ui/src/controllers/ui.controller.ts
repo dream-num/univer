@@ -18,10 +18,10 @@ import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { LinkIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
+import { InsertLinkShortcut } from '../menu/menu';
+import { menuSchema } from '../menu/schema';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CellLinkPopup } from '../views/CellLinkPopup';
-import { InsertLinkShortcut } from './menu';
-import { menuSchema } from './menu.schema';
 
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(

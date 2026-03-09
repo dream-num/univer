@@ -22,12 +22,12 @@ import { ComponentManager } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
+import { QuickInsertButton } from '../menu';
+import { builtInMenus } from '../menu/built-in-menus';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 import { KeywordInputPlaceholder } from '../views/KeywordInputPlaceholder';
-import { QuickInsertButton } from '../views/menu';
 import { QuickInsertPlaceholder } from '../views/QuickInsertPlaceholder';
 import { QuickInsertPopup } from '../views/QuickInsertPopup';
-import { builtInMenus } from './built-in-menus';
 
 export class DocQuickInsertUIController extends Disposable {
     constructor(

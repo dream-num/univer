@@ -35,8 +35,8 @@ export { DocumentViewModel } from './components/docs/view-model/document-view-mo
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
 export { DEFAULT_PADDING_DATA } from './components/sheets/sheet.render-skeleton';
+export type { IUniverEngineRenderConfig } from './config/config';
 export * from './context';
-export type { IUniverEngineRenderConfig } from './controllers/config.schema';
 export * from './custom';
 export * from './engine';
 export * from './group';

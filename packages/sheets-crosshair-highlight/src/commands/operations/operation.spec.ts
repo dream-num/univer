@@ -20,8 +20,8 @@ import { describe, expect, it, vi } from 'vitest';
 import {
     CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT,
     CrosshairHighlightMenuItemFactory,
-} from '../../controllers/crosshair.menu';
-import { menuSchema } from '../../controllers/menu.schema';
+} from '../../menu/crosshair.menu';
+import { menuSchema } from '../../menu/schema';
 import {
     CROSSHAIR_HIGHLIGHT_COLORS,
     SheetsCrosshairHighlightService,

@@ -30,8 +30,8 @@ import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu
 import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
 import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
+import { menuSchema } from '../menu/schema';
 import { SlideEditorContainer } from '../views/editor-container';
-import { menuSchema } from './menu.schema';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
 
 /**

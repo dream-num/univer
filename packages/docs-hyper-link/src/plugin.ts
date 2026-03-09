@@ -15,11 +15,11 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsHyperLinkConfig } from './controllers/config.schema';
+import type { IUniverDocsHyperLinkConfig } from './config/config';
 import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import { AddHyperLinkMuatation, DeleteHyperLinkMuatation, UpdateHyperLinkMuatation } from './commands/mutations/hyper-link.mutation';
-import { defaultPluginConfig, DOCS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './config/config';
 import { DOC_HYPER_LINK_PLUGIN, DocHyperLinkResourceController } from './controllers/resource.controller';
 
 export class UniverDocsHyperLinkPlugin extends Plugin {

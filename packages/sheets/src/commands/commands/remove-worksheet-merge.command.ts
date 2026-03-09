@@ -19,12 +19,12 @@ import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationPar
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
-import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { SelectionMoveType } from '../../services/selections';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation } from '../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 interface IRemoveWorksheetMergeCommandParams extends ISheetCommandSharedParams {

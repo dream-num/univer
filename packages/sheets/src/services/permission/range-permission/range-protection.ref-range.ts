@@ -25,7 +25,7 @@ import type { IDeleteRangeProtectionMutationParams } from '../../../commands/mut
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
 import type { IRangeProtectionRule } from '../../../model/range-protection-rule.model';
-import type { EffectRefRangeParams } from '../../../services/ref-range/type';
+import type { EffectRefRangeParams } from '../../ref-range/type';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColCommand, InsertRowCommand } from '../../../commands/commands/insert-row-col.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../../commands/commands/move-rows-cols.command';
@@ -41,7 +41,7 @@ import { SetRangeProtectionMutation } from '../../../commands/mutations/set-rang
 import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { RangeProtectionCache } from '../../../model/range-protection.cache';
-import { RefRangeService } from '../../../services/ref-range/ref-range.service';
+import { RefRangeService } from '../../ref-range/ref-range.service';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsFilterUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -30,7 +30,7 @@ import {
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';

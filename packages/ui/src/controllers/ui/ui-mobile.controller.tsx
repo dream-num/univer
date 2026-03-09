@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IUniverUIConfig } from '../config.schema';
+import type { IUniverUIConfig } from '../../config/config';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from '@univerjs/design';

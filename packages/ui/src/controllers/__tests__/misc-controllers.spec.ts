@@ -17,9 +17,9 @@
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
+import { menuSchema } from '../../menu/schema';
 import { RibbonStartGroup } from '../../services/menu/types';
 import { ErrorController } from '../error/error.controller';
-import { menuSchema } from '../menus/menu.schema';
 import { ShortcutPanelMenuItemFactory } from '../shortcut-display/menu';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
 import { IUIController } from '../ui/ui.controller';

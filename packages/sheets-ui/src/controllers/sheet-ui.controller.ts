@@ -91,12 +91,12 @@ import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../components/menu-item-frozen';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
+import { menuSchema } from '../menu/schema';
 import { CellPopup } from '../views/cell-popup';
 import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
-import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
     EditorCursorCtrlEnterShortcut,

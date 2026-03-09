@@ -15,16 +15,16 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsConfig } from './controllers/config.schema';
+import type { IUniverSheetsConfig } from './config/config';
 import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './config/config';
 import { ActiveWorksheetController } from './controllers/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
-import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { SheetsFreezeSyncController } from './controllers/freeze-sync.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';

@@ -15,12 +15,12 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverThreadCommentConfig } from './controllers/config.schema';
+import type { IUniverThreadCommentConfig } from './config/config';
 import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
-import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
 import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';

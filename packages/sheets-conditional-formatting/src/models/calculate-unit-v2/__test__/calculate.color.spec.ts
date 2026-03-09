@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IColorScale, IConditionFormattingRule } from '../../../models/type';
+import type { IColorScale, IConditionFormattingRule } from '../../type';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CFRuleType, CFValueType } from '../../../base/const';
 import { createTestBed } from './test.util';

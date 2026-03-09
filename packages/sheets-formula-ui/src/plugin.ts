@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFormulaUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsFormulaUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -26,7 +26,7 @@ import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginConfig,
     PLUGIN_CONFIG_KEY_BASE,
-} from './controllers/config.schema';
+} from './config/config';
 import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';

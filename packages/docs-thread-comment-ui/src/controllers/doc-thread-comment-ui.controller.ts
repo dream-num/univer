@@ -20,8 +20,8 @@ import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
+import { menuSchema } from '../menu/schema';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
-import { menuSchema } from './menu.schema';
 
 export class DocThreadCommentUIController extends Disposable {
     constructor(

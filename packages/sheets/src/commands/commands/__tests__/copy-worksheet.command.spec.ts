@@ -17,7 +17,7 @@
 import type { Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, IConfigService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { SheetLazyExecuteScheduleService } from '../../../services/lazy-execute-schedule.service';

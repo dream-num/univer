@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
+export type { IUniverSheetsThreadCommentConfig } from './config/config';
 export { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 export { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 export { UniverSheetsThreadCommentPlugin } from './plugin';

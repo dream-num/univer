@@ -16,12 +16,12 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IUniverSheetsUIConfig } from './config.schema';
+import type { IUniverSheetsUIConfig } from '../config/config';
 import { CellValueType, Disposable, getNumfmtParseValueFilter, IConfigService, Inject, isRealNum, isTextFormat, LocaleService } from '@univerjs/core';
 import { IZenZoneService } from '@univerjs/ui';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 import { HoverManagerService } from '../services/hover-manager.service';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 
 const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
 

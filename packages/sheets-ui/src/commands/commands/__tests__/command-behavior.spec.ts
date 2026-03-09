@@ -57,7 +57,7 @@ import {
 import { describe, expect, it, vi } from 'vitest';
 import { SHEET_VIEW_KEY, SHEET_ZOOM_RANGE } from '../../../common/keys';
 import { AutoWidthController } from '../../../controllers/auto-width.controller';
-import * as menuUtils from '../../../controllers/menu/utils';
+import * as menuUtils from '../../../menu/utils';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SetScrollOperation } from '../../operations/scroll.operation';

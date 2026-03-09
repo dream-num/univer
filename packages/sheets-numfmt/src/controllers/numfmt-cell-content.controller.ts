@@ -16,7 +16,7 @@
 
 import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocaleTag, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IUniverSheetsNumfmtConfig } from './config.schema';
+import type { IUniverSheetsNumfmtConfig } from '../config/config';
 import {
     CellValueType,
     Disposable,
@@ -44,8 +44,8 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
+import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../config/config';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
-import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './config.schema';
 
 const TEXT_FORMAT_MARK = {
     tl: {

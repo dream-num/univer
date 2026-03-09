@@ -15,10 +15,10 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
+import type { IUniverDocsUIConfig } from '../../config/config';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
-import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CountBar } from '../count-bar';
 
 export function DocFooter() {

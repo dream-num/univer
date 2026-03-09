@@ -37,7 +37,7 @@ import { Address } from '../lookup/address';
 import { Choose } from '../lookup/choose';
 import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
 import { Hyperlink } from '../lookup/hyperlink';
-import { Index } from '../lookup/index';
+import { Index } from '../lookup/index/index';
 import { Match } from '../lookup/match';
 import { Row } from '../lookup/row';
 import { Xlookup } from '../lookup/xlookup';

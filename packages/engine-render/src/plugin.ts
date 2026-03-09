@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUniverEngineRenderConfig } from './controllers/config.schema';
+import type { IUniverEngineRenderConfig } from './config/config';
 import { createIdentifier, IConfigService, Inject, Injector, merge, Plugin, registerDependencies } from '@univerjs/core';
 
 import pkg from '../package.json';
-import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './config/config';
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
 import { CanvasColorService, ICanvasColorService } from './services/canvas-color.service';

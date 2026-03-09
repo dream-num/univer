@@ -32,10 +32,10 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { menuSchema } from '../menu/schema';
 import { BATCH_SAVE_IMAGES_DIALOG_ID, BatchSaveImagesDialog } from '../views/batch-save-images';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
 import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
-import { menuSchema } from './menu.schema';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 export class SheetDrawingUIController extends Disposable {

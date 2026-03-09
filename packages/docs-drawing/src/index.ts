@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type { IUniverDocsDrawingConfig } from './controllers/config.schema';
+export type { IUniverDocsDrawingConfig } from './config/config';
 export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';
 export { UniverDocsDrawingPlugin } from './plugin';

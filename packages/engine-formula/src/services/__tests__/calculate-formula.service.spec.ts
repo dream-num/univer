@@ -16,7 +16,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
-import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { FORMULA_REF_TO_ARRAY_CACHE } from '../../engine/reference-object/base-reference-object';
 import { CalculateFormulaService } from '../calculate-formula.service';
 import { FormulaExecuteStageType } from '../runtime.service';

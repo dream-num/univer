@@ -16,7 +16,7 @@
 
 export * from './commands/commands/note.command';
 export * from './commands/mutations/note.mutation';
-export type { IUniverSheetsNoteConfig } from './controllers/config.schema';
+export type { IUniverSheetsNoteConfig } from './config/config';
 export * from './controllers/sheets-note-resource.controller';
 export * from './models/sheets-note.model';
 export { UniverSheetsNotePlugin } from './plugin';

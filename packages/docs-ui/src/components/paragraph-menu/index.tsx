@@ -23,7 +23,7 @@ import { DownIcon } from '@univerjs/icons';
 import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { HEADING_ICON_MAP } from '../../controllers/menu/paragraph-menu';
+import { HEADING_ICON_MAP } from '../../menu/paragraph-menu';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 import { DocParagraphMenuService } from '../../services/doc-paragraph-menu.service';
 

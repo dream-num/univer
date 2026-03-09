@@ -40,8 +40,8 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../../config/config';
 import * as patternUtils from '../../utils/pattern';
-import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../config.schema';
 import { SheetsNumfmtCellContentController } from '../numfmt-cell-content.controller';
 
 function createWorkbookData(): IWorkbookData {

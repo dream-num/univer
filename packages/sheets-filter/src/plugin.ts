@@ -15,10 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFilterConfig } from './controllers/config.schema';
+import type { IUniverSheetsFilterConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SheetsFilterFormulaService } from './services/sheet-filter-formula.service';

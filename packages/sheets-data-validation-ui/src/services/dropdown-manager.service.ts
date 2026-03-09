@@ -18,7 +18,7 @@ import type { CellValue, IDisposable, Nullable, Workbook } from '@univerjs/core'
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import type { IUniverSheetsDataValidationUIConfig } from '../controllers/config.schema';
+import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
 import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -29,8 +29,8 @@ import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisi
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
+import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { DROP_DOWN_DEFAULT_COLOR } from '../const';
-import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 import { DataValidationRejectInputController } from '../controllers/dv-reject-input.controller';
 
 export interface IDataValidationDropdownParam {

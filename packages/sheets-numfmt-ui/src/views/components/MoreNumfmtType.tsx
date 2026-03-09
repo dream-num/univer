@@ -28,7 +28,7 @@ import {
 import { ILayoutService, useDependency } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
-import { MENU_OPTIONS } from '../../controllers/menu';
+import { MENU_OPTIONS } from '../../menu/menu';
 
 export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';

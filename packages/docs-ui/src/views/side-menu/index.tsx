@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISideMenuItem } from '../../components/side-menu';
-import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
+import type { IUniverDocsUIConfig } from '../../config/config';
 import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.service';
 import { debounce, fromEventSubject, getPlainText, ICommandService, isInternalEditorID, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -27,7 +27,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { of, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { SideMenu } from '../../components/side-menu';
-import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 const transformNamedStyleTypeToLevel = (type: NamedStyleType) => {

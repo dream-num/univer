@@ -15,13 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsThreadCommentUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsThreadCommentUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import pkg from '../package.json';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
-import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';

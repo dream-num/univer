@@ -15,22 +15,22 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsTableUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsTableUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import pkg from '../package.json';
 import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
+import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
-import { defaultPluginConfig, SHEETS_TABLE_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetTableAnchorController } from './controllers/sheet-table-anchor.controller';
 import { SheetsTableComponentController } from './controllers/sheet-table-component.controller';
 import { SheetsTableFilterButtonRenderController } from './controllers/sheet-table-filter-button-render.controller';
-import { SheetTableMenuController } from './controllers/sheet-table-menu.controller';
 import { SheetsTableRenderController } from './controllers/sheet-table-render.controller';
 import { SheetTableSelectionController } from './controllers/sheet-table-selection.controller';
 import { SheetTableThemeUIController } from './controllers/sheet-table-theme-ui.controller';
+import { SheetTableMenuController } from './menu/sheet-table-menu.controller';
 import { SheetsTableUiService } from './services/sheets-table-ui-service';
 
 @DependentOn(UniverSheetsTablePlugin)

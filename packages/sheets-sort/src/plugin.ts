@@ -15,12 +15,12 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsSortConfig } from './controllers/config.schema';
+import type { IUniverSheetsSortConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_SORT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_SORT_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
 

@@ -17,7 +17,7 @@
 import { IConfigService, LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PLUGIN_CONFIG_KEY_BASE } from '../../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { DescriptionService, IDescriptionService } from '../description.service';
 import { IRegisterFunctionService, RegisterFunctionService } from '../register-function.service';
 import { IRemoteRegisterFunctionService } from '../remote/remote-register-function.service';

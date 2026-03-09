@@ -32,8 +32,8 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISetRangeValuesCommandParams, MutationsAffectRange } from '@univerjs/sheets';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import type { IUniverSheetsUIConfig } from '../config.schema';
 import {
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -89,10 +89,10 @@ import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-range.operation';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';

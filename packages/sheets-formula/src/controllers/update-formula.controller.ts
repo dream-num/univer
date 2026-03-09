@@ -28,7 +28,7 @@ import type {
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
@@ -54,7 +54,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
-import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';

@@ -31,10 +31,10 @@ export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-dr
 export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
-export type { IUniverSheetsDrawingUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsDrawingUIConfig } from './config/config';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
+export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { BatchSaveImagesService, FileNamePart, type IBatchSaveImagesConfig, IBatchSaveImagesService, type ICellImageInfo } from './services/batch-save-images.service';
 export { calcSheetFloatDomPosition, type ICanvasFloatDom, type ICanvasFloatDomInfo, type IDOMAnchor, SHEET_FLOAT_DOM_PREFIX, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
-export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';
 export { SheetDrawingAnchor } from './views/sheet-image-panel/SheetDrawingAnchor';

@@ -16,7 +16,7 @@
 
 import type { IAccessor, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IMenuItem } from '../menu/menu';
+import type { IMenuItem } from './menu';
 import { createIdentifier, Disposable, IConfigService, Inject, Injector, merge } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { tableDefaultBorderStyle } from '../config.schema';
+import { tableDefaultBorderStyle } from '../../config/config';
 import { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle, tableThemeConfig } from '../table-theme.factory';
 
 describe('table-theme.factory', () => {

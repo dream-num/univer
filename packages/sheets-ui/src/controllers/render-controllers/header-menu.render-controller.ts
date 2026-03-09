@@ -29,8 +29,8 @@ import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
+import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../../menu/header-menu-shape';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../../views/header-menu-shape';
 import { getCoordByOffset } from '../utils/component-tools';
 
 const HEADER_MENU_CONTROLLER_SHAPE = '__SpreadsheetHeaderMenuSHAPEControllerShape__';

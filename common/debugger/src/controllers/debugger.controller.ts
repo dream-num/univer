@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverDebuggerConfig } from './config.schema';
+import type { IUniverDebuggerConfig } from '../config/config';
 import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
 import {
     BuiltInUIPart,
@@ -28,11 +28,11 @@ import {
 import { AIButton, FloatButton } from '../components/FloatButton';
 import { ImageDemo } from '../components/Image';
 import { RangeLoading } from '../components/RangeLoading';
+import { DEBUGGER_PLUGIN_CONFIG_KEY } from '../config/config';
 // @ts-ignore
 // import VueComponent from '../components/VueComponent.vue';
 // import { CounterComponent } from '../components/WebComponent';
 import { Fab } from '../views/Fab';
-import { DEBUGGER_PLUGIN_CONFIG_KEY } from './config.schema';
 import { RecordController } from './local-save/record.controller';
 
 export class DebuggerController extends Disposable {

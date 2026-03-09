@@ -16,5 +16,5 @@
 
 import './global.css';
 
-export type { IUniverDocsHyperLinkUIConfig } from './controllers/config.schema';
+export type { IUniverDocsHyperLinkUIConfig } from './config/config';
 export { UniverDocsHyperLinkUIPlugin } from './plugin';

@@ -33,7 +33,7 @@ import {
     SetQueryFormulaDependencyResultMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE } from '../../controllers/config.schema';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_RETURN_DEPENDENCY_TREE } from '../../config/config';
 import { FFormula } from '../f-formula';
 
 interface ICommandServiceMock {

@@ -24,7 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
-import { useStateRef } from '../hooks/use-state-ref';
+import { useStateRef } from './use-state-ref';
 
 export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);

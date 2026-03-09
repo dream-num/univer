@@ -30,9 +30,9 @@ import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDoc
 import { ClearDocDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { menuSchema } from '../menu/schema';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
 import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
-import { menuSchema } from './menu.schema';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 export class DocDrawingUIController extends Disposable {

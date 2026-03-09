@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export type { IUniverDocsHyperLinkConfig } from './controllers/config.schema';
+export type { IUniverDocsHyperLinkConfig } from './config/config';
 export { UniverDocsHyperLinkPlugin } from './plugin';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -40,19 +40,19 @@ import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
 import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
+import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingEditorController } from './controllers/cf.editor.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
-import { ConditionalFormattingMenuController } from './controllers/cf.menu.controller';
 import { ConditionalFormattingPainterController } from './controllers/cf.painter.controller';
 import { ConditionalFormattingPanelController } from './controllers/cf.panel.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
-import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin, UniverSheetsFormulaPlugin)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {

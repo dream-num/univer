@@ -15,11 +15,11 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
+import type { IUniverSheetsThreadCommentConfig } from './config/config';
 import { DependentOn, ICommandService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import pkg from '../package.json';
-import { defaultPluginConfig } from './controllers/config.schema';
+import { defaultPluginConfig } from './config/config';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentResourceController } from './controllers/sheets-thread-comment-resource.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';

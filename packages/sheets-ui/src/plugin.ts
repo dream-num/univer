@@ -16,13 +16,14 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -32,7 +33,6 @@ import { CellCustomRenderController } from './controllers/cell-custom-render.con
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { EditorDataSyncController } from './controllers/editor/data-sync.controller';

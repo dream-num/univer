@@ -30,7 +30,7 @@ import { Hlookup } from './hlookup';
 import { Hstack } from './hstack';
 import { Hyperlink } from './hyperlink';
 import { ImageFunction } from './image';
-import { Index } from './index';
+import { Index } from './index/index';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
 import { Match } from './match';

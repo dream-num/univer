@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IUniverUIConfig } from '../../controllers/config.schema';
+import type { IUniverUIConfig } from '../../config/config';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { IConfigService, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfigValue } from '../../components/hooks';
-import { UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
 import { useDependency } from '../../utils/di';

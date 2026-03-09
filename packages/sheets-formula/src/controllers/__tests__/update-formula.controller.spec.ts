@@ -20,8 +20,8 @@ import { FormulaDataModel, SetArrayFormulaDataMutation, SetFormulaDataMutation, 
 import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
-import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config.schema';
 import { UpdateFormulaController } from '../update-formula.controller';
 
 function createWorkbookData(): IWorkbookData {

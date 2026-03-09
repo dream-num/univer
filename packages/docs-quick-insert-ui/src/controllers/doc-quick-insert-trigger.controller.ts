@@ -22,8 +22,8 @@ import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/d
 import { DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
+import { builtInMenuCommandIds, textMenu } from '../menu/built-in-menus';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { builtInMenuCommandIds, textMenu } from './built-in-menus';
 
 export class DocQuickInsertTriggerController extends Disposable {
     constructor(

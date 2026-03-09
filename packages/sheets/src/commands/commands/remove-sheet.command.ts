@@ -19,7 +19,7 @@ import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import type { IUniverSheetsConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsConfig } from '../../config/config';
 
 import {
     CommandType,
@@ -29,7 +29,7 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
-import { defaultLargeSheetOperationConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { defaultLargeSheetOperationConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';

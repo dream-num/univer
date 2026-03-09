@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
+import type { IUniverSheetsDataValidationConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -39,7 +39,7 @@ import {
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-import { defaultPluginConfig, SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY } from './config/config';
 import { DataValidationFormulaRefRangeController } from './controllers/dv-formula-ref-range.controller';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';

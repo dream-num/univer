@@ -16,8 +16,8 @@
 
 import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
+import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { BaseFunction } from '../functions/base-function';
-import type { IUniverEngineFormulaConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
@@ -45,6 +45,7 @@ import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.m
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { functionArray } from '../functions/array/function-map';
 import { functionCompatibility } from '../functions/compatibility/function-map';
 import { functionCube } from '../functions/cube/function-map';
@@ -62,7 +63,6 @@ import { functionText } from '../functions/text/function-map';
 import { functionUniver } from '../functions/univer/function-map';
 import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
-import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config.schema';
 
 export class FormulaController extends Disposable {
     constructor(

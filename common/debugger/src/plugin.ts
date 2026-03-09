@@ -15,14 +15,14 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDebuggerConfig } from './controllers/config.schema';
+import type { IUniverDebuggerConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import pkg from '../package.json';
-import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
+import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './config/config';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
-import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
+import { UniverWatermarkMenuController } from './menu/watermark.menu.controller';
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'UNIVER_DEBUGGER_PLUGIN';

@@ -16,5 +16,5 @@
 
 import './global.css';
 
-export type { IUniverSheetsTableUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsTableUIConfig } from './config/config';
 export { UniverSheetsTableUIPlugin } from './plugin';

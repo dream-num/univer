@@ -19,7 +19,7 @@ import type { Engine } from '@univerjs/engine-render';
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import pkg from '../package.json';
-import { defaultPluginConfig, SLIDES_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SLIDES_PLUGIN_CONFIG_KEY } from './config/config';
 // import { DocSelectionManagerService } from '@univerjs/docs';
 // import { CanvasView } from './views/render';
 

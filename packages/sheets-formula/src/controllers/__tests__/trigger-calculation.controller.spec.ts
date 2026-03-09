@@ -40,8 +40,8 @@ import {
 import { SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
-import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config.schema';
 import { TriggerCalculationController } from '../trigger-calculation.controller';
 
 function createWorkbookData(): IWorkbookData {

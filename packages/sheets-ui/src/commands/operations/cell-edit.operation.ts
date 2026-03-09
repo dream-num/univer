@@ -15,11 +15,11 @@
  */
 
 import type { IOperation, Workbook } from '@univerjs/core';
-import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { CommandType, ICommandService, IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {

@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsDrawingUIConfig } from './controllers/config.schema';
+import type { IUniverDocsDrawingUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
@@ -23,15 +23,15 @@ import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
-import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
 import { DocDrawingPrintingController } from './controllers/doc-drawing-printing.controller';
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocFloatDomController } from './controllers/doc-float-dom.controller';
-import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
+import { DocDrawingPopupMenuController } from './menu/drawing-popup-menu.controller';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
 
 @DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)

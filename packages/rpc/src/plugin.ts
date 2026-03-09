@@ -18,7 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type {
     IUniverRPCMainThreadConfig,
     IUniverRPCWorkerThreadConfig,
-} from './controllers/config.schema';
+} from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import pkg from '../package.json';
 import {
@@ -26,7 +26,7 @@ import {
     defaultPluginWorkerThreadConfig,
     PLUGIN_CONFIG_KEY_MAIN_THREAD,
     PLUGIN_CONFIG_KEY_WORKER_THREAD,
-} from './controllers/config.schema';
+} from './config/config';
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 import {

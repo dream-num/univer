@@ -15,7 +15,7 @@
  */
 
 import type * as React from 'react';
-import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
+import type { IUniverDocsUIConfig } from '../../config/config';
 import { Component, createRef } from 'react';
 
 interface IBaseDocContainerProps {

@@ -27,11 +27,11 @@ import { InsertFunctionOperation } from '../commands/operations/insert-function.
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
+import { menuSchema } from '../menu/schema';
 import { FormulaProgressBar } from '../views/formula-progress/FormulaProgress';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
-import { menuSchema } from './menu.schema';
 import {
     ChangeRefToAbsoluteShortcut,
     promptSelectionShortcutItem,

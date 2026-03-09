@@ -97,6 +97,7 @@ import { BorderPanel } from '../../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
 import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../../components/menu-item-frozen';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../../components/menu-item-input';
+import { menuSchema } from '../../menu/mobile-menu';
 import { CellPopup } from '../../views/cell-popup';
 import { CELL_POPUP_COMPONENT_KEY } from '../../views/cell-popup/config';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
@@ -156,7 +157,6 @@ import {
     ZoomInShortcutItem,
     ZoomOutShortcutItem,
 } from '../shortcuts/view.shortcut';
-import { menuSchema } from './menu.schema';
 
 export class SheetUIMobileController extends Disposable {
     constructor(

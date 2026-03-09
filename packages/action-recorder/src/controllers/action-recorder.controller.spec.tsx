@@ -19,8 +19,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
 import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
+import { menuSchema, OpenRecorderMenuItemFactory, RECORD_MENU_ITEM_ID, RecordMenuItemFactory, ReplayLocalRecordMenuItemFactory, ReplayLocalRecordOnActiveMenuItemFactory, ReplayLocalRecordOnNamesakeMenuItemFactory } from '../menu/action-recorder.menu';
 import { ActionRecorderController } from './action-recorder.controller';
-import { menuSchema, OpenRecorderMenuItemFactory, RECORD_MENU_ITEM_ID, RecordMenuItemFactory, ReplayLocalRecordMenuItemFactory, ReplayLocalRecordOnActiveMenuItemFactory, ReplayLocalRecordOnNamesakeMenuItemFactory } from './action-recorder.menu';
 
 describe('action-recorder controller/menu', () => {
     it('should create menu items', () => {

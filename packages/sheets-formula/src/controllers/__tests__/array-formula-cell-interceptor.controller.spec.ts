@@ -33,9 +33,9 @@ import {
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ArrayFormulaCellInterceptorController } from '../array-formula-cell-interceptor.controller';
-import { PLUGIN_CONFIG_KEY_BASE } from '../config.schema';
 
 function createWorkbookData(): IWorkbookData {
     return {

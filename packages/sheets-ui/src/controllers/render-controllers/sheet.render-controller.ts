@@ -17,7 +17,7 @@
 import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import type { IUniverSheetsUIConfig } from '../config.schema';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 
@@ -39,9 +39,9 @@ import {
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
     SHEET_VIEW_KEY,
 } from '../../common/keys';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 interface ISetWorksheetMutationParams {
     unitId: string;

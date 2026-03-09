@@ -18,7 +18,7 @@ import type { IFunctionInfo } from '@univerjs/engine-formula';
 import { IConfigService, LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PLUGIN_CONFIG_KEY_BASE } from '../../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { DescriptionService, IDescriptionService } from '../description.service';
 
 function createFunctionInfo(overrides: Partial<IFunctionInfo> = {}): IFunctionInfo {

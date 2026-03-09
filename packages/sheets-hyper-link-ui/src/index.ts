@@ -22,9 +22,9 @@ export {
     type IOpenHyperLinkEditPanelOperationParams,
     OpenHyperLinkEditPanelOperation,
 } from './commands/operations/popup.operations';
-export type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsHyperLinkUIConfig } from './config/config';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
-export { InsertLinkShortcut } from './controllers/menu';
+export { InsertLinkShortcut } from './menu/menu';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { SheetsHyperLinkPopupService } from './services/popup.service';
 export { SheetsHyperLinkResolverService } from './services/resolver.service';

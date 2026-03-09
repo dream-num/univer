@@ -15,11 +15,11 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsGraphicsConfig } from './controllers/config.schema';
+import type { IUniverSheetsGraphicsConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import pkg from '../package.json';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetGraphicsRenderController } from './controllers/graphics-render.controller';
 
 export class UniverSheetsGraphicsPlugin extends Plugin {

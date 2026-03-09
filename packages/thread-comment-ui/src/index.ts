@@ -21,7 +21,7 @@ export {
     SetActiveCommentOperation,
     ToggleSheetCommentPanelOperation,
 } from './commands/operations/comment.operations';
-export type { IUniverThreadCommentUIConfig } from './controllers/config.schema';
+export type { IUniverThreadCommentUIConfig } from './config/config';
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export { THREAD_COMMENT_PANEL } from './types/const';

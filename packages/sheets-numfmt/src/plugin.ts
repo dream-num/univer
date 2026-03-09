@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
+import type { IUniverSheetsNumfmtConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import pkg from '../package.json';
@@ -24,7 +24,7 @@ import { SetCurrencyCommand } from './commands/commands/set-currency.command';
 import { SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 import { SetPercentCommand } from './commands/commands/set-percent.command';
 import { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
-import { defaultPluginConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
 
 @DependentOn(UniverSheetsPlugin)

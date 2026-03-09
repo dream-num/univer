@@ -30,6 +30,7 @@ import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
 import * as React from 'react';
 import tailwindcss from 'tailwindcss';
+import { syncDemoArtifacts } from './scripts/sync-demos';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -100,41 +101,7 @@ if (!args.watch) {
     define['process.env.BUILD_TIME'] = `"${new Date().toISOString()}"`;
 }
 
-const entryPoints = [
-    // homepage
-    './src/main.tsx',
-
-    // sheets
-    './src/sheets/main.ts',
-    './src/sheets/worker.ts',
-
-    './src/sheets-no-worker/main.ts',
-
-    // sheets-multi
-    './src/sheets-multi/main.tsx',
-
-    // sheets-multi-units
-    './src/sheets-multi-units/main.ts',
-
-    // sheets-uniscript
-    './src/sheets-uniscript/main.ts',
-
-    // sheets-webcomponent
-    './src/sheets-webcomponent/main.tsx',
-
-    // docs
-    './src/docs/main.ts',
-
-    // docs-uniscript
-    './src/docs-uniscript/main.ts',
-
-    // slides
-    './src/slides/main.ts',
-
-    // mobile sheet
-    './src/mobile-s/main.ts',
-    './src/mobile-s/worker.ts',
-];
+const { entryPoints } = syncDemoArtifacts();
 
 const config: SameShape<BuildOptions, BuildOptions> = {
     bundle: true,

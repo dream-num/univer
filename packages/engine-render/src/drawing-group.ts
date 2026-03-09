@@ -18,7 +18,7 @@ import type { IGroupBaseBound } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IViewportInfo, Vector2 } from './basics';
 import type { UniverRenderingContext } from './context';
-import { getDrawingGroupState, RENDER_CLASS_TYPE, Transform } from './basics';
+import { RENDER_CLASS_TYPE, Transform } from './basics';
 import { Group } from './group';
 
 export class DrawingGroupObject extends Group {

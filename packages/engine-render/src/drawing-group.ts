@@ -77,9 +77,9 @@ export class DrawingGroupObject extends Group {
         return renderTransform;
     }
 
-    override getState() {
-        return getDrawingGroupState(this.left, this.top, this._objects.map((o) => o.getState()));
-    }
+    // override getState() {
+    //     return getDrawingGroupState(this.left, this.top, this._objects.map((o) => o.getState()));
+    // }
 
     override render(ctx: UniverRenderingContext, bounds: IViewportInfo): void {
         const realBound = this.getRealBound();

@@ -22,15 +22,15 @@ import {
 } from '../__testing__/test-formula-move';
 
 describe('Test formula move', () => {
-    it('move formula rows', () => {
-        expectMoveFormulaRowsResultMatchesSnapshot();
+    it('move formula rows', async () => {
+        await expectMoveFormulaRowsResultMatchesSnapshot();
     });
 
-    it('move formula si rows', () => {
-        expectMoveFormulaSiRowsResultMatchesSnapshot();
+    it('move formula si rows', async () => {
+        await expectMoveFormulaSiRowsResultMatchesSnapshot();
     });
 
-    it('move formula cell', () => {
-        expectMoveFormulaCellResultMatchesSnapshot();
+    it('move formula cell', async () => {
+        await expectMoveFormulaCellResultMatchesSnapshot();
     });
 });

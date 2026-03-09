@@ -387,8 +387,7 @@ export class EditingRenderController extends Disposable {
                  * but move the cursor within the editor instead.
                  */
                 if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))
-                ) {
+                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))) {
                     this._moveInEditor(keycode, isShift);
                     return;
                 }

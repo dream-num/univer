@@ -721,8 +721,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
          * the up, down, left, and right keys can no longer switch editing cells,
          * but move the cursor within the editor instead.
          */
-        if (keycode != null && this._cursorChange === CursorChange.CursorChange
-        ) {
+        if (keycode != null && this._cursorChange === CursorChange.CursorChange) {
             this._moveInEditor(keycode, isShift);
         } else {
             // TODO @Jocs: After we merging editor related controllers, this seems verbose.

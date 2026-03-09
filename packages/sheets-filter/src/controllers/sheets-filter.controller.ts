@@ -461,14 +461,12 @@ export class SheetsFilterController extends Disposable {
         // border will change if first col or last col moves.
         if (startColumn >= fromRange.startColumn && startColumn <= fromRange.endColumn
             && toRange.startColumn > fromRange.startColumn
-            && fromRange.endColumn < endColumn
-        ) {
+            && fromRange.endColumn < endColumn) {
             startBorder = fromRange.endColumn + 1;
         }
         if (endColumn >= fromRange.startColumn && endColumn <= fromRange.endColumn
             && toRange.startColumn < fromRange.startColumn
-            && fromRange.startColumn > startColumn
-        ) {
+            && fromRange.startColumn > startColumn) {
             endBorder = fromRange.startColumn - 1;
         }
 
@@ -562,8 +560,7 @@ export class SheetsFilterController extends Disposable {
         // only need to deal with endBorder, startRow will not be moved.
         if (endRow >= fromRange.startRow && endRow <= fromRange.endRow
             && toRange.startRow < fromRange.startRow
-            && fromRange.startRow > startRow
-        ) {
+            && fromRange.startRow > startRow) {
             endBorder = fromRange.startRow - 1;
         }
 

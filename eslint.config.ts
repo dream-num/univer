@@ -22,6 +22,7 @@ export default antfu(
             indent: 4,
             semi: true,
         },
+        e18e: false,
         regexp: false,
         react: true,
         pnpm: false,

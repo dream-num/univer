@@ -111,8 +111,7 @@ function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
         }
 
         if (isInWhiteSpace &&
-            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK
-        ) {
+            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK) {
             return false;
         }
     }

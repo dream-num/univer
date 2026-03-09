@@ -39,6 +39,17 @@ function shouldIgnoreFile(normalizedFilePath: string, ignorePaths: readonly unkn
     });
 }
 
+function getRuleFilename(context: Rule.RuleContext): string {
+    const filenameFromProperty = (context as { filename?: unknown }).filename;
+
+    if (typeof filenameFromProperty === 'string' && filenameFromProperty) {
+        return filenameFromProperty;
+    }
+
+    const getFilename = (context as { getFilename?: () => string }).getFilename;
+    return typeof getFilename === 'function' ? getFilename.call(context) : '';
+}
+
 const rule: Rule.RuleModule = {
     meta: {
         type: 'problem',
@@ -65,7 +76,7 @@ const rule: Rule.RuleModule = {
     },
 
     create(context) {
-        const filename = context.getFilename();
+        const filename = getRuleFilename(context);
         const normalizedPath = normalizePath(filename);
         const [ruleOptions = {} as IRuleOptions] = context.options as [IRuleOptions?];
         const ignorePaths = Array.isArray(ruleOptions.ignore) ? ruleOptions.ignore : [];

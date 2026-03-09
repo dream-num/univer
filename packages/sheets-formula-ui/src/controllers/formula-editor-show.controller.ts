@@ -154,8 +154,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
 
     private _commandExecutedListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
-            if (command.id === SetFormulaCalculationResultMutation.id || (command.id === SetArrayFormulaDataMutation.id && options && options.remove)
-            ) {
+            if (command.id === SetFormulaCalculationResultMutation.id || (command.id === SetArrayFormulaDataMutation.id && options && options.remove)) {
                 this._removeArrayFormulaRangeShape();
             }
         }));

@@ -115,7 +115,8 @@ export class AutoFillUIController extends Disposable {
             const fromCollab = options?.fromCollab;
             const fromSync = options?.fromSync;
             const fromFormula = options?.fromFormula;
-            if (quitCommands.includes(command.id)
+            if (
+                quitCommands.includes(command.id)
                 && !fromCollab
                 && !fromSync
                 && !fromFormula

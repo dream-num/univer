@@ -3,6 +3,7 @@ import type { Rules } from '@antfu/eslint-config';
 import type { Linter } from 'eslint';
 import os from 'node:os';
 import path from 'node:path';
+import { fixupPluginRules } from '@eslint/compat';
 import typescriptParser from '@typescript-eslint/parser';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import header from 'eslint-plugin-header';
@@ -352,7 +353,7 @@ export const penetratingPreset = (): Linter.Config => {
         // Not penetrating for source files
         files: ['**/*.ts', '**/*.tsx'],
         plugins: {
-            penetrating,
+            penetrating: fixupPluginRules(penetrating),
         },
         ignores: [
             '**/__tests__/**/*',
@@ -386,7 +387,7 @@ export const noBarrelImportPreset = (): Linter.Config => {
             '**/*.test.tsx',
         ], // do not check test files
         plugins: {
-            barrel,
+            barrel: fixupPluginRules(barrel),
         },
         rules: {
             'barrel/no-barrel-import': 2,
@@ -415,7 +416,7 @@ export const headerPreset = (): Linter.Config => {
             'playwright.config.ts',
         ],
         plugins: {
-            header,
+            header: fixupPluginRules(header),
         },
         rules: {
             'header/header': [

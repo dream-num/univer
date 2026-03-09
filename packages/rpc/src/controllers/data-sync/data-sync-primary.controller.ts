@@ -119,8 +119,7 @@ export class DataSyncPrimaryController extends RxDisposable {
                 // do not sync mutations from the web worker back to the web worker
                 !(options as IRemoteSyncMutationOptions)?.fromSync &&
                 // do not sync mutations those are not meant to be synced
-                this._syncingMutations.has(id)
-            ) {
+                this._syncingMutations.has(id)) {
                 this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo }, options);
             }
         }));

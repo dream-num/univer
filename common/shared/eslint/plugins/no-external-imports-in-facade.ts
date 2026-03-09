@@ -15,6 +15,17 @@ function getImportSourceValue(node: Rule.Node): string | null {
     return source.value;
 }
 
+function getRuleFilename(context: Rule.RuleContext): string {
+    const filenameFromProperty = (context as { filename?: unknown }).filename;
+
+    if (typeof filenameFromProperty === 'string' && filenameFromProperty) {
+        return filenameFromProperty;
+    }
+
+    const getFilename = (context as { getFilename?: () => string }).getFilename;
+    return typeof getFilename === 'function' ? getFilename.call(context) : '';
+}
+
 const rule: Rule.RuleModule = {
     meta: {
         type: 'problem',
@@ -27,7 +38,7 @@ const rule: Rule.RuleModule = {
     },
 
     create(context) {
-        const filename = context.getFilename();
+        const filename = getRuleFilename(context);
         const normalizedPath = filename.split(path.sep).join('/');
         const isFacadeFile = normalizedPath.includes('/facade/');
 

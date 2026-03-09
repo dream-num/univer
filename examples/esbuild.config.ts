@@ -86,7 +86,7 @@ function monacoBuildTask() {
     });
 }
 
-const define = {
+const define: Record<string, string> = {
     'process.env.NODE_ENV': args.watch ? '"development"' : '"production"',
     'process.env.IS_E2E': isE2E ? 'true' : 'false',
 };

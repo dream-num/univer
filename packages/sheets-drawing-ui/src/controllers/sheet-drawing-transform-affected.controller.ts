@@ -1228,7 +1228,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
                             const drawing = drawingData[drawingId] as ISheetDrawing;
-                            if(drawing.sheetTransform){
+                            if (drawing.sheetTransform) {
                                 drawing.transform = drawingPositionToTransform(drawing.sheetTransform, this._selectionRenderService, this._skeletonManagerService);
                             }
                             insertDrawings.push(drawingData[drawingId]);

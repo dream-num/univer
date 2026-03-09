@@ -17,7 +17,7 @@
 import type { IFontConfig } from '../../services/font.service';
 import { createIdentifier } from '@univerjs/core';
 
-export type RibbonType = 'default' | 'simple' | 'classic';
+export type RibbonType = 'collapsed' | 'simple' | 'classic';
 
 export interface IWorkbenchOptions {
     container?: string | HTMLElement;

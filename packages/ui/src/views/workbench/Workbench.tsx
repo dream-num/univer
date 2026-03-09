@@ -49,7 +49,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
         footer = true,
         headerMenu = true,
         contextMenu = true,
-        ribbonType = 'default',
+        ribbonType = 'classic',
         mountContainer,
         onRendered,
     } = props;

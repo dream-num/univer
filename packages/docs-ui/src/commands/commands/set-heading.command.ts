@@ -17,8 +17,8 @@
 import type { DocumentDataModel, ICommand, IMutationInfo, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, CommandType, generateRandomId, ICommandService, IUniverInstanceService, JSONX, NamedStyleType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, generateRandomId, ICommandService, IPermissionService, IUniverInstanceService, JSONX, NamedStyleType, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocumentEditablePermission, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
 export interface ISetParagraphNamedStyleCommandParams {
@@ -35,11 +35,17 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const permissionService = accessor.get(IPermissionService);
         const doc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!doc) {
             return false;
         }
         const unitId = doc.getUnitId();
+
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
+            return false;
+        }
         const selectionService = accessor.get(DocSelectionManagerService);
         const selections = params.textRanges ?? selectionService.getTextRanges({ unitId, subUnitId: unitId });
         if (!selections?.length) {

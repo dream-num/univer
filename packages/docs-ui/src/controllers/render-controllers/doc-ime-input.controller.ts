@@ -22,10 +22,11 @@ import {
     Disposable,
     ICommandService,
     Inject,
+    IPermissionService,
     Tools,
 } from '@univerjs/core';
 
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, DocumentEditablePermission } from '@univerjs/docs';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -46,7 +47,8 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocIMEInputManagerService) private readonly _docImeInputManagerService: DocIMEInputManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
 
@@ -102,13 +104,19 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
             return;
         }
 
-        const unitId = this._context.unitId;
-
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
         const { event, activeRange } = config;
 
         if (skeleton == null || activeRange == null) {
+            return;
+        }
+
+        // Check if document is editable (using permission system)
+        const docDataModel = this._context.unit;
+        const unitId = docDataModel.getUnitId();
+        const editablePermission = this._permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
             return;
         }
 

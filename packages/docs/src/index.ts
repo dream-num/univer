@@ -24,5 +24,6 @@ export { DocSelectionManagerService } from './services/doc-selection-manager.ser
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
+export { DocumentEditablePermission } from './services/permission/document-editable.permission';
 export { addCustomRangeBySelectionFactory, addCustomRangeFactory, deleteCustomRangeFactory } from './utils/custom-range-factory';
 export { replaceSelectionFactory } from './utils/replace-selection-factory';

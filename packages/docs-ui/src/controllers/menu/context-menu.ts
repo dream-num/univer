@@ -21,12 +21,13 @@ import type { Subscriber } from 'rxjs';
 import { DOC_RANGE_TYPE, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../../commands/commands/doc-delete.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../../commands/commands/table/doc-table-insert.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
+import { getCurrentDocRangeDisable$ } from './menu';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -124,7 +125,10 @@ export const CutMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'rightClick.cut',
-        disabled$: getDisableOnCollapsedObservable(accessor),
+        disabled$: getDisableOnCollapsedObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([collapsed, permission]) => collapsed || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -135,6 +139,7 @@ export const PasteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecialDoubleIcon',
         title: 'rightClick.paste',
+        disabled$: getCurrentDocRangeDisable$(accessor, false),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -145,7 +150,10 @@ export const DeleteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecialDoubleIcon',
         title: 'rightClick.delete',
-        disabled$: getDisableOnCollapsedObservable(accessor),
+        disabled$: getDisableOnCollapsedObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([collapsed, permission]) => collapsed || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -169,7 +177,10 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         title: 'table.insertRowAbove',
         icon: 'InsertRowAboveDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -180,7 +191,10 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'table.insertRowBelow',
         icon: 'InsertRowBelowDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -191,7 +205,10 @@ export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButto
         type: MenuItemType.BUTTON,
         title: 'table.insertColumnLeft',
         icon: 'LeftInsertColumnDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -202,7 +219,10 @@ export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButt
         type: MenuItemType.BUTTON,
         title: 'table.insertColumnRight',
         icon: 'RightInsertColumnDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -226,7 +246,10 @@ export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         type: MenuItemType.BUTTON,
         title: 'table.deleteRows',
         icon: 'DeleteRowDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -237,7 +260,10 @@ export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         type: MenuItemType.BUTTON,
         title: 'table.deleteColumns',
         icon: 'DeleteColumnDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -248,7 +274,10 @@ export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         title: 'table.deleteTable',
         icon: 'GridIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor).pipe(
+            combineLatestWith(getCurrentDocRangeDisable$(accessor, false)),
+            map(([table, permission]) => table || permission)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

@@ -38,6 +38,7 @@
         "@univerjs/icons": "1.1.1",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/network": "workspace:*",
+        "@univerjs/protocol": "0.1.47",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",

@@ -23,6 +23,7 @@ import {
     CommandType,
     DataStreamTreeTokenType,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     JSONX,
     PositionedObjectLayoutType,
@@ -33,7 +34,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocumentEditablePermission, RichTextEditingMutation } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
@@ -65,6 +66,13 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
         }
 
         const { direction, range, unitId, drawingId } = params;
+
+        // Check if document is editable (using permission system)
+        const permissionService = accessor.get(IPermissionService);
+        const editablePermission = permissionService.getPermissionPoint(new DocumentEditablePermission(unitId).id);
+        if (editablePermission && !editablePermission.value) {
+            return false;
+        }
 
         const { startOffset, segmentId, style } = activeRange;
 

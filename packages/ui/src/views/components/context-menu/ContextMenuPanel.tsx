@@ -130,7 +130,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
             ref={setMenuElement}
             className={clsx(
                 `
-                  univer-box-border univer-grid univer-min-w-52 univer-max-w-fit univer-gap-1 univer-overflow-y-auto
+                  univer-box-border univer-grid univer-min-w-52 univer-max-w-full univer-gap-1 univer-overflow-y-auto
                   univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-2 univer-py-1 univer-text-sm
                   univer-text-gray-900 univer-shadow-md
                   dark:!univer-bg-gray-700 dark:!univer-text-white

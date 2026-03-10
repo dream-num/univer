@@ -519,7 +519,7 @@ export class FUniver extends Disposable {
      * ```
      */
     newBlob(): FBlob {
-        return this._injector.createInstance(FBlob);
+        return this._injector.createInstance(FBlob, null);
     }
 
     /**

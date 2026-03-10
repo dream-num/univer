@@ -15,11 +15,12 @@
  */
 
 import type { Univer } from '../../univer';
-import type { IPermissionPoint, PermissionStatus } from '../permission/type';
+import type { IPermissionPoint } from '../permission/type';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PermissionService } from '../permission/permission.service';
+import { PermissionStatus } from '../permission/type';
 import { createTestBed } from './create-test-bed';
 
 class TestPermissionPoint implements IPermissionPoint {
@@ -34,15 +35,17 @@ class TestPermissionPoint implements IPermissionPoint {
     }
 }
 
-describe('Test array util function', () => {
+describe('Test permission service', () => {
     let univer: Univer;
     let permissionService: PermissionService;
+
     beforeEach(() => {
         univer?.dispose();
         const instance = createTestBed([[PermissionService]]);
         univer = instance.univer;
         permissionService = instance.get(PermissionService);
     });
+
     it('test get permission from permissionService', () => {
         const point = new TestPermissionPoint('test');
         permissionService.addPermissionPoint(point);
@@ -78,5 +81,51 @@ describe('Test array util function', () => {
         permissionService.updatePermissionPoint(point2.id, !point2.value);
         const v = await firstValueFrom(result$);
         expect(v).toEqual([point1, point2]);
+    });
+
+    it('should manage permission updates, duplicates and visibility flags', () => {
+        const point = new TestPermissionPoint('subject');
+        const pointSubject = new BehaviorSubject<IPermissionPoint<boolean>>(point);
+        const updates: string[] = [];
+        const warningSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const subscription = permissionService.permissionPointUpdate$.subscribe((permission) => {
+            updates.push(`${permission.id}:${String(permission.value)}`);
+        });
+
+        expect(permissionService.getShowComponents()).toBe(true);
+        permissionService.setShowComponents(false);
+        expect(permissionService.getShowComponents()).toBe(false);
+
+        expect(permissionService.addPermissionPoint(pointSubject)).toBe(true);
+        expect(permissionService.addPermissionPoint(point)).toBe(false);
+
+        permissionService.updatePermissionPoint(point.id, true);
+
+        expect(permissionService.getPermissionPoint(point.id)).toMatchObject({
+            value: true,
+            status: PermissionStatus.DONE,
+        });
+        expect(updates).toEqual([
+            `${point.id}:false`,
+            `${point.id}:true`,
+        ]);
+
+        const snapshot = permissionService.getAllPermissionPoint();
+        snapshot.clear();
+        expect(permissionService.getAllPermissionPoint().size).toBe(1);
+
+        permissionService.deletePermissionPoint(point.id);
+        expect(permissionService.getPermissionPoint(point.id)).toBeUndefined();
+
+        permissionService.clearPermissionMap();
+        expect(permissionService.getAllPermissionPoint().size).toBe(0);
+
+        subscription.unsubscribe();
+        warningSpy.mockRestore();
+    });
+
+    it('should throw clear errors when composing missing permission points', () => {
+        expect(() => permissionService.composePermission(['missing.permission'])).toThrow('[PermissionService]: missing.permission permissionPoint does not exist!');
+        expect(() => permissionService.composePermission$(['missing.permission'])).toThrow('[PermissionService]: missing.permission permissionPoint does not exist!');
     });
 });

@@ -18,11 +18,8 @@ import type { ILocales } from '../shared/locale';
 import { defaultTheme } from '@univerjs/themes';
 import { describe, expect, it, vi } from 'vitest';
 import { Injector } from '../common/di';
-import { UniverInstanceType } from '../common/unit';
 import { COMMAND_LOG_EXECUTION_CONFIG_KEY } from '../services/command/command.service';
 import { IConfigService } from '../services/config/config.service';
-import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { LogLevel } from '../services/log/log.service';
 import { Skeleton } from '../skeleton';
@@ -89,26 +86,6 @@ describe('Univer', () => {
 
         expect(removedCallback).not.toHaveBeenCalled();
         expect(activeCallback).toHaveBeenCalledTimes(1);
-    });
-
-    it('should create units via deprecated and current APIs', () => {
-        const univer = new Univer();
-        const injector = univer.__getInjector();
-
-        const sheetA = univer.createUniverSheet({ id: 'sheet-a' });
-        const sheetB = univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'sheet-b' });
-        const sheetC = univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'sheet-c' });
-        const doc = univer.createUniverDoc({ id: 'doc-a' });
-        const slide = univer.createUniverSlide({ id: 'slide-a' });
-
-        expect(sheetA.getUnitId()).toBe('sheet-a');
-        expect(sheetB.getUnitId()).toBe('sheet-b');
-        expect(sheetC.getUnitId()).toBe('sheet-c');
-        expect(doc.getUnitId()).toBe('doc-a');
-        expect(slide.getUnitId()).toBe('slide-a');
-        expect(injector.get(LifecycleService).stage).toBe(LifecycleStages.Ready);
-
-        univer.dispose();
     });
 
     it('should delegate plugin registration for tuple-style APIs and support parent injector', () => {

@@ -173,7 +173,7 @@ export function Tree(props: ITreeProps) {
                     />
                     <div
                         className="
-                          univer-mx-1 univer-inline-block univer-h-full univer-shrink univer-overflow-hidden
+                          univer-mx-1 univer-flex univer-h-full univer-shrink univer-items-center univer-overflow-hidden
                           univer-text-ellipsis univer-whitespace-nowrap
                         "
                         onClick={(e) => {

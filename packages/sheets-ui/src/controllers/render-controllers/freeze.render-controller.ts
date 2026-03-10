@@ -192,7 +192,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._zoomRefresh();
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     private _createFreeze(
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
@@ -207,20 +207,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         if (position == null || skeleton == null) return null;
 
         const sheetObject = this._getSheetObject()!;
-        const engine = sheetObject.engine;
-        const canvasMaxWidth = engine?.width || 0;
-        const canvasMaxHeight = engine?.height || 0;
         const scene = sheetObject.scene;
         const { startX, startY } = position;
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
-
-        const contentWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
-            ? canvasMaxWidth
-            : columnTotalWidth + columnHeaderHeightAndMarginTop;
-
-        const contentHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
-            ? canvasMaxHeight
-            : rowTotalHeight + columnHeaderHeightAndMarginTop;
 
         this._changeToRow = freezeRow;
         this._changeToColumn = freezeColumn;
@@ -254,7 +243,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
                 fill,
-                width: contentWidth * 2 / scale,
+                width: columnTotalWidth,
                 height: freezeSize,
                 left: rowHeaderWidthAndMarginLeft,
                 top: startY - freezeOffset,
@@ -286,7 +275,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
                 fill,
                 width: freezeSize,
-                height: contentHeight * 2 / scale,
+                height: rowTotalHeight,
                 left: startX - FREEZE_OFFSET,
                 top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,

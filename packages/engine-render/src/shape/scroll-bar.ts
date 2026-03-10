@@ -115,7 +115,7 @@ export class ScrollBar extends Disposable {
     private _vThumbMargin = DEFAULT_THUMB_MARGIN;
     private _hThumbMargin = DEFAULT_THUMB_MARGIN;
 
-    // origin: barBorder
+    // origin: barBorder, used for strokeWidth of scroll track, is draw on the center of the track border, so the visible border thickness is barBorder / 2 at both side of the track, and the visible track thickness is `trackThickness - barBorder`.
     private _trackBorderThickness = 1;
     private _thumbLengthRatio = 1;
 
@@ -287,14 +287,24 @@ export class ScrollBar extends Disposable {
         return this.verticalThumbRect?.visible || false;
     }
 
+    /**
+     * The horizontal scroll thumb thickness.
+     */
     get scrollHorizonThumbThickness() {
         return Math.max(0, this._trackThickness - this._hThumbMargin * 2);
     }
 
+    /**
+     * The vertical scroll thumb thickness.
+     */
     get scrollVerticalThumbThickness() {
         return Math.max(0, this._trackThickness - this._vThumbMargin * 2);
     }
 
+    /**
+     * The scroll track thickness.
+     * trackThickness = scrollTrackSize(horizonScrollTrack.height/verticalScrollTrack.width) + trackBorderThickness
+     */
     set barSize(v: number) {
         this._trackThickness = v;
     }
@@ -309,6 +319,10 @@ export class ScrollBar extends Disposable {
 
     get trackThickness() {
         return this._trackThickness;
+    }
+
+    get totalSize() {
+        return this._trackThickness + this._trackBorderThickness;
     }
 
     static attachTo(view: Viewport, props?: IScrollBarProps) {

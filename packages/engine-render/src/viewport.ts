@@ -197,6 +197,14 @@ export class Viewport {
     private _paddingEndY: number = 0;
 
     /**
+     * The viewMain viewport's marginLeft and marginTop is used to calculate the scrollBar position.
+     * marginLeft = rowHeaderWidthAndMarginLeft;
+     * marginTop = columnHeaderHeightAndMarginTop;
+     */
+    private _marginLeft: number = 0;
+    private _marginTop: number = 0;
+
+    /**
      * viewbound of cache area, cache area is slightly bigger than viewbound.
      */
     private _cacheBound: IBoundRectNoAngle | null;
@@ -511,6 +519,11 @@ export class Viewport {
             startY: 0,
             endY: 0,
         });
+    }
+
+    setMargin(marginLeft: number, marginTop: number) {
+        this._marginLeft = marginLeft;
+        this._marginTop = marginTop;
     }
 
     /**
@@ -1102,8 +1115,9 @@ export class Viewport {
         const freezeWidth = this._paddingEndX - this._paddingStartX;
         const scaleY = this.scene.scaleY;
         const scaleX = this.scene.scaleX;
-        const maxViewportScrollX = this._sceneWidthAfterScale - freezeWidth * scaleX - width;
-        const maxViewportScrollY = this._sceneHeightAfterScale - freezeHeight * scaleY - height;
+        const scrollBarThicknessTotalSize = this.getScrollBar()?.totalSize ?? 0;
+        const maxViewportScrollX = this._sceneWidthAfterScale - this._marginLeft * scaleX - freezeWidth * scaleX - width + scrollBarThicknessTotalSize;
+        const maxViewportScrollY = this._sceneHeightAfterScale - this._marginTop * scaleY - freezeHeight * scaleY - height + scrollBarThicknessTotalSize;
         return {
             viewportScrollX: Tools.clamp(viewportScrollX, this._paddingStartX, maxViewportScrollX / scaleX),
             viewportScrollY: Tools.clamp(viewportScrollY, this._paddingStartY, maxViewportScrollY / scaleY),
@@ -1166,8 +1180,8 @@ export class Viewport {
         if (!this.width || this.width < 0) return;
         if (!this.height || this.height < 0) return;
         const { width, height } = this._calcViewPortSize();
-        const sceneWidthCurrVpAfterScale = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
-        const sceneHeightCurrVpAfterScale = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
+        const sceneWidthCurrVpAfterScale = (this._scene.width - this._marginLeft - this._paddingEndX) * this._scene.scaleX;
+        const sceneHeightCurrVpAfterScale = (this._scene.height - this._marginTop - this._paddingEndY) * this._scene.scaleY;
         this._sceneWCurrVpAfterScale = sceneWidthCurrVpAfterScale;
         this._sceneHCurrVpAfterScale = sceneHeightCurrVpAfterScale;
         this._sceneWidthAfterScale = this._scene.width * this._scene.scaleX;

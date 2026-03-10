@@ -61,5 +61,6 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
         });
+        scene.getMainViewport().setMargin(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
     }
 }

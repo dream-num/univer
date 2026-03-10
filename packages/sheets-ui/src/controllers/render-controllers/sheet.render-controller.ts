@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { BooleanNumber, ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../../config/config';
@@ -260,12 +260,15 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
     }
 
-    private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
+    private _initViewports(scene: Scene, rowHeader: { width: number; hidden?: BooleanNumber }, columnHeader: { height: number; hidden?: BooleanNumber }) {
+        const rowHeaderWidth = rowHeader.hidden ? 0 : rowHeader.width;
+        const columnHeaderHeight = columnHeader.hidden ? 0 : columnHeader.height;
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
+
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
-            left: rowHeader.width,
-            top: columnHeader.height,
+            left: rowHeaderWidth,
+            top: columnHeaderHeight,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
@@ -300,9 +303,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         });
         const viewRowBottom = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
             left: 0,
-            top: columnHeader.height,
+            top: columnHeaderHeight,
             bottom: 0,
-            width: rowHeader.width + 1,
+            width: rowHeaderWidth + 1,
             isWheelPreventDefaultX: true,
         });
         const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
@@ -310,17 +313,17 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             isWheelPreventDefaultX: true,
         });
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
-            left: rowHeader.width,
+            left: rowHeaderWidth,
             top: 0,
-            height: columnHeader.height + 1,
+            height: columnHeaderHeight + 1,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
-            width: rowHeader.width,
-            height: columnHeader.height,
+            width: rowHeaderWidth,
+            height: columnHeaderHeight,
             isWheelPreventDefaultX: true,
         });
 

@@ -44,6 +44,9 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
 
     const onGroupBtnClick = () => {
         const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length <= 1) {
+            return;
+        }
         const { unitId, subUnitId } = focusDrawings[0];
         const groupId = generateRandomId(10);
         const groupTransform = getGroupState(0, 0, focusDrawings.map((o) => o.transform || {}));
@@ -134,6 +137,10 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
 
         drawingManagerService.featurePluginUngroupUpdateNotification(params);
     };
+
+    useEffect(() => {
+        setGroupShow(hasGroup);
+    }, [hasGroup])
 
     useEffect(() => {
         const drawingParam = drawings[0];

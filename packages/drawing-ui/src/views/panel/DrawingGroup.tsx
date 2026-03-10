@@ -140,7 +140,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
 
     useEffect(() => {
         setGroupShow(hasGroup);
-    }, [hasGroup])
+    }, [hasGroup]);
 
     useEffect(() => {
         const drawingParam = drawings[0];

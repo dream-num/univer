@@ -68,7 +68,7 @@ describe('test ChannelClient & ChannelServer', () => {
         server = new ChannelServer(serverProtocol);
     });
 
-    describe('test fromModule and toModule', async () => {
+    describe('test fromModule and toModule', () => {
         it('should remote call work', async () => {
             interface INameService {
                 getName(): Promise<string>;

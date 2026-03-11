@@ -190,6 +190,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     ) {
         super();
 
+        /**
+         * Mutations that effect formula calculation should be registered here.
+         * Because these mutations should be synced to the worker (if the worker is enabled) to trigger the formula recalculation.
+         * SetWorksheetRowCountMutation and SetWorksheetColumnCountMutation effect reference node generation, so they should also be registered here to avoid generating incorrect reference nodes in the worker.
+         */
         ([
             SetRangeValuesMutation,
             InsertColMutation,
@@ -215,6 +220,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             MarkDirtyRowAutoHeightMutation,
             CancelMarkDirtyRowAutoHeightMutation,
             CopyWorksheetEndMutation,
+
+            SetWorksheetRowCountMutation,
+            SetWorksheetColumnCountMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -314,9 +322,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 // SetWorksheetColIsAutoWidthCommand,
 
                 SetWorksheetRowCountCommand,
-                SetWorksheetRowCountMutation,
                 SetWorksheetColumnCountCommand,
-                SetWorksheetColumnCountMutation,
 
                 SelectRangeCommand,
                 SetSelectionsOperation,

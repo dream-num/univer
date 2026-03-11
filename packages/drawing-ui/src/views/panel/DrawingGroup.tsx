@@ -15,14 +15,14 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, generateRandomId, LocaleService } from '@univerjs/core';
+import { DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { GroupIcon, UngroupIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../commands/operations/drawing-group.operation';
 import { getUpdateParams } from '../../utils/get-update-params';
 
 export interface IDrawingGroupProps {
@@ -34,6 +34,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingManagerService = useDependency(IDrawingManagerService);
+    const commandService = useDependency(ICommandService);
 
     const { hasGroup, drawings } = props;
 
@@ -43,104 +44,12 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const [ungroupBtnShow, setUngroupBtnShow] = useState(true);
 
     const onGroupBtnClick = () => {
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (focusDrawings.length <= 1) {
-            return;
-        }
-        const { unitId, subUnitId } = focusDrawings[0];
-        const groupId = generateRandomId(10);
-        const groupTransform = getGroupState(0, 0, focusDrawings.map((o) => o.transform || {}));
-        const groupParam = {
-            unitId,
-            subUnitId,
-            drawingId: groupId,
-            drawingType: DrawingTypeEnum.DRAWING_GROUP,
-            transform: groupTransform,
-            groupBaseBound: {
-                left: groupTransform.left,
-                top: groupTransform.top,
-                width: groupTransform.width,
-                height: groupTransform.height,
-            },
-        } as IDrawingParam;
-
-        const children = focusDrawings.map((drawing) => {
-            const transform = drawing.transform || { left: 0, top: 0 };
-            const { unitId, subUnitId, drawingId } = drawing;
-            return {
-                unitId,
-                subUnitId,
-                drawingId,
-                transform: {
-                    ...transform,
-                    // left: transform.left! - groupTransform.left,
-                    // top: transform.top! - groupTransform.top,
-                },
-                groupId,
-            };
-        }) as IDrawingParam[];
-
-        drawingManagerService.featurePluginGroupUpdateNotification([{
-            parent: groupParam,
-            children,
-        }]);
-    };
-
-    const ungroup = (param: IDrawingParam) => {
-        if (param.drawingType !== DrawingTypeEnum.DRAWING_GROUP) {
-            return;
-        }
-
-        const { unitId, subUnitId, drawingId, transform: groupTransform = { width: 0, height: 0 }, groupBaseBound } = param;
-
-        if (groupTransform == null) {
-            return;
-        }
-
-        const objects = drawingManagerService.getDrawingsByGroup({ unitId, subUnitId, drawingId });
-
-        if (objects.length === 0) {
-            return;
-        }
-
-        const children = objects.map((object) => {
-            const { transform } = object;
-            const { unitId, subUnitId, drawingId } = object;
-            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0, groupBaseBound);
-            return {
-                unitId,
-                subUnitId,
-                drawingId,
-                transform: {
-                    ...transform,
-                    ...newTransform,
-                },
-                groupId: undefined,
-            };
-        });
-
-        return {
-            parent: param,
-            children,
-        } as IDrawingGroupUpdateParam;
+        commandService.syncExecuteCommand(SetDrawingGroupOperation.id);
     };
 
     const onUngroupBtnClick = () => {
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        const params = focusDrawings.map((drawing) =>
-            ungroup(drawing)
-        ).filter((o) => o != null) as IDrawingGroupUpdateParam[];
-
-        if (params.length === 0) {
-            return;
-        }
-
-        drawingManagerService.featurePluginUngroupUpdateNotification(params);
+        commandService.syncExecuteCommand(CancelDrawingGroupOperation.id);
     };
-
-    useEffect(() => {
-        setGroupShow(hasGroup);
-    }, [hasGroup]);
 
     useEffect(() => {
         const drawingParam = drawings[0];

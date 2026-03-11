@@ -17,6 +17,7 @@
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
+import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../commands/operations/drawing-group.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
@@ -44,6 +45,8 @@ export class DrawingUIController extends Disposable {
             ImageResetSizeOperation,
             SetDrawingAlignOperation,
             AutoImageCropOperation,
+            SetDrawingGroupOperation,
+            CancelDrawingGroupOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

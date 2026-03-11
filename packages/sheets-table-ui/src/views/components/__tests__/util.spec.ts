@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { describe, expect, it } from 'vitest';
 import { ConditionSubComponentEnum } from '../type';

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { describe, expect, it, vi } from 'vitest';
 import { FWorkbookThreadCommentMixin } from '../f-workbook';
 

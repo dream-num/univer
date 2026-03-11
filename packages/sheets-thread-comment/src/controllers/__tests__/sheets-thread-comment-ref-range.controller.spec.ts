@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { AddCommentMutation, DeleteCommentMutation, UpdateCommentRefMutation } from '@univerjs/thread-comment';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';

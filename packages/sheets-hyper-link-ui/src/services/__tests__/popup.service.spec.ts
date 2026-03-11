@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';

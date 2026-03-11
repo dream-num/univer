@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import type { Observable } from 'rxjs';
 import type { IMessageProtocol } from '../rpc.service';
 import { awaitTime } from '@univerjs/core';

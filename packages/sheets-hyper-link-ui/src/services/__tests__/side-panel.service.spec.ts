@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsHyperLinkSidePanelService } from '../side-panel.service';

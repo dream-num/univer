@@ -56,6 +56,7 @@ function createConfig(options) {
                     'packages/slides-ui/**',
                     '**/src/plugin.ts',
                     '**/src/mobile-plugin.ts',
+                    '**/src/config/config.ts',
                 ],
             },
         },

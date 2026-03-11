@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { CopySheetCommand, RemoveSheetCommand } from '@univerjs/sheets';
 import { AddCommentMutation, DeleteCommentMutation } from '@univerjs/thread-comment';
 import { describe, expect, it, vi } from 'vitest';

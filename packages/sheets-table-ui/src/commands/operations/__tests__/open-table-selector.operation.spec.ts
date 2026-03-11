@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { AddSheetTableCommand } from '@univerjs/sheets-table';

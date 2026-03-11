@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';

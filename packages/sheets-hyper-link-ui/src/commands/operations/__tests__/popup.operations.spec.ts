@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';

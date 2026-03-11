@@ -14,38 +14,35 @@
  * limitations under the License.
  */
 
-import { FOCUSING_SHEET, ICommandService, IContextService } from '@univerjs/core';
+import { FOCUSING_SHEET, ICommandService } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
+import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SheetsScrollRenderController } from '../scroll.render-controller';
 import { createRenderTestBed } from './render-test-bed';
 
 describe('SheetsScrollRenderController', () => {
     it('executes relative scroll command on mousewheel when focused', () => {
-        const testBed = createRenderTestBed();
+        const scrollManagerService = {
+            rawScrollInfo$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) },
+            currentSkeletonBefore$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) },
+            setValidScrollStateToCurrSheet: vi.fn(),
+            validViewportScrollInfo$: { next: vi.fn() },
+            setSearchParam: vi.fn(),
+            getScrollStateByParam: vi.fn(() => null),
+            calcViewportScrollFromRowColOffset: vi.fn(() => ({ viewportScrollX: 0, viewportScrollY: 0 })),
+        };
+
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+        });
         const { context, scene, contextService } = testBed;
         const commandService = testBed.get(ICommandService);
         const executeSpy = vi.spyOn(commandService, 'executeCommand');
 
         contextService.setContextValue(FOCUSING_SHEET, true);
 
-        const _controller = new SheetsScrollRenderController(
-            context as any,
-            testBed.injector as any,
-            testBed.sheetSkeletonManagerService as any,
-            testBed.get(IContextService) as any,
-            commandService as any,
-            { getRenderById: vi.fn(() => ({ scene })) } as any,
-            {
-                rawScrollInfo$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) },
-                currentSkeletonBefore$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) },
-                setValidScrollStateToCurrSheet: vi.fn(),
-                validViewportScrollInfo$: { next: vi.fn() },
-                setSearchParam: vi.fn(),
-                getScrollStateByParam: vi.fn(() => null),
-                calcViewportScrollFromRowColOffset: vi.fn(() => ({ viewportScrollX: 0, viewportScrollY: 0 })),
-            } as any
-        );
+        const _controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
 
         const preventDefault = vi.fn();
         scene.onMouseWheel$.emit(

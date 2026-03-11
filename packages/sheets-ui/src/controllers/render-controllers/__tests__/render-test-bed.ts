@@ -17,12 +17,13 @@
 import type { Dependency, IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import { ILogService, Inject, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { ICommandService, IContextService, ILogService, Inject, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, Injector as UniverInjector, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import enUS from '../../../locale/en-US';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 export interface ITestEvent<TEvent, TState = { stopPropagation: () => void }> {
     subscribeEvent(handler: (evt: TEvent, state: TState) => void): IDisposable;
@@ -258,18 +259,8 @@ export interface IRenderTestBed {
     scene: IFakeScene;
     engine: IFakeEngine;
     skeleton: IFakeSkeleton;
-    commandService: {
-        executeCommand: (id: string, params?: any) => boolean;
-        syncExecuteCommand: (id: string, params?: any) => boolean;
-        onCommandExecuted: (handler: (command: { id: string; params?: any }) => void) => IDisposable;
-        emitCommandExecuted: (command: { id: string; params?: any }) => void;
-        getExecuted: () => Array<{ id: string; params?: any }>;
-    };
-    contextService: {
-        setContextValue: (key: any, value: any) => void;
-        getContextValue: (key: any) => any;
-        subscribeContextValue$: (key: any) => Observable<any>;
-    };
+    commandService: ICommandService;
+    contextService: IContextService;
     sheetSkeletonManagerService: {
         currentSkeleton$: Observable<any>;
         currentSkeletonBefore$: Observable<any>;
@@ -279,9 +270,11 @@ export interface IRenderTestBed {
         emitCurrentSkeleton: (value: any) => void;
         emitCurrentSkeletonBefore: (value: any) => void;
     };
+    renderManagerService: IRenderManagerService;
 }
 
-export function createRenderTestBed(options?: { workbookData?: IWorkbookData; dependencies?: Dependency[] }): IRenderTestBed {
+// eslint-disable-next-line max-lines-per-function
+export function createRenderTestBed(options?: { workbookData?: IWorkbookData; dependencies?: Dependency[]; parentClassType?: string }): IRenderTestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -329,43 +322,8 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
 
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 
-    const contextValueMap = new Map<any, any>();
-    const contextSubjects = new Map<any, BehaviorSubject<any>>();
-    const contextService = {
-        setContextValue: (key: any, value: any) => {
-            contextValueMap.set(key, value);
-            const subject = contextSubjects.get(key);
-            if (subject) subject.next(value);
-        },
-        getContextValue: (key: any) => contextValueMap.get(key),
-        subscribeContextValue$: (key: any) => {
-            if (!contextSubjects.has(key)) {
-                contextSubjects.set(key, new BehaviorSubject(contextValueMap.get(key)));
-            }
-            return contextSubjects.get(key)!.asObservable();
-        },
-    };
-
-    const executedCommands: Array<{ id: string; params?: any }> = [];
-    const executed$ = new Subject<{ id: string; params?: any }>();
-    const commandService = {
-        executeCommand: (id: string, params?: any) => {
-            executedCommands.push({ id, params });
-            executed$.next({ id, params });
-            return true;
-        },
-        syncExecuteCommand: (id: string, params?: any) => {
-            executedCommands.push({ id, params });
-            executed$.next({ id, params });
-            return true;
-        },
-        onCommandExecuted: (handler: (command: { id: string; params?: any }) => void) => {
-            const sub = executed$.subscribe(handler);
-            return { dispose: () => sub.unsubscribe() };
-        },
-        emitCommandExecuted: (command: { id: string; params?: any }) => executed$.next(command),
-        getExecuted: () => executedCommands,
-    };
+    const contextService = injector.get(IContextService);
+    const commandService = injector.get(ICommandService);
 
     const viewportMap = new Map<any, IFakeViewport>();
     viewportMap.set(SHEET_VIEWPORT_KEY.VIEW_MAIN, createFakeViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN));
@@ -374,7 +332,7 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
     viewportMap.set(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, createFakeViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT));
     viewportMap.set(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, createFakeViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP));
 
-    const scene = createFakeScene(viewportMap);
+    const scene = createFakeScene(viewportMap, { parentClassType: options?.parentClassType });
     const engine = createFakeEngine();
 
     const components = new Map<any, any>();
@@ -415,8 +373,22 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
         emitCurrentSkeletonBefore: (value: any) => currentSkeletonBefore$.next(value),
     };
 
-    // NOTE: Do NOT `injector.add(...)` for existing core tokens (e.g. `IContextService`) here.
-    // `Univer` may have already resolved them; `redi` forbids re-binding after resolution.
+    injector.add([SheetSkeletonManagerService, { useValue: sheetSkeletonManagerService as any }]);
+
+    const renderManagerService: IRenderManagerService = {
+        getRenderById: (unitId: string) => {
+            if (unitId !== sheet.getUnitId()) return null as any;
+            return {
+                unitId,
+                engine,
+                scene,
+                mainComponent,
+                components,
+            } as any;
+        },
+    } as IRenderManagerService;
+
+    injector.add([IRenderManagerService, { useValue: renderManagerService as any }]);
 
     return {
         univer,
@@ -431,5 +403,6 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
         commandService,
         contextService,
         sheetSkeletonManagerService,
+        renderManagerService,
     };
 }

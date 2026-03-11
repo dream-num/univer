@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FOCUSING_SHEET, ICommandService, IContextService } from '@univerjs/core';
+import { FOCUSING_SHEET, ICommandService } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
 import { SheetsZoomRenderController } from '../zoom.render-controller';
@@ -24,19 +24,13 @@ describe('SheetsZoomRenderController', () => {
     it('executes zoom command only when ctrl+wheels and sheet is focused', () => {
         const testBed = createRenderTestBed();
         const { context, scene, contextService } = testBed;
-        const commandService = testBed.get(ICommandService);
-
         contextService.setContextValue(FOCUSING_SHEET, true);
+
+        const commandService = testBed.get(ICommandService);
 
         const executeSpy = vi.spyOn(commandService, 'executeCommand');
 
-        const controller = new SheetsZoomRenderController(
-            context as any,
-            testBed.sheetSkeletonManagerService as any,
-            commandService as any,
-            testBed.get(IContextService) as any,
-            undefined
-        );
+        const controller = testBed.injector.createInstance(SheetsZoomRenderController, context as any);
 
         const sheet = testBed.sheet.getActiveSheet();
         expect(sheet).toBeTruthy();
@@ -70,18 +64,10 @@ describe('SheetsZoomRenderController', () => {
     it('updates active worksheet zoom in-place', () => {
         const testBed = createRenderTestBed();
         const { context, scene } = testBed;
-        const commandService = testBed.get(ICommandService);
-
         const scaleSpy = vi.spyOn(scene, 'scale');
         const makeDirtySpy = vi.spyOn(context.mainComponent as any, 'makeForceDirty');
 
-        const controller = new SheetsZoomRenderController(
-            context as any,
-            testBed.sheetSkeletonManagerService as any,
-            commandService as any,
-            testBed.get(IContextService) as any,
-            undefined
-        );
+        const controller = testBed.injector.createInstance(SheetsZoomRenderController, context as any);
 
         const sheetId = testBed.sheet.getActiveSheet()!.getSheetId();
         const ok = controller.updateZoom(sheetId, 1.5);

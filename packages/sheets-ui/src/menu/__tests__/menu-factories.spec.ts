@@ -14,14 +14,34 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { IRange, Univer, Workbook } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import {
+    BooleanNumber,
+    BorderStyleTypes,
+    FOCUSING_COMMON_DRAWINGS,
     ICommandService,
+    IContextService,
     Injector,
+
+    IUniverInstanceService,
     RANGE_TYPE,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { SetSelectionsOperation, SetWorksheetHideCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { firstValueFrom, take } from 'rxjs';
+import {
+    BorderStyleManagerService,
+    IExclusiveRangeService,
+    MergeCellController,
+    SetBorderBasicCommand,
+    SetBorderCommand,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SetWorksheetHideCommand,
+    SheetsSelectionsService,
+    ToggleGridlinesCommand,
+    ToggleGridlinesMutation,
+} from '@univerjs/sheets';
+import { firstValueFrom, of, skip, take } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
     SetRangeFontDecreaseCommand,
@@ -29,11 +49,13 @@ import {
     SetRangeFontSizeCommand,
 } from '../../commands/commands/inline-format.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { CellBorderSelectorMenuItemFactory } from '../border.menu';
 import {
     FontSizeDecreaseMenuItemFactory,
     FontSizeIncreaseMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
 } from '../font.menu';
+import { ToggleGridlinesMenuFactory } from '../gridlines.menu';
 import {
     ColInsertMenuItemFactory,
     InsertColAfterMenuItemFactory,
@@ -50,6 +72,7 @@ import {
     InsertRowBeforeMenuItemFactory,
     RowInsertMenuItemFactory,
 } from '../insert.menu';
+import { CellMergeMenuItemFactory } from '../merge.menu';
 import {
     ChangeColorSheetMenuItemFactory,
     CopySheetMenuItemFactory,
@@ -63,7 +86,7 @@ import { createMenuTestBed } from './create-menu-test-bed';
 
 describe('menu factories', () => {
     let univer: Univer;
-    let get: any;
+    let get: Injector['get'];
     let commandService: ICommandService;
     let selectionService: SheetsSelectionsService;
 
@@ -80,23 +103,29 @@ describe('menu factories', () => {
         univer.dispose();
     });
 
-    function setSingleSelection(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        selectionService.setSelections([
-            {
-                range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
-                primary: {
-                    startRow,
-                    startColumn,
-                    endRow,
-                    endColumn,
-                    actualRow: startRow,
-                    actualColumn: startColumn,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
+    function createSelection(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+        return {
+            range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
+            primary: {
+                startRow,
+                startColumn,
+                endRow,
+                endColumn,
+                actualRow: startRow,
+                actualColumn: startColumn,
+                isMerged: false,
+                isMergedMainCell: false,
             },
-        ]);
+            style: null,
+        };
+    }
+
+    function setSelections(ranges: IRange[]) {
+        selectionService.setSelections(ranges.map((range) => createSelection(range.startRow, range.startColumn, range.endRow, range.endColumn)), 2);
+    }
+
+    function setSingleSelection(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+        setSelections([{ startRow, startColumn, endRow, endColumn }]);
     }
 
     it('creates base insert selectors and header insert commands', async () => {
@@ -169,7 +198,82 @@ describe('menu factories', () => {
         expect(await firstValueFrom(hideSheet.disabled$!.pipe(take(1)))).toBe(true);
         expect(await firstValueFrom(unhideSheet.disabled$!.pipe(take(1)))).toBe(true);
         expect(await firstValueFrom(showMenu.disabled$!.pipe(take(1)))).toBe(true);
-        expect(await firstValueFrom((unhideSheet.selections as any).pipe(take(1)))).toEqual([]);
+        expect(await firstValueFrom((unhideSheet.selections as Observable<unknown[]>).pipe(take(1)))).toEqual([]);
+    });
+
+    it('updates gridlines menu activation after toggling sheet gridlines', async () => {
+        const injector = get(Injector);
+        const instanceService = get(IUniverInstanceService);
+        commandService.registerCommand(ToggleGridlinesCommand);
+        commandService.registerCommand(ToggleGridlinesMutation);
+
+        const menuItem = injector.invoke(ToggleGridlinesMenuFactory);
+        const worksheet = instanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+        const initial = await firstValueFrom(menuItem.activated$!.pipe(take(1)));
+        expect(await firstValueFrom(menuItem.disabled$!.pipe(take(1)))).toBeTypeOf('boolean');
+
+        expect(await commandService.executeCommand(ToggleGridlinesCommand.id)).toBe(true);
+        const activatedAfterToggle = await firstValueFrom(menuItem.activated$!.pipe(take(1)));
+        expect(activatedAfterToggle).toBe(worksheet.getConfig().showGridlines === BooleanNumber.TRUE);
+        expect(activatedAfterToggle).not.toBe(initial);
+    });
+
+    it('updates border menu icon and hidden state from real border commands', async () => {
+        const injector = get(Injector);
+        const contextService = get(IContextService);
+        setSingleSelection(0, 0, 1, 1);
+
+        injector.add([BorderStyleManagerService]);
+        commandService.registerCommand(SetBorderBasicCommand);
+        commandService.registerCommand(SetBorderCommand);
+        commandService.registerCommand(SetRangeValuesMutation);
+
+        const menuItem = injector.invoke(CellBorderSelectorMenuItemFactory);
+        expect(await firstValueFrom((menuItem.icon as Observable<string>).pipe(take(1)))).toBe('AllBorderIcon');
+        expect(await firstValueFrom(menuItem.disabled$!.pipe(take(1)))).toBe(false);
+
+        const nextIcon = firstValueFrom((menuItem.icon as Observable<string>).pipe(skip(1), take(1)));
+        expect(await commandService.executeCommand(SetBorderBasicCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }],
+            value: { type: 'top', color: '#123456', style: BorderStyleTypes.DASHED },
+        })).toBe(true);
+        expect(await nextIcon).toBe('UpBorderDoubleIcon');
+        expect(get(BorderStyleManagerService).getBorderInfo().type).toBe('top');
+
+        const hiddenState = firstValueFrom(menuItem.hidden$!.pipe(skip(1), take(1)));
+        contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+        expect(await hiddenState).toBe(true);
+    });
+
+    it('disables merge menu for overlapping multi-selections and hides it while drawing is focused', async () => {
+        const injector = get(Injector);
+        const contextService = get(IContextService);
+        injector.add([IExclusiveRangeService, { useValue: {
+            exclusiveRangesChange$: of({ unitId: 'test', subUnitId: 'sheet1', ranges: [] }),
+            addExclusiveRange: () => {},
+            getExclusiveRanges: () => undefined,
+            clearExclusiveRanges: () => {},
+            clearExclusiveRangesByGroupId: () => {},
+            getInterestGroupId: () => [],
+        } }]);
+        injector.add([MergeCellController]);
+
+        setSingleSelection(0, 0, 1, 1);
+        const menuItem = injector.invoke(CellMergeMenuItemFactory);
+        expect(await firstValueFrom(menuItem.disabled$!.pipe(take(1)))).toBe(false);
+        expect(await firstValueFrom(menuItem.hidden$!.pipe(take(1)))).toBeTypeOf('boolean');
+
+        setSelections([
+            { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 },
+            { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 },
+        ]);
+        expect(await firstValueFrom(menuItem.disabled$!.pipe(take(1)))).toBe(true);
+
+        const hiddenState = firstValueFrom(menuItem.hidden$!.pipe(skip(1), take(1)));
+        contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+        expect(await hiddenState).toBe(true);
     });
 
     it('creates font-size menu items and exposes selector current value stream', async () => {

@@ -15,12 +15,13 @@
  */
 
 import type { Injector } from '../../common/di';
+import type { IDocumentData, IDocumentRenderConfig, IPaddingData } from '../../types/interfaces';
 import type { IWorkbookData } from '../typedef';
 import { afterEach, describe, expect, it } from 'vitest';
 import { IConfigService } from '../../services/config/config.service';
 import { IContextService } from '../../services/context/context.service';
 import { LocaleService } from '../../services/locale/locale.service';
-import { BooleanNumber } from '../../types/enum';
+import { BooleanNumber, HorizontalAlign } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { SheetSkeleton } from '../sheet-skeleton';
 import { RANGE_TYPE } from '../typedef';
@@ -43,6 +44,9 @@ const workbookDataFactory = (): IWorkbookData => ({
             defaultRowHeight: 24,
             mergeData: [{ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2, rangeType: RANGE_TYPE.NORMAL }],
             cellData: {
+                0: {
+                    3: { v: 'Stop overflow' },
+                },
                 1: {
                     1: { v: 'Merged main' },
                 },
@@ -60,6 +64,25 @@ const workbookDataFactory = (): IWorkbookData => ({
         },
     },
 });
+
+class TestableSheetSkeleton extends SheetSkeleton {
+    getOverflowBoundPublic(row: number, startColumn: number, endColumn: number, contentWidth: number, horizontalAlign = HorizontalAlign.LEFT) {
+        return this._getOverflowBound(row, startColumn, endColumn, contentWidth, horizontalAlign);
+    }
+
+    hasUnMergedCellInRowPublic(rowIndex: number, startColumn: number, endColumn: number) {
+        return this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
+    }
+
+    updateConfigAndGetDocumentModelPublic(
+        documentData: IDocumentData,
+        horizontalAlign: HorizontalAlign,
+        paddingData: IPaddingData,
+        renderConfig?: IDocumentRenderConfig
+    ) {
+        return this._updateConfigAndGetDocumentModel(documentData, horizontalAlign, paddingData, renderConfig);
+    }
+}
 
 describe('SheetSkeleton integration', () => {
     const disposables: Array<() => void> = [];
@@ -81,7 +104,7 @@ describe('SheetSkeleton integration', () => {
             injector.get(IContextService),
             injector.get(IConfigService),
             injector as Injector
-        ).calculate()!;
+        ).calculate()! as TestableSheetSkeleton;
 
         disposables.push(() => testBed.univer.dispose());
 
@@ -160,7 +183,7 @@ describe('SheetSkeleton integration', () => {
             injector.get(IContextService),
             injector.get(IConfigService),
             injector as Injector
-        ).calculate()!;
+        ).calculate()! as TestableSheetSkeleton;
 
         disposables.push(() => testBed.univer.dispose());
 
@@ -189,5 +212,75 @@ describe('SheetSkeleton integration', () => {
         expect(skeleton.getCellIndexByOffset(252, 96, 2, 2, { x: 24, y: 12 })).toEqual({ row: 1, column: 1 });
         expect(skeleton.getRowIndexByOffsetY(128, 1, { x: 0, y: 0 }, { firstMatch: true })).toBe(5);
         expect(skeleton.getColumnIndexByOffsetX(382, 1, { x: 0, y: 0 }, { firstMatch: true })).toBe(5);
+    });
+
+    it('should compute overflow bounds and document render config through the real skeleton instance', () => {
+        const testBed = createCoreTestBed(workbookDataFactory());
+        const injector = testBed.univer.__getInjector();
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const skeleton = new TestableSheetSkeleton(
+            worksheet,
+            testBed.sheet.getStyles(),
+            injector.get(LocaleService),
+            injector.get(IContextService),
+            injector.get(IConfigService),
+            injector as Injector
+        ).calculate()! as TestableSheetSkeleton;
+
+        disposables.push(() => testBed.univer.dispose());
+
+        expect(skeleton.getOverflowBoundPublic(0, 0, 3, 100)).toBe(1);
+        expect(skeleton.getOverflowBoundPublic(0, 0, 3, 500)).toBe(2);
+        expect(skeleton.hasUnMergedCellInRowPublic(1, 1, 2)).toBe(false);
+        expect(skeleton.hasUnMergedCellInRowPublic(1, 0, 2)).toBe(true);
+
+        const docData: IDocumentData = {
+            id: 'doc-in-skeleton',
+            body: {
+                dataStream: 'Hello\r\n',
+                paragraphs: [{ startIndex: 5 }],
+            },
+            documentStyle: {
+                marginTop: 9,
+                marginBottom: 9,
+                marginLeft: 9,
+                marginRight: 9,
+                renderConfig: {
+                    horizontalAlign: HorizontalAlign.LEFT,
+                },
+            },
+        };
+        const updatedModel = skeleton.updateConfigAndGetDocumentModelPublic(
+            docData,
+            HorizontalAlign.CENTER,
+            { t: 1, r: 4, b: 3, l: 2 },
+            { horizontalAlign: HorizontalAlign.CENTER }
+        );
+
+        expect(skeleton.updateConfigAndGetDocumentModelPublic({ id: 'no-body' } as IDocumentData, HorizontalAlign.CENTER, { t: 0, r: 0, b: 0, l: 0 }, { horizontalAlign: HorizontalAlign.CENTER })).toBeUndefined();
+        expect(skeleton.updateConfigAndGetDocumentModelPublic(docData, HorizontalAlign.CENTER, { t: 0, r: 0, b: 0, l: 0 })).toBeUndefined();
+        expect(updatedModel?.getSnapshot()).toMatchObject({
+            documentStyle: {
+                marginTop: 1,
+                marginBottom: 3,
+                marginLeft: 2,
+                marginRight: 4,
+                pageSize: {
+                    width: Number.POSITIVE_INFINITY,
+                    height: Number.POSITIVE_INFINITY,
+                },
+                renderConfig: {
+                    horizontalAlign: HorizontalAlign.CENTER,
+                },
+            },
+            body: {
+                paragraphs: [{
+                    startIndex: 5,
+                    paragraphStyle: {
+                        horizontalAlign: HorizontalAlign.CENTER,
+                    },
+                }],
+            },
+        });
     });
 });

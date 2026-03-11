@@ -153,4 +153,52 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
         expect(model.getDrawingsOrder()).toEqual([]);
         model.dispose();
     });
+
+    it('should manage reset, noop apply and header-footer reinitialization for realistic document state changes', () => {
+        const snapshot = createDocSnapshot('doc-reset');
+        const model = new DocumentDataModel(snapshot);
+        const jsonx = JSONX.getInstance();
+        const initialChangeCount = model.change$.getValue();
+
+        expect(model.getCustomRanges()).toEqual([]);
+        expect(model.getCustomDecorations()).toEqual([]);
+        expect(model.getSettings()).toBeUndefined();
+        expect(model.apply(null as never)).toBeUndefined();
+        expect(model.change$.getValue()).toBe(initialChangeCount);
+
+        model.setZoomRatio(2);
+        expect(model.getSettings()).toEqual({ zoomRatio: 2 });
+
+        model.apply(jsonx.replaceOp(['headers'], model.getSnapshot().headers, {
+            ...model.getSnapshot().headers,
+            header2: {
+                headerId: 'header2',
+                body: {
+                    dataStream: 'Another Header\r\n',
+                    paragraphs: [{ startIndex: 0 }],
+                },
+            },
+        }) as never);
+
+        expect(model.getSnapshot().headers?.header2?.body.dataStream).toBe('Another Header\r\n');
+        expect(model.change$.getValue()).toBeGreaterThan(initialChangeCount);
+
+        expect(() => model.reset({ id: 'other-doc' })).toThrow('Cannot reset a document model with a different unit id!');
+
+        model.reset({
+            id: 'doc-reset',
+            title: 'Reset Title',
+            body: {
+                dataStream: 'Reset\r\n',
+                paragraphs: [{ startIndex: 5 }],
+            },
+            documentStyle: {},
+        });
+
+        expect(model.getTitle()).toBe('Reset Title');
+        expect(model.getBody()?.dataStream).toBe('Reset\r\n');
+        expect(model.getUnitId()).toBe('doc-reset');
+        expect(model.sliceBody(0, 5)?.dataStream).toContain('Reset');
+        model.dispose();
+    });
 });

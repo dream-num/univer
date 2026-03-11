@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { AddSheetTableCommand } from '@univerjs/sheets-table';
@@ -71,6 +73,27 @@ describe('open-table-selector operation', () => {
 
         expect(result).toEqual({ unitId: 'u1', subUnitId: 's1', range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 } });
         expect(close).toHaveBeenCalled();
+    });
+
+    it('openRangeSelector should resolve null on cancel and close callbacks', async () => {
+        const close = vi.fn();
+        const dialogService = {
+            open: vi.fn((props: any) => {
+                props.children.label.props.onCancel();
+                props.onClose();
+            }),
+            close,
+        };
+
+        const accessor = createAccessor([
+            [IDialogService, dialogService],
+            [LocaleService, { t: () => 'Select range' }],
+        ]);
+
+        const result = await openRangeSelector(accessor, 'u1', 's1', { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, 't1');
+
+        expect(result).toBeNull();
+        expect(close).toHaveBeenCalledTimes(2);
     });
 
     it('OpenTableSelectorOperation should return false without sheet target', async () => {
@@ -133,5 +156,39 @@ describe('open-table-selector operation', () => {
             subUnitId: 's1',
             range: { startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 },
         });
+    });
+
+    it('OpenTableSelectorOperation should keep multi-cell selections unchanged and stop when dialog is cancelled', async () => {
+        sheetsMocks.expandToContinuousRange.mockClear();
+        sheetsMocks.getSheetCommandTarget.mockReturnValue({
+            unitId: 'u1',
+            subUnitId: 's1',
+            worksheet: { id: 'sheet' },
+        });
+        sheetsMocks.isSingleCellSelection.mockReturnValue(false);
+
+        const executeCommand = vi.fn();
+        const dialogService = {
+            open: vi.fn((props: any) => {
+                props.children.label.props.onCancel();
+            }),
+            close: vi.fn(),
+        };
+
+        const accessor = createAccessor([
+            [IUniverInstanceService, {}],
+            [ICommandService, { executeCommand }],
+            [SheetsSelectionsService, {
+                getCurrentLastSelection: () => ({
+                    range: { startRow: 2, endRow: 4, startColumn: 2, endColumn: 5 },
+                }),
+            }],
+            [IDialogService, dialogService],
+            [LocaleService, { t: () => 'Select range' }],
+        ]);
+
+        await expect(OpenTableSelectorOperation.handler(accessor)).resolves.toBe(false);
+        expect(sheetsMocks.expandToContinuousRange).not.toHaveBeenCalled();
+        expect(executeCommand).not.toHaveBeenCalled();
     });
 });

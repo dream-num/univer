@@ -54,6 +54,8 @@ function createConfig(options) {
                     '**/*/tailwind.config.ts',
                     'packages/slides/**',
                     'packages/slides-ui/**',
+                    '**/src/plugin.ts',
+                    '**/src/mobile-plugin.ts',
                 ],
             },
         },

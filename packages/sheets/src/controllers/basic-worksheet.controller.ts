@@ -228,6 +228,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
         });
 
+        /**
+         * Worker do not need to know about the mutations that do not effect formula calculation, so set the config to true in the worker.
+         * Default is false, which means all mutations should be registered, so the main thread do not need to care about the config and just register all mutations.
+         */
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
         if (!onlyRegisterFormulaRelatedMutations) {
             [

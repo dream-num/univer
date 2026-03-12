@@ -503,6 +503,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 if (subFormulaData == null) {
                     continue;
                 }
+                const { rowCount = Infinity, columnCount = Infinity } = this._currentConfigService.getSheetRowColumnCount(unitId, subUnitId) || {};
                 const subFormulaDataKeys = Object.keys(subFormulaData);
                 for (const subFormulaDataId of subFormulaDataKeys) {
                     const hasOtherFormula = this._dependencyManagerService.hasOtherFormulaDataMainData(subFormulaDataId);
@@ -521,8 +522,10 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
                     for (let i = 0; i < ranges.length; i++) {
                         const range = ranges[i];
-                        const { startRow, startColumn, endRow, endColumn } = range;
-
+                        const { startRow, startColumn } = range;
+                        let { endRow, endColumn } = range;
+                        endRow = Math.min(endRow, rowCount - 1);
+                        endColumn = Math.min(endColumn, columnCount - 1);
                         for (let r = startRow; r <= endRow; r++) {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 const x = c - firstColumn;

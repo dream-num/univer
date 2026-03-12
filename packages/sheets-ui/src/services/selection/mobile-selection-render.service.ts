@@ -42,7 +42,7 @@ import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univ
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
-import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
+import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING, MOBILE_TRIGGER_CONTEXT_MENU } from '../../consts/mobile-context';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
@@ -221,6 +221,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             // Don't create selection during pinch zoom
             if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
 
+            this._contextService.setContextValue(MOBILE_TRIGGER_CONTEXT_MENU, showContextMenu);
+
             // TODO @lumixraku
             this.createNewSelection(
                 evt,
@@ -228,9 +230,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 RANGE_TYPE.NORMAL,
                 this._getActiveViewport(evt)
             );
-
-            // show contextmenu when longpress and change selection area
-            // do not show contextmenu when click a cell
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
         };
         spreadsheet?.onPointerMove$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state) => {

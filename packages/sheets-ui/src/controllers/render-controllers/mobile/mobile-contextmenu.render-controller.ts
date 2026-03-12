@@ -17,10 +17,11 @@
 import type { Workbook } from '@univerjs/core';
 import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { Disposable, Inject, RANGE_TYPE, Tools } from '@univerjs/core';
+import { Disposable, IContextService, Inject, RANGE_TYPE, Tools } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
+import { MOBILE_TRIGGER_CONTEXT_MENU } from '../../../consts/mobile-context';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { attachSelectionWithCoord } from '../../../services/selection/util';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
@@ -35,6 +36,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         private readonly _context: IRenderContext<Workbook>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
@@ -48,8 +50,11 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         let listenToSelectionChangeEvent = false;
         this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(() => listenToSelectionChangeEvent = true));
         this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionWithStyleList: ISelectionWithStyle[]) => {
+            const shouldOpenContextMenu = this._contextService.getContextValue(MOBILE_TRIGGER_CONTEXT_MENU);
+            this._contextService.setContextValue(MOBILE_TRIGGER_CONTEXT_MENU, false);
+
             const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
-            if (!skeleton || !selectionWithStyleList || listenToSelectionChangeEvent === false) {
+            if (!shouldOpenContextMenu || !skeleton || !selectionWithStyleList || listenToSelectionChangeEvent === false) {
                 return;
             }
 

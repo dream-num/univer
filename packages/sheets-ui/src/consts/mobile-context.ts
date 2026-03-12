@@ -25,3 +25,9 @@ export const MOBILE_PINCH_ZOOMING = 'MOBILE_PINCH_ZOOMING';
  * Used to prevent scroll/inertia/zoom operations during selection expansion.
  */
 export const MOBILE_EXPANDING_SELECTION = 'MOBILE_EXPANDING_SELECTION';
+
+/**
+ * Context key indicating that the next selection-end event was triggered by a mobile long press.
+ * Used to ensure the context menu only opens for long-press gestures, not normal taps.
+ */
+export const MOBILE_TRIGGER_CONTEXT_MENU = 'MOBILE_TRIGGER_CONTEXT_MENU';

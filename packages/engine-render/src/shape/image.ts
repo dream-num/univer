@@ -271,7 +271,7 @@ export class Image extends Shape<IImageProps> {
             this.makeDirty(false);
             return this;
         }
-        
+
         if (!this.transform) {
             return this;
         }
@@ -386,14 +386,17 @@ export class Image extends Shape<IImageProps> {
             });
         }
     }
+
     override set transform(trans: Transform) {
         this._transform = trans;
     }
 
     override get transform() {
+        // when active sheet is changed, maybe the image is reused, the transform need to be recalculated by transform
         if (!this._transform) {
             this._setTransForm();
         }
+
         const transform = this._transform.clone();
         return this.transformForAngle(transform);
     }
@@ -428,6 +431,7 @@ export class Image extends Shape<IImageProps> {
         ) {
             return true;
         }
+
         return false;
     }
 }

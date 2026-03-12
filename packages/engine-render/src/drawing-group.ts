@@ -151,6 +151,7 @@ export class DrawingGroupObject extends Group {
 
         return false;
     }
+
     override dispose() {
         const objects = [...this.getObjects()];
         const scene = this.getScene();

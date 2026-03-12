@@ -70,6 +70,9 @@ describe('drawing controller utils', () => {
                     attachTransformerTo,
                 };
             },
+            getObjectIncludeInGroup(key: string) {
+                return this.getObject(key);
+            },
         };
         const drawingManagerService = {
             getDrawingByParam: vi.fn(() => ({

@@ -17,7 +17,7 @@
 import type { IDocumentData } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { AddCommentMutation, IThreadCommentDataSourceService, ThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddDocCommentComment } from '../add-doc-comment.command';
@@ -53,9 +53,9 @@ describe('AddDocCommentComment', () => {
     });
 
     it('should add comment and attach decoration via sequenceExecute', async () => {
-        const dataSource = {
-            addComment: vi.fn(async (c) => ({ ...c, id: 'comment-1', threadId: 'thread-1' })),
-        };
+        const dataSource = new ThreadCommentDataSourceService();
+        vi.spyOn(dataSource, 'addComment').mockImplementation(async (c) => ({ ...c, id: 'comment-1', threadId: 'thread-1' }));
+
         injector.add([IThreadCommentDataSourceService, { useValue: dataSource }]);
         injector.add([DocSelectionManagerService]);
 

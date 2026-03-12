@@ -19,7 +19,7 @@
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareTypeEnum, TableManager } from '@univerjs/sheets-table';
-import * as React from 'react';
+import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
 import { SheetsTableUiService } from '../../../services/sheets-table-ui-service';
@@ -88,11 +88,11 @@ vi.mock('@univerjs/icons', async () => {
 });
 
 vi.mock('../SheetTableItemsFilterPanel', () => ({
-    SheetTableItemsFilterPanel: (props: any) => React.createElement('items-filter-panel', props),
+    SheetTableItemsFilterPanel: (props: any) => createElement('items-filter-panel', props),
 }));
 
 vi.mock('../SheetTableConditionPanel', () => ({
-    SheetTableConditionPanel: (props: any) => React.createElement('condition-panel', props),
+    SheetTableConditionPanel: (props: any) => createElement('condition-panel', props),
 }));
 
 function renderPanel() {

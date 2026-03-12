@@ -15,8 +15,7 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import * as core from '@univerjs/core';
-import { ArrangeTypeEnum, Direction, ICommandService, IUniverInstanceService, PositionedObjectLayoutType } from '@univerjs/core';
+import { ArrangeTypeEnum, Direction, ICommandService, IUniverInstanceService, JSONX, PositionedObjectLayoutType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -27,15 +26,6 @@ import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
 import { UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
-
-vi.mock('@univerjs/docs-ui', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/docs-ui')>();
-    return {
-        ...actual,
-        getCustomBlockIdsInSelections: vi.fn(() => ['shape-1']),
-        getRichTextEditPath: vi.fn(() => ['body', 'dataStream']),
-    };
-});
 
 function createAccessor() {
     const commandService = { syncExecuteCommand: vi.fn(() => true), executeCommand: vi.fn(() => true) };
@@ -117,7 +107,7 @@ function createAccessor() {
 
 describe('docs drawing commands', () => {
     it('arranges drawings by converting drawing order ops into rich-text mutations', () => {
-        const composeSpy = vi.spyOn(core.JSONX, 'compose').mockReturnValue(['composed'] as never);
+        const composeSpy = vi.spyOn(JSONX, 'compose').mockReturnValue(['composed'] as never);
         const { accessor, commandService } = createAccessor();
 
         expect(SetDocDrawingArrangeCommand.handler(accessor, {
@@ -170,10 +160,10 @@ describe('docs drawing commands', () => {
     });
 
     it('inserts drawing placeholders into the active document selection', () => {
-        const composeSpy = vi.spyOn(core.JSONX, 'compose').mockReturnValue(['insert-composed'] as never);
+        const composeSpy = vi.spyOn(JSONX, 'compose').mockReturnValue(['insert-composed'] as never);
         const editOp = vi.fn(() => ['edit-op']);
         const insertOp = vi.fn((path, value) => ({ path, value }));
-        vi.spyOn(core.JSONX, 'getInstance').mockReturnValue({
+        vi.spyOn(JSONX, 'getInstance').mockReturnValue({
             editOp,
             insertOp,
             removeOp: vi.fn(),

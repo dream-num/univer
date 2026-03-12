@@ -14,72 +14,11 @@
  * limitations under the License.
  */
 
-import * as engineRender from '@univerjs/engine-render';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const mocks = vi.hoisted(() => {
-    const textRangeMock = vi.fn(function (this: Record<string, unknown>, ...args: unknown[]) {
-        this.args = args;
-        this.rangeType = 'TEXT';
-        this.startOffset = 1;
-        this.endOffset = 3;
-        this.collapsed = false;
-        this.startNodePosition = { glyph: 0 };
-        this.endNodePosition = { glyph: 1 };
-        this.direction = 'FORWARD';
-        this.segmentId = '';
-        this.segmentPage = -1;
-        this.isActive = () => true;
-    });
-
-    const rectRangeMock = vi.fn(function (this: Record<string, unknown>, ...args: unknown[]) {
-        this.args = args;
-        this.rangeType = 'RECT';
-        this.startOffset = 1;
-        this.endOffset = 3;
-        this.collapsed = false;
-        this.startNodePosition = { glyph: 0 };
-        this.endNodePosition = { glyph: 1 };
-        this.direction = 'FORWARD';
-        this.segmentId = '';
-        this.segmentPage = -1;
-        this.startRow = 0;
-        this.startColumn = 0;
-        this.endRow = 1;
-        this.endColumn = 2;
-        this.tableId = 'table-1';
-        this.spanEntireRow = false;
-        this.spanEntireColumn = false;
-        this.spanEntireTable = false;
-        this.isActive = () => false;
-    });
-
-    return {
-        textRangeMock,
-        rectRangeMock,
-        convertPositionsToRectRangesMock: vi.fn(() => [{ kind: 'rect' }]),
-        isInSameTableCellDataMock: vi.fn(() => false),
-        isInSameTableCellMock: vi.fn(() => false),
-        isValidRectRangeMock: vi.fn(() => false),
-    };
-});
-
-vi.mock('../text-range', () => ({
-    TextRange: mocks.textRangeMock,
-}));
-
-vi.mock('../rect-range', () => ({
-    RectRange: mocks.rectRangeMock,
-    convertPositionsToRectRanges: mocks.convertPositionsToRectRangesMock,
-}));
-
-vi.mock('../convert-rect-range', () => ({
-    isInSameTableCellData: mocks.isInSameTableCellDataMock,
-    isInSameTableCell: mocks.isInSameTableCellMock,
-    isValidRectRange: mocks.isValidRectRangeMock,
-}));
-
-const {
+import { getOffsetRectForDom } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { NodePositionConvertToRectRange } from '../convert-rect-range';
+import { RectRange } from '../rect-range';
+import {
     getCanvasOffsetByEngine,
     getParagraphInfoByGlyph,
     getRangeListFromSelection,
@@ -87,15 +26,66 @@ const {
     getTextRangeFromCharIndex,
     serializeRectRange,
     serializeTextRange,
-} = await import('../selection-utils');
+} from '../selection-utils';
+import { TextRange } from '../text-range';
+
+vi.mock('@univerjs/engine-render', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@univerjs/engine-render')>();
+
+    return {
+        ...actual,
+        getOffsetRectForDom: vi.fn(),
+    };
+});
+
+function createNodePosition(path: Array<string | number>, glyph = 0) {
+    return {
+        path,
+        page: 0,
+        section: 0,
+        column: 0,
+        line: 0,
+        divide: 0,
+        glyph,
+        isBack: false,
+        segmentPage: -1,
+        pageType: 0,
+    } as never;
+}
+
+function createGlyphInCell(cellPage: object) {
+    return {
+        parent: {
+            parent: {
+                parent: {
+                    parent: {
+                        parent: cellPage,
+                    },
+                },
+            },
+        },
+    } as never;
+}
+
+function createDocument() {
+    return {
+        getOffsetConfig: () => ({
+            docsLeft: 0,
+            docsTop: 0,
+        }),
+    } as never;
+}
 
 describe('selection utils', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.isInSameTableCellDataMock.mockReturnValue(false);
-        mocks.isInSameTableCellMock.mockReturnValue(false);
-        mocks.isValidRectRangeMock.mockReturnValue(false);
-        mocks.convertPositionsToRectRangesMock.mockReturnValue([{ kind: 'rect' }]);
+        vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
+        vi.spyOn(TextRange.prototype, 'refresh').mockImplementation(() => {});
+        vi.spyOn(RectRange.prototype, 'refresh').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('creates text and rect ranges from char indexes', () => {
@@ -110,38 +100,68 @@ describe('selection utils', () => {
                 .mockReturnValueOnce(endPosition),
         } as never;
 
-        getTextRangeFromCharIndex(1, 2, {} as never, {} as never, skeleton, {} as never, '', -1);
-        getRectRangeFromCharIndex(1, 2, {} as never, {} as never, skeleton, {} as never, '', -1);
+        const textRange = getTextRangeFromCharIndex(1, 2, {} as never, createDocument(), skeleton, {} as never, '', -1);
+        const rectRange = getRectRangeFromCharIndex(1, 2, {} as never, createDocument(), skeleton, {} as never, '', -1);
 
-        expect(mocks.textRangeMock).toHaveBeenCalledWith({} as never, {} as never, skeleton, startPosition, endPosition, {} as never, '', -1);
-        expect(mocks.rectRangeMock).toHaveBeenCalledWith({} as never, {} as never, skeleton, startPosition, endPosition, {} as never, '', -1);
+        expect(textRange).toBeInstanceOf(TextRange);
+        expect(textRange?.anchorNodePosition).toEqual(startPosition);
+        expect(textRange?.focusNodePosition).toEqual(endPosition);
+        expect(rectRange).toBeInstanceOf(RectRange);
+        expect(rectRange?.anchorNodePosition).toEqual(startPosition);
+        expect(rectRange?.focusNodePosition).toEqual(endPosition);
     });
 
     it('routes same-cell and rect selections into the expected range buckets', () => {
-        const anchor = { glyph: 0 } as never;
-        const focus = { glyph: 1 } as never;
+        const sameCellAnchor = createNodePosition(['skeTables', 'table-1#-#0', 'rows', 0, 'cells', 0]);
+        const sameCellFocus = createNodePosition(['skeTables', 'table-1#-#0', 'rows', 0, 'cells', 0], 1);
+        const crossPageFocus = createNodePosition(['skeTables', 'table-1#-#1', 'rows', 0, 'cells', 0], 1);
+        const rectAnchor = createNodePosition(['skeTables', 'table-1#-#0', 'rows', 0, 'cells', 0]);
+        const rectFocus = createNodePosition(['skeTables', 'table-1#-#0', 'rows', 1, 'cells', 0], 1);
+        const sameCellPage = {} as { parent?: unknown };
+        const sameCellRow = { index: 0, cells: [sameCellPage] };
+        sameCellPage.parent = sameCellRow;
+
+        const crossPageStartCell = {} as { parent?: unknown };
+        const crossPageStartRow = { index: 0, cells: [crossPageStartCell] };
+        crossPageStartCell.parent = crossPageStartRow;
+
+        const crossPageEndCell = {} as { parent?: unknown };
+        const crossPageEndRow = { index: 0, cells: [crossPageEndCell] };
+        crossPageEndCell.parent = crossPageEndRow;
+
         const skeleton = {
-            findCharIndexByPosition: vi.fn(),
-            getViewModel: vi.fn(),
+            findGlyphByPosition: vi
+                .fn()
+                .mockReturnValueOnce(createGlyphInCell(sameCellPage))
+                .mockReturnValueOnce(createGlyphInCell(sameCellPage))
+                .mockReturnValueOnce(createGlyphInCell(crossPageStartCell))
+                .mockReturnValueOnce(createGlyphInCell(crossPageEndCell))
+                .mockReturnValueOnce(null)
+                .mockReturnValueOnce(null),
         } as never;
+        const document = createDocument();
 
-        mocks.isInSameTableCellDataMock.mockReturnValueOnce(true);
-        mocks.isInSameTableCellMock.mockReturnValueOnce(true);
+        vi.spyOn(NodePositionConvertToRectRange.prototype, 'getNodePositionGroup').mockReturnValue([
+            {
+                anchor: rectAnchor,
+                focus: rectFocus,
+            },
+        ] as never);
 
-        const sameCell = getRangeListFromSelection(anchor, focus, {} as never, {} as never, skeleton, {} as never, '', -1);
+        const sameCell = getRangeListFromSelection(sameCellAnchor, sameCellFocus, {} as never, document, skeleton, {} as never, '', -1);
         expect(sameCell?.textRanges).toHaveLength(1);
         expect(sameCell?.rectRanges).toHaveLength(0);
+        expect(sameCell?.textRanges[0]).toBeInstanceOf(TextRange);
 
-        mocks.isInSameTableCellDataMock.mockReturnValueOnce(true);
-        mocks.isInSameTableCellMock.mockReturnValueOnce(false);
-
-        const sameTable = getRangeListFromSelection(anchor, focus, {} as never, {} as never, skeleton, {} as never, '', -1);
+        const sameTable = getRangeListFromSelection(sameCellAnchor, crossPageFocus, {} as never, document, skeleton, {} as never, '', -1);
         expect(sameTable?.textRanges).toHaveLength(0);
-        expect(sameTable?.rectRanges).toEqual([{ kind: 'rect' }]);
+        expect(sameTable?.rectRanges).toHaveLength(1);
+        expect(sameTable?.rectRanges[0]).toBeInstanceOf(RectRange);
 
-        mocks.isValidRectRangeMock.mockReturnValueOnce(true);
-        const rectRange = getRangeListFromSelection(anchor, focus, {} as never, {} as never, skeleton, {} as never, '', -1);
-        expect(rectRange?.rectRanges).toEqual([{ kind: 'rect' }]);
+        const rectRange = getRangeListFromSelection(rectAnchor, rectFocus, {} as never, document, skeleton, {} as never, '', -1);
+        expect(rectRange?.textRanges).toHaveLength(0);
+        expect(rectRange?.rectRanges).toHaveLength(1);
+        expect(rectRange?.rectRanges[0]).toBeInstanceOf(RectRange);
     });
 
     it('builds normal text ranges outside tables and skips when offsets are missing', () => {
@@ -170,16 +190,35 @@ describe('selection utils', () => {
             }),
         } as never;
 
-        const result = getRangeListFromSelection({ glyph: 0 } as never, { glyph: 1 } as never, {} as never, {} as never, skeleton, {} as never, '', -1);
+        const result = getRangeListFromSelection(
+            createNodePosition(['body']),
+            createNodePosition(['body'], 1),
+            {} as never,
+            createDocument(),
+            skeleton,
+            {} as never,
+            '',
+            -1
+        );
         expect(result?.textRanges).toHaveLength(1);
         expect(result?.rectRanges).toHaveLength(0);
+        expect(result?.textRanges[0]).toBeInstanceOf(TextRange);
 
-        const missing = getRangeListFromSelection({ glyph: 0 } as never, { glyph: 1 } as never, {} as never, {} as never, skeleton, {} as never, '', -1);
+        const missing = getRangeListFromSelection(
+            createNodePosition(['body']),
+            createNodePosition(['body'], 1),
+            {} as never,
+            createDocument(),
+            skeleton,
+            {} as never,
+            '',
+            -1
+        );
         expect(missing).toBeUndefined();
     });
 
     it('reads canvas offsets, paragraph glyph info, and serializes ranges', () => {
-        vi.spyOn(engineRender, 'getOffsetRectForDom').mockReturnValue({ left: 12, top: 34 } as never);
+        vi.mocked(getOffsetRectForDom).mockReturnValue({ left: 12, top: 34 } as never);
 
         expect(getCanvasOffsetByEngine({ getCanvasElement: () => ({}) } as never)).toEqual({ left: 12, top: 34 });
         expect(getCanvasOffsetByEngine(null)).toEqual({ left: 0, top: 0 });
@@ -224,7 +263,7 @@ describe('selection utils', () => {
             startOffset: 1,
             endOffset: 3,
             collapsed: false,
-            rangeType: 'TEXT',
+            rangeType: 'RECT',
             startNodePosition: { glyph: 0 },
             endNodePosition: { glyph: 1 },
             direction: 'FORWARD',

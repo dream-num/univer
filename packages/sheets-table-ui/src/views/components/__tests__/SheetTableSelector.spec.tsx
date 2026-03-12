@@ -18,13 +18,12 @@
 
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TableManager } from '@univerjs/sheets-table';
-import * as React from 'react';
+import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetTableSelector } from '../SheetTableSelector';
 
 const mocks = vi.hoisted(() => ({
     useDependency: vi.fn(),
-    getSheetCommandTarget: vi.fn(),
     stateValues: [] as any[],
     stateCursor: 0,
 }));
@@ -59,20 +58,12 @@ vi.mock('@univerjs/ui', async () => {
 });
 
 vi.mock('@univerjs/sheets-formula-ui', () => ({
-    RangeSelector: (props: any) => React.createElement('range-selector', props),
+    RangeSelector: (props: any) => createElement('range-selector', props),
 }));
 
 vi.mock('@univerjs/design', () => ({
-    Button: (props: any) => React.createElement('button', props, props.children),
+    Button: (props: any) => createElement('button', props, props.children),
 }));
-
-vi.mock('@univerjs/sheets', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/sheets')>('@univerjs/sheets');
-    return {
-        ...actual,
-        getSheetCommandTarget: mocks.getSheetCommandTarget,
-    };
-});
 
 function renderSelector(props: Parameters<typeof SheetTableSelector>[0]) {
     mocks.stateCursor = 0;
@@ -110,7 +101,12 @@ describe('SheetTableSelector', () => {
                 return localeService;
             }
             if (token === IUniverInstanceService) {
-                return { getCurrentUnitForType: vi.fn() };
+                return {
+                    getUnit: vi.fn(() => ({
+                        getUnitId: () => 'unit-1',
+                        getSheetBySheetId: () => ({ getSheetId: () => 'sheet-1', getMergeData: () => [] }),
+                    })),
+                };
             }
             return null;
         });
@@ -122,7 +118,7 @@ describe('SheetTableSelector', () => {
         vi.clearAllMocks();
     });
 
-    it('should block selecting a range that overlaps merged cells or other tables', () => {
+    it('blocks selecting a range that overlaps merged cells or other tables', () => {
         const onConfirm = vi.fn();
         const props = {
             unitId: 'unit-1',
@@ -135,8 +131,25 @@ describe('SheetTableSelector', () => {
         buildDependencies({
             getTablesBySubunitId: () => [{ getId: () => 'table-2', getRange: () => ({ startRow: 5, endRow: 8, startColumn: 0, endColumn: 2 }) }],
         });
-        mocks.getSheetCommandTarget.mockReturnValue({
-            worksheet: { getMergeData: () => [{ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }] },
+        mocks.useDependency.mockImplementation((token: unknown) => {
+            if (token === TableManager) {
+                return {
+                    getTablesBySubunitId: () => [{ getId: () => 'table-2', getRange: () => ({ startRow: 5, endRow: 8, startColumn: 0, endColumn: 2 }) }],
+                    getTableById: () => null,
+                };
+            }
+            if (token === LocaleService) {
+                return localeService;
+            }
+            if (token === IUniverInstanceService) {
+                return {
+                    getUnit: () => ({
+                        getUnitId: () => 'unit-1',
+                        getSheetBySheetId: () => ({ getSheetId: () => 'sheet-1', getMergeData: () => [{ startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }] }),
+                    }),
+                };
+            }
+            return null;
         });
 
         let tree = renderSelector(props);
@@ -152,7 +165,7 @@ describe('SheetTableSelector', () => {
         expect(onConfirm).not.toHaveBeenCalled();
     });
 
-    it('should reject invalid single-row ranges and confirm valid ranges for a new table', () => {
+    it('rejects invalid single-row ranges and confirms valid ranges for a new table', () => {
         const onConfirm = vi.fn();
         const onCancel = vi.fn();
         const props = {
@@ -164,7 +177,6 @@ describe('SheetTableSelector', () => {
         };
 
         buildDependencies();
-        mocks.getSheetCommandTarget.mockReturnValue({ worksheet: { getMergeData: () => [] } });
 
         let tree = renderSelector(props);
         getRangeSelector(tree).props.onChange(undefined, 'A2:B2');
@@ -184,7 +196,7 @@ describe('SheetTableSelector', () => {
         expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
-    it('should allow in-place table range updates only when keeping the header row aligned', () => {
+    it('only allows in-place table updates when the header row stays aligned', () => {
         const onConfirm = vi.fn();
         const props = {
             unitId: 'unit-1',
@@ -198,7 +210,26 @@ describe('SheetTableSelector', () => {
         buildDependencies({
             getTableById: () => ({ getRange: () => ({ startRow: 2, endRow: 5, startColumn: 0, endColumn: 1 }) }),
         });
-        mocks.getSheetCommandTarget.mockReturnValue({ worksheet: { getMergeData: () => [] } });
+        mocks.useDependency.mockImplementation((token: unknown) => {
+            if (token === TableManager) {
+                return {
+                    getTablesBySubunitId: () => [],
+                    getTableById: () => ({ getRange: () => ({ startRow: 2, endRow: 5, startColumn: 0, endColumn: 1 }) }),
+                };
+            }
+            if (token === LocaleService) {
+                return localeService;
+            }
+            if (token === IUniverInstanceService) {
+                return {
+                    getUnit: () => ({
+                        getUnitId: () => 'unit-1',
+                        getSheetBySheetId: () => ({ getSheetId: () => 'sheet-1', getMergeData: () => [] }),
+                    }),
+                };
+            }
+            return null;
+        });
 
         let tree = renderSelector(props);
         getRangeSelector(tree).props.onChange(undefined, 'A4:B8');

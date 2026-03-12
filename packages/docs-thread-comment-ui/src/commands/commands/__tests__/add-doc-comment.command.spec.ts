@@ -14,39 +14,86 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-
-import { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
-import { describe, expect, it, vi } from 'vitest';
+import type { IDocumentData } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddDocCommentComment } from '../add-doc-comment.command';
 
-vi.mock('@univerjs/core', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/core')>('@univerjs/core');
+function createDocData(id: string): IDocumentData {
     return {
-        ...actual,
-        sequenceExecute: vi.fn(async () => ({ result: true })),
+        id,
+        body: {
+            dataStream: 'Hello world\r\n',
+            customDecorations: [],
+        },
+        documentStyle: {
+            pageSize: { width: 100, height: 100 },
+            marginTop: 0,
+            marginBottom: 0,
+            marginLeft: 0,
+            marginRight: 0,
+        },
     };
-});
-
-vi.mock('@univerjs/docs-ui', () => ({
-    addCustomDecorationBySelectionFactory: vi.fn(() => ({ id: 'do-mutation' })),
-}));
+}
 
 describe('AddDocCommentComment', () => {
+    let univer: Univer;
+    let injector: ReturnType<Univer['__getInjector']>;
+
+    beforeEach(() => {
+        univer = new Univer();
+        injector = univer.__getInjector();
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
     it('should add comment and attach decoration via sequenceExecute', async () => {
         const dataSource = {
             addComment: vi.fn(async (c) => ({ ...c, id: 'comment-1', threadId: 'thread-1' })),
         };
-        const commandService = {};
-        const accessor = {
-            get: (token: any) => {
-                if (token === IThreadCommentDataSourceService) return dataSource;
-                if (token === ICommandService) return commandService;
-                return null;
-            },
-        };
+        injector.add([IThreadCommentDataSourceService, { useValue: dataSource }]);
+        injector.add([DocSelectionManagerService]);
 
-        const ok = await AddDocCommentComment.handler(accessor as any, {
+        const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData('doc-1'));
+        injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+
+        const selectionManager = injector.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: doc.getUnitId(), subUnitId: doc.getUnitId() });
+        selectionManager.__TEST_ONLY_add([{ startOffset: 0, endOffset: 5, collapsed: false, isActive: true }] as never);
+
+        const executed: Array<{ id: string; params: unknown }> = [];
+        const commandService = injector.get(ICommandService);
+        commandService.registerCommand({
+            id: AddCommentMutation.id,
+            type: CommandType.MUTATION,
+            handler: (_accessor, params) => {
+                executed.push({ id: AddCommentMutation.id, params });
+                return true;
+            },
+        });
+        commandService.registerCommand({
+            id: RichTextEditingMutation.id,
+            type: CommandType.MUTATION,
+            handler: (_accessor, params) => {
+                executed.push({ id: RichTextEditingMutation.id, params });
+                return true;
+            },
+        });
+        commandService.registerCommand({
+            id: SetActiveCommentOperation.id,
+            type: CommandType.OPERATION,
+            handler: (_accessor, params) => {
+                executed.push({ id: SetActiveCommentOperation.id, params });
+                return true;
+            },
+        });
+
+        const ok = await AddDocCommentComment.handler(injector as any, {
             unitId: 'doc-1',
             range: { startOffset: 1, endOffset: 2, collapsed: false },
             comment: { id: '', threadId: '', unitId: 'doc-1', subUnitId: 'default_doc', ref: '' } as any,
@@ -54,6 +101,16 @@ describe('AddDocCommentComment', () => {
 
         expect(ok).toBe(true);
         expect(dataSource.addComment).toHaveBeenCalled();
+        expect(executed.map((command) => command.id)).toEqual([
+            AddCommentMutation.id,
+            RichTextEditingMutation.id,
+            SetActiveCommentOperation.id,
+        ]);
+        expect(executed[0].params).toEqual(expect.objectContaining({
+            unitId: 'doc-1',
+            comment: expect.objectContaining({ id: 'comment-1', threadId: 'thread-1' }),
+        }));
+        expect(executed[1].params).toEqual(expect.objectContaining({ unitId: 'doc-1' }));
     });
 
     it('should return false when missing params', async () => {

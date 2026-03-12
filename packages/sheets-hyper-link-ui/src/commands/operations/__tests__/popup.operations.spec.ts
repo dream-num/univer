@@ -14,34 +14,19 @@
  * limitations under the License.
  */
 
+import type { IOpenHyperLinkEditPanelOperationParams } from '../popup.operations';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsHyperLinkPopupService } from '../../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../../types/enums/edit-source';
-import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../popup.operations';
-
-const mocks = vi.hoisted(() => ({
-    getSheetCommandTarget: vi.fn(),
-    getShouldDisableCurrentCellLink: vi.fn(),
-}));
-
-vi.mock('@univerjs/sheets', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/sheets')>('@univerjs/sheets');
-    return {
-        ...actual,
-        getSheetCommandTarget: mocks.getSheetCommandTarget,
-    };
-});
-
-vi.mock('../../../utils', async () => {
-    const actual = await vi.importActual<typeof import('../../../utils')>('../../../utils');
-    return {
-        ...actual,
-        getShouldDisableCurrentCellLink: mocks.getShouldDisableCurrentCellLink,
-    };
-});
+import {
+    CloseHyperLinkPopupOperation,
+    InsertHyperLinkOperation,
+    InsertHyperLinkToolbarOperation,
+    OpenHyperLinkEditPanelOperation,
+} from '../popup.operations';
 
 function createAccessor(pairs: Array<[unknown, unknown]>) {
     const map = new Map<unknown, unknown>(pairs);
@@ -52,25 +37,67 @@ function createAccessor(pairs: Array<[unknown, unknown]>) {
             }
             return map.get(token);
         },
-    } as any;
+        has(token: unknown) {
+            return map.has(token);
+        },
+    } as never;
+}
+
+function createWorksheet(cell: Record<string, unknown> | null = null) {
+    return {
+        getSheetId: () => 's1',
+        getUnitId: () => 'u1',
+        getCell: vi.fn(() => cell),
+    };
+}
+
+function createWorkbook(worksheet: ReturnType<typeof createWorksheet>) {
+    return {
+        getUnitId: () => 'u1',
+        getActiveSheet: () => worksheet,
+        getSheetBySheetId: () => worksheet,
+    };
+}
+
+function createUniverInstanceService(options?: {
+    workbook?: ReturnType<typeof createWorkbook> | null;
+    focusedUnitId?: string;
+}) {
+    return {
+        getCurrentUnitOfType: () => options?.workbook ?? null,
+        getCurrentUnitForType: () => options?.workbook ?? null,
+        getFocusedUnit: () => options?.focusedUnitId ? { getUnitId: () => options.focusedUnitId } : null,
+    };
 }
 
 describe('hyper-link popup operations', () => {
-    it('should start add/edit flows through the popup service', () => {
+    it('starts add and edit flows through the popup service', () => {
         const startAddEditing = vi.fn();
         const startEditing = vi.fn();
         const popupService = { startAddEditing, startEditing };
         const accessor = createAccessor([[SheetsHyperLinkPopupService, popupService]]);
+        const startAddParams: IOpenHyperLinkEditPanelOperationParams = {
+            unitId: 'u1',
+            subUnitId: 's1',
+            row: 1,
+            col: 2,
+            type: HyperLinkEditSourceType.VIEWING,
+        };
+        const startEditParams: IOpenHyperLinkEditPanelOperationParams = {
+            ...startAddParams,
+            customRangeId: 'range-1',
+            type: HyperLinkEditSourceType.EDITING,
+        };
 
-        expect(OpenHyperLinkEditPanelOperation.handler(accessor, undefined as any)).toBe(false);
-        expect(OpenHyperLinkEditPanelOperation.handler(accessor, { unitId: 'u1', subUnitId: 's1', row: 1, col: 2, type: HyperLinkEditSourceType.VIEWING } as any)).toBe(true);
-        expect(OpenHyperLinkEditPanelOperation.handler(accessor, { unitId: 'u1', subUnitId: 's1', row: 1, col: 2, customRangeId: 'range-1', type: HyperLinkEditSourceType.EDITING } as any)).toBe(true);
+        expect(OpenHyperLinkEditPanelOperation.handler(accessor, undefined)).toBe(false);
+        expect(OpenHyperLinkEditPanelOperation.handler(accessor, startAddParams)).toBe(true);
+        expect(OpenHyperLinkEditPanelOperation.handler(accessor, startEditParams)).toBe(true);
 
         expect(startAddEditing).toHaveBeenCalledTimes(1);
         expect(startEditing).toHaveBeenCalledTimes(1);
     });
 
-    it('should close the popup edit session', () => {
+    it('closes the popup edit session', () => {
         const endEditing = vi.fn();
         const accessor = createAccessor([[SheetsHyperLinkPopupService, { endEditing }]]);
 
@@ -78,14 +105,15 @@ describe('hyper-link popup operations', () => {
         expect(endEditing).toHaveBeenCalledTimes(1);
     });
 
-    it('should derive the correct edit source from current sheet selection state', () => {
-        mocks.getSheetCommandTarget.mockReturnValue({ unitId: 'u1', subUnitId: 's1' });
+    it('derives the correct edit source from the current sheet selection state', () => {
         const executeCommand = vi.fn(() => true);
+        const worksheet = createWorksheet();
+        const workbook = createWorkbook(worksheet);
 
-        const createInsertAccessor = (visible: boolean, focusedUnitId?: string) => createAccessor([
-            [IUniverInstanceService, { getFocusedUnit: () => (focusedUnitId ? { getUnitId: () => focusedUnitId } : null) }],
+        const createInsertAccessor = (visible: boolean, focusedUnitId?: string, hasSelection = true, activeWorkbook: ReturnType<typeof createWorkbook> | null = workbook) => createAccessor([
+            [IUniverInstanceService, createUniverInstanceService({ workbook: activeWorkbook, focusedUnitId })],
             [ICommandService, { executeCommand }],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => ({ range: { startRow: 3, startColumn: 4 } }) }],
+            [SheetsSelectionsService, { getCurrentLastSelection: () => (hasSelection ? { range: { startRow: 3, startColumn: 4 } } : null) }],
             [IEditorBridgeService, { isVisible: () => ({ visible }) }],
         ]);
 
@@ -97,33 +125,32 @@ describe('hyper-link popup operations', () => {
         expect(executeCommand).toHaveBeenNthCalledWith(2, OpenHyperLinkEditPanelOperation.id, expect.objectContaining({ type: HyperLinkEditSourceType.EDITING }));
         expect(executeCommand).toHaveBeenNthCalledWith(3, OpenHyperLinkEditPanelOperation.id, expect.objectContaining({ type: HyperLinkEditSourceType.ZEN_EDITOR }));
 
-        mocks.getSheetCommandTarget.mockReturnValueOnce(null);
-        expect(InsertHyperLinkOperation.handler(createInsertAccessor(false))).toBe(false);
+        expect(InsertHyperLinkOperation.handler(createInsertAccessor(false, undefined, true, null))).toBe(false);
 
-        mocks.getSheetCommandTarget.mockReturnValueOnce({ unitId: 'u1', subUnitId: 's1' });
-        expect(InsertHyperLinkOperation.handler(createAccessor([
-            [IUniverInstanceService, { getFocusedUnit: () => null }],
-            [ICommandService, { executeCommand }],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => null }],
-            [IEditorBridgeService, { isVisible: () => ({ visible: false }) }],
-        ]))).toBe(false);
+        expect(InsertHyperLinkOperation.handler(createInsertAccessor(false, undefined, false))).toBe(false);
     });
 
-    it('should respect disabled cells and toggle between insert/close commands from the toolbar', () => {
+    it('respects disabled cells and toggles between insert and close commands from the toolbar', () => {
         const executeCommand = vi.fn(() => true);
+        const disabledWorksheet = createWorksheet({ f: '=A1' });
+        const enabledWorksheet = createWorksheet({ v: 'cell' });
 
-        mocks.getShouldDisableCurrentCellLink.mockReturnValueOnce(true);
         expect(InsertHyperLinkToolbarOperation.handler(createAccessor([
+            [IUniverInstanceService, createUniverInstanceService({ workbook: createWorkbook(disabledWorksheet) })],
+            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, startColumn: 1 } }] }],
             [ICommandService, { executeCommand }],
             [SheetsHyperLinkPopupService, { currentEditing: null }],
         ]))).toBe(false);
 
-        mocks.getShouldDisableCurrentCellLink.mockReturnValue(false);
         expect(InsertHyperLinkToolbarOperation.handler(createAccessor([
+            [IUniverInstanceService, createUniverInstanceService({ workbook: createWorkbook(enabledWorksheet) })],
+            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, startColumn: 1 } }] }],
             [ICommandService, { executeCommand }],
             [SheetsHyperLinkPopupService, { currentEditing: { row: 1 } }],
         ]))).toBe(true);
         expect(InsertHyperLinkToolbarOperation.handler(createAccessor([
+            [IUniverInstanceService, createUniverInstanceService({ workbook: createWorkbook(enabledWorksheet) })],
+            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, startColumn: 1 } }] }],
             [ICommandService, { executeCommand }],
             [SheetsHyperLinkPopupService, { currentEditing: null }],
         ]))).toBe(true);

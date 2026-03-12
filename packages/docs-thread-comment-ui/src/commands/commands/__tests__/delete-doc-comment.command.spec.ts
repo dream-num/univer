@@ -14,31 +14,62 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
-
+import type { IDocumentData } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeleteDocCommentComment } from '../delete-doc-comment.command';
 
-vi.mock('@univerjs/core', async () => {
-    const actual = await vi.importActual<typeof import('@univerjs/core')>('@univerjs/core');
+function createDocData(id: string): IDocumentData {
     return {
-        ...actual,
-        sequenceExecute: vi.fn(async () => ({ result: true })),
+        id,
+        body: {
+            dataStream: 'Hello world\r\n',
+            customDecorations: [{ id: 'c1', startIndex: 0, endIndex: 5, type: 1 as never }],
+        },
+        documentStyle: {
+            pageSize: { width: 100, height: 100 },
+            marginTop: 0,
+            marginBottom: 0,
+            marginLeft: 0,
+            marginRight: 0,
+        },
     };
-});
-
-vi.mock('@univerjs/docs-ui', () => ({
-    deleteCustomDecorationFactory: vi.fn(() => ({ id: 'do-mutation' })),
-}));
+}
 
 describe('DeleteDocCommentComment', () => {
-    it('should delete decoration via sequenceExecute', async () => {
-        const commandService = {};
-        const accessor = {
-            get: vi.fn(() => commandService),
-        } as any;
+    let univer: Univer;
+    let injector: ReturnType<Univer['__getInjector']>;
 
-        const ok = await DeleteDocCommentComment.handler(accessor, { unitId: 'doc-1', commentId: 'c1' });
+    beforeEach(() => {
+        univer = new Univer();
+        injector = univer.__getInjector();
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    it('should delete decoration via sequenceExecute', async () => {
+        const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData('doc-1'));
+        injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+
+        const executed: Array<{ id: string; params: unknown }> = [];
+        const commandService = injector.get(ICommandService);
+        commandService.registerCommand({
+            id: RichTextEditingMutation.id,
+            type: CommandType.MUTATION,
+            handler: (_accessor, params) => {
+                executed.push({ id: RichTextEditingMutation.id, params });
+                return true;
+            },
+        });
+
+        const ok = await DeleteDocCommentComment.handler(injector as any, { unitId: 'doc-1', commentId: 'c1' });
         expect(ok).toBe(true);
+        expect(executed).toHaveLength(1);
+        expect(executed[0]).toEqual(expect.objectContaining({ id: RichTextEditingMutation.id }));
+        expect(executed[0].params).toEqual(expect.objectContaining({ unitId: 'doc-1' }));
     });
 
     it('should return false when missing params', async () => {

@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     LocaleType,
     LogLevel,
+    ObjectMatrix,
     RANGE_TYPE,
     Univer,
     UniverInstanceType,
@@ -36,7 +37,7 @@ import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Viewport } from '../../../viewport';
 import { SHEET_VIEWPORT_KEY } from '../interfaces';
-import { SpreadsheetSkeleton } from '../sheet.render-skeleton';
+import { convertTransformToOffsetX, convertTransformToOffsetY, SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { Spreadsheet } from '../spreadsheet';
 
 const workbookDataFactory = (): IWorkbookData => ({
@@ -258,11 +259,27 @@ describe('spreadsheet integration', () => {
         expect(autoHeights.length).toBeGreaterThan(0);
         expect(autoHeights.some((item) => (item.autoHeight ?? 0) >= 24)).toBe(true);
 
+        const currentCellHeights = new ObjectMatrix<number>();
+        currentCellHeights.setValue(0, 0, 6);
+        currentCellHeights.setValue(0, 1, 8);
+        const autoHeightsWithCurrent = skeleton.calculateAutoHeightInRange([
+            { startRow: 0, endRow: 3, startColumn: 0, endColumn: 2, rangeType: RANGE_TYPE.NORMAL },
+        ], currentCellHeights);
+        expect(autoHeightsWithCurrent.length).toBeGreaterThan(0);
+
         const autoWidths = skeleton.calculateAutoWidthInRange([{ startRow: 0, endRow: 8, startColumn: 0, endColumn: 4, rangeType: RANGE_TYPE.NORMAL }]);
         expect(autoWidths.length).toBeGreaterThan(0);
         expect(autoWidths.every((item) => (item.width ?? 0) > 0)).toBe(true);
 
         expect(skeleton.getFont(0, 1)).toBeTruthy();
+        expect(skeleton.getColWidth(2)).toBeGreaterThan(0);
+        expect(skeleton.getRowHeight(2)).toBeGreaterThan(0);
+        expect(skeleton.getDistanceFromTopLeft(2, 2)).toEqual({
+            x: expect.any(Number),
+            y: expect.any(Number),
+        });
+        expect(convertTransformToOffsetX(120, 2, { x: 20, y: 0 })).toBe(200);
+        expect(convertTransformToOffsetY(80, 1.5, { x: 0, y: 10 })).toBe(105);
         expect(skeleton.getCellWithMergeInfoByIndex(2, 2)).toEqual(expect.objectContaining({
             startRow: 2,
             endRow: 3,
@@ -335,5 +352,74 @@ describe('spreadsheet integration', () => {
         });
 
         skeleton.dispose();
+    });
+
+    it('covers spreadsheet draw helpers and utility branches', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const context = mainCanvas.getContext() as any;
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(100, 60, 220, 140)],
+            diffCacheBounds: [createBound(100, 60, 220, 140)],
+            diffX: 4,
+            diffY: 3,
+            shouldCacheUpdate: 1,
+            isDirty: 0,
+            isForceDirty: false,
+        });
+
+        const extensionDraw = vi.fn();
+        vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([{
+            uKey: 'MockSheetExtension',
+            draw: extensionDraw,
+        }]);
+
+        spreadsheet.draw(context, viewportInfo);
+        expect(extensionDraw).toHaveBeenCalled();
+
+        spreadsheet.paintNewAreaForScrolling(viewportInfo, {
+            cacheCanvas,
+            cacheCtx: cacheCanvas.getContext() as any,
+            mainCtx: context,
+            topOrigin: 0,
+            leftOrigin: 0,
+            bufferEdgeX: 8,
+            bufferEdgeY: 6,
+            rowHeaderWidth: skeleton.rowHeaderWidth,
+            columnHeaderHeight: skeleton.columnHeaderHeight,
+            scaleX: 1,
+            scaleY: 1,
+        } as any);
+
+        spreadsheet.refreshCacheCanvas(viewportInfo, {
+            cacheCanvas,
+            cacheCtx: cacheCanvas.getContext() as any,
+            mainCtx: context,
+            topOrigin: 0,
+            leftOrigin: 0,
+            bufferEdgeX: 8,
+            bufferEdgeY: 6,
+        });
+
+        (spreadsheet as any)._applyCache(cacheCanvas, null);
+        spreadsheet.testShowRuler(cacheCanvas.getContext() as any, viewportInfo);
+        const random = spreadsheet.testGetRandomLightColor();
+        expect(random).toMatch(/^#[A-F]{6}$/);
+
+        expect(spreadsheet.backgroundExtension).toBe(spreadsheet.backgroundExtension);
+        expect(spreadsheet.borderExtension).toBe(spreadsheet.borderExtension);
+        expect(spreadsheet.fontExtension).toBe(spreadsheet.fontExtension);
+        expect(spreadsheet.getDocuments()).toBeDefined();
+        expect(spreadsheet.forceDisableGridlines).toBe(spreadsheet.forceDisableGridlines);
+
+        const noSkeletonSpreadsheet = new Spreadsheet('no-skeleton');
+        expect(noSkeletonSpreadsheet.draw(context, viewportInfo)).toBeUndefined();
+        expect(noSkeletonSpreadsheet.isHit(Vector2.FromArray([10, 10]))).toBe(false);
+        expect(noSkeletonSpreadsheet.getNoMergeCellPositionByIndex(0, 0)).toEqual({
+            startX: 0,
+            startY: 0,
+            endX: 0,
+            endY: 0,
+        });
+        noSkeletonSpreadsheet.dispose();
     });
 });

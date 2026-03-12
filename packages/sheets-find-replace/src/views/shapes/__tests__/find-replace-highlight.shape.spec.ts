@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ISheetFindReplaceHighlightShapeProps } from '../find-replace-highlight.shape';
+import { Rect } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetFindReplaceHighlightShape } from '../find-replace-highlight.shape';
 
@@ -27,8 +29,8 @@ vi.mock('@univerjs/engine-render', async () => {
         Shape: class {
             width = 0;
             height = 0;
-            constructor(_key?: string, _props?: any) {}
-            transformByState(state: any) {
+            constructor(_key?: string, _props?: unknown) {}
+            transformByState(state: { width?: number; height?: number }) {
                 if (state.width) this.width = state.width;
                 if (state.height) this.height = state.height;
             }
@@ -37,18 +39,20 @@ vi.mock('@univerjs/engine-render', async () => {
 });
 
 describe('SheetFindReplaceHighlightShape', () => {
-    it('should update props and draw activated border', async () => {
-        const { Rect } = await import('@univerjs/engine-render');
-
+    it('should update props and draw activated border', () => {
         const shape = new SheetFindReplaceHighlightShape('k', {
             inHiddenRange: false,
             color: { r: 1, g: 2, b: 3 },
             width: 10,
             height: 20,
-        } as any);
+        } satisfies ISheetFindReplaceHighlightShapeProps);
 
-        shape.setShapeProps({ activated: true, width: 10, height: 20 } as any);
-        (shape as any)._draw({} as any);
+        const drawableShape = shape as SheetFindReplaceHighlightShape & {
+            _draw(ctx: CanvasRenderingContext2D): void;
+        };
+
+        shape.setShapeProps({ activated: true, width: 10, height: 20 });
+        drawableShape._draw({} as CanvasRenderingContext2D);
 
         expect(Rect.drawWith).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
             strokeWidth: 2,

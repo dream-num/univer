@@ -29,14 +29,26 @@ import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../set-drawing-arrange.command';
 import { SetSheetDrawingCommand } from '../set-sheet-drawing.command';
 
-vi.mock('../../../basics/transform-position', () => ({
-    transformToDrawingPosition: vi.fn((transform) => ({ from: transform.left, to: transform.top })),
-    transformToAxisAlignPosition: vi.fn((transform) => ({ axis: `${transform.left}:${transform.top}` })),
-}));
+function createSelectionRenderService() {
+    return {
+        getCellWithCoordByOffset(left: number, top: number) {
+            const actualColumn = Math.floor(left / 10);
+            const actualRow = Math.floor(top / 10);
+
+            return {
+                actualColumn,
+                actualRow,
+                startX: actualColumn * 10,
+                startY: actualRow * 10,
+            };
+        },
+    };
+}
 
 function createAccessor() {
     const commandService = { syncExecuteCommand: vi.fn(() => true) };
     const pushUndoRedo = vi.fn();
+    const selectionRenderService = createSelectionRenderService();
     const sheetDrawingService = {
         getForwardDrawingsOp: vi.fn(() => ({ redo: ['redo-forward'], undo: ['undo-forward'], objects: ['shape-1'] })),
         getBackwardDrawingOp: vi.fn(() => ({ redo: ['redo-backward'], undo: ['undo-backward'], objects: ['shape-1'] })),
@@ -57,7 +69,7 @@ function createAccessor() {
     const renderManagerService = {
         getRenderById: vi.fn(() => ({
             scene: null,
-            with: vi.fn((token: unknown) => (token === ISheetSelectionRenderService ? {} : null)),
+            with: vi.fn((token: unknown) => (token === ISheetSelectionRenderService ? selectionRenderService : null)),
         })),
     };
     const sheetInterceptorService = {
@@ -87,7 +99,7 @@ function createAccessor() {
             }
 
             if (token === ISheetSelectionRenderService) {
-                return {};
+                return selectionRenderService;
             }
 
             if (token === IRenderManagerService) {
@@ -151,8 +163,24 @@ describe('sheet drawing commands', () => {
             unitId: 'book-1',
             drawings: [expect.objectContaining({
                 transform: { left: 9, top: 20 },
-                sheetTransform: { from: 9, to: 20 },
-                axisAlignSheetTransform: { axis: '9:20' },
+                sheetTransform: {
+                    from: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
+                    to: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
+                    flipX: false,
+                    flipY: false,
+                    angle: 0,
+                    skewX: 0,
+                    skewY: 0,
+                },
+                axisAlignSheetTransform: {
+                    from: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
+                    to: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
+                    flipX: false,
+                    flipY: false,
+                    angle: 0,
+                    skewX: 0,
+                    skewY: 0,
+                },
             })],
         });
         expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(2, ClearSheetDrawingTransformerOperation.id, ['book-1']);
@@ -200,8 +228,24 @@ describe('sheet drawing commands', () => {
                 drawingId: 'shape-1',
                 drawingType: DrawingTypeEnum.DRAWING_SHAPE,
                 transform: expect.objectContaining({ left: 10, top: 20, flipX: true, flipY: true }),
-                sheetTransform: { from: 10, to: 20 },
-                axisAlignSheetTransform: { axis: '10:20' },
+                sheetTransform: {
+                    from: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
+                    to: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
+                    flipX: true,
+                    flipY: true,
+                    angle: 0,
+                    skewX: 0,
+                    skewY: 0,
+                },
+                axisAlignSheetTransform: {
+                    from: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
+                    to: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
+                    flipX: true,
+                    flipY: true,
+                    angle: 0,
+                    skewX: 0,
+                    skewY: 0,
+                },
             }),
         ]);
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDrawingApplyMutation.id, {

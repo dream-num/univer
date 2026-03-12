@@ -23,6 +23,13 @@ import {
     CUSTOM_FORMULA_INPUT_NAME,
     LIST_FORMULA_INPUT_NAME,
 } from '../../views/components/formula-input';
+import { SheetsDataValidationUIController } from '../dv-ui.controller';
+
+vi.hoisted(() => {
+    Object.assign(globalThis, {
+        Path2D: class Path2D {},
+    });
+});
 
 const FORMULA_INPUT_KEYS = [
     CUSTOM_FORMULA_INPUT_NAME,
@@ -42,12 +49,7 @@ function createView(id: string) {
 }
 
 describe('SheetsDataValidationUIController', () => {
-    it('registers panel components and wires validator views into the registry', async () => {
-        Object.assign(globalThis, {
-            Path2D: class Path2D {},
-        });
-
-        const { SheetsDataValidationUIController } = await import('../dv-ui.controller');
+    it('registers panel components and wires validator views into the registry', () => {
         const register = vi.fn((_key: string) => ({ dispose: vi.fn() }));
         const validators = new Map<string, Record<string, unknown>>();
         const createInstance = vi.fn((viewCtor: { name: string }) => createView(viewCtor.name));

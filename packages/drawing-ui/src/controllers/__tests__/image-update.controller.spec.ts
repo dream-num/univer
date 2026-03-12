@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImageResetSizeOperation } from '../../commands/operations/image-reset-size.operation';
 import { ImageUpdateController } from '../image-update.controller';
-import { getCurrentUnitInfo } from '../utils';
-
-vi.mock('../utils', () => ({
-    getCurrentUnitInfo: vi.fn(() => ({ subUnitId: 'sheet-1' })),
-}));
 
 afterEach(() => {
     vi.useRealTimers();
 });
+
+function createSheetUnit(unitId = 'book-1', subUnitId = 'sheet-1') {
+    return {
+        type: UniverInstanceType.UNIVER_SHEET,
+        getUnitId: () => unitId,
+        getActiveSheet: () => ({ getSheetId: () => subUnitId }),
+    };
+}
 
 describe('ImageUpdateController', () => {
     it('resets image size after command execution and pushes updated drawing state back', () => {
@@ -74,7 +77,7 @@ describe('ImageUpdateController', () => {
             drawingManagerService as never,
             {} as never,
             {} as never,
-            {} as never,
+            { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
             { renderImages: vi.fn() } as never
         );
 
@@ -124,12 +127,11 @@ describe('ImageUpdateController', () => {
             drawingManagerService as never,
             {} as never,
             {} as never,
-            {} as never,
+            { getUnit: vi.fn(() => createSheetUnit()), getFocusedUnit: vi.fn(() => createSheetUnit()) } as never,
             { renderImages } as never
         );
 
         expect(controller).toBeTruthy();
-        vi.mocked(getCurrentUnitInfo).mockReturnValue({ subUnitId: 'sheet-1' } as never);
 
         const duplicated = { unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'shape-2' };
         add$.next([duplicated]);

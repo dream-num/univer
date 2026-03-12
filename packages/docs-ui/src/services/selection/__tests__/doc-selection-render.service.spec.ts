@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+import type { Mock } from 'vitest';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
+import { TextRange } from '../text-range';
 
 const {
     getCanvasOffsetByEngineMock,
     getRangeListFromCharIndexMock,
     getRectRangeFromCharIndexMock,
     getTextRangeFromCharIndexMock,
-    textRangeCtorMock,
 } = vi.hoisted(() => ({
     getCanvasOffsetByEngineMock: vi.fn(),
     getRangeListFromCharIndexMock: vi.fn(),
     getRectRangeFromCharIndexMock: vi.fn(),
     getTextRangeFromCharIndexMock: vi.fn(),
-    textRangeCtorMock: vi.fn(),
 }));
 
 vi.mock('../selection-utils', async () => {
@@ -44,28 +44,31 @@ vi.mock('../selection-utils', async () => {
     };
 });
 
-vi.mock('../text-range', () => ({
-    TextRange: textRangeCtorMock,
-}));
-
-type MockFn = ReturnType<typeof vi.fn>;
+type VoidMock = Mock<() => void>;
+type BooleanMock = Mock<() => boolean>;
+type AnchorMock = Mock<() => { left: number; top: number; visible: boolean } | null>;
+type IntersectionMock = Mock<(range: unknown) => boolean>;
 
 interface IFakeTextRange {
-    activate: MockFn;
-    deactivate: MockFn;
-    dispose: MockFn;
-    getAnchor: MockFn;
-    isActive: MockFn;
-    isIntersection: MockFn;
+    activate: VoidMock;
+    deactivate: VoidMock;
+    dispose: VoidMock;
+    getAnchor: AnchorMock;
+    isActive: BooleanMock;
+    isIntersection: IntersectionMock;
     collapsed?: boolean;
     anchorNodePosition?: Record<string, unknown> | null;
+    focusNodePosition?: Record<string, unknown> | null;
+    style?: { strokeWidth: number };
+    segmentId?: string;
+    segmentPage?: number;
 }
 
 interface IFakeRectRange {
-    activate: MockFn;
-    deactivate: MockFn;
-    dispose: MockFn;
-    isIntersection: MockFn;
+    activate: VoidMock;
+    deactivate: VoidMock;
+    dispose: VoidMock;
+    isIntersection: IntersectionMock;
 }
 
 interface IServiceHarness {
@@ -74,12 +77,12 @@ interface IServiceHarness {
     _rectRangeList: IFakeRectRange[];
     _rectRangeListCache: IFakeRectRange[];
     _selectionStyle: { strokeWidth: number };
-    _textSelectionInner$: { next: MockFn };
-    focus: MockFn;
-    _getAllTextRanges: MockFn;
-    _getAllRectRanges: MockFn;
-    _findNodeByCoord: MockFn;
-    _getNodePosition: MockFn;
+    _textSelectionInner$: { next: Mock<(...args: unknown[]) => void> };
+    focus: Mock<() => void>;
+    _getAllTextRanges: Mock<() => string[]>;
+    _getAllRectRanges: Mock<() => string[]>;
+    _findNodeByCoord: Mock<(...args: unknown[]) => unknown>;
+    _getNodePosition: Mock<(...args: unknown[]) => unknown>;
     _interactTextRanges(textRanges: IFakeTextRange[]): void;
     _interactRectRanges(rectRanges: IFakeRectRange[]): void;
     _removeAllRanges(): void;
@@ -175,15 +178,8 @@ describe('doc selection render service internals', () => {
         getRangeListFromCharIndexMock.mockReturnValue(null);
         getRectRangeFromCharIndexMock.mockReturnValue(null);
         getTextRangeFromCharIndexMock.mockReturnValue(null);
-        textRangeCtorMock.mockImplementation(function MockTextRange(this: Record<string, unknown>) {
-            this.activate = vi.fn();
-            this.deactivate = vi.fn();
-            this.dispose = vi.fn();
-            this.getAnchor = vi.fn(() => ({ left: 12, top: 24, visible: true }));
-            this.isActive = vi.fn(() => false);
-            this.isIntersection = vi.fn(() => false);
-            this.anchorNodePosition = { glyph: 1 };
-        });
+        vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
+        vi.spyOn(TextRange.prototype, 'refresh').mockImplementation(() => {});
     });
 
     it('drops intersecting text and rect ranges while keeping unrelated ones', () => {
@@ -281,7 +277,7 @@ describe('doc selection render service internals', () => {
     });
 
     it('creates a text range from anchor position with current skeleton and segment context', () => {
-        const { mainComponent, scene, service, skeleton } = createService();
+        const { service } = createService();
         const oldText = createTextRange();
         const oldRect = createRectRange();
         const position = { glyph: 9, line: 3 };
@@ -293,19 +289,14 @@ describe('doc selection render service internals', () => {
 
         expect(oldText.dispose).toHaveBeenCalledTimes(1);
         expect(oldRect.dispose).toHaveBeenCalledTimes(1);
-        expect(textRangeCtorMock).toHaveBeenCalledTimes(1);
-        expect(textRangeCtorMock).toHaveBeenCalledWith(
-            scene,
-            mainComponent,
-            skeleton,
-            position,
-            undefined,
-            service._selectionStyle,
-            'segment-1',
-            2
-        );
+        expect(service._rangeList[0]).toBeInstanceOf(TextRange);
+        expect(service._rangeList[0].anchorNodePosition).toEqual(position);
+        expect(service._rangeList[0].focusNodePosition).toBeUndefined();
+        expect(service._rangeList[0].style).toBe(service._selectionStyle);
+        expect(service._rangeList[0].segmentId).toBe('segment-1');
+        expect(service._rangeList[0].segmentPage).toBe(2);
         expect(service._rangeList).toHaveLength(1);
-        expect(service._rangeList[0].activate).toHaveBeenCalledTimes(1);
+        expect(service._rangeList[0].isActive()).toBe(true);
     });
 
     it('adds document ranges across rect, text, and fallback branches without focusing', () => {

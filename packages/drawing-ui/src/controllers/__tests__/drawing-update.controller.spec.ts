@@ -14,29 +14,43 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import { DrawingUpdateController } from '../drawing-update.controller';
 
-vi.mock('../utils', () => ({
-    getCurrentUnitInfo: vi.fn(() => ({ unitId: 'unit-1', subUnitId: 'sheet-1' })),
-}));
+interface IDrawingNotification {
+    unitId: string;
+    subUnitId: string;
+    drawingId: string;
+}
+
+interface IDrawingTransformObject {
+    oKey: string;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    angle: number;
+    isInGroup?: boolean;
+}
 
 function createHarness() {
-    const add$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
-    const remove$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
-    const update$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
-    const refreshTransform$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
-    const visible$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string; visible: boolean }>>();
+    const add$ = new Subject<IDrawingNotification[]>();
+    const remove$ = new Subject<IDrawingNotification[]>();
+    const update$ = new Subject<IDrawingNotification[]>();
+    const refreshTransform$ = new Subject<IDrawingNotification[]>();
+    const visible$ = new Subject<Array<IDrawingNotification & { visible: boolean }>>();
     const order$ = new Subject<{ unitId: string; subUnitId: string; drawingIds: string[] }>();
-    const group$ = new Subject<any>();
-    const ungroup$ = new Subject<any>();
+    const group$ = new Subject<IDrawingGroupUpdateParam[]>();
+    const ungroup$ = new Subject<IDrawingGroupUpdateParam[]>();
 
-    const changeStart$ = new Subject<any>();
-    const changeEnd$ = new Subject<any>();
+    const changeStart$ = new Subject<{ objects: Map<string, IDrawingTransformObject> }>();
+    const changeEnd$ = new Subject<{ objects: Map<string, IDrawingTransformObject> }>();
     const transformer = {
         changeStart$,
         changeEnd$,
@@ -79,7 +93,7 @@ function createHarness() {
         getRenderById: vi.fn(() => ({ scene })),
     };
 
-    const drawingParams = new Map<string, any>([
+    const drawingParams = new Map<string, { unitId: string; subUnitId: string; drawingId: string; drawingType: DrawingTypeEnum; transform: { left: number; top: number; width: number; height: number; angle: number } }>([
         ['drawing-a', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-a', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 } }],
         ['drawing-b', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-b', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 20, top: 0, width: 10, height: 10, angle: 0 } }],
         ['drawing-transform', { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-transform', drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 1, top: 2, width: 3, height: 4, angle: 0 } }],
@@ -95,7 +109,7 @@ function createHarness() {
         order$,
         group$,
         ungroup$,
-        getDrawingByParam: vi.fn(({ drawingId }: any) => drawingParams.get(drawingId) ?? null),
+        getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => drawingParams.get(drawingId) ?? null),
         getDrawingOKey: vi.fn((oKey: string) => ({ unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: oKey, drawingType: DrawingTypeEnum.DRAWING_IMAGE, transform: { left: 0, top: 0, width: 10, height: 10, angle: 0 } })),
         getDrawingOrder: vi.fn(() => ['drawing-z']),
         getFocusDrawings: vi.fn(() => [
@@ -105,9 +119,9 @@ function createHarness() {
         featurePluginUpdateNotification: vi.fn(),
     };
 
-    let commandExecuted: ((cmd: any) => void) | undefined;
+    let commandExecuted: ((cmd: ICommandInfo) => void) | undefined;
     const commandService = {
-        onCommandExecuted: vi.fn((handler: any) => {
+        onCommandExecuted: vi.fn((handler: (cmd: ICommandInfo) => void) => {
             commandExecuted = handler;
             return { dispose: vi.fn() };
         }),
@@ -115,7 +129,13 @@ function createHarness() {
     };
 
     const controller = new DrawingUpdateController(
-        { getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'unit-1' })) } as never,
+        {
+            getFocusedUnit: vi.fn(() => ({
+                type: UniverInstanceType.UNIVER_SHEET,
+                getUnitId: () => 'unit-1',
+                getActiveSheet: () => ({ getSheetId: () => 'sheet-1' }),
+            })),
+        } as never,
         commandService as never,
         renderManagerService as never,
         drawingManagerService as never

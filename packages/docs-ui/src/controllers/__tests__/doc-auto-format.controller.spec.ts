@@ -23,14 +23,6 @@ import { QUICK_HEADING_MAP, QuickHeadingCommand } from '../../commands/commands/
 import { DocTableTabCommand } from '../../commands/commands/table/doc-table-tab.command';
 import { DocAutoFormatController } from '../doc-auto-format.controller';
 
-const { isInSameTableCellDataMock } = vi.hoisted(() => ({
-    isInSameTableCellDataMock: vi.fn(),
-}));
-
-vi.mock('../../services/selection/convert-rect-range', () => ({
-    isInSameTableCellData: isInSameTableCellDataMock,
-}));
-
 interface IAutoFormatRule {
     id: string;
     priority?: number;
@@ -89,7 +81,6 @@ describe('doc auto format controller', () => {
             },
         }]);
 
-        isInSameTableCellDataMock.mockReturnValue(false);
         expect(tableTabRule.match({
             selection: {
                 startNodePosition: { path: ['pages', 0, 'cells', 0] },

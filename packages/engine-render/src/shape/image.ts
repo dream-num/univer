@@ -271,6 +271,10 @@ export class Image extends Shape<IImageProps> {
             this.makeDirty(false);
             return this;
         }
+        
+        if (!this.transform) {
+            return this;
+        }
 
         let { width: realWidth, height: realHeight, left: realLeft, top: realTop } = this;
 
@@ -381,6 +385,17 @@ export class Image extends Shape<IImageProps> {
                 bottom: newBottom,
             });
         }
+    }
+    override set transform(trans: Transform) {
+        this._transform = trans;
+    }
+
+    override get transform() {
+        if (!this._transform) {
+            this._setTransForm();
+        }
+        const transform = this._transform.clone();
+        return this.transformForAngle(transform);
     }
 
     override isHit(coord: Vector2) {

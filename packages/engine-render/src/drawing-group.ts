@@ -151,4 +151,15 @@ export class DrawingGroupObject extends Group {
 
         return false;
     }
+    override dispose() {
+        const objects = [...this.getObjects()];
+        const scene = this.getScene();
+        objects.forEach((o) => {
+            o.dispose();
+            scene?.removeObject(o);
+        });
+        this._objects = [];
+        super.dispose();
+        scene?.removeObject(this);
+    }
 }

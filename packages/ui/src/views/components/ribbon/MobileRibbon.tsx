@@ -15,8 +15,6 @@
  */
 
 import type { ComponentType } from 'react';
-import type { RibbonType } from '../../../controllers/ui/ui.controller';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { MoreIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
@@ -28,7 +26,6 @@ import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarItem } from './ToolbarItem';
 
 interface IMobileRibbonProps {
-    ribbonType: RibbonType;
     headerMenuComponents?: Set<ComponentType>;
     headerMenu?: boolean;
 }
@@ -48,29 +45,13 @@ const nestedControlResetClassName = `
 `;
 
 export function MobileRibbon(props: IMobileRibbonProps) {
-    const { ribbonType, headerMenuComponents, headerMenu = true } = props;
+    const { headerMenuComponents, headerMenu = true } = props;
 
     const localeService = useDependency(LocaleService);
     const ribbonService = useDependency(IRibbonService);
 
-    const ribbonData = useObservable(ribbonService.ribbon$, []);
+    const ribbon = useObservable(ribbonService.ribbon$, []);
     const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
-
-    const ribbon = useMemo(() => {
-        if (ribbonType === 'simple') {
-            const simpleRibbon: IMenuSchema[] = [{ key: RibbonPosition.START, children: [], order: 0 }];
-
-            ribbonData.forEach((group) => {
-                group.children?.forEach((item) => {
-                    simpleRibbon[0].children?.push(item);
-                });
-            });
-
-            return simpleRibbon;
-        }
-
-        return ribbonData;
-    }, [ribbonData, ribbonType]);
 
     const activeIndex = useMemo(() => {
         const index = ribbon.findIndex((group) => group.key === activatedTab);

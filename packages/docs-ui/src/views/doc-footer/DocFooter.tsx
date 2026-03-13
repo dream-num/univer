@@ -21,14 +21,7 @@ import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CountBar } from '../count-bar';
 
-export function DocFooter() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
-
-    if (workbook) {
-        return null;
-    }
-
+function DocFooterContent() {
     const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
     const isShow = config?.footer ?? true;
 
@@ -42,4 +35,15 @@ export function DocFooter() {
             <CountBar />
         </div>
     );
+}
+
+export function DocFooter() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
+
+    if (workbook) {
+        return null;
+    }
+
+    return <DocFooterContent />;
 };

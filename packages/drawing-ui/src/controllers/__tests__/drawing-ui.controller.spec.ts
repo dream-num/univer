@@ -33,7 +33,7 @@ describe('DrawingUIController', () => {
         );
 
         expect(controller).toBeTruthy();
-        expect(registerCommand).toHaveBeenCalledTimes(5);
+        expect(registerCommand).toHaveBeenCalledTimes(20);
         expect(register).toHaveBeenCalledWith(COMPONENT_IMAGE_POPUP_MENU, expect.any(Function));
     });
 });

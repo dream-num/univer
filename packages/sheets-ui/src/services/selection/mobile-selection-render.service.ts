@@ -35,6 +35,7 @@ import {
     Inject,
     Injector,
     RANGE_TYPE,
+    Rectangle,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -42,7 +43,7 @@ import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univ
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
-import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING, MOBILE_TRIGGER_CONTEXT_MENU } from '../../consts/mobile-context';
+import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
@@ -59,6 +60,11 @@ enum ExpandingControl {
     TOP = 'top',
     BOTTOM = 'bottom',
 }
+
+export function shouldKeepCurrentSelectionOnMobileLongPress(currentSelections: IRange[], targetRange: IRange): boolean {
+    return currentSelections.some((selection) => Rectangle.contains(selection, targetRange));
+}
+
 export class MobileSheetsSelectionRenderService extends BaseSelectionRenderService implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelectionModel;
     private _renderDisposable: Nullable<IDisposable> = null;
@@ -208,20 +214,10 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     private _initSpreadsheetEvent(sheetObject: ISheetObjectParam): void {
         const { spreadsheet } = sheetObject;
-        let longPressTimer: ReturnType<typeof setTimeout>;
-        const longPressDuration = 500; // Longpress duration in milliseconds
         const pointerDownPos = { x: 0, y: 0 };
-
-        const clearLongPressTimer = () => {
-            // Clear the timer if pointer is moved or released
-            clearTimeout(longPressTimer);
-        };
-
-        const createNewSelection = (evt: IPointerEvent | IMouseEvent, showContextMenu: boolean) => {
+        const createNewSelection = (evt: IPointerEvent | IMouseEvent) => {
             // Don't create selection during pinch zoom
             if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
-
-            this._contextService.setContextValue(MOBILE_TRIGGER_CONTEXT_MENU, showContextMenu);
 
             // TODO @lumixraku
             this.createNewSelection(
@@ -232,22 +228,11 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             );
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
         };
-        spreadsheet?.onPointerMove$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state) => {
-            const edge = 10;
-            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
-            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
-                clearLongPressTimer();
-            }
-        });
         const spreadsheetPointerDownSub = spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             // Don't start long press timer during pinch zoom
             if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
-
             pointerDownPos.x = evt.offsetX;
             pointerDownPos.y = evt.offsetY;
-            longPressTimer = setTimeout(() => {
-                createNewSelection(evt, true);
-            }, longPressDuration);
 
             state.stopPropagation();
         });
@@ -256,13 +241,12 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             // Don't create selection during pinch zoom
             if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
 
-            clearTimeout(longPressTimer);
             const edge = 10;
             if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
             Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
                 return;
             }
-            createNewSelection(evt, false);
+            createNewSelection(evt);
             state.stopPropagation();
         });
 

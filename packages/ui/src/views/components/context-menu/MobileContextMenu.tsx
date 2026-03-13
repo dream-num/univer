@@ -23,6 +23,7 @@ import { createPortal } from 'react-dom';
 import { MobileMenu } from '../../../components/menu/mobile/MobileMenu';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
+import { ILayoutService } from '../../../services/layout/layout.service';
 import { ContextMenuPosition } from '../../../services/menu/types';
 import { useDependency } from '../../../utils/di';
 
@@ -35,6 +36,7 @@ export function MobileContextMenu() {
     const contextMenuHostService = useDependency(IContextMenuHostService);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
+    const layoutService = useDependency(ILayoutService);
     const localeService = useDependency(LocaleService);
     const { mountContainer } = useContext(ConfigContext);
     visibleRef.current = visible;
@@ -143,6 +145,7 @@ export function MobileContextMenu() {
                         menuType={menuType}
                         onOptionSelect={(params) => {
                             const { label: id, value, commandId } = params;
+                            layoutService.focus();
                             commandService.executeCommand(commandId ?? id as string, { value });
                             handleClose();
                         }}

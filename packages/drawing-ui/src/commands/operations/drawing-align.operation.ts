@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { IDrawingParam, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 export enum AlignType {
@@ -31,6 +31,7 @@ export enum AlignType {
 
 export interface ISetDrawingAlignOperationParams {
     alignType: AlignType;
+    drawings?: IDrawingParam[];
 }
 
 export const SetDrawingAlignOperation: IOperation<ISetDrawingAlignOperationParams> = {

@@ -34,6 +34,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { DrawingContextMenuController } from './controllers/drawing-context-menu.controller';
 import { SheetCellImageHoverRenderController } from './controllers/render-controllers/sheet-celll-image-hover.render-controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
@@ -88,6 +89,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetCellImageAutofillController],
             [SheetCellImageCopyPasteController],
             [IBatchSaveImagesService, { useClass: BatchSaveImagesService }],
+            [DrawingContextMenuController],
         ]);
 
         touchDependencies(this._injector, [
@@ -116,6 +118,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
     override onSteady(): void {
         this._injector.get(DrawingPopupMenuController);
+        this._injector.get(DrawingContextMenuController);
     }
 
     private _registerRenderModules(): void {

@@ -16,11 +16,11 @@
 
 import type { IAccessor, IDrawingParam } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
-import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../commands/operations/drawing-group.operation';
+import { MenuItemType } from '@univerjs/ui';
+import { Observable } from 'rxjs';
+import { CancelDrawingGroupOperation, DRAWING_GROUP_TYPES, SetDrawingGroupOperation } from '../commands/operations/drawing-group.operation';
 
 const getMenuStateByDrawingFocusChangedObservable$ = (accessor: IAccessor, type?: 'group' | 'unGroup'): Observable<boolean> => {
     const drawingManagerService = accessor.get(IDrawingManagerService);
@@ -32,24 +32,24 @@ const getMenuStateByDrawingFocusChangedObservable$ = (accessor: IAccessor, type?
             }
 
             if (type === 'group') {
-                const shapes = drawings.filter((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_SHAPE || drawing.drawingType === DrawingTypeEnum.DRAWING_GROUP);
+                // If there are less than 2 drawings that can be grouped, disable the group button
+                if (drawings.length < 2) {
+                    return subscriber.next(true);
+                }
 
-                // If there are less than 2 shapes or groups, disable the group button
-                if (shapes.length < 2) {
+                if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) {
                     return subscriber.next(true);
                 }
             } else if (type === 'unGroup') {
+                // If there are no groups, disable the unGroup button
                 const groups = drawings.filter((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_GROUP);
 
-                // If there are no groups, disable the unGroup button
                 if (groups.length === 0) {
                     return subscriber.next(true);
                 }
             } else {
-                const shapes = drawings.filter((drawing) => drawing.drawingType === DrawingTypeEnum.DRAWING_SHAPE || drawing.drawingType === DrawingTypeEnum.DRAWING_GROUP);
-
-                // If there are no shapes or groups, hide the context menu
-                if (shapes.length === 0) {
+                // If there are drawings that cannot be grouped or ungrouped, hide the context menu
+                if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) {
                     return subscriber.next(true);
                 }
             }
@@ -76,11 +76,9 @@ export function DrawingGroupContextMenuItemFactory(accessor: IAccessor): IMenuSe
     return {
         id: DRAWING_GROUP_CONTEXT_MENU_ID,
         type: MenuItemType.SUBITEMS,
+        icon: 'GroupIcon',
         title: 'image-panel.group.title',
-        icon: 'PipingIcon',
-        hidden$: combineLatest([getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET), getMenuStateByDrawingFocusChangedObservable$(accessor)]).pipe(
-            map(([menuHidden, selectionHidden]) => menuHidden || selectionHidden)
-        ),
+        hidden$: getMenuStateByDrawingFocusChangedObservable$(accessor),
     };
 }
 
@@ -88,10 +86,9 @@ export function SetDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuButton
     return {
         id: SetDrawingGroupOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'ClearFormatDoubleIcon',
+        icon: 'GroupIcon',
         title: 'image-panel.group.group',
         disabled$: getMenuStateByDrawingFocusChangedObservable$(accessor, 'group'),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -99,9 +96,8 @@ export function CancelDrawingGroupMenuItemFactory(accessor: IAccessor): IMenuBut
     return {
         id: CancelDrawingGroupOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'ClearFormatDoubleIcon',
+        icon: 'UngroupIcon',
         title: 'image-panel.group.unGroup',
         disabled$: getMenuStateByDrawingFocusChangedObservable$(accessor, 'unGroup'),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

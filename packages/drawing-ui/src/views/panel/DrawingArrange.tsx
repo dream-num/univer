@@ -15,12 +15,12 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ArrangeTypeEnum, LocaleService } from '@univerjs/core';
+import { ArrangeTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { BottomIcon, MoveDownIcon, MoveUpIcon, TopmostIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
 export interface IDrawingArrangeProps {
     arrangeShow: boolean;
@@ -32,6 +32,13 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
 
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
+    const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
+
+    const MoveUpIcon = componentManager.get('MoveUpIcon');
+    const MoveDownIcon = componentManager.get('MoveDownIcon');
+    const TopmostIcon = componentManager.get('TopmostIcon');
+    const BottomIcon = componentManager.get('BottomIcon');
 
     const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
 
@@ -46,11 +53,7 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
     }, []);
 
     const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {
-        const unitId = drawings[0].unitId;
-        const subUnitId = drawings[0].subUnitId;
-        const drawingIds = drawings.map((drawing) => drawing.drawingId);
-
-        drawingManagerService.featurePluginOrderUpdateNotification({ unitId, subUnitId, drawingIds, arrangeType });
+        commandService.syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType, drawings });
     };
 
     return (

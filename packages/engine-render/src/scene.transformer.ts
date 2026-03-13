@@ -170,7 +170,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private readonly _changing$ = new Subject<IChangeObserverConfig>();
     readonly changing$ = this._changing$.asObservable();
 
-    private readonly _changeEnd$ = new Subject<IChangeObserverConfig>();
+    private readonly _changeEnd$ = new Subject<IChangeObserverConfig & { event: IPointerEvent | IMouseEvent }>();
     readonly changeEnd$ = this._changeEnd$.asObservable();
 
     private readonly _clearControl$ = new Subject<boolean>();
@@ -466,6 +466,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         type: MoveObserverType.MOVE_END,
                         offsetX,
                         offsetY,
+                        event,
                     });
                 } else {
                     this._changeEnd$.next({
@@ -473,6 +474,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         type: MoveObserverType.MOVE_END,
                         offsetX,
                         offsetY,
+                        event,
                     });
                 }
             });
@@ -1038,6 +1040,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                                 type: MoveObserverType.MOVE_END,
                                 offsetX,
                                 offsetY,
+                                event,
                             });
                         } else {
                             this._recoverySizeBoundary([applyObject], ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
@@ -1046,6 +1049,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                                 type: MoveObserverType.MOVE_END,
                                 offsetX,
                                 offsetY,
+                                event,
                             });
                         }
                         this.refreshControls();
@@ -1139,6 +1143,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                             type: MoveObserverType.MOVE_END,
                             offsetX,
                             offsetY,
+                            event,
                         });
                     });
 

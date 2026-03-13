@@ -19,8 +19,7 @@ import { DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core'
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { GroupIcon, UngroupIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../commands/operations/drawing-group.operation';
 import { getUpdateParams } from '../../utils/get-update-params';
@@ -35,20 +34,22 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
 
     const { hasGroup, drawings } = props;
+    const GroupIcon = componentManager.get('GroupIcon');
+    const UngroupIcon = componentManager.get('UngroupIcon');
 
     const [groupShow, setGroupShow] = useState(false);
-
     const [groupBtnShow, setGroupBtnShow] = useState(true);
     const [ungroupBtnShow, setUngroupBtnShow] = useState(true);
 
     const onGroupBtnClick = () => {
-        commandService.syncExecuteCommand(SetDrawingGroupOperation.id);
+        commandService.syncExecuteCommand(SetDrawingGroupOperation.id, { drawings });
     };
 
     const onUngroupBtnClick = () => {
-        commandService.syncExecuteCommand(CancelDrawingGroupOperation.id);
+        commandService.syncExecuteCommand(CancelDrawingGroupOperation.id, { drawings });
     };
 
     useEffect(() => {

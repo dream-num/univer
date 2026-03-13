@@ -373,7 +373,7 @@ export class DrawingUpdateController extends Disposable {
 
     private _drawingAlign(params: ISetDrawingAlignOperationParams) {
         const { alignType } = params;
-        const drawings = this._drawingManagerService.getFocusDrawings();
+        const drawings = params.drawings || this._drawingManagerService.getFocusDrawings();
 
         if (alignType === AlignType.default) {
             return;

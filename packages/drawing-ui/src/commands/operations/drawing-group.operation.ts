@@ -14,23 +14,38 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDrawingParam } from '@univerjs/core';
+import type { IDrawingParam, IOperation } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import { CommandType, DrawingTypeEnum, generateRandomId } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
-export const SetDrawingGroupOperation = {
+/**
+ * Now only support grouping images, shapes, and groups.
+ */
+export const DRAWING_GROUP_TYPES = [DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_SHAPE, DrawingTypeEnum.DRAWING_GROUP];
+
+export interface IDrawingGroupOperationParams {
+    drawings?: IDrawingParam[];
+}
+
+/**
+ * Group the selected drawings into a new group. The selected drawings must be of type image, shape, or group, and there must be at least 2 drawings selected.
+ */
+export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> = {
     id: 'drawing.operation.set-drawing-group',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor) => {
+    handler: (accessor, params) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);
+        const drawings = params.drawings || drawingManagerService.getFocusDrawings();
 
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        const { unitId, subUnitId } = focusDrawings[0];
+        if (drawings.length < 2) return false;
+        if (!drawings.every((drawing) => DRAWING_GROUP_TYPES.includes(drawing.drawingType))) return false;
+
+        const { unitId, subUnitId } = drawings[0];
 
         const groupId = generateRandomId(10);
-        const groupTransform = getGroupState(0, 0, focusDrawings.map((o) => o.transform || {}));
+        const groupTransform = getGroupState(0, 0, drawings.map((o) => o.transform || {}));
         const groupParam = {
             unitId,
             subUnitId,
@@ -45,7 +60,7 @@ export const SetDrawingGroupOperation = {
             },
         } as IDrawingParam;
 
-        const children = focusDrawings.map((drawing) => {
+        const children = drawings.map((drawing) => {
             const transform = drawing.transform || { left: 0, top: 0 };
             const { unitId, subUnitId, drawingId } = drawing;
             return {
@@ -70,14 +85,21 @@ export const SetDrawingGroupOperation = {
     },
 };
 
-export const CancelDrawingGroupOperation = {
+export interface ICancelDrawingGroupOperationParams {
+    drawings?: IDrawingParam[];
+}
+
+/**
+ * Ungroup the selected groups. The selected drawings must be at least 1 group selected.
+ */
+export const CancelDrawingGroupOperation: IOperation<ICancelDrawingGroupOperationParams> = {
     id: 'drawing.operation.cancel-drawing-group',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor) => {
+    handler: (accessor, params) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);
+        const drawings = params.drawings || drawingManagerService.getFocusDrawings();
 
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        const params = focusDrawings
+        const groupParams = drawings
             .map((drawing) => {
                 if (drawing.drawingType !== DrawingTypeEnum.DRAWING_GROUP) return null;
 
@@ -108,11 +130,11 @@ export const CancelDrawingGroupOperation = {
                     children,
                 } as IDrawingGroupUpdateParam;
             })
-            .filter((o) => o !== null) as IDrawingGroupUpdateParam[];
+            .filter((o) => o !== null);
 
-        if (params.length === 0) return false;
+        if (groupParams.length === 0) return false;
 
-        drawingManagerService.featurePluginUngroupUpdateNotification(params);
+        drawingManagerService.featurePluginUngroupUpdateNotification(groupParams);
 
         return true;
     },

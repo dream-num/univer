@@ -230,6 +230,12 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                     order: 3,
                 },
             },
+            [ContextMenuPosition.DRAWING]: {
+                order: 5,
+                [ContextMenuGroup.OTHERS]: {
+                    order: 3,
+                },
+            },
         },
     };
 

@@ -49,6 +49,21 @@ const SELECTION_OBJECT_PREFIXES = [
     SELECTION_MANAGER_KEY.backgroundBottom,
 ];
 
+interface ITouchPosition {
+    clientX: number;
+    clientY: number;
+    offsetX: number;
+    offsetY: number;
+}
+
+interface ILongPressState {
+    longPressTimer: ReturnType<typeof setTimeout> | null;
+    activeTouch: Nullable<ITouchPosition>;
+    longPressTriggered: boolean;
+    selectionSnapshot: ISelectionWithStyle[];
+    shouldRestoreSelectionSnapshot: boolean;
+}
+
 function isSelectionObjectKey(objectKey?: string | null): boolean {
     return !!objectKey && SELECTION_OBJECT_PREFIXES.some((prefix) => objectKey.startsWith(prefix));
 }
@@ -85,208 +100,10 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             return;
         }
 
-        let longPressTimer: ReturnType<typeof setTimeout> | null = null;
-        let activeTouch: Nullable<{ clientX: number; clientY: number; offsetX: number; offsetY: number }> = null;
-        let longPressTriggered = false;
-        let selectionSnapshot: ISelectionWithStyle[] = [];
-        let shouldRestoreSelectionSnapshot = false;
-
-        const clearLongPressTimer = () => {
-            if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
-        };
-
-        const resetLongPressState = () => {
-            clearLongPressTimer();
-            activeTouch = null;
-        };
-
-        const getTouchOffset = (touch: Touch) => {
-            const rect = contentElement.getBoundingClientRect();
-            return {
-                clientX: touch.clientX,
-                clientY: touch.clientY,
-                offsetX: touch.clientX - rect.left,
-                offsetY: touch.clientY - rect.top,
-            };
-        };
-
-        const getMainAreaViewport = (offsetX: number, offsetY: number): Nullable<Viewport> => {
-            const { scene } = this._context;
-            const viewport = scene.getActiveViewportByCoord(Vector2.FromArray([offsetX, offsetY]));
-
-            if (!viewport || !MAIN_AREA_VIEWPORT_KEYS.has(viewport.viewportKey)) {
-                return null;
-            }
-
-            return viewport;
-        };
-
-        const getTargetCellByOffset = (offsetX: number, offsetY: number): Nullable<ICellWithCoord> => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
-            const viewport = getMainAreaViewport(offsetX, offsetY);
-            const { scene } = this._context;
-
-            if (!skeleton || !viewport) {
-                return null;
-            }
-
-            const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([offsetX, offsetY]));
-            const scrollXY = scene.getScrollXYInfoByViewport(relativeCoords, viewport);
-            const { scaleX, scaleY } = scene.getAncestorScale();
-
-            return skeleton.getCellWithCoordByOffset(relativeCoords.x - scrollXY.x, relativeCoords.y - scrollXY.y, scaleX, scaleY, scrollXY);
-        };
-
-        const getCurrentRenderSelections = () => {
-            const currentRender = this._renderManagerService.getRenderById(this._context.unitId);
-            const selectionRenderService = currentRender?.with(ISheetSelectionRenderService);
-            return selectionRenderService?.getSelectionControls().map((control) => convertSelectionDataToRange(control.getValue())) ?? [];
-        };
-
-        const cloneSelections = (selections: ISelectionWithStyle[]) => selections.map((selection) => ({
-            range: { ...selection.range },
-            primary: selection.primary ? { ...selection.primary } : selection.primary,
-            style: selection.style ? { ...selection.style } : selection.style,
-        }));
-
-        const getSelectionSnapshot = () => {
-            const renderedSelections = getCurrentRenderSelections();
-            if (renderedSelections.length) {
-                return cloneSelections(renderedSelections);
-            }
-
-            return cloneSelections(this._selectionManagerService.getCurrentSelections() as ISelectionWithStyle[]);
-        };
-
-        const restoreSelectionSnapshot = () => {
-            const worksheet = this._context.unit.getActiveSheet();
-            if (!worksheet || !selectionSnapshot.length) {
-                return;
-            }
-
-            this._selectionManagerService.setSelections(
-                this._context.unitId,
-                worksheet.getSheetId(),
-                cloneSelections(selectionSnapshot),
-                SelectionMoveType.MOVE_END
-            );
-        };
-
-        const replaceSelectionWithTargetCell = (targetCell: ICellWithCoord) => {
-            const worksheet = this._context.unit.getActiveSheet();
-            if (!worksheet) {
-                return;
-            }
-
-            this._selectionManagerService.setSelections(this._context.unitId, worksheet.getSheetId(), [{
-                range: {
-                    startRow: targetCell.mergeInfo.startRow,
-                    endRow: targetCell.mergeInfo.endRow,
-                    startColumn: targetCell.mergeInfo.startColumn,
-                    endColumn: targetCell.mergeInfo.endColumn,
-                    rangeType: RANGE_TYPE.NORMAL,
-                    unitId: this._context.unitId,
-                    sheetId: worksheet.getSheetId(),
-                },
-                primary: convertPrimaryWithCoordToPrimary(targetCell),
-                style: null,
-            }], SelectionMoveType.MOVE_END);
-        };
-
-        const openMenu = (clientX: number, clientY: number) => {
-            this._contextMenuService.triggerContextMenu({
-                clientX,
-                clientY,
-                preventDefault: () => {},
-                stopPropagation: () => {},
-            } as unknown as IPointerEvent, ContextMenuPosition.MAIN_AREA);
-        };
-
-        const triggerLongPressMenu = () => {
-            if (!activeTouch || this._contextMenuService.visible) {
-                return;
-            }
-
-            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
-                return;
-            }
-
-            const targetCell = getTargetCellByOffset(activeTouch.offsetX, activeTouch.offsetY);
-            if (!targetCell) {
-                return;
-            }
-
-            const pickedObject = this._context.scene.pick(Vector2.FromArray([activeTouch.offsetX, activeTouch.offsetY])) as { oKey?: string } | null;
-            const snapshotRanges = selectionSnapshot.map((selection) => selection.range);
-            const shouldKeepSelection = isSelectionObjectKey(pickedObject?.oKey)
-                || shouldKeepCurrentSelectionForMobileContextMenu(snapshotRanges, targetCell.mergeInfo);
-            longPressTriggered = true;
-            shouldRestoreSelectionSnapshot = shouldKeepSelection;
-            if (shouldKeepSelection) {
-                restoreSelectionSnapshot();
-                queueMicrotask(() => restoreSelectionSnapshot());
-            }
-            openMenu(activeTouch.clientX, activeTouch.clientY);
-            if (!shouldKeepSelection) {
-                queueMicrotask(() => replaceSelectionWithTargetCell(targetCell));
-            }
-        };
-
-        const handleTouchStart = (event: TouchEvent) => {
-            if (event.touches.length !== 1 || this._contextMenuService.visible) {
-                resetLongPressState();
-                return;
-            }
-
-            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
-                resetLongPressState();
-                return;
-            }
-
-            const touch = getTouchOffset(event.touches[0]);
-            if (!getTargetCellByOffset(touch.offsetX, touch.offsetY)) {
-                resetLongPressState();
-                return;
-            }
-
-            longPressTriggered = false;
-            shouldRestoreSelectionSnapshot = false;
-            selectionSnapshot = getSelectionSnapshot();
-            activeTouch = touch;
-            clearLongPressTimer();
-            longPressTimer = setTimeout(triggerLongPressMenu, LONG_PRESS_DURATION);
-        };
-
-        const handleTouchMove = (event: TouchEvent) => {
-            if (!activeTouch || event.touches.length !== 1) {
-                resetLongPressState();
-                return;
-            }
-
-            const touch = getTouchOffset(event.touches[0]);
-            if (
-                Math.abs(touch.offsetX - activeTouch.offsetX) > LONG_PRESS_MOVE_THRESHOLD ||
-                Math.abs(touch.offsetY - activeTouch.offsetY) > LONG_PRESS_MOVE_THRESHOLD
-            ) {
-                resetLongPressState();
-            }
-        };
-
-        const handleTouchEnd = (event: TouchEvent) => {
-            if (longPressTriggered) {
-                event.preventDefault();
-                if (shouldRestoreSelectionSnapshot) {
-                    queueMicrotask(() => restoreSelectionSnapshot());
-                }
-            }
-
-            longPressTriggered = false;
-            shouldRestoreSelectionSnapshot = false;
-            resetLongPressState();
-        };
+        const state = this._createLongPressState();
+        const handleTouchStart = (event: TouchEvent) => this._handleTouchStart(contentElement, state, event);
+        const handleTouchMove = (event: TouchEvent) => this._handleTouchMove(contentElement, state, event);
+        const handleTouchEnd = (event: TouchEvent) => this._handleTouchEnd(state, event);
 
         contentElement.addEventListener('touchstart', handleTouchStart, { passive: true });
         contentElement.addEventListener('touchmove', handleTouchMove, { passive: true });
@@ -294,11 +111,224 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         contentElement.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
         this.disposeWithMe(toDisposable(() => {
-            clearLongPressTimer();
+            this._clearLongPressTimer(state);
             contentElement.removeEventListener('touchstart', handleTouchStart);
             contentElement.removeEventListener('touchmove', handleTouchMove);
             contentElement.removeEventListener('touchend', handleTouchEnd);
             contentElement.removeEventListener('touchcancel', handleTouchEnd);
         }));
+    }
+
+    private _createLongPressState(): ILongPressState {
+        return {
+            longPressTimer: null,
+            activeTouch: null,
+            longPressTriggered: false,
+            selectionSnapshot: [],
+            shouldRestoreSelectionSnapshot: false,
+        };
+    }
+
+    private _clearLongPressTimer(state: ILongPressState): void {
+        if (state.longPressTimer) {
+            clearTimeout(state.longPressTimer);
+            state.longPressTimer = null;
+        }
+    }
+
+    private _resetLongPressState(state: ILongPressState): void {
+        this._clearLongPressTimer(state);
+        state.activeTouch = null;
+    }
+
+    private _getTouchOffset(contentElement: HTMLElement, touch: Touch): ITouchPosition {
+        const rect = contentElement.getBoundingClientRect();
+        return {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            offsetX: touch.clientX - rect.left,
+            offsetY: touch.clientY - rect.top,
+        };
+    }
+
+    private _getMainAreaViewport(offsetX: number, offsetY: number): Nullable<Viewport> {
+        const { scene } = this._context;
+        const viewport = scene.getActiveViewportByCoord(Vector2.FromArray([offsetX, offsetY]));
+
+        if (!viewport || !MAIN_AREA_VIEWPORT_KEYS.has(viewport.viewportKey)) {
+            return null;
+        }
+
+        return viewport;
+    }
+
+    private _getTargetCellByOffset(offsetX: number, offsetY: number): Nullable<ICellWithCoord> {
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+        const viewport = this._getMainAreaViewport(offsetX, offsetY);
+        const { scene } = this._context;
+
+        if (!skeleton || !viewport) {
+            return null;
+        }
+
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([offsetX, offsetY]));
+        const scrollXY = scene.getScrollXYInfoByViewport(relativeCoords, viewport);
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        return skeleton.getCellWithCoordByOffset(relativeCoords.x - scrollXY.x, relativeCoords.y - scrollXY.y, scaleX, scaleY, scrollXY);
+    }
+
+    private _getCurrentRenderSelections(): ISelectionWithStyle[] {
+        const currentRender = this._renderManagerService.getRenderById(this._context.unitId);
+        const selectionRenderService = currentRender?.with(ISheetSelectionRenderService);
+        return selectionRenderService?.getSelectionControls().map((control) => convertSelectionDataToRange(control.getValue())) ?? [];
+    }
+
+    private _cloneSelections(selections: ISelectionWithStyle[]): ISelectionWithStyle[] {
+        return selections.map((selection) => ({
+            range: { ...selection.range },
+            primary: selection.primary ? { ...selection.primary } : selection.primary,
+            style: selection.style ? { ...selection.style } : selection.style,
+        }));
+    }
+
+    private _getSelectionSnapshot(): ISelectionWithStyle[] {
+        const renderedSelections = this._getCurrentRenderSelections();
+        if (renderedSelections.length) {
+            return this._cloneSelections(renderedSelections);
+        }
+
+        return this._cloneSelections(this._selectionManagerService.getCurrentSelections() as ISelectionWithStyle[]);
+    }
+
+    private _restoreSelectionSnapshot(selectionSnapshot: ISelectionWithStyle[]): void {
+        const worksheet = this._context.unit.getActiveSheet();
+        if (!worksheet || !selectionSnapshot.length) {
+            return;
+        }
+
+        this._selectionManagerService.setSelections(
+            this._context.unitId,
+            worksheet.getSheetId(),
+            this._cloneSelections(selectionSnapshot),
+            SelectionMoveType.MOVE_END
+        );
+    }
+
+    private _replaceSelectionWithTargetCell(targetCell: ICellWithCoord): void {
+        const worksheet = this._context.unit.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        this._selectionManagerService.setSelections(this._context.unitId, worksheet.getSheetId(), [{
+            range: {
+                startRow: targetCell.mergeInfo.startRow,
+                endRow: targetCell.mergeInfo.endRow,
+                startColumn: targetCell.mergeInfo.startColumn,
+                endColumn: targetCell.mergeInfo.endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
+                unitId: this._context.unitId,
+                sheetId: worksheet.getSheetId(),
+            },
+            primary: convertPrimaryWithCoordToPrimary(targetCell),
+            style: null,
+        }], SelectionMoveType.MOVE_END);
+    }
+
+    private _openMenu(clientX: number, clientY: number): void {
+        this._contextMenuService.triggerContextMenu({
+            clientX,
+            clientY,
+            preventDefault: () => {},
+            stopPropagation: () => {},
+        } as unknown as IPointerEvent, ContextMenuPosition.MAIN_AREA);
+    }
+
+    private _triggerLongPressMenu(state: ILongPressState): void {
+        if (!state.activeTouch || this._contextMenuService.visible) {
+            return;
+        }
+
+        if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
+            return;
+        }
+
+        const targetCell = this._getTargetCellByOffset(state.activeTouch.offsetX, state.activeTouch.offsetY);
+        if (!targetCell) {
+            return;
+        }
+
+        const pickedObject = this._context.scene.pick(Vector2.FromArray([state.activeTouch.offsetX, state.activeTouch.offsetY])) as { oKey?: string } | null;
+        const snapshotRanges = state.selectionSnapshot.map((selection) => selection.range);
+        const shouldKeepSelection = isSelectionObjectKey(pickedObject?.oKey)
+            || shouldKeepCurrentSelectionForMobileContextMenu(snapshotRanges, targetCell.mergeInfo);
+
+        state.longPressTriggered = true;
+        state.shouldRestoreSelectionSnapshot = shouldKeepSelection;
+
+        if (shouldKeepSelection) {
+            this._restoreSelectionSnapshot(state.selectionSnapshot);
+            queueMicrotask(() => this._restoreSelectionSnapshot(state.selectionSnapshot));
+        }
+
+        this._openMenu(state.activeTouch.clientX, state.activeTouch.clientY);
+
+        if (!shouldKeepSelection) {
+            queueMicrotask(() => this._replaceSelectionWithTargetCell(targetCell));
+        }
+    }
+
+    private _handleTouchStart(contentElement: HTMLElement, state: ILongPressState, event: TouchEvent): void {
+        if (event.touches.length !== 1 || this._contextMenuService.visible) {
+            this._resetLongPressState(state);
+            return;
+        }
+
+        if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
+            this._resetLongPressState(state);
+            return;
+        }
+
+        const touch = this._getTouchOffset(contentElement, event.touches[0]);
+        if (!this._getTargetCellByOffset(touch.offsetX, touch.offsetY)) {
+            this._resetLongPressState(state);
+            return;
+        }
+
+        state.longPressTriggered = false;
+        state.shouldRestoreSelectionSnapshot = false;
+        state.selectionSnapshot = this._getSelectionSnapshot();
+        state.activeTouch = touch;
+        this._clearLongPressTimer(state);
+        state.longPressTimer = setTimeout(() => this._triggerLongPressMenu(state), LONG_PRESS_DURATION);
+    }
+
+    private _handleTouchMove(contentElement: HTMLElement, state: ILongPressState, event: TouchEvent): void {
+        if (!state.activeTouch || event.touches.length !== 1) {
+            this._resetLongPressState(state);
+            return;
+        }
+
+        const touch = this._getTouchOffset(contentElement, event.touches[0]);
+        if (
+            Math.abs(touch.offsetX - state.activeTouch.offsetX) > LONG_PRESS_MOVE_THRESHOLD ||
+            Math.abs(touch.offsetY - state.activeTouch.offsetY) > LONG_PRESS_MOVE_THRESHOLD
+        ) {
+            this._resetLongPressState(state);
+        }
+    }
+
+    private _handleTouchEnd(state: ILongPressState, event: TouchEvent): void {
+        if (state.longPressTriggered) {
+            event.preventDefault();
+            if (state.shouldRestoreSelectionSnapshot) {
+                queueMicrotask(() => this._restoreSelectionSnapshot(state.selectionSnapshot));
+            }
+        }
+
+        state.longPressTriggered = false;
+        state.shouldRestoreSelectionSnapshot = false;
+        this._resetLongPressState(state);
     }
 }

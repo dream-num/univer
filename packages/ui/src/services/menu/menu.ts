@@ -76,6 +76,7 @@ export interface IValueOption<T = undefined> {
     id?: string;
     value?: string | number;
     value$?: Observable<T>;
+    params?: any;
     slot?: boolean;
     label?:
     | string

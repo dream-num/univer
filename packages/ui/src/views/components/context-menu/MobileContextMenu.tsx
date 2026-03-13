@@ -144,9 +144,16 @@ export function MobileContextMenu() {
                     <MobileMenu
                         menuType={menuType}
                         onOptionSelect={(params) => {
-                            const { label: id, value, commandId } = params;
+                            const commandId = params.commandId ?? params.id ?? params.label as string | undefined;
+                            const fallbackParams = typeof params.params === 'function' ? params.params() : params.params;
+                            const commandParams = typeof params.value === 'undefined' ? fallbackParams : { value: params.value };
+
+                            if (!commandId) {
+                                return;
+                            }
+
                             layoutService.focus();
-                            commandService.executeCommand(commandId ?? id as string, { value });
+                            commandService.executeCommand(commandId, commandParams);
                             handleClose();
                         }}
                     />

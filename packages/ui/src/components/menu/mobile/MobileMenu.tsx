@@ -43,8 +43,12 @@ type MobileMenuView =
         currentValue: MenuItemDefaultValueType;
     };
 
-export function MobileMenu(props: IBaseMenuProps) {
-    const { menuType, onOptionSelect } = props;
+interface IMobileMenuProps extends IBaseMenuProps {
+    schemas?: IMenuSchema[];
+}
+
+export function MobileMenu(props: IMobileMenuProps) {
+    const { menuType, onOptionSelect, schemas: providedSchemas } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const [viewStack, setViewStack] = useState<MobileMenuView[]>([]);
 
@@ -57,20 +61,24 @@ export function MobileMenu(props: IBaseMenuProps) {
     const menuSchemaVersion = useObservable(menuSchemaVersion$, 0);
 
     const menuSchemas = useMemo(() => {
+        if (providedSchemas) {
+            return providedSchemas;
+        }
+
         if (!menuType) {
             return [];
         }
 
         return menuManagerService.getMenuByPositionKey(menuType);
-    }, [menuManagerService, menuSchemaVersion, menuType]);
+    }, [providedSchemas, menuManagerService, menuSchemaVersion, menuType]);
 
     useEffect(() => {
         setViewStack([]);
-    }, [menuType]);
+    }, [menuType, providedSchemas]);
 
     const currentView = viewStack[viewStack.length - 1] ?? null;
 
-    if (!menuType) {
+    if (!menuType && !providedSchemas) {
         return null;
     }
 
@@ -142,7 +150,7 @@ export function MobileMenu(props: IBaseMenuProps) {
 
 function MobileSchemaList(props: {
     schemas: IMenuSchema[];
-    menuType: string;
+    menuType?: string;
     onExecute?: IBaseMenuProps['onOptionSelect'];
     onOpenView: (view: MobileMenuView) => void;
 }) {
@@ -217,7 +225,7 @@ function MobileSchemaList(props: {
 
 function MobileSchemaRow(props: {
     schema: IMenuSchema;
-    menuType: string;
+    menuType?: string;
     onExecute?: IBaseMenuProps['onOptionSelect'];
     onOpenView: (view: MobileMenuView) => void;
     bordered: boolean;
@@ -350,7 +358,7 @@ function MobileSelectionOptionRow(props: {
 
 function useMobileSchemaInteraction(props: {
     schema: IMenuSchema;
-    menuType: string;
+    menuType?: string;
     onOpenView: (view: MobileMenuView) => void;
 }) {
     const { schema, menuType, onOpenView } = props;
@@ -434,6 +442,7 @@ function useMobileSchemaInteraction(props: {
             value,
             id: buttonItem.id,
             label: schema.key,
+            params: buttonItem.params,
         });
     };
 

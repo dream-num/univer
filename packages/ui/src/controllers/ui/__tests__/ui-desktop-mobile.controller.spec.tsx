@@ -201,8 +201,15 @@ describe('MobileUIController', () => {
         vi.mocked(unmount).mockClear();
 
         const deps = createCommonDeps();
+        const menuManagerService = {
+            mergeMenu: vi.fn(),
+        };
         const uiPartsService = {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
+        };
+        const componentManager = {
+            register: vi.fn(() => ({ dispose: vi.fn() })),
+            dispose: vi.fn(),
         };
 
         const controller = new MobileUIController(
@@ -212,16 +219,21 @@ describe('MobileUIController', () => {
             deps.renderManagerService as any,
             deps.layoutService as any,
             deps.instanceService as any,
-            uiPartsService as any
+            menuManagerService as any,
+            uiPartsService as any,
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);
 
-        expect(uiPartsService.registerComponent).toHaveBeenCalledTimes(2);
+        expect(menuManagerService.mergeMenu).toHaveBeenCalledTimes(1);
+        expect(uiPartsService.registerComponent).toHaveBeenCalledTimes(3);
+        expect(componentManager.register).toHaveBeenCalledTimes(6);
         expect(render).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ id: 'missing-mobile' }));
 
         controller.dispose();
         expect(unmount).toHaveBeenCalled();
+        expect(componentManager.dispose).toHaveBeenCalledTimes(1);
     });
 
     it('should support existing id, html container and default container', () => {
@@ -235,8 +247,15 @@ describe('MobileUIController', () => {
         document.body.appendChild(existing);
         const htmlContainer = document.createElement('section');
 
+        const menuManagerService = {
+            mergeMenu: vi.fn(),
+        };
         const uiPartsService = {
             registerComponent: vi.fn(() => ({ dispose: vi.fn() })),
+        };
+        const componentManager = {
+            register: vi.fn(() => ({ dispose: vi.fn() })),
+            dispose: vi.fn(),
         };
 
         const byExistingId = new MobileUIController(
@@ -246,7 +265,9 @@ describe('MobileUIController', () => {
             deps.renderManagerService as any,
             deps.layoutService as any,
             deps.instanceService as any,
-            uiPartsService as any
+            menuManagerService as any,
+            uiPartsService as any,
+            componentManager as any
         );
 
         const byElement = new MobileUIController(
@@ -256,7 +277,9 @@ describe('MobileUIController', () => {
             deps.renderManagerService as any,
             deps.layoutService as any,
             deps.instanceService as any,
-            uiPartsService as any
+            menuManagerService as any,
+            uiPartsService as any,
+            componentManager as any
         );
 
         const byDefault = new MobileUIController(
@@ -266,7 +289,9 @@ describe('MobileUIController', () => {
             deps.renderManagerService as any,
             deps.layoutService as any,
             deps.instanceService as any,
-            uiPartsService as any
+            menuManagerService as any,
+            uiPartsService as any,
+            componentManager as any
         );
 
         vi.advanceTimersByTime(3300);

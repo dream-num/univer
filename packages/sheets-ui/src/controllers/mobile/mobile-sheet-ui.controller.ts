@@ -346,7 +346,7 @@ export class SheetUIMobileController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileSheetBar, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(MobileSheetBar, injector)));
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
 

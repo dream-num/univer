@@ -34,6 +34,7 @@ import { ContextMenuService, IContextMenuService } from './services/contextmenu/
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
 import { IGalleryService } from './services/gallery/gallery.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
@@ -50,6 +51,7 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -103,6 +105,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
+            [IRibbonService, { useClass: DesktopRibbonService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
@@ -121,6 +124,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
+            [IFontService, { useClass: FontService }],
             [CanvasFloatDomService],
 
             [

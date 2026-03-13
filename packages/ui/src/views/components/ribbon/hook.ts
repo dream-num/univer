@@ -45,7 +45,7 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
     if (isMenuButtonSelectorItem(menuItem)) {
         const { selections } = menuItem;
 
-        if (Array.isArray(selections)) {
+        if (Array.isArray(selections) && !menuItem.id.startsWith('sheet')) {
             selectionsValue$ = selections?.[0]?.value$;
         }
     }

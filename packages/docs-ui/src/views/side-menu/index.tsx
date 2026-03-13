@@ -81,7 +81,7 @@ const TITLE_ID = '__title';
 export function DocSideMenu() {
     const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
 
-    if (config?.layout?.docContainerConfig?.sideMenu ?? true) {
+    if (config?.toc) {
         return <DocSideMenuContent />;
     }
 

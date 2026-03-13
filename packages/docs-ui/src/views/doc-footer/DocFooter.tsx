@@ -23,20 +23,23 @@ import { CountBar } from '../count-bar';
 
 export function DocFooter() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
-    const isShow = config?.layout?.docContainerConfig?.footer ?? true;
 
-    return workbook
-        ? null
-        : isShow && (
-            <div
-                className={`
-                  univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5 univer-py-1.5
-                `}
-            >
-                <div />
-                <CountBar />
-            </div>
-        );
+    if (workbook) {
+        return null;
+    }
+
+    const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
+    const isShow = config?.footer ?? true;
+
+    return isShow && (
+        <div
+            className={`
+              univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5 univer-py-1.5
+            `}
+        >
+            <div />
+            <CountBar />
+        </div>
+    );
 };

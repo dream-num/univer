@@ -15,9 +15,13 @@
  */
 
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { ArrangeTypeEnum } from '@univerjs/core';
 import { MenuItemType } from '@univerjs/ui';
-import { SetDrawingArrangeOperation } from '../commands/operations/drawing-arrange.operation';
+import {
+    SetDrawingArrangeBackOperation,
+    SetDrawingArrangeBackwardOperation,
+    SetDrawingArrangeForwardOperation,
+    SetDrawingArrangeFrontOperation,
+} from '../commands/operations/drawing-arrange.operation';
 
 export const DRAWING_ARRANGE_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange';
 export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<string> {
@@ -29,56 +33,36 @@ export function DrawingArrangeContextMenuItemFactory(): IMenuSelectorItem<string
     };
 }
 
-export const DRAWING_ARRANGE_FRONT_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange-front';
 export function SetDrawingArrangeFrontMenuItemFactory(): IMenuButtonItem {
     return {
-        id: DRAWING_ARRANGE_FRONT_CONTEXT_MENU_ID,
-        commandId: SetDrawingArrangeOperation.id,
-        params: {
-            arrangeType: ArrangeTypeEnum.front,
-        },
+        id: SetDrawingArrangeFrontOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'TopmostIcon',
         title: 'image-panel.arrange.front',
     };
 }
 
-export const DRAWING_ARRANGE_FORWARD_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange-forward';
 export function SetDrawingArrangeForwardMenuItemFactory(): IMenuButtonItem {
     return {
-        id: DRAWING_ARRANGE_FORWARD_CONTEXT_MENU_ID,
-        commandId: SetDrawingArrangeOperation.id,
-        params: {
-            arrangeType: ArrangeTypeEnum.forward,
-        },
+        id: SetDrawingArrangeForwardOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'MoveUpIcon',
         title: 'image-panel.arrange.forward',
     };
 }
 
-export const DRAWING_ARRANGE_BACK_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange-back';
 export function SetDrawingArrangeBackMenuItemFactory(): IMenuButtonItem {
     return {
-        id: DRAWING_ARRANGE_BACK_CONTEXT_MENU_ID,
-        commandId: SetDrawingArrangeOperation.id,
-        params: {
-            arrangeType: ArrangeTypeEnum.back,
-        },
+        id: SetDrawingArrangeBackOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'BottomIcon',
         title: 'image-panel.arrange.back',
     };
 }
 
-export const DRAWING_ARRANGE_BACKWARD_CONTEXT_MENU_ID = 'contextMenu.drawing-arrange-backward';
 export function SetDrawingArrangeBackwardMenuItemFactory(): IMenuButtonItem {
     return {
-        id: DRAWING_ARRANGE_BACKWARD_CONTEXT_MENU_ID,
-        commandId: SetDrawingArrangeOperation.id,
-        params: {
-            arrangeType: ArrangeTypeEnum.backward,
-        },
+        id: SetDrawingArrangeBackwardOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'MoveDownIcon',
         title: 'image-panel.arrange.backward',

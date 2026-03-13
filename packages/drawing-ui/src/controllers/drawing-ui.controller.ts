@@ -17,8 +17,24 @@
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { BottomIcon, GroupIcon, MoveDownIcon, MoveUpIcon, TopmostIcon, UngroupIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
-import { SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
-import { SetDrawingArrangeOperation } from '../commands/operations/drawing-arrange.operation';
+import {
+    SetDrawingAlignBottomOperation,
+    SetDrawingAlignCenterOperation,
+    SetDrawingAlignHorizonOperation,
+    SetDrawingAlignLeftOperation,
+    SetDrawingAlignMiddleOperation,
+    SetDrawingAlignOperation,
+    SetDrawingAlignRightOperation,
+    SetDrawingAlignTopOperation,
+    SetDrawingAlignVerticalOperation,
+} from '../commands/operations/drawing-align.operation';
+import {
+    SetDrawingArrangeBackOperation,
+    SetDrawingArrangeBackwardOperation,
+    SetDrawingArrangeForwardOperation,
+    SetDrawingArrangeFrontOperation,
+    SetDrawingArrangeOperation,
+} from '../commands/operations/drawing-arrange.operation';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../commands/operations/drawing-group.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
@@ -53,10 +69,22 @@ export class DrawingUIController extends Disposable {
             CloseImageCropOperation,
             ImageResetSizeOperation,
             SetDrawingAlignOperation,
+            SetDrawingAlignLeftOperation,
+            SetDrawingAlignCenterOperation,
+            SetDrawingAlignRightOperation,
+            SetDrawingAlignTopOperation,
+            SetDrawingAlignMiddleOperation,
+            SetDrawingAlignBottomOperation,
+            SetDrawingAlignHorizonOperation,
+            SetDrawingAlignVerticalOperation,
             AutoImageCropOperation,
             SetDrawingGroupOperation,
             CancelDrawingGroupOperation,
             SetDrawingArrangeOperation,
+            SetDrawingArrangeFrontOperation,
+            SetDrawingArrangeForwardOperation,
+            SetDrawingArrangeBackOperation,
+            SetDrawingArrangeBackwardOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

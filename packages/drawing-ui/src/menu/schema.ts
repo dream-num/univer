@@ -16,17 +16,25 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
+import {
+    SetDrawingAlignBottomOperation,
+    SetDrawingAlignCenterOperation,
+    SetDrawingAlignHorizonOperation,
+    SetDrawingAlignLeftOperation,
+    SetDrawingAlignMiddleOperation,
+    SetDrawingAlignRightOperation,
+    SetDrawingAlignTopOperation,
+    SetDrawingAlignVerticalOperation,
+} from '../commands/operations/drawing-align.operation';
+import {
+    SetDrawingArrangeBackOperation,
+    SetDrawingArrangeBackwardOperation,
+    SetDrawingArrangeForwardOperation,
+    SetDrawingArrangeFrontOperation,
+} from '../commands/operations/drawing-arrange.operation';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../commands/operations/drawing-group.operation';
 import {
-    DRAWING_ALIGN_BOTTOM_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_CENTER_CONTEXT_MENU_ID,
     DRAWING_ALIGN_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_HORIZON_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_LEFT_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_MIDDLE_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_RIGHT_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_TOP_CONTEXT_MENU_ID,
-    DRAWING_ALIGN_VERTICAL_CONTEXT_MENU_ID,
     DrawingAlignContextMenuItemFactory,
     SetDrawingAlignBottomMenuItemFactory,
     SetDrawingAlignCenterMenuItemFactory,
@@ -38,18 +46,19 @@ import {
     SetDrawingAlignVerticalMenuItemFactory,
 } from './align.menu';
 import {
-    DRAWING_ARRANGE_BACK_CONTEXT_MENU_ID,
-    DRAWING_ARRANGE_BACKWARD_CONTEXT_MENU_ID,
     DRAWING_ARRANGE_CONTEXT_MENU_ID,
-    DRAWING_ARRANGE_FORWARD_CONTEXT_MENU_ID,
-    DRAWING_ARRANGE_FRONT_CONTEXT_MENU_ID,
     DrawingArrangeContextMenuItemFactory,
     SetDrawingArrangeBackMenuItemFactory,
     SetDrawingArrangeBackwardMenuItemFactory,
     SetDrawingArrangeForwardMenuItemFactory,
     SetDrawingArrangeFrontMenuItemFactory,
 } from './arrange.menu';
-import { CancelDrawingGroupMenuItemFactory, DRAWING_GROUP_CONTEXT_MENU_ID, DrawingGroupContextMenuItemFactory, SetDrawingGroupMenuItemFactory } from './group.menu';
+import {
+    CancelDrawingGroupMenuItemFactory,
+    DRAWING_GROUP_CONTEXT_MENU_ID,
+    DrawingGroupContextMenuItemFactory,
+    SetDrawingGroupMenuItemFactory,
+} from './group.menu';
 
 export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.DRAWING]: {
@@ -69,19 +78,19 @@ export const menuSchema: MenuSchemaType = {
             [DRAWING_ARRANGE_CONTEXT_MENU_ID]: {
                 order: 2,
                 menuItemFactory: DrawingArrangeContextMenuItemFactory,
-                [DRAWING_ARRANGE_FRONT_CONTEXT_MENU_ID]: {
+                [SetDrawingArrangeFrontOperation.id]: {
                     order: 0,
                     menuItemFactory: SetDrawingArrangeFrontMenuItemFactory,
                 },
-                [DRAWING_ARRANGE_FORWARD_CONTEXT_MENU_ID]: {
+                [SetDrawingArrangeForwardOperation.id]: {
                     order: 1,
                     menuItemFactory: SetDrawingArrangeForwardMenuItemFactory,
                 },
-                [DRAWING_ARRANGE_BACK_CONTEXT_MENU_ID]: {
+                [SetDrawingArrangeBackOperation.id]: {
                     order: 2,
                     menuItemFactory: SetDrawingArrangeBackMenuItemFactory,
                 },
-                [DRAWING_ARRANGE_BACKWARD_CONTEXT_MENU_ID]: {
+                [SetDrawingArrangeBackwardOperation.id]: {
                     order: 3,
                     menuItemFactory: SetDrawingArrangeBackwardMenuItemFactory,
                 },
@@ -89,35 +98,35 @@ export const menuSchema: MenuSchemaType = {
             [DRAWING_ALIGN_CONTEXT_MENU_ID]: {
                 order: 3,
                 menuItemFactory: DrawingAlignContextMenuItemFactory,
-                [DRAWING_ALIGN_LEFT_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignLeftOperation.id]: {
                     order: 0,
                     menuItemFactory: SetDrawingAlignLeftMenuItemFactory,
                 },
-                [DRAWING_ALIGN_CENTER_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignCenterOperation.id]: {
                     order: 1,
                     menuItemFactory: SetDrawingAlignCenterMenuItemFactory,
                 },
-                [DRAWING_ALIGN_RIGHT_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignRightOperation.id]: {
                     order: 2,
                     menuItemFactory: SetDrawingAlignRightMenuItemFactory,
                 },
-                [DRAWING_ALIGN_TOP_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignTopOperation.id]: {
                     order: 3,
                     menuItemFactory: SetDrawingAlignTopMenuItemFactory,
                 },
-                [DRAWING_ALIGN_MIDDLE_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignMiddleOperation.id]: {
                     order: 4,
                     menuItemFactory: SetDrawingAlignMiddleMenuItemFactory,
                 },
-                [DRAWING_ALIGN_BOTTOM_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignBottomOperation.id]: {
                     order: 5,
                     menuItemFactory: SetDrawingAlignBottomMenuItemFactory,
                 },
-                [DRAWING_ALIGN_HORIZON_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignHorizonOperation.id]: {
                     order: 6,
                     menuItemFactory: SetDrawingAlignHorizonMenuItemFactory,
                 },
-                [DRAWING_ALIGN_VERTICAL_CONTEXT_MENU_ID]: {
+                [SetDrawingAlignVerticalOperation.id]: {
                     order: 7,
                     menuItemFactory: SetDrawingAlignVerticalMenuItemFactory,
                 },

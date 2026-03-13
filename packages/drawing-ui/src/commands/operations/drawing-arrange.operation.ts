@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ArrangeTypeEnum, IDrawingParam, IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { IDrawingParam, IOperation } from '@univerjs/core';
+import { ArrangeTypeEnum, CommandType, ICommandService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 
 export interface IDrawingArrangeOperationParams {
@@ -24,7 +24,7 @@ export interface IDrawingArrangeOperationParams {
 }
 
 /**
- * Group the selected drawings into a new group. The selected drawings must be of type image, shape, or group, and there must be at least 2 drawings selected.
+ * Set the layer of the drawing, including forward, backward, front, and back
  */
 export const SetDrawingArrangeOperation: IOperation<IDrawingArrangeOperationParams> = {
     id: 'drawing.operation.set-drawing-arrange',
@@ -41,5 +41,37 @@ export const SetDrawingArrangeOperation: IOperation<IDrawingArrangeOperationPara
         drawingManagerService.featurePluginOrderUpdateNotification({ unitId, subUnitId, drawingIds, arrangeType });
 
         return true;
+    },
+};
+
+export const SetDrawingArrangeFrontOperation: IOperation = {
+    id: 'drawing.operation.set-drawing-arrange-front',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType: ArrangeTypeEnum.front });
+    },
+};
+
+export const SetDrawingArrangeForwardOperation: IOperation = {
+    id: 'drawing.operation.set-drawing-arrange-forward',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType: ArrangeTypeEnum.forward });
+    },
+};
+
+export const SetDrawingArrangeBackOperation: IOperation = {
+    id: 'drawing.operation.set-drawing-arrange-back',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType: ArrangeTypeEnum.back });
+    },
+};
+
+export const SetDrawingArrangeBackwardOperation: IOperation = {
+    id: 'drawing.operation.set-drawing-arrange-backward',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingArrangeOperation.id, { arrangeType: ArrangeTypeEnum.backward });
     },
 };

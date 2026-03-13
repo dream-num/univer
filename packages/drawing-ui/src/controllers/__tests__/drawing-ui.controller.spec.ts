@@ -15,7 +15,7 @@
  */
 
 import type { ICommandService } from '@univerjs/core';
-import type { ComponentManager } from '@univerjs/ui';
+import type { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../../views/image-popup-menu/component-name';
 import { DrawingUIController } from '../drawing-ui.controller';
@@ -24,10 +24,12 @@ describe('DrawingUIController', () => {
     it('registers popup components and drawing operations', () => {
         const register = vi.fn(() => ({ dispose: vi.fn() }));
         const registerCommand = vi.fn(() => ({ dispose: vi.fn() }));
+        const mergeMenu = vi.fn();
 
         const controller = new DrawingUIController(
             { register } as unknown as ComponentManager,
-            { registerCommand } as unknown as ICommandService
+            { registerCommand } as unknown as ICommandService,
+            { mergeMenu } as unknown as IMenuManagerService
         );
 
         expect(controller).toBeTruthy();

@@ -93,6 +93,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "postcss": "^8.5.8",
         "react": "18.3.1",

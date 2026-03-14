@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, ObjectMatrix, Univer } from '@univerjs/core';
+import type { ICellDataWithSpanInfo } from '../type';
 import type { IClipboardItem } from './mock-clipboard';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
 import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
@@ -30,9 +31,8 @@ import {
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { FormulaClipboardController } from '../../../../../sheets-formula-ui/src/controllers/formula-clipboard.controller';
-import { UpdateFormulaController } from '../../../../../sheets-formula/src/controllers/update-formula.controller';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -45,7 +45,7 @@ interface ITestSheetClipboardService extends ISheetClipboardService {
         range: IRange,
         hooks: unknown[]
     ) => {
-        matrixFragment: unknown;
+        matrixFragment: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
         copyId: string;
     };
     _pasteInternal: (copyId: string, pasteType: string) => Promise<boolean>;
@@ -1232,7 +1232,6 @@ describe('Test cut command with formulas', () => {
     beforeEach(() => {
         const testBed = clipboardTestBed(FORMULA_CLIPBOARD_WORKBOOK_DATA, [
             [UpdateFormulaController],
-            [FormulaClipboardController],
         ]);
 
         univer = testBed.univer;
@@ -1247,7 +1246,6 @@ describe('Test cut command with formulas', () => {
         sheetClipboardService = get(ISheetClipboardService);
 
         get(UpdateFormulaController);
-        get(FormulaClipboardController);
 
         getValues = (
             startRow: number,

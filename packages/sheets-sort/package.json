@@ -71,7 +71,7 @@
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.build.json",
+        "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "dependencies": {

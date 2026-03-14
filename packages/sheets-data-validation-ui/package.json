@@ -62,7 +62,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.build.json",
+        "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types",
         "typecheck": "tsc --noEmit"
     },

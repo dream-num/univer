@@ -163,6 +163,24 @@ describe('Test selection utils', () => {
         expect(findNextRange(start as any, Direction.LEFT, worksheet as any)).toEqual({ startRow: 5, endRow: 5, startColumn: 5, endColumn: 5 });
     });
 
+    it('findNextRange with isGoBack=false should clamp at boundaries', () => {
+        const worksheet = createWorksheet();
+        const topLeft = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        const bottomRight = { startRow: 5, endRow: 5, startColumn: 5, endColumn: 5 };
+
+        // At top-left corner: LEFT and UP should return the same range (no wrap)
+        expect(findNextRange(topLeft as any, Direction.LEFT, worksheet as any, undefined, true, 1, false)).toEqual(topLeft);
+        expect(findNextRange(topLeft as any, Direction.UP, worksheet as any, undefined, true, 1, false)).toEqual(topLeft);
+
+        // At bottom-right corner: RIGHT and DOWN should return the same range (no wrap)
+        expect(findNextRange(bottomRight as any, Direction.RIGHT, worksheet as any, undefined, true, 1, false)).toEqual(bottomRight);
+        expect(findNextRange(bottomRight as any, Direction.DOWN, worksheet as any, undefined, true, 1, false)).toEqual(bottomRight);
+
+        // Interior movement still works with isGoBack=false
+        expect(findNextRange(topLeft as any, Direction.DOWN, worksheet as any, undefined, true, 1, false)).toEqual({ ...topLeft, startRow: 2, endRow: 2 });
+        expect(findNextRange(topLeft as any, Direction.RIGHT, worksheet as any, undefined, true, 1, false)).toEqual({ ...topLeft, startColumn: 2, endColumn: 2 });
+    });
+
     it('findNextGapRange should continue to gap boundary on empty ranges', () => {
         const worksheet = createWorksheet();
         const start = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };

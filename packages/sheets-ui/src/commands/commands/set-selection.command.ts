@@ -121,7 +121,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         const next =
             jumpOver === JumpOver.moveGap
                 ? findNextGapRange(startRange, direction, worksheet)
-                : findNextRange(startRange, direction, worksheet);
+                : findNextRange(startRange, direction, worksheet, undefined, true, 1, false);
         const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
         if (Rectangle.equals(destRange, startRange)) {

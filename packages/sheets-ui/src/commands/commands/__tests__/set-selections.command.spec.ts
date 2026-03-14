@@ -193,30 +193,48 @@ describe('Test commands used for change selections', () => {
         it('Should move selection with command', async () => {
             selectTopLeft();
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            // LEFT at column 0 boundary → stays at (0,0)
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
-            });
-            expectSelectionToBe(19, 19, 19, 19);
-
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
-                direction: Direction.RIGHT,
-            });
+            })).toBeFalsy();
             expectSelectionToBe(0, 0, 0, 0);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            // UP at row 0 boundary → stays at (0,0)
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.UP,
+            })).toBeFalsy();
+            expectSelectionToBe(0, 0, 0, 0);
+
+            // Normal interior movement still works
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.DOWN,
-            });
+            })).toBeTruthy();
             expectSelectionToBe(1, 0, 1, 0);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
-                direction: Direction.LEFT,
-            });
-            expectSelectionToBe(0, 19, 0, 19);
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            })).toBeTruthy();
+            expectSelectionToBe(1, 1, 1, 1);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
-                direction: Direction.UP,
-            });
-            expectSelectionToBe(19, 18, 19, 18);
+            // Move to bottom-right corner
+            selectionManagerService.setSelections([{
+                range: { startRow: 19, startColumn: 19, endRow: 19, endColumn: 19, rangeType: RANGE_TYPE.NORMAL },
+                primary: { startRow: 19, startColumn: 19, endRow: 19, endColumn: 19, actualRow: 19, actualColumn: 19, isMerged: false, isMergedMainCell: false },
+                style: null,
+            }]);
+            expectSelectionToBe(19, 19, 19, 19);
+
+            // RIGHT at last column boundary → stays at (19,19)
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            })).toBeFalsy();
+            expectSelectionToBe(19, 19, 19, 19);
+
+            // DOWN at last row boundary → stays at (19,19)
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.DOWN,
+            })).toBeFalsy();
+            expectSelectionToBe(19, 19, 19, 19);
         });
 
         it('Should skip cells in hidden rows / cols', async () => {
@@ -275,16 +293,13 @@ describe('Test commands used for change selections', () => {
         it('Should select merged cell and move to next cell', async () => {
             selectTopLeft();
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            // LEFT at column 0 boundary → stays at (0,0)
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
-            });
-            expectSelectionToBe(999, 19, 999, 19);
-
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
-                direction: Direction.RIGHT,
-            });
+            })).toBeFalsy();
             expectSelectionToBe(0, 0, 0, 0);
 
+            // RIGHT from (0,0) → moves into merged cell B1:B2
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
             });
@@ -300,10 +315,11 @@ describe('Test commands used for change selections', () => {
             });
             expectSelectionToBe(2, 0, 2, 0);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            // LEFT at column 0 boundary → stays at (2,0)
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
-            });
-            expectSelectionToBe(1, 19, 1, 19);
+            })).toBeFalsy();
+            expectSelectionToBe(2, 0, 2, 0);
         });
     });
 

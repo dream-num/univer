@@ -56,7 +56,18 @@ export function getNewRangeByMoveParam(
     currentFormulaUnitId: string,
     currentFormulaSheetId: string
 ) {
-    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to, rangeFilteredRows } = formulaReferenceMoveParam;
+    const {
+        type,
+        unitId: userUnitId,
+        sheetId: userSheetId,
+        targetUnitId,
+        targetSheetId,
+        targetSheetName,
+        range,
+        from,
+        to,
+        rangeFilteredRows,
+    } = formulaReferenceMoveParam;
 
     const {
         range: unitRange,
@@ -353,10 +364,14 @@ export function getNewRangeByMoveParam(
         return;
     }
 
+    const shouldRewriteSheet = type === FormulaReferenceMoveType.MoveRange
+        && !!targetSheetId
+        && targetSheetId !== userSheetId;
+
     return serializeRangeToRefString({
         range: newRange,
-        sheetName: sequenceRangeSheetName,
-        unitId: sequenceRangeUnitId,
+        sheetName: shouldRewriteSheet ? (targetSheetName || sequenceRangeSheetName) : sequenceRangeSheetName,
+        unitId: shouldRewriteSheet ? (targetUnitId || sequenceRangeUnitId) : sequenceRangeUnitId,
     });
 }
 

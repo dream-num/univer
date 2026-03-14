@@ -44,6 +44,9 @@ export interface IFormulaReferenceMoveParam {
     type: FormulaReferenceMoveType;
     unitId: string;
     sheetId: string;
+    targetUnitId?: string;
+    targetSheetId?: string;
+    targetSheetName?: string;
     range?: IRange;
     from?: IRange;
     to?: IRange;

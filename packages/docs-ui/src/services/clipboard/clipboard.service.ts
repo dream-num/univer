@@ -556,7 +556,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         };
         // clipboardHooks 应该被重新设计,用来处理多个 hook 处理同一个节点的能力
         // 参考 interceptor
-        const onBeforePasteImage = (this._clipboardHooks.find((e) => e.onBeforePasteImage)?.onBeforePasteImage!) ?? fileToBase64;
+        const onBeforePasteImage = this._clipboardHooks.find((e) => e.onBeforePasteImage)?.onBeforePasteImage ?? fileToBase64;
 
         await Promise.all(files.map(async (file, index) => {
             const image = await onBeforePasteImage(file);

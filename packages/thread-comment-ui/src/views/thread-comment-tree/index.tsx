@@ -503,17 +503,21 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         unitId={unitId}
                         subUnitId={subUnitId}
                         onSave={async ({ text, attachments }) => {
+                            if (!currentUser?.userID || !comments?.root) {
+                                throw new Error('[ThreadCommentTree] No current user or root comment found');
+                            }
+
                             const comment: IThreadComment = {
                                 text,
                                 attachments,
                                 dT: getDT(),
                                 id: generateRandomId(),
                                 ref: refStr!,
-                                personId: currentUser?.userID!,
+                                personId: currentUser?.userID,
                                 parentId: comments?.root.id,
                                 unitId,
                                 subUnitId,
-                                threadId: comments?.root.threadId!,
+                                threadId: comments?.root.threadId,
                             };
 
                             if (onAddComment?.(comment) === false) {

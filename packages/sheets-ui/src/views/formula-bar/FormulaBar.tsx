@@ -83,7 +83,7 @@ export function FormulaBar(props: IProps) {
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
     const isRefSelecting = useRef<0 | 1 | 2>(0);
     const editState = useObservable(editorBridgeService.currentEditCellState$);
-    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId ?? '');
+    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId);
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);

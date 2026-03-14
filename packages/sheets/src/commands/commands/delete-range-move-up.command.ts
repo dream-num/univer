@@ -54,9 +54,10 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         if (!target) return false;
 
         const { unitId, subUnitId, workbook, worksheet } = target;
-        let range = params?.range;
+        let range: IRange | undefined = params?.range;
         if (!range) {
-            range = selectionManagerService.getCurrentLastSelection()?.range!;
+            const currentSelection = selectionManagerService.getCurrentLastSelection();
+            range = currentSelection?.range as IRange | undefined;
         }
         if (!range) return false;
 

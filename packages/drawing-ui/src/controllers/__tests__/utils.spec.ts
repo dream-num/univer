@@ -102,6 +102,7 @@ describe('drawing controller utils', () => {
     it('skips invalid group targets and resolves current unit info for sheet, doc, and slide', () => {
         const scene = {
             getObject: vi.fn(() => ({ oKey: 'not-a-group' })),
+            getObjectIncludeInGroup: vi.fn(() => ({ oKey: 'not-a-group' })),
         };
         const drawingManagerService = {
             getDrawingByParam: vi.fn(() => ({ transform: { left: 0, top: 0, width: 10, height: 10 } })),

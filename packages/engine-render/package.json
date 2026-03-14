@@ -51,6 +51,7 @@
         "lib"
     ],
     "scripts": {
+        "prepare": "node --experimental-strip-types ./scripts/generate-hyphen-pattern-loaders.mts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",

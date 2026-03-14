@@ -49,6 +49,10 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         dts: false,
         entry: { [entry.key]: entry.path },
         format,
+        outputOptions: {
+            codeSplitting: true,
+            minify: true,
+        },
         outDir,
         plugins: [
             ...plugins,

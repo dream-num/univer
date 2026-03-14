@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import { createRequire } from 'node:module';
 import { defineConfig, mergeConfig } from 'vitest/config';
+
+const require = createRequire(import.meta.url);
+const coverageProviderModule = require.resolve('@vitest/coverage-istanbul');
 
 export default function createConfig(options?: any) {
     return defineConfig(mergeConfig({
@@ -30,7 +34,11 @@ export default function createConfig(options?: any) {
             coverage: {
                 reporter: ['html', 'json'],
                 provider: 'custom',
-                customProviderModule: '@vitest/coverage-istanbul',
+                // `customProviderModule` expects a file path. Using a bare
+                // package name makes Vitest resolve it as a relative path from
+                // each package root (e.g. `packages/foo/@vitest/...`) and fail.
+                // Resolve it from this shared package's deps instead.
+                customProviderModule: coverageProviderModule,
                 include: ['src/**/*.{ts,tsx}'],
                 exclude: [
                     'coverage/**',

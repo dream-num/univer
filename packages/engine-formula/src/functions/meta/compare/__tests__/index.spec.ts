@@ -20,7 +20,7 @@ import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cac
 import { compareToken } from '../../../../basics/token';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_META } from '../../function-names';
 import { Compare } from '../index';
 

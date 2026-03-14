@@ -18,7 +18,16 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { stripErrorMargin } from '../engine/utils/math-kit';
-import { stripArrayValue } from './__tests__/create-function-test-bed';
+
+export function stripArrayValue(array: (string | number | boolean | null)[][]) {
+    return array.map((row) => row.map((cell) => {
+        if (typeof cell === 'number') {
+            return stripErrorMargin(cell);
+        }
+
+        return cell;
+    }));
+}
 
 export function getObjectValue(result: FunctionVariantType, isUseStrip: boolean = false) {
     if (result.isReferenceObject()) {

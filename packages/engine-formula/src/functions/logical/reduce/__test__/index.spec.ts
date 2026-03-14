@@ -16,7 +16,6 @@
 
 import type { Injector } from '@univerjs/core';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
@@ -25,9 +24,10 @@ import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { IFunctionService } from '../../../../services/function.service';
-import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Lambda } from '../../lambda';
 import { Reduce } from '../index';

@@ -23,7 +23,7 @@ import {
     NumberValueObject,
     StringValueObject,
 } from '../../../../engine/value-object/primitive-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Address } from '../index';
 

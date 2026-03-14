@@ -102,14 +102,15 @@ describe('drawing controller utils', () => {
     it('skips invalid group targets and resolves current unit info for sheet, doc, and slide', () => {
         const scene = {
             getObject: vi.fn(() => ({ oKey: 'not-a-group' })),
-            getObjectIncludeInGroup: vi.fn(() => ({ oKey: 'not-a-group' })),
+            getObjectIncludeInGroup: vi.fn(() => null),
+            addObject: vi.fn(() => ({ attachTransformerTo: vi.fn() })),
         };
         const drawingManagerService = {
             getDrawingByParam: vi.fn(() => ({ transform: { left: 0, top: 0, width: 10, height: 10 } })),
         };
 
         insertGroupObject({ drawingId: 'group-2' } as never, { oKey: 'child-2' } as never, scene as never, drawingManagerService as never);
-        expect(scene.getObject).toHaveBeenCalled();
+        expect(scene.getObjectIncludeInGroup).toHaveBeenCalled();
 
         const sheet = {
             type: UniverInstanceType.UNIVER_SHEET,

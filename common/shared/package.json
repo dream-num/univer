@@ -1,5 +1,6 @@
 {
     "name": "@univerjs-infra/shared",
+    "type": "module",
     "version": "0.17.0",
     "private": true,
     "description": "Some infrastructures for univerjs",
@@ -14,13 +15,13 @@
     "exports": {
         "./eslint": "./eslint/index.ts",
         "./tsconfigs/*": "./tsconfigs/*.json",
-        "./vite": "./vite/index.ts",
         "./vitest": "./vitest/index.js",
         "./esbuild": "./esbuild/index.ts",
         "./tailwind": "./tailwind/tailwind.config.ts",
-        "./postcss": "./postcss/postcss.config.mjs"
+        "./postcss": "./postcss/postcss.config.mjs",
+        "./tsdown": "./tsdown/index.ts"
     },
-    "main": "bin/index.js",
+    "main": "bin/index.ts",
     "bin": {
         "univer-cli": "bin/index.ts"
     },
@@ -28,9 +29,8 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
+        "@tsdown/css": "^0.21.2",
         "@typescript-eslint/parser": "^8.56.1",
-        "@vitejs/plugin-react": "^5.1.4",
-        "@vitejs/plugin-vue": "^6.0.4",
         "@vitest/coverage-istanbul": "^4.0.18",
         "autoprefixer": "^10.4.24",
         "eslint-plugin-better-tailwindcss": "^4.3.0",
@@ -45,9 +45,8 @@
         "sort-keys": "^6.0.0",
         "tailwind-scrollbar": "^3",
         "tailwindcss": "3.4.18",
-        "vite": "^7.3.1",
-        "vite-plugin-dts": "^4.5.4",
-        "vite-plugin-external": "^6.2.2",
+        "tsdown": "^0.21.2",
+        "unplugin-vue": "^7.1.1",
         "vitest": "^4.0.18"
     },
     "devDependencies": {
@@ -55,6 +54,7 @@
         "@univerjs/icons": "^1.1.1",
         "@univerjs/icons-svg": "^1.1.1",
         "@univerjs/protocol": "0.1.48",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "vue-tsc": "^3.2.5"
     }
 }

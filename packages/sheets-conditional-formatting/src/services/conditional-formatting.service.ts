@@ -118,7 +118,7 @@ export class ConditionalFormattingService extends Disposable {
             } else if (type === CFRuleType.colorScale) {
                 const ruleCache = cacheItem.result;
                 if (ruleCache && typeof ruleCache === 'string') {
-                    result.style = { ...result.style, bg: { rgb: ruleCache } };
+                    result.style = { ...(result.style || {}), bg: { rgb: ruleCache } };
                 }
             } else if (type === CFRuleType.dataBar) {
                 const ruleCache = cacheItem.result as IDataBarRenderParams;

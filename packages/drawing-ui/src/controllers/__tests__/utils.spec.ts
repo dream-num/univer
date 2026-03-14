@@ -38,6 +38,10 @@ const { MockGroup } = vi.hoisted(() => {
         addObject(object: { oKey: string }) {
             this._objects.push(object);
         }
+
+        getObjectIncludeInGroup(key: string) {
+            return this._objects.find((obj) => obj.oKey === key) ?? null;
+        }
     }
 
     return {

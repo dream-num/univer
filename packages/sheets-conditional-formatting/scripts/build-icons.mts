@@ -140,7 +140,7 @@ function runTask() {
         fs.mkdirSync('./src/assets');
     }
 
-    fs.writeFileSync('./src/assets/icon-map.json', `${JSON.stringify(base64EncodedSVGs, null, 4)}\n`);
+    fs.writeFileSync('./src/assets/icon-map.ts', `/* eslint-disable */\nexport const ICON_MAP = ${JSON.stringify(base64EncodedSVGs, null, 4)};\n`);
 };
 
 runTask();

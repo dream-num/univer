@@ -62,7 +62,7 @@
         "lib"
     ],
     "scripts": {
-        "prepare": "tsx ./scripts/build-icons.ts",
+        "prepare": "node --experimental-strip-types ./scripts/build-icons.mts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",

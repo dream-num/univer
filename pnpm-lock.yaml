@@ -761,9 +761,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -850,9 +847,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -938,9 +932,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -963,9 +954,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -985,9 +973,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1040,9 +1025,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1059,9 +1041,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1111,9 +1090,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1154,9 +1130,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1215,9 +1188,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1267,9 +1237,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1325,9 +1292,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1350,9 +1314,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1396,9 +1357,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1427,9 +1385,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1470,9 +1425,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1513,9 +1465,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1535,9 +1484,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1557,9 +1503,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1582,9 +1525,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1619,9 +1559,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1653,9 +1590,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1714,9 +1648,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1763,9 +1694,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1800,9 +1728,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1864,9 +1789,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1889,9 +1811,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1950,9 +1869,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1984,9 +1900,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2042,9 +1955,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2076,9 +1986,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2113,9 +2020,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2174,9 +2078,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2199,9 +2100,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2230,9 +2128,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2297,9 +2192,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2331,9 +2223,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2383,9 +2272,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2411,9 +2297,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2466,9 +2349,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2491,9 +2371,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2546,9 +2423,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2574,9 +2448,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2635,9 +2506,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2666,9 +2534,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2724,9 +2589,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2788,9 +2650,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2843,9 +2702,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2865,9 +2721,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2920,9 +2773,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2939,9 +2789,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -2951,9 +2798,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/thread-comment:
     dependencies:
@@ -2970,9 +2814,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -3016,9 +2857,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -3074,9 +2912,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -3096,9 +2931,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -3124,9 +2956,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -3170,9 +2999,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -3195,9 +3021,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.3.5)(happy-dom@20.7.0)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.32.0)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)

@@ -28,6 +28,7 @@ import { createBaseConfig, createInputOptions, createInputPlugins } from './util
 import { getEntries } from './utils/entries.ts';
 import { removeCssArtifacts } from './utils/files.ts';
 import { createExternalPackages, readPackageJson } from './utils/package.ts';
+import { emitPublishPackageJson } from './utils/publish-manifest.ts';
 
 /**
  * Builds the shared context consumed by all output format factories.
@@ -107,6 +108,7 @@ export async function build(options: IBuildOptions = {}) {
 
     const configs = createConfigs(packageDir, options);
     await Promise.all(configs.map((config) => tsdownBuild(config)));
+    emitPublishPackageJson(packageDir);
 }
 
 export type { IBuildOptions } from './types.ts';

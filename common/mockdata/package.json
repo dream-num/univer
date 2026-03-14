@@ -24,7 +24,7 @@
     },
     "main": "./src/index.ts",
     "scripts": {
-        "prepare": "tsx ./scripts/generate-locales.ts"
+        "prepare": "node --experimental-strip-types ./scripts/generate-locales.mts"
     },
     "dependencies": {
         "@univerjs/action-recorder": "workspace:*",

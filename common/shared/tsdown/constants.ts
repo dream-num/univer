@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-export const BUILD_OUTPUT_ROOT = 'lib';
+export const BUILD_OUTPUT_ROOT = 'dist';
 
 export const BUILD_OUTPUT_DIRECTORIES = {
-    cjs: 'lib/cjs',
-    esm: 'lib/es',
-    umd: 'lib/umd',
+    cjs: 'dist/cjs',
+    esm: 'dist/es',
+    umd: 'dist/umd',
 } as const;
 
-export const CLEANUP_DIRECTORIES = ['lib', 'coverage'] as const;
+export const CLEANUP_DIRECTORIES = ['dist', 'lib', 'coverage'] as const;
 export const DEFAULT_BROWSER_TARGET = 'chrome70';
 export const DEFAULT_ENTRY_FILE = 'src/index.ts';
 export const FACADE_ENTRY_FILE = 'src/facade/index.ts';

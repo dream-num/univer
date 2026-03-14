@@ -18,9 +18,17 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "engines": {
-        "node": ">=20",
-        "pnpm": ">=10"
+    "devEngines": {
+        "runtime": [
+            {
+                "name": "node",
+                "version": ">=22.18"
+            },
+            {
+                "name": "pnpm",
+                "version": ">=10"
+            }
+        ]
     },
     "scripts": {
         "prepare": "husky",

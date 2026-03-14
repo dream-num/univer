@@ -17,9 +17,9 @@
 export const BUILD_OUTPUT_ROOT = 'dist';
 
 export const BUILD_OUTPUT_DIRECTORIES = {
-    cjs: 'dist/cjs',
-    esm: 'dist/es',
-    umd: 'dist/umd',
+    cjs: 'lib/cjs',
+    esm: 'lib/es',
+    umd: 'lib/umd',
 } as const;
 
 export const CLEANUP_DIRECTORIES = ['dist', 'lib', 'coverage'] as const;

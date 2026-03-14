@@ -15,7 +15,7 @@
     "exports": {
         "./eslint": "./eslint/index.ts",
         "./tsconfigs/*": "./tsconfigs/*.json",
-        "./vitest": "./vitest/index.js",
+        "./vitest": "./vitest/index.ts",
         "./esbuild": "./esbuild/index.ts",
         "./tailwind": "./tailwind/tailwind.config.ts",
         "./postcss": "./postcss/postcss.config.mjs",
@@ -31,7 +31,7 @@
     "dependencies": {
         "@tsdown/css": "^0.21.2",
         "@typescript-eslint/parser": "^8.56.1",
-        "@vitest/coverage-istanbul": "^4.0.18",
+        "@vitest/coverage-istanbul": "^4.1.0",
         "autoprefixer": "^10.4.24",
         "eslint-plugin-better-tailwindcss": "^4.3.0",
         "eslint-plugin-header": "^3.1.1",
@@ -47,7 +47,7 @@
         "tailwindcss": "3.4.18",
         "tsdown": "^0.21.2",
         "unplugin-vue": "^7.1.1",
-        "vitest": "^4.0.18"
+        "vitest": "^4.1.0"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

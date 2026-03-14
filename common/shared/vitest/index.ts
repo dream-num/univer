@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const { defineConfig, mergeConfig } = require('vitest/config');
+import { defineConfig, mergeConfig } from 'vitest/config';
 
-function createConfig(options) {
+export default function createConfig(options?: any) {
     return defineConfig(mergeConfig({
         test: {
             testTimeout: 30_000,
@@ -30,7 +30,7 @@ function createConfig(options) {
             coverage: {
                 reporter: ['html', 'json'],
                 provider: 'custom',
-                customProviderModule: require.resolve('@vitest/coverage-istanbul'),
+                customProviderModule: '@vitest/coverage-istanbul',
                 include: ['src/**/*.{ts,tsx}'],
                 exclude: [
                     'coverage/**',
@@ -60,7 +60,5 @@ function createConfig(options) {
                 ],
             },
         },
-    }, options));
+    }, options ?? {}));
 }
-
-module.exports = createConfig;

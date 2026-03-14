@@ -29,6 +29,7 @@ export {
     SheetPasteShortKeyCommand,
     SheetPasteValueCommand,
 } from './commands/commands/clipboard.command';
+export { SheetCopyDownCommand, SheetCopyRightCommand } from './commands/commands/copy-fill.command';
 export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-range-move-left-confirm.command';
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
 export { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from './commands/commands/headersize-changed.command';

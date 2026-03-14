@@ -27,6 +27,7 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { SheetCopyDownCommand, SheetCopyRightCommand } from '../commands/commands/copy-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
@@ -97,6 +98,7 @@ import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
+import { CopyDownShortcutItem, CopyRightShortcutItem } from './shortcuts/copy-fill.shortcut';
 import {
     EditorBreakLineShortcut,
     EditorCursorCtrlEnterShortcut,
@@ -263,6 +265,8 @@ export class SheetUIController extends Disposable {
             SetWorksheetColAutoWidthCommand,
             SetRowHeaderWidthCommand,
             SetColumnHeaderHeightCommand,
+            SheetCopyDownCommand,
+            SheetCopyRightCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -328,6 +332,10 @@ export class SheetUIController extends Disposable {
             EditorCursorEscShortcut,
             EditorCursorCtrlEnterShortcut,
             ShiftEditorDeleteLeftShortcut,
+
+            // copy fill shortcuts
+            CopyDownShortcutItem,
+            CopyRightShortcutItem,
 
             // operation shortcuts
             SetRowHiddenShortcutItem,

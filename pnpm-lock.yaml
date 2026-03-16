@@ -315,7 +315,7 @@ importers:
     dependencies:
       '@tsdown/css':
         specifier: ^0.21.2
-        version: 0.21.2(jiti@2.6.1)(postcss@8.5.8)(sass@1.87.0)(tsdown@0.21.2)(tsx@4.21.0)(yaml@2.8.2)
+        version: 0.21.2(jiti@2.6.1)(postcss@8.5.8)(sass@1.87.0)(tsdown@0.21.3)(tsx@4.21.0)(yaml@2.8.2)
       '@typescript-eslint/parser':
         specifier: ^8.56.1
         version: 8.56.1(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3)
@@ -362,8 +362,8 @@ importers:
         specifier: 3.4.18
         version: 3.4.18
       tsdown:
-        specifier: ^0.21.2
-        version: 0.21.2(@tsdown/css@0.21.2)(synckit@0.11.12)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
+        specifier: ^0.21.3
+        version: 0.21.3(@tsdown/css@0.21.2)(synckit@0.11.12)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       unplugin-vue:
         specifier: ^7.1.1
         version: 7.1.1(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(sass@1.87.0)(terser@5.44.1)(tsx@4.21.0)(vue@3.5.30(typescript@5.9.3))(yaml@2.8.2)
@@ -10355,14 +10355,14 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
-  tsdown@0.21.2:
-    resolution: {integrity: sha512-pP8eAcd1XAWjl5gjosuJs0BAuVoheUe3V8VDHx31QK7YOgXjcCMsBSyFWO3CMh/CSUkjRUzR96JtGH3WJFTExQ==}
+  tsdown@0.21.3:
+    resolution: {integrity: sha512-oKKeMC8+IgNsB+81hvF5VBsqhqL/nr0g9vse+ujbK40vv0i3ReFI6gUts7hQH7J53ylQNjMgf2Vu6n0+P/uddA==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
       '@arethetypeswrong/core': ^0.18.1
-      '@tsdown/css': 0.21.2
-      '@tsdown/exe': 0.21.2
+      '@tsdown/css': 0.21.3
+      '@tsdown/exe': 0.21.3
       '@vitejs/devtools': '*'
       publint: ^0.3.0
       typescript: ^5.0.0
@@ -13342,12 +13342,12 @@ snapshots:
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
-  '@tsdown/css@0.21.2(jiti@2.6.1)(postcss@8.5.8)(sass@1.87.0)(tsdown@0.21.2)(tsx@4.21.0)(yaml@2.8.2)':
+  '@tsdown/css@0.21.2(jiti@2.6.1)(postcss@8.5.8)(sass@1.87.0)(tsdown@0.21.3)(tsx@4.21.0)(yaml@2.8.2)':
     dependencies:
       lightningcss: 1.32.0
       postcss-load-config: 6.0.1(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(yaml@2.8.2)
       rolldown: 1.0.0-rc.9
-      tsdown: 0.21.2(@tsdown/css@0.21.2)(synckit@0.11.12)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
+      tsdown: 0.21.3(@tsdown/css@0.21.2)(synckit@0.11.12)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
     optionalDependencies:
       postcss: 8.5.8
       sass: 1.87.0
@@ -18990,7 +18990,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.21.2(@tsdown/css@0.21.2)(synckit@0.11.12)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3)):
+  tsdown@0.21.3(@tsdown/css@0.21.2)(synckit@0.11.12)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3)):
     dependencies:
       ansis: 4.2.0
       cac: 7.0.0
@@ -19003,13 +19003,13 @@ snapshots:
       rolldown: 1.0.0-rc.9
       rolldown-plugin-dts: 0.22.5(rolldown@1.0.0-rc.9)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       semver: 7.7.4
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       tinyglobby: 0.2.15
       tree-kill: 1.2.2
       unconfig-core: 7.5.0
       unrun: 0.2.32(synckit@0.11.12)
     optionalDependencies:
-      '@tsdown/css': 0.21.2(jiti@2.6.1)(postcss@8.5.8)(sass@1.87.0)(tsdown@0.21.2)(tsx@4.21.0)(yaml@2.8.2)
+      '@tsdown/css': 0.21.2(jiti@2.6.1)(postcss@8.5.8)(sass@1.87.0)(tsdown@0.21.3)(tsx@4.21.0)(yaml@2.8.2)
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@ts-macro/tsc'

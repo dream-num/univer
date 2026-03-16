@@ -412,7 +412,7 @@ function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
 
 function assignPeerDependencies(pkg: CleanupPackageJson, peerDeps: StringMap) {
     const managedPeerDepNames = [...new Set(Object.values(peerDepsMap).map((value) => value.name))];
-    const existing = { ...(pkg.peerDependencies ?? {}) };
+    const existing = { ...pkg.peerDependencies };
     for (const key of managedPeerDepNames) {
         delete existing[key];
     }

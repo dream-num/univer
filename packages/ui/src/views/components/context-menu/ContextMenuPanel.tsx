@@ -40,6 +40,7 @@ import { useDependency, useObservable } from '../../../utils/di';
 interface IContextMenuPanelProps {
     menuType: string;
     menuSessionVersion?: number;
+    className?: string;
     onOptionSelect?: (option: IValueOption) => void;
 }
 
@@ -65,7 +66,7 @@ const submenuVisualGap = 20;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
-    const { menuType, menuSessionVersion = 0, onOptionSelect } = props;
+    const { menuType, menuSessionVersion = 0, className, onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
     const layoutService = useDependency(ILayoutService);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
@@ -136,7 +137,8 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                   dark:!univer-bg-gray-700 dark:!univer-text-white
                 `,
                 borderClassName,
-                scrollbarClassName
+                scrollbarClassName,
+                className
             )}
             style={{
                 maxHeight: maxMenuHeight,

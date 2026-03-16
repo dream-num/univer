@@ -14,44 +14,8 @@
  * limitations under the License.
  */
 
-import type { MenuItemGroupProps, MenuItemProps, MenuProps, MenuRef, SubMenuProps } from 'rc-menu';
 import type { ComponentType } from 'react';
-import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMenu as RcSubMenu } from 'rc-menu';
-import { forwardRef, useContext } from 'react';
-import { clsx } from '../../helper/clsx';
-import { ConfigContext } from '../config-provider/ConfigProvider';
-import { Tooltip } from '../tooltip/Tooltip';
-import './index.css';
-
-/** @deprecated */
-export const Menu = forwardRef<MenuRef, MenuProps & { wrapperClass?: string }>((props, ref) => {
-    const { mountContainer } = useContext(ConfigContext);
-    const { wrapperClass, ...rest } = props;
-    return mountContainer && (
-        <RcMenu
-            ref={ref}
-            prefixCls={clsx('univer-menu', props.className)}
-            getPopupContainer={() => mountContainer}
-            {...rest}
-            className={wrapperClass}
-        />
-    );
-});
-
-/** @deprecated */
-export function MenuItem(props: MenuItemProps) {
-    return <RcMenuItem {...props} />;
-}
-
-/** @deprecated */
-export function SubMenu(props: SubMenuProps) {
-    return <RcSubMenu {...props} />;
-}
-
-/** @deprecated */
-export function MenuItemGroup(props: MenuItemGroupProps) {
-    return <RcMenuItemGroup {...props} />;
-}
+import { clsx, Tooltip } from '@univerjs/design';
 
 export interface ITinyMenuItem {
     onClick: () => void;
@@ -66,7 +30,7 @@ export interface ITinyMenuGroupProps {
     items: ITinyMenuItem[];
 }
 
-export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
+export function DesignTinyMenuGroup({ items }: ITinyMenuGroupProps) {
     return (
         <div
             className="univer-menu-item-group univer-flex univer-flex-wrap univer-gap-2.5 univer-p-1 univer-px-0"
@@ -99,9 +63,7 @@ export function TinyMenuGroup({ items }: ITinyMenuGroupProps) {
                             {ele}
                         </Tooltip>
                     )
-                    : (
-                        ele
-                    );
+                    : ele;
             })}
         </div>
     );

@@ -17,11 +17,12 @@
 import type { IDisplayMenuItem, IMenuItem, IValueOption } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { convertObservableToBehaviorSubject, LocaleService } from '@univerjs/core';
-import { clsx, TinyMenuGroup as DesignTinyMenuGroup } from '@univerjs/design';
+import { clsx } from '@univerjs/design';
 import { useEffect, useState } from 'react';
 import { combineLatest, of } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { useDependency, useObservable } from '../../../utils/di';
+import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
 
 interface IUIQuickMenuGroupProps {
     item: IMenuSchema;

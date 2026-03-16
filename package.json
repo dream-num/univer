@@ -34,7 +34,7 @@
         "prepare": "husky",
         "pre-commit": "lint-staged",
         "dev": "pnpm --filter univer-examples dev:demo -- --host 0.0.0.0",
-        "dev:libs": "pnpm --filter univer-examples dev:demo-libs",
+        "dev:umd": "serve .",
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
         "use:react16": "tsx ./scripts/react-version-manager.ts --react=16",
         "use:react19": "tsx ./scripts/react-version-manager.ts --react=19",

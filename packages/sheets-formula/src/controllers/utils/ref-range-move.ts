@@ -54,7 +54,10 @@ export function getNewRangeByMoveParam(
     unitRangeWidthOffset: IUnitRangeWithOffset,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam,
     currentFormulaUnitId: string,
-    currentFormulaSheetId: string
+    currentFormulaSheetId: string,
+    options: {
+        preserveSheetQualifier?: boolean;
+    } = {}
 ) {
     const {
         type,
@@ -77,6 +80,7 @@ export function getNewRangeByMoveParam(
         refOffsetX,
         refOffsetY,
     } = unitRangeWidthOffset;
+    const { preserveSheetQualifier = false } = options;
 
     if (
         !checkIsSameUnitAndSheet(
@@ -379,7 +383,7 @@ export function getNewRangeByMoveParam(
 
     return serializeRangeToRefString({
         range: newRange,
-        sheetName: isCurrentFormulaWorkbook && isCurrentFormulaSheet ? '' : rewrittenSheetName,
+        sheetName: preserveSheetQualifier || !(isCurrentFormulaWorkbook && isCurrentFormulaSheet) ? rewrittenSheetName : '',
         unitId: isCurrentFormulaWorkbook ? '' : rewrittenUnitId,
     });
 }

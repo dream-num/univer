@@ -104,6 +104,7 @@ export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
         outputOptions: {
             entryFileNames: '[name].js',
             globals: (source: string) => resolveUmdGlobal(source) ?? convertLibNameFromPackageName(source),
+            minify: true,
         },
         platform: 'browser',
         plugins: [

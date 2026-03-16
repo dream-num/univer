@@ -265,6 +265,18 @@ export interface ISheetClipboardHook {
         matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>,
         plainMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
     ): void;
+
+    /**
+     * If the hook is provided with `getCellValueBySpecialMatrix`, then should be used first to get cell value when copying.
+     */
+    getCellValueBySpecialMatrix?(
+        row: number,
+        column: number,
+        options?: {
+            unitId?: string;
+            subUnitId?: string;
+        }
+    ): ICellDataWithSpanAndDisplay | undefined;
 }
 
 export interface ICopyOptions {

@@ -272,6 +272,10 @@ export class Image extends Shape<IImageProps> {
             return this;
         }
 
+        if (!this.transform) {
+            return this;
+        }
+
         let { width: realWidth, height: realHeight, left: realLeft, top: realTop } = this;
 
         const realBound = this.getRealBound();
@@ -383,6 +387,20 @@ export class Image extends Shape<IImageProps> {
         }
     }
 
+    override set transform(trans: Transform) {
+        this._transform = trans;
+    }
+
+    override get transform() {
+        // when active sheet is changed, maybe the image is reused, the transform need to be recalculated by transform
+        if (!this._transform) {
+            this._setTransForm();
+        }
+
+        const transform = this._transform.clone();
+        return this.transformForAngle(transform);
+    }
+
     override isHit(coord: Vector2) {
         // Build the same effective transform used in render():
         // Must use realBound to match render() method's coordinate system
@@ -413,6 +431,7 @@ export class Image extends Shape<IImageProps> {
         ) {
             return true;
         }
+
         return false;
     }
 }

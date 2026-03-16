@@ -129,7 +129,7 @@ export abstract class BaseObject extends Disposable {
 
     private _debounceParentDirty: boolean = true;
 
-    private _transform = new Transform();
+    protected _transform = new Transform();
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 

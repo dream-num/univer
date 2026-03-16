@@ -367,11 +367,20 @@ export function getNewRangeByMoveParam(
     const shouldRewriteSheet = type === FormulaReferenceMoveType.MoveRange
         && !!targetSheetId
         && targetSheetId !== userSheetId;
+    const rewrittenSheetId = shouldRewriteSheet ? targetSheetId : sequenceRangeSheetId;
+    const rewrittenSheetName = shouldRewriteSheet ? (targetSheetName || sequenceRangeSheetName) : sequenceRangeSheetName;
+    const rewrittenUnitId = shouldRewriteSheet ? (targetUnitId || sequenceRangeUnitId) : sequenceRangeUnitId;
+    // We need the destination sheet to decide whether a rewritten ref should stay local (`A1`)
+    // or become explicitly qualified (`Sheet2!A1`) after a move.
+    const isCurrentFormulaWorkbook = rewrittenUnitId == null
+        || rewrittenUnitId.length === 0
+        || rewrittenUnitId === currentFormulaUnitId;
+    const isCurrentFormulaSheet = rewrittenSheetId === currentFormulaSheetId;
 
     return serializeRangeToRefString({
         range: newRange,
-        sheetName: shouldRewriteSheet ? (targetSheetName || sequenceRangeSheetName) : sequenceRangeSheetName,
-        unitId: shouldRewriteSheet ? (targetUnitId || sequenceRangeUnitId) : sequenceRangeUnitId,
+        sheetName: isCurrentFormulaWorkbook && isCurrentFormulaSheet ? '' : rewrittenSheetName,
+        unitId: isCurrentFormulaWorkbook ? '' : rewrittenUnitId,
     });
 }
 

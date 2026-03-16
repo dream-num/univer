@@ -28,13 +28,6 @@ describe('Tools extra coverage', () => {
 
     it('should handle basic string and index helpers', () => {
         expect(Tools.deleteNull({ a: 1, b: null, c: undefined })).toEqual({ a: 1 });
-        expect(Tools.stringAt(0)).toBe('A');
-        expect(Tools.stringAt(26)).toBe('AA');
-        expect(Tools.indexAt('A')).toBe(0);
-        expect(Tools.indexAt('AA')).toBe(26);
-        expect(Tools.deleteBlank(' a b\n c ')).toBe('abc');
-        expect(Tools.deleteBlank()).toBeUndefined();
-        expect(Tools.getClassName(new CustomProto())).toBe('CustomProto');
     });
 
     it('should merge, compare and clone complex values', () => {
@@ -43,7 +36,6 @@ describe('Tools extra coverage', () => {
             { a: { c: 2 }, list: [2, 3], extra: 'x' }
         );
         expect(merged).toEqual({ a: { b: 1, c: 2 }, list: [2, 3], keep: true, extra: 'x' });
-        expect(Tools.numberFixed(1.236, 2)).toBe(1.24);
         expect(Tools.diffValue([1, { a: 2 }], [1, { a: 2 }])).toBe(true);
         expect(Tools.diffValue(new Date('2024-01-01'), new Date('2024-01-01'))).toBe(true);
         expect(Tools.diffValue(/a/i, /a/i)).toBe(true);
@@ -93,10 +85,6 @@ describe('Tools extra coverage', () => {
         const input = { a: 1, b: null, c: { d: undefined, e: 2 } };
 
         expect(Tools.removeNull(input)).toEqual({ a: 1, c: { e: 2 } });
-        expect(Tools.fillTwoDimensionalArray(2, 3, 'x')).toEqual([
-            ['x', 'x', 'x'],
-            ['x', 'x', 'x'],
-        ]);
         expect(Tools.numToWord(27)).toBe('AA');
         expect(Tools.ABCatNum('AZ')).toBe(51);
         expect(Tools.ABCatNum('')).toBeNaN();

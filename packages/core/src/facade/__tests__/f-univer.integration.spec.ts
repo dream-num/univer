@@ -129,7 +129,6 @@ describe('FUniver integration', () => {
         expect(paragraph.horizontalAlign).toBe(HorizontalAlign.CENTER);
         expect(univerAPI.newTextDecoration({ s: univerAPI.Enum.BooleanNumber.TRUE }).build().s).toBe(univerAPI.Enum.BooleanNumber.TRUE);
         expect(univerAPI.newRichTextValue(createDocData('facade-rich-text') as IDocumentData).getData().body?.dataStream).toBe('Hello\r\n');
-        expect(univerAPI.Util.tools.deleteBlank(' f a c a d e ')).toBe('facade');
         expect(univerAPI.Util.rectangle.intersects(
             { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
             { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 }

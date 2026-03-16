@@ -17,8 +17,14 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IHyphenPattern, RawHyphenPattern } from './tools';
 import { Lang } from './lang';
+import { PATTERN_LOADERS } from './pattern-loaders.gen';
 import { EnUs } from './patterns/en-us';
 import { createCharIterator, createStringSlicer, parsePattern, snackToPascal } from './tools';
+
+// NOTE: tsdown/rolldown doesn't rewrite dynamic import vars like
+// `import(`./patterns/${lang}.ts`)`.
+// Use a static import map so the bundler can create code-split chunks
+// and rewrite them to the hashed output filenames.
 
 export class Hyphen implements IDisposable {
     private _patterns: Map<Lang, IHyphenPattern> = new Map();
@@ -69,9 +75,18 @@ export class Hyphen implements IDisposable {
     }
 
     async loadPattern(lang: Lang) {
-        let pattern = await import(`./patterns/${lang}.ts`);
+        const loader = PATTERN_LOADERS[lang];
 
-        pattern = pattern?.[snackToPascal(lang)];
+        if (!loader) {
+            return;
+        }
+
+        const loaded = await loader();
+        const exported = Array.isArray(loaded)
+            ? loaded
+            : (loaded as Record<string, unknown> | null)?.[snackToPascal(lang)];
+
+        const pattern = exported as RawHyphenPattern | undefined;
 
         if (pattern == null) {
             return;

@@ -1,4 +1,19 @@
 {
     "extends": "@univerjs-infra/shared/tsconfigs/node",
-    "include": ["vitest.config.ts"]
+    "compilerOptions": {
+        "rootDir": "src",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "noEmit": false,
+        "outDir": "lib/types"
+    },
+    "include": [
+        "src",
+        "types"
+    ],
+    "exclude": [
+        "src/**/__tests__/**",
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts"
+    ]
 }

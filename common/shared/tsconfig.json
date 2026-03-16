@@ -10,7 +10,7 @@
         "eslint/**/*.ts",
         "eslint/**/*.d.ts",
         "tailwind/**/*.ts",
-        "vite/**/*.ts",
+        "tsdown/**/*.ts",
         "vitest/**/*.ts"
     ],
     "exclude": [

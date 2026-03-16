@@ -18,22 +18,32 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "engines": {
-        "node": ">=20",
-        "pnpm": ">=10"
+    "devEngines": {
+        "runtime": [
+            {
+                "name": "node",
+                "version": ">=22.18"
+            },
+            {
+                "name": "pnpm",
+                "version": ">=10"
+            }
+        ]
     },
     "scripts": {
         "prepare": "husky",
         "pre-commit": "lint-staged",
         "dev": "pnpm --filter univer-examples dev:demo -- --host 0.0.0.0",
-        "dev:libs": "pnpm --filter univer-examples dev:demo-libs",
+        "dev:umd": "serve .",
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
         "use:react16": "tsx ./scripts/react-version-manager.ts --react=16",
         "use:react19": "tsx ./scripts/react-version-manager.ts --react=19",
         "typecheck": "turbo typecheck",
+        "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
-        "build": "turbo build --concurrency=30% --filter=!./common/*",
+        "analyze:build": "tsx ./scripts/build-analysis.ts",
+        "build": "turbo build --concurrency=100% --filter=!./common/*",
         "build:ci": "turbo build --concurrency=100% --filter=!./common/*",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
@@ -46,8 +56,8 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^7.7.0",
-        "@commitlint/cli": "^20.4.3",
-        "@commitlint/config-conventional": "^20.4.3",
+        "@commitlint/cli": "^20.5.0",
+        "@commitlint/config-conventional": "^20.5.0",
         "@eslint-react/eslint-plugin": "^2.13.0",
         "@eslint/compat": "^2.0.3",
         "@playwright/test": "^1.57.0",
@@ -59,7 +69,6 @@
         "@types/react-dom": "19.2.3",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@vitejs/plugin-react": "^5.1.4",
         "eslint": "10.0.3",
         "eslint-plugin-format": "^2.0.1",
         "eslint-plugin-react": "^7.37.5",
@@ -75,9 +84,9 @@
         "serve": "^14.2.6",
         "tailwindcss": "3.4.18",
         "tsx": "^4.21.0",
-        "turbo": "^2.8.14",
+        "turbo": "^2.8.17",
         "typescript": "^5.9.3",
-        "vitest": "^4.0.18"
+        "vitest": "^4.1.0"
     },
     "pnpm": {
         "onlyBuiltDependencies": [

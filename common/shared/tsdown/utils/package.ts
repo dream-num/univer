@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPackageJson } from '../types.ts';
+import type { IPackageJson } from '../types';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 

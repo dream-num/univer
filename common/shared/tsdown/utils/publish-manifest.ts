@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IPackageJson } from '../types.ts';
+import type { IPackageJson } from '../types';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { readPackageJson } from './package.ts';
+import { readPackageJson } from './package';
 
 const ROOT_MANIFEST_FIELDS = [
     'author',

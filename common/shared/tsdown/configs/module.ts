@@ -15,14 +15,16 @@
  */
 
 import type { UserConfig } from 'tsdown';
-import type { IEntryConfig } from '../types.ts';
+import type { IEntryConfig } from '../types';
 import { defineConfig } from 'tsdown';
-import { createOutputAliasPlugin } from '../plugins/output-alias.ts';
+import { createOutputAliasPlugin } from '../plugins/output-alias';
+import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
 export type TModuleFormat = 'cjs' | 'esm';
 
 export interface ICreateModuleConfigOptions {
     baseConfig: Partial<UserConfig>;
+    enableObfuscation: boolean;
     entry: IEntryConfig;
     externalPackages: string[];
     facadeExternalPackages: string[];
@@ -36,7 +38,7 @@ export interface ICreateModuleConfigOptions {
  * Creates the common ESM/CJS bundle config for a single package entry.
  */
 export function createModuleConfig(options: ICreateModuleConfigOptions): UserConfig {
-    const { baseConfig, entry, externalPackages, facadeExternalPackages, format, outDir, packageDir, plugins } = options;
+    const { baseConfig, enableObfuscation, entry, externalPackages, facadeExternalPackages, format, outDir, packageDir, plugins } = options;
     const neverBundle = entry.type === 'facade' ? facadeExternalPackages : externalPackages;
     const copyToRoot = format === 'esm';
     const keepRootIndexCss = entry.type === 'index' && format === 'esm';
@@ -56,6 +58,7 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         outDir,
         plugins: [
             ...plugins,
+            ...(enableObfuscation ? [createOutputObfuscatorPlugin()] : []),
             createOutputAliasPlugin({
                 copyToRoot,
                 keepRootIndexCss,

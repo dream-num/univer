@@ -1,9 +1,9 @@
 #!/usr/bin/env -S node --import tsx/esm
 /* eslint-disable header/header */
 
-import type { IBuildOptions } from '../tsdown/index.ts';
+import type { IBuildOptions } from '../tsdown/types';
 import process from 'node:process';
-import { build } from '../tsdown/index.ts';
+import { build } from '../tsdown/index';
 
 const argvs = process.argv.slice(2);
 const [command, ...args] = argvs;

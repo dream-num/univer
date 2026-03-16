@@ -15,12 +15,14 @@
  */
 
 import type { UserConfig } from 'tsdown';
-import type { IEntryConfig } from '../types.ts';
+import type { IEntryConfig } from '../types';
 import { defineConfig } from 'tsdown';
-import { createOutputAliasPlugin } from '../plugins/output-alias.ts';
+import { createOutputAliasPlugin } from '../plugins/output-alias';
+import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
 export interface ICreateUmdConfigOptions {
     baseConfig: Partial<UserConfig>;
+    enableObfuscation: boolean;
     entry: IEntryConfig;
     outDir: string;
     packageDir: string;
@@ -93,7 +95,7 @@ function getGlobalName(packageName: string, entryKey: string) {
  * Creates the browser-oriented UMD bundle config for a single package entry.
  */
 export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
-    const { baseConfig, entry, outDir, packageDir, packageName, plugins } = options;
+    const { baseConfig, enableObfuscation, entry, outDir, packageDir, packageName, plugins } = options;
 
     return defineConfig({
         ...baseConfig,
@@ -114,6 +116,7 @@ export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
         platform: 'browser',
         plugins: [
             ...plugins,
+            ...(enableObfuscation ? [createOutputObfuscatorPlugin()] : []),
             createOutputAliasPlugin({
                 copyToRoot: false,
                 keepRootIndexCss: false,

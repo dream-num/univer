@@ -15,20 +15,20 @@
  */
 
 import type { UserConfig } from 'tsdown';
-import type { TModuleFormat } from './configs/module.ts';
-import type { IBuildContext, IBuildOptions } from './types.ts';
+import type { TModuleFormat } from './configs/module';
+import type { IBuildContext, IBuildOptions } from './types';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { build as tsdownBuild } from 'tsdown';
-import { createModuleConfig } from './configs/module.ts';
-import { createUmdConfig } from './configs/umd.ts';
-import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants.ts';
-import { createBaseConfig, createInputOptions, createInputPlugins } from './utils/base-config.ts';
-import { getEntries } from './utils/entries.ts';
-import { removeCssArtifacts } from './utils/files.ts';
-import { createExternalPackages, readPackageJson } from './utils/package.ts';
-import { emitPublishPackageJson } from './utils/publish-manifest.ts';
+import { createModuleConfig } from './configs/module';
+import { createUmdConfig } from './configs/umd';
+import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants';
+import { createBaseConfig, createInputOptions, createInputPlugins } from './utils/base-config';
+import { getEntries } from './utils/entries';
+import { removeCssArtifacts } from './utils/files';
+import { createExternalPackages, readPackageJson } from './utils/package';
+import { emitPublishPackageJson } from './utils/publish-manifest';
 
 /**
  * Builds the shared context consumed by all output format factories.
@@ -55,10 +55,12 @@ function createConfigs(packageDir: string, options: IBuildOptions): UserConfig[]
     const context = createBuildContext(packageDir, options);
     const baseConfig = createBaseConfig(context);
     const moduleFormats: TModuleFormat[] = ['esm', 'cjs'];
+    const enableObfuscation = context.packageJson.name.startsWith('@univerjs-pro/');
 
     const moduleConfigs = context.entries.flatMap((entry) => {
         return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
+            enableObfuscation,
             entry,
             externalPackages: context.externalPackages,
             facadeExternalPackages: context.facadeExternalPackages,
@@ -75,6 +77,7 @@ function createConfigs(packageDir: string, options: IBuildOptions): UserConfig[]
 
     const umdConfigs = context.entries.map((entry) => createUmdConfig({
         baseConfig,
+        enableObfuscation,
         entry,
         outDir: BUILD_OUTPUT_DIRECTORIES.umd,
         packageDir: context.packageDir,
@@ -110,5 +113,3 @@ export async function build(options: IBuildOptions = {}) {
     await Promise.all(configs.map((config) => tsdownBuild(config)));
     emitPublishPackageJson(packageDir);
 }
-
-export type { IBuildOptions } from './types.ts';

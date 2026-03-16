@@ -39,6 +39,7 @@
         "use:react16": "tsx ./scripts/react-version-manager.ts --react=16",
         "use:react19": "tsx ./scripts/react-version-manager.ts --react=19",
         "typecheck": "turbo typecheck",
+        "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
         "build": "turbo build --concurrency=100% --filter=!./common/*",
@@ -54,8 +55,8 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^7.7.0",
-        "@commitlint/cli": "^20.4.3",
-        "@commitlint/config-conventional": "^20.4.3",
+        "@commitlint/cli": "^20.5.0",
+        "@commitlint/config-conventional": "^20.5.0",
         "@eslint-react/eslint-plugin": "^2.13.0",
         "@eslint/compat": "^2.0.3",
         "@playwright/test": "^1.57.0",

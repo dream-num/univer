@@ -15,8 +15,8 @@
  */
 
 import type { IShortcutItem } from '@univerjs/ui';
+import { SheetCopyDownCommand, SheetCopyRightCommand } from '@univerjs/sheets';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import { SheetCopyDownCommand, SheetCopyRightCommand } from '../../commands/commands/copy-fill.command';
 import { whenSheetEditorFocused } from './utils';
 
 export const CopyDownShortcutItem: IShortcutItem = {

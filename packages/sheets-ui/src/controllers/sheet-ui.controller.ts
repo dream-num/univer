@@ -27,7 +27,6 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import { BuiltInUIPart, ComponentManager, connectInjector, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import { SheetCopyDownCommand, SheetCopyRightCommand } from '../commands/commands/copy-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../commands/commands/headersize-changed.command';
@@ -265,8 +264,6 @@ export class SheetUIController extends Disposable {
             SetWorksheetColAutoWidthCommand,
             SetRowHeaderWidthCommand,
             SetColumnHeaderHeightCommand,
-            SheetCopyDownCommand,
-            SheetCopyRightCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

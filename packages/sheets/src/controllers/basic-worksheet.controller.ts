@@ -22,7 +22,7 @@ import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMerg
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
 import { AppendRowCommand } from '../commands/commands/append-row.command';
-import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
+import { AutoClearContentCommand, AutoFillCommand, SheetCopyDownCommand, SheetCopyRightCommand } from '../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -381,6 +381,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RemoveRangeThemeMutation,
 
                 AutoFillCommand,
+                SheetCopyDownCommand,
+                SheetCopyRightCommand,
                 AutoClearContentCommand,
                 RefillCommand,
 

@@ -42,6 +42,7 @@
         "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
+        "analyze:build": "tsx ./scripts/build-analysis.ts",
         "build": "turbo build --concurrency=100% --filter=!./common/*",
         "build:ci": "turbo build --concurrency=100% --filter=!./common/*",
         "build:demo": "pnpm --filter univer-examples build:demo",

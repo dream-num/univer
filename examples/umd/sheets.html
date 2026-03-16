@@ -126,13 +126,13 @@
     <script src="/packages/sheets-formula/lib/umd/facade.js"></script>
     <script src="/packages/sheets-numfmt/lib/umd/facade.js"></script>
 
-    <script src="/packages/design/lib/umd/locale/zh-CN.js"></script>
-    <script src="/packages/ui/lib/umd/locale/zh-CN.js"></script>
-    <script src="/packages/sheets/lib/umd/locale/zh-CN.js"></script>
-    <script src="/packages/sheets-ui/lib/umd/locale/zh-CN.js"></script>
-    <script src="/packages/docs-ui/lib/umd/locale/zh-CN.js"></script>
-    <script src="/packages/sheets-formula-ui/lib/umd/locale/zh-CN.js"></script>
-    <script src="/packages/sheets-numfmt-ui/lib/umd/locale/zh-CN.js"></script>
+    <script src="/packages/design/lib/umd/locale/en-US.js"></script>
+    <script src="/packages/ui/lib/umd/locale/en-US.js"></script>
+    <script src="/packages/sheets/lib/umd/locale/en-US.js"></script>
+    <script src="/packages/sheets-ui/lib/umd/locale/en-US.js"></script>
+    <script src="/packages/docs-ui/lib/umd/locale/en-US.js"></script>
+    <script src="/packages/sheets-formula-ui/lib/umd/locale/en-US.js"></script>
+    <script src="/packages/sheets-numfmt-ui/lib/umd/locale/en-US.js"></script>
 
     <link rel="stylesheet" href="/packages/design/lib/index.css" />
     <link rel="stylesheet" href="/packages/ui/lib/index.css" />
@@ -171,16 +171,16 @@
         const { UniverSheetsNumfmtUIPlugin } = UniverSheetsNumfmtUi;
 
         const univer = new Univer({
-            locale: LocaleType.ZH_CN,
+            locale: LocaleType.EN_US,
             locales: {
-                [LocaleType.ZH_CN]: mergeLocales(
-                    UniverDesignZhCN,
-                    UniverUiZhCN,
-                    UniverDocsUiZhCN,
-                    UniverSheetsZhCN,
-                    UniverSheetsUiZhCN,
-                    UniverSheetsFormulaUiZhCN,
-                    UniverSheetsNumfmtUiZhCN,
+                [LocaleType.EN_US]: mergeLocales(
+                    UniverDesignEnUS,
+                    UniverUiEnUS,
+                    UniverDocsUiEnUS,
+                    UniverSheetsEnUS,
+                    UniverSheetsUiEnUS,
+                    UniverSheetsFormulaUiEnUS,
+                    UniverSheetsNumfmtUiEnUS,
                 ),
             },
         });

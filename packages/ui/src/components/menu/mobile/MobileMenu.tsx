@@ -16,7 +16,7 @@
 
 import type { IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import type { IBaseMenuProps } from '../desktop/Menu';
+import type { IBaseMenuProps } from '../types';
 import { LocaleService } from '@univerjs/core';
 import { borderBottomClassName, clsx } from '@univerjs/design';
 import { CheckMarkIcon, MoreIcon, MoreLeftIcon } from '@univerjs/icons';

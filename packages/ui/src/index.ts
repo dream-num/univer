@@ -29,8 +29,6 @@ export { FontSize } from './components/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './components/font-size/interface';
 export * from './components/hooks';
 export { t } from './components/hooks/locale';
-export { Menu as UIMenu } from './components/menu/desktop/Menu';
-export { Menu as DesktopMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -130,6 +128,7 @@ export type { IConfirmChildrenProps } from './views/components/confirm-part/inte
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { AnchoredContextMenu, type IContextMenuAnchorRect } from './views/components/context-menu/AnchoredContextMenu';
 export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
+export { ContextMenuPanel } from './views/components/context-menu/ContextMenuPanel';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
 export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
 export { FloatDomSingle } from './views/components/dom/FloatDom';

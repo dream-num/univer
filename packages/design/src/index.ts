@@ -41,7 +41,6 @@ export { HoverCard, type IHoverCardProps } from './components/hover-card/HoverCa
 export { type IInputNumberProps, InputNumber } from './components/input-number/InputNumber';
 export { type IInputProps, Input } from './components/input/Input';
 export { type IKBDProps, KBD } from './components/kbd/Kbd';
-export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu, TinyMenuGroup } from './components/menu';
 export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message/Message';
 export { type IPagerProps, Pager } from './components/pager/Pager';
 export { type IPopupProps, Popup } from './components/popup';

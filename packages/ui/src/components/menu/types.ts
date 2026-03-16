@@ -14,5 +14,19 @@
  * limitations under the License.
  */
 
-export { Menu, MenuItem, MenuItemGroup, SubMenu, TinyMenuGroup } from './Menu';
-export type { MenuRef } from 'rc-menu';
+import type { IValueOption } from '../../services/menu/menu';
+
+export interface IBaseMenuProps {
+    parentKey?: string | number;
+    menuType?: string;
+
+    value?: string | number;
+    options?: IValueOption[];
+    /**
+     * The menu will show scroll on it over viewport height
+     * Recommend that you use this prop when displaying menu overlays in Dropdown
+     */
+    overViewport?: 'scroll';
+    onOptionSelect?: (option: IValueOption) => void;
+    style?: React.CSSProperties;
+}

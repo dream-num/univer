@@ -6,34 +6,19 @@ on:
             - dev
 
 jobs:
-    update-submodules:
+    dispatch-sync:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+            - name: Dispatch sync event to univer-pro
+              uses: peter-evans/repository-dispatch@v2
               with:
                   repository: dream-num/univer-pro
                   token: ${{ secrets.GH_TOKEN }}
-                  submodules: true
-
-            - name: Setup Node.js
-              uses: ./.github/actions/setup-node
-
-            - name: Update submodules (univer)
-              run: |
-                  git config --global user.email "actions@github.com"
-                  git config --global user.name "GitHub Actions"
-
-                  cd submodules/univer
-                  git checkout dev
-                  git pull
-                  commit_hash=$(git log -1 --pretty=format:"%h")
-
-                  cd ../../
-                  pnpm install --no-frozen-lockfile
-
-                  git add -A
-                  git commit -m "chore(submodules): update submodules($commit_hash)" || exit 0
-                  git push
+                  event-type: sync-univer
+                  client-payload: >
+                      {
+                          "ref": "${{ github.ref_name }}",
+                          "sha": "${{ github.sha }}"
+                      }

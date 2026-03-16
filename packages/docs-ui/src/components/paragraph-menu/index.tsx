@@ -124,7 +124,7 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                         }}
                     >
                         <ContextMenuPanel
-                            className="univer-w-[212px] univer-min-w-[212px] univer-max-w-[212px]"
+                            className="univer-w-[212px]"
                             menuType={ContextMenuPosition.PARAGRAPH}
                             onOptionSelect={(params) => {
                                 const { label: id, commandId, value } = params;

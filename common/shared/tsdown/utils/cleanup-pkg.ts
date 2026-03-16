@@ -17,7 +17,6 @@
 /* eslint-disable max-lines-per-function */
 import type { IPackageJson } from '../types';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import fs from 'fs-extra';
 import sortKeys from 'sort-keys';
 import * as ts from 'typescript';
@@ -47,6 +46,7 @@ interface IDerivedDependencyGroups {
 
 const SOURCE_EXTS = new Set(['.ts', '.tsx']);
 const TEST_FILE_RE = /\.(spec|test)\.[cm]?tsx?$/;
+const IMMUTABLE_MANAGED_DEPENDENCIES = new Set(['@univerjs/icons', '@univerjs/icons-svg', '@univerjs/protocol']);
 
 function filterPackageName(packageName: string): string {
     if (packageName.startsWith('@univerjs/')) {
@@ -62,9 +62,13 @@ function isManagedUniverPackage(packageName: string) {
     return packageName.startsWith('@univerjs/') || packageName.startsWith('@univerjs-pro/');
 }
 
+function shouldPreserveExistingDependency(packageName: string) {
+    return !isManagedUniverPackage(packageName) || IMMUTABLE_MANAGED_DEPENDENCIES.has(packageName);
+}
+
 function mergePreservingNonUniver(existing: StringMap | undefined, next: StringMap) {
     const preserved = Object.fromEntries(
-        Object.entries(existing ?? {}).filter(([name]) => !isManagedUniverPackage(name))
+        Object.entries(existing ?? {}).filter(([name]) => shouldPreserveExistingDependency(name))
     ) as StringMap;
 
     return sortKeys({ ...preserved, ...next });
@@ -83,12 +87,6 @@ function assignDependencyGroup(
     }
 
     pkg[key] = merged;
-}
-
-function readInfraSharedPackageJson(): { devDependencies?: StringMap } {
-    const here = path.dirname(fileURLToPath(import.meta.url));
-    const pkgPath = path.resolve(here, '..', '..', 'package.json');
-    return fs.readJSONSync(pkgPath);
 }
 
 function isTestSourceFile(filePath: string) {
@@ -278,22 +276,15 @@ function resolvePeerDepVersion(value: PeerDepValue): { name: string; version: st
     return { name, optional, version };
 }
 
-function resolveUniverDependencyVersion(name: string, isPro: boolean, localDevDependencies: StringMap) {
-    if (!['@univerjs/icons', '@univerjs/icons-svg', '@univerjs/protocol'].includes(name)) {
-        return 'workspace:*';
+function resolveUniverDependencyVersion(name: string) {
+    if (IMMUTABLE_MANAGED_DEPENDENCIES.has(name)) {
+        return undefined;
     }
 
-    if (name === '@univerjs/protocol' && isPro) {
-        return 'workspace:*';
-    }
-
-    return localDevDependencies[name];
+    return 'workspace:*';
 }
 
 function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): IDerivedDependencyGroups {
-    const isPro = packageJson.name.startsWith('@univerjs-pro/');
-    const infraSharedPkg = readInfraSharedPackageJson();
-    const localDevDependencies = (infraSharedPkg.devDependencies ?? {}) as StringMap;
     const declaredDependencies = packageJson.dependencies ?? {};
     const declaredOptionalDependencies = (packageJson as CleanupPackageJson).optionalDependencies ?? {};
     const peerDeps: StringMap = {};
@@ -348,7 +339,7 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
             continue;
         }
 
-        const dependencyVersion = resolveUniverDependencyVersion(name, isPro, localDevDependencies);
+        const dependencyVersion = resolveUniverDependencyVersion(name);
         if (dependencyVersion) {
             deps[name] = dependencyVersion;
         }
@@ -359,7 +350,7 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
             continue;
         }
 
-        const dependencyVersion = resolveUniverDependencyVersion(name, isPro, localDevDependencies);
+        const dependencyVersion = resolveUniverDependencyVersion(name);
         if (dependencyVersion) {
             devDeps[name] = dependencyVersion;
         }

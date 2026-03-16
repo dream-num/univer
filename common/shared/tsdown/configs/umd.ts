@@ -17,6 +17,7 @@
 import type { UserConfig } from 'tsdown';
 import type { IEntryConfig } from '../types';
 import { defineConfig } from 'tsdown';
+import { peerDepsMap } from '../data/peer-deps';
 import { createOutputAliasPlugin } from '../plugins/output-alias';
 import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
@@ -30,18 +31,9 @@ export interface ICreateUmdConfigOptions {
     plugins: any[];
 }
 
-const UMD_GLOBALS: Record<string, string> = {
-    '@wendellhu/redi': '@wendellhu/redi',
-    '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',
-    'monaco-editor': 'monaco',
-    react: 'React',
-    'react-dom': 'ReactDOM',
-    'react-dom/client': 'ReactDOM',
-    'react/jsx-runtime': 'React',
-    rxjs: 'rxjs',
-    'rxjs/operators': 'rxjs.operators',
-    vue: 'Vue',
-};
+const UMD_GLOBALS: Record<string, string> = Object.fromEntries(
+    Object.entries(peerDepsMap).map(([source, value]) => [source, value.global])
+);
 
 function convertLibNameFromPackageName(name: string) {
     return name

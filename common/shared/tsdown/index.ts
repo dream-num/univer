@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { UserConfig } from 'tsdown';
 import type { TModuleFormat } from './configs/module';
 import type { IBuildContext, IBuildOptions } from './types';
 import { existsSync, rmSync } from 'node:fs';
@@ -25,6 +24,7 @@ import { createModuleConfig } from './configs/module';
 import { createUmdConfig } from './configs/umd';
 import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants';
 import { createBaseConfig, createInputOptions, createInputPlugins } from './utils/base-config';
+import { cleanupPackageJson } from './utils/cleanup-pkg';
 import { getEntries } from './utils/entries';
 import { removeCssArtifacts } from './utils/files';
 import { createExternalPackages, readPackageJson } from './utils/package';
@@ -51,8 +51,7 @@ function createBuildContext(packageDir: string, options: IBuildOptions): IBuildC
 /**
  * Expands the package context into all required tsdown configs.
  */
-function createConfigs(packageDir: string, options: IBuildOptions): UserConfig[] {
-    const context = createBuildContext(packageDir, options);
+function createConfigs(context: IBuildContext, options: IBuildOptions) {
     const baseConfig = createBaseConfig(context);
     const moduleFormats: TModuleFormat[] = ['esm', 'cjs'];
     const enableObfuscation = context.packageJson.name.startsWith('@univerjs-pro/');
@@ -109,7 +108,9 @@ export async function build(options: IBuildOptions = {}) {
 
     removeCssArtifacts(path.join(packageDir, BUILD_OUTPUT_ROOT));
 
-    const configs = createConfigs(packageDir, options);
+    const context = createBuildContext(packageDir, options);
+    const configs = createConfigs(context, options);
     await Promise.all(configs.map((config) => tsdownBuild(config)));
+    cleanupPackageJson(packageDir, context.packageJson);
     emitPublishPackageJson(packageDir);
 }

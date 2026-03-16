@@ -911,9 +911,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
       postcss:
         specifier: ^8.5.8
         version: 8.5.8
@@ -2253,9 +2250,6 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
-      rxjs:
-        specifier: ^7.8.2
-        version: 7.8.2
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2266,6 +2260,9 @@ importers:
       react:
         specifier: 19.2.4
         version: 19.2.4
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
       tailwindcss:
         specifier: 3.4.18
         version: 3.4.18
@@ -2946,9 +2943,6 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
-      react:
-        specifier: 19.2.4
-        version: 19.2.4
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

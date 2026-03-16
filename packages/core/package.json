@@ -71,7 +71,6 @@
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
-        "@wendellhu/redi": "1.1.1",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

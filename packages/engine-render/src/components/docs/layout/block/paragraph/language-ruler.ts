@@ -102,11 +102,11 @@ export function emojiHandler(
     paragraph: IParagraph
 ) {
     const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-    const seg = getFirstGrapheme(charArray) || charArray[0];
+    const firstGrapheme = getFirstGrapheme(charArray) || charArray[0];
 
     return {
-        step: seg.length,
-        glyphGroup: [createSkeletonLetterGlyph(seg, config)],
+        step: firstGrapheme.length,
+        glyphGroup: [createSkeletonLetterGlyph(firstGrapheme, config)],
     };
 }
 

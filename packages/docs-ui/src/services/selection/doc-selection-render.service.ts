@@ -419,11 +419,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             return;
         }
 
-        // Firefox do not support Segmenter in an old version, so you need a Segmenter polyfill if you want use it in Firefox.
-        if (!Intl.Segmenter) {
-            throw new Error('Intl.Segmenter is not supported in this environment. Please use a polyfill for Intl.Segmenter.');
-        }
-
         // Create a locale-specific word segmenter
         const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
         const segments = segmenter.segment(content);

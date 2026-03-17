@@ -43,14 +43,18 @@ import {
     DeleteRangeProtectionMutation,
     DeleteWorksheetProtectionCommand,
     RangeProtectionRuleModel,
+    RemoveColCommand,
     RemoveSheetCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
     SetItalicCommand,
+    SetRangeValuesCommand,
     SetStrikeThroughCommand,
+    SetStyleCommand,
     SetTextColorCommand,
     SetUnderlineCommand,
+    SheetPermissionCheckController,
     SheetsSelectionsService,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
@@ -59,6 +63,7 @@ import { SHEET_VIEW_KEY, SHEET_ZOOM_RANGE } from '../../../common/keys';
 import { AutoWidthController } from '../../../controllers/auto-width.controller';
 import * as menuUtils from '../../../menu/utils';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { IRepeatLastActionService } from '../../../services/repeat-last-action.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SetScrollOperation } from '../../operations/scroll.operation';
 import { SetZoomRatioOperation } from '../../operations/set-zoom-ratio.operation';
@@ -88,6 +93,7 @@ import {
     ViewSheetPermissionFromSheetBarCommand,
 } from '../range-protection.command';
 import { RemoveSheetConfirmCommand } from '../remove-sheet-confirm.command';
+import { RepeatLastActionCommand } from '../repeat-last-action.command';
 import { ResetScrollCommand, ScrollCommand, ScrollToCellCommand, SetScrollRelativeCommand } from '../set-scroll.command';
 import { SetWorksheetColAutoWidthCommand } from '../set-worksheet-auto-col-width.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../set-zoom-ratio.command';
@@ -222,6 +228,160 @@ describe('sheets-ui command behaviors', () => {
             [SheetsSelectionsService, { getCurrentLastSelection: () => null }],
         ]);
         expect(await SetRangeFontIncreaseCommand.handler(noSelectionAccessor, undefined as any)).toBe(false);
+    });
+
+    it('replays the stored style action against the current selection', async () => {
+        const executeCommand = vi.fn(async () => true);
+        const repeatLastActionService = {
+            getAction: vi.fn(() => ({
+                kind: 'command',
+                commandId: SetStyleCommand.id,
+                params: {
+                    style: {
+                        type: 'bl',
+                        value: true,
+                    },
+                },
+                permission: 'cellStyle',
+                selectionRequirement: 'none',
+            })),
+            runWithoutRecording: vi.fn(async (callback: () => Promise<boolean>) => callback()),
+        };
+        const permissionCheckController = {
+            permissionCheckWithRanges: vi.fn(() => true),
+            blockExecuteWithoutPermission: vi.fn(),
+        };
+
+        const accessor = createAccessor([
+            [ICommandService, { executeCommand }],
+            [IRepeatLastActionService, repeatLastActionService],
+            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 } }] }],
+            [IUniverInstanceService, {
+                getCurrentUnitOfType: () => ({
+                    getUnitId: () => 'workbook-1',
+                    getActiveSheet: () => ({
+                        getSheetId: () => 'sheet-1',
+                        getMaxRows: () => 100,
+                        getMaxColumns: () => 50,
+                    }),
+                }),
+            }],
+            [LocaleService, { t: vi.fn((key: string) => key) }],
+            [SheetPermissionCheckController, permissionCheckController],
+        ]);
+
+        expect(await RepeatLastActionCommand.handler(accessor, undefined as any)).toBe(true);
+        expect(permissionCheckController.permissionCheckWithRanges).toHaveBeenCalledTimes(1);
+        expect(executeCommand).toHaveBeenCalledWith(SetStyleCommand.id, {
+            style: {
+                type: 'bl',
+                value: true,
+            },
+        });
+    });
+
+    it('fails silently when the stored structural action does not match the current selection shape', async () => {
+        const executeCommand = vi.fn(async () => true);
+        const accessor = createAccessor([
+            [ICommandService, { executeCommand }],
+            [IRepeatLastActionService, {
+                getAction: () => ({
+                    kind: 'command',
+                    commandId: RemoveColCommand.id,
+                    permission: 'none',
+                    selectionRequirement: 'fullColumns',
+                }),
+                runWithoutRecording: async (callback: () => Promise<boolean>) => callback(),
+            }],
+            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 1 } }] }],
+            [IUniverInstanceService, {
+                getCurrentUnitOfType: () => ({
+                    getUnitId: () => 'workbook-1',
+                    getActiveSheet: () => ({
+                        getSheetId: () => 'sheet-1',
+                        getMaxRows: () => 100,
+                        getMaxColumns: () => 50,
+                    }),
+                }),
+            }],
+            [LocaleService, { t: vi.fn((key: string) => key) }],
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges: vi.fn(() => true),
+                blockExecuteWithoutPermission: vi.fn(),
+            }],
+        ]);
+
+        expect(await RepeatLastActionCommand.handler(accessor, undefined as any)).toBe(false);
+        expect(executeCommand).not.toHaveBeenCalled();
+    });
+
+    it('replays stored value and numfmt actions using the current selection coordinates', async () => {
+        const executeCommand = vi.fn(async () => true);
+        const selectionRange = { startRow: 3, endRow: 4, startColumn: 5, endColumn: 6 };
+        const permissionCheckController = {
+            permissionCheckWithRanges: vi.fn(() => true),
+            blockExecuteWithoutPermission: vi.fn(),
+        };
+        const baseAccessor = [
+            [ICommandService, { executeCommand }],
+            [SheetsSelectionsService, { getCurrentSelections: () => [{ range: selectionRange }] }],
+            [IUniverInstanceService, {
+                getCurrentUnitOfType: () => ({
+                    getUnitId: () => 'workbook-1',
+                    getActiveSheet: () => ({
+                        getSheetId: () => 'sheet-1',
+                        getMaxRows: () => 100,
+                        getMaxColumns: () => 50,
+                    }),
+                }),
+            }],
+            [LocaleService, { t: vi.fn((key: string) => key) }],
+            [SheetPermissionCheckController, permissionCheckController],
+        ] as Array<[unknown, unknown]>;
+
+        const valueAccessor = createAccessor([
+            ...baseAccessor,
+            [IRepeatLastActionService, {
+                getAction: () => ({
+                    kind: 'set-range-values',
+                    value: { v: 'repeat', t: 1 },
+                    permission: 'cellValue',
+                    selectionRequirement: 'none',
+                }),
+                runWithoutRecording: async (callback: () => Promise<boolean>) => callback(),
+            }],
+        ]);
+
+        expect(await RepeatLastActionCommand.handler(valueAccessor, undefined as any)).toBe(true);
+        expect(executeCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, {
+            value: { v: 'repeat', t: 1 },
+        });
+
+        executeCommand.mockClear();
+
+        const numfmtAccessor = createAccessor([
+            ...baseAccessor,
+            [IRepeatLastActionService, {
+                getAction: () => ({
+                    kind: 'set-numfmt',
+                    pattern: '0.00%',
+                    type: 'percent',
+                    permission: 'cellStyle',
+                    selectionRequirement: 'none',
+                }),
+                runWithoutRecording: async (callback: () => Promise<boolean>) => callback(),
+            }],
+        ]);
+
+        expect(await RepeatLastActionCommand.handler(numfmtAccessor, undefined as any)).toBe(true);
+        expect(executeCommand).toHaveBeenCalledWith('sheet.command.numfmt.set.numfmt', {
+            values: [
+                { row: 3, col: 5, pattern: '0.00%', type: 'percent' },
+                { row: 3, col: 6, pattern: '0.00%', type: 'percent' },
+                { row: 4, col: 5, pattern: '0.00%', type: 'percent' },
+                { row: 4, col: 6, pattern: '0.00%', type: 'percent' },
+            ],
+        });
     });
 
     it('updates header sizes and custom header components', async () => {

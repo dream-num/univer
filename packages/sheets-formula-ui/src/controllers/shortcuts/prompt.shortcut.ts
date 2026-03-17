@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
+import { EDITOR_ACTIVATED, FOCUSING_SHEET, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { whenFormulaEditorActivated } from '@univerjs/sheets-ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
@@ -103,8 +105,16 @@ export function promptSelectionShortcutItemCtrlAndShift() {
 export const ChangeRefToAbsoluteShortcut: IShortcutItem = {
     id: ReferenceAbsoluteOperation.id,
     binding: KeyCode.F4,
-    preconditions: (contextService) => whenFormulaEditorActivated(contextService),
+    preconditions: (contextService) => whenSheetEditorActivated(contextService),
 };
+
+function whenSheetEditorActivated(contextService: IContextService): boolean {
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        contextService.getContextValue(EDITOR_ACTIVATED)
+    );
+}
 
 export function singleEditorPromptSelectionShortcutItem() {
     const shortcutList: IShortcutItem[] = [];

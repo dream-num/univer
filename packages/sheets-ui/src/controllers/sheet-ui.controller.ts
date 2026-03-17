@@ -50,6 +50,7 @@ import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
+import { RepeatLastActionCommand } from '../commands/commands/repeat-last-action.command';
 import {
     ApplyFormatPainterCommand,
     SetInfiniteFormatPainterCommand,
@@ -107,6 +108,7 @@ import {
     EditorDeleteLeftShortcutInActive,
     EditorDeleteRightShortcut,
     generateArrowSelectionShortCutItem,
+    RepeatLastActionShortcut,
     ShiftEditorDeleteLeftShortcut,
     StartEditWithF2Shortcut,
 } from './shortcuts/editor.shortcut';
@@ -263,6 +265,7 @@ export class SheetUIController extends Disposable {
             SetWorksheetColAutoWidthCommand,
             SetRowHeaderWidthCommand,
             SetColumnHeaderHeightCommand,
+            RepeatLastActionCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -319,6 +322,7 @@ export class SheetUIController extends Disposable {
             ShiftDeleteSelectionValueShortcutItem,
             ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
+            RepeatLastActionShortcut,
             StartEditWithF2Shortcut,
             EditorCursorTabShortcut,
             EditorBreakLineShortcut,

@@ -20,7 +20,7 @@ import { BooleanNumber } from '@univerjs/core';
 // @ts-ignore
 import { parse } from 'opentype.js/dist/opentype.module';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
-import { EMOJI_CHECK, getFirstGrapheme } from '../../../../basics/tools';
+import { getFirstGrapheme, isEmojiGrapheme } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';
 import { prepareTextChunks } from './utils';
 
@@ -118,7 +118,7 @@ function shapeChunk(
             const subStr = content.substring(start);
             const firstGrapheme = getFirstGrapheme(subStr);
 
-            if (firstGrapheme && EMOJI_CHECK.test(firstGrapheme)) {
+            if (firstGrapheme && isEmojiGrapheme(firstGrapheme)) {
                 let acc = 0;
                 do {
                     acc += chars[gi].length;
@@ -133,7 +133,7 @@ function shapeChunk(
                 let nextGlyph = glyphs[gi + 1];
                 let nextChar = chars[gi + 1];
 
-                while (nextGlyph?.index === 0 && !EMOJI_CHECK.test(nextChar)) {
+                while (nextGlyph?.index === 0 && !isEmojiGrapheme(nextChar)) {
                     startIndex += chars[gi].length;
                     gi++;
                     nextGlyph = glyphs[gi + 1];

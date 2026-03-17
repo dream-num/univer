@@ -390,24 +390,41 @@ export function hasLatinExtendedB(text: string) {
     return true;
 }
 
-export function getFirstGrapheme(str: string): string | null {
-    if (!Intl.Segmenter) {
-        // Firefox do not support Segmenter in an old version, so you need a Segmenter polyfill if you want use it in Firefox.
-        throw new Error('Intl.Segmenter is not supported in this environment. Please use a polyfill for Intl.Segmenter.');
-    }
+if (!Intl.Segmenter) {
+    // Firefox do not support Segmenter in an old version, so you need a Segmenter polyfill if you want use it in Firefox.
+    throw new Error('Intl.Segmenter is not supported in this environment. Please use a polyfill for Intl.Segmenter.');
+}
 
-    // Emoji check logic
-    const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+// Emoji check logic
+const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
-    const it = segmenter.segment(str)[Symbol.iterator]();
+export function getFirstGrapheme(text: string): string | null {
+    const it = segmenter.segment(text)[Symbol.iterator]();
     return it.next().value?.segment ?? null;
 }
 
-export const EMOJI_CHECK = /\p{Extended_Pictographic}|\p{Emoji}/u;
+export function isEmojiGrapheme(grapheme: string): boolean {
+    // emoji + ZWJ + skin tone
+    if (/\p{Extended_Pictographic}/u.test(grapheme)) {
+        return true;
+    }
 
-export function startWithEmoji(text: string) {
+    // flag 🇸🇬
+    if (/^\p{Regional_Indicator}{2}$/u.test(grapheme)) {
+        return true;
+    }
+
+    // keycap 1️⃣ #️⃣ *️⃣
+    if (/^[0-9#*]\uFE0F?\u20E3$/u.test(grapheme)) {
+        return true;
+    }
+
+    return false;
+}
+
+export function startWithEmoji(text: string): boolean {
     const first = getFirstGrapheme(text);
-    return first ? EMOJI_CHECK.test(first) : false;
+    return first ? isEmojiGrapheme(first) : false;
 }
 
 export function hasArabic(text: string) {

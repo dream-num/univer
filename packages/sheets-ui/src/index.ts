@@ -168,3 +168,4 @@ export { SheetBar } from './views/sheet-bar/SheetBar';
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
 export { type IStatisticItem } from './views/status-bar/CopyableStatisticItem';
 export { functionDisplayNames } from './views/status-bar/CopyableStatisticItem';
+export { SheetCopyDownCommand, SheetCopyRightCommand } from '@univerjs/sheets';

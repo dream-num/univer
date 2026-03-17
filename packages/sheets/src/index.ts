@@ -70,7 +70,7 @@ export {
 export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';
 export { AppendRowCommand, type IAppendRowCommandParams } from './commands/commands/append-row.command';
-export { AutoClearContentCommand, AutoFillCommand, type IAutoClearContentCommand, type IAutoFillCommandParams } from './commands/commands/auto-fill.command';
+export { AutoClearContentCommand, AutoFillCommand, type IAutoClearContentCommand, type IAutoFillCommandParams, SheetCopyDownCommand, SheetCopyRightCommand } from './commands/commands/auto-fill.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand, type IClearSelectionContentCommandParams } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';

@@ -65,6 +65,16 @@ const submenuOverlapOffset = 2;
 const submenuVisualGap = 20;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 
+type MenuLabel = IMenuItem['label'] | IValueOption['label'];
+
+function isNonSelectableLabel(label?: MenuLabel) {
+    return typeof label === 'object' && label?.selectable === false;
+}
+
+function isNonHoverableLabel(label?: MenuLabel) {
+    return typeof label === 'object' && label?.hoverable === false;
+}
+
 export function ContextMenuPanel(props: IContextMenuPanelProps) {
     const { menuType, menuSessionVersion = 0, className, onOptionSelect } = props;
     const menuManagerService = useDependency(IMenuManagerService);
@@ -395,6 +405,11 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     );
 
     const canExecuteItem = menuItem.type === MenuItemType.BUTTON || menuItem.type === MenuItemType.BUTTON_SELECTOR;
+    const renderAsContainer = isNonSelectableLabel(menuItem.label);
+    const interactiveItemClassName = clsx(itemClassName, isNonHoverableLabel(menuItem.label) && `
+      hover:univer-bg-transparent
+      dark:hover:!univer-bg-transparent
+    `);
 
     return (
         <div
@@ -416,40 +431,59 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                 }
             }}
         >
-            <button
-                type="button"
-                className={itemClassName}
-                disabled={disabled}
-                onClick={() => {
-                    if (hasSubmenu) {
-                        setSubmenuPositionReady(false);
-                        setSubmenuVisible(true);
-                        return;
-                    }
+            {renderAsContainer
+                ? (
+                    <div
+                        className={interactiveItemClassName}
+                        aria-disabled={disabled}
+                    >
+                        {contentNode}
+                        {hasSubmenu && (
+                            <MoreIcon
+                                className={`
+                                  univer-size-3.5 univer-text-gray-400
+                                  dark:!univer-text-gray-200
+                                `}
+                            />
+                        )}
+                    </div>
+                )
+                : (
+                    <button
+                        type="button"
+                        className={interactiveItemClassName}
+                        disabled={disabled}
+                        onClick={() => {
+                            if (hasSubmenu) {
+                                setSubmenuPositionReady(false);
+                                setSubmenuVisible(true);
+                                return;
+                            }
 
-                    if (!canExecuteItem) {
-                        return;
-                    }
+                            if (!canExecuteItem) {
+                                return;
+                            }
 
-                    const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
-                    onOptionSelect?.({
-                        commandId: item.commandId,
-                        value: inputValue,
-                        id: item.id,
-                        label: menuKey,
-                    });
-                }}
-            >
-                {contentNode}
-                {hasSubmenu && (
-                    <MoreIcon
-                        className={`
-                          univer-size-3.5 univer-text-gray-400
-                          dark:!univer-text-gray-200
-                        `}
-                    />
+                            const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
+                            onOptionSelect?.({
+                                commandId: item.commandId,
+                                value: inputValue,
+                                id: item.id,
+                                label: menuKey,
+                            });
+                        }}
+                    >
+                        {contentNode}
+                        {hasSubmenu && (
+                            <MoreIcon
+                                className={`
+                                  univer-size-3.5 univer-text-gray-400
+                                  dark:!univer-text-gray-200
+                                `}
+                            />
+                        )}
+                    </button>
                 )}
-            </button>
 
             {hasSubmenu && submenuVisible && (
                 submenuPortalContainer
@@ -497,38 +531,26 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         {selections.map((option, index) => {
                                             const optionKey = `${menuItem.id}-${option.label ?? option.id}-${index}`;
                                             const optionSelected = typeof inputValue !== 'undefined' && String(inputValue) === String(option.value);
-
-                                            return (
-                                                <button
-                                                    key={optionKey}
-                                                    type="button"
-                                                    className={clsx(
-                                                        `
-                                                          univer-relative univer-flex univer-min-h-8 univer-w-full
-                                                          univer-items-center univer-rounded-md univer-border-none
-                                                          univer-bg-transparent univer-px-2 univer-text-left
-                                                          univer-text-sm
-                                                          dark:!univer-text-white
-                                                        `,
-                                                        option.disabled
-                                                            ? 'univer-cursor-not-allowed univer-opacity-60'
-                                                            : `
-                                                              univer-cursor-pointer
-                                                              hover:univer-bg-gray-50
-                                                              dark:hover:!univer-bg-gray-600
-                                                            `
-                                                    )}
-                                                    disabled={option.disabled}
-                                                    onClick={() => {
-                                                        onOptionSelect?.({
-                                                            ...option,
-                                                            id: menuItem.id,
-                                                            label: menuKey,
-                                                            commandId: option.commandId,
-                                                        });
-                                                    }}
-                                                >
-                                                    {optionSelected && (
+                                            const optionSelectable = !isNonSelectableLabel(option.label);
+                                            const optionHoverable = !isNonHoverableLabel(option.label);
+                                            const optionClassName = clsx(
+                                                `
+                                                  univer-relative univer-flex univer-min-h-8 univer-w-full
+                                                  univer-items-center univer-rounded-md univer-border-none
+                                                  univer-bg-transparent univer-px-2 univer-text-left univer-text-sm
+                                                  dark:!univer-text-white
+                                                `,
+                                                option.disabled
+                                                    ? 'univer-cursor-not-allowed univer-opacity-60'
+                                                    : optionHoverable && `
+                                                      univer-cursor-pointer
+                                                      hover:univer-bg-gray-50
+                                                      dark:hover:!univer-bg-gray-600
+                                                    `
+                                            );
+                                            const optionContentNode = (
+                                                <>
+                                                    {optionSelectable && optionSelected && (
                                                         <CheckMarkIcon
                                                             className="
                                                               univer-absolute univer-left-0 univer-size-4
@@ -537,7 +559,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                         />
                                                     )}
                                                     <span
-                                                        className={clsx(contentClassName, optionSelected && `
+                                                        className={clsx(contentClassName, optionSelectable && optionSelected && `
                                                           univer-pl-4
                                                         `)}
                                                     >
@@ -557,7 +579,38 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                             }}
                                                         />
                                                     </span>
-                                                </button>
+                                                </>
+                                            );
+
+                                            return (
+                                                optionSelectable
+                                                    ? (
+                                                        <button
+                                                            key={optionKey}
+                                                            type="button"
+                                                            className={optionClassName}
+                                                            disabled={option.disabled}
+                                                            onClick={() => {
+                                                                onOptionSelect?.({
+                                                                    ...option,
+                                                                    id: menuItem.id,
+                                                                    label: menuKey,
+                                                                    commandId: option.commandId,
+                                                                });
+                                                            }}
+                                                        >
+                                                            {optionContentNode}
+                                                        </button>
+                                                    )
+                                                    : (
+                                                        <div
+                                                            key={optionKey}
+                                                            className={optionClassName}
+                                                            aria-disabled={option.disabled}
+                                                        >
+                                                            {optionContentNode}
+                                                        </div>
+                                                    )
                                             );
                                         })}
                                     </div>

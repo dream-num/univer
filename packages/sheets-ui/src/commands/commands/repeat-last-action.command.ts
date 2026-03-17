@@ -21,7 +21,6 @@ import {
     ICommandService,
     IUniverInstanceService,
     LocaleService,
-    UniverInstanceType,
 } from '@univerjs/core';
 import {
     getSheetCommandTarget,

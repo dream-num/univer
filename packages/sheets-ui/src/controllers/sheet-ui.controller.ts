@@ -51,6 +51,12 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import {
+    DeleteSelectedRowsOrColsByShortcutCommand,
+    InsertSelectedRowsOrColsByShortcutCommand,
+    SelectColumnsByShortcutCommand,
+    SelectRowsByShortcutCommand,
+} from '../commands/commands/row-col-shortcut.command';
+import {
     ApplyFormatPainterCommand,
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
@@ -111,7 +117,14 @@ import {
     ShiftEditorDeleteLeftShortcut,
     StartEditWithF2Shortcut,
 } from './shortcuts/editor.shortcut';
-import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
+import {
+    DeleteSelectedRowsOrColsByShortcutItem,
+    InsertSelectedRowsOrColsByShortcutItem,
+    SelectColumnsByShortcutItem,
+    SelectRowsByShortcutItem,
+    SetColHiddenShortcutItem,
+    SetRowHiddenShortcutItem,
+} from './shortcuts/operation.shortcut';
 import {
     ExpandSelectionDownShortcutItem,
     ExpandSelectionEndDownShortcutItem,
@@ -197,6 +210,10 @@ export class SheetUIController extends Disposable {
             ExpandSelectionCommand,
             MoveSelectionCommand,
             MoveSelectionEnterAndTabCommand,
+            SelectColumnsByShortcutCommand,
+            SelectRowsByShortcutCommand,
+            InsertSelectedRowsOrColsByShortcutCommand,
+            DeleteSelectedRowsOrColsByShortcutCommand,
             RenameSheetOperation,
             RemoveSheetConfirmCommand,
             RemoveRowConfirmCommand,
@@ -248,7 +265,6 @@ export class SheetUIController extends Disposable {
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
             SidebarDefinedNameOperation,
-
             // permission
             SheetPermissionOpenPanelOperation,
             SheetPermissionOpenDialogOperation,
@@ -337,6 +353,10 @@ export class SheetUIController extends Disposable {
             // operation shortcuts
             SetRowHiddenShortcutItem,
             SetColHiddenShortcutItem,
+            SelectColumnsByShortcutItem,
+            SelectRowsByShortcutItem,
+            InsertSelectedRowsOrColsByShortcutItem,
+            DeleteSelectedRowsOrColsByShortcutItem,
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });

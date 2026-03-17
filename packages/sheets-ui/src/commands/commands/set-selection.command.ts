@@ -24,6 +24,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     expandToContinuousRange,
     getCellAtRowCol,
+    getPrimaryForRange,
     getSelectionsService,
     getSheetCommandTarget,
     SelectionMoveType,
@@ -93,6 +94,18 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 
         const { direction, jumpOver, extra } = params;
         let { range, primary } = selection;
+
+        if ((range.rangeType === RANGE_TYPE.ROW || range.rangeType === RANGE_TYPE.COLUMN)) {
+            const anchorPrimary = primary ?? getPrimaryForRange(range, worksheet);
+            range = {
+                startRow: anchorPrimary.actualRow,
+                endRow: anchorPrimary.actualRow,
+                startColumn: anchorPrimary.actualColumn,
+                endColumn: anchorPrimary.actualColumn,
+                rangeType: RANGE_TYPE.NORMAL,
+            };
+            primary = anchorPrimary;
+        }
 
         if (extra === 'formula-editor') {
             // When in formula editor, if the current cell is a merged cell, expand the selection to the merged cell range for calculation.

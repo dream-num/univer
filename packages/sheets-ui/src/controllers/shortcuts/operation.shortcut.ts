@@ -17,6 +17,12 @@
 import type { IShortcutItem } from '@univerjs/ui';
 import { SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+import {
+    DeleteSelectedRowsOrColsByShortcutCommand,
+    InsertSelectedRowsOrColsByShortcutCommand,
+    SelectColumnsByShortcutCommand,
+    SelectRowsByShortcutCommand,
+} from '../../commands/commands/row-col-shortcut.command';
 import { whenSheetEditorFocused } from './utils';
 
 export const SetRowHiddenShortcutItem: IShortcutItem = {
@@ -31,4 +37,28 @@ export const SetColHiddenShortcutItem: IShortcutItem = {
     // when focusing on any other input tag do not trigger this shortcut
     preconditions: (contextService) => whenSheetEditorFocused(contextService),
     binding: KeyCode.Digit0 | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+};
+
+export const SelectColumnsByShortcutItem: IShortcutItem = {
+    id: SelectColumnsByShortcutCommand.id,
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
+    binding: KeyCode.SPACE | MetaKeys.CTRL_COMMAND,
+};
+
+export const SelectRowsByShortcutItem: IShortcutItem = {
+    id: SelectRowsByShortcutCommand.id,
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
+    binding: KeyCode.SPACE | MetaKeys.SHIFT,
+};
+
+export const InsertSelectedRowsOrColsByShortcutItem: IShortcutItem = {
+    id: InsertSelectedRowsOrColsByShortcutCommand.id,
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
+    binding: KeyCode.EQUAL | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+};
+
+export const DeleteSelectedRowsOrColsByShortcutItem: IShortcutItem = {
+    id: DeleteSelectedRowsOrColsByShortcutCommand.id,
+    preconditions: (contextService) => whenSheetEditorFocused(contextService),
+    binding: KeyCode.MINUS | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
 };

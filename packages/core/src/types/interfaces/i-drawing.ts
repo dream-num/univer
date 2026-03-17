@@ -131,7 +131,6 @@ export interface IDrawingParam extends IDrawingSearch {
     groupBaseBound?: Nullable<IGroupBaseBound>;
 }
 
-
 /**
  * Describes a single group node's direct children in a group hierarchy.
  */

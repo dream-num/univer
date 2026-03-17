@@ -168,7 +168,7 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
 
         // Only the root group's absolute position changes; all other drawings keep their
         // group-relative transforms as-is.
-        const newTransform = { ...(origRootGroup.transform ?? {}), left: pasteRect.startX, top: pasteRect.startY };
+        const newTransform = { ...(origRootGroup.transform), left: pasteRect.startX, top: pasteRect.startY };
 
         const allDrawings: ISheetDrawing[] = [
             ...(cloned.flatChildren ?? []).map((d) => ({ ...d, unitId, subUnitId } as ISheetDrawing)),

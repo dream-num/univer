@@ -359,7 +359,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return null;
         }
 
-        // 读取一次全数据，构建map，后续递归直接从map读取
+        // get all drawings in the same subUnit one time to avoid multiple times of data access when there are many drawings
         const allDrawings = this._getDrawingData(unitId, subUnitId);
         const groupDerivedDrawingsIdMap: Map<string, string[]> = new Map();
         Object.values(allDrawings).forEach((drawing) => {
@@ -375,8 +375,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         const groups: IDrawingParam[] = [];
         const nestedIdRecord: Record<string, IDrawingGroupNestedIds> = {};
 
-        // 保存了所有的非group的子元素，同时满足每个子元素在数组中的位置一定在父元素的前面
-        // flatChildren保存所有的非group的元素， 满足左序遍历的顺序
+        // It stores all non-grouped child elements, while ensuring that each child element is always positioned before its parent element in the repository.
+        // `flatChildren` stores all non-grouped elements, satisfying the left-order traversal order.
         const dfs = (param: IDrawingParam): void => {
             const { drawingId } = param;
             const childrenIds = groupDerivedDrawingsIdMap.get(drawingId) ?? [];

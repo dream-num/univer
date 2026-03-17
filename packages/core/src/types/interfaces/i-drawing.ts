@@ -113,7 +113,7 @@ export interface ITransformStateDisableOption {
     borderEnabled?: boolean;
 }
 
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform, ITransformStateDisableOption {}
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform, ITransformStateDisableOption { }
 
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;
@@ -131,4 +131,43 @@ export interface IDrawingParam extends IDrawingSearch {
     groupBaseBound?: Nullable<IGroupBaseBound>;
 }
 
+/**
+ * Describes a single group node's direct children in a group hierarchy.
+ */
+export interface IDrawingGroupNestedIds {
+    /** The drawing ID of the group itself. */
+    drawingId: string;
+    /**
+     * The drawing IDs of the direct children of this group (both group and
+     * non-group children). Does not include deeply-nested descendants.
+     */
+    children?: string[];
+}
+
+/**
+ * A flattened representation of a nested group hierarchy, produced by a
+ * post-order DFS traversal so that every child always appears before its
+ * parent in the respective arrays.
+ */
+export interface IDrawingGroupNestedParam {
+    /**
+     * A map from each group's drawingId to its {@link IDrawingGroupNestedIds}
+     * descriptor. Covers the root group and every nested sub-group. Look up
+     * any group's direct children in O(1) via `nestedIdRecord[groupId].children`.
+     */
+    nestedIdRecord: Record<string, IDrawingGroupNestedIds>;
+    /**
+     * All non-group (leaf) drawing params that belong anywhere in the group
+     * hierarchy. Post-order: a leaf always appears before the group that
+     * directly contains it.
+     */
+    flatChildren?: IDrawingParam[];
+    /**
+     * All group drawing params in the hierarchy (including the root group).
+     * Post-order: nested child groups appear before their parent group, so
+     * callers can safely iterate in order without dependency issues.
+     * The root group is always the last element.
+     */
+    groups: IDrawingParam[];
+}
 // #endregion

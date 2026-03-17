@@ -30,6 +30,7 @@ import {
     getCellPositionByIndex,
     getColor,
     getDPI,
+    getFirstGrapheme,
     getFontStyleString,
     getPointerPrefix,
     getScale,
@@ -306,5 +307,17 @@ describe('tools extra', () => {
         expect(GridType.LINES).toBeGreaterThanOrEqual(0);
         expect(BooleanNumber.TRUE).toBe(1);
         expect(NumberUnitType.PIXEL).toBeGreaterThanOrEqual(0);
+    });
+
+    it('Emoji test', () => {
+        expect(startWithEmoji('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe(true);
+        expect(startWithEmoji('1abc')).toBe(false);
+        expect(startWithEmoji('#tag')).toBe(false);
+        expect(startWithEmoji('1️⃣')).toBe(true);
+        expect(startWithEmoji('31️⃣2')).toBe(false);
+        expect(startWithEmoji('👨‍👩‍👧‍👦abc')).toBe(true);
+        expect(startWithEmoji('1👨‍👩‍👧‍👦abc')).toBe(false);
+        expect(getFirstGrapheme('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe('🐱‍🏍');
+        expect(getFirstGrapheme('👨‍👩‍👧‍👦abc')).toBe('👨‍👩‍👧‍👦');
     });
 });

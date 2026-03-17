@@ -98,6 +98,7 @@ import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
+import { CopyDownShortcutItem, CopyRightShortcutItem } from './shortcuts/copy-fill.shortcut';
 import {
     EditorBreakLineShortcut,
     EditorCursorCtrlEnterShortcut,
@@ -332,6 +333,10 @@ export class SheetUIController extends Disposable {
             EditorCursorEscShortcut,
             EditorCursorCtrlEnterShortcut,
             ShiftEditorDeleteLeftShortcut,
+
+            // copy fill shortcuts
+            CopyDownShortcutItem,
+            CopyRightShortcutItem,
 
             // operation shortcuts
             SetRowHiddenShortcutItem,

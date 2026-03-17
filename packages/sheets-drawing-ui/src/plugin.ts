@@ -41,6 +41,7 @@ import { SheetCellImageAutofillController } from './controllers/sheet-cell-image
 import { SheetCellImageCopyPasteController } from './controllers/sheet-cell-image-copy-paste.controller';
 import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
+import { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
@@ -85,6 +86,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
+            [SheetsDrawingGroupCopyPasteController],
             [SheetCellImageController],
             [SheetCellImageAutofillController],
             [SheetCellImageCopyPasteController],
@@ -101,6 +103,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsDrawingCopyPasteController],
             [SheetCellImageCopyPasteController],
+            [SheetsDrawingGroupCopyPasteController],
         ]);
     }
 

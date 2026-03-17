@@ -30,6 +30,7 @@ import {
     getCellPositionByIndex,
     getColor,
     getDPI,
+    getFirstGrapheme,
     getFontStyleString,
     getPointerPrefix,
     getScale,
@@ -306,5 +307,10 @@ describe('tools extra', () => {
         expect(GridType.LINES).toBeGreaterThanOrEqual(0);
         expect(BooleanNumber.TRUE).toBe(1);
         expect(NumberUnitType.PIXEL).toBeGreaterThanOrEqual(0);
+    });
+
+    it('Emoji test', () => {
+        expect(startWithEmoji('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe(true);
+        expect(getFirstGrapheme('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe('🐱‍🏍');
     });
 });

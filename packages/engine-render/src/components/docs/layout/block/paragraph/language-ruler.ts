@@ -19,7 +19,7 @@ import type { IParagraph } from '@univerjs/core';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { getFirstGrapheme, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
 import { getFontCreateConfig } from '../../tools';
 
@@ -102,11 +102,11 @@ export function emojiHandler(
     paragraph: IParagraph
 ) {
     const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-    const match = charArray.match(EMOJI_REG);
+    const seg = getFirstGrapheme(charArray) || charArray[0];
 
     return {
-        step: match![0].length,
-        glyphGroup: [createSkeletonLetterGlyph(match![0], config)],
+        step: seg.length,
+        glyphGroup: [createSkeletonLetterGlyph(seg, config)],
     };
 }
 

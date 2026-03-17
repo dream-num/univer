@@ -311,6 +311,7 @@ describe('tools extra', () => {
 
     it('Emoji test', () => {
         expect(startWithEmoji('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe(true);
+        expect(startWithEmoji('1abc')).toBe(false);
         expect(getFirstGrapheme('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe('🐱‍🏍');
     });
 });

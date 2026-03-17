@@ -390,10 +390,15 @@ export function hasLatinExtendedB(text: string) {
     return true;
 }
 
-// Emoji check logic
-const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
-
 export function getFirstGrapheme(str: string): string | null {
+    if (!Intl.Segmenter) {
+        // Firefox do not support Segmenter in an old version, so you need a Segmenter polyfill if you want use it in Firefox.
+        throw new Error('Intl.Segmenter is not supported in this environment. Please use a polyfill for Intl.Segmenter.');
+    }
+
+    // Emoji check logic
+    const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
     const it = segmenter.segment(str)[Symbol.iterator]();
     return it.next().value?.segment ?? null;
 }

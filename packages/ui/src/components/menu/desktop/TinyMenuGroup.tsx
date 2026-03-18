@@ -54,10 +54,10 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
             type="button"
             className={clsx(
                 `
-                  univer-relative univer-box-border univer-flex univer-size-12 univer-appearance-none univer-flex-col
-                  univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg univer-border-none
-                  univer-bg-white univer-p-0 univer-font-medium univer-text-gray-700 univer-outline-none
-                  univer-transition-all
+                  univer-relative univer-box-border univer-flex univer-size-12 univer-w-full univer-appearance-none
+                  univer-flex-col univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg
+                  univer-border-none univer-bg-white univer-p-0 univer-font-medium univer-text-gray-700
+                  univer-outline-none univer-transition-all
                   focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
                   dark:!univer-bg-gray-700 dark:!univer-text-gray-100
                 `,
@@ -94,7 +94,7 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
                 />
             )}
             <span
-                className="univer-max-w-full univer-break-words univer-text-center univer-text-xs univer-leading-4"
+                className="univer-break-words univer-text-center univer-text-xs univer-leading-4"
             >
                 {menuItem.title ? localeService.t(menuItem.title) : menuSchema.key}
             </span>
@@ -158,7 +158,7 @@ export function UIQuickTileMenuGroup(props: IUIQuickMenuGroupProps) {
     }
 
     return (
-        <div className="univer-flex univer-flex-wrap univer-justify-around univer-gap-1.5 univer-py-1">
+        <div className="univer-item-center univer-grid univer-grid-cols-3 univer-gap-1.5 univer-py-1">
             {item.children.map((menuSchema) => (
                 <QuickTileMenuItem
                     key={menuSchema.key}

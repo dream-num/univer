@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
+import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import type { Observable } from 'rxjs';
 import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
-import { sortRules, sortRulesByDesc } from '@univerjs/core';
+import { DrawingTypeEnum, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
 
@@ -350,6 +350,57 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         });
 
         return children;
+    }
+
+    getDrawingsByGroupNested(groupSearch: IDrawingSearch): IDrawingGroupNestedParam | null {
+        const { unitId, subUnitId } = groupSearch;
+        const rootParam = this.getDrawingByParam(groupSearch);
+        if (!rootParam) {
+            return null;
+        }
+
+        // get all drawings in the same subUnit one time to avoid multiple times of data access when there are many drawings
+        const allDrawings = this._getDrawingData(unitId, subUnitId);
+        const groupDerivedDrawingsIdMap: Map<string, string[]> = new Map();
+        Object.values(allDrawings).forEach((drawing) => {
+            if (drawing.groupId != null) {
+                if (!groupDerivedDrawingsIdMap.has(drawing.groupId)) {
+                    groupDerivedDrawingsIdMap.set(drawing.groupId, []);
+                }
+                groupDerivedDrawingsIdMap.get(drawing.groupId)!.push(drawing.drawingId);
+            }
+        });
+
+        const flatChildren: IDrawingParam[] = [];
+        const groups: IDrawingParam[] = [];
+        const nestedIdRecord: Record<string, IDrawingGroupNestedIds> = {};
+
+        // It stores all non-grouped child elements, while ensuring that each child element is always positioned before its parent element in the repository.
+        // `flatChildren` stores all non-grouped elements, satisfying the left-order traversal order.
+        const dfs = (param: IDrawingParam): void => {
+            const { drawingId } = param;
+            const childrenIds = groupDerivedDrawingsIdMap.get(drawingId) ?? [];
+            nestedIdRecord[drawingId] = { drawingId, children: childrenIds };
+            childrenIds.forEach((childId) => {
+                const childParam = allDrawings[childId];
+                if (!childParam) return;
+                if (childParam.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+                    dfs(childParam);
+                    groups.push(childParam);
+                } else {
+                    flatChildren.push(childParam);
+                }
+            });
+        };
+
+        dfs(rootParam);
+        groups.push(rootParam); // root group is always last
+
+        return {
+            nestedIdRecord,
+            flatChildren,
+            groups,
+        };
     }
 
     private _getGroupDrawingOp(groupParam: IDrawingGroupUpdateParam): JSONOp {
@@ -793,4 +844,4 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 }
 
-export class DrawingManagerService extends UnitDrawingService<IDrawingParam> {}
+export class DrawingManagerService extends UnitDrawingService<IDrawingParam> { }

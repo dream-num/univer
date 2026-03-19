@@ -32,6 +32,7 @@ export { ClearSheetDrawingTransformerOperation } from './commands/operations/cle
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 export type { IUniverSheetsDrawingUIConfig } from './config/config';
+export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverSheetsDrawingUIPlugin } from './plugin';

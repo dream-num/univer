@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ArrangeTypeEnum, IDisposable, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
+import type { ArrangeTypeEnum, IDisposable, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { createIdentifier } from '@univerjs/core';
 
@@ -108,6 +108,7 @@ export interface IUnitGroupDrawingService {
     groupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
     ungroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
     getDrawingsByGroup(groupParam: IDrawingSearch): IDrawingParam[];
+    getDrawingsByGroupNested(groupParam: IDrawingSearch): IDrawingGroupNestedParam | null;
 
     featurePluginGroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
     featurePluginUngroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;

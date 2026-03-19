@@ -16,11 +16,11 @@
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
 import { CommandType, Direction, DisposableCollection, generateRandomId, ICommandService, LocaleService, toDisposable } from '@univerjs/core';
-import { clsx, Menu, MenuItem, MenuItemGroup, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { ComponentManager, IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
+import { getQuickInsertMenuLeafCount, QuickInsertMenu } from './QuickInsertMenu';
 import { QuickInsertPlaceholder } from './QuickInsertPlaceholder';
 
 function filterMenusByKeyword(menus: DocPopupMenu[], keyword: string) {
@@ -76,9 +76,6 @@ export const QuickInsertPopup = () => {
     const [focusedMenuIndex, setFocusedMenuIndex] = useState(0);
     const focusedMenuRef = useRef<IDocPopupMenuItem | null>(null);
 
-    const menuIndexAccumulator = useRef(0);
-    menuIndexAccumulator.current = 0;
-
     const filterKeyword = useObservable(docQuickInsertPopupService.filterKeyword$, '');
     const currentPopup = useObservable(docQuickInsertPopupService.editPopup$);
     const menus = useObservable<DocPopupMenu[]>(currentPopup?.popup.menus$, []);
@@ -90,6 +87,12 @@ export const QuickInsertPopup = () => {
     const [filteredMenus, setFilteredMenus] = useState<DocPopupMenu[]>(() => {
         return filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase());
     });
+    const filteredMenuCount = useMemo(() => getQuickInsertMenuLeafCount(filteredMenus), [filteredMenus]);
+    const filteredMenuCountRef = useRef(filteredMenuCount);
+
+    useEffect(() => {
+        filteredMenuCountRef.current = filteredMenuCount;
+    }, [filteredMenuCount]);
 
     useEffect(() => {
         const id = requestIdleCallback(() => {
@@ -140,9 +143,13 @@ export const QuickInsertPopup = () => {
             type: CommandType.OPERATION,
             handler: () => {
                 setFocusedMenuIndex((index) => {
+                    if (filteredMenuCountRef.current <= 0) {
+                        return 0;
+                    }
+
                     const nextIndex = (index - 1);
 
-                    return nextIndex >= 0 ? nextIndex : menuIndexAccumulator.current - 1;
+                    return nextIndex >= 0 ? nextIndex : filteredMenuCountRef.current - 1;
                 });
             },
         };
@@ -151,9 +158,13 @@ export const QuickInsertPopup = () => {
             type: CommandType.OPERATION,
             handler: () => {
                 setFocusedMenuIndex((index) => {
+                    if (filteredMenuCountRef.current <= 0) {
+                        return 0;
+                    }
+
                     const nextIndex = (index + 1);
 
-                    return nextIndex <= (menuIndexAccumulator.current - 1) ? nextIndex : 0;
+                    return nextIndex <= (filteredMenuCountRef.current - 1) ? nextIndex : 0;
                 });
             },
         };
@@ -192,7 +203,7 @@ export const QuickInsertPopup = () => {
         return () => {
             disposableCollection.dispose();
         };
-    }, []);
+    }, [commandService, id, shortcutService]);
 
     useEffect(() => {
         setFocusedMenuIndex(0);
@@ -206,75 +217,6 @@ export const QuickInsertPopup = () => {
         };
     }, []);
 
-    function renderMenus(menus: DocPopupMenu[]) {
-        return menus.map((menu) => {
-            const iconKey = (menu as IDocPopupMenuItem).icon;
-            const Icon = iconKey ? componentManager.get(iconKey) : null;
-
-            if ('children' in menu) {
-                return (
-                    <MenuItemGroup
-                        key={menu.id}
-                        title={(
-                            <div
-                                className={`
-                                  univer-mb-2 univer-flex univer-items-center univer-text-xs univer-text-gray-400
-                                `}
-                            >
-                                {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
-                                <span>{menu.title}</span>
-                            </div>
-                        )}
-                    >
-                        {renderMenus(menu.children!)}
-                    </MenuItemGroup>
-                );
-            }
-
-            const currentMenuIndex = menuIndexAccumulator.current;
-            const isFocused = focusedMenuIndex === currentMenuIndex;
-            if (isFocused) {
-                focusedMenuRef.current = menu as IDocPopupMenuItem;
-                const node = menuNodeMapRef.current.get(menu.id);
-                node?.scrollIntoView({
-                    block: 'nearest',
-                });
-            }
-
-            menuIndexAccumulator.current++;
-
-            return (
-                <MenuItem
-                    // @ts-expect-error
-                    ref={(node) => {
-                        if (node) {
-                            menuNodeMapRef.current.set(menu.id, node);
-                        }
-                    }}
-                    onMouseEnter={() => setFocusedMenuIndex(currentMenuIndex)}
-                    onMouseLeave={() => setFocusedMenuIndex(Number.NaN)}
-                    key={menu.id}
-                    className={clsx('univer-w-[calc(220px-var(--padding-base)*2)] univer-text-sm', {
-                        'hover:univer-bg-transparent': !isFocused,
-                        'univer-bg-gray-100 dark:!univer-bg-gray-500': isFocused,
-                    })}
-                    onClick={() => {
-                        handleMenuSelect(menu as IDocPopupMenuItem);
-                    }}
-                >
-                    <div
-                        className="univer-flex univer-w-full univer-items-center univer-px-1"
-                    >
-                        {Icon && <span className="univer-mr-2 univer-inline-flex univer-text-base"><Icon /></span>}
-                        <Tooltip showIfEllipsis title={menu.title} placement="right">
-                            <span className="univer-truncate">{menu.title}</span>
-                        </Tooltip>
-                    </div>
-                </MenuItem>
-            );
-        });
-    }
-
     const hasMenus = filteredMenus.length > 0;
 
     const Placeholder = currentPopup?.popup.Placeholder || componentManager.get(QuickInsertPlaceholder.componentKey);
@@ -283,13 +225,15 @@ export const QuickInsertPopup = () => {
         <div className="univer-mt-2">
             {hasMenus
                 ? (
-                    <Menu
-                        wrapperClass={clsx(`
-                          univer-max-h-[360px] univer-w-[220px] univer-overflow-y-auto univer-overflow-x-hidden
-                        `, scrollbarClassName)}
-                    >
-                        {renderMenus(filteredMenus)}
-                    </Menu>
+                    <QuickInsertMenu
+                        menus={filteredMenus}
+                        focusedMenuIndex={focusedMenuIndex}
+                        focusedMenuRef={focusedMenuRef}
+                        menuNodeMapRef={menuNodeMapRef}
+                        componentManager={componentManager}
+                        onFocusedMenuIndexChange={setFocusedMenuIndex}
+                        onSelect={handleMenuSelect}
+                    />
                 )
                 : Placeholder && <Placeholder />}
         </div>

@@ -27,7 +27,7 @@ import { createBaseConfig, createInputOptions, createInputPlugins } from './util
 import { cleanupPackageJson } from './utils/cleanup-pkg';
 import { getEntries } from './utils/entries';
 import { removeCssArtifacts } from './utils/files';
-import { createExternalPackages, readPackageJson } from './utils/package';
+import { createBundledPackages, createExternalPackages, readPackageJson } from './utils/package';
 import { emitPublishPackageJson } from './utils/publish-manifest';
 
 /**
@@ -35,12 +35,14 @@ import { emitPublishPackageJson } from './utils/publish-manifest';
  */
 function createBuildContext(packageDir: string, options: IBuildOptions): IBuildContext {
     const packageJson = readPackageJson(packageDir);
+    const bundledPackages = createBundledPackages(packageJson);
     const externalPackages = createExternalPackages(packageJson);
 
     return {
+        bundledPackages,
         entries: getEntries(packageDir),
         externalPackages,
-        facadeExternalPackages: [...externalPackages, packageJson.name, `${packageJson.name}/*`],
+        facadeExternalPackages: [...externalPackages, packageJson.name],
         inputOptions: createInputOptions(options),
         packageDir,
         packageJson,
@@ -59,6 +61,7 @@ function createConfigs(context: IBuildContext, options: IBuildOptions) {
     const moduleConfigs = context.entries.flatMap((entry) => {
         return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
+            bundledPackages: context.bundledPackages,
             enableObfuscation,
             entry,
             externalPackages: context.externalPackages,

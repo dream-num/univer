@@ -18,6 +18,17 @@ import type { IPackageJson } from '../types';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
+function isUniverPackage(packageName: string) {
+    return packageName.startsWith('@univerjs/') || packageName.startsWith('@univerjs-pro/');
+}
+
+function getProductionDependencyNames(packageJson: IPackageJson) {
+    return [...new Set([
+        ...Object.keys(packageJson.dependencies ?? {}),
+        ...Object.keys(packageJson.peerDependencies ?? {}),
+    ])].sort((left, right) => left.localeCompare(right));
+}
+
 /**
  * Reads the package manifest used to derive dependency externalization rules.
  */
@@ -26,15 +37,17 @@ export function readPackageJson(packageDir: string): IPackageJson {
 }
 
 /**
- * Produces the external package allowlist including subpath imports.
+ * Produces the external package allowlist.
  */
 export function createExternalPackages(packageJson: IPackageJson) {
-    const dependencyNames = [
-        ...Object.keys(packageJson.dependencies ?? {}),
-        ...Object.keys(packageJson.peerDependencies ?? {}),
-    ];
+    return getProductionDependencyNames(packageJson)
+        .filter((packageName) => isUniverPackage(packageName));
+}
 
-    return [...new Set(dependencyNames)]
-        .sort((left, right) => left.localeCompare(right))
-        .flatMap((packageName) => [packageName, `${packageName}/*`]);
+/**
+ * Produces the package allowlist that should be bundled into ESM/CJS outputs.
+ */
+export function createBundledPackages(packageJson: IPackageJson) {
+    return getProductionDependencyNames(packageJson)
+        .filter((packageName) => !isUniverPackage(packageName));
 }

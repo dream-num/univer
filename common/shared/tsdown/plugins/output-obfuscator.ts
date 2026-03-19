@@ -23,24 +23,9 @@ interface IBundleOutput {
     fileName?: string;
 }
 
-const DEFAULT_OBFUSCATION_OPTIONS = {
-    compact: true,
-    identifierNamesGenerator: 'hexadecimal',
-    renameGlobals: false,
-    renameProperties: false,
-    selfDefending: false,
-    simplify: true,
-    splitStrings: false,
-    stringArray: true,
-    stringArrayThreshold: 1,
-    transformObjectKeys: true,
-    unicodeEscapeSequence: false,
-} satisfies ObfuscatorOptions;
-
-export function createOutputObfuscatorPlugin(options: Partial<ObfuscatorOptions> = {}) {
+export function createOutputObfuscatorPlugin() {
     const obfuscationOptions: ObfuscatorOptions = {
-        ...DEFAULT_OBFUSCATION_OPTIONS,
-        ...options,
+        ignoreImports: true,
     };
 
     return {

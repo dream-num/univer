@@ -15,4 +15,6 @@
  */
 
 export const SHEETS_THREAD_COMMENT_MODAL = 'univer.sheet.thread-comment-modal';
-export const SHEETS_THREAD_COMMENT = 'SHEET_THREAD_COMMENT';
+export const SHEETS_THREAD_COMMENT_PANEL = 'univer.sheet.thread-comment-panel';
+
+export const PLUGIN_NAME = 'SHEET_THREAD_COMMENT_UI_PLUGIN';

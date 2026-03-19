@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
+import { ThreadCommentTree, ThreadCommentTreeLocation } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
@@ -46,7 +46,7 @@ export const SheetsThreadCommentCell = () => {
             onClick={() => {
                 sheetsThreadCommentPopupService.persistPopup();
             }}
-            prefix="cell"
+            location={ThreadCommentTreeLocation.CELL}
             id={rootId}
             unitId={unitId}
             subUnitId={subUnitId}

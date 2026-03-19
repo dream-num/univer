@@ -14,8 +14,4 @@
  * limitations under the License.
  */
 
-export const THREAD_COMMENT_POPUP = 'thread-comment-popup';
-
-export const THREAD_COMMENT_PANEL = 'thread-comment-panel';
-
 export const PLUGIN_NAME = 'UNIVER_THREAD_COMMENT_UI_PLUGIN';

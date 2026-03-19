@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/themes",
-    "version": "0.17.0",
+    "version": "0.18.0",
     "private": false,
     "description": "Themes package for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -53,10 +53,11 @@
     ],
     "scripts": {
         "typecheck": "tsc --noEmit",
-        "build": "univer-cli build"
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "devDependencies": {
-        "@univerjs-infra/shared": "workspace:*",
-        "vite": "^7.3.1"
+        "@univerjs-infra/shared": "workspace:*"
     }
 }

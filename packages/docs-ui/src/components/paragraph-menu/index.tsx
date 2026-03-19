@@ -20,7 +20,7 @@ import { ICommandService, IUniverInstanceService, NamedStyleType, UniverInstance
 import { borderClassName, clsx } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DownIcon } from '@univerjs/icons';
-import { ContextMenuPosition, DesktopMenu, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
+import { ContextMenuPanel, ContextMenuPosition, ILayoutService, RectPopup, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { HEADING_ICON_MAP } from '../../menu/paragraph-menu';
@@ -123,8 +123,8 @@ export const ParagraphMenu = ({ popup }: { popup: IPopup }) => {
                             isMouseOver.current = false;
                         }}
                     >
-                        <DesktopMenu
-                            style={{ width: 212 }}
+                        <ContextMenuPanel
+                            className="univer-w-[212px]"
                             menuType={ContextMenuPosition.PARAGRAPH}
                             onOptionSelect={(params) => {
                                 const { label: id, commandId, value } = params;

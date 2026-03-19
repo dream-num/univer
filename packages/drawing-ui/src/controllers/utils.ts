@@ -28,7 +28,7 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     }
 
     const groupKey = getDrawingShapeKeyByDrawingSearch(objectParam);
-    const groupObject = scene.getObject(groupKey);
+    const groupObject = scene.getObjectIncludeInGroup(groupKey);
 
     if (groupObject && !(groupObject instanceof Group)) {
         return;
@@ -55,6 +55,16 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
 
     if (groupBaseBound) {
         group.setBaseBound(groupBaseBound);
+    }
+
+    if (groupParam.groupId) {
+        group.isInGroup = true;
+        insertGroupObject(
+            { drawingId: groupParam.groupId, unitId: objectParam.unitId, subUnitId: objectParam.subUnitId },
+            group,
+            scene,
+            drawingManagerService
+        );
     }
 
     transform && group.transformByState(

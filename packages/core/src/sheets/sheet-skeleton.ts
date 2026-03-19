@@ -845,7 +845,7 @@ export class SheetSkeleton extends Skeleton {
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this.worksheet.getCellInfoInMergeData(row, column)
+            this.worksheet?.getCellInfoInMergeData(row, column)
         );
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;

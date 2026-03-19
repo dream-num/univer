@@ -32,9 +32,12 @@ export function parsePattern(pattern: RawHyphenPattern): IHyphenPattern {
 }
 
 export function snackToPascal(snack: string) {
+    // Turns values like `en-us` -> `EnUs`, `de-1901` -> `De1901`.
     return snack
-        .replace(/^[a-z]/, (g) => g.toUpperCase())
-        .replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        .split('-')
+        .filter(Boolean)
+        .map((part) => part[0].toUpperCase() + part.slice(1))
+        .join('');
 }
 
 export function createStringSlicer(str: string[]): [() => string[], () => boolean] {

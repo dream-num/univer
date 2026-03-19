@@ -283,4 +283,24 @@ describe('SheetSkeleton integration', () => {
             },
         });
     });
+
+    it('should not throw when getCellWithCoordByIndex is called after skeleton is disposed', () => {
+        const testBed = createCoreTestBed(workbookDataFactory());
+        const injector = testBed.univer.__getInjector();
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const skeleton = new SheetSkeleton(
+            worksheet,
+            testBed.sheet.getStyles(),
+            injector.get(LocaleService),
+            injector.get(IContextService),
+            injector.get(IConfigService),
+            injector as Injector
+        ).calculate()!;
+
+        disposables.push(() => testBed.univer.dispose());
+
+        skeleton.dispose();
+
+        expect(() => skeleton.getCellWithCoordByIndex(0, 0)).not.toThrow();
+    });
 });

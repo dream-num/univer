@@ -967,12 +967,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             }));
             const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
 
-            skm?.currentSkeleton$.subscribe((skeleton) => {
+            const skeletonSubscription = skm?.currentSkeleton$.subscribe((skeleton) => {
                 if (!skeleton) return;
                 if (skeletonParam.sheetId !== skeleton.sheetId) {
                     this._removeDom(id, true);
                 }
             });
+            skeletonSubscription && disposableCollection.add(skeletonSubscription);
 
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
                 const newPosition = calcSheetFloatDomPosition(domRect, renderObject.renderUnit.scene, skeletonParam.skeleton, target.worksheet, floatDomInfo);

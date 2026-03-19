@@ -1,12 +1,11 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env -S node --import tsx/esm
 /* eslint-disable header/header */
 
-import type { IBuildOptions } from '../vite';
+import type { IBuildOptions } from '../tsdown/types';
 import process from 'node:process';
-import { build } from '../vite';
+import { build } from '../tsdown/index';
 
 const argvs = process.argv.slice(2);
-
 const [command, ...args] = argvs;
 
 if (command === 'build') {
@@ -22,5 +21,6 @@ if (command === 'build') {
         options.nodeFirst = true;
     }
 
-    build(options);
+    // eslint-disable-next-line antfu/no-top-level-await
+    await build(options);
 }

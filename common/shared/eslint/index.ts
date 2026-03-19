@@ -379,7 +379,7 @@ export const noBarrelImportPreset = (): Linter.Config => {
             'packages/engine-render/src/components/docs/**/*.ts',
             '**/*.tsx',
             '**/*.d.ts',
-            '**/vite.config.ts',
+            '**/tsdown.config.ts',
             'playwright.config.ts',
             '**/*.spec.ts',
             '**/*.spec.tsx',
@@ -410,7 +410,6 @@ export const headerPreset = (): Linter.Config => {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
             '**/*.d.ts',
-            '**/vite.config.ts',
             '**/vitest.config.ts',
             '**/vitest.workspace.ts',
             'playwright.config.ts',

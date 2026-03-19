@@ -16,12 +16,8 @@
 
 import type { IStyleData } from '../types/interfaces';
 import type { IKeyValue, Nullable } from './types';
-
 import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl, topLevelDomainSet } from '../common/url';
-
-const rmsPrefix = /^-ms-/;
-const rDashAlpha = /-([a-z])/g;
 
 const alphabets = [
     'A',
@@ -125,37 +121,6 @@ export class Tools {
         return obj;
     }
 
-    static stringAt(index: number): string {
-        let str = '';
-        let idx = index;
-        while (idx >= alphabets.length) {
-            idx /= alphabets.length;
-            idx -= 1;
-            str += alphabets[idx % alphabets.length];
-        }
-        const last = index % alphabets.length;
-        str += alphabets[last];
-        return str;
-    }
-
-    static indexAt(code: string): number {
-        let ret = 0;
-        for (let i = 0; i < code.length - 1; i += 1) {
-            const idx = code.charCodeAt(i) - 65;
-            const expoNet = code.length - 1 - i;
-            ret += alphabets.length ** expoNet + alphabets.length * idx;
-        }
-        ret += code.charCodeAt(code.length - 1) - 65;
-        return ret;
-    }
-
-    static deleteBlank(value?: string) {
-        if (Tools.isString(value)) {
-            return value.replace(/\s/g, '');
-        }
-        return value;
-    }
-
     // eslint-disable-next-line complexity
     static getSystemType(): string {
         const sUserAgent = navigator.userAgent;
@@ -237,10 +202,6 @@ export class Tools {
         return 'Unknown browser';
     }
 
-    static getClassName(instance: object): string {
-        return instance.constructor.name;
-    }
-
     /** @deprecated This method is deprecated, please use `import { merge } from '@univerjs/core` instead */
     static deepMerge(target: any, ...sources: any[]): any {
         sources.forEach((item) => item && deepItem(item));
@@ -304,10 +265,6 @@ export class Tools {
         return target;
     }
 
-    static numberFixed(value: number, digit: number): number {
-        return Number(Number(value).toFixed(digit));
-    }
-
     static diffValue(one: any, two: any) {
         return isValueEqual(one, two);
     }
@@ -340,14 +297,6 @@ export class Tools {
             return clone as T;
         }
         return value;
-    }
-
-    static getLanguage(): string {
-        const defaultValue = 'en-US';
-        if (globalThis.navigator) {
-            return (navigator.languages && navigator.languages[0]) || navigator.language || defaultValue;
-        }
-        return defaultValue;
     }
 
     static getValueType(value: any): string {
@@ -449,34 +398,6 @@ export class Tools {
         }
         return value;
     }
-
-    /**
-     * Generate a two-dimensional array with the specified number of rows and columns, and fill in the values
-     * @param rows row length
-     * @param columns column length
-     * @param value value to be set
-     * @returns
-     */
-    static fillTwoDimensionalArray(rows: number, columns: number, value: any): any[][] {
-        return new Array(rows).fill(value).map((item) => new Array(columns).fill(value));
-    }
-
-    /**
-     * Generate a two-dimensional array with the specified number of rows and columns, and fill in the values
-     * @param rows row length
-     * @param columns column length
-     * @param value value to be set
-     * @returns
-     */
-    // static fillObjectMatrix<T>(rows: number, columns: number, value: T): IObjectMatrixPrimitiveType<T> {
-    //     const matrix = new ObjectMatrix<T>();
-    //     for (let r = 0; r < rows; r++) {
-    //         for (let c = 0; c < columns; c++) {
-    //             matrix.setValue(r, c, value);
-    //         }
-    //     }
-    //     return matrix.getData();
-    // }
 
     static numToWord(x: number) {
         let s = '';

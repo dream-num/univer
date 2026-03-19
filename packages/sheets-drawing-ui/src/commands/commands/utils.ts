@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, generateRandomId } from '@univerjs/core';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
@@ -101,4 +101,65 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
     });
 
     return newGroupParams;
+}
+
+export interface ICloneGroupResult {
+    cloned: IDrawingGroupNestedParam;
+    /** Map from original drawingId → new drawingId, for updating connector/line relations */
+    idMap: Map<string, string>;
+}
+
+// only paste can use this function
+export function cloneGroupParams(groupParams: IDrawingGroupNestedParam): ICloneGroupResult {
+    const idMap = new Map<string, string>();
+
+    groupParams.flatChildren?.forEach((p) => idMap.set(p.drawingId, generateRandomId(10)));
+    groupParams.groups.forEach((p) => idMap.set(p.drawingId, generateRandomId(10)));
+
+    const clonedNestedIdRecord: Record<string, IDrawingGroupNestedIds> = {};
+    for (const [oldGroupId, entry] of Object.entries(groupParams.nestedIdRecord)) {
+        const newGroupId = idMap.get(oldGroupId) ?? oldGroupId;
+        clonedNestedIdRecord[newGroupId] = {
+            drawingId: newGroupId,
+            children: entry.children?.map((id) => idMap.get(id) ?? id),
+        };
+    }
+
+    const flatChildren: IDrawingParam[] = [];
+    const groups: IDrawingParam[] = [];
+
+    for (const group of groupParams.groups) {
+        const groupDrawingId = idMap.get(group.drawingId) ?? group.drawingId;
+        const parentGroupId = group.groupId ? idMap.get(group.groupId) ?? group.groupId : undefined;
+        groups.push(cloneDrawingParam(group, groupDrawingId, parentGroupId));
+    }
+
+    for (const child of groupParams.flatChildren || []) {
+        const childDrawingId = idMap.get(child.drawingId) ?? child.drawingId;
+        const parentGroupId = child.groupId ? idMap.get(child.groupId) ?? child.groupId : undefined;
+        flatChildren.push(cloneDrawingParam(child, childDrawingId, parentGroupId));
+    }
+
+    return {
+        cloned: {
+            nestedIdRecord: clonedNestedIdRecord,
+            flatChildren,
+            groups,
+        },
+        idMap,
+    };
+}
+
+function cloneDrawingParam(param: IDrawingParam, newDrawingId: string, parentGroupId: string | undefined): IDrawingParam {
+    const newParam = { ...param };
+    if (newDrawingId) {
+        newParam.drawingId = newDrawingId;
+    }
+    if (parentGroupId) {
+        newParam.groupId = parentGroupId;
+    } else {
+        delete newParam.groupId;
+    }
+
+    return JSON.parse(JSON.stringify(newParam)) as IDrawingParam;
 }

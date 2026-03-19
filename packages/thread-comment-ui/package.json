@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment-ui",
-    "version": "0.17.0",
+    "version": "0.18.0",
     "private": false,
     "description": "Univer common thread comment UI plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -59,7 +59,9 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
-        "build": "univer-cli build"
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc",
@@ -80,7 +82,6 @@
         "rxjs": "^7.8.2",
         "tailwindcss": "3.4.18",
         "typescript": "^5.9.3",
-        "vite": "^7.3.1",
-        "vitest": "^4.0.18"
+        "vitest": "^4.1.0"
     }
 }

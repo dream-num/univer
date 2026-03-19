@@ -46,7 +46,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                         worksheetTypes: [WorksheetViewPermission],
                     });
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.commentErr'));
                     }
                 } else if (id === AddCommentCommand.id) {
                     const params = command.params as IAddCommentCommandParams;
@@ -60,7 +60,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                         rangeTypes: [RangeProtectionPermissionViewPoint],
                     }, [{ startRow: row, startColumn: column, endRow: row, endColumn: column }], unitId, subUnitId);
                     if (!permission) {
-                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.commentErr'));
                     }
                 } else if (id === UpdateCommentCommand.id) {
                     const params = command.params as IUpdateCommentCommandParams;
@@ -78,7 +78,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                         }, [{ startRow: row, startColumn: column, endRow: row, endColumn: column }], unitId, subUnitId);
                         if (!permission) {
-                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
+                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.commentErr'));
                         }
                     }
                 } else if (id === ResolveCommentCommand.id || id === DeleteCommentCommand.id || id === DeleteCommentTreeCommand.id) {
@@ -96,7 +96,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                         }, [{ startRow: row, startColumn: column, endRow: row, endColumn: column }], unitId, subUnitId);
                         if (!permission) {
-                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
+                            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.commentErr'));
                         }
                     }
                 }

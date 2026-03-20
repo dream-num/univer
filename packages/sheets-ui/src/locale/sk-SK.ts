@@ -479,6 +479,7 @@ const locale: typeof enUS = {
             printErr: 'Hárok je chránený a nemáte oprávnenie na tlač. Ak chcete tlačiť, kontaktujte autora.',
             formulaErr: 'Rozsah alebo referenčný rozsah je chránený a nemáte oprávnenie na úpravu. Ak chcete upravovať, kontaktujte autora.',
             hyperLinkErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať hypertextové odkazy. Ak chcete nastavovať hypertextové odkazy, kontaktujte autora.',
+            commentErr: 'Rozsah je chránený a nemáte oprávnění pro komentování. Pokud chcete komentovat, kontaktujte autora.',
         },
         button: {
             confirm: 'Potvrdiť',

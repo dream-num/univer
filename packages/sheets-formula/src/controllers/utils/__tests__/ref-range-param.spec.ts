@@ -89,6 +89,9 @@ describe('getReferenceMoveParams', () => {
             type: FormulaReferenceMoveType.MoveRange,
             unitId: 'test',
             sheetId: 'sheet1',
+            targetUnitId: 'test',
+            targetSheetId: 'sheet1',
+            targetSheetName: 'Sheet1',
             from: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
             to: { startRow: 4, endRow: 5, startColumn: 3, endColumn: 4 },
         });

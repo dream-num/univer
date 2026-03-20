@@ -209,16 +209,49 @@ export class RefRangeService extends Disposable {
                         }
                         case EffectRefRangId.MoveRangeCommandId: {
                             const params = command.params as IMoveRangeCommandParams;
-                            const target = getSheetCommandTarget(this._univerInstanceService);
-                            if (!target) return [];
+                            const sourceTarget = getSheetCommandTarget(this._univerInstanceService, {
+                                unitId: params.fromUnitId,
+                                subUnitId: params.fromSubUnitId,
+                            });
+                            const destinationTarget = getSheetCommandTarget(this._univerInstanceService, {
+                                unitId: params.toUnitId ?? params.fromUnitId,
+                                subUnitId: params.toSubUnitId ?? params.fromSubUnitId,
+                            });
+                            if (!sourceTarget && !destinationTarget) return [];
 
-                            const { unitId, subUnitId } = target;
+                            if (
+                                sourceTarget
+                                && destinationTarget
+                                && sourceTarget.unitId === destinationTarget.unitId
+                                && sourceTarget.subUnitId === destinationTarget.subUnitId
+                            ) {
+                                return this._checkRange(
+                                    [params.fromRange, params.toRange],
+                                    sourceTarget.unitId,
+                                    sourceTarget.subUnitId
+                                );
+                            }
 
-                            return this._checkRange(
-                                [params.fromRange, params.toRange],
-                                unitId,
-                                subUnitId
-                            );
+                            const effects = [];
+                            if (sourceTarget) {
+                                effects.push(
+                                    ...this._checkRange(
+                                        [params.fromRange],
+                                        sourceTarget.unitId,
+                                        sourceTarget.subUnitId
+                                    )
+                                );
+                            }
+                            if (destinationTarget) {
+                                effects.push(
+                                    ...this._checkRange(
+                                        [params.toRange],
+                                        destinationTarget.unitId,
+                                        destinationTarget.subUnitId
+                                    )
+                                );
+                            }
+                            return effects;
                         }
                         case EffectRefRangId.InsertRowCommandId: {
                             const params = command.params as IInsertRowCommandParams;

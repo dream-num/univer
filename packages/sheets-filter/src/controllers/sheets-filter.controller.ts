@@ -591,6 +591,13 @@ export class SheetsFilterController extends Disposable {
 
     private _handleMoveRangeCommand(config: IMoveRangeCommandParams, unitId: string, subUnitId: string) {
         const { fromRange, toRange } = config;
+        const sourceSubUnitId = config.fromSubUnitId ?? subUnitId;
+        const targetSubUnitId = config.toSubUnitId ?? sourceSubUnitId;
+
+        if (sourceSubUnitId !== targetSubUnitId && subUnitId !== sourceSubUnitId) {
+            return this._handleNull();
+        }
+
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (!filterModel) {
             return this._handleNull();
@@ -621,6 +628,60 @@ export class SheetsFilterController extends Disposable {
             };
             const setNewFilterRange = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: newFilterRange } as ISetSheetsFilterRangeMutationParams };
             const setOldFilterRange = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: filterRange } as ISetSheetsFilterRangeMutationParams };
+
+            if (sourceSubUnitId !== targetSubUnitId) {
+                const targetFilterModel = this._sheetsFilterService.getFilterModel(unitId, targetSubUnitId);
+                if (targetFilterModel?.getRange()) {
+                    return this._handleNull();
+                }
+
+                redos.push(removeFilter, {
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: { unitId, subUnitId: targetSubUnitId, range: newFilterRange } as ISetSheetsFilterRangeMutationParams,
+                });
+
+                undos.push(
+                    {
+                        id: RemoveSheetsFilterMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: targetSubUnitId,
+                        },
+                    },
+                    setOldFilterRange
+                );
+
+                const filterColumn = filterModel.getAllFilterColumns();
+                const moveColDelta = toRange.startColumn - fromRange.startColumn;
+                filterColumn.forEach((column) => {
+                    const [col, criteria] = column;
+                    if (criteria) {
+                        redos.push({
+                            id: SetSheetsFilterCriteriaMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId: targetSubUnitId,
+                                col: col + moveColDelta,
+                                criteria: { ...criteria.serialize(), colId: col + moveColDelta },
+                            },
+                        });
+                        undos.push({
+                            id: SetSheetsFilterCriteriaMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                col,
+                                criteria: { ...criteria.serialize(), colId: col },
+                            },
+                        });
+                    }
+                });
+
+                return {
+                    redos,
+                    undos,
+                };
+            }
 
             redos.push(removeFilter, setNewFilterRange);
 

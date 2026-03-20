@@ -101,7 +101,7 @@ export {
     InsertRowCommand,
 } from './commands/commands/insert-row-col.command';
 export { type IInsertSheetCommandParams, InsertSheetCommand } from './commands/commands/insert-sheet.command';
-export { getMoveRangeUndoRedoMutations, type IMoveRangeCommandParams, MoveRangeCommand } from './commands/commands/move-range.command';
+export { getMoveRangeCommandMutations, getMoveRangeUndoRedoMutations, type IMoveRangeCommandParams, MoveRangeCommand } from './commands/commands/move-range.command';
 export {
     type IMoveColsCommandParams,
     type IMoveRowsCommandParams,

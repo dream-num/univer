@@ -20,14 +20,11 @@ import type { IAccessor, IBorderData, ICellData, ICustomRange, IDocumentBody, IM
 import type {
     IAddWorksheetMergeMutationParams,
     IDiscreteRange,
-    IMoveRangeMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
-    ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import {
-    cellToRange,
     CellValueType,
     cloneCellData,
     cloneCellDataMatrix,
@@ -39,7 +36,6 @@ import {
     isTextFormat,
     IUniverInstanceService,
     ObjectMatrix,
-    Range,
     Rectangle,
     Tools,
     willLoseNumericPrecision,
@@ -49,18 +45,12 @@ import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     discreteRangeToRange,
-    getAddMergeMutationRangeByType,
-    getPrimaryForRange,
+    getMoveRangeCommandMutations,
     getSheetCommandTarget,
-    MoveRangeCommand,
-    MoveRangeMutation,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-    SelectionMoveType,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
-    SetSelectionsOperation,
-    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { isRichText } from '../editor/editing.render-controller';
@@ -151,186 +141,38 @@ export function getMoveRangeMutations(
     },
     accessor: IAccessor
 ) {
-    let redos: IMutationInfo[] = [];
-    let undos: IMutationInfo[] = [];
     const { range: fromDiscreteRange, subUnitId: fromSubUnitId, unitId } = from;
     const { range: toDiscreteRange, subUnitId: toSubUnitId } = to;
     const toRange = toDiscreteRange ? discreteRangeToRange(toDiscreteRange) : null;
     const fromRange = fromDiscreteRange ? discreteRangeToRange(fromDiscreteRange) : null;
 
-    if (fromRange && toRange) {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
-        const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
-        if (fromWorksheet && toWorksheet) {
-            const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-            const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-            const fromCellMatrix = fromWorksheet.getCellMatrix();
-            const toCellMatrix = toWorksheet.getCellMatrix();
-
-            Range.foreach(fromRange, (row, col) => {
-                fromCellValue.setValue(row, col, cloneCellData(fromCellMatrix.getValue(row, col)));
-                newFromCellValue.setValue(row, col, null);
-            });
-            const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
-
-            Range.foreach(toRange, (row, col) => {
-                toCellValue.setValue(row, col, cloneCellData(toCellMatrix.getValue(row, col)));
-            });
-
-            const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
-
-            Range.foreach(fromRange, (row, col) => {
-                const cellRange = cellToRange(row, col);
-                const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
-                const range = Rectangle.getPositionRange(relativeRange, toRange);
-                newToCellValue.setValue(range.startRow, range.startColumn, fromCellMatrix.getValue(row, col));
-            });
-
-            const doMoveRangeMutation: IMoveRangeMutationParams = {
-                fromRange,
-                toRange,
-                from: {
-                    value: newFromCellValue.getMatrix(),
-                    subUnitId: fromSubUnitId,
-                },
-                to: {
-                    value: newToCellValue.getMatrix(),
-                    subUnitId: toSubUnitId,
-                },
-                unitId,
-            };
-            const undoMoveRangeMutation: IMoveRangeMutationParams = {
-                fromRange: toRange,
-                toRange: fromRange,
-                from: {
-                    value: fromCellValue.getMatrix(),
-                    subUnitId: fromSubUnitId,
-                },
-                to: {
-                    value: toCellValue.getMatrix(),
-                    subUnitId: toSubUnitId,
-                },
-                unitId,
-            };
-            const interceptorCommands = sheetInterceptorService.onCommandExecute({
-                id: MoveRangeCommand.id,
-                params: { toRange, fromRange },
-            });
-
-            // handle merge mutations
-            const fromMergeData = fromWorksheet.getMergeData();
-            const toMergeData = toWorksheet.getMergeData();
-            const fromMergeRanges = fromMergeData.filter((item) => Rectangle.intersects(item, fromRange));
-            const toMergeRanges = toMergeData.filter((item) => Rectangle.intersects(item, toRange));
-            const mergeRedos: Array<{
-                id: string;
-                params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
-            }> = [];
-            const mergeUndos: Array<{
-                id: string;
-                params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
-            }> = [];
-
-            if (fromMergeRanges.length > 0 || toMergeRanges.length > 0) {
-                const willMoveToMergeRanges = fromMergeRanges
-                    .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, fromRange))
-                    .map((relativeRange) => Rectangle.getPositionRange(relativeRange, toRange));
-                const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges);
-
-                if (fromMergeRanges.length > 0) {
-                    mergeRedos.push({
-                        id: RemoveWorksheetMergeMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId: fromSubUnitId,
-                            ranges: fromMergeRanges,
-                        },
-                    });
-                    mergeUndos.push({
-                        id: AddWorksheetMergeMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId: fromSubUnitId,
-                            ranges: fromMergeRanges,
-                        },
-                    });
-                }
-
-                if (toMergeRanges.length > 0) {
-                    mergeRedos.push({
-                        id: RemoveWorksheetMergeMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId: fromSubUnitId,
-                            ranges: toMergeRanges,
-                        },
-                    });
-                    mergeUndos.push({
-                        id: AddWorksheetMergeMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId: toSubUnitId,
-                            ranges: toMergeRanges,
-                        },
-                    });
-                }
-
-                mergeRedos.push({
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: addMergeCellRanges,
-                    },
-                });
-                mergeUndos.unshift({
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: addMergeCellRanges,
-                    },
-                });
-            }
-
-            redos = [
-                { id: MoveRangeMutation.id, params: doMoveRangeMutation },
-                ...interceptorCommands.redos,
-                ...mergeRedos,
-                {
-                    id: SetSelectionsOperation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        selections: [{ range: toRange, primary: getPrimaryForRange(toRange, toWorksheet) }],
-                        type: SelectionMoveType.MOVE_END,
-                    } as ISetSelectionsOperationParams,
-                },
-            ];
-            undos = [
-                { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
-                ...interceptorCommands.undos,
-                ...mergeUndos,
-                {
-                    id: SetSelectionsOperation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        type: SelectionMoveType.MOVE_END,
-                        selections: [{ range: fromRange, primary: getPrimaryForRange(fromRange, fromWorksheet) }],
-                    },
-                },
-            ];
-        }
+    if (!fromRange || !toRange) {
+        return {
+            undos: [],
+            redos: [],
+        };
     }
 
-    return {
-        undos,
-        redos,
-    };
+    const moveRangeMutations = getMoveRangeCommandMutations(accessor, {
+        fromRange,
+        toRange,
+        fromUnitId: unitId,
+        fromSubUnitId,
+        toUnitId: to.unitId,
+        toSubUnitId,
+    }, {
+        includeAutoHeight: false,
+    });
+
+    return moveRangeMutations
+        ? {
+            undos: moveRangeMutations.undos,
+            redos: moveRangeMutations.redos,
+        }
+        : {
+            undos: [],
+            redos: [],
+        };
 }
 
 /**
@@ -423,16 +265,17 @@ export function getSetCellValueMutations(
 /**
  *
  * @param pasteTo
+ * @param pasteFrom
  * @param matrix
  * @param accessor
- * @param withRichFormat
+ * @param _withRichFormat
  */
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor,
-    withRichFormat = false
+    _withRichFormat = false
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];

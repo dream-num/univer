@@ -479,6 +479,7 @@ const locale: typeof enUS = {
             printErr: 'La feuille de calcul est protégée, et vous n\'avez pas la permission d\'imprimer. Pour imprimer, veuillez contacter le créateur.',
             formulaErr: 'La plage ou la plage référencée est protégée, et vous n\'avez pas la permission de modifier. Pour modifier, veuillez contacter le créateur.',
             hyperLinkErr: 'La plage est protégée, et vous n\'avez pas la permission de définir des liens hypertextes. Pour définir des liens hypertextes, veuillez contacter le créateur.',
+            commentErr: 'La plage est protégée, et vous n\'avez pas la permission de commenter. Pour commenter, veuillez contacter le créateur.',
         },
         button: {
             confirm: 'Confirmer',

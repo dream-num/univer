@@ -39,5 +39,5 @@ export function isInternalEditorID(id: string) {
 }
 
 export function isCommentEditorID(id: string) {
-    return id === DOCS_COMMENT_EDITOR_UNIT_ID_KEY;
+    return id.startsWith(DOCS_COMMENT_EDITOR_UNIT_ID_KEY);
 }

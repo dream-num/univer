@@ -14,34 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
-import { THREAD_COMMENT_PANEL } from '../../types/const';
-
-export const ToggleSheetCommentPanelOperation: ICommand = {
-    id: 'thread-comment-ui.operation.toggle-panel',
-    type: CommandType.OPERATION,
-    handler(accessor: IAccessor) {
-        const sidebarService = accessor.get(ISidebarService);
-        const panelService = accessor.get(ThreadCommentPanelService);
-
-        if (panelService.panelVisible) {
-            sidebarService.close();
-            panelService.setPanelVisible(false);
-        } else {
-            sidebarService.open({
-                header: { title: 'threadCommentUI.panel.title' },
-                children: { label: THREAD_COMMENT_PANEL },
-                width: 360,
-            });
-            panelService.setPanelVisible(true);
-        }
-
-        return true;
-    },
-};
 
 export interface ISetActiveCommentOperationParams {
     unitId: string;

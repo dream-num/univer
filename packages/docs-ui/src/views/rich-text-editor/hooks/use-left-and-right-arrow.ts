@@ -35,7 +35,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, ed
             return;
         }
         const editorId = editor.getEditorId();
-        const operationId = `sheet.formula-embedding-editor.${editorId}`;
+        const operationId = `doc.rich-text-editor.${editorId}`;
         const d = new DisposableCollection();
         const handleMoveInEditor = (keycode: KeyCode, metaKey?: MetaKeys) => {
             if (onMoveInEditorRef.current) {

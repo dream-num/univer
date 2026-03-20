@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-
+import { DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
 import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
 import { DocThreadCommentUIController } from '../doc-thread-comment-ui.controller';
 
@@ -33,7 +33,7 @@ describe('DocThreadCommentUIController', () => {
 
         expect(registerCommand).toHaveBeenCalled();
         expect(mergeMenu).toHaveBeenCalled();
-        expect(registerComponent).toHaveBeenCalledWith(DocThreadCommentPanel.componentKey, DocThreadCommentPanel);
+        expect(registerComponent).toHaveBeenCalledWith(DOCS_THREAD_COMMENT_PANEL, DocThreadCommentPanel);
 
         controller.dispose();
     });

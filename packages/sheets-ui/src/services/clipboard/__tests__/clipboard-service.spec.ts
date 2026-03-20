@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, ObjectMatrix, Univer } from '@univerjs/core';
+import type { ICellDataWithSpanInfo } from '../type';
 import type { IClipboardItem } from './mock-clipboard';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
+import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
@@ -29,11 +31,25 @@ import {
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
 import { MockClipboard } from './mock-clipboard';
+
+interface ITestSheetClipboardService extends ISheetClipboardService {
+    _generateCopyContent: (
+        unitId: string,
+        subUnitId: string,
+        range: IRange,
+        hooks: unknown[]
+    ) => {
+        matrixFragment: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
+        copyId: string;
+    };
+    _pasteInternal: (copyId: string, pasteType: string) => Promise<boolean>;
+}
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -153,7 +169,6 @@ describe('Test clipboard', () => {
             const values = getValues(startRow, startColumn, endRow, endColumn);
             const styles = getStyles(startRow, startColumn, endRow, endColumn);
             const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
-            const rowManager = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getRowManager();
             const columnManager = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getColumnManager();
             const columnWidth = columnManager?.getColumnWidth(0);
             expect(columnWidth).toBe(88);
@@ -1116,8 +1131,9 @@ describe('Test clipboard', () => {
             const subUnitId = 'sheet1';
             const fromRange = { rows: [24], cols: [0] };
             const toRange = { startRow: 24, startColumn: 1, endRow: 24, endColumn: 1 };
+            const testSheetClipboardService = sheetClipboardService as ITestSheetClipboardService;
             const copyContentCache = sheetClipboardService.copyContentCache();
-            const { matrixFragment, copyId } = (sheetClipboardService as any)._generateCopyContent(unitId, subUnitId, discreteRangeToRange(fromRange), []);
+            const { matrixFragment, copyId } = testSheetClipboardService._generateCopyContent(unitId, subUnitId, discreteRangeToRange(fromRange), []);
 
             // cache the copy content for internal paste
             copyContentCache.set(copyId, {
@@ -1138,7 +1154,7 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            (sheetClipboardService as any)._pasteInternal(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+            testSheetClipboardService._pasteInternal(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
 
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
@@ -1153,5 +1169,297 @@ describe('Test clipboard', () => {
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
+    });
+});
+
+function createFormulaClipboardWorkbookData(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: ['sheet1', 'sheet2'],
+        styles: {},
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'Sheet1',
+                cellData: {
+                    0: {
+                        0: { v: 1 },
+                        1: { v: 2 },
+                        2: { f: '=A1' },
+                        3: { f: '=SUM(A1:B2)' },
+                        4: { f: '=$A1' },
+                        5: { f: '=A$1' },
+                        6: { f: '=$A$1' },
+                        7: { f: '=B1' },
+                        8: { f: '=H1' },
+                        9: { f: '=F3' },
+                        10: { f: '=A1', si: 'shared-ref' },
+                    },
+                    1: {
+                        0: { v: 3 },
+                        1: { v: 4 },
+                        10: { si: 'shared-ref' },
+                    },
+                    2: {
+                        0: { v: 'label' },
+                        1: { v: 7 },
+                        2: { f: '=B3' },
+                        3: { f: '=C3+1' },
+                        4: { v: 11 },
+                        5: { f: '=SUM(B3:E3)' },
+                    },
+                },
+            },
+            sheet2: {
+                id: 'sheet2',
+                name: 'Sheet2',
+                cellData: {
+                    0: {
+                        0: { f: '=Sheet1!A1' },
+                        1: { f: '=Sheet1!H1' },
+                    },
+                },
+            },
+        },
+    };
+}
+
+describe('Test cut command with formulas', () => {
+    let univer: Univer;
+    let get: Injector['get'];
+    let commandService: ICommandService;
+    let sheetClipboardService: ISheetClipboardService;
+    let getValues: (
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number,
+        sheetId?: string
+    ) => Array<Array<Nullable<ICellData>>> | undefined;
+
+    beforeEach(() => {
+        const testBed = clipboardTestBed(createFormulaClipboardWorkbookData(), [
+            [UpdateFormulaController],
+        ]);
+
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
+        commandService.registerCommand(SetFormulaDataMutation);
+        commandService.registerCommand(SetArrayFormulaDataMutation);
+        sheetClipboardService = get(ISheetClipboardService);
+
+        get(UpdateFormulaController);
+
+        getValues = (
+            startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number,
+            sheetId: string = 'sheet1'
+        ): Array<Array<Nullable<ICellData>>> | undefined =>
+            get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId(sheetId)
+                ?.getRange(startRow, startColumn, endRow, endColumn)
+                .getValues();
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    async function cutPaste(
+        fromRange: { rows: number[]; cols: number[] },
+        toRange: { startRow: number; startColumn: number; endRow: number; endColumn: number },
+        fromSubUnitId: string = 'sheet1',
+        toSubUnitId: string = fromSubUnitId
+    ) {
+        const testSheetClipboardService = sheetClipboardService as ITestSheetClipboardService;
+        const copyContentCache = sheetClipboardService.copyContentCache();
+        const workbook = get(IUniverInstanceService).getUniverSheetInstance('test');
+        const targetWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
+
+        if (targetWorksheet) {
+            workbook?.setActiveSheet(targetWorksheet);
+        }
+
+        const { matrixFragment, copyId } = testSheetClipboardService._generateCopyContent(
+            'test',
+            fromSubUnitId,
+            discreteRangeToRange(fromRange),
+            []
+        );
+
+        copyContentCache.set(copyId, {
+            unitId: 'test',
+            subUnitId: fromSubUnitId,
+            range: fromRange,
+            matrix: matrixFragment,
+            copyType: COPY_TYPE.CUT,
+        });
+
+        get(SheetsSelectionsService).addSelections([
+            {
+                range: { ...toRange, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        await testSheetClipboardService._pasteInternal(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+    }
+
+    it('cut-moving a referenced value range updates direct, range, mixed-absolute, cross-sheet, and shared formulas', async () => {
+        await cutPaste(
+            { rows: [0, 1], cols: [0, 1] },
+            { startRow: 3, startColumn: 3, endRow: 4, endColumn: 4 }
+        );
+
+        expect(getValues(0, 0, 1, 1)).toStrictEqual([
+            [null, null],
+            [null, null],
+        ]);
+        expect(getValues(3, 3, 4, 4)).toStrictEqual([
+            [{ v: 1 }, { v: 2 }],
+            [{ v: 3 }, { v: 4 }],
+        ]);
+
+        expect(getValues(0, 2, 0, 6)).toStrictEqual([
+            [
+                { f: '=D4' },
+                { f: '=SUM(D4:E5)' },
+                { f: '=$D4' },
+                { f: '=D$4' },
+                { f: '=$D$4' },
+            ],
+        ]);
+        expect(getValues(0, 10, 1, 10)).toStrictEqual([
+            [{ f: '=D4' }],
+            [{ f: '=D5' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!D4' }, { f: '=Sheet1!H1' }],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getValues(0, 2, 0, 6)).toStrictEqual([
+            [
+                { f: '=A1' },
+                { f: '=SUM(A1:B2)' },
+                { f: '=$A1' },
+                { f: '=A$1' },
+                { f: '=$A$1' },
+            ],
+        ]);
+        expect(getValues(0, 10, 1, 10)).toStrictEqual([
+            [{ f: '=A1', si: 'shared-ref' }],
+            [{ si: 'shared-ref' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }, { f: '=Sheet1!H1' }],
+        ]);
+    });
+
+    it('cut-pasting a referenced value range across sheets adds and removes sheet qualifiers correctly', async () => {
+        await cutPaste(
+            { rows: [0, 1], cols: [0, 1] },
+            { startRow: 2, startColumn: 2, endRow: 3, endColumn: 3 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(0, 0, 1, 1)).toStrictEqual([
+            [null, null],
+            [null, null],
+        ]);
+        expect(getValues(2, 2, 3, 3, 'sheet2')).toStrictEqual([
+            [{ v: 1 }, { v: 2 }],
+            [{ v: 3 }, { v: 4 }],
+        ]);
+
+        expect(getValues(0, 2, 0, 6)).toStrictEqual([
+            [
+                { f: '=Sheet2!C3' },
+                { f: '=SUM(Sheet2!C3:D4)' },
+                { f: '=Sheet2!$C3' },
+                { f: '=Sheet2!C$3' },
+                { f: '=Sheet2!$C$3' },
+            ],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=C3' }, { f: '=Sheet1!H1' }],
+        ]);
+    });
+
+    it('cut-moving a formula cell keeps its formula text stable while dependents update to the new address', async () => {
+        await cutPaste(
+            { rows: [0], cols: [7] },
+            { startRow: 3, startColumn: 9, endRow: 3, endColumn: 9 }
+        );
+
+        expect(getValues(0, 7, 0, 8)).toStrictEqual([
+            [null, { f: '=J4' }],
+        ]);
+        expect(getValues(3, 9, 3, 9)).toStrictEqual([
+            [{ f: '=B1' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }, { f: '=Sheet1!J4' }],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getValues(0, 7, 0, 8)).toStrictEqual([
+            [{ f: '=B1' }, { f: '=H1' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }, { f: '=Sheet1!H1' }],
+        ]);
+    });
+
+    it('cut-moving a larger mixed value, text, and formula range preserves moved formulas and updates dependents', async () => {
+        await cutPaste(
+            { rows: [2], cols: [0, 1, 2, 3, 4, 5] },
+            { startRow: 5, startColumn: 0, endRow: 5, endColumn: 5 }
+        );
+
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+        expect(getValues(5, 0, 5, 5)).toStrictEqual([
+            [
+                { v: 'label' },
+                { v: 7 },
+                { f: '=B6' },
+                { f: '=C6+1' },
+                { v: 11 },
+                { f: '=SUM(B6:E6)' },
+            ],
+        ]);
+        expect(getValues(0, 9, 0, 9)).toStrictEqual([
+            [{ f: '=F6' }],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [
+                { v: 'label' },
+                { v: 7 },
+                { f: '=B3' },
+                { f: '=C3+1' },
+                { v: 11 },
+                { f: '=SUM(B3:E3)' },
+            ],
+        ]);
+        expect(getValues(0, 9, 0, 9)).toStrictEqual([
+            [{ f: '=F3' }],
+        ]);
     });
 });

@@ -15,8 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-
-import { DocThreadCommentPanel } from '../../../views/doc-thread-comment-panel';
+import { DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
 import { ShowCommentPanelOperation, ToggleCommentPanelOperation } from '../show-comment-panel.operation';
 
 describe('ShowCommentPanelOperation', () => {
@@ -48,7 +47,7 @@ describe('ShowCommentPanelOperation', () => {
 
         expect(ok).toBe(true);
         expect(open).toHaveBeenCalledWith(expect.objectContaining({
-            children: { label: DocThreadCommentPanel.componentKey },
+            children: { label: DOCS_THREAD_COMMENT_PANEL },
             width: 320,
         }));
         expect(setPanelVisible).toHaveBeenCalledWith(true);
@@ -68,7 +67,7 @@ describe('ToggleCommentPanelOperation', () => {
 
         const close = vi.fn();
         const sidebarService = {
-            options: { children: { label: DocThreadCommentPanel.componentKey } },
+            options: { children: { label: DOCS_THREAD_COMMENT_PANEL } },
             open: vi.fn(),
             close,
         };

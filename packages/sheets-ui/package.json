@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-ui",
-    "version": "0.17.0",
+    "version": "0.18.0",
     "private": false,
     "description": "UniverSheet normal ui-plugin-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -95,6 +95,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "postcss": "^8.5.8",
         "react": "18.3.1",

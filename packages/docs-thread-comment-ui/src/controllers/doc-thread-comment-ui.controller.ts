@@ -20,6 +20,7 @@ import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
+import { DOCS_THREAD_COMMENT_PANEL } from '../common/const';
 import { menuSchema } from '../menu/schema';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
 
@@ -53,7 +54,7 @@ export class DocThreadCommentUIController extends Disposable {
 
     private _initComponents() {
         ([
-            [DocThreadCommentPanel.componentKey, DocThreadCommentPanel],
+            [DOCS_THREAD_COMMENT_PANEL, DocThreadCommentPanel],
             ['CommentIcon', CommentIcon],
         ] as const).forEach(([id, comp]) => {
             this.disposeWithMe(

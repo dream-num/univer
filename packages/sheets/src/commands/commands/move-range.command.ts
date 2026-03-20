@@ -42,24 +42,36 @@ import { getSheetCommandTarget } from './utils/target-util';
 export interface IMoveRangeCommandParams {
     toRange: IRange;
     fromRange: IRange;
+    fromUnitId?: string;
+    fromSubUnitId?: string;
+    toUnitId?: string;
+    toSubUnitId?: string;
 }
 export const MoveRangeCommandId = 'sheet.command.move-range';
+
+interface IResolvedMoveRangeContext {
+    unitId: string;
+    fromSubUnitId: string;
+    toSubUnitId: string;
+    fromWorksheet: Worksheet;
+    toWorksheet: Worksheet;
+}
+
+interface IGetMoveRangeCommandMutationsOptions {
+    includeSelection?: boolean;
+    includeAfterCommand?: boolean;
+    includeAutoHeight?: boolean;
+}
 
 export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
-
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const errorService = accessor.get(ErrorService);
         const localeService = accessor.get(LocaleService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
 
         const perform = await sheetInterceptorService.beforeCommandExecute({ id: MoveRangeCommand.id, params });
 
@@ -67,76 +79,148 @@ export const MoveRangeCommand: ICommand = {
             return false;
         }
 
-        const { worksheet, subUnitId, unitId } = target;
-        const moveRangeMutations = getMoveRangeUndoRedoMutations(
-            accessor,
-            { unitId, subUnitId, range: params.fromRange },
-            { unitId, subUnitId, range: params.toRange }
-        );
-        if (moveRangeMutations === null) {
+        const moveRangeCommandMutations = getMoveRangeCommandMutations(accessor, params);
+        if (!moveRangeCommandMutations) {
             errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
 
-        const interceptorCommands = sheetInterceptorService.onCommandExecute({
-            id: MoveRangeCommand.id,
-            params,
-        });
-
-        const redos = [
-            ...(interceptorCommands.preRedos ?? []),
-            ...moveRangeMutations.redos,
-            ...interceptorCommands.redos,
-            {
-                id: SetSelectionsOperation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    selections: [{ range: params.toRange, primary: getPrimaryAfterMove(params.fromRange, params.toRange, worksheet) }],
-                    type: SelectionMoveType.MOVE_END,
-                } as ISetSelectionsOperationParams,
-            },
-        ];
-        const undos = [
-            ...(interceptorCommands.preUndos ?? []),
-            ...moveRangeMutations.undos,
-            ...interceptorCommands.undos,
-            {
-                id: SetSelectionsOperation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
-                    type: SelectionMoveType.MOVE_END,
-                } as ISetSelectionsOperationParams,
-            },
-        ];
-
-        const result = sequenceExecute(redos, commandService).result;
+        const result = sequenceExecute(moveRangeCommandMutations.redos, commandService).result;
 
         if (result) {
-            const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
-                unitId,
-                subUnitId,
-                ranges: [params.fromRange, params.toRange],
-            });
-
-            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
-                id: MoveRangeCommand.id,
-                params,
-            });
-
-            sequenceExecute([...afterInterceptors.redos, ...autoHeightRedos], commandService);
             undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [...undos, ...afterInterceptors.undos, ...autoHeightUndos],
-                redoMutations: [...redos, ...afterInterceptors.redos, ...autoHeightRedos],
+                unitID: moveRangeCommandMutations.unitId,
+                undoMutations: moveRangeCommandMutations.undos,
+                redoMutations: moveRangeCommandMutations.redos,
             });
             return true;
         }
         return false;
     },
 };
+
+function _resolveMoveRangeContext(accessor: IAccessor, params: IMoveRangeCommandParams): IResolvedMoveRangeContext | null {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const target = getSheetCommandTarget(univerInstanceService);
+
+    const unitId = params.toUnitId ?? params.fromUnitId ?? target?.unitId;
+    const fromSubUnitId = params.fromSubUnitId ?? target?.subUnitId;
+    const toSubUnitId = params.toSubUnitId ?? params.fromSubUnitId ?? target?.subUnitId;
+
+    if (!unitId || !fromSubUnitId || !toSubUnitId) {
+        return null;
+    }
+
+    if (params.fromUnitId && params.toUnitId && params.fromUnitId !== params.toUnitId) {
+        return null;
+    }
+
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
+    const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
+
+    if (!fromWorksheet || !toWorksheet) {
+        return null;
+    }
+
+    return {
+        unitId,
+        fromSubUnitId,
+        toSubUnitId,
+        fromWorksheet,
+        toWorksheet,
+    };
+}
+
+export function getMoveRangeCommandMutations(
+    accessor: IAccessor,
+    params: IMoveRangeCommandParams,
+    options: IGetMoveRangeCommandMutationsOptions = {}
+) {
+    const {
+        includeSelection = true,
+        includeAfterCommand = true,
+        includeAutoHeight = true,
+    } = options;
+
+    const context = _resolveMoveRangeContext(accessor, params);
+    if (!context) {
+        return null;
+    }
+
+    const sheetInterceptorService = accessor.get(SheetInterceptorService);
+    const { unitId, fromSubUnitId, toSubUnitId, fromWorksheet, toWorksheet } = context;
+
+    const moveRangeMutations = getMoveRangeUndoRedoMutations(
+        accessor,
+        { unitId, subUnitId: fromSubUnitId, range: params.fromRange },
+        { unitId, subUnitId: toSubUnitId, range: params.toRange }
+    );
+    if (moveRangeMutations === null) {
+        return null;
+    }
+
+    const commandInfo = {
+        id: MoveRangeCommand.id,
+        params,
+    };
+
+    const interceptorCommands = sheetInterceptorService.onCommandExecute(commandInfo);
+    const redos = [
+        ...(interceptorCommands.preRedos ?? []),
+        ...moveRangeMutations.redos,
+        ...interceptorCommands.redos,
+    ];
+    const undos = [
+        ...(interceptorCommands.preUndos ?? []),
+        ...moveRangeMutations.undos,
+        ...interceptorCommands.undos,
+    ];
+
+    if (includeSelection) {
+        redos.push({
+            id: SetSelectionsOperation.id,
+            params: {
+                unitId,
+                subUnitId: toSubUnitId,
+                selections: [{ range: params.toRange, primary: getPrimaryAfterMove(params.fromRange, params.toRange, fromWorksheet, toWorksheet) }],
+                type: SelectionMoveType.MOVE_END,
+            } as ISetSelectionsOperationParams,
+        });
+        undos.push({
+            id: SetSelectionsOperation.id,
+            params: {
+                unitId,
+                subUnitId: fromSubUnitId,
+                selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, fromWorksheet) }],
+                type: SelectionMoveType.MOVE_END,
+            } as ISetSelectionsOperationParams,
+        });
+    }
+
+    if (includeAfterCommand) {
+        const afterInterceptors = sheetInterceptorService.afterCommandExecute(commandInfo);
+        redos.push(...afterInterceptors.redos);
+        undos.push(...afterInterceptors.undos);
+    }
+
+    if (includeAutoHeight) {
+        const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
+            unitId,
+            subUnitId: toSubUnitId,
+            ranges: fromSubUnitId === toSubUnitId ? [params.fromRange, params.toRange] : [params.toRange],
+        });
+
+        redos.push(...autoHeightRedos);
+        undos.push(...autoHeightUndos);
+    }
+
+    return {
+        unitId,
+        redos,
+        undos,
+    };
+}
 
 export interface IRangeUnit {
     unitId: string;
@@ -240,12 +324,12 @@ export function getMoveRangeUndoRedoMutations(
 
 // Before moveRange is executed, the target area has no merge cell yet.
 // So need to get the merge info of the start cell and then transform it
-function getPrimaryAfterMove(fromRange: IRange, toRange: IRange, worksheet: Worksheet): ISelectionCell {
+function getPrimaryAfterMove(fromRange: IRange, toRange: IRange, sourceWorksheet: Worksheet, targetWorksheet: Worksheet = sourceWorksheet): ISelectionCell {
     const startRow = fromRange.startRow;
     const startColumn = fromRange.startColumn;
-    const mergeInfo = worksheet.getMergedCell(startRow, startColumn);
+    const mergeInfo = sourceWorksheet.getMergedCell(startRow, startColumn);
 
-    const res = getPrimaryForRange(toRange, worksheet);
+    const res = getPrimaryForRange(toRange, targetWorksheet);
     if (mergeInfo) {
         const mergeRowCount = mergeInfo.endRow - mergeInfo.startRow + 1;
         const mergeColCount = mergeInfo.endColumn - mergeInfo.startColumn + 1;

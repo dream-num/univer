@@ -121,11 +121,12 @@ export function ParagraphSetting() {
                     );
                 })}
             </div>
-            <div className="univer-t-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.indentation')}</div>
+            <div className="univer-t-4 univer-mt-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.indentation')}</div>
             <div>
                 <div className="univer-item-center univer-flex univer-justify-between">
                     <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.left')}
+                        {' '}
                         (px)
                     </div>
                     <AutoFocusInputNumber className="univer-mt-4" value={indentStart} onChange={(v) => setIndentStart(v ?? 0)} />
@@ -134,6 +135,7 @@ export function ParagraphSetting() {
 
                     <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.right')}
+                        {' '}
                         (px)
                     </div>
                     <AutoFocusInputNumber className="univer-mt-4" value={indentEnd} onChange={(v) => setIndentEnd(v ?? 0)} />
@@ -142,6 +144,7 @@ export function ParagraphSetting() {
 
                     <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.firstLine')}
+                        {' '}
                         (px)
                     </div>
                     <AutoFocusInputNumber className="univer-mt-4" value={indentFirstLine} onChange={(v) => setIndentFirstLine(v ?? 0)} />
@@ -150,17 +153,19 @@ export function ParagraphSetting() {
 
                     <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.hanging')}
+                        {' '}
                         (px)
                     </div>
                     <AutoFocusInputNumber className="univer-mt-4" value={hanging} onChange={(v) => setHanging(v ?? 0)} />
                 </div>
             </div>
-            <div className="univer-t-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.spacing')}</div>
+            <div className="univer-t-4 univer-mt-4 univer-text-sm univer-font-medium">{localeService.t('doc.paragraphSetting.spacing')}</div>
             <div>
-                <div className="univer-justify-betweenuniver-item-center univer-flex">
+                <div className="univer-item-center univer-flex univer-justify-between">
 
                     <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.before')}
+                        {' '}
                         (px)
                     </div>
                     <AutoFocusInputNumber className="univer-mt-4" value={spaceAbove} onChange={(v) => setSpaceAbove(v ?? 0)} />
@@ -169,6 +174,7 @@ export function ParagraphSetting() {
 
                     <div className="univer-mt-3 univer-text-xs">
                         {localeService.t('doc.paragraphSetting.after')}
+                        {' '}
                         (px)
                     </div>
                     <AutoFocusInputNumber className="univer-mt-4" value={spaceBelow} onChange={(v) => setSpaceBelow(v ?? 0)} />

@@ -15,13 +15,13 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { DefinedNameDataController, IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { EditorBridgeService, IEditorBridgeService, SheetClipboardController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -119,10 +119,17 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
             dependencies?.forEach((d) => injector.add(d));
 
+            // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
+            const sheetClipboardController = injector.createInstance(SheetClipboardController);
+            injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
+
             this._injector.get(SheetInterceptorService);
             this._injector.get(WorkbookPermissionService);
             this._injector.get(WorksheetPermissionService);
             this._injector.get(DefinedNameDataController);
+
+            const localeService = injector.get(LocaleService);
+            localeService.load({});
         }
 
         override onReady(): void {

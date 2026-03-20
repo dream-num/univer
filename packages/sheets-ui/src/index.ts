@@ -97,6 +97,7 @@ export { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 export { AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+export { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 export { DragRenderController } from './controllers/drag-render.controller';
 export { EditingRenderController } from './controllers/editor/editing.render-controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';

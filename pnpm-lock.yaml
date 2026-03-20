@@ -2623,9 +2623,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../sheets-formula
       '@univerjs/themes':
         specifier: workspace:*
         version: link:../themes

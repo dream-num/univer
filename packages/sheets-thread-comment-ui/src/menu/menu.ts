@@ -19,9 +19,8 @@ import type { IShortcutItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
-import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
+import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
 
 export const threadCommentMenuFactory = (accessor: IAccessor) => {
     return {

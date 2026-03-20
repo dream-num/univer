@@ -187,6 +187,13 @@ export class FormulaClipboardController extends Disposable {
             };
         }
 
+        if (payload.copyType === COPY_TYPE.CUT && !isSpecialPaste) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
+
         const workbook = this._getWorkbook();
         const unitId = pasteTo.unitId || workbook?.getUnitId();
         const subUnitId = pasteTo.subUnitId || workbook?.getActiveSheet()?.getSheetId();
@@ -234,7 +241,7 @@ export function getSetCellFormulaMutations(
     },
     lexerTreeBuilder: LexerTreeBuilder,
     formulaDataModel: FormulaDataModel,
-    isSpecialPaste = false,
+    _isSpecialPaste = false,
     pasteFrom: ISheetDiscreteRangeLocation | null
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];

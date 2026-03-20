@@ -161,7 +161,8 @@ export class UpdateDefinedNameController extends Disposable {
                         sequenceUnitRangeWidthOffset,
                         moveParams,
                         unitId,
-                        sheetId
+                        sheetId,
+                        { preserveSheetQualifier: true }
                     );
                 }
 

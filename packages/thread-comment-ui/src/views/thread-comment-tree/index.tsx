@@ -18,7 +18,7 @@ import type { IUser, UniverInstanceType } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
-import { generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
+import { DOCS_COMMENT_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, ResolvedIcon, SolveIcon } from '@univerjs/icons';
 import {
@@ -37,6 +37,11 @@ import { SetActiveCommentOperation } from '../../commands/operations/comment.ope
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 
+export enum ThreadCommentTreeLocation {
+    CELL = 'CELL',
+    PANEL = 'PANEL',
+};
+
 export interface IThreadCommentTreeProps {
     full?: boolean;
     id?: string;
@@ -49,7 +54,7 @@ export interface IThreadCommentTreeProps {
     showHighlight?: boolean;
     onClose?: () => void;
     getSubUnitName: (subUnitId: string) => string;
-    prefix?: string;
+    location: ThreadCommentTreeLocation;
     autoFocus?: boolean;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
@@ -73,12 +78,13 @@ export interface IThreadCommentItemProps {
     onAddComment?: (comment: IThreadComment) => boolean;
     onDeleteComment?: (comment: IThreadComment) => boolean;
     type: UniverInstanceType;
+    threadCommentEditorId: string;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment, type } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment, type, threadCommentEditorId } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -214,6 +220,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         autoFocus
                         unitId={unitId}
                         subUnitId={subUnitId}
+                        editorId={threadCommentEditorId}
                         onSave={({ text, attachments }) => {
                             onEditingChange?.(false);
                             commandService.executeCommand(
@@ -272,7 +279,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         showHighlight,
         onClose,
         getSubUnitName,
-        prefix,
+        location,
         autoFocus,
         onMouseEnter,
         onMouseLeave,
@@ -360,17 +367,18 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
     const editorVisible = showEdit && !editingId && !resolved;
     const title = `${refStr || comments?.root.ref || ''}${subUnitName ? ' · ' : ''}${subUnitName}`;
+    const threadCommentEditorId = `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_${location}`;
 
     return (
         <div
-            id={`${prefix}-${unitId}-${subUnitId}-${id}`}
+            id={`${location}-${unitId}-${subUnitId}-${id}`}
             className={clsx(`
               univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4
               dark:!univer-bg-gray-900 dark:!univer-text-white
             `, borderClassName, {
                 'univer-w-[278px]': !full,
                 'univer-w-full': full,
-                'univer-shadow': !resolved && (showHighlight || isHover || prefix === 'cell'),
+                'univer-shadow': !resolved && (showHighlight || isHover || location === ThreadCommentTreeLocation.CELL),
             })}
             style={style}
             onClick={onClick}
@@ -460,6 +468,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             editing={editingId === item.id}
                             resolved={comments?.root.resolved}
                             type={type}
+                            threadCommentEditorId={threadCommentEditorId}
                             onClose={onClose}
                             onEditingChange={(editing) => {
                                 if (editing) {
@@ -502,22 +511,19 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         type={type}
                         unitId={unitId}
                         subUnitId={subUnitId}
+                        editorId={threadCommentEditorId}
                         onSave={async ({ text, attachments }) => {
-                            if (!currentUser?.userID || !comments?.root) {
-                                throw new Error('[ThreadCommentTree] No current user or root comment found');
-                            }
-
                             const comment: IThreadComment = {
                                 text,
                                 attachments,
                                 dT: getDT(),
                                 id: generateRandomId(),
                                 ref: refStr!,
-                                personId: currentUser?.userID,
+                                personId: currentUser?.userID ?? '',
                                 parentId: comments?.root.id,
                                 unitId,
                                 subUnitId,
-                                threadId: comments?.root.threadId,
+                                threadId: comments?.root.threadId ?? '',
                             };
 
                             if (onAddComment?.(comment) === false) {

@@ -477,6 +477,7 @@ const locale: typeof enUS = {
             printErr: '该工作表已被保护，目前无打印权限。如需打印，请联系创建者。',
             formulaErr: '该范围或者引用范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
             hyperLinkErr: '该范围已被保护，目前无设置超链接权限。如需设置超链接，请联系创建者。',
+            commentErr: '该范围已被保护，目前无评论权限。如需评论，请联系创建者。',
         },
         button: {
             confirm: '确认',

@@ -476,6 +476,7 @@ const locale: typeof enUS = {
             printErr: 'Trang bảng này đã được bảo vệ, hiện không có quyền in. Nếu cần in, vui lòng liên hệ với người tạo.',
             formulaErr: 'Phạm vi hoặc phạm vi tham chiếu này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
             hyperLinkErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập liên kết. Nếu cần thiết lập liên kết, vui lòng liên hệ với người tạo.',
+            commentErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền bình luận. Nếu cần bình luận, vui lòng liên hệ với người tạo.',
         },
         button: {
             confirm: 'Xác nhận',

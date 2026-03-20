@@ -23,9 +23,8 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { getDT } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
+import { DEFAULT_DOC_SUBUNIT_ID, DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
-import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
 
 export interface IShowCommentPanelOperationParams {
     activeComment: ActiveCommentInfo;
@@ -38,10 +37,10 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
         const panelService = accessor.get(ThreadCommentPanelService);
         const sidebarService = accessor.get(ISidebarService);
 
-        if (!panelService.panelVisible || sidebarService.options.children?.label !== DocThreadCommentPanel.componentKey) {
+        if (!panelService.panelVisible || sidebarService.options.children?.label !== DOCS_THREAD_COMMENT_PANEL) {
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
-                children: { label: DocThreadCommentPanel.componentKey },
+                children: { label: DOCS_THREAD_COMMENT_PANEL },
                 width: 320,
                 onClose: () => panelService.setPanelVisible(false),
             });
@@ -63,10 +62,10 @@ export const ToggleCommentPanelOperation: ICommand = {
         const panelService = accessor.get(ThreadCommentPanelService);
         const sidebarService = accessor.get(ISidebarService);
 
-        if (!panelService.panelVisible || sidebarService.options.children?.label !== DocThreadCommentPanel.componentKey) {
+        if (!panelService.panelVisible || sidebarService.options.children?.label !== DOCS_THREAD_COMMENT_PANEL) {
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
-                children: { label: DocThreadCommentPanel.componentKey },
+                children: { label: DOCS_THREAD_COMMENT_PANEL },
                 width: 320,
                 onClose: () => panelService.setPanelVisible(false),
             });

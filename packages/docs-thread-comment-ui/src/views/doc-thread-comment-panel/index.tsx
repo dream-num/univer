@@ -121,5 +121,3 @@ export const DocThreadCommentPanel = () => {
         />
     );
 };
-
-DocThreadCommentPanel.componentKey = 'univer.doc.thread-comment-panel';

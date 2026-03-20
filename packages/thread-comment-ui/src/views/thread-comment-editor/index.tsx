@@ -17,7 +17,7 @@
 import type { IDocumentBody, IDocumentData, IUser } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { BuildTextUtils, DOCS_COMMENT_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
@@ -33,6 +33,7 @@ export interface IThreadCommentEditorProps {
     unitId: string;
     subUnitId: string;
     type: UniverInstanceType;
+    editorId: string;
 }
 
 export interface IThreadCommentEditorInstance {
@@ -48,7 +49,7 @@ function getSnapshot(body: IDocumentBody): IDocumentData {
 }
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
-    const { comment, onSave, id, onCancel, autoFocus, unitId, type } = props;
+    const { comment, onSave, id, onCancel, autoFocus, unitId, type, editorId } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
@@ -115,7 +116,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             <RichTextEditor
                 className="univer-w-full"
                 editorRef={editor}
-                editorId={DOCS_COMMENT_EDITOR_UNIT_ID_KEY}
+                editorId={editorId}
                 autoFocus={autoFocus}
                 keyboardEventConfig={keyboardEventConfig}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}

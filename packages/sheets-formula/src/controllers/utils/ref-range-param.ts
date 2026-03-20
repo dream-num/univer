@@ -120,10 +120,22 @@ function handleRefMoveRange(command: ICommandInfo<IMoveRangeCommandParams>, work
     const { params } = command;
     if (!params) return null;
 
-    const { fromRange, toRange } = params;
+    const {
+        fromRange,
+        toRange,
+        fromUnitId,
+        fromSubUnitId,
+        toUnitId,
+        toSubUnitId,
+    } = params;
     if (!fromRange || !toRange) return null;
 
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
+    const { unitId: currentUnitId, sheetId: currentSheetId } = getCurrentSheetInfo(workbook);
+    const unitId = fromUnitId || toUnitId || currentUnitId;
+    const sheetId = fromSubUnitId || currentSheetId;
+    const targetSheetId = toSubUnitId || fromSubUnitId || currentSheetId;
+    const targetUnitId = toUnitId || fromUnitId || currentUnitId;
+    const targetSheetName = workbook.getSheetBySheetId(targetSheetId)?.getName();
 
     return {
         type: FormulaReferenceMoveType.MoveRange,
@@ -131,6 +143,9 @@ function handleRefMoveRange(command: ICommandInfo<IMoveRangeCommandParams>, work
         to: toRange,
         unitId,
         sheetId,
+        targetUnitId,
+        targetSheetId,
+        targetSheetName,
     };
 }
 

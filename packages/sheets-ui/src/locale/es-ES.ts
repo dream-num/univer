@@ -479,6 +479,7 @@ const locale: typeof enUS = {
             printErr: 'La hoja de cálculo está protegida y no tienes permiso para imprimir. Para imprimir, contacta al creador.',
             formulaErr: 'El rango o el rango referenciado está protegido, y no tienes permiso de edición. Para editar, contacta al creador.',
             hyperLinkErr: 'El rango está protegido y no tienes permiso para establecer hipervínculos. Para establecer hipervínculos, contacta al creador.',
+            commentErr: 'El rango está protegido y no tienes permiso para comentar. Para comentar, contacta al creador.',
         },
         button: {
             confirm: 'Confirmar',

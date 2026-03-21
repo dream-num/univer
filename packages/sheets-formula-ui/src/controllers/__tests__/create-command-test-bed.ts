@@ -14,14 +14,55 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { DefinedNameDataController, IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { EditorBridgeService, IEditorBridgeService, SheetClipboardController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { EditorBridgeService, IEditorBridgeService, IMarkSelectionService, ISheetClipboardService, SheetClipboardController, SheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { BrowserClipboardService, DesktopMessageService, IClipboardInterfaceService, IMessageService, INotificationService, IPlatformService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+
+class testMarkSelectionService {
+    addShape(): string | null {
+        return null;
+    }
+
+    addShapeWithNoFresh(): string | null {
+        return null;
+    }
+
+    removeShape(id: string): void {
+        // empty
+    }
+
+    removeAllShapes(): void {
+        // empty
+    }
+
+    refreshShapes(): void {
+        // empty
+    }
+
+    getShapeMap(): Map<string, any> {
+        return new Map();
+    }
+}
+
+class testNotificationService {
+    show(): IDisposable {
+        return {
+            dispose: () => { /* empty */ },
+        };
+    }
+}
+
+class testPlatformService {
+    isWindows: boolean = false;
+    isMac: boolean = true;
+    isLinux: boolean = false;
+}
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -74,6 +115,7 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -95,6 +137,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([IUIPartsService, { useClass: UIPartsService }]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
@@ -102,6 +145,12 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
+            injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
+            injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+            injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
+            injector.add([IMarkSelectionService, { useClass: testMarkSelectionService }]);
+            injector.add([INotificationService, { useClass: testNotificationService }]);
+            injector.add([IPlatformService, { useClass: testPlatformService }]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);

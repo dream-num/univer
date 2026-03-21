@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, Injector, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { ICommandService, IUniverInstanceService, LocaleType, ObjectMatrix, RANGE_TYPE, UndoCommand } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder, SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
-import { COPY_TYPE, IMarkSelectionService, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardService, SheetSelectionRenderService } from '@univerjs/sheets-ui';
-import { BrowserClipboardService, DesktopMessageService, IClipboardInterfaceService, IMessageService, INotificationService, IPlatformService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { COPY_TYPE, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getSetCellFormulaMutations } from '../formula-clipboard.controller';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -38,46 +37,6 @@ interface ITestSheetClipboardService extends ISheetClipboardService {
         copyId: string;
     };
     _pasteInternal: (copyId: string, pasteType: string) => Promise<boolean>;
-}
-
-class testMarkSelectionService {
-    addShape(): string | null {
-        return null;
-    }
-
-    addShapeWithNoFresh(): string | null {
-        return null;
-    }
-
-    removeShape(id: string): void {
-        // empty
-    }
-
-    removeAllShapes(): void {
-        // empty
-    }
-
-    refreshShapes(): void {
-        // empty
-    }
-
-    getShapeMap(): Map<string, any> {
-        return new Map();
-    }
-}
-
-class testNotificationService {
-    show(): IDisposable {
-        return {
-            dispose: () => { /* empty */ },
-        };
-    }
-}
-
-class testPlatformService {
-    isWindows: boolean = false;
-    isMac: boolean = true;
-    isLinux: boolean = false;
 }
 
 function createFormulaClipboardWorkbookData(): IWorkbookData {
@@ -150,13 +109,6 @@ describe('Test cut command with formulas', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(createFormulaClipboardWorkbookData(), [
-            [IUIPartsService, { useClass: UIPartsService }],
-            [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
-            [IMarkSelectionService, { useClass: testMarkSelectionService }],
-            [IMessageService, { useClass: DesktopMessageService, lazy: true }],
-            [ISheetClipboardService, { useClass: SheetClipboardService }],
-            [INotificationService, { useClass: testNotificationService }],
-            [IPlatformService, { useClass: testPlatformService }],
             [UpdateFormulaController],
         ]);
 

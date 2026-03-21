@@ -213,13 +213,16 @@ export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IF
     const redoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
     const undoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
 
-    const { unitId: targetUnitId, sheetId } = formulaReferenceMoveParam;
+    const { unitId: fromUnitId, sheetId: fromSheetId } = formulaReferenceMoveParam;
+    const targetUnitId = formulaReferenceMoveParam.targetUnitId ?? fromUnitId;
+    const targetSheetId = formulaReferenceMoveParam.targetSheetId ?? fromSheetId;
+    const isCrossSheet = fromUnitId !== targetUnitId || fromSheetId !== targetSheetId;
 
     // Iterate over all unitId in oldFormulaData
     const allUnitIds = new Set([...Object.keys(oldFormulaData), ...Object.keys(newFormulaData)]);
 
     allUnitIds.forEach((unitId) => {
-        if (checkFormulaDataNull(oldFormulaData, unitId, sheetId)) {
+        if (checkFormulaDataNull(oldFormulaData, unitId, fromSheetId)) {
             return;
         }
 
@@ -239,7 +242,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData, newFormulaData: IF
 
             // If the sheet where the range is changed is different from the current sheet, the position will not be changed.
             // Simply get the data from newFormulaMatrix to update the range.
-            if (unitId !== targetUnitId || currentSheetId !== sheetId) {
+            if (isCrossSheet || unitId !== fromUnitId || currentSheetId !== fromSheetId) {
                 rangeList = processFormulaRange(newFormulaMatrix);
             } else {
                 rangeList = processFormulaChanges(oldFormulaMatrix, newFormulaMatrix, formulaReferenceMoveParam);

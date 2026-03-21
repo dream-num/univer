@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { Dependency, ICellData, IDisposable, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
-import { ICommandService, IUniverInstanceService, LocaleType, ObjectMatrix, RANGE_TYPE, UndoCommand } from '@univerjs/core';
-import { FormulaDataModel, LexerTreeBuilder, SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
-import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { DisposableCollection, ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, ObjectMatrix, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder, SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
-import { COPY_TYPE, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, IMarkSelectionService, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardController, SheetClipboardService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { BrowserClipboardService, DesktopMessageService, IClipboardInterfaceService, IMessageService, INotificationService, IPlatformService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getSetCellFormulaMutations } from '../formula-clipboard.controller';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -37,6 +40,148 @@ interface ITestSheetClipboardService extends ISheetClipboardService {
         copyId: string;
     };
     _pasteInternal: (copyId: string, pasteType: string) => Promise<boolean>;
+}
+
+class testMarkSelectionService {
+    addShape(): string | null {
+        return null;
+    }
+
+    addShapeWithNoFresh(): string | null {
+        return null;
+    }
+
+    removeShape(id: string): void {
+        // empty
+    }
+
+    removeAllShapes(): void {
+        // empty
+    }
+
+    refreshShapes(): void {
+        // empty
+    }
+
+    getShapeMap(): Map<string, any> {
+        return new Map();
+    }
+}
+
+class testNotificationService {
+    show(): IDisposable {
+        return {
+            dispose: () => { /* empty */ },
+        };
+    }
+}
+
+class testPlatformService {
+    isWindows: boolean = false;
+    isMac: boolean = true;
+    isLinux: boolean = false;
+}
+
+export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
+
+    /**
+     * This plugin hooks into Sheet's DI system to expose API to test scripts
+     */
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            const injector = this._injector;
+            injector.add([IUIPartsService, { useClass: UIPartsService }]);
+            injector.add([SheetsSelectionsService]);
+            injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
+            injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+            injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
+            injector.add([IMarkSelectionService, { useClass: testMarkSelectionService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
+            injector.add([INotificationService, { useClass: testNotificationService }]);
+            injector.add([IPlatformService, { useClass: testPlatformService }]);
+
+            // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
+            const sheetClipboardController = injector.createInstance(SheetClipboardController);
+
+            injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
+            injector.add([SheetInterceptorService]);
+            injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
+            injector.add([FormulaDataModel]);
+            injector.add([LexerTreeBuilder]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
+            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([SheetSkeletonService]);
+
+            dependencies?.forEach((d) => injector.add(d));
+
+            const localeService = injector.get(LocaleService);
+            localeService.load({});
+
+            injector.get(IUIPartsService);
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || {});
+
+    const univerInstanceService = get(IUniverInstanceService);
+    univerInstanceService.focusUnit('test');
+
+    const logService = get(ILogService);
+    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+
+    // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
+    // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+    const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
+        unit: sheet,
+        unitId: 'test',
+        type: UniverInstanceType.UNIVER_SHEET,
+        engine: null as any,
+        scene: null as any,
+        mainComponent: null as any,
+        components: null as any,
+        isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
+    }, injector, injector.get(SheetSkeletonService));
+
+    injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
+    injector.get(IRenderManagerService).addRender('test', {
+        type: UniverInstanceType.UNIVER_SHEET,
+        unitId: 'test',
+        engine: new DisposableCollection() as any,
+        scene: new DisposableCollection() as any,
+        mainComponent: null as any,
+        components: new Map(),
+        isMainScene: true,
+        with: injector.get.bind(injector),
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
+    });
+
+    return {
+        univer,
+        get,
+        sheet,
+    };
 }
 
 function createFormulaClipboardWorkbookData(): IWorkbookData {
@@ -108,7 +253,7 @@ describe('Test cut command with formulas', () => {
     ) => Array<Array<Nullable<ICellData>>> | undefined;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(createFormulaClipboardWorkbookData(), [
+        const testBed = clipboardTestBed(createFormulaClipboardWorkbookData(), [
             [UpdateFormulaController],
         ]);
 

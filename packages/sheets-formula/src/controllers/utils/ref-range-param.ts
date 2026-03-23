@@ -133,6 +133,7 @@ function handleRefMoveRange(command: ICommandInfo<IMoveRangeCommandParams>, work
     const { unitId: currentUnitId, sheetId: currentSheetId } = getCurrentSheetInfo(workbook);
     const unitId = fromUnitId || toUnitId || currentUnitId;
     const sheetId = fromSubUnitId || currentSheetId;
+    const sheetName = workbook.getSheetBySheetId(sheetId)?.getName();
     const targetSheetId = toSubUnitId || fromSubUnitId || currentSheetId;
     const targetUnitId = toUnitId || fromUnitId || currentUnitId;
     const targetSheetName = workbook.getSheetBySheetId(targetSheetId)?.getName();
@@ -143,6 +144,7 @@ function handleRefMoveRange(command: ICommandInfo<IMoveRangeCommandParams>, work
         to: toRange,
         unitId,
         sheetId,
+        sheetName,
         targetUnitId,
         targetSheetId,
         targetSheetName,

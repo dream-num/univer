@@ -223,6 +223,9 @@ function createFormulaClipboardWorkbookData(): IWorkbookData {
                         4: { v: 11 },
                         5: { f: '=SUM(B3:E3)' },
                     },
+                    3: {
+                        0: { f: '=SUM(Sheet3!A1:A3,B1)' },
+                    },
                 },
             },
             sheet2: {
@@ -232,6 +235,17 @@ function createFormulaClipboardWorkbookData(): IWorkbookData {
                     0: {
                         0: { f: '=Sheet1!A1' },
                         1: { f: '=Sheet1!H1' },
+                    },
+                },
+            },
+            sheet3: {
+                id: 'sheet3',
+                name: 'Sheet3',
+                cellData: {
+                    0: {
+                        0: { v: 1 },
+                        1: { v: 2 },
+                        2: { v: 3 },
                     },
                 },
             },
@@ -472,6 +486,99 @@ describe('Test cut command with formulas', () => {
         ]);
         expect(getValues(0, 9, 0, 9)).toStrictEqual([
             [{ f: '=F3' }],
+        ]);
+    });
+
+    it('cut-pasting a formula cell across worksheets, the reference range is not affected by the moved range', async () => {
+        await cutPaste(
+            { rows: [0], cols: [2] },
+            { startRow: 10, startColumn: 0, endRow: 10, endColumn: 0 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(0, 2, 0, 2)).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+        expect(getValues(0, 2, 0, 2)).toStrictEqual([
+            [{ f: '=A1' }],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet2')).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+    });
+
+    it('cut-pasting a formula cell across worksheets, the reference range is affected by the moved range', async () => {
+        await cutPaste(
+            { rows: [2], cols: [0, 1, 2, 3, 4, 5] },
+            { startRow: 11, startColumn: 0, endRow: 11, endColumn: 0 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet2')).toStrictEqual([
+            [{ v: 'label' }, { v: 7 }, { f: '=B12' }, { f: '=C12+1' }, { v: 11 }, { f: '=SUM(B12:E12)' }],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet1')).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [{ v: 'label' }, { v: 7 }, { f: '=B3' }, { f: '=C3+1' }, { v: 11 }, { f: '=SUM(B3:E3)' }],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet2')).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet1')).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+    });
+
+    it('cut-pasting a formula cell across worksheets, the reference range has Sheet3 range and Sheet1 range', async () => {
+        await cutPaste(
+            { rows: [3], cols: [0] },
+            { startRow: 12, startColumn: 0, endRow: 12, endColumn: 0 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(3, 0, 3, 0)).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet2')).toStrictEqual([
+            [{ f: '=SUM(Sheet3!A1:A3,Sheet1!B1)' }],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+        expect(getValues(3, 0, 3, 0)).toStrictEqual([
+            [{ f: '=SUM(Sheet3!A1:A3,B1)' }],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet2')).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet1')).toStrictEqual([
+            [null],
         ]);
     });
 });

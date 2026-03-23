@@ -57,6 +57,7 @@ export function getNewRangeByMoveParam(
     currentFormulaSheetId: string,
     options: {
         preserveSheetQualifier?: boolean;
+        inCrossSheetCutRange?: boolean;
     } = {}
 ) {
     const {
@@ -80,7 +81,7 @@ export function getNewRangeByMoveParam(
         refOffsetX,
         refOffsetY,
     } = unitRangeWidthOffset;
-    const { preserveSheetQualifier = false } = options;
+    const { preserveSheetQualifier = false, inCrossSheetCutRange = false } = options;
 
     if (
         !checkIsSameUnitAndSheet(
@@ -370,7 +371,8 @@ export function getNewRangeByMoveParam(
 
     const shouldRewriteSheet = type === FormulaReferenceMoveType.MoveRange
         && !!targetSheetId
-        && targetSheetId !== userSheetId;
+        && targetSheetId !== userSheetId
+        && !inCrossSheetCutRange;
     const rewrittenSheetId = shouldRewriteSheet ? targetSheetId : sequenceRangeSheetId;
     const rewrittenSheetName = shouldRewriteSheet ? (targetSheetName || sequenceRangeSheetName) : sequenceRangeSheetName;
     const rewrittenUnitId = shouldRewriteSheet ? (targetUnitId || sequenceRangeUnitId) : sequenceRangeUnitId;

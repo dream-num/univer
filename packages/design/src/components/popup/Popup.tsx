@@ -15,13 +15,14 @@
  */
 
 import type { ReactElement } from 'react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CSSTransition } from 'react-transition-group';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import './index.css';
 
 const POPUP_POINTER_OFFSET = 2;
+const HIDDEN_POPUP_OFFSET: [number, number] = [-9999, -9999];
 
 export interface IPopupProps {
     children: ReactElement;
@@ -56,7 +57,7 @@ export function Popup(props: IPopupProps) {
 
     const nodeRef = useRef(null);
 
-    const [realOffset, setRealOffset] = useState<[number, number]>(offset);
+    const [realOffset, setRealOffset] = useState<[number, number]>(HIDDEN_POPUP_OFFSET);
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -80,9 +81,9 @@ export function Popup(props: IPopupProps) {
         return [x, y];
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!visible) {
-            setRealOffset([-9999, -9999]);
+            setRealOffset(HIDDEN_POPUP_OFFSET);
             return;
         }
 

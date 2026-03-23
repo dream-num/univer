@@ -226,11 +226,70 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return { undo: invertOp, redo: op, unitId, subUnitId, objects };
     }
 
+    getBatchRemoveOpInOder(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
+        if (removeParams.length === 0) {
+            return { undo: null as unknown as JSONOp, redo: null as unknown as JSONOp, unitId: '', subUnitId: '', objects: [] };
+        }
+        const orders = this.getDrawingOrder(removeParams[0].unitId, removeParams[0].subUnitId);
+        const orderIndexMap = new Map<string, number>();
+        orders.forEach((drawingId, index) => {
+            orderIndexMap.set(drawingId, index);
+        });
+        removeParams.sort((a, b) => {
+            const indexA = orderIndexMap.get(a.drawingId) ?? Number.NEGATIVE_INFINITY;
+            const indexB = orderIndexMap.get(b.drawingId) ?? Number.NEGATIVE_INFINITY;
+            return indexA - indexB;
+        });
+
+        return this.getBatchRemoveOp(removeParams);
+    }
+
     getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
+        // Expand group drawings to include all nested group nodes and leaf children.
+        // Non-group drawings are kept as-is.
+        const seenIds = new Set<string>();
+        const allToRemove: IDrawingSearch[] = [];
+        removeParams.forEach((removeParam) => {
+            const drawing = this.getDrawingByParam(removeParam);
+            if (drawing?.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
+                const nested = this.getDrawingsByGroupNested(removeParam);
+                if (nested) {
+                    const { flatChildren, groups } = nested;
+                    [...(flatChildren ?? []), ...groups].forEach((d) => {
+                        if (!seenIds.has(d.drawingId)) {
+                            seenIds.add(d.drawingId);
+                            allToRemove.push({ unitId: d.unitId, subUnitId: d.subUnitId, drawingId: d.drawingId });
+                        }
+                    });
+                } else if (!seenIds.has(removeParam.drawingId)) {
+                    seenIds.add(removeParam.drawingId);
+                    allToRemove.push(removeParam);
+                }
+            } else if (!seenIds.has(removeParam.drawingId)) {
+                seenIds.add(removeParam.drawingId);
+                allToRemove.push(removeParam);
+            }
+        });
+
+        const { unitId, subUnitId } = allToRemove[0] ?? removeParams[0];
+
+        // Sort ascending by order index so that, with the unshift trick below,
+        // composition applies removals from highest index to lowest (back-to-front).
+        // This handles nested groups layer-by-layer: inner groups sit at higher order
+        // positions than their parents and are therefore removed first.
+        const orderArr = this._getDrawingOrder(unitId, subUnitId);
+        const orderIndexMap = new Map<string, number>();
+        orderArr.forEach((id, idx) => orderIndexMap.set(id, idx));
+        allToRemove.sort((a, b) => {
+            const ia = orderIndexMap.get(a.drawingId) ?? Number.NEGATIVE_INFINITY;
+            const ib = orderIndexMap.get(b.drawingId) ?? Number.NEGATIVE_INFINITY;
+            return ia - ib;
+        });
+
         const ops: JSONOp[] = [];
         const invertOps: JSONOp[] = [];
 
-        removeParams.forEach((removeParam) => {
+        allToRemove.forEach((removeParam) => {
             const { op, invertOp } = this._removeByParam(removeParam);
             /**
              * ot-json compose case
@@ -249,9 +308,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         // this._remove$.next(objects);
 
-        const { unitId, subUnitId } = removeParams[0];
-
-        return { undo: invertOp, redo: op, unitId, subUnitId, objects: removeParams };
+        return { undo: invertOp, redo: op, unitId, subUnitId, objects: allToRemove };
     }
 
     getBatchUpdateOp(updateParams: T[]): IDrawingJsonUndo1 {

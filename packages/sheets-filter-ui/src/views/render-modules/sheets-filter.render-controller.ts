@@ -60,6 +60,7 @@ function computeIconTop(
  * Show selected range in filter.
  */
 export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
+    private _currentRenderParams: ISheetsFilterRenderParams | null = null;
     private _filterRangeShape: SelectionControl | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];
@@ -85,6 +86,10 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
     }
 
     private _initRenderer(): void {
+        this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
+            this._refreshRendering(this._currentRenderParams);
+        }));
+
         // Subscribe to skeleton change and filter model change.
         this._sheetSkeletonManagerService.currentSkeleton$.pipe(
             switchMap((skeletonParams) => {
@@ -114,14 +119,19 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             }),
             takeUntil(this.dispose$)
         ).subscribe((renderParams) => {
-            this._disposeRendering();
-            if (!renderParams || !renderParams.range) {
-                return;
-            }
-
-            this._renderRange(renderParams.range, renderParams.skeleton);
-            this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
+            this._currentRenderParams = renderParams;
+            this._refreshRendering(renderParams);
         });
+    }
+
+    private _refreshRendering(renderParams: ISheetsFilterRenderParams | null): void {
+        this._disposeRendering();
+        if (!renderParams || !renderParams.range) {
+            return;
+        }
+
+        this._renderRange(renderParams.range, renderParams.skeleton);
+        this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
     }
 
     private _renderRange(range: IRange, skeleton: SpreadsheetSkeleton): void {

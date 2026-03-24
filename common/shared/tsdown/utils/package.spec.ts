@@ -22,6 +22,7 @@ const packageJson = {
     dependencies: {
         '@univerjs/design': 'workspace:*',
         '@univerjs-pro/example': 'workspace:*',
+        canvas: '^3.2.2',
         '@wendellhu/redi': '1.1.1',
         dayjs: '^1.11.20',
     },
@@ -32,15 +33,16 @@ const packageJson = {
 };
 
 describe('package dependency helpers', () => {
-    it('should only keep @univerjs and @univerjs-pro packages as external', () => {
-        expect(createExternalPackages(packageJson)).toEqual([
+    it('should keep @univerjs packages and ignored packages as external', () => {
+        expect(createExternalPackages(packageJson, ['canvas'])).toEqual([
             '@univerjs-pro/example',
             '@univerjs/design',
+            'canvas',
         ]);
     });
 
-    it('should bundle third-party production dependencies and peer dependencies', () => {
-        expect(createBundledPackages(packageJson)).toEqual([
+    it('should bundle third-party production dependencies and peer dependencies except ignored packages', () => {
+        expect(createBundledPackages(packageJson, ['canvas'])).toEqual([
             '@wendellhu/redi',
             'dayjs',
             'react',

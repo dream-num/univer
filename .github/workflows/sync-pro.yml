@@ -22,3 +22,14 @@ jobs:
                           "ref": "${{ github.ref_name }}",
                           "sha": "${{ github.sha }}"
                       }
+            - name: Dispatch sync event to univer-labs
+              uses: peter-evans/repository-dispatch@v2
+              with:
+                  repository: dream-num/univer-labs
+                  token: ${{ secrets.GH_TOKEN }}
+                  event-type: sync-univer
+                  client-payload: >
+                      {
+                          "ref": "${{ github.ref_name }}",
+                          "sha": "${{ github.sha }}"
+                      }

@@ -29,6 +29,10 @@ function getProductionDependencyNames(packageJson: IPackageJson) {
     ])].sort((left, right) => left.localeCompare(right));
 }
 
+function normalizeIgnoredPackages(ignorePackages: string[] = []) {
+    return [...new Set(ignorePackages)].sort((left, right) => left.localeCompare(right));
+}
+
 /**
  * Reads the package manifest used to derive dependency externalization rules.
  */
@@ -39,15 +43,23 @@ export function readPackageJson(packageDir: string): IPackageJson {
 /**
  * Produces the external package allowlist.
  */
-export function createExternalPackages(packageJson: IPackageJson) {
-    return getProductionDependencyNames(packageJson)
-        .filter((packageName) => isUniverPackage(packageName));
+export function createExternalPackages(packageJson: IPackageJson, ignorePackages: string[] = []) {
+    const ignoredPackages = normalizeIgnoredPackages(ignorePackages);
+
+    return [...new Set([
+        ...getProductionDependencyNames(packageJson)
+            .filter((packageName) => isUniverPackage(packageName)),
+        ...ignoredPackages,
+    ])].sort((left, right) => left.localeCompare(right));
 }
 
 /**
  * Produces the package allowlist that should be bundled into ESM/CJS outputs.
  */
-export function createBundledPackages(packageJson: IPackageJson) {
+export function createBundledPackages(packageJson: IPackageJson, ignorePackages: string[] = []) {
+    const ignoredPackages = normalizeIgnoredPackages(ignorePackages);
+
     return getProductionDependencyNames(packageJson)
-        .filter((packageName) => !isUniverPackage(packageName));
+        .filter((packageName) => !isUniverPackage(packageName))
+        .filter((packageName) => !ignoredPackages.includes(packageName));
 }

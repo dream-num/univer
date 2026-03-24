@@ -19,6 +19,7 @@ import type { UserConfig } from 'tsdown';
 export interface IBuildOptions {
     skipUMD?: boolean;
     cleanup?: boolean;
+    ignorePackages?: string[];
     nodeFirst?: boolean;
 }
 

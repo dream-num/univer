@@ -35,8 +35,8 @@ import { emitPublishPackageJson } from './utils/publish-manifest';
  */
 function createBuildContext(packageDir: string, options: IBuildOptions): IBuildContext {
     const packageJson = readPackageJson(packageDir);
-    const bundledPackages = createBundledPackages(packageJson);
-    const externalPackages = createExternalPackages(packageJson);
+    const bundledPackages = createBundledPackages(packageJson, options.ignorePackages);
+    const externalPackages = createExternalPackages(packageJson, options.ignorePackages);
 
     return {
         bundledPackages,

@@ -8,6 +8,26 @@ import { build } from '../tsdown/index';
 const argvs = process.argv.slice(2);
 const [command, ...args] = argvs;
 
+function collectOptionValues(argv: string[], optionName: string) {
+    const values: string[] = [];
+
+    for (let index = 0; index < argv.length; index++) {
+        if (argv[index] !== optionName) {
+            continue;
+        }
+
+        const next = argv[index + 1];
+        if (!next || next.startsWith('--')) {
+            continue;
+        }
+
+        values.push(...next.split(',').map((value) => value.trim()).filter(Boolean));
+        index++;
+    }
+
+    return [...new Set(values)];
+}
+
 if (command === 'build') {
     const options: IBuildOptions = {};
 
@@ -19,6 +39,11 @@ if (command === 'build') {
     }
     if (args.includes('--nodeFirst')) {
         options.nodeFirst = true;
+    }
+
+    const ignorePackages = collectOptionValues(args, '--ignorePackages');
+    if (ignorePackages.length > 0) {
+        options.ignorePackages = ignorePackages;
     }
 
     // eslint-disable-next-line antfu/no-top-level-await

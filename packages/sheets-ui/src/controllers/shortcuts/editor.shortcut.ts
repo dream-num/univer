@@ -86,6 +86,14 @@ export const StartEditWithF2Shortcut: IShortcutItem = {
     },
 };
 
+export const RepeatLastActionShortcut: IShortcutItem = {
+    id: 'sheet.command.repeat-last-action',
+    binding: KeyCode.F4,
+    description: 'shortcut.sheet.repeat-last-action',
+    group: '4_sheet-edit',
+    preconditions: whenSheetEditorFocused,
+};
+
 export const EditorCursorEnterShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.ENTER,

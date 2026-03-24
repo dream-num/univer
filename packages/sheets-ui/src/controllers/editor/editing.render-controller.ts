@@ -93,6 +93,7 @@ import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { IRepeatLastActionService } from '../../services/repeat-last-action.service';
 import { EditorBridgeRenderController } from '../render-controllers/editor-bridge.render-controller';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
@@ -134,6 +135,7 @@ export class EditingRenderController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @IRepeatLastActionService private readonly _repeatLastActionService: IRepeatLastActionService,
         @IConfigService private readonly _configService: IConfigService
     ) {
         super();
@@ -679,6 +681,8 @@ export class EditingRenderController extends Disposable {
                 this._undoRedoService.rollback(redoUndoId, unitId);
                 return false;
             }
+
+            this._repeatLastActionService.setCellContentAction(finalCell);
         }
 
         return true;

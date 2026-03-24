@@ -32,6 +32,32 @@ import { textTrim } from './util';
 const PX_TO_PT_RATIO = 0.75;
 const MAX_FONT_SIZE = 78;
 const MIN_FONT_SIZE = 9;
+const STRIPPED_HTML_SELECTOR = 'script, iframe, object, embed';
+
+function sanitizeParsedHtml(root: ParentNode) {
+    root.querySelectorAll(STRIPPED_HTML_SELECTOR).forEach((element) => element.remove());
+    root.querySelectorAll<HTMLElement>('*').forEach((element) => {
+        for (const { name } of Array.from(element.attributes)) {
+            if (name.startsWith('on')) {
+                element.removeAttribute(name);
+            }
+        }
+    });
+}
+
+function parseHtmlFragment(html: string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    sanitizeParsedHtml(doc);
+    return doc.body;
+}
+
+function parseHtmlDocument(html: string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    sanitizeParsedHtml(doc);
+    return doc;
+}
 
 // TODO: move to Utils
 /**
@@ -53,7 +79,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
         nodeList = nodeList[0].childNodes;
     }
 
-    // 普通单元格，非富文本
+    // Plain cell content without rich text
     if (nodeList.length === 1 && nodeList[0].nodeName === '#text') {
         return nodeList[0].textContent as string;
     }
@@ -89,7 +115,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
                 ed: ed - 1,
                 ts: textStyle,
             });
-            // // 如果有 \n 说明有换行，另起一段
+            // // If `\n` is present, start a new paragraph block.
             // if (item.includes('\n')) {
             //     const pStart = cot.length > 0 ? cot[cot.length].ed : 0;
             //     block = {
@@ -350,7 +376,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
                 if (match?.length) {
                     angle = +match[0];
                 }
-                // 竖排文字
+                // Vertical text
                 if ($dom?.dataset.vertical) {
                     ver = +$dom.dataset.vertical;
                 }
@@ -606,9 +632,8 @@ export function splitSpanText(text: string) {
 }
 
 export function handleTableColgroup(table: string) {
-    const content = document.createElement('DIV');
+    const content = parseHtmlFragment(table);
     const data: any[] = [];
-    content.innerHTML = table;
     const colgroup = content.querySelectorAll('table col');
     if (!colgroup.length) return [];
     for (let i = 0; i < colgroup.length; i++) {
@@ -641,9 +666,8 @@ function getTdHeight(height: string | null, defaultHeight: number) {
 }
 
 export function handleTableRowGroup(table: string) {
-    const content = document.createElement('DIV');
+    const content = parseHtmlFragment(table);
     const data: any[] = [];
-    content.innerHTML = table;
     const rowGroup = content.querySelectorAll('table tr');
     if (!rowGroup.length) return [];
     for (let i = 0; i < rowGroup.length; i++) {
@@ -669,11 +693,10 @@ export function handleTableRowGroup(table: string) {
     return data;
 }
 
-// 将table数据转为sheet数据
+// Convert table data into sheet data
 export function handelTableToJson(table: string) {
     let data: any[] = [];
-    const content = document.createElement('DIV');
-    content.innerHTML = table;
+    const content = parseHtmlFragment(table);
     data = new Array(content.querySelectorAll('table tr').length);
     if (!data.length) return [];
     let colLen = 0;
@@ -707,7 +730,7 @@ export function handelTableToJson(table: string) {
             if (txt.trim().length === 0) {
                 cell.v = '';
             } else {
-                // Todo,处理格式
+                // TODO: handle formatting
                 cell.v = txt;
             }
             const style = handleStringToStyle(td);
@@ -745,11 +768,9 @@ export function handelTableToJson(table: string) {
     return data;
 }
 
-// 将文本格式数据转为sheet数据
+// Convert plain text data into sheet data
 export function handlePlainToJson(plain: string) {
     const data: any[] = [];
-    const content = document.createElement('DIV');
-    content.innerHTML = plain;
     const dataChe = plain.replace(/\r/g, '');
     const che = dataChe.split('\n');
     const colCheLen = che[0].split('\t').length;
@@ -775,18 +796,18 @@ export function handlePlainToJson(plain: string) {
     return data;
 }
 
-// 获取最终sheet数据
+// Get the final sheet data
 export function handleTableMergeData(data: any[], selection?: IRange) {
     const copyH = data.length;
     const copyC = data[0].length;
-    let minH = 0; //应用范围首尾行
+    let minH = 0; // Start row of the target range
     let maxH = minH + copyH - 1;
-    let minC = 0; //应用范围首尾列
+    let minC = 0; // Start column of the target range
     let maxC = minC + copyC - 1;
     if (selection) {
-        minH = selection.startRow; //应用范围首尾行
+        minH = selection.startRow; // Start row of the target range
         maxH = minH + copyH - 1;
-        minC = selection.startColumn; //应用范围首尾列
+        minC = selection.startColumn; // Start column of the target range
         maxC = minC + copyC - 1;
     }
 
@@ -819,8 +840,7 @@ export function handleTableMergeData(data: any[], selection?: IRange) {
 
 export function handelExcelToJson(html: string) {
     let data: any[] = [];
-    const content = document.createElement('html');
-    content.innerHTML = html;
+    const content = parseHtmlDocument(html);
     const styleText = content.querySelector('style')?.innerText;
     if (!styleText) return;
     const excelStyle = getStyles(styleText);
@@ -858,7 +878,7 @@ export function handelExcelToJson(html: string) {
             if (txt.trim().length === 0) {
                 cell.v = '';
             } else {
-                // Todo,处理格式
+                // TODO: handle formatting
                 cell.v = txt;
             }
 

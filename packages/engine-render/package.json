@@ -76,8 +76,8 @@
         "@univerjs-infra/shared": "workspace:*",
         "jest-canvas-mock": "^2.5.2",
         "rxjs": "^7.8.2",
-        "typescript": "^5.9.3",
-        "vitest": "^4.1.0"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.1"
     },
     "browser": {
         "fs": false

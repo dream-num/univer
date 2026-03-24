@@ -84,7 +84,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/icons-svg": "^1.1.1",
         "rxjs": "^7.8.2",
-        "typescript": "^5.9.3",
-        "vitest": "^4.1.0"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.1"
     }
 }

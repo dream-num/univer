@@ -34,7 +34,7 @@
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^4.0.0",
         "tsconfig-paths-webpack-plugin": "^4.2.0",
-        "typescript": "^5.9.3"
+        "typescript": "^6.0.2"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

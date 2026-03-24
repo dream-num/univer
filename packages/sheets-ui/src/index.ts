@@ -111,7 +111,7 @@ export { HeaderResizeRenderController } from './controllers/render-controllers/h
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { type ITelemetryData, SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
-export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
+export { whenFormulaEditorActivated, whenSheetEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';

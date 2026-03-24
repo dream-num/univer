@@ -81,6 +81,14 @@ describe('toggleReferenceAbsoluteAtCursor', () => {
         }
     });
 
+    it('the reference is row or column only', () => {
+        const rowReference = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, '=1:1', '=1'.length);
+        const columnReference = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, '=A:A', '=A'.length);
+
+        expect(rowReference?.formulaText).toBe('=$1:$1');
+        expect(columnReference?.formulaText).toBe('=$A:$A');
+    });
+
     it('handles references at formula boundaries', () => {
         const startBoundary = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, '=A1+SUM(B2)', '=A1'.length);
         const endBoundary = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, '=SUM(1)+B2', '=SUM(1)+B2'.length);

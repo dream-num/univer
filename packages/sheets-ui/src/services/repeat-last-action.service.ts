@@ -16,11 +16,9 @@
 
 import type { ICellData, ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import type { IBorderInfo, ISetBorderBasicCommandParams, ISetColWidthCommandParams, ISetStyleCommandParams } from '@univerjs/sheets';
-import { createIdentifier, Disposable, ICommandService, Tools } from '@univerjs/core';
+import { createIdentifier, Disposable, ICommandService, Inject, Injector, Tools } from '@univerjs/core';
 import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
+    AddWorksheetMergeCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand,
     InsertColAfterCommand,
@@ -30,12 +28,10 @@ import {
     RemoveColCommand,
     RemoveRowCommand,
     RemoveWorksheetMergeCommand,
-    SetBackgroundColorCommand,
     SetBorderBasicCommand,
     SetColWidthCommand,
     SetRowHeightCommand,
     SetStyleCommand,
-    SetTextColorCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
@@ -83,19 +79,18 @@ export type IRepeatLastAction =
     | IRepeatLastActionSetRangeValues;
 
 export interface IRepeatLastActionService {
-    getAction(): IRepeatLastAction | null;
-    setAction(action: IRepeatLastAction | null): void;
-    setCellContentAction(value: ICellData): void;
-    runWithoutRecording<T>(callback: () => Promise<T>): Promise<T>;
+    getAction(): ICommandInfo | null;
+    runWithoutRecording(): Promise<boolean>;
 }
 
 export const IRepeatLastActionService = createIdentifier<IRepeatLastActionService>('sheet-ui.repeat-last-action.service');
 
 export class RepeatLastActionService extends Disposable implements IRepeatLastActionService {
-    private _action: IRepeatLastAction | null = null;
+    private _action: ICommandInfo | null = null;
     private _recordingDepth = 0;
 
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -103,28 +98,21 @@ export class RepeatLastActionService extends Disposable implements IRepeatLastAc
         this._initCommandRecording();
     }
 
-    getAction(): IRepeatLastAction | null {
-        return this._action ? Tools.deepClone(this._action) : null;
+    getAction(): ICommandInfo | null {
+        return this._action;
     }
 
-    setAction(action: IRepeatLastAction | null): void {
-        this._action = action ? Tools.deepClone(action) : null;
-    }
+    async runWithoutRecording(): Promise<boolean> {
+        if (!this._action) {
+            return false;
+        }
 
-    setCellContentAction(value: ICellData): void {
-        this.setAction({
-            kind: 'set-range-values',
-            value: Tools.deepClone(value),
-            permission: 'cellValue',
-            selectionRequirement: 'none',
-        });
-    }
-
-    async runWithoutRecording<T>(callback: () => Promise<T>): Promise<T> {
         this._recordingDepth += 1;
 
         try {
-            return await callback();
+            const { id, params } = this._action as ICommandInfo;
+
+            return await this._commandService.executeCommand(id, params);
         } finally {
             this._recordingDepth -= 1;
         }
@@ -136,9 +124,12 @@ export class RepeatLastActionService extends Disposable implements IRepeatLastAc
                 return;
             }
 
-            const nextAction = this._normalizeAction(commandInfo, options);
-            if (nextAction) {
-                this._action = nextAction;
+            if (
+                [
+                    SetStyleCommand.id,
+                ].includes(commandInfo.id)
+            ) {
+                this._action = commandInfo;
             }
         }));
     }
@@ -150,15 +141,6 @@ export class RepeatLastActionService extends Disposable implements IRepeatLastAc
                     kind: 'command',
                     commandId: SetStyleCommand.id,
                     params: this._normalizeSetStyleParams(commandInfo.params as ISetStyleCommandParams<unknown> | undefined),
-                    permission: 'cellStyle',
-                    selectionRequirement: 'none',
-                };
-            case SetTextColorCommand.id:
-            case SetBackgroundColorCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: commandInfo.id,
-                    params: Tools.deepClone(commandInfo.params as Record<string, unknown> | undefined),
                     permission: 'cellStyle',
                     selectionRequirement: 'none',
                 };
@@ -213,9 +195,7 @@ export class RepeatLastActionService extends Disposable implements IRepeatLastAc
                 };
             case ClearSelectionContentCommand.id:
             case ClearSelectionFormatCommand.id:
-            case AddWorksheetMergeAllCommand.id:
-            case AddWorksheetMergeVerticalCommand.id:
-            case AddWorksheetMergeHorizontalCommand.id:
+            case AddWorksheetMergeCommand.id:
             case RemoveWorksheetMergeCommand.id:
                 return {
                     kind: 'command',

@@ -21,7 +21,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import caES from '@univerjs/mockdata/locales/ca-ES';
 import enUS from '@univerjs/mockdata/locales/en-US';
 import esES from '@univerjs/mockdata/locales/es-ES';
@@ -52,10 +51,8 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
 import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-component';
-import { customRegisterEvent } from './custom/custom-register-event';
 import { UniverSheetsCustomShortcutPlugin } from './custom/custom-shortcut';
 import ImportCSVButtonPlugin from './custom/import-csv-button';
-import { simpleRangePopupDemo } from './custom/simple-range-popup';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -175,7 +172,7 @@ function createNewInstance() {
 
     // create univer sheet instance
     if (!IS_E2E) {
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {});
     }
 
     setTimeout(() => {
@@ -205,9 +202,9 @@ function createNewInstance() {
     //     { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
     // ]);
 
-    customRegisterEvent(univer, window.univerAPI!);
+    // customRegisterEvent(univer, window.univerAPI!);
     // customRangePopups(univer, window.univerAPI!);
-    simpleRangePopupDemo(univer, window.univerAPI!);
+    // simpleRangePopupDemo(univer, window.univerAPI!);
 }
 
 createNewInstance();

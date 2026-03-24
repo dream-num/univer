@@ -68,12 +68,13 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
     const displayListRef = useRef(list);
     const [draggingId, setDraggingId] = useState<string | null>(null);
     const [dragOverId, setDragOverId] = useState<string | null>(null);
-    const [ghostMarkup, setGhostMarkup] = useState<string | null>(null);
+    const [ghostElement, setGhostElement] = useState<HTMLElement | null>(null);
     const [ghostPosition, setGhostPosition] = useState<{ x: number; y: number } | null>(null);
     const [canUsePortal, setCanUsePortal] = useState(false);
     const pointerIdRef = useRef<number | null>(null);
     const dragPointerOffsetRef = useRef({ x: 0, y: 0 });
     const dragItemSizeRef = useRef({ width: 0, height: 0 });
+    const ghostContainerRef = useRef<HTMLDivElement | null>(null);
 
     const pressedHandleIdRef = useRef<string | null>(null);
     const dragSourceIdRef = useRef<string | null>(null);
@@ -89,6 +90,18 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
     useEffect(() => {
         setCanUsePortal(typeof document !== 'undefined');
     }, []);
+
+    useEffect(() => {
+        const container = ghostContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        container.replaceChildren();
+        if (ghostElement) {
+            container.appendChild(ghostElement);
+        }
+    }, [ghostElement]);
 
     useEffect(() => {
         if (!draggingId) {
@@ -145,7 +158,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
             dragSourceIdRef.current = null;
             dragStartIndexRef.current = -1;
             setDragOverId(null);
-            setGhostMarkup(null);
+            setGhostElement(null);
             setGhostPosition(null);
             setDraggingId(null);
         };
@@ -225,7 +238,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                                     height: rect.height,
                                 };
                                 setGhostPosition({ x: rect.left, y: rect.top });
-                                setGhostMarkup((e.currentTarget as HTMLDivElement).innerHTML);
+                                setGhostElement((e.currentTarget as HTMLDivElement).cloneNode(true) as HTMLElement);
 
                                 pointerIdRef.current = e.pointerId;
                                 dragSourceIdRef.current = itemId;
@@ -270,8 +283,8 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                         opacity: 0.95,
                     }}
                 >
-                    {ghostMarkup
-                        ? <div dangerouslySetInnerHTML={{ __html: ghostMarkup }} />
+                    {ghostElement
+                        ? <div ref={ghostContainerRef} />
                         : itemRender(draggingItem, displayList.findIndex((item) => getItemId(item) === getItemId(draggingItem)))}
                 </div>
             ), document.body

@@ -14,8 +14,239 @@
  * limitations under the License.
  */
 
-import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
-import { normalizeTextRuns, Tools } from '@univerjs/core';
+import type {
+    BorderKey,
+    BorderStyleKey,
+    ColorStyleKey,
+    IBorderData,
+    IBorderStyleData,
+    ICellData,
+    IColorStyle,
+    IDocumentData,
+    IPaddingData,
+    IParagraph,
+    IStyleData,
+    ITextDecoration,
+    ITextRotation,
+    ITextRun,
+    ITextStyle,
+    Nullable,
+    PaddingKey,
+    StyleKey,
+    Styles,
+    TextDecorationKey,
+    TextRotationKey,
+} from '@univerjs/core';
+import {
+    BORDER_KEYS,
+    BORDER_STYLE_KEYS,
+    COLOR_STYLE_KEYS,
+    normalizeTextRuns,
+    PADDING_KEYS,
+    STYLE_KEYS,
+    TEXT_DECORATION_KEYS,
+    TEXT_ROTATION_KEYS,
+    Tools,
+} from '@univerjs/core';
+
+type UnknownRecord = Record<string, unknown>;
+type BorderRecord = Partial<Record<BorderKey, Nullable<IBorderStyleData>>>;
+
+function isPlainRecord(value: unknown): value is UnknownRecord {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function forEachPresentKey<K extends string>(
+    value: UnknownRecord,
+    keys: readonly K[],
+    iteratee: (key: K, fieldValue: unknown) => void
+) {
+    for (const key of keys) {
+        if (!Object.prototype.hasOwnProperty.call(value, key)) {
+            continue;
+        }
+
+        iteratee(key, value[key]);
+    }
+}
+
+function sanitizeFixedShapeObject<T extends object, K extends string>(
+    value: unknown,
+    directKeys: readonly K[],
+    nestedSanitizers?: Record<string, (value: unknown) => unknown>
+): Nullable<T> | undefined {
+    if (value == null) {
+        return value as null | undefined;
+    }
+
+    if (!isPlainRecord(value)) {
+        return undefined;
+    }
+
+    const sanitized: UnknownRecord = {};
+    let hasFields = false;
+
+    forEachPresentKey(value, directKeys, (key, fieldValue) => {
+        sanitized[key] = fieldValue;
+        hasFields = true;
+    });
+
+    if (nestedSanitizers) {
+        for (const key in nestedSanitizers) {
+            const sanitize = nestedSanitizers[key];
+
+            if (!sanitize || !Object.prototype.hasOwnProperty.call(value, key)) {
+                continue;
+            }
+
+            const sanitizedValue = sanitize(value[key]);
+
+            if (sanitizedValue !== undefined) {
+                sanitized[key] = sanitizedValue;
+                hasFields = true;
+            }
+        }
+    }
+
+    return hasFields ? (sanitized as T) : undefined;
+}
+
+function sanitizeMappedObject<T extends object, K extends string>(
+    value: unknown,
+    keys: readonly K[],
+    sanitize: (value: unknown) => unknown
+): Nullable<T> | undefined {
+    if (value == null) {
+        return value as null | undefined;
+    }
+
+    if (!isPlainRecord(value)) {
+        return undefined;
+    }
+
+    const sanitized: UnknownRecord = {};
+    let hasFields = false;
+
+    forEachPresentKey(value, keys, (key, fieldValue) => {
+        const sanitizedValue = sanitize(fieldValue);
+
+        if (sanitizedValue !== undefined) {
+            sanitized[key] = sanitizedValue;
+            hasFields = true;
+        }
+    });
+
+    return hasFields ? (sanitized as T) : undefined;
+}
+
+function shouldSkipRichTextStyleKey(key: StyleKey): boolean {
+    switch (key) {
+        case 'bd':
+        case 'tr':
+        case 'td':
+        case 'ht':
+        case 'vt':
+        case 'tb':
+        case 'pd':
+        case 'bg':
+            return true;
+        default:
+            return false;
+    }
+}
+
+function isSerializablePrimitive(value: unknown): value is string | number | boolean | null | undefined {
+    return value == null || ['string', 'number', 'boolean'].includes(typeof value);
+}
+
+function sanitizeColorStyle(value: unknown): Nullable<IColorStyle> | undefined {
+    return sanitizeFixedShapeObject<IColorStyle, ColorStyleKey>(value, COLOR_STYLE_KEYS);
+}
+
+function sanitizeTextDecoration(value: unknown): Nullable<ITextDecoration> | undefined {
+    return sanitizeFixedShapeObject<ITextDecoration, TextDecorationKey>(value, TEXT_DECORATION_KEYS, {
+        cl: sanitizeColorStyle,
+    });
+}
+
+function sanitizeBorderStyleData(value: unknown): Nullable<IBorderStyleData> | undefined {
+    return sanitizeFixedShapeObject<IBorderStyleData, BorderStyleKey>(value, BORDER_STYLE_KEYS, {
+        cl: sanitizeColorStyle,
+    });
+}
+
+function sanitizeBorderData(value: unknown): Nullable<IBorderData> | undefined {
+    return sanitizeMappedObject<IBorderData, BorderKey>(value, BORDER_KEYS, sanitizeBorderStyleData);
+}
+
+function sanitizeTextRotation(value: unknown): Nullable<ITextRotation> | undefined {
+    return sanitizeFixedShapeObject<ITextRotation, TextRotationKey>(value, TEXT_ROTATION_KEYS);
+}
+
+function sanitizePaddingData(value: unknown): Nullable<IPaddingData> | undefined {
+    return sanitizeFixedShapeObject<IPaddingData, PaddingKey>(value, PADDING_KEYS);
+}
+
+function sanitizeNumberFormat(value: unknown): Nullable<{ pattern: string }> | undefined {
+    if (value == null) {
+        return value as null | undefined;
+    }
+
+    if (!isPlainRecord(value) || !Object.prototype.hasOwnProperty.call(value, 'pattern') || typeof value.pattern !== 'string') {
+        return undefined;
+    }
+
+    return { pattern: value.pattern };
+}
+
+function sanitizeStyleValue(key: StyleKey, value: unknown): unknown {
+    switch (key) {
+        case 'ul':
+        case 'bbl':
+        case 'st':
+        case 'ol':
+            return sanitizeTextDecoration(value);
+        case 'bg':
+        case 'cl':
+            return sanitizeColorStyle(value);
+        case 'bd':
+            return sanitizeBorderData(value);
+        case 'tr':
+            return sanitizeTextRotation(value);
+        case 'pd':
+            return sanitizePaddingData(value);
+        case 'n':
+            return sanitizeNumberFormat(value);
+        default:
+            return isSerializablePrimitive(value) ? value : undefined;
+    }
+}
+
+function mergeBorderData(
+    currentBorders: Nullable<IBorderData>,
+    incomingBorders: Nullable<IBorderData>
+): Nullable<IBorderData> {
+    if (incomingBorders === null) {
+        return null;
+    }
+
+    if (incomingBorders === undefined) {
+        return currentBorders;
+    }
+
+    const borderRecord = incomingBorders as BorderRecord;
+    const mergedBorders: BorderRecord = Tools.isObject(currentBorders) ? { ...(currentBorders as BorderRecord) } : {};
+
+    forEachPresentKey(borderRecord as UnknownRecord, BORDER_KEYS, (key, fieldValue) => {
+        const borderStyle = sanitizeBorderStyleData(fieldValue);
+
+        if (borderStyle !== undefined) {
+            mergedBorders[key] = borderStyle;
+        }
+    });
+
+    return mergedBorders as IBorderData;
+}
 
 /**
  *
@@ -79,19 +310,30 @@ export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullabl
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
     }
-    const backupStyle: Record<string, any> = Tools.deepClone(oldStyle ?? {});
+    const backupStyle = (Tools.deepClone(oldStyle ?? {}) || {}) as UnknownRecord;
+    const styleRecord = newStyle as UnknownRecord;
 
-    for (const k in newStyle) {
-        if (k === 'bd') {
-            backupStyle[k] = transformBorders(backupStyle[k] || {}, newStyle[k]);
+    for (const key of STYLE_KEYS) {
+        if (!Object.prototype.hasOwnProperty.call(styleRecord, key)) {
+            continue;
+        }
+
+        const sanitizedValue = sanitizeStyleValue(key, styleRecord[key]);
+
+        if (sanitizedValue === undefined) {
+            continue;
+        }
+
+        if (key === 'bd') {
+            backupStyle[key] = transformBorders((backupStyle[key] as IBorderData) || {}, sanitizedValue as Nullable<IBorderData>);
         }
         // 1. To modify the existing style,we need original setting to undo
         // 2. Newly set the style, we need null to undo
-        else if (!(k in backupStyle)) {
-            backupStyle[k] = null;
+        else if (!(key in backupStyle)) {
+            backupStyle[key] = null;
         }
     }
-    return backupStyle;
+    return backupStyle as Nullable<IStyleData>;
 }
 
 /**
@@ -106,11 +348,17 @@ function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderD
         return oldBorders;
     }
 
-    for (const k in newBorders) {
+    const oldBorderRecord = oldBorders as BorderRecord;
+
+    for (const key of BORDER_KEYS) {
+        if (!Object.prototype.hasOwnProperty.call(newBorders as UnknownRecord, key)) {
+            continue;
+        }
+
         // 1. To modify the existing border,we need original setting to undo
         // 2. Newly set the border, we need null to undo
-        if (!(k in oldBorders)) {
-            (oldBorders as IKeyValue)[k] = null;
+        if (!(key in oldBorders)) {
+            oldBorderRecord[key] = null;
         }
     }
 
@@ -133,36 +381,51 @@ function mergeStyle(
     // don't operate
     if (newStyle === undefined) return oldStyle;
 
-    const backupStyle: Record<string, any> = Tools.deepClone(oldStyle) || {};
+    const backupStyle = (Tools.deepClone(oldStyle) || {}) as UnknownRecord;
+    const styleRecord = newStyle as UnknownRecord;
 
-    for (const k in newStyle) {
-        // Do not copy cell background color to rich text background color.
-        if (isRichText && ['bd', 'tr', 'td', 'ht', 'vt', 'tb', 'pd', 'bg'].includes(k)) {
+    for (const key of STYLE_KEYS) {
+        if (!Object.prototype.hasOwnProperty.call(styleRecord, key)) {
             continue;
         }
+
+        // Do not copy cell background color to rich text background color.
+        if (isRichText && shouldSkipRichTextStyleKey(key)) {
+            continue;
+        }
+
+        const sanitizedValue = sanitizeStyleValue(key, styleRecord[key]);
+
+        if (sanitizedValue === undefined) {
+            continue;
+        }
+
         // you can only choose one of the themeColor and rgbColor of the border setting
-        if (k in backupStyle && k === 'bd') {
-            backupStyle[k] = Object.assign(backupStyle[k], newStyle[k]);
+        if (key === 'bd') {
+            backupStyle[key] = mergeBorderData(backupStyle[key] as Nullable<IBorderData>, sanitizedValue as Nullable<IBorderData>);
         } else {
-            backupStyle[k] = (newStyle as IKeyValue)[k];
+            backupStyle[key] = sanitizedValue;
         }
     }
 
     if ('cl' in backupStyle) {
-        if ('ul' in backupStyle && backupStyle.ul) {
-            backupStyle.ul.cl = backupStyle.cl;
+        const backupStyleData = backupStyle as IStyleData;
+        const color = backupStyleData.cl;
+
+        if ('ul' in backupStyleData && backupStyleData.ul) {
+            backupStyleData.ul.cl = color as IColorStyle;
         }
 
-        if ('ol' in backupStyle && backupStyle.ol) {
-            backupStyle.ol.cl = backupStyle.cl;
+        if ('ol' in backupStyleData && backupStyleData.ol) {
+            backupStyleData.ol.cl = color as IColorStyle;
         }
 
-        if ('st' in backupStyle && backupStyle.st) {
-            backupStyle.st.cl = backupStyle.cl;
+        if ('st' in backupStyleData && backupStyleData.st) {
+            backupStyleData.st.cl = color as IColorStyle;
         }
     }
 
-    return backupStyle;
+    return backupStyle as Nullable<IStyleData>;
 }
 
 /**

@@ -27,6 +27,17 @@ import type {
 } from '../enum/text-style';
 import type { ThemeColorType } from '../enum/theme-color-type';
 
+type ExactKeys<T extends object, K extends readonly (keyof T)[]> =
+    Exclude<keyof T, K[number]> extends never
+        ? Exclude<K[number], keyof T> extends never
+            ? K
+            : never
+        : never;
+
+function defineExactKeys<T extends object>() {
+    return <const K extends readonly (keyof T)[]>(keys: ExactKeys<T, K>) => keys;
+}
+
 /**
  * Properties of text decoration
  */
@@ -50,13 +61,39 @@ export interface ITextDecoration {
 }
 
 /**
+ * Exact keys of {@link ITextDecoration}.
+ */
+export const TEXT_DECORATION_KEYS = defineExactKeys<ITextDecoration>()(['s', 'c', 'cl', 't'] as const);
+
+/**
+ * Key union of {@link ITextDecoration}.
+ */
+export type TextDecorationKey = (typeof TEXT_DECORATION_KEYS)[number];
+
+/**
  * RGB color or theme color
  */
 export interface IColorStyle {
-    // rgb?: Nullable<IColor | string>;
+    /**
+     * RGB color string, such as `#RRGGBB` or `rgb(r, g, b)`.
+     */
     rgb?: Nullable<string>;
+
+    /**
+     * Theme color token.
+     */
     th?: ThemeColorType;
 }
+
+/**
+ * Exact keys of {@link IColorStyle}.
+ */
+export const COLOR_STYLE_KEYS = defineExactKeys<IColorStyle>()(['rgb', 'th'] as const);
+
+/**
+ * Key union of {@link IColorStyle}.
+ */
+export type ColorStyleKey = (typeof COLOR_STYLE_KEYS)[number];
 
 /**
  * Format of RBGA color
@@ -75,6 +112,16 @@ export interface IBorderStyleData {
     s: BorderStyleTypes;
     cl: IColorStyle;
 }
+
+/**
+ * Exact keys of {@link IBorderStyleData}.
+ */
+export const BORDER_STYLE_KEYS = defineExactKeys<IBorderStyleData>()(['s', 'cl'] as const);
+
+/**
+ * Key union of {@link IBorderStyleData}.
+ */
+export type BorderStyleKey = (typeof BORDER_STYLE_KEYS)[number];
 
 /**
  * Style properties of top, bottom, left and right border
@@ -105,6 +152,16 @@ export interface IBorderData {
     bc_tr?: Nullable<IBorderStyleData>;
 }
 
+/**
+ * Exact keys of {@link IBorderData}.
+ */
+export const BORDER_KEYS = defineExactKeys<IBorderData>()(['t', 'r', 'b', 'l', 'tl_br', 'tl_bc', 'tl_mr', 'bl_tr', 'ml_tr', 'bc_tr'] as const);
+
+/**
+ * Key union of {@link IBorderData}.
+ */
+export type BorderKey = (typeof BORDER_KEYS)[number];
+
 export interface ITextRotation {
     /**
      * angle
@@ -119,6 +176,16 @@ export interface ITextRotation {
 }
 
 /**
+ * Exact keys of {@link ITextRotation}.
+ */
+export const TEXT_ROTATION_KEYS = defineExactKeys<ITextRotation>()(['a', 'v'] as const);
+
+/**
+ * Key union of {@link ITextRotation}.
+ */
+export type TextRotationKey = (typeof TEXT_ROTATION_KEYS)[number];
+
+/**
  * Top,right,bottom,left padding
  */
 export interface IPaddingData {
@@ -127,6 +194,16 @@ export interface IPaddingData {
     b?: number;
     l?: number;
 }
+
+/**
+ * Exact keys of {@link IPaddingData}.
+ */
+export const PADDING_KEYS = defineExactKeys<IPaddingData>()(['t', 'r', 'b', 'l'] as const);
+
+/**
+ * Key union of {@link IPaddingData}.
+ */
+export type PaddingKey = (typeof PADDING_KEYS)[number];
 
 /**
  * Basics properties of cell style
@@ -229,3 +306,33 @@ export interface IStyleData extends IStyleBase {
      */
     pd?: Nullable<IPaddingData>;
 }
+
+/**
+ * Exact keys of {@link IStyleData}.
+ */
+export const STYLE_KEYS = defineExactKeys<IStyleData>()([
+    'ff',
+    'fs',
+    'it',
+    'bl',
+    'ul',
+    'bbl',
+    'st',
+    'ol',
+    'bg',
+    'bd',
+    'cl',
+    'va',
+    'n',
+    'tr',
+    'td',
+    'ht',
+    'vt',
+    'tb',
+    'pd',
+] as const);
+
+/**
+ * Key union of {@link IStyleData}.
+ */
+export type StyleKey = (typeof STYLE_KEYS)[number];

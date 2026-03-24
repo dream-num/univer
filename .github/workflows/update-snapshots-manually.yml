@@ -4,6 +4,9 @@ name: 📸 Manually Update Snapshots
 on:
     workflow_dispatch:
 
+permissions:
+    contents: read
+
 jobs:
     update-snapshots:
         runs-on: ubuntu-latest
@@ -14,7 +17,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                  token: ${{ secrets.GH_TOKEN }}
+                  persist-credentials: false
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -24,11 +27,14 @@ jobs:
 
             - name: Commit Updated Snapshots
               shell: bash
+              env:
+                  PUSH_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                   git config --global user.email "actions@github.com"
                   git config --global user.name "GitHub Actions"
+                  git remote set-url origin "https://x-access-token:${PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
                   git status
                   git add -A
                   git commit -m "chore(snapshots): update snapshots" || exit 0
-                  git push
+                  git push origin "HEAD:${GITHUB_REF_NAME}"

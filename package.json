@@ -89,15 +89,13 @@
         "vitest": "^4.1.1"
     },
     "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
-    },
-    "resolutions": {
-        "@types/react": "19.2.14",
-        "@types/react-dom": "19.2.3",
-        "react": "19.2.4",
-        "react-dom": "19.2.4"
+        "overrides": {
+            "@types/react": "19.2.14",
+            "@types/react-dom": "19.2.3",
+            "basic-ftp": "5.2.0",
+            "react": "19.2.4",
+            "react-dom": "19.2.4"
+        }
     },
     "lint-staged": {
         "*": "eslint --fix"

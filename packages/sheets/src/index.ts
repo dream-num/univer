@@ -65,15 +65,16 @@ export {
     AddWorksheetMergeVerticalCommand,
     getClearContentMutationParamForRange,
     getClearContentMutationParamsForRanges,
+    type IAddMergeCommandParams,
     type IMergeCellsUtilOptions,
 } from './commands/commands/add-worksheet-merge.command';
 export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
 export { SetWorksheetRangeThemeStyleCommand } from './commands/commands/add-worksheet-range-theme.command';
 export { AppendRowCommand, type IAppendRowCommandParams } from './commands/commands/append-row.command';
 export { AutoClearContentCommand, AutoFillCommand, type IAutoClearContentCommand, type IAutoFillCommandParams, SheetCopyDownCommand, SheetCopyRightCommand } from './commands/commands/auto-fill.command';
-export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
+export { ClearSelectionAllCommand, type IClearSelectionAllCommandParams } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand, type IClearSelectionContentCommandParams } from './commands/commands/clear-selection-content.command';
-export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
+export { ClearSelectionFormatCommand, type IClearSelectionFormatCommandParams } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export type { ICopySheetCommandParams } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand, type IDeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
@@ -114,7 +115,7 @@ export type { IRegisterWorksheetRangeThemeStyleCommandParams } from './commands/
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
 export { type IRemoveColByRangeCommandParams, type IRemoveRowByRangeCommandParams, type IRemoveRowColCommandInterceptParams, type IRemoveRowColCommandParams, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
 export { type IRemoveSheetCommandParams, RemoveSheetCommand } from './commands/commands/remove-sheet.command';
-export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
+export { type IRemoveWorksheetMergeCommandParams, RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export { type IReorderRangeCommandParams, ReorderRangeCommand } from './commands/commands/reorder-range.command';
 export {
     type ISetBorderBasicCommandParams,
@@ -192,7 +193,7 @@ export { SetWorksheetPermissionPointsCommand } from './commands/commands/set-wor
 export { SetWorksheetProtectionCommand } from './commands/commands/set-worksheet-protection.command';
 export { SetWorksheetRightToLeftCommand } from './commands/commands/set-worksheet-right-to-left.command';
 export { SetWorksheetRowCountCommand } from './commands/commands/set-worksheet-row-count.command';
-export { DeltaRowHeightCommand, SetRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from './commands/commands/set-worksheet-row-height.command';
+export { DeltaRowHeightCommand, type ISetRowHeightCommandParams, SetRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from './commands/commands/set-worksheet-row-height.command';
 export type { IDeltaRowHeightCommand, ISetWorksheetRowIsAutoHeightCommandParams } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';

@@ -144,6 +144,7 @@ export { IMarkSelectionService, MarkSelectionService } from './services/mark-sel
 export { type ProtectedRangeShadowStrategy, SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
+export { IRepeatLastActionService, type RepeatableCommandHandler, RepeatLastActionPermission } from './services/repeat-last-action.service';
 export { SheetScrollManagerService } from './services/scroll-manager.service';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
 export { BaseSelectionRenderService, genSelectionByRange, selectionDataForSelectAll as getAllSelection, getTopLeftSelectionOfCurrSheet, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';

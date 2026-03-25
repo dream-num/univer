@@ -17,7 +17,6 @@
 import './global.css';
 
 export { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
-export { SelectEditorFormulaOperation } from './commands/operations/editor-formula.operation';
 export { HelpFunctionOperation } from './commands/operations/help-function.operation';
 export { InsertFunctionOperation } from './commands/operations/insert-function.operation';
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';

@@ -111,7 +111,7 @@ export { HeaderResizeRenderController } from './controllers/render-controllers/h
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { type ITelemetryData, SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
-export { whenFormulaEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
+export { whenFormulaEditorActivated, whenSheetEditorActivated, whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from './controllers/utils/component-tools';
 export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
@@ -144,6 +144,7 @@ export { IMarkSelectionService, MarkSelectionService } from './services/mark-sel
 export { type ProtectedRangeShadowStrategy, SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
+export { IRepeatLastActionService, type RepeatableCommandHandler, RepeatLastActionPermission } from './services/repeat-last-action.service';
 export { SheetScrollManagerService } from './services/scroll-manager.service';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
 export { BaseSelectionRenderService, genSelectionByRange, selectionDataForSelectAll as getAllSelection, getTopLeftSelectionOfCurrSheet, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';

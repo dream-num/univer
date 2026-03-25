@@ -14,152 +14,101 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { RepeatLastActionPermission } from '../../services/repeat-last-action.service';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, LocaleService } from '@univerjs/core';
 import {
-    CommandType,
-    ICommandService,
-    IUniverInstanceService,
-    LocaleService,
-} from '@univerjs/core';
-import {
-    getSheetCommandTarget,
     RangeProtectionPermissionEditPoint,
-    SetBorderBasicCommand,
-    SetRangeValuesCommand,
     SheetPermissionCheckController,
     SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
+    WorksheetSetColumnStylePermission,
+    WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
-import { IRepeatLastActionService } from '../../services/repeat-last-action.service';
+import { IRepeatLastActionService, RepeatLastActionPermission } from '../../services/repeat-last-action.service';
 
-const SET_NUMFMT_COMMAND_ID = 'sheet.command.numfmt.set.numfmt';
+const permissionCheckMap = {
+    [RepeatLastActionPermission.Editable]: {
+        permissionTypes: {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        },
+        errorMessageKey: 'permission.dialog.editErr',
+    },
+    [RepeatLastActionPermission.CellStyle]: {
+        permissionTypes: {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        },
+        errorMessageKey: 'permission.dialog.setStyleErr',
+    },
+    [RepeatLastActionPermission.CellValue]: {
+        permissionTypes: {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        },
+        errorMessageKey: 'permission.dialog.editErr',
+    },
+    [RepeatLastActionPermission.RowStyle]: {
+        permissionTypes: {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        },
+        errorMessageKey: 'permission.dialog.setRowColStyleErr',
+    },
+    [RepeatLastActionPermission.ColumnStyle]: {
+        permissionTypes: {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        },
+        errorMessageKey: 'permission.dialog.setRowColStyleErr',
+    },
+};
 
 export const RepeatLastActionCommand: ICommand = {
     id: 'sheet.command.repeat-last-action',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
-        const repeatLastActionService = accessor.get(IRepeatLastActionService);
-        const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const localeService = accessor.get(LocaleService);
-        const permissionCheckController = accessor.get(SheetPermissionCheckController);
-
-        const action = repeatLastActionService.getAction();
-        if (!action) {
-            return false;
-        }
-
         const selections = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range);
         if (!selections?.length) {
             return false;
         }
 
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) {
-            return false;
-        }
+        const repeatLastActionService = accessor.get(IRepeatLastActionService);
+        const sheetPermissionCheckController = accessor.get(SheetPermissionCheckController);
+        const localeService = accessor.get(LocaleService);
+        const actionPermissionType = repeatLastActionService.getActionPermission();
 
-        const { worksheet } = target;
-        if (!_matchesSelectionRequirement(action.selectionRequirement, selections, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1)) {
-            return false;
-        }
+        if (Array.isArray(actionPermissionType)) {
+            for (const permissionType of actionPermissionType) {
+                if (permissionType === RepeatLastActionPermission.None) {
+                    continue;
+                }
 
-        _ensurePermission(accessor, action.permission, permissionCheckController, localeService);
-
-        return repeatLastActionService.runWithoutRecording(async () => {
-            switch (action.kind) {
-                case 'command':
-                    return commandService.executeCommand(action.commandId, action.params);
-                case 'set-border-basic':
-                    return commandService.executeCommand(SetBorderBasicCommand.id, {
-                        value: action.value,
-                        ranges: selections,
-                    });
-                case 'set-numfmt':
-                    return commandService.executeCommand(SET_NUMFMT_COMMAND_ID, {
-                        values: _buildNumfmtValues(selections, action.pattern, action.type),
-                    });
-                case 'set-range-values':
-                    return commandService.executeCommand(SetRangeValuesCommand.id, {
-                        value: action.value,
-                    });
-                default:
+                const permissionConfig = permissionCheckMap[permissionType];
+                const permission = sheetPermissionCheckController.permissionCheckWithRanges(permissionConfig.permissionTypes);
+                if (!permission) {
+                    sheetPermissionCheckController.blockExecuteWithoutPermission(localeService.t(permissionConfig.errorMessageKey));
                     return false;
+                }
             }
-        });
+        } else if (actionPermissionType !== RepeatLastActionPermission.None) {
+            const permissionConfig = permissionCheckMap[actionPermissionType];
+            const permission = sheetPermissionCheckController.permissionCheckWithRanges(permissionConfig.permissionTypes);
+            if (!permission) {
+                sheetPermissionCheckController.blockExecuteWithoutPermission(localeService.t(permissionConfig.errorMessageKey));
+                return false;
+            }
+        }
+
+        return await repeatLastActionService.runWithoutRecording(selections);
     },
 };
-
-function _ensurePermission(
-    accessor: IAccessor,
-    permission: RepeatLastActionPermission,
-    permissionCheckController: SheetPermissionCheckController,
-    localeService: LocaleService
-) {
-    if (permission === 'none') {
-        return;
-    }
-
-    const hasPermission = permission === 'cellStyle'
-        ? permissionCheckController.permissionCheckWithRanges({
-            workbookTypes: [WorkbookEditablePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-            worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
-        })
-        : permissionCheckController.permissionCheckWithRanges({
-            workbookTypes: [WorkbookEditablePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-            worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
-        });
-
-    if (hasPermission) {
-        return;
-    }
-
-    const errorMessage = permission === 'cellStyle'
-        ? localeService.t('permission.dialog.setStyleErr')
-        : localeService.t('permission.dialog.editErr');
-
-    permissionCheckController.blockExecuteWithoutPermission(errorMessage);
-}
-
-function _matchesSelectionRequirement(
-    selectionRequirement: 'none' | 'fullRows' | 'fullColumns',
-    selections: IRange[],
-    maxRow: number,
-    maxColumn: number
-): boolean {
-    if (selectionRequirement === 'none') {
-        return true;
-    }
-
-    if (selectionRequirement === 'fullRows') {
-        return selections.every((range) => range.startColumn === 0 && range.endColumn === maxColumn);
-    }
-
-    return selections.every((range) => range.startRow === 0 && range.endRow === maxRow);
-}
-
-function _buildNumfmtValues(selections: IRange[], pattern?: string, type?: string) {
-    const values: Array<{ pattern?: string; row: number; col: number; type?: string }> = [];
-
-    selections.forEach((range) => {
-        for (let row = range.startRow; row <= range.endRow; row++) {
-            for (let col = range.startColumn; col <= range.endColumn; col++) {
-                values.push({
-                    row,
-                    col,
-                    pattern,
-                    type,
-                });
-            }
-        }
-    });
-
-    return values;
-}

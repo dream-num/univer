@@ -63,6 +63,7 @@ import { SheetsScrollRenderController } from './controllers/render-controllers/s
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { RepeatLastActionController } from './controllers/repeat-last-action.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoHeightService } from './services/auto-height.service';
@@ -179,6 +180,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [EditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
+            [RepeatLastActionController],
 
             // permission
             [SheetPermissionPanelModel],
@@ -225,6 +227,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [EditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
+            [RepeatLastActionController],
         ]);
     }
 

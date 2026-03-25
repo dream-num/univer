@@ -14,287 +14,282 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IExecutionOptions } from '@univerjs/core';
-import type { IBorderInfo, ISetBorderBasicCommandParams, ISetColWidthCommandParams, ISetStyleCommandParams } from '@univerjs/sheets';
-import { createIdentifier, Disposable, ICommandService, Tools } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, IRange } from '@univerjs/core';
+import type {
+    IAddMergeCommandParams,
+    IClearSelectionAllCommandParams,
+    IClearSelectionContentCommandParams,
+    IClearSelectionFormatCommandParams,
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IInsertRangeMoveDownCommandParams,
+    IInsertRangeMoveRightCommandParams,
+    IRemoveWorksheetMergeCommandParams,
+    ISetBorderCommandParams,
+    ISetColWidthCommandParams,
+    ISetRowHeightCommandParams,
+    ISetStyleCommandParams,
+} from '@univerjs/sheets';
+import { createIdentifier, Disposable, ICommandService, toDisposable } from '@univerjs/core';
 import {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
+    AddWorksheetMergeCommand,
+    ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand,
-    InsertColAfterCommand,
-    InsertColBeforeCommand,
-    InsertRowAfterCommand,
-    InsertRowBeforeCommand,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
+    InsertColCommand,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
+    InsertRowCommand,
     RemoveColCommand,
     RemoveRowCommand,
     RemoveWorksheetMergeCommand,
-    SetBackgroundColorCommand,
-    SetBorderBasicCommand,
+    SetBorderCommand,
     SetColWidthCommand,
     SetRowHeightCommand,
     SetStyleCommand,
-    SetTextColorCommand,
-    SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
-import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 
-const SET_NUMFMT_COMMAND_ID = 'sheet.command.numfmt.set.numfmt';
-const REPEAT_LAST_ACTION_COMMAND_ID = 'sheet.command.repeat-last-action';
+export type RepeatableCommandHandler<T = any> = (selections: IRange[], params?: T) => T | undefined;
 
-export type RepeatLastActionPermission = 'none' | 'cellStyle' | 'cellValue';
-export type RepeatLastActionSelectionRequirement = 'none' | 'fullRows' | 'fullColumns';
-
-export interface IRepeatLastActionCommand {
-    kind: 'command';
-    commandId: string;
-    params?: Record<string, unknown>;
-    permission: RepeatLastActionPermission;
-    selectionRequirement: RepeatLastActionSelectionRequirement;
+export enum RepeatLastActionPermission {
+    None = 'none',
+    Editable = 'editable',
+    CellStyle = 'cellStyle',
+    CellValue = 'cellValue',
+    RowStyle = 'rowStyle',
+    ColumnStyle = 'columnStyle',
 }
 
-export interface IRepeatLastActionSetBorder {
-    kind: 'set-border-basic';
-    value: IBorderInfo;
-    permission: 'cellStyle';
-    selectionRequirement: 'none';
-}
+type RepeatableCommandRangesParams =
+    | ISetBorderCommandParams
+    | ISetRowHeightCommandParams
+    | ISetColWidthCommandParams
+    | IClearSelectionContentCommandParams
+    | IClearSelectionFormatCommandParams
+    | IClearSelectionAllCommandParams
+    | IRemoveWorksheetMergeCommandParams;
 
-export interface IRepeatLastActionSetNumfmt {
-    kind: 'set-numfmt';
-    pattern?: string;
-    type?: string;
-    permission: 'cellStyle';
-    selectionRequirement: 'none';
-}
-
-export interface IRepeatLastActionSetRangeValues {
-    kind: 'set-range-values';
-    value: ICellData;
-    permission: 'cellValue';
-    selectionRequirement: 'none';
-}
-
-export type IRepeatLastAction =
-    | IRepeatLastActionCommand
-    | IRepeatLastActionSetBorder
-    | IRepeatLastActionSetNumfmt
-    | IRepeatLastActionSetRangeValues;
+export const SHEETS_BASIC_REPEATABLE_COMMANDS = [
+    SetStyleCommand.id,
+    SetBorderCommand.id,
+    AddWorksheetMergeCommand.id,
+    RemoveWorksheetMergeCommand.id,
+    InsertRowCommand.id,
+    InsertColCommand.id,
+    RemoveRowCommand.id,
+    RemoveColCommand.id,
+    SetRowHeightCommand.id,
+    SetColWidthCommand.id,
+    ClearSelectionContentCommand.id,
+    ClearSelectionFormatCommand.id,
+    ClearSelectionAllCommand.id,
+];
 
 export interface IRepeatLastActionService {
-    getAction(): IRepeatLastAction | null;
-    setAction(action: IRepeatLastAction | null): void;
-    setCellContentAction(value: ICellData): void;
-    runWithoutRecording<T>(callback: () => Promise<T>): Promise<T>;
+    setAction(commandInfo: ICommandInfo | null): void;
+    getAction(): ICommandInfo | null;
+    getRepeatableCommands(): Set<string>;
+    getActionPermission(): RepeatLastActionPermission | RepeatLastActionPermission[];
+    registerRepeatableCommand(commandId: string, handler: RepeatableCommandHandler, permissionType?: RepeatLastActionPermission): IDisposable;
+    runWithoutRecording(selections: IRange[]): Promise<boolean>;
 }
 
 export const IRepeatLastActionService = createIdentifier<IRepeatLastActionService>('sheet-ui.repeat-last-action.service');
 
 export class RepeatLastActionService extends Disposable implements IRepeatLastActionService {
-    private _action: IRepeatLastAction | null = null;
+    private _action: ICommandInfo | null = null;
     private _recordingDepth = 0;
+    private _repeatableCommands = new Set<string>(SHEETS_BASIC_REPEATABLE_COMMANDS);
+    private _customCommandHandlers = new Map<string, RepeatableCommandHandler>();
+    private _permissionCheckMap = new Map<RepeatLastActionPermission, Set<string>>([
+        [
+            RepeatLastActionPermission.Editable,
+            new Set<string>([
+                InsertRowCommand.id,
+                InsertColCommand.id,
+                RemoveRowCommand.id,
+                RemoveColCommand.id,
+            ]),
+        ],
+        [
+            RepeatLastActionPermission.CellStyle,
+            new Set<string>([
+                SetStyleCommand.id,
+                SetBorderCommand.id,
+                ClearSelectionFormatCommand.id,
+                ClearSelectionAllCommand.id,
+            ]),
+        ],
+        [
+            RepeatLastActionPermission.CellValue,
+            new Set<string>([
+                ClearSelectionContentCommand.id,
+                ClearSelectionAllCommand.id,
+            ]),
+        ],
+        [
+            RepeatLastActionPermission.RowStyle,
+            new Set<string>([
+                SetRowHeightCommand.id,
+            ]),
+        ],
+        [
+            RepeatLastActionPermission.ColumnStyle,
+            new Set<string>([
+                SetColWidthCommand.id,
+            ]),
+        ],
+    ]);
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-
-        this._initCommandRecording();
     }
 
-    getAction(): IRepeatLastAction | null {
-        return this._action ? Tools.deepClone(this._action) : null;
+    override dispose(): void {
+        super.dispose();
+
+        this._action = null;
+        this._repeatableCommands.clear();
+        this._customCommandHandlers.clear();
+        this._permissionCheckMap.clear();
     }
 
-    setAction(action: IRepeatLastAction | null): void {
-        this._action = action ? Tools.deepClone(action) : null;
+    setAction(commandInfo: ICommandInfo | null): void {
+        if (this._recordingDepth > 0) {
+            return;
+        }
+
+        this._action = commandInfo;
     }
 
-    setCellContentAction(value: ICellData): void {
-        this.setAction({
-            kind: 'set-range-values',
-            value: Tools.deepClone(value),
-            permission: 'cellValue',
-            selectionRequirement: 'none',
+    getAction(): ICommandInfo | null {
+        return this._action;
+    }
+
+    getRepeatableCommands(): Set<string> {
+        return this._repeatableCommands;
+    }
+
+    getActionPermission(): RepeatLastActionPermission | RepeatLastActionPermission[] {
+        if (!this._action) {
+            return RepeatLastActionPermission.None;
+        }
+
+        const permissions: RepeatLastActionPermission[] = [];
+
+        for (const [permission, commandSet] of this._permissionCheckMap.entries()) {
+            if (commandSet.has(this._action.id)) {
+                permissions.push(permission);
+            }
+        }
+
+        if (permissions.length === 0) {
+            return RepeatLastActionPermission.None;
+        }
+
+        return permissions.length === 1 ? permissions[0] : permissions;
+    }
+
+    registerRepeatableCommand(commandId: string, handler: RepeatableCommandHandler, permissionType: RepeatLastActionPermission = RepeatLastActionPermission.None): IDisposable {
+        this._repeatableCommands.add(commandId);
+        this._customCommandHandlers.set(commandId, handler);
+
+        if (!this._permissionCheckMap.has(permissionType)) {
+            this._permissionCheckMap.set(permissionType, new Set<string>());
+        }
+        this._permissionCheckMap.get(permissionType)?.add(commandId);
+
+        return toDisposable(() => {
+            this._repeatableCommands.delete(commandId);
+            this._customCommandHandlers.delete(commandId);
+            this._permissionCheckMap.get(permissionType)?.delete(commandId);
         });
     }
 
-    async runWithoutRecording<T>(callback: () => Promise<T>): Promise<T> {
+    // eslint-disable-next-line max-lines-per-function
+    async runWithoutRecording(selections: IRange[]): Promise<boolean> {
+        if (!this._action) {
+            return false;
+        }
+
         this._recordingDepth += 1;
 
         try {
-            return await callback();
+            const { id, params } = this._action as ICommandInfo;
+
+            if (id === SetStyleCommand.id) {
+                const styleParams: ISetStyleCommandParams<unknown> = {
+                    ...(params as ISetStyleCommandParams<unknown>),
+                    range: selections[selections.length - 1],
+                };
+                return await this._commandService.executeCommand(id, styleParams);
+            }
+
+            if (id === AddWorksheetMergeCommand.id) {
+                const mergeParams: IAddMergeCommandParams = {
+                    ...(params as IAddMergeCommandParams),
+                    selections,
+                };
+                return await this._commandService.executeCommand(id, mergeParams);
+            }
+
+            if (id === InsertRowCommand.id) {
+                const insertRangeMoveDownParams: IInsertRangeMoveDownCommandParams = {
+                    range: selections[selections.length - 1],
+                };
+                return await this._commandService.executeCommand(InsertRangeMoveDownCommand.id, insertRangeMoveDownParams);
+            }
+
+            if (id === InsertColCommand.id) {
+                const insertRangeMoveRightParams: IInsertRangeMoveRightCommandParams = {
+                    range: selections[selections.length - 1],
+                };
+                return await this._commandService.executeCommand(InsertRangeMoveRightCommand.id, insertRangeMoveRightParams);
+            }
+
+            if (id === RemoveRowCommand.id) {
+                const deleteRangeMoveUpParams: IDeleteRangeMoveUpCommandParams = {
+                    range: selections[selections.length - 1],
+                };
+                return await this._commandService.executeCommand(DeleteRangeMoveUpCommand.id, deleteRangeMoveUpParams);
+            }
+
+            if (id === RemoveColCommand.id) {
+                const deleteRangeMoveLeftParams: IDeleteRangeMoveLeftCommandParams = {
+                    range: selections[selections.length - 1],
+                };
+                return await this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, deleteRangeMoveLeftParams);
+            }
+
+            if (
+                id === SetBorderCommand.id ||
+                id === SetRowHeightCommand.id ||
+                id === SetColWidthCommand.id ||
+                id === ClearSelectionContentCommand.id ||
+                id === ClearSelectionFormatCommand.id ||
+                id === ClearSelectionAllCommand.id ||
+                id === RemoveWorksheetMergeCommand.id
+            ) {
+                const newRangesParams: RepeatableCommandRangesParams = {
+                    ...(params as RepeatableCommandRangesParams),
+                    ranges: selections,
+                };
+                return await this._commandService.executeCommand(id, newRangesParams);
+            }
+
+            if (this._customCommandHandlers.has(id)) {
+                const handler = this._customCommandHandlers.get(id) as RepeatableCommandHandler;
+                const customParams = handler(selections, params);
+                return await this._commandService.executeCommand(id, customParams);
+            }
+
+            return await this._commandService.executeCommand(id, params);
         } finally {
             this._recordingDepth -= 1;
         }
-    }
-
-    private _initCommandRecording(): void {
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo, options) => {
-            if (this._recordingDepth > 0 || options?.fromCollab || options?.fromChangeset) {
-                return;
-            }
-
-            const nextAction = this._normalizeAction(commandInfo, options);
-            if (nextAction) {
-                this._action = nextAction;
-            }
-        }));
-    }
-
-    private _normalizeAction(commandInfo: Readonly<ICommandInfo>, _options?: IExecutionOptions): IRepeatLastAction | null {
-        switch (commandInfo.id) {
-            case SetStyleCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: SetStyleCommand.id,
-                    params: this._normalizeSetStyleParams(commandInfo.params as ISetStyleCommandParams<unknown> | undefined),
-                    permission: 'cellStyle',
-                    selectionRequirement: 'none',
-                };
-            case SetTextColorCommand.id:
-            case SetBackgroundColorCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: commandInfo.id,
-                    params: Tools.deepClone(commandInfo.params as Record<string, unknown> | undefined),
-                    permission: 'cellStyle',
-                    selectionRequirement: 'none',
-                };
-            case InsertRowBeforeCommand.id:
-            case InsertRowAfterCommand.id:
-            case InsertColBeforeCommand.id:
-            case InsertColAfterCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: commandInfo.id,
-                    params: Tools.deepClone(commandInfo.params as Record<string, unknown> | undefined),
-                    permission: 'none',
-                    selectionRequirement: 'none',
-                };
-            case RemoveRowCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: RemoveRowCommand.id,
-                    permission: 'none',
-                    selectionRequirement: 'fullRows',
-                };
-            case RemoveColCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: RemoveColCommand.id,
-                    permission: 'none',
-                    selectionRequirement: 'fullColumns',
-                };
-            case SetRowHeightCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: SetRowHeightCommand.id,
-                    params: this._normalizeSetRowHeightParams(commandInfo.params as { value: number } | undefined),
-                    permission: 'none',
-                    selectionRequirement: 'none',
-                };
-            case SetColWidthCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: SetColWidthCommand.id,
-                    params: this._normalizeSetColWidthParams(commandInfo.params as ISetColWidthCommandParams | undefined),
-                    permission: 'none',
-                    selectionRequirement: 'none',
-                };
-            case SetWorksheetRowIsAutoHeightCommand.id:
-            case SetWorksheetColAutoWidthCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: commandInfo.id,
-                    permission: 'none',
-                    selectionRequirement: 'none',
-                };
-            case ClearSelectionContentCommand.id:
-            case ClearSelectionFormatCommand.id:
-            case AddWorksheetMergeAllCommand.id:
-            case AddWorksheetMergeVerticalCommand.id:
-            case AddWorksheetMergeHorizontalCommand.id:
-            case RemoveWorksheetMergeCommand.id:
-                return {
-                    kind: 'command',
-                    commandId: commandInfo.id,
-                    permission: 'none',
-                    selectionRequirement: 'none',
-                };
-            case SetBorderBasicCommand.id:
-                return this._normalizeSetBorderAction(commandInfo.params as ISetBorderBasicCommandParams | undefined);
-            case SET_NUMFMT_COMMAND_ID:
-                return this._normalizeSetNumfmtAction(commandInfo.params as { values?: Array<{ pattern?: string; type?: string }> } | undefined);
-            case REPEAT_LAST_ACTION_COMMAND_ID:
-                return null;
-            default:
-                return null;
-        }
-    }
-
-    private _normalizeSetStyleParams(params: ISetStyleCommandParams<unknown> | undefined): Record<string, unknown> | undefined {
-        if (!params) {
-            return undefined;
-        }
-
-        return {
-            style: Tools.deepClone(params.style),
-        };
-    }
-
-    private _normalizeSetRowHeightParams(params: { value: number } | undefined): Record<string, unknown> | undefined {
-        if (!params) {
-            return undefined;
-        }
-
-        return {
-            value: params.value,
-        };
-    }
-
-    private _normalizeSetColWidthParams(params: ISetColWidthCommandParams | undefined): Record<string, unknown> | undefined {
-        if (!params) {
-            return undefined;
-        }
-
-        return {
-            value: params.value,
-        };
-    }
-
-    private _normalizeSetBorderAction(params: ISetBorderBasicCommandParams | undefined): IRepeatLastActionSetBorder | null {
-        if (!params) {
-            return null;
-        }
-
-        return {
-            kind: 'set-border-basic',
-            value: Tools.deepClone(params.value),
-            permission: 'cellStyle',
-            selectionRequirement: 'none',
-        };
-    }
-
-    private _normalizeSetNumfmtAction(params: { values?: Array<{ pattern?: string; type?: string }> } | undefined): IRepeatLastActionSetNumfmt | null {
-        const values = params?.values;
-        if (!values?.length) {
-            return null;
-        }
-
-        const [firstValue] = values;
-        const isUniform = values.every((value) => value.pattern === firstValue.pattern && value.type === firstValue.type);
-        if (!isUniform) {
-            return null;
-        }
-
-        return {
-            kind: 'set-numfmt',
-            pattern: firstValue.pattern,
-            type: firstValue.type,
-            permission: 'cellStyle',
-            selectionRequirement: 'none',
-        };
     }
 }

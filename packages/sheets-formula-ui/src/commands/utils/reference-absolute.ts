@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISequenceNode } from '@univerjs/engine-formula';
-import { AbsoluteRefType } from '@univerjs/core';
+import type { ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { AbsoluteRefType, RANGE_TYPE } from '@univerjs/core';
 import {
     deserializeRangeWithSheetWithCache,
     generateStringWithSequence,
@@ -32,10 +32,6 @@ export interface IReferenceAbsoluteResult {
     cursorOffset: number;
 }
 
-interface ILexerTreeBuilderLike {
-    sequenceNodesBuilder(formulaString: string): Array<string | ISequenceNode> | undefined;
-}
-
 interface IToggleReferenceTokenResult {
     token: string;
     referenceTarget: 'start' | 'end' | 'both';
@@ -44,7 +40,7 @@ interface IToggleReferenceTokenResult {
 }
 
 export function toggleReferenceAbsoluteAtCursor(
-    lexerTreeBuilder: ILexerTreeBuilderLike,
+    lexerTreeBuilder: LexerTreeBuilder,
     formulaText: string,
     cursorOffset: number
 ): IReferenceAbsoluteResult | null {
@@ -113,6 +109,26 @@ function _toggleReferenceToken(referenceNode: ISequenceNode, offsetInToken: numb
         return null;
     }
 
+    const { range } = sequenceGrid;
+
+    if (range.rangeType === RANGE_TYPE.ROW || range.rangeType === RANGE_TYPE.COLUMN) {
+        const newToken = serializeRangeToRefString({
+            ...sequenceGrid,
+            range: {
+                ...range,
+                startAbsoluteRefType: range.startAbsoluteRefType === AbsoluteRefType.NONE ? AbsoluteRefType.ALL : AbsoluteRefType.NONE,
+                endAbsoluteRefType: range.endAbsoluteRefType === AbsoluteRefType.NONE ? AbsoluteRefType.ALL : AbsoluteRefType.NONE,
+            },
+        });
+
+        return {
+            token: newToken,
+            referenceTarget: 'both',
+            previousSeparatorOffset: null,
+            nextSeparatorOffset: null,
+        };
+    }
+
     const { refBody } = handleRefStringInfo(referenceNode.token);
     const referenceParts = refBody.split(':');
     const previousSeparatorOffset = referenceParts.length === 2 ? referenceNode.token.indexOf(':') : null;
@@ -127,7 +143,7 @@ function _toggleReferenceToken(referenceNode: ISequenceNode, offsetInToken: numb
         : _getRangeReferenceTarget(referenceNode.token, refBody, offsetInToken);
 
     const nextRange = {
-        ...sequenceGrid.range,
+        ...range,
     };
 
     if (referenceTarget === 'start' || referenceTarget === 'both') {

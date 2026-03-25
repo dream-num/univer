@@ -45,8 +45,8 @@ describe('FormulaUIController', () => {
 
         expect(controller).toBeTruthy();
         expect(mergeMenu).toHaveBeenCalledTimes(1);
-        expect(registerCommand).toHaveBeenCalledTimes(8);
-        expect(registerShortcut.mock.calls.length).toBeGreaterThan(3);
+        expect(registerCommand).toHaveBeenCalledTimes(7);
+        expect(registerShortcut.mock.calls.length).toBeLessThan(3);
         expect(registerComponent).toHaveBeenCalledWith(SheetsUIPart.FORMULA_AUX, expect.any(Function));
         expect(componentRegister).toHaveBeenCalledWith(MORE_FUNCTIONS_COMPONENT, expect.any(Function));
         expect(registerRenderModule).toHaveBeenCalledWith(UniverInstanceType.UNIVER_SHEET, [expect.any(Function)]);

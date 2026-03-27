@@ -44,26 +44,23 @@ const univer = new Univer({
         [LocaleType.ZH_CN]: zhCN,
     },
     logLevel: LogLevel.VERBOSE,
-});
-
-// core plugins
-univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin);
-univer.registerPlugin(UniverUIPlugin, {
-    container: 'app',
-    ribbonType: 'classic',
-});
-
-univer.registerPlugin(UniverDocsPlugin);
-univer.registerPlugin(UniverDocsUIPlugin, {
-    container: 'univerdoc',
-});
-
-univer.registerPlugin(UniverDocsDrawingUIPlugin);
-univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
-univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
-univer.registerPlugin(UniverDocsMentionUIPlugin);
-univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
+})
+    // core plugins
+    .registerPlugin(UniverRenderEnginePlugin)
+    .registerPlugin(UniverFormulaEnginePlugin)
+    .registerPlugin(UniverUIPlugin, {
+        container: 'app',
+        ribbonType: 'classic',
+    })
+    .registerPlugin(UniverDocsPlugin)
+    .registerPlugin(UniverDocsUIPlugin, {
+        container: 'univerdoc',
+    })
+    .registerPlugin(UniverDocsDrawingUIPlugin)
+    .registerPlugin(UniverDocsThreadCommentUIPlugin)
+    .registerPlugin(UniverDocsHyperLinkUIPlugin)
+    .registerPlugin(UniverDocsMentionUIPlugin)
+    .registerPlugin(UniverDocsQuickInsertUIPlugin);
 
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);

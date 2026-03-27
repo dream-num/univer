@@ -96,9 +96,60 @@ describe('Univer', () => {
             .mockImplementation(() => undefined);
 
         univer.registerPlugins([
-            [class FakePluginA {} as never, { enabled: true }],
-            [class FakePluginB {} as never],
+            [class FakePluginA { } as never, { enabled: true }],
+            [class FakePluginB { } as never],
         ] as never);
+
+        expect(registerPluginSpy).toHaveBeenCalledTimes(2);
+
+        registerPluginSpy.mockRestore();
+        univer.dispose();
+    });
+
+    it('should return this to support method chaining', () => {
+        const univer = new Univer();
+
+        const registerPluginSpy = vi
+            .spyOn((univer as any)._pluginService, 'registerPlugin')
+            .mockImplementation(() => undefined);
+
+        const result = univer.registerPlugin(class TestPlugin { } as never);
+
+        expect(result).toBe(univer);
+        expect(registerPluginSpy).toHaveBeenCalledTimes(1);
+
+        registerPluginSpy.mockRestore();
+        univer.dispose();
+    });
+
+    it('should allow chaining multiple registerPlugin calls', () => {
+        const univer = new Univer();
+
+        const registerPluginSpy = vi
+            .spyOn((univer as any)._pluginService, 'registerPlugin')
+            .mockImplementation(() => undefined);
+
+        const chainResult = univer
+            .registerPlugin(class FakePluginA { } as never)
+            .registerPlugin(class FakePluginB { } as never)
+            .registerPlugin(class FakePluginC { } as never);
+
+        expect(registerPluginSpy).toHaveBeenCalledTimes(3);
+        expect(chainResult).toBe(univer);
+
+        registerPluginSpy.mockRestore();
+        univer.dispose();
+    });
+
+    it('should maintain backward compatibility when return value is ignored', () => {
+        const univer = new Univer();
+
+        const registerPluginSpy = vi
+            .spyOn((univer as any)._pluginService, 'registerPlugin')
+            .mockImplementation(() => undefined);
+
+        univer.registerPlugin(class FakePluginA { } as never);
+        univer.registerPlugin(class FakePluginB { } as never);
 
         expect(registerPluginSpy).toHaveBeenCalledTimes(2);
 

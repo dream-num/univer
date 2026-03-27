@@ -226,8 +226,10 @@ export class Univer implements IDisposable {
     }
 
     /** Register a plugin into univer. */
-    registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
+    registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): this {
         this._pluginService.registerPlugin(plugin, config);
+
+        return this;
     }
 
     /**

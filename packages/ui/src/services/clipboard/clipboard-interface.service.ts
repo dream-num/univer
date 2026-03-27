@@ -15,7 +15,7 @@
  */
 
 import { createIdentifier, Disposable, ILogService, Inject, LocaleService, Optional } from '@univerjs/core';
-
+import { sanitizeParsedHtml } from '../../utils/html';
 import { INotificationService } from '../notification/notification.service';
 import { supportClipboardAPI } from './clipboard-utils';
 
@@ -32,6 +32,105 @@ export const imageMimeTypeSet = new Set([
     FILE__JPEG_CLIPBOARD_MIME_TYPE,
     FILE__WEBP_CLIPBOARD_MIME_TYPE,
     FILE_PNG_CLIPBOARD_MIME_TYPE,
+]);
+
+const DROP_CONTENT_TAGS = new Set([
+    'base',
+    'button',
+    'embed',
+    'form',
+    'frame',
+    'frameset',
+    'head',
+    'iframe',
+    'input',
+    'link',
+    'meta',
+    'object',
+    'script',
+    'select',
+    'style',
+    'template',
+    'textarea',
+]);
+
+const ALLOWED_HTML_TAGS = new Set([
+    'a',
+    'b',
+    'blockquote',
+    'br',
+    'caption',
+    'code',
+    'col',
+    'colgroup',
+    'dd',
+    'div',
+    'dl',
+    'dt',
+    'em',
+    'font',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'hr',
+    'i',
+    'img',
+    'li',
+    'ol',
+    'p',
+    'pre',
+    's',
+    'span',
+    'strike',
+    'strong',
+    'sub',
+    'sup',
+    'table',
+    'tbody',
+    'td',
+    'tfoot',
+    'th',
+    'thead',
+    'tr',
+    'u',
+    'ul',
+]);
+
+const ALLOWED_HTML_ATTRIBUTES = new Set([
+    'align',
+    'alt',
+    'aria-colindex',
+    'aria-colspan',
+    'aria-label',
+    'aria-labelledby',
+    'aria-rowindex',
+    'aria-rowspan',
+    'bgcolor',
+    'border',
+    'cellpadding',
+    'cellspacing',
+    'class',
+    'colspan',
+    'color',
+    'dir',
+    'face',
+    'headers',
+    'height',
+    'href',
+    'lang',
+    'rel',
+    'role',
+    'rowspan',
+    'size',
+    'src',
+    'style',
+    'target',
+    'title',
+    'valign',
+    'width',
 ]);
 
 /**
@@ -150,7 +249,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         const activeElement = document.activeElement;
         const container = createCopyHtmlContainer();
         document.body.appendChild(container);
-        container.innerHTML = html; // TODO: wzhudev: sanitize html
+        container.replaceChildren(sanitizeHtmlForClipboard(html));
 
         try {
             select(container);
@@ -210,6 +309,159 @@ function createCopyHtmlContainer() {
     div.style.height = '1px';
     div.style.width = '1px';
     return div;
+}
+
+function sanitizeHtmlForClipboard(html: string): DocumentFragment {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, HTML_CLIPBOARD_MIME_TYPE);
+    sanitizeParsedHtml(doc, {
+        strippedSelector: 'script, iframe, object, embed',
+    });
+    const fragment = document.createDocumentFragment();
+
+    Array.from(doc.body.childNodes).forEach((node) => {
+        const sanitizedNode = sanitizeHtmlNode(node);
+
+        if (sanitizedNode) {
+            fragment.appendChild(sanitizedNode);
+        }
+    });
+
+    return fragment;
+}
+
+function sanitizeHtmlNode(node: Node): Node | null {
+    if (node.nodeType === Node.TEXT_NODE) {
+        return document.createTextNode(node.textContent ?? '');
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+        return null;
+    }
+
+    const sourceElement = node as HTMLElement;
+    const tagName = sourceElement.tagName.toLowerCase();
+
+    if (DROP_CONTENT_TAGS.has(tagName)) {
+        return null;
+    }
+
+    if (!ALLOWED_HTML_TAGS.has(tagName)) {
+        const fragment = document.createDocumentFragment();
+
+        Array.from(sourceElement.childNodes).forEach((childNode) => {
+            const sanitizedChildNode = sanitizeHtmlNode(childNode);
+
+            if (sanitizedChildNode) {
+                fragment.appendChild(sanitizedChildNode);
+            }
+        });
+
+        return fragment;
+    }
+
+    const sanitizedElement = document.createElement(tagName);
+    copySanitizedAttributes(sourceElement, sanitizedElement);
+
+    Array.from(sourceElement.childNodes).forEach((childNode) => {
+        const sanitizedChildNode = sanitizeHtmlNode(childNode);
+
+        if (sanitizedChildNode) {
+            sanitizedElement.appendChild(sanitizedChildNode);
+        }
+    });
+
+    return sanitizedElement;
+}
+
+function copySanitizedAttributes(sourceElement: HTMLElement, targetElement: HTMLElement) {
+    Array.from(sourceElement.attributes).forEach((attribute) => {
+        const attributeName = attribute.name.toLowerCase();
+
+        if (attributeName.startsWith('on')) {
+            return;
+        }
+
+        if (attributeName.startsWith('data-') || attributeName.startsWith('aria-')) {
+            targetElement.setAttribute(attribute.name, attribute.value);
+            return;
+        }
+
+        if (!ALLOWED_HTML_ATTRIBUTES.has(attributeName)) {
+            return;
+        }
+
+        if (attributeName === 'href' || attributeName === 'src') {
+            const sanitizedUrl = sanitizeHtmlUrl(attribute.value, attributeName === 'src');
+
+            if (sanitizedUrl) {
+                targetElement.setAttribute(attribute.name, sanitizedUrl);
+            }
+
+            return;
+        }
+
+        if (attributeName === 'style') {
+            const sanitizedStyle = sanitizeInlineStyle(attribute.value);
+
+            if (sanitizedStyle) {
+                targetElement.setAttribute(attribute.name, sanitizedStyle);
+            }
+
+            return;
+        }
+
+        targetElement.setAttribute(attribute.name, attribute.value);
+    });
+}
+
+function sanitizeHtmlUrl(value: string, allowDataImage: boolean): string | null {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+        return null;
+    }
+
+    if (trimmedValue.startsWith('#')) {
+        return trimmedValue;
+    }
+
+    if (/^(?:https?:|mailto:|tel:)/i.test(trimmedValue)) {
+        return trimmedValue;
+    }
+
+    if (allowDataImage && /^data:image\/[a-z0-9.+-]+;base64,/i.test(trimmedValue)) {
+        return trimmedValue;
+    }
+
+    if (/^(?:\/|\.\/|\.\.\/)/.test(trimmedValue)) {
+        return trimmedValue;
+    }
+
+    return null;
+}
+
+function sanitizeInlineStyle(styleText: string): string {
+    const probe = document.createElement('div');
+    probe.style.cssText = styleText;
+
+    const sanitizedDeclarations: string[] = [];
+
+    Array.from(probe.style).forEach((propertyName) => {
+        const propertyValue = probe.style.getPropertyValue(propertyName).trim();
+
+        if (!propertyValue || isUnsafeStyleValue(propertyValue)) {
+            return;
+        }
+
+        sanitizedDeclarations.push(`${propertyName}: ${propertyValue}`);
+    });
+
+    return sanitizedDeclarations.join('; ');
+}
+
+function isUnsafeStyleValue(styleValue: string): boolean {
+    return /(expression\s*\(|url\s*\(|javascript:|vbscript:|mocha:|-moz-binding|behavior\s*:|@import)/i.test(styleValue);
 }
 
 function select(element: HTMLTextAreaElement | HTMLDivElement): string {

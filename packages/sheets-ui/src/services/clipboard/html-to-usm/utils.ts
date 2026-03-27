@@ -18,8 +18,7 @@ import type { IParagraph, IParagraphStyle, ITextRun, Nullable } from '@univerjs/
 import type { ICellDataWithSpanInfo } from '../type';
 import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
-
-const STRIPPED_HTML_SELECTOR = 'script, iframe, object, embed';
+import { sanitizeParsedHtml } from '@univerjs/ui';
 
 function cleanTextNodes(node: Node) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -38,17 +37,6 @@ function cleanTextNodes(node: Node) {
     node.childNodes.forEach(cleanTextNodes);
 }
 
-function sanitizeParsedHtml(root: ParentNode) {
-    root.querySelectorAll(STRIPPED_HTML_SELECTOR).forEach((element) => element.remove());
-    root.querySelectorAll<HTMLElement>('*').forEach((element) => {
-        for (const { name } of Array.from(element.attributes)) {
-            if (name.startsWith('on')) {
-                element.removeAttribute(name);
-            }
-        }
-    });
-}
-
 export default function parseToDom(rawHtml: string) {
     const doc = document.implementation.createHTMLDocument('');
     const range = doc.createRange();
@@ -56,7 +44,9 @@ export default function parseToDom(rawHtml: string) {
 
     const fragment = range.createContextualFragment(rawHtml);
 
-    sanitizeParsedHtml(fragment);
+    sanitizeParsedHtml(fragment, {
+        strippedSelector: 'script, iframe, object, embed',
+    });
     cleanTextNodes(fragment);
     doc.body.append(fragment);
 

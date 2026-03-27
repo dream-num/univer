@@ -98,6 +98,37 @@ describe('BrowserClipboardService', () => {
         expect(document.execCommand).toHaveBeenCalledWith('copy');
     });
 
+    it('should sanitize html before legacy copy', async () => {
+        vi.mocked(supportClipboardAPI).mockReturnValue(false);
+        const { service } = createService();
+        let copiedHtml = '';
+
+        vi.mocked(document.execCommand).mockImplementation(() => {
+            copiedHtml = document.body.lastElementChild?.innerHTML ?? '';
+            return true;
+        });
+
+        await service.write(
+            'legacy',
+            '<div data-copy-id="copy-id" onclick="alert(1)"><a href="javascript:alert(1)">unsafe</a><img src="data:image/png;base64,ZmFrZQ==" onerror="alert(1)" /><span style="color: red; background-image: url(javascript:alert(1))">safe</span><script>alert(1)</script></div>'
+        );
+
+        const copiedDocument = new DOMParser().parseFromString(copiedHtml, 'text/html');
+        const wrapper = copiedDocument.body.firstElementChild as HTMLDivElement | null;
+        const link = copiedDocument.querySelector('a');
+        const image = copiedDocument.querySelector('img');
+        const span = copiedDocument.querySelector('span');
+
+        expect(wrapper?.getAttribute('data-copy-id')).toBe('copy-id');
+        expect(wrapper?.hasAttribute('onclick')).toBe(false);
+        expect(copiedDocument.querySelector('script')).toBeNull();
+        expect(link?.hasAttribute('href')).toBe(false);
+        expect(image?.getAttribute('src')).toBe('data:image/png;base64,ZmFrZQ==');
+        expect(image?.hasAttribute('onerror')).toBe(false);
+        expect(span?.getAttribute('style')).toContain('color: red');
+        expect(span?.getAttribute('style')).not.toContain('url(');
+    });
+
     it('should show notification when write/writeText fails', async () => {
         const { service, logService, notificationService } = createService();
         vi.mocked(navigator.clipboard.writeText).mockRejectedValueOnce(new Error('writeText failed'));

@@ -19,6 +19,8 @@ import type { ICellDataWithSpanInfo } from '../type';
 import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
+const STRIPPED_HTML_SELECTOR = 'script, iframe, object, embed';
+
 function cleanTextNodes(node: Node) {
     if (node.nodeType === Node.TEXT_NODE) {
         /**
@@ -36,11 +38,29 @@ function cleanTextNodes(node: Node) {
     node.childNodes.forEach(cleanTextNodes);
 }
 
+function sanitizeParsedHtml(root: ParentNode) {
+    root.querySelectorAll(STRIPPED_HTML_SELECTOR).forEach((element) => element.remove());
+    root.querySelectorAll<HTMLElement>('*').forEach((element) => {
+        for (const { name } of Array.from(element.attributes)) {
+            if (name.startsWith('on')) {
+                element.removeAttribute(name);
+            }
+        }
+    });
+}
+
 export default function parseToDom(rawHtml: string) {
-    const template = document.createElement('body');
-    template.innerHTML = rawHtml;
-    cleanTextNodes(template);
-    return template;
+    const doc = document.implementation.createHTMLDocument('');
+    const range = doc.createRange();
+    range.selectNodeContents(doc.body);
+
+    const fragment = range.createContextualFragment(rawHtml);
+
+    sanitizeParsedHtml(fragment);
+    cleanTextNodes(fragment);
+    doc.body.append(fragment);
+
+    return doc.body;
 }
 
 // TODO: @JOCS, Complete other missing attributes that exist in IParagraphStyle

@@ -22,13 +22,8 @@ import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator';
 
 export type TModuleFormat = 'cjs' | 'esm';
 
-function matchesPackage(source: string, packageNames: string[]) {
-    return packageNames.some((packageName) => source === packageName || source.startsWith(`${packageName}/`));
-}
-
 export interface ICreateModuleConfigOptions {
     baseConfig: Partial<UserConfig>;
-    bundledPackages: string[];
     enableObfuscation: boolean;
     entry: IEntryConfig;
     externalPackages: string[];
@@ -43,17 +38,15 @@ export interface ICreateModuleConfigOptions {
  * Creates the common ESM/CJS bundle config for a single package entry.
  */
 export function createModuleConfig(options: ICreateModuleConfigOptions): UserConfig {
-    const { baseConfig, bundledPackages, enableObfuscation, entry, externalPackages, facadeExternalPackages, format, outDir, packageDir, plugins } = options;
-    const neverBundlePackages = entry.type === 'facade' ? facadeExternalPackages : externalPackages;
+    const { baseConfig, enableObfuscation, entry, externalPackages, facadeExternalPackages, format, outDir, packageDir, plugins } = options;
+    const neverBundle = entry.type === 'facade' ? facadeExternalPackages : externalPackages;
     const copyToRoot = format === 'esm';
     const keepRootIndexCss = entry.type === 'index' && format === 'esm';
 
     return defineConfig({
         ...baseConfig,
         deps: {
-            alwaysBundle: (source) => matchesPackage(source, bundledPackages),
-            neverBundle: (source) => matchesPackage(source, neverBundlePackages),
-            onlyBundle: false,
+            neverBundle,
         },
         dts: false,
         entry: { [entry.key]: entry.path },

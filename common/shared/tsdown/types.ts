@@ -39,7 +39,6 @@ export interface IPackageJson {
 }
 
 export interface IBuildContext {
-    bundledPackages: string[];
     entries: IEntryConfig[];
     externalPackages: string[];
     facadeExternalPackages: string[];

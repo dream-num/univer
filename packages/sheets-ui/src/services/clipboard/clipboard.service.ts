@@ -85,7 +85,7 @@ import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange, spilitLargeSetRangeValuesMutations } from './utils';
+import { convertTextToTable, discreteRangeContainsRange, htmlContainsImage, htmlContainsTable, htmlIsFromExcel, mergeSetRangeValues, rangeIntersectWithDiscreteRange, spilitLargeSetRangeValuesMutations } from './utils';
 
 export const PREDEFINED_HOOK_NAME_COPY = {
     DEFAULT_COPY: 'default-copy',
@@ -354,8 +354,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     async legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
         const isFromExcel = htmlIsFromExcel(html ?? '');
+        const isContainsTable = htmlContainsTable(html ?? '');
 
-        if (files && !isFromExcel) {
+        if (files && !isFromExcel && !isContainsTable) {
             return this._pasteFiles(files, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
         } else if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);

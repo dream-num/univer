@@ -130,6 +130,16 @@ export function htmlContainsImage(html: string): boolean {
     return images.length > 0;
 }
 
+export function htmlContainsTable(html: string): boolean {
+    if (!html) {
+        return false;
+    }
+
+    const tableRegex = /<table[\s\S]*?>[\s\S]*?<\/table>/i;
+
+    return tableRegex.test(html);
+}
+
 export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullable<ICellData>>[]) {
     if (cellValues.length === 1) {
         return cellValues[0];

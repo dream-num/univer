@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { FWorkbookThreadCommentMixin } from '../f-workbook';
+import { FWorkbookSheetsThreadCommentMixin } from '../f-workbook';
 
-describe('FWorkbookThreadCommentMixin', () => {
+describe('FWorkbookSheetsThreadCommentMixin', () => {
     it('should lazily resolve the thread comment model and create workbook comment facades', async () => {
         const rootComment = { id: 'comment-1' };
         const deleteAsync = vi.fn(async () => true);
@@ -25,7 +25,7 @@ describe('FWorkbookThreadCommentMixin', () => {
         const createInstance = vi.fn(() => ({ deleteAsync }));
         const get = vi.fn(() => ({ getUnit }));
 
-        const instance = Object.create(FWorkbookThreadCommentMixin.prototype) as any;
+        const instance = Object.create(FWorkbookSheetsThreadCommentMixin.prototype) as any;
         instance._injector = { get, createInstance };
         instance._workbook = { getUnitId: () => 'unit-1' };
 

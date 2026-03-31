@@ -15,10 +15,9 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation, SheetSkeletonService } from '@univerjs/sheets';
-
 import { BehaviorSubject } from 'rxjs';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
@@ -198,7 +197,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
     const injector = univer.__getInjector();
     injector.add([SheetSkeletonService]);
     // NOTE: this is a hack. Please refer to ./services/clipboard/__tests__/clipboard-test-bed.ts
-    const mockSheetSkService = new SheetSkeletonService(injector);
+    const mockSheetSkService = new SheetSkeletonService(injector, get(IUniverInstanceService));
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId,
@@ -212,7 +211,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector, injector.get(SheetSkeletonService));
+    }, injector.get(SheetSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender(unitId, {

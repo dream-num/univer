@@ -131,6 +131,7 @@ export {
 } from './commands/commands/set-border-command';
 export { type ISetColDataCommandParams, SetColDataCommand } from './commands/commands/set-col-data.command';
 export {
+    type ISetColHiddenCommandParams,
     type ISetSpecificColsVisibleCommandParams,
     SetColHiddenCommand,
     SetSelectedColsVisibleCommand,
@@ -145,6 +146,7 @@ export { type ISetRangeCustomMetadataCommandParams, SetRangeCustomMetadataComman
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export { type ISetRowDataCommandParams, SetRowDataCommand } from './commands/commands/set-row-data.command';
 export {
+    type ISetRowHiddenCommandParams,
     type ISetSpecificRowsVisibleCommandParams,
     SetRowHiddenCommand,
     SetSelectedRowsVisibleCommand,
@@ -194,7 +196,7 @@ export { SetWorksheetProtectionCommand } from './commands/commands/set-worksheet
 export { SetWorksheetRightToLeftCommand } from './commands/commands/set-worksheet-right-to-left.command';
 export { SetWorksheetRowCountCommand } from './commands/commands/set-worksheet-row-count.command';
 export { DeltaRowHeightCommand, type ISetRowHeightCommandParams, SetRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from './commands/commands/set-worksheet-row-height.command';
-export type { IDeltaRowHeightCommand, ISetWorksheetRowIsAutoHeightCommandParams } from './commands/commands/set-worksheet-row-height.command';
+export type { IDeltaRowHeightCommandParams, ISetWorksheetRowIsAutoHeightCommandParams } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { SplitTextToColumnsCommand } from './commands/commands/split-text-to-columns.command';
@@ -467,5 +469,7 @@ export { getNextPrimaryCell } from './services/selections/move-active-cell-util'
 export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { AFTER_CELL_EDIT, BEFORE_CELL_EDIT, type IAutoHeightContext, SheetInterceptorService, VALIDATE_CELL } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
-export { SheetSkeletonService } from './skeleton/skeleton.service';
+export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './skeleton/drawing-position-util';
+export { type ISheetSkeletonManagerParam, SheetSkeletonService } from './skeleton/skeleton.service';
+export { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from './skeleton/util';
 export { UnitAction, UnitObject } from '@univerjs/protocol';

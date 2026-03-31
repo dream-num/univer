@@ -16,12 +16,12 @@
 
 import type { Injector } from '@univerjs/core';
 import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
-import type { IBeforeSheetLinkAddEvent, IBeforeSheetLinkCancelEvent, IBeforeSheetLinkUpdateEvent } from './f-event';
+import type { IBeforeSheetLinkAddEventParams, IBeforeSheetLinkCancelEventParams, IBeforeSheetLinkUpdateEventParams } from './f-event';
 import { CanceledError, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 
-export class FSheetLinkUniver extends FUniver {
+export class FUniverSheetsHyperlinkMixin extends FUniver {
     /**
      * @ignore
      */
@@ -38,7 +38,7 @@ export class FSheetLinkUniver extends FUniver {
                     if (!eventTarget) return;
 
                     const params = commandInfo.params as IAddHyperLinkCommandParams;
-                    const eventParams: IBeforeSheetLinkAddEvent = {
+                    const eventParams: IBeforeSheetLinkAddEventParams = {
                         workbook: eventTarget.workbook,
                         worksheet: eventTarget.worksheet,
                         row: params.link.row,
@@ -63,7 +63,7 @@ export class FSheetLinkUniver extends FUniver {
                     if (!eventTarget) return;
 
                     const params = commandInfo.params as IUpdateHyperLinkCommandParams;
-                    const eventParams: IBeforeSheetLinkUpdateEvent = {
+                    const eventParams: IBeforeSheetLinkUpdateEventParams = {
                         workbook: eventTarget.workbook,
                         worksheet: eventTarget.worksheet,
                         row: params.row,
@@ -89,7 +89,7 @@ export class FSheetLinkUniver extends FUniver {
                     if (!eventTarget) return;
 
                     const params = commandInfo.params as ICancelHyperLinkCommandParams;
-                    const eventParams: IBeforeSheetLinkCancelEvent = {
+                    const eventParams: IBeforeSheetLinkCancelEventParams = {
                         workbook: eventTarget.workbook,
                         worksheet: eventTarget.worksheet,
                         row: params.row,
@@ -106,4 +106,4 @@ export class FSheetLinkUniver extends FUniver {
     }
 }
 
-FUniver.extend(FSheetLinkUniver);
+FUniver.extend(FUniverSheetsHyperlinkMixin);

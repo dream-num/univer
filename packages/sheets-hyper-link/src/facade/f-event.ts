@@ -22,10 +22,10 @@ import { FEventName } from '@univerjs/core/facade';
 /**
  * @ignore
  */
-interface IFSheetLinkEvent {
+interface IFSheetsHyperlinkEventNameMixin {
     /**
      * Event triggered before adding a link
-     * @see {@link IBeforeSheetLinkAddEvent}
+     * @see {@link IBeforeSheetLinkAddEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkAdd, (params) => {
@@ -43,7 +43,7 @@ interface IFSheetLinkEvent {
 
     /**
      * Event triggered before canceling a link
-     * @see {@link IBeforeSheetLinkCancelEvent}
+     * @see {@link IBeforeSheetLinkCancelEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkCancel, (params) => {
@@ -61,7 +61,7 @@ interface IFSheetLinkEvent {
 
     /**
      * Event triggered before updating a link
-     * @see {@link IBeforeSheetLinkUpdateEvent}
+     * @see {@link IBeforeSheetLinkUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetLinkUpdate, (params) => {
@@ -78,21 +78,21 @@ interface IFSheetLinkEvent {
     readonly BeforeSheetLinkUpdate: 'BeforeSheetLinkUpdate';
 }
 
-export class FSheetLinkEvent implements IFSheetLinkEvent {
-    get BeforeSheetLinkAdd(): 'BeforeSheetLinkAdd' {
+export class FSheetsHyperlinkEventNameMixin extends FEventName implements IFSheetsHyperlinkEventNameMixin {
+    override get BeforeSheetLinkAdd(): 'BeforeSheetLinkAdd' {
         return 'BeforeSheetLinkAdd' as const;
     }
 
-    get BeforeSheetLinkCancel(): 'BeforeSheetLinkCancel' {
+    override get BeforeSheetLinkCancel(): 'BeforeSheetLinkCancel' {
         return 'BeforeSheetLinkCancel' as const;
     }
 
-    get BeforeSheetLinkUpdate(): 'BeforeSheetLinkUpdate' {
+    override get BeforeSheetLinkUpdate(): 'BeforeSheetLinkUpdate' {
         return 'BeforeSheetLinkUpdate' as const;
     }
 }
 
-export interface IBeforeSheetLinkAddEvent extends IEventBase {
+export interface IBeforeSheetLinkAddEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet where the link will be added */
@@ -105,7 +105,7 @@ export interface IBeforeSheetLinkAddEvent extends IEventBase {
     link: ISheetHyperLink;
 }
 
-export interface IBeforeSheetLinkCancelEvent extends IEventBase {
+export interface IBeforeSheetLinkCancelEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet containing the link */
@@ -118,7 +118,7 @@ export interface IBeforeSheetLinkCancelEvent extends IEventBase {
     id: string;
 }
 
-export interface IBeforeSheetLinkUpdateEvent extends IEventBase {
+export interface IBeforeSheetLinkUpdateEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet containing the link */
@@ -136,19 +136,17 @@ export interface IBeforeSheetLinkUpdateEvent extends IEventBase {
 /**
  * @ignore
  */
-export interface ISheetLinkEventConfig {
-    BeforeSheetLinkAdd: IBeforeSheetLinkAddEvent;
-    BeforeSheetLinkCancel: IBeforeSheetLinkCancelEvent;
-    BeforeSheetLinkUpdate: IBeforeSheetLinkUpdateEvent;
+export interface ISheetsHyperlinkEventParamConfig {
+    BeforeSheetLinkAdd: IBeforeSheetLinkAddEventParams;
+    BeforeSheetLinkCancel: IBeforeSheetLinkCancelEventParams;
+    BeforeSheetLinkUpdate: IBeforeSheetLinkUpdateEventParams;
 }
 
-FEventName.extend(FSheetLinkEvent);
+FEventName.extend(FSheetsHyperlinkEventNameMixin);
 
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends IFSheetLinkEvent {
-    }
+    interface FEventName extends IFSheetsHyperlinkEventNameMixin {}
 
-    interface IEventParamConfig extends ISheetLinkEventConfig {
-    }
+    interface IEventParamConfig extends ISheetsHyperlinkEventParamConfig { }
 }

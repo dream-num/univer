@@ -18,7 +18,7 @@
 
 import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
+import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,

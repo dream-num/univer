@@ -20,7 +20,7 @@ import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 /**
  * @ignore
  */
-export interface IFSheetsUIEnum {
+export interface IFSheetsUIEnumMixin {
     /**
      * Sheet value change command types. These commands affect the content or style of cells.
      * Includes operations like setting cell values, moving ranges, merging cells, and applying styles.
@@ -28,15 +28,15 @@ export interface IFSheetsUIEnum {
     SHEET_VIEWPORT_KEY: typeof SHEET_VIEWPORT_KEY;
 }
 
-export class FSheetsUIEnum implements IFSheetsUIEnum {
-    get SHEET_VIEWPORT_KEY(): typeof SHEET_VIEWPORT_KEY {
+export class FSheetsUIEnumMixin extends FEnum implements IFSheetsUIEnumMixin {
+    override get SHEET_VIEWPORT_KEY(): typeof SHEET_VIEWPORT_KEY {
         return SHEET_VIEWPORT_KEY;
     }
 }
 
-FEnum.extend(FSheetsUIEnum);
+FEnum.extend(FSheetsUIEnumMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    export interface FEnum extends IFSheetsUIEnum {
+    export interface FEnum extends IFSheetsUIEnumMixin {
     }
 }

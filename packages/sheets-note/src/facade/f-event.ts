@@ -82,7 +82,7 @@ export interface ISheetsNoteEventParamConfig {
 /**
  * @ignore
  */
-interface ISheetNoteEvent {
+interface IFSheetsNoteEventNameMixin {
     /**
      * Event fired when a note is added
      * @see {@link ISheetNoteAddEventParams}
@@ -96,7 +96,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    SheetNoteAdd: 'SheetNoteAdd';
+    readonly SheetNoteAdd: 'SheetNoteAdd';
     /**
      * Event fired when a note is deleted
      * @see {@link ISheetNoteDeleteEventParams}
@@ -110,7 +110,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    SheetNoteDelete: 'SheetNoteDelete';
+    readonly SheetNoteDelete: 'SheetNoteDelete';
     /**
      * Event fired when a note is updated
      * @see {@link ISheetNoteUpdateEventParams}
@@ -124,7 +124,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    SheetNoteUpdate: 'SheetNoteUpdate';
+    readonly SheetNoteUpdate: 'SheetNoteUpdate';
     /**
      * Event fired when a note is shown
      * @see {@link ISheetNoteShowEventParams}
@@ -138,7 +138,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    SheetNoteShow: 'SheetNoteShow';
+    readonly SheetNoteShow: 'SheetNoteShow';
     /**
      * Event fired when a note is hidden
      * @see {@link ISheetNoteHideEventParams}
@@ -152,7 +152,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    SheetNoteHide: 'SheetNoteHide';
+    readonly SheetNoteHide: 'SheetNoteHide';
 
     /**
      * Event fired before a note is added
@@ -170,7 +170,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    BeforeSheetNoteAdd: 'BeforeSheetNoteAdd';
+    readonly BeforeSheetNoteAdd: 'BeforeSheetNoteAdd';
     /**
      * Event fired before a note is deleted
      * @see {@link ISheetNoteDeleteEventParams}
@@ -187,7 +187,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    BeforeSheetNoteDelete: 'BeforeSheetNoteDelete';
+    readonly BeforeSheetNoteDelete: 'BeforeSheetNoteDelete';
     /**
      * Event fired before a note is updated
      * @see {@link ISheetNoteUpdateEventParams}
@@ -204,7 +204,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    BeforeSheetNoteUpdate: 'BeforeSheetNoteUpdate';
+    readonly BeforeSheetNoteUpdate: 'BeforeSheetNoteUpdate';
     /**
      * Event fired before a note is shown
      * @see {@link ISheetNoteShowEventParams}
@@ -221,7 +221,7 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    BeforeSheetNoteShow: 'BeforeSheetNoteShow';
+    readonly BeforeSheetNoteShow: 'BeforeSheetNoteShow';
     /**
      * Event fired before a note is hidden
      * @see {@link ISheetNoteHideEventParams}
@@ -238,58 +238,58 @@ interface ISheetNoteEvent {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    BeforeSheetNoteHide: 'BeforeSheetNoteHide';
+    readonly BeforeSheetNoteHide: 'BeforeSheetNoteHide';
 }
 
 /**
  * @ignore
  */
-export class FSheetNoteEvent implements ISheetNoteEvent {
-    get SheetNoteAdd(): 'SheetNoteAdd' {
-        return 'SheetNoteAdd';
+export class FSheetsNoteEventNameMixin extends FEventName implements IFSheetsNoteEventNameMixin {
+    override get SheetNoteAdd(): 'SheetNoteAdd' {
+        return 'SheetNoteAdd' as const;
     }
 
-    get SheetNoteDelete(): 'SheetNoteDelete' {
-        return 'SheetNoteDelete';
+    override get SheetNoteDelete(): 'SheetNoteDelete' {
+        return 'SheetNoteDelete' as const;
     }
 
-    get SheetNoteUpdate(): 'SheetNoteUpdate' {
-        return 'SheetNoteUpdate';
+    override get SheetNoteUpdate(): 'SheetNoteUpdate' {
+        return 'SheetNoteUpdate' as const;
     }
 
-    get SheetNoteShow(): 'SheetNoteShow' {
-        return 'SheetNoteShow';
+    override get SheetNoteShow(): 'SheetNoteShow' {
+        return 'SheetNoteShow' as const;
     }
 
-    get SheetNoteHide(): 'SheetNoteHide' {
-        return 'SheetNoteHide';
+    override get SheetNoteHide(): 'SheetNoteHide' {
+        return 'SheetNoteHide' as const;
     }
 
-    get BeforeSheetNoteAdd(): 'BeforeSheetNoteAdd' {
-        return 'BeforeSheetNoteAdd';
+    override get BeforeSheetNoteAdd(): 'BeforeSheetNoteAdd' {
+        return 'BeforeSheetNoteAdd' as const;
     }
 
-    get BeforeSheetNoteDelete(): 'BeforeSheetNoteDelete' {
-        return 'BeforeSheetNoteDelete';
+    override get BeforeSheetNoteDelete(): 'BeforeSheetNoteDelete' {
+        return 'BeforeSheetNoteDelete' as const;
     }
 
-    get BeforeSheetNoteUpdate(): 'BeforeSheetNoteUpdate' {
-        return 'BeforeSheetNoteUpdate';
+    override get BeforeSheetNoteUpdate(): 'BeforeSheetNoteUpdate' {
+        return 'BeforeSheetNoteUpdate' as const;
     }
 
-    get BeforeSheetNoteShow(): 'BeforeSheetNoteShow' {
-        return 'BeforeSheetNoteShow';
+    override get BeforeSheetNoteShow(): 'BeforeSheetNoteShow' {
+        return 'BeforeSheetNoteShow' as const;
     }
 
-    get BeforeSheetNoteHide(): 'BeforeSheetNoteHide' {
-        return 'BeforeSheetNoteHide';
+    override get BeforeSheetNoteHide(): 'BeforeSheetNoteHide' {
+        return 'BeforeSheetNoteHide' as const;
     }
 }
 
 /**
  * @ignore
  */
-export interface ISheetNoteEventConfig {
+export interface ISheetsNoteEventParamConfig {
     SheetNoteAdd: ISheetNoteAddEventParams;
     SheetNoteDelete: ISheetNoteDeleteEventParams;
     SheetNoteUpdate: ISheetNoteUpdateEventParams;
@@ -303,9 +303,9 @@ export interface ISheetNoteEventConfig {
     BeforeSheetNoteHide: ISheetNoteHideEventParams;
 }
 
-FEventName.extend(FSheetNoteEvent);
+FEventName.extend(FSheetsNoteEventNameMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends ISheetNoteEvent {}
-    interface IEventParamConfig extends ISheetNoteEventConfig {}
+    interface FEventName extends IFSheetsNoteEventNameMixin {}
+    interface IEventParamConfig extends ISheetsNoteEventParamConfig {}
 }

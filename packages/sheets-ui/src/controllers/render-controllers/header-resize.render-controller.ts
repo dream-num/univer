@@ -21,7 +21,7 @@ import type { EventState, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommand,
+    IDeltaRowHeightCommandParams,
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '@univerjs/sheets';
 import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
@@ -461,7 +461,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         this._columnResizeRect?.hide();
 
                         if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                            this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
+                            this._commandService.executeCommand<IDeltaRowHeightCommandParams>(DeltaRowHeightCommand.id, {
                                 deltaY: moveChangeY,
                                 anchorRow: this._currentRow,
                             });

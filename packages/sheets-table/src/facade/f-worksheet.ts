@@ -40,7 +40,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 /**
  * @ignore
  */
-export interface IFWorkSheetTableMixin {
+export interface IFWorksheetTableMixin {
     /**
      * Add a table to the worksheet
      * @param {string} tableName The table name
@@ -344,7 +344,7 @@ export interface IFWorkSheetTableMixin {
     addTableTheme(tableId: string, themeStyleJSON: IRangeThemeStyleJSON): Promise<boolean>;
 }
 
-export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTableMixin {
+export class FWorksheetTableMixin extends FWorksheet implements IFWorksheetTableMixin {
     override addTable(tableName: string, rangeInfo: ITableRange, tableId?: string, options?: ITableOptions): Promise<boolean> | boolean {
         const subUnitId = this.getSheetId();
         const workbook = this.getWorkbook();
@@ -469,8 +469,8 @@ export class FWorkSheetTableMixin extends FWorksheet implements IFWorkSheetTable
     }
 }
 
-FWorksheet.extend(FWorkSheetTableMixin);
+FWorksheet.extend(FWorksheetTableMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorkSheetTableMixin { }
+    interface FWorksheet extends IFWorksheetTableMixin { }
 }

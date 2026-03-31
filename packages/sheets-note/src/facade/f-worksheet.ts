@@ -21,7 +21,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 /**
  * @ignore
  */
-export interface IFSheetsNoteWorksheet {
+export interface IFWorksheetNoteMixin {
     /**
      * Get all annotations in the worksheet
      * @returns {ISheetNote[]} An array of all annotations in the worksheet
@@ -41,7 +41,7 @@ export interface IFSheetsNoteWorksheet {
     getNotes(): ISheetNote[];
 }
 
-export class FSheetsNoteWorksheet extends FWorksheet implements IFSheetsNoteWorksheet {
+export class FWorksheetNoteMixin extends FWorksheet implements IFWorksheetNoteMixin {
     override getNotes(): ISheetNote[] {
         const model = this._injector.get(SheetsNoteModel);
         const notes = model.getSheetNotes(this.getWorkbook().getUnitId(), this.getSheetId());
@@ -52,8 +52,8 @@ export class FSheetsNoteWorksheet extends FWorksheet implements IFSheetsNoteWork
     }
 }
 
-FWorksheet.extend(FSheetsNoteWorksheet);
+FWorksheet.extend(FWorksheetNoteMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFSheetsNoteWorksheet { }
+    interface FWorksheet extends IFWorksheetNoteMixin { }
 }

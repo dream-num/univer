@@ -15,11 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import type { IDeleteDrawingCommandParams } from './interfaces';
+import type { IDeleteDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, ICommandService } from '@univerjs/core';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { RemoveSheetDrawingCommand } from './remove-sheet-drawing.command';
+import { ISheetDrawingService, RemoveSheetDrawingCommand } from '@univerjs/sheets-drawing';
 
 export const DeleteDrawingsCommand: ICommand = {
     id: 'sheet.command.delete-drawing',

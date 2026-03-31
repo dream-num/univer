@@ -21,7 +21,7 @@ import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 /**
  * @ignore
  */
-export interface IFDrawingEnumMixin {
+export interface IFSheetsDrawingEnumMixin {
     /** Please refer to {@link DrawingTypeEnum}. */
     DrawingType: typeof DrawingTypeEnum;
 
@@ -32,7 +32,7 @@ export interface IFDrawingEnumMixin {
     SheetDrawingAnchorType: typeof SheetDrawingAnchorType;
 }
 
-export class FDrawingEnumMixin extends FEnum implements IFDrawingEnumMixin {
+export class FSheetsDrawingEnumMixin extends FEnum implements IFSheetsDrawingEnumMixin {
     override get DrawingType(): typeof DrawingTypeEnum { return DrawingTypeEnum; };
 
     override get ImageSourceType(): Omit<typeof ImageSourceType, 'UUID'> { return ImageSourceType; };
@@ -40,8 +40,8 @@ export class FDrawingEnumMixin extends FEnum implements IFDrawingEnumMixin {
     override get SheetDrawingAnchorType(): typeof SheetDrawingAnchorType { return SheetDrawingAnchorType; };
 }
 
-FEnum.extend(FDrawingEnumMixin);
+FEnum.extend(FSheetsDrawingEnumMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEnum extends IFDrawingEnumMixin { }
+    interface FEnum extends IFSheetsDrawingEnumMixin { }
 }

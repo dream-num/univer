@@ -24,18 +24,18 @@ interface IFUIEnumMixin {
     /**
      * Built-in UI parts.
      */
-    get BuiltInUIPart(): typeof BuiltInUIPart;
+    BuiltInUIPart: typeof BuiltInUIPart;
 
     /**
      * Key codes.
      */
-    get KeyCode(): typeof KeyCode;
+    KeyCode: typeof KeyCode;
 }
 
 /**
  * @ignore
  */
-export class FUIEnum extends FEnum implements IFUIEnumMixin {
+export class FUIEnumMixin extends FEnum implements IFUIEnumMixin {
     override get BuiltInUIPart(): typeof BuiltInUIPart {
         return BuiltInUIPart;
     };
@@ -45,7 +45,7 @@ export class FUIEnum extends FEnum implements IFUIEnumMixin {
     }
 }
 
-FEnum.extend(FUIEnum);
+FEnum.extend(FUIEnumMixin);
 
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention

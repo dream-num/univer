@@ -16,13 +16,11 @@
 
 import type { ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithCoord, ISelectionWithStyle } from '../basics';
 
 /**
  * Add startXY endXY to range, XY are no merge cell position.
- * @param skeleton
- * @param range
- * @returns {IRangeWithCoord}
+ * @returns {IRangeWithCoord} range with coord
  */
 export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRange): IRangeWithCoord {
     const { startRow, startColumn, endRow, endColumn, rangeType } = range;
@@ -54,8 +52,6 @@ export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRang
 /**
  * Return selection with coord and style from selection, which has range & primary & style.
  * coord are no merge cell position.
- * @param selection
- * @param skeleton
  * @returns {ISelectionWithCoord} selection with coord and style
  */
 export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleton: SpreadsheetSkeleton): ISelectionWithCoord {
@@ -69,6 +65,10 @@ export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleto
     } as ISelectionWithCoord;
 }
 
+/**
+ * Add startXY endXY to primary, XY are no merge cell position.
+ * @returns {ICellWithCoord} primary with coord
+ */
 export function attachPrimaryWithCoord(skeleton: SpreadsheetSkeleton, primary: ISelectionCell): ICellWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = primary;
     const cellPosition = skeleton.getNoMergeCellWithCoordByIndex(actualRow, actualColumn);

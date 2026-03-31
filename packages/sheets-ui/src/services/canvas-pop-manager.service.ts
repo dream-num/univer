@@ -344,9 +344,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return;
         }
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
-            sheetId: subUnitId,
-        });
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender || !skeleton) {
@@ -544,9 +542,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
         const currentRender = this._renderManagerService.getRenderById(unitId);
-        const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
-            sheetId: subUnitId,
-        });
+        const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
 
         if (!currentRender || !skeleton || !sheetSelectionRenderService) {

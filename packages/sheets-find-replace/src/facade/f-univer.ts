@@ -21,7 +21,7 @@ import { FTextFinder } from './f-text-finder';
 /**
  * @ignore
  */
-export interface IFUniverFindReplaceMixin {
+export interface IFUniverSheetsFindReplaceMixin {
     /**
      * Create a text-finder for the current univer.
      * @param {string} text - The text to find.
@@ -60,7 +60,7 @@ export interface IFUniverFindReplaceMixin {
     createTextFinderAsync(text: string): Promise<FTextFinder | null>;
 }
 
-export class FUniverFindReplaceMixin extends FUniver implements IFUniverFindReplaceMixin {
+export class FUniverSheetsFindReplaceMixin extends FUniver implements IFUniverSheetsFindReplaceMixin {
     override async createTextFinderAsync(text: string): Promise<FTextFinder | null> {
         const state: Partial<IFindReplaceState> = { findString: text };
         const textFinder = this._injector.createInstance(FTextFinder, state);
@@ -69,8 +69,8 @@ export class FUniverFindReplaceMixin extends FUniver implements IFUniverFindRepl
     }
 }
 
-FUniver.extend(FUniverFindReplaceMixin);
+FUniver.extend(FUniverSheetsFindReplaceMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverFindReplaceMixin {}
+    interface FUniver extends IFUniverSheetsFindReplaceMixin {}
 }

@@ -95,7 +95,7 @@ export interface IFRangeSheetsNumfmtMixin {
     getNumberFormats(): string[][];
 }
 
-export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
+export class FRangeSheetsNumfmtMixin extends FRange implements IFRangeSheetsNumfmtMixin {
     override setNumberFormat(pattern: string): FRange {
         // TODO@Gggpound: the API should support other types of parameters
         const values: ISetNumfmtCommandParams['values'] = [];
@@ -149,7 +149,7 @@ export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
     }
 }
 
-FRange.extend(FRangeLegacy);
+FRange.extend(FRangeSheetsNumfmtMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeSheetsNumfmtMixin { }

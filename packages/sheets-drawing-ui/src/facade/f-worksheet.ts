@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ITransformState, Nullable } from '@univerjs/core';
-import type { IFBlobSource } from '@univerjs/core/facade';
-import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
+import type { ITransformState, Nullable } from '@univerjs/core';
+import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { ICanvasFloatDom, ICanvasFloatDomInfo, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
 import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import type { ISaveCellImagesOptions } from './f-range';
-import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { FileNamePart, IBatchSaveImagesService, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing-ui';
-import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { ISheetDrawingService, RemoveSheetDrawingCommand, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { FileNamePart, IBatchSaveImagesService, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
-import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
 // why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey { }
@@ -44,7 +40,7 @@ export interface IFCanvasFloatDomResult extends Omit<ICanvasFloatDom, 'component
 /**
  * @ignore
  */
-export interface IFWorksheetLegacy {
+export interface IFWorksheetDrawingUIMixin {
     /**
      * Get float dom by id
      * @param {string} id - float dom id
@@ -387,210 +383,6 @@ export interface IFWorksheetLegacy {
     }>;
 
     /**
-     * Insert an image to the sheet
-     * @param {string} url - The image url
-     * @returns true if the image is inserted successfully
-     * @example
-     * ```ts
-     * // Insert an image to the sheet, default position is A1
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4');
-     * console.log(result);
-     * ```
-     */
-    insertImage(url: string): Promise<boolean>;
-    /**
-     * @param {string} url - The image url
-     * @param {number} column - The column index to insert the image
-     * @param {number} row - The row index to insert the image
-     * @returns True if the image is inserted successfully
-     * @example
-     * ```ts
-     * // Insert an image to the sheet, position is F6
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5);
-     * console.log(result);
-     * ```
-     */
-    insertImage(url: string, column: number, row: number): Promise<boolean>;
-    /**
-     * @param {string} url - The image url
-     * @param {number} column - The column index to insert the image
-     * @param {number} row - The row index to insert the image
-     * @param {number} offsetX - The column offset, pixel unit
-     * @param {number} offsetY - The row offset, pixel unit
-     * @returns True if the image is inserted successfully
-     * @example
-     * ```ts
-     * // Insert an image to the sheet, position is F6, offset is 10px
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const result = await fWorksheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5, 10, 10);
-     * console.log(result);
-     * ```
-     */
-    insertImage(url: string, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
-    insertImage(url: IFBlobSource): Promise<boolean>;
-    insertImage(url: IFBlobSource, column: number, row: number): Promise<boolean>;
-    insertImage(url: IFBlobSource, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
-    insertImage(url: IFBlobSource | string, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
-
-    /**
-     * Insert images to the sheet
-     * @param {ISheetImage[]} sheetImages - The images to insert
-     * @returns {FWorksheet} The FWorksheet instance for chaining
-     * @example
-     * ```ts
-     * // create a new image builder and set image source.
-     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
-     * const image = await fWorksheet.newOverGridImage()
-     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
-     *   .setColumn(5)
-     *   .setRow(5)
-     *   .setWidth(500)
-     *   .setHeight(300)
-     *   .buildAsync();
-     * fWorksheet.insertImages([image]);
-     *
-     * // update the image width to 100px and height to 50px
-     * setTimeout(async () => {
-     *   const imageBuilder = fWorksheet.getImageById(image.drawingId).toBuilder();
-     *   const newImage = await imageBuilder.setWidth(100).setHeight(50).buildAsync();
-     *   fWorksheet.updateImages([newImage]);
-     * }, 4000);
-     * ```
-     */
-    insertImages(sheetImages: ISheetImage[]): FWorksheet;
-
-    /**
-     * Get all images of the sheet.
-     * @returns {FOverGridImage[]} The FOverGridImage instances
-     * @example
-     * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const images = fWorksheet.getImages();
-     * images.forEach((image) => {
-     *   console.log(image, image.getId());
-     * });
-     * ```
-     */
-    getImages(): FOverGridImage[];
-
-    /**
-     * Get image by drawing id
-     * @param {string} id - The drawing id of the image
-     * @returns {FOverGridImage | null} The FOverGridImage instance
-     * @example
-     * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const image = fWorksheet.getImageById('xxxx');
-     * console.log(image);
-     * ```
-     */
-    getImageById(id: string): FOverGridImage | null;
-
-    /**
-     * Delete images from the sheet
-     * @param {FOverGridImage[]} sheetImages - The images to delete
-     * @returns {FWorksheet} The FWorksheet instance for chaining
-     * @example
-     * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const image = fWorksheet.getImages()[0];
-     *
-     * // Delete the first image of the sheet
-     * fWorksheet.deleteImages([image]);
-     * ```
-     */
-    deleteImages(sheetImages: FOverGridImage[]): FWorksheet;
-
-    /**
-     * Update images to the sheet
-     * @param {ISheetImage[]} sheetImages - The images to update
-     * @returns {FWorksheet} The FWorksheet instance for chaining
-     * @example
-     * ```ts
-     * // create a new image builder and set image source.
-     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
-     * const image = await fWorksheet.newOverGridImage()
-     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
-     *   .setColumn(5)
-     *   .setRow(5)
-     *   .setWidth(500)
-     *   .setHeight(300)
-     *   .buildAsync();
-     * fWorksheet.insertImages([image]);
-     *
-     * // update the image width to 100px and height to 50px after 4 seconds
-     * setTimeout(async () => {
-     *   const imageBuilder = fWorksheet.getImageById(image.drawingId).toBuilder();
-     *   const newImage = await imageBuilder.setWidth(100).setHeight(50).buildAsync();
-     *   fWorksheet.updateImages([newImage]);
-     * }, 4000);
-     * ```
-     */
-    updateImages(sheetImages: ISheetImage[]): FWorksheet;
-
-    /**
-     * Get the current selected images.
-     * @returns {FOverGridImage[]} The FOverGridImage instances
-     * @example
-     * ```ts
-     * const fWorksheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const images = fWorksheet.getActiveImages();
-     * images.forEach((image) => {
-     *   console.log(image, image.getId());
-     * });
-     * ```
-     */
-    getActiveImages(): FOverGridImage[];
-
-    /**
-     * Hook when a image is inserted.
-     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is inserted.
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.OverGridImageInserted, (params) => {})` as instead
-     */
-    onImageInserted(callback: (images: FOverGridImage[]) => void): IDisposable;
-
-    /**
-     * Hook when a image is deleted.
-     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is deleted.
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.OverGridImageRemoved, (params) => {})` as instead
-     */
-    onImageDeleted(callback: (images: FOverGridImage[]) => void): IDisposable;
-
-    /**
-     * Hook when a image is changed.
-     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is changed.
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.OverGridImageChanged, (params) => {})` as instead
-     */
-    onImageChanged(callback: (images: FOverGridImage[]) => void): IDisposable;
-
-    /**
-     * Create a new over grid image builder.
-     * @returns {FOverGridImageBuilder} The FOverGridImageBuilder instance
-     * @example
-     * ```ts
-     * // create a new image builder and set image source.
-     * // then build `ISheetImage` and insert it into the sheet, position is start from F6 cell, width is 500px, height is 300px
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getActiveSheet();
-     * const image = await fWorksheet.newOverGridImage()
-     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', univerAPI.Enum.ImageSourceType.URL)
-     *   .setColumn(5)
-     *   .setRow(5)
-     *   .setWidth(500)
-     *   .setHeight(300)
-     *   .buildAsync();
-     * fWorksheet.insertImages([image]);
-     * ```
-     */
-    newOverGridImage(): FOverGridImageBuilder;
-
-    /**
      * Save all cell images from specified ranges to the file system.
      * This method will open a directory picker dialog and save all images to the selected directory.
      *
@@ -619,7 +411,7 @@ export interface IFWorksheetLegacy {
     saveCellImagesAsync(options?: ISaveCellImagesOptions, ranges?: FRange[]): Promise<boolean>;
 }
 
-export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
+export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetDrawingUIMixin {
     override getFloatDomById(id: string): Nullable<IFCanvasFloatDomResult> {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const info = floatDomService.getFloatDomInfo(id);
@@ -693,11 +485,14 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     }
 
     override updateFloatDom(id: string, config: Partial<Omit<IFCanvasFloatDomResult, 'id'>>): this {
+        const sheetSkeletonService = this._injector.get(SheetSkeletonService);
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const info = floatDomService.getFloatDomInfo(id);
         if (!info) return this;
 
         const { unitId, subUnitId } = info;
+        const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        if (!skeleton) return this;
 
         const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
             unitId,
@@ -705,50 +500,34 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             drawingId: id,
         })! as ISheetFloatDom;
 
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
-        if (!render) return this;
-
-        const skeleton = this.getSkeleton();
-        if (!skeleton) return this;
-
-        const selectionRenderService = renderManagerService.getRenderById(this.getWorkbook().getUnitId())?.with(ISheetSelectionRenderService);
-        if (!selectionRenderService) return this;
-
         const newParam: ISheetFloatDom = {
             ...drawingParm,
             componentKey: config.componentKey || drawingParm.componentKey,
             allowTransform: config.allowTransform !== undefined ? config.allowTransform : drawingParm.allowTransform,
             data: config.data || drawingParm.data,
             sheetTransform: config.position
-                ? transformToDrawingPosition(
-                    config.position,
-                    selectionRenderService
-                ) ?? drawingParm.sheetTransform
+                ? transformToDrawingPosition(config.position, skeleton) ?? drawingParm.sheetTransform
                 : drawingParm.sheetTransform,
             transform: {
                 ...drawingParm.transform,
                 ...config.position, // Merge with existing transform
             },
             axisAlignSheetTransform: config.position
-                ? transformToAxisAlignPosition(
-                    config.position,
-                    selectionRenderService
-                ) ?? drawingParm.sheetTransform
+                ? transformToAxisAlignPosition(config.position, skeleton) ?? drawingParm.sheetTransform
                 : drawingParm.sheetTransform,
         };
+
         const res = this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId, subUnitId, drawings: [newParam] });
         if (!res) {
             throw new Error('updateFloatDom failed');
         }
-
         return this;
     }
 
     override batchUpdateFloatDoms(updates: Array<{ id: string; config: Partial<Omit<IFCanvasFloatDomResult, 'id'>> }>): this {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const drawingService = this._injector.get(ISheetDrawingService);
-        const renderManagerService = this._injector.get(IRenderManagerService);
+        const sheetSkeletonService = this._injector.get(SheetSkeletonService);
 
         const drawings: ISheetFloatDom[] = [];
 
@@ -757,6 +536,9 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             if (!info) continue;
 
             const { unitId, subUnitId } = info;
+            const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+            if (!skeleton) continue;
+
             const drawingParm = drawingService.getDrawingByParam({
                 unitId,
                 subUnitId,
@@ -764,35 +546,20 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             }) as ISheetFloatDom;
             if (!drawingParm) continue;
 
-            const render = renderManagerService.getRenderById(unitId);
-            if (!render) continue;
-
-            const skeleton = this.getSkeleton();
-            if (!skeleton) continue;
-
-            const selectionRenderService = render.with(ISheetSelectionRenderService);
-            if (!selectionRenderService) return this;
-
             const newParam: ISheetFloatDom = {
                 ...drawingParm,
                 componentKey: update.config.componentKey || drawingParm.componentKey,
                 allowTransform: update.config.allowTransform !== undefined ? update.config.allowTransform : drawingParm.allowTransform,
                 data: update.config.data || drawingParm.data,
                 sheetTransform: update.config.position
-                    ? transformToDrawingPosition(
-                        update.config.position,
-                        selectionRenderService
-                    ) ?? drawingParm.sheetTransform
+                    ? transformToDrawingPosition(update.config.position, skeleton) ?? drawingParm.sheetTransform
                     : drawingParm.sheetTransform,
                 transform: {
                     ...drawingParm.transform,
                     ...update.config.position, // Merge with existing transform
                 },
                 axisAlignSheetTransform: update.config.position
-                    ? transformToAxisAlignPosition(
-                        update.config.position,
-                        selectionRenderService
-                    ) ?? drawingParm.sheetTransform
+                    ? transformToAxisAlignPosition(update.config.position, skeleton) ?? drawingParm.sheetTransform
                     : drawingParm.sheetTransform,
             };
 
@@ -913,146 +680,6 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return null;
     }
 
-    override async insertImage(url: IFBlobSource | string, column?: number, row?: number, offsetX?: number, offsetY?: number): Promise<boolean> {
-        const imageBuilder = this.newOverGridImage();
-        if (typeof url === 'string') {
-            imageBuilder.setSource(url);
-        } else {
-            const blobSource = url.getBlob();
-            const base64 = await blobSource.getDataAsString();
-            imageBuilder.setSource(base64, ImageSourceType.BASE64);
-        }
-
-        if (column !== undefined) {
-            imageBuilder.setColumn(column);
-        } else {
-            imageBuilder.setColumn(0);
-        }
-
-        if (row !== undefined) {
-            imageBuilder.setRow(row);
-        } else {
-            imageBuilder.setRow(0);
-        }
-
-        if (offsetX !== undefined) {
-            imageBuilder.setColumnOffset(offsetX);
-        } else {
-            imageBuilder.setColumnOffset(0);
-        }
-
-        if (offsetY !== undefined) {
-            imageBuilder.setRowOffset(offsetY);
-        } else {
-            imageBuilder.setRowOffset(0);
-        }
-
-        const param = await imageBuilder.buildAsync();
-        // param.drawingId
-
-        return this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
-    }
-
-    override insertImages(sheetImages: ISheetImage[]): FWorksheet {
-        const param = sheetImages.map((image) => {
-            image.unitId = this._fWorkbook.getId();
-            image.subUnitId = this.getSheetId();
-            return image;
-        });
-
-        this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: param });
-        return this;
-    }
-
-    override deleteImages(sheetImages: FOverGridImage[]): FWorksheet {
-        const drawings = sheetImages.map((image) => {
-            return {
-                unitId: this._fWorkbook.getId(),
-                drawingId: image.getId(),
-                subUnitId: this.getSheetId(),
-                drawingType: image.getType(),
-            };
-        });
-        this._commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings });
-
-        return this;
-    }
-
-    override getImages(): FOverGridImage[] {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        const drawingData = sheetDrawingService.getDrawingData(this._fWorkbook.getId(), this.getSheetId());
-        const images: FOverGridImage[] = [];
-        for (const drawingId in drawingData) {
-            const drawing = drawingData[drawingId];
-            if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
-                continue;
-            }
-            images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
-        }
-        return images;
-    }
-
-    override getImageById(id: string): FOverGridImage | null {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        const drawing = sheetDrawingService.getDrawingByParam({ unitId: this._fWorkbook.getId(), subUnitId: this.getSheetId(), drawingId: id });
-        if (drawing && drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
-            return this._injector.createInstance(FOverGridImage, drawing as ISheetImage);
-        }
-        return null;
-    }
-
-    override getActiveImages(): FOverGridImage[] {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        const drawingData = sheetDrawingService.getFocusDrawings();
-        const images: FOverGridImage[] = [];
-        for (const drawingId in drawingData) {
-            const drawing = drawingData[drawingId];
-            images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
-        }
-        return images;
-    }
-
-    override updateImages(sheetImages: ISheetImage[]): FWorksheet {
-        this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: sheetImages });
-        return this;
-    }
-
-    override onImageInserted(callback: (images: FOverGridImage[]) => void): IDisposable {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        return toDisposable(sheetDrawingService.add$.subscribe((drawingSearches) => {
-            const drawings = drawingSearches.map(
-                (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
-            );
-            callback(drawings);
-        }));
-    }
-
-    override onImageDeleted(callback: (images: FOverGridImage[]) => void): IDisposable {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        return toDisposable(sheetDrawingService.remove$.subscribe((drawingSearches) => {
-            const drawings = drawingSearches.map(
-                (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
-            );
-            callback(drawings);
-        }));
-    }
-
-    override onImageChanged(callback: (images: FOverGridImage[]) => void): IDisposable {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        return toDisposable(sheetDrawingService.update$.subscribe((drawingSearches) => {
-            const drawings = drawingSearches.map(
-                (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
-            );
-            callback(drawings);
-        }));
-    }
-
-    override newOverGridImage(): FOverGridImageBuilder {
-        const unitId = this._fWorkbook.getId();
-        const subUnitId = this.getSheetId();
-        return this._injector.createInstance(FOverGridImageBuilder, unitId, subUnitId);
-    }
-
     override async saveCellImagesAsync(options?: ISaveCellImagesOptions, ranges?: FRange[]): Promise<boolean> {
         const batchSaveService = this._injector.get(IBatchSaveImagesService);
         const unitId = this._fWorkbook.getId();
@@ -1109,8 +736,8 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     }
 }
 
-FWorksheet.extend(FWorksheetLegacy);
+FWorksheet.extend(FWorksheetDrawingUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetLegacy { }
+    interface FWorksheet extends IFWorksheetDrawingUIMixin { }
 }

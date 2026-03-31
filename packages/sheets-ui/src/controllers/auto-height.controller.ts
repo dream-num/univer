@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange, ObjectMatrix, Workbook } from '@univerjs/core';
-import type { RenderManagerService } from '@univerjs/engine-render';
+import type { IMutationInfo, IRange, ObjectMatrix, Workbook } from '@univerjs/core';
 import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { Disposable, generateRandomId, IConfigService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     CancelMarkDirtyRowAutoHeightMutation,
@@ -26,30 +25,20 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SheetInterceptorService,
-    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-interface IAutoHeightParams {
-    cellHeights?: ObjectMatrix<number>;
-    autoHeightRanges?: IRange[];
-    lazyAutoHeightRanges?: IRange[];
-    ranges: IRange[];
-}
-
 export class AutoHeightController extends Disposable {
     constructor(
-        @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @IConfigService private readonly _configService: IConfigService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initialize();
     }
 
-    private _processLazyAutoHeight(redoUndoItem: { redos: any[]; undos: any[] }, unitId: string, subUnitId: string, lazyAutoHeightRanges?: IRange[]) {
+    private _processLazyAutoHeight(redoUndoItem: { redos: IMutationInfo[]; undos: IMutationInfo[] }, unitId: string, subUnitId: string, lazyAutoHeightRanges?: IRange[]) {
         if (lazyAutoHeightRanges?.length) {
             const redo = {
                 id: MarkDirtyRowAutoHeightMutation.id,
@@ -84,7 +73,7 @@ export class AutoHeightController extends Disposable {
         return redoUndoItem;
     }
 
-    getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): { redos: any[]; undos: any[] } {
+    getUndoRedoParamsOfAutoHeight(ranges: IRange[], subUnitIdParam?: string, currentCellHeights?: ObjectMatrix<number>): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
         const { _univerInstanceService: univerInstanceService } = this;
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 

@@ -18,18 +18,16 @@ import type { IDisposable, IDrawingSearch, IPosition, IRange, ITransformState, N
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams, ISetSelectionsOperationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type { IFloatDomData, IInsertDrawingCommandParams, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, getSheetCommandTarget, SetFrozenMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 
 export interface ICanvasFloatDom {
     /**
@@ -761,7 +759,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!renderObject) return;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) return;
-        const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+        const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
         if (!skeletonParam) return;
 
         const { componentKey, data, allowTransform = true } = config;
@@ -815,7 +813,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (!skMangerService) {
                 return;
             }
-            const skeletonParam = skMangerService.getWorksheetSkeleton(subUnitId);
+            const skeletonParam = skMangerService.getSkeletonParam(subUnitId);
             if (!skeletonParam) {
                 return;
             }
@@ -1011,7 +1009,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!renderObject) return;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) return;
-        const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+        const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
         if (!skeletonParam) return;
 
         const { componentKey, data, allowTransform = true } = config;
@@ -1071,7 +1069,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (!skMangerService) {
                 return;
             }
-            const skeleton = skMangerService.getWorksheetSkeleton(subUnitId);
+            const skeleton = skMangerService.getSkeletonParam(subUnitId);
             if (!skeleton) {
                 return;
             }

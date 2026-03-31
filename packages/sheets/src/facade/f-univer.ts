@@ -15,13 +15,58 @@
  */
 
 import type { ICommandInfo, ICreateUnitOptions, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
-import type { CommandListenerValueChange, IInsertSheetCommandParams, IRemoveSheetCommandParams, ISetGridlinesColorCommandParams, ISetTabColorMutationParams, ISetWorksheetActivateCommandParams, ISetWorksheetHideMutationParams, ISetWorksheetNameCommandParams, ISetWorksheetOrderMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
-import type { IBeforeActiveSheetChangeEvent, IBeforeGridlineColorChanged, IBeforeGridlineEnableChange, IBeforeSheetCreateEventParams, IBeforeSheetDeleteEvent, IBeforeSheetHideChangeEvent, IBeforeSheetMoveEvent, IBeforeSheetNameChangeEvent, IBeforeSheetTabColorChangeEvent, ISheetCreatedEventParams } from './f-event';
+import type {
+    CommandListenerValueChange,
+    IInsertSheetCommandParams,
+    IRemoveSheetCommandParams,
+    ISetGridlinesColorCommandParams,
+    ISetTabColorMutationParams,
+    ISetWorksheetActivateCommandParams,
+    ISetWorksheetHideMutationParams,
+    ISetWorksheetNameCommandParams,
+    ISetWorksheetOrderMutationParams,
+    IToggleGridlinesCommandParams,
+} from '@univerjs/sheets';
+import type {
+    IActiveSheetChangedEventParams,
+    IBeforeActiveSheetChangeEventParams,
+    IBeforeGridlineColorChangedEventParams,
+    IBeforeGridlineEnableChangeEventParams,
+    IBeforeSheetCreateEventParams,
+    IBeforeSheetDeleteEventParams,
+    IBeforeSheetHideChangeEventParams,
+    IBeforeSheetMoveEventParams,
+    IBeforeSheetNameChangeEventParams,
+    IBeforeSheetTabColorChangeEventParams,
+    IGridlineChangedEventParams,
+    ISheetCreatedEventParams,
+    ISheetDeletedEventParams,
+    ISheetHideChangedEventParams,
+    ISheetMovedEventParams,
+    ISheetNameChangedEventParams,
+    ISheetTabColorChangedEventParams,
+    ISheetValueChangedEventParams,
+    IWorkbookCreateEventParams,
+    IWorkbookDisposedEventParams,
+} from './f-event';
 import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
 import { CanceledError, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameCommand, SetWorksheetOrderMutation, SheetsFreezeSyncController, ToggleGridlinesCommand } from '@univerjs/sheets';
+import {
+    COMMAND_LISTENER_VALUE_CHANGE,
+    getValueChangedEffectedRange,
+    InsertSheetCommand,
+    RemoveSheetCommand,
+    SetGridlinesColorCommand,
+    SetTabColorMutation,
+    SetWorksheetActiveOperation,
+    SetWorksheetHideMutation,
+    SetWorksheetNameCommand,
+    SetWorksheetOrderMutation,
+    SheetsFreezeSyncController,
+    ToggleGridlinesCommand,
+} from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -214,11 +259,12 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 this.Event.WorkbookDisposed,
                 () => univerInstanceService.unitDisposed$.subscribe((unit) => {
                     if (unit.type === UniverInstanceType.UNIVER_SHEET) {
-                        this.fireEvent(this.Event.WorkbookDisposed, {
+                        const eventParams: IWorkbookDisposedEventParams = {
                             unitId: unit.getUnitId(),
                             unitType: unit.type,
                             snapshot: unit.getSnapshot() as IWorkbookData,
-                        });
+                        };
+                        this.fireEvent(this.Event.WorkbookDisposed, eventParams);
                     }
                 })
             )
@@ -232,12 +278,13 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                         const workbook = unit as Workbook;
                         const workbookUnit = injector.createInstance(FWorkbook, workbook);
-                        this.fireEvent(this.Event.WorkbookCreated, {
+                        const eventParams: IWorkbookCreateEventParams = {
                             unitId: unit.getUnitId(),
                             type: unit.type,
                             workbook: workbookUnit,
                             unit: workbookUnit,
-                        });
+                        };
+                        this.fireEvent(this.Event.WorkbookCreated, eventParams);
                     }
                 })
             )
@@ -289,7 +336,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const activeSheet = workbook.getSheetBySheetId(sheetId);
                         const oldActiveSheet = workbook.getActiveSheet();
                         if (!activeSheet || !oldActiveSheet) return;
-                        const eventParams: IBeforeActiveSheetChangeEvent = {
+                        const eventParams: IBeforeActiveSheetChangeEventParams = {
                             workbook,
                             activeSheet,
                             oldActiveSheet,
@@ -312,7 +359,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
                         const { workbook, worksheet } = target;
-                        const eventParams: IBeforeSheetDeleteEvent = {
+                        const eventParams: IBeforeSheetDeleteEventParams = {
                             workbook,
                             worksheet,
                         };
@@ -334,7 +381,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { fromOrder, toOrder } = commandInfo.params as ISetWorksheetOrderMutationParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        const eventParams: IBeforeSheetMoveEvent = {
+                        const eventParams: IBeforeSheetMoveEventParams = {
                             workbook: target.workbook,
                             worksheet: target.worksheet,
                             newIndex: toOrder,
@@ -358,7 +405,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { name } = commandInfo.params as ISetWorksheetNameCommandParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        const eventParams: IBeforeSheetNameChangeEvent = {
+                        const eventParams: IBeforeSheetNameChangeEventParams = {
                             workbook: target.workbook,
                             worksheet: target.worksheet,
                             newName: name,
@@ -382,7 +429,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { color } = commandInfo.params as ISetTabColorMutationParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        const eventParams: IBeforeSheetTabColorChangeEvent = {
+                        const eventParams: IBeforeSheetTabColorChangeEventParams = {
                             workbook: target.workbook,
                             worksheet: target.worksheet,
                             newColor: color,
@@ -406,7 +453,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { hidden } = commandInfo.params as ISetWorksheetHideMutationParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        const eventParams: IBeforeSheetHideChangeEvent = {
+                        const eventParams: IBeforeSheetHideChangeEventParams = {
                             workbook: target.workbook,
                             worksheet: target.worksheet,
                             hidden: Boolean(hidden),
@@ -428,7 +475,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     if (commandInfo.id === SetGridlinesColorCommand.id) {
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        const eventParams: IBeforeGridlineColorChanged = {
+                        const eventParams: IBeforeGridlineColorChangedEventParams = {
                             ...target,
                             color: (commandInfo.params as ISetGridlinesColorCommandParams)?.color,
                         };
@@ -450,7 +497,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
                         const showGridlines = (commandInfo.params as IToggleGridlinesCommandParams)?.showGridlines ?? !target.worksheet.hasHiddenGridLines();
-                        const eventParams: IBeforeGridlineEnableChange = {
+                        const eventParams: IBeforeGridlineEnableChangeEventParams = {
                             ...target,
                             enabled: Boolean(showGridlines),
                         };
@@ -479,10 +526,11 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                             )
                             .filter(Boolean) as FRange[];
                         if (!ranges.length) return;
-                        this.fireEvent(this.Event.SheetValueChanged, {
+                        const eventParams: ISheetValueChangedEventParams = {
                             payload: commandInfo as CommandListenerValueChange,
                             effectedRanges: ranges,
-                        });
+                        };
+                        this.fireEvent(this.Event.SheetValueChanged, eventParams);
                     }
                 })
             )
@@ -507,10 +555,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                             workbook,
                             worksheet,
                         };
-                        this.fireEvent(
-                            this.Event.SheetCreated,
-                            eventParams
-                        );
+                        this.fireEvent(this.Event.SheetCreated, eventParams);
                     }
                 })
             )
@@ -524,7 +569,11 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const target = this.getActiveSheet();
                         if (!target) return;
                         const { workbook, worksheet: activeSheet } = target;
-                        this._fireActiveSheetChanged(workbook, activeSheet);
+                        const eventParams: IActiveSheetChangedEventParams = {
+                            workbook,
+                            activeSheet,
+                        };
+                        this.fireEvent(this.Event.ActiveSheetChanged, eventParams);
                     }
                 })
             )
@@ -538,7 +587,11 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { subUnitId: sheetId, unitId } = commandInfo.params as IRemoveSheetCommandParams;
                         const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
                         if (!workbook || !sheetId) return;
-                        this._fireSheetDeleted(workbook, sheetId);
+                        const eventParams: ISheetDeletedEventParams = {
+                            workbook,
+                            sheetId,
+                        };
+                        this.fireEvent(this.Event.SheetDeleted, eventParams);
                     }
                 })
             )
@@ -552,7 +605,13 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { toOrder: toIndex } = commandInfo.params as ISetWorksheetOrderMutationParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        this._fireSheetMoved(target.workbook, target.worksheet, toIndex);
+                        const { workbook, worksheet } = target;
+                        const eventParams: ISheetMovedEventParams = {
+                            workbook,
+                            worksheet,
+                            newIndex: toIndex,
+                        };
+                        this.fireEvent(this.Event.SheetMoved, eventParams);
                     }
                 })
             )
@@ -566,7 +625,13 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { name } = commandInfo.params as ISetWorksheetNameCommandParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        this._fireSheetNameChanged(target.workbook, target.worksheet, name);
+                        const { workbook, worksheet } = target;
+                        const eventParams: ISheetNameChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            newName: name,
+                        };
+                        this.fireEvent(this.Event.SheetNameChanged, eventParams);
                     }
                 })
             )
@@ -580,7 +645,13 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { color } = commandInfo.params as ISetTabColorMutationParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        this._fireSheetTabColorChanged(target.workbook, target.worksheet, color);
+                        const { workbook, worksheet } = target;
+                        const eventParams: ISheetTabColorChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            newColor: color,
+                        };
+                        this.fireEvent(this.Event.SheetTabColorChanged, eventParams);
                     }
                 })
             )
@@ -594,7 +665,13 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         const { hidden } = commandInfo.params as ISetWorksheetHideMutationParams;
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        this._fireSheetHideChanged(target.workbook, target.worksheet, !!hidden);
+                        const { workbook, worksheet } = target;
+                        const eventParams: ISheetHideChangedEventParams = {
+                            workbook,
+                            worksheet,
+                            hidden: Boolean(hidden),
+                        };
+                        this.fireEvent(this.Event.SheetHideChanged, eventParams);
                     }
                 })
             )
@@ -607,11 +684,12 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     if (commandInfo.id === SetGridlinesColorCommand.id || commandInfo.id === ToggleGridlinesCommand.id) {
                         const target = this.getCommandSheetTarget(commandInfo);
                         if (!target) return;
-                        this.fireEvent(this.Event.GridlineChanged, {
+                        const eventParams: IGridlineChangedEventParams = {
                             ...target,
                             enabled: !target.worksheet.hasHiddenGridLines(),
                             color: target.worksheet.getGridLinesColor(),
-                        });
+                        };
+                        this.fireEvent(this.Event.GridlineChanged, eventParams);
                     }
                 })
             )
@@ -688,52 +766,6 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     override setFreezeSync(enabled: boolean): void {
         const controller = this._injector.get(SheetsFreezeSyncController);
         controller.setEnabled(enabled);
-    }
-
-    private _fireActiveSheetChanged(workbook: FWorkbook, newActiveSheet: FWorksheet): void {
-        this.fireEvent(this.Event.ActiveSheetChanged, {
-            workbook,
-            activeSheet: newActiveSheet,
-        });
-    }
-
-    private _fireSheetDeleted(workbook: FWorkbook, sheetId: string): void {
-        this.fireEvent(this.Event.SheetDeleted, {
-            workbook,
-            sheetId,
-        });
-    }
-
-    private _fireSheetMoved(workbook: FWorkbook, worksheet: FWorksheet, toIndex: number): void {
-        this.fireEvent(this.Event.SheetMoved, {
-            workbook,
-            worksheet,
-            newIndex: toIndex,
-        });
-    }
-
-    private _fireSheetNameChanged(workbook: FWorkbook, worksheet: FWorksheet, newName: string): void {
-        this.fireEvent(this.Event.SheetNameChanged, {
-            workbook,
-            worksheet,
-            newName,
-        });
-    }
-
-    private _fireSheetTabColorChanged(workbook: FWorkbook, worksheet: FWorksheet, newColor: string): void {
-        this.fireEvent(this.Event.SheetTabColorChanged, {
-            workbook,
-            worksheet,
-            newColor,
-        });
-    }
-
-    private _fireSheetHideChanged(workbook: FWorkbook, worksheet: FWorksheet, hidden: boolean): void {
-        this.fireEvent(this.Event.SheetHideChanged, {
-            workbook,
-            worksheet,
-            hidden,
-        });
     }
 }
 

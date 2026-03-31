@@ -27,9 +27,8 @@ import {
 } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
-import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 interface IFlipDrawingCommandParam {
@@ -51,21 +50,18 @@ export const FlipSheetDrawingCommand: ICommand = {
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor: IAccessor, params?: IFlipSheetDrawingCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
-        const renderManagerService = accessor.get(IRenderManagerService);
-
         if (!params) return false;
 
-        const { drawings } = params;
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const sheetSkeletonService = accessor.get(SheetSkeletonService);
 
+        const { drawings } = params;
         const flipH = params.flipH;
         const flipV = params.flipV;
 
         const unitIds: string[] = [];
-
         const updateParams: any[] = [];
 
         for (const param of drawings) {
@@ -78,6 +74,11 @@ export const FlipSheetDrawingCommand: ICommand = {
                 continue;
             }
 
+            const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+            if (!skeleton) {
+                continue;
+            }
+
             const transform = { ...existing.transform } as ITransformState;
 
             if (flipH) {
@@ -87,14 +88,8 @@ export const FlipSheetDrawingCommand: ICommand = {
                 transform.flipY = !transform.flipY;
             }
 
-            const render = renderManagerService.getRenderById(unitId);
-            const selectionRenderService = render?.with(ISheetSelectionRenderService);
-            if (!selectionRenderService) {
-                continue;
-            }
-
-            const sheetTransform = transformToDrawingPosition(transform, selectionRenderService);
-            const axisAlignSheetTransform = transformToAxisAlignPosition(transform, selectionRenderService) as ISheetDrawingPosition;
+            const sheetTransform = transformToDrawingPosition(transform, skeleton);
+            const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeleton) as ISheetDrawingPosition;
 
             const updateParamItem: any = {
                 unitId,

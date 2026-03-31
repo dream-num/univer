@@ -21,11 +21,10 @@ import type { Subscription } from 'rxjs';
 import type { SelectionControl } from './selection-control';
 import { ColorKit, IUniverInstanceService, Quantity, UniverInstanceType } from '@univerjs/core';
 import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
-import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
+import { attachSelectionWithCoord, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
-import { attachSelectionWithCoord } from './util';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 

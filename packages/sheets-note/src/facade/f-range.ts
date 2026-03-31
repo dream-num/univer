@@ -22,7 +22,7 @@ import { FRange } from '@univerjs/sheets/facade';
 /**
  * @ignore
  */
-export interface IFSheetsNoteRange {
+export interface IFRangeSheetsNoteMixin {
     /**
      * Get the annotation of the top-left cell in the range
      * @returns {Nullable<ISheetNote>} The annotation of the top-left cell in the range
@@ -74,7 +74,7 @@ export interface IFSheetsNoteRange {
     deleteNote(): FRange;
 }
 
-export class FSheetsNoteRangeMixin extends FRange implements IFSheetsNoteRange {
+export class FRangeSheetsNoteMixin extends FRange implements IFRangeSheetsNoteMixin {
     override createOrUpdateNote(note: ISheetNote): FRange {
         this._commandService.syncExecuteCommand(
             UpdateNoteMutation.id,
@@ -110,8 +110,8 @@ export class FSheetsNoteRangeMixin extends FRange implements IFSheetsNoteRange {
     }
 }
 
-FRange.extend(FSheetsNoteRangeMixin);
+FRange.extend(FRangeSheetsNoteMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFSheetsNoteRange { }
+    interface FRange extends IFRangeSheetsNoteMixin { }
 }

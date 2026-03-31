@@ -35,7 +35,7 @@ export interface ISaveCellImagesOptions {
     useColumnIndex?: number;
 }
 
-export interface IFRangeSheetDrawingMixin {
+export interface IFRangeSheetsDrawingUIMixin {
     /**
      * Inserts an image into the current cell.
      *
@@ -81,7 +81,7 @@ export interface IFRangeSheetDrawingMixin {
     saveCellImagesAsync(options?: ISaveCellImagesOptions): Promise<boolean>;
 }
 
-export class FRangeSheetDrawingUI extends FRange implements IFRangeSheetDrawingMixin {
+export class FRangeSheetsDrawingUIMixin extends FRange implements IFRangeSheetsDrawingUIMixin {
     override async insertCellImageAsync(file: File | string): Promise<boolean> {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const controller = getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET, this._injector.get(IUniverInstanceService), renderManagerService)
@@ -157,8 +157,8 @@ export class FRangeSheetDrawingUI extends FRange implements IFRangeSheetDrawingM
     }
 }
 
-FRange.extend(FRangeSheetDrawingUI);
+FRange.extend(FRangeSheetsDrawingUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeSheetDrawingMixin { }
+    interface FRange extends IFRangeSheetsDrawingUIMixin { }
 }

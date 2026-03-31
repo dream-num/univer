@@ -29,7 +29,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 /**
  * @ignore
  */
-export interface IFWorksheetSkeletonMixin {
+export interface IFWorksheetUIMixin {
     /**
      * Refresh the canvas.
      * @returns {FWorksheet} The FWorksheet instance for chaining.
@@ -322,7 +322,7 @@ export interface IFWorksheetSkeletonMixin {
     onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
 }
 
-export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
+export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin {
     override refreshCanvas(): FWorksheet {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
@@ -447,7 +447,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
 
     override getSkeleton(): Nullable<SpreadsheetSkeleton> {
         const service = this._injector.get(IRenderManagerService).getRenderById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
-        return service?.getWorksheetSkeleton(this._worksheet.getSheetId())?.skeleton;
+        return service?.getSkeleton(this._worksheet.getSheetId());
     }
 
     override autoResizeColumn(columnPosition: number): FWorksheet {
@@ -578,8 +578,8 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 }
 
-FWorksheet.extend(FWorksheetSkeletonMixin);
+FWorksheet.extend(FWorksheetUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetSkeletonMixin { }
+    interface FWorksheet extends IFWorksheetUIMixin { }
 }

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { DrawingTypeEnum, IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { IDeleteDrawingCommandParams } from './interfaces';
 import {
     CommandType,
     ICommandService,
@@ -24,40 +23,38 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 
-/**
- * The command to remove new sheet image
- */
+export interface IDeleteDrawingCommandParam {
+    unitId: string;
+    subUnitId: string;
+    drawingId: string;
+    drawingType: DrawingTypeEnum;
+}
+
+export interface IDeleteDrawingCommandParams {
+    unitId: string;
+    drawings: IDeleteDrawingCommandParam[];
+}
+
 export const RemoveSheetDrawingCommand: ICommand = {
     id: 'sheet.command.remove-sheet-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
+        if (!params) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        if (!params) return false;
-
         const { drawings } = params;
-
-        const unitIds: string[] = [];
-
-        drawings.forEach((param) => {
-            const { unitId } = param;
-            unitIds.push(unitId);
-        });
-
         const jsonOp = sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
-
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         const intercepted = sheetInterceptorService.onCommandExecute({ id: RemoveSheetDrawingCommand.id, params });
 
-        // execute do mutations and add undo mutations to undo stack if completed
         const removeMutation = { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE } };
         const undoRemoveMutation = { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.INSERT } };
 
@@ -70,13 +67,11 @@ export const RemoveSheetDrawingCommand: ICommand = {
                     ...(intercepted.preUndos ?? []),
                     undoRemoveMutation,
                     ...intercepted.undos,
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     removeMutation,
                     ...intercepted.redos,
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

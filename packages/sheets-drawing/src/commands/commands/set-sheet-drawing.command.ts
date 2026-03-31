@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import type { ISetDrawingCommandParams } from './interfaces';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     CommandType,
     ICommandService,
@@ -26,30 +24,27 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 
-/**
- * The command to update defined name
- */
-export const SetSheetDrawingCommand: ICommand = {
+export interface ISetDrawingCommandParams {
+    unitId: string;
+    drawings: Partial<ISheetDrawing>[];
+}
+
+export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
     id: 'sheet.command.set-sheet-image',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params?: ISetDrawingCommandParams) => {
+    handler: (accessor, params) => {
+        if (!params) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        if (!params) return false;
-
         const { drawings } = params;
-
-        // const newSheetDrawingParams = drawings.map((param) => param.newDrawing);
-        // const oldSheetDrawingParams = drawings.map((param) => param.oldDrawing);
-
         const jsonOp = sheetDrawingService.getBatchUpdateOp(drawings as ISheetDrawing[]) as IDrawingJsonUndo1;
-
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params });
@@ -57,18 +52,12 @@ export const SetSheetDrawingCommand: ICommand = {
             ...(intercepted.preRedos ?? []),
             { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE } },
             ...intercepted.redos,
-            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
         ];
         const undoMutations = [
             ...(intercepted.preUndos ?? []),
-
             { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } },
             ...intercepted.undos,
-            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
         ];
-
-        // execute do mutations and add undo mutations to undo stack if completed
-        // const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE });
 
         const result = sequenceExecute(redoMutations, commandService);
         if (result) {

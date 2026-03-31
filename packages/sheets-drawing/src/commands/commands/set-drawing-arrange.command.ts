@@ -22,15 +22,13 @@ import {
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
     arrangeType: ArrangeTypeEnum;
 }
 
-/**
- * The command to insert new defined name
- */
 export const SetDrawingArrangeCommand: ICommand = {
     id: 'sheet.command.set-drawing-arrange',
     type: CommandType.COMMAND,

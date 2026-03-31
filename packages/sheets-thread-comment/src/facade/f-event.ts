@@ -23,10 +23,10 @@ import { FEventName } from '@univerjs/core/facade';
 /**
  * @ignore
  */
-interface ICommentEventMixin {
+interface IFSheetsThreadCommentEventNameMixin {
     /**
      * Event fired after comment added
-     * @see {@link ISheetCommentAddEvent}
+     * @see {@link ISheetCommentAddEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.CommentAdded, (params) => {
@@ -41,7 +41,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired before comment added
-     * @see {@link IBeforeSheetCommentAddEvent}
+     * @see {@link IBeforeSheetCommentAddEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, (params) => {
@@ -59,7 +59,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired after comment updated
-     * @see {@link ISheetCommentUpdateEvent}
+     * @see {@link ISheetCommentUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.CommentUpdated, (params) => {
@@ -74,7 +74,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired before comment update
-     * @see {@link IBeforeSheetCommentUpdateEvent}
+     * @see {@link IBeforeSheetCommentUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, (params) => {
@@ -92,7 +92,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired after comment deleted
-     * @see {@link ISheetCommentDeleteEvent}
+     * @see {@link ISheetCommentDeleteEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.CommentDeleted, (params) => {
@@ -107,7 +107,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired before comment delete
-     * @see {@link IBeforeSheetCommentDeleteEvent}
+     * @see {@link IBeforeSheetCommentDeleteEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, (params) => {
@@ -125,7 +125,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired after comment resolve
-     * @see {@link ISheetCommentResolveEvent}
+     * @see {@link ISheetCommentResolveEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.CommentResolved, (params) => {
@@ -140,7 +140,7 @@ interface ICommentEventMixin {
 
     /**
      * Event fired before comment resolve
-     * @see {@link ISheetCommentResolveEvent}
+     * @see {@link ISheetCommentResolveEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeCommentResolve, (params) => {
@@ -157,63 +157,49 @@ interface ICommentEventMixin {
     readonly BeforeCommentResolve: 'BeforeCommentResolve';
 }
 
-const CommentEvent: ICommentEventMixin = {
-    CommentAdded: 'CommentAdded',
-    BeforeCommentAdd: 'BeforeCommentAdd',
-
-    CommentUpdated: 'CommentUpdated',
-    BeforeCommentUpdate: 'BeforeCommentUpdate',
-
-    CommentDeleted: 'CommentDeleted',
-    BeforeCommentDelete: 'BeforeCommentDelete',
-
-    CommentResolved: 'CommentResolved',
-    BeforeCommentResolve: 'BeforeCommentResolve',
-} as const;
-
 /**
  * @ignore
  */
-export class FCommentEvent extends FEventName {
+export class FSheetsThreadCommentEventNameMixin extends FEventName implements IFSheetsThreadCommentEventNameMixin {
     override get CommentAdded(): 'CommentAdded' {
-        return CommentEvent.CommentAdded;
+        return 'CommentAdded' as const;
     }
 
     override get BeforeCommentAdd(): 'BeforeCommentAdd' {
-        return CommentEvent.BeforeCommentAdd;
+        return 'BeforeCommentAdd' as const;
     }
 
     override get CommentUpdated(): 'CommentUpdated' {
-        return CommentEvent.CommentUpdated;
+        return 'CommentUpdated' as const;
     }
 
     override get BeforeCommentUpdate(): 'BeforeCommentUpdate' {
-        return CommentEvent.BeforeCommentUpdate;
+        return 'BeforeCommentUpdate' as const;
     }
 
     override get CommentDeleted(): 'CommentDeleted' {
-        return CommentEvent.CommentDeleted;
+        return 'CommentDeleted' as const;
     }
 
     override get BeforeCommentDelete(): 'BeforeCommentDelete' {
-        return CommentEvent.BeforeCommentDelete;
+        return 'BeforeCommentDelete' as const;
     }
 
     override get CommentResolved(): 'CommentResolved' {
-        return CommentEvent.CommentResolved;
+        return 'CommentResolved' as const;
     }
 
     override get BeforeCommentResolve(): 'BeforeCommentResolve' {
-        return CommentEvent.BeforeCommentResolve;
+        return 'BeforeCommentResolve' as const;
     }
 }
 
 /**
  * Event interface triggered after a comment is added to a sheet
- * @interface ISheetCommentAddEvent
+ * @interface ISheetCommentAddEventParams
  * @augments {IEventBase}
  */
-export interface ISheetCommentAddEvent extends IEventBase {
+export interface ISheetCommentAddEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet where the comment is added */
@@ -228,10 +214,10 @@ export interface ISheetCommentAddEvent extends IEventBase {
 
 /**
  * Event interface triggered before a comment is added to a sheet
- * @interface IBeforeSheetCommentAddEvent
+ * @interface IBeforeSheetCommentAddEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetCommentAddEvent extends IEventBase {
+export interface IBeforeSheetCommentAddEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet where the comment will be added */
@@ -246,10 +232,10 @@ export interface IBeforeSheetCommentAddEvent extends IEventBase {
 
 /**
  * Event interface triggered after a comment is updated in a sheet
- * @interface ISheetCommentUpdateEvent
+ * @interface ISheetCommentUpdateEventParams
  * @augments {IEventBase}
  */
-export interface ISheetCommentUpdateEvent extends IEventBase {
+export interface ISheetCommentUpdateEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet containing the updated comment */
@@ -264,10 +250,10 @@ export interface ISheetCommentUpdateEvent extends IEventBase {
 
 /**
  * Event interface triggered before a comment is updated in a sheet
- * @interface IBeforeSheetCommentUpdateEvent
+ * @interface IBeforeSheetCommentUpdateEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetCommentUpdateEvent extends IEventBase {
+export interface IBeforeSheetCommentUpdateEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet containing the comment */
@@ -284,10 +270,10 @@ export interface IBeforeSheetCommentUpdateEvent extends IEventBase {
 
 /**
  * Event interface triggered before a comment is deleted from a sheet
- * @interface IBeforeSheetCommentDeleteEvent
+ * @interface IBeforeSheetCommentDeleteEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetCommentDeleteEvent extends IEventBase {
+export interface IBeforeSheetCommentDeleteEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet containing the comment */
@@ -302,10 +288,10 @@ export interface IBeforeSheetCommentDeleteEvent extends IEventBase {
 
 /**
  * Event interface triggered after a comment is deleted from a sheet
- * @interface ISheetCommentDeleteEvent
+ * @interface ISheetCommentDeleteEventParams
  * @augments {IEventBase}
  */
-export interface ISheetCommentDeleteEvent extends IEventBase {
+export interface ISheetCommentDeleteEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet that contained the comment */
@@ -316,10 +302,10 @@ export interface ISheetCommentDeleteEvent extends IEventBase {
 
 /**
  * Event interface triggered when a comment's resolve status changes
- * @interface ISheetCommentResolveEvent
+ * @interface ISheetCommentResolveEventParams
  * @augments {IEventBase}
  */
-export interface ISheetCommentResolveEvent extends IEventBase {
+export interface ISheetCommentResolveEventParams extends IEventBase {
     /** The workbook instance */
     workbook: FWorkbook;
     /** The worksheet containing the comment */
@@ -334,30 +320,27 @@ export interface ISheetCommentResolveEvent extends IEventBase {
     resolved: boolean;
 }
 
-FEventName.extend(FCommentEvent);
-
 /**
  * @ignore
  */
-export interface ISheetCommentEventConfig {
-    BeforeCommentAdd: IBeforeSheetCommentAddEvent;
-    CommentAdded: ISheetCommentAddEvent;
+export interface ISheetsThreadCommentEventParamConfig {
+    BeforeCommentAdd: IBeforeSheetCommentAddEventParams;
+    CommentAdded: ISheetCommentAddEventParams;
 
-    BeforeCommentUpdate: IBeforeSheetCommentUpdateEvent;
-    CommentUpdated: ISheetCommentUpdateEvent;
+    BeforeCommentUpdate: IBeforeSheetCommentUpdateEventParams;
+    CommentUpdated: ISheetCommentUpdateEventParams;
 
-    BeforeCommentDelete: IBeforeSheetCommentDeleteEvent;
-    CommentDeleted: ISheetCommentDeleteEvent;
+    BeforeCommentDelete: IBeforeSheetCommentDeleteEventParams;
+    CommentDeleted: ISheetCommentDeleteEventParams;
 
-    BeforeCommentResolve: ISheetCommentResolveEvent;
-    CommentResolved: ISheetCommentResolveEvent;
+    BeforeCommentResolve: ISheetCommentResolveEventParams;
+    CommentResolved: ISheetCommentResolveEventParams;
 }
 
+FEventName.extend(FSheetsThreadCommentEventNameMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends ICommentEventMixin {
-    }
+    interface FEventName extends IFSheetsThreadCommentEventNameMixin {}
 
-    interface IEventParamConfig extends ISheetCommentEventConfig {
-    }
+    interface IEventParamConfig extends ISheetsThreadCommentEventParamConfig { }
 }

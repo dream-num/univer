@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICellOverGridPosition, ISheetOverGridPosition } from '@univerjs/sheets';
-import type { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ICellOverGridPosition, ISheetOverGridPosition } from '../basics';
 import { precisionTo } from '@univerjs/engine-render';
-import { attachRangeWithCoord } from '../selection/util';
+import { attachRangeWithCoord } from './util';
 
-export function convertPositionSheetOverGridToAbsolute(unitId: string, subUnitId: string, sheetOverGridPosition: ISheetOverGridPosition, sheetSkeletonManagerService: SheetSkeletonManagerService) {
+export function convertPositionSheetOverGridToAbsolute(
+    unitId: string,
+    subUnitId: string,
+    sheetOverGridPosition: ISheetOverGridPosition,
+    skeleton: SpreadsheetSkeleton
+) {
     const { from, to } = sheetOverGridPosition;
-
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
-
-    const skeleton = sheetSkeletonManagerService.ensureSkeleton(subUnitId);
-
-    if (skeleton == null) {
-        throw new Error('No current skeleton');
-    }
 
     const startSelectionCell = attachRangeWithCoord(skeleton, {
         startColumn: fromColumn,
@@ -74,14 +71,15 @@ export function convertPositionSheetOverGridToAbsolute(unitId: string, subUnitId
     };
 }
 
-export function convertPositionCellToSheetOverGrid(unitId: string, subUnitId: string, cellOverGridPosition: ICellOverGridPosition, width: number, height: number, selectionRenderService: ISheetSelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService) {
+export function convertPositionCellToSheetOverGrid(
+    unitId: string,
+    subUnitId: string,
+    cellOverGridPosition: ICellOverGridPosition,
+    width: number,
+    height: number,
+    skeleton: SpreadsheetSkeleton
+) {
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = cellOverGridPosition;
-
-    const skeleton = sheetSkeletonManagerService.ensureSkeleton(subUnitId);
-
-    if (skeleton == null) {
-        throw new Error('No current skeleton');
-    }
 
     const startSelectionCell = attachRangeWithCoord(skeleton, {
         startColumn: fromColumn,
@@ -95,18 +93,7 @@ export function convertPositionCellToSheetOverGrid(unitId: string, subUnitId: st
     const left = precisionTo(startSelectionX + fromColumnOffset, 1);
     const top = precisionTo(startSelectionY + fromRowOffset, 1);
 
-    const endSelectionCell = selectionRenderService.getCellWithCoordByOffset(left + width, top + height, skeleton);
-
-    if (endSelectionCell == null) {
-        throw new Error('No end selection cell');
-    }
-
-    const to = {
-        column: endSelectionCell.actualColumn,
-        columnOffset: precisionTo(left + width - endSelectionCell.startX, 1),
-        row: endSelectionCell.actualRow,
-        rowOffset: precisionTo(top + height - endSelectionCell.startY, 1),
-    };
+    const endSelectionCell = skeleton.getOffsetRelativeToRowCol(left + width, top + height);
 
     return {
         unitId,
@@ -118,7 +105,7 @@ export function convertPositionCellToSheetOverGrid(unitId: string, subUnitId: st
                 row: fromRow,
                 rowOffset: fromRowOffset,
             },
-            to,
+            to: endSelectionCell,
         },
         transform: {
             left,

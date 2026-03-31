@@ -40,7 +40,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
@@ -50,7 +50,6 @@ import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
-import { attachSelectionWithCoord } from './util';
 
 enum ExpandingControl {
     BOTTOM_RIGHT = 'bottom-right',

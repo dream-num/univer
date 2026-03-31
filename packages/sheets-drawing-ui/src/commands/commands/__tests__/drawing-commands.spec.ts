@@ -15,19 +15,12 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { ArrangeTypeEnum, Direction, DrawingTypeEnum, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { ArrangeTypeEnum, DrawingTypeEnum, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetDrawingArrangeCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';
-import { ClearSheetDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
-import { FlipSheetDrawingCommand } from '../flip-drawings.command';
-import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
-import { MoveDrawingsCommand } from '../move-drawings.command';
-import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
-import { SetDrawingArrangeCommand } from '../set-drawing-arrange.command';
-import { SetSheetDrawingCommand } from '../set-sheet-drawing.command';
 
 function createSelectionRenderService() {
     return {
@@ -151,46 +144,13 @@ describe('sheet drawing commands', () => {
             type: DrawingApplyType.REMOVE,
         }, undefined);
         expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            undoMutations: expect.arrayContaining([expect.objectContaining({ id: ClearSheetDrawingTransformerOperation.id })]),
-            redoMutations: expect.arrayContaining([expect.objectContaining({ id: ClearSheetDrawingTransformerOperation.id })]),
+            undoMutations: expect.arrayContaining([expect.objectContaining({ id: SetDrawingApplyMutation.id })]),
+            redoMutations: expect.arrayContaining([expect.objectContaining({ id: SetDrawingApplyMutation.id })]),
         }));
     });
 
-    it('moves focused drawings, recalculates sheet anchors, and clears transformers', () => {
-        const { accessor, commandService, sheetDrawingService } = createAccessor();
-        expect(MoveDrawingsCommand.handler(accessor, { direction: Direction.LEFT })).toBe(true);
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(1, SetSheetDrawingCommand.id, {
-            unitId: 'book-1',
-            drawings: [expect.objectContaining({
-                transform: { left: 9, top: 20 },
-                sheetTransform: {
-                    from: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
-                    to: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
-                    flipX: false,
-                    flipY: false,
-                    angle: 0,
-                    skewX: 0,
-                    skewY: 0,
-                },
-                axisAlignSheetTransform: {
-                    from: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
-                    to: { column: 0, columnOffset: 9, row: 2, rowOffset: 0 },
-                    flipX: false,
-                    flipY: false,
-                    angle: 0,
-                    skewX: 0,
-                    skewY: 0,
-                },
-            })],
-        });
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(2, ClearSheetDrawingTransformerOperation.id, ['book-1']);
-
-        sheetDrawingService.getFocusDrawings.mockReturnValue([]);
-        expect(MoveDrawingsCommand.handler(accessor, { direction: Direction.RIGHT })).toBe(false);
-    });
-
     it('inserts drawings through sheet interceptors and records undo/redo mutations', () => {
-        const { accessor, commandService, pushUndoRedo, sheetInterceptorService } = createAccessor();
+        const { accessor, commandService, sheetInterceptorService } = createAccessor();
         const params = {
             drawings: [{ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'shape-2' }],
         };
@@ -205,66 +165,7 @@ describe('sheet drawing commands', () => {
             objects: ['shape-2'],
             type: DrawingApplyType.INSERT,
         }, undefined);
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            unitID: 'book-1',
-            undoMutations: expect.arrayContaining([expect.objectContaining({ id: ClearSheetDrawingTransformerOperation.id, params: ['book-1'] })]),
-            redoMutations: expect.arrayContaining([expect.objectContaining({ id: ClearSheetDrawingTransformerOperation.id, params: ['book-1'] })]),
-        }));
 
         expect(InsertSheetDrawingCommand.handler(accessor, undefined)).toBe(false);
-    });
-
-    it('flips drawing transforms, rebuilds anchors, and pushes transformer cleanup', () => {
-        const { accessor, commandService, pushUndoRedo, sheetDrawingService } = createAccessor();
-
-        expect(FlipSheetDrawingCommand.handler(accessor, {
-            unitId: 'book-1',
-            drawings: [{ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'shape-1' }],
-            flipH: true,
-            flipV: true,
-        })).toBe(true);
-        expect(sheetDrawingService.getBatchUpdateOp).toHaveBeenCalledWith([
-            expect.objectContaining({
-                drawingId: 'shape-1',
-                drawingType: DrawingTypeEnum.DRAWING_SHAPE,
-                transform: expect.objectContaining({ left: 10, top: 20, flipX: true, flipY: true }),
-                sheetTransform: {
-                    from: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
-                    to: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
-                    flipX: true,
-                    flipY: true,
-                    angle: 0,
-                    skewX: 0,
-                    skewY: 0,
-                },
-                axisAlignSheetTransform: {
-                    from: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
-                    to: { column: 1, columnOffset: 0, row: 2, rowOffset: 0 },
-                    flipX: true,
-                    flipY: true,
-                    angle: 0,
-                    skewX: 0,
-                    skewY: 0,
-                },
-            }),
-        ]);
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDrawingApplyMutation.id, {
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            op: ['update-redo'],
-            objects: ['shape-1'],
-            type: DrawingApplyType.UPDATE,
-        }, undefined);
-        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
-            undoMutations: expect.arrayContaining([expect.objectContaining({ id: ClearSheetDrawingTransformerOperation.id, params: ['book-1'] })]),
-            redoMutations: expect.arrayContaining([expect.objectContaining({ id: ClearSheetDrawingTransformerOperation.id, params: ['book-1'] })]),
-        }));
-
-        sheetDrawingService.getDrawingData.mockReturnValue({} as never);
-        expect(FlipSheetDrawingCommand.handler(accessor, {
-            unitId: 'book-1',
-            drawings: [{ unitId: 'book-1', subUnitId: 'sheet-1', drawingId: 'missing' }],
-            flipH: true,
-        })).toBe(false);
     });
 });

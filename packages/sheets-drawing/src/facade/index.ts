@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import './f-over-grid-image';
+import './f-worksheet';
+import './f-enum';
+import './f-event';
+import './f-univer';
 
-export interface IInsertDrawingCommandParams {
-    unitId: string;
-    drawings: ISheetDrawing[];
-}
-
-export interface IDeleteDrawingCommandParam {
-    unitId: string;
-    subUnitId: string;
-    drawingId: string;
-    drawingType: DrawingTypeEnum;
-}
-
-export interface IDeleteDrawingCommandParams {
-    unitId: string;
-    drawings: IDeleteDrawingCommandParam[];
-}
-
-export interface ISetDrawingCommandParams {
-    unitId: string;
-    drawings: Partial<ISheetDrawing>[];
-}
+export type * from './f-enum';
+export type * from './f-event';
+export type * from './f-over-grid-image';
+export type * from './f-univer';
+export type * from './f-worksheet';

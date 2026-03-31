@@ -21,12 +21,10 @@ import {
     Inject,
     RANGE_TYPE,
 } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { attachSelectionWithCoord, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
-
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
-import { attachSelectionWithCoord } from '../../services/selection/util';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct

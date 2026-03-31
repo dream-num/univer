@@ -20,7 +20,7 @@ import { CFNumberOperator, CFTimePeriodOperator } from '@univerjs/sheets-conditi
 /**
  * @ignore
  */
-export interface IFSheetsConditionalFormattingEnum {
+export interface IFSheetsConditionalFormattingEnumMixin {
     /**
      * Conditional formatting number operator
      */
@@ -32,19 +32,19 @@ export interface IFSheetsConditionalFormattingEnum {
     ConditionFormatTimePeriodOperatorEnum: typeof CFTimePeriodOperator;
 }
 
-export class FSheetsConditionalFormattingEnum implements IFSheetsConditionalFormattingEnum {
-    get ConditionFormatNumberOperatorEnum(): typeof CFNumberOperator {
+export class FSheetsConditionalFormattingEnumMixin extends FEnum implements IFSheetsConditionalFormattingEnumMixin {
+    override get ConditionFormatNumberOperatorEnum(): typeof CFNumberOperator {
         return CFNumberOperator;
     }
 
-    get ConditionFormatTimePeriodOperatorEnum(): typeof CFTimePeriodOperator {
+    override get ConditionFormatTimePeriodOperatorEnum(): typeof CFTimePeriodOperator {
         return CFTimePeriodOperator;
     }
 }
 
-FEnum.extend(FSheetsConditionalFormattingEnum);
+FEnum.extend(FSheetsConditionalFormattingEnumMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    export interface FEnum extends IFSheetsConditionalFormattingEnum {
+    export interface FEnum extends IFSheetsConditionalFormattingEnumMixin {
     }
 }

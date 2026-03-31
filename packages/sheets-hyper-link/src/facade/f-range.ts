@@ -30,7 +30,7 @@ export interface ICellHyperLink {
 /**
  * @ignore
  */
-export interface IFRangeHyperlinkMixin {
+export interface IFRangeSheetsHyperlinkMixin {
     /**
      * @deprecated use `range.setRichTextValueForCell(univerAPI.newRichText().insertLink(label, url))` instead
      * @example
@@ -124,7 +124,7 @@ export interface IFRangeHyperlinkMixin {
     getUrl(): string;
 }
 
-export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
+export class FRangeSheetsHyperlinkMixin extends FRange implements IFRangeSheetsHyperlinkMixin {
     // #region hyperlink
 
     override setHyperLink(url: string, label?: string): Promise<boolean> {
@@ -196,8 +196,8 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     // #endregion
 }
 
-FRange.extend(FRangeHyperlinkMixin);
+FRange.extend(FRangeSheetsHyperlinkMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeHyperlinkMixin {}
+    interface FRange extends IFRangeSheetsHyperlinkMixin {}
 }

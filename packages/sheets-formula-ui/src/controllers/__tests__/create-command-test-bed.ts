@@ -20,7 +20,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { DefinedNameDataController, IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { DefinedNameDataController, IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -102,6 +102,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
+            injector.add([SheetSkeletonService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);

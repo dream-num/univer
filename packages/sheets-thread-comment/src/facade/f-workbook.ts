@@ -28,7 +28,7 @@ type IUpdateCommandParams = any;
 /**
  * @ignore
  */
-export interface IFWorkbookThreadCommentMixin {
+export interface IFWorkbookSheetsThreadCommentMixin {
     /**
      * Get all comments in the current workbook
      * @returns {FThreadComment[]} All comments in the current workbook
@@ -97,7 +97,7 @@ export interface IFWorkbookThreadCommentMixin {
 /**
  * @ignore
  */
-export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
+export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWorkbookSheetsThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 
     /**
@@ -187,8 +187,8 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
     }
 }
 
-FWorkbook.extend(FWorkbookThreadCommentMixin);
+FWorkbook.extend(FWorkbookSheetsThreadCommentMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookThreadCommentMixin {}
+    interface FWorkbook extends IFWorkbookSheetsThreadCommentMixin {}
 }

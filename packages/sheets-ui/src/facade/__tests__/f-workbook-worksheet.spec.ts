@@ -94,9 +94,9 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
         };
         const worksheetSkeleton = { skeleton: { id: 'sheet-skeleton' } };
         const skeletonManager = {
+            getSkeleton: vi.fn(() => worksheetSkeleton.skeleton),
             reCalculate: vi.fn(),
             getCurrentSkeleton: vi.fn(() => skeleton),
-            getWorksheetSkeleton: vi.fn(() => worksheetSkeleton),
             setColumnHeaderSize: vi.fn(),
             setRowHeaderSize: vi.fn(),
         };

@@ -25,8 +25,8 @@ export interface IFSheetsFilterEnumMixin {
     CustomFilterOperator: typeof CustomFilterOperator;
 }
 
-export class FSheetsFilterEnumMixin implements IFSheetsFilterEnumMixin {
-    get CustomFilterOperator(): typeof CustomFilterOperator {
+export class FSheetsFilterEnumMixin extends FEnum implements IFSheetsFilterEnumMixin {
+    override get CustomFilterOperator(): typeof CustomFilterOperator {
         return CustomFilterOperator;
     };
 }

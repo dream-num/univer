@@ -20,22 +20,22 @@ import { CalculationMode } from '@univerjs/sheets-formula';
 /**
  * @ignore
  */
-export interface IFSheetsFormulaEnum {
+export interface IFSheetsFormulaEnumMixin {
     /**
      * Define the calculation mode during initialization
      */
     CalculationMode: typeof CalculationMode;
 }
 
-export class FSheetsFormulaEnum implements IFSheetsFormulaEnum {
-    get CalculationMode(): typeof CalculationMode {
+export class FSheetsFormulaEnumMixin extends FEnum implements IFSheetsFormulaEnumMixin {
+    override get CalculationMode(): typeof CalculationMode {
         return CalculationMode;
     }
 }
 
-FEnum.extend(FSheetsFormulaEnum);
+FEnum.extend(FSheetsFormulaEnumMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    export interface FEnum extends IFSheetsFormulaEnum {
+    export interface FEnum extends IFSheetsFormulaEnumMixin {
     }
 }

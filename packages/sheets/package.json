@@ -82,12 +82,12 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/protocol": "0.1.48",
         "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "rxjs": "^7.8.2",
         "typescript": "^6.0.2",

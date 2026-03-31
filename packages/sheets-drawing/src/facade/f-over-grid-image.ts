@@ -15,14 +15,14 @@
  */
 
 import type { IRotationSkewFlipTransform, ISize } from '@univerjs/core';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
 import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { ArrangeTypeEnum, DrawingTypeEnum, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand, transformToAxisAlignPosition } from '@univerjs/sheets-drawing-ui';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, SheetSkeletonService } from '@univerjs/sheets';
+import { RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand, transformToAxisAlignPosition } from '@univerjs/sheets-drawing';
 
 export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'>, ICellOverGridPosition, IRotationSkewFlipTransform, Required<ISize> {
 
@@ -31,10 +31,10 @@ export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 't
 /**
  * Convert the image parameter to a FOverGridImage
  * @param {ISheetImage} sheetImage The image parameter
- * @param {SheetSkeletonManagerService} sheetSkeletonManagerService The skeleton manager service
+ * @param {SpreadsheetSkeleton} skeleton The skeleton of the sheet where the image is located
  * @returns {IFOverGridImage} The FOverGridImage {@link IFOverGridImage}
  */
-function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeletonManagerService: SheetSkeletonManagerService): IFOverGridImage {
+function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, skeleton: SpreadsheetSkeleton): IFOverGridImage {
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = sheetImage.sheetTransform;
 
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
@@ -43,7 +43,7 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
         sheetImage.unitId,
         sheetImage.subUnitId,
         { from, to },
-        sheetSkeletonManagerService
+        skeleton
     );
 
     const { width, height } = absolutePosition;
@@ -71,7 +71,12 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
  * @param {SheetSkeletonManagerService} sheetSkeletonManagerService The skeleton manager service
  * @returns {ISheetImage} The ISheetImage {@link ISheetImage}
  */
-function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, selectionRenderService: ISheetSelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): ISheetImage {
+function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sheetSkeletonService: SheetSkeletonService): ISheetImage {
+    const skeleton = sheetSkeletonService.ensureSkeleton(fOverGridImage.unitId, fOverGridImage.subUnitId);
+    if (!skeleton) {
+        throw new Error(`Skeleton for unitId ${fOverGridImage.unitId} and subUnitId ${fOverGridImage.subUnitId} not found`);
+    }
+
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0, width, height } = fOverGridImage;
 
     const absolutePosition = convertPositionCellToSheetOverGrid(
@@ -80,8 +85,7 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
         { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset },
         width,
         height,
-        selectionRenderService,
-        sheetSkeletonManagerService
+        skeleton
     );
 
     const { sheetTransform, transform } = absolutePosition;
@@ -104,7 +108,7 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
             skewX,
             skewY,
         },
-        axisAlignSheetTransform: transformToAxisAlignPosition(transform, selectionRenderService)!,
+        axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
     };
 }
 
@@ -117,8 +121,6 @@ export class FOverGridImageBuilder {
         unitId: string,
         subUnitId: string,
         @Inject(Injector) protected readonly _injector: Injector
-        // @Inject(SheetSkeletonManagerService) protected readonly _skeletonManagerService: SheetSkeletonManagerService,
-        // @ISheetSelectionRenderService protected readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         this._image = {
             drawingId: generateRandomId(6),
@@ -176,12 +178,12 @@ export class FOverGridImageBuilder {
      * ```
      */
     setImage(image: ISheetImage): FOverGridImageBuilder {
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(image.unitId);
-        if (!render) {
-            throw new Error(`Render Unit with unitId ${image.unitId} not found`);
+        const { unitId, subUnitId } = image;
+        const sheetSkeletonService = this._injector.get(SheetSkeletonService);
+        const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        if (!skeleton) {
+            throw new Error(`Skeleton for unitId ${unitId} and subUnitId ${subUnitId} not found`);
         }
-        const skeletonManagerService = render.with(SheetSkeletonManagerService);
 
         if (image.sheetTransform == null) {
             image.sheetTransform = {
@@ -215,7 +217,7 @@ export class FOverGridImageBuilder {
                 },
             };
         }
-        this._image = convertSheetImageToFOverGridImage(image, skeletonManagerService);
+        this._image = convertSheetImageToFOverGridImage(image, skeleton);
         return this;
     }
 
@@ -622,13 +624,7 @@ export class FOverGridImageBuilder {
     }
 
     async buildAsync(): Promise<ISheetImage> {
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(this._image.unitId);
-        if (!render) {
-            throw new Error(`Render Unit with unitId ${this._image.unitId} not found`);
-        }
-        const selectionRenderService = render.with(ISheetSelectionRenderService);
-        const skeletonManagerService = render.with(SheetSkeletonManagerService);
+        const sheetSkeletonService = this._injector.get(SheetSkeletonService);
 
         if (this._image.width === 0 || this._image.height === 0) {
             const size = await getImageSize(this._image.source);
@@ -644,7 +640,7 @@ export class FOverGridImageBuilder {
             }
         }
 
-        return convertFOverGridImageToSheetImage(this._image, selectionRenderService, skeletonManagerService);
+        return convertFOverGridImageToSheetImage(this._image, sheetSkeletonService);
     }
 }
 
@@ -899,14 +895,13 @@ export class FOverGridImage extends FBase {
         this._image.sheetTransform.angle = angle;
         this._image.transform && (this._image.transform.angle = angle);
         if (this._image.transform) {
-            const renderManagerService = this._injector.get(IRenderManagerService);
-            const render = renderManagerService.getRenderById(this._image.unitId);
-            if (!render) {
-                throw new Error(`Render Unit with unitId ${this._image.unitId} not found`);
+            const sheetSkeletonService = this._injector.get(SheetSkeletonService);
+            const skeleton = sheetSkeletonService.getSkeleton(this._image.unitId, this._image.subUnitId);
+            if (!skeleton) {
+                throw new Error(`Skeleton for unitId ${this._image.unitId} and subUnitId ${this._image.subUnitId} not found`);
             }
-            const selectionRenderService = render.with(ISheetSelectionRenderService);
 
-            this._image.axisAlignSheetTransform && (this._image.axisAlignSheetTransform = transformToAxisAlignPosition(this._image.transform, selectionRenderService)!);
+            this._image.axisAlignSheetTransform && (this._image.axisAlignSheetTransform = transformToAxisAlignPosition(this._image.transform, skeleton));
         }
 
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });

@@ -15,44 +15,14 @@
  */
 
 import type { IDisposable, IDrawingSearch, Injector } from '@univerjs/core';
-import type { IEventBase } from '@univerjs/core/facade';
-import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
-import type { FWorkbook } from '@univerjs/sheets/facade';
-import type {
-    IBeforeFloatDomAddParam,
-    IBeforeFloatDomDeleteParam,
-    IBeforeFloatDomUpdateParam,
-    IBeforeOverGridImageChangeParamObject,
-} from './f-event';
+import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type { IBeforeFloatDomAddEventParams, IBeforeFloatDomDeleteEventParams, IBeforeFloatDomUpdateEventParams, IFloatDomAddedEventParams, IFloatDomDeletedEventParams, IFloatDomUpdatedEventParams } from './f-event';
 import { CanceledError, DrawingTypeEnum, ICommandService, IURLImageService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
-import { FOverGridImage } from './f-over-grid-image';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 
-interface IBeforeOverGridImageInsertParam extends IEventBase {
-    workbook: FWorkbook;
-    insertImageParams: ISheetImage[];
-}
-
-interface IBeforeOverGridImageRemoveParam extends IEventBase {
-    workbook: FWorkbook;
-    images: FOverGridImage[];
-}
-
-interface IBeforeOverGridImageChangeParam extends IEventBase {
-    workbook: FWorkbook;
-    images: IBeforeOverGridImageChangeParamObject[];
-}
-
-interface IBeforeOverGridImageSelectParam extends IEventBase {
-    workbook: FWorkbook;
-    selectedImages: FOverGridImage[];
-    oldSelectedImages: FOverGridImage[];
-}
-
-export interface IFUniverDrawingUIMixin {
+export interface IFUniverSheetsDrawingUIMixin {
     /**
      * Register a custom image downloader for URL images
      * @param downloader The downloader function that takes a URL and returns a base64 string
@@ -77,7 +47,7 @@ export interface IFUniverDrawingUIMixin {
 /**
  * @ignore
  */
-export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIMixin {
+export class FUniverSheetsDrawingUIMixin extends FUniver implements IFUniverSheetsDrawingUIMixin {
     /**
      * @ignore
      */
@@ -107,7 +77,7 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
                         return;
                     }
 
-                    const eventParams: IBeforeFloatDomAddParam = {
+                    const eventParams: IBeforeFloatDomAddEventParams = {
                         workbook,
                         drawings: floatDomDrawings,
                     };
@@ -142,113 +112,11 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
                         return;
                     }
 
-                    this.fireEvent(this.Event.FloatDomAdded, {
+                    const eventParams: IFloatDomAddedEventParams = {
                         workbook,
                         drawings: floatDomDrawings,
-                    });
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeOverGridImageInsert,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
-
-                    const params = commandInfo.params as IInsertDrawingCommandParams;
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null || params == null) {
-                        return;
-                    }
-
-                    const { drawings } = params;
-                    const eventParams: IBeforeOverGridImageInsertParam = {
-                        workbook,
-                        insertImageParams: drawings as ISheetImage[],
                     };
-
-                    this.fireEvent(this.Event.BeforeOverGridImageInsert, eventParams);
-
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeOverGridImageRemove,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
-
-                    const params = commandInfo.params as IDeleteDrawingCommandParams;
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null || params == null) {
-                        return;
-                    }
-
-                    const drawingManagerService = injector.get(IDrawingManagerService);
-
-                    const { drawings } = params;
-                    const willRemoveDrawings = drawings.map((drawing) => {
-                        return drawingManagerService.getDrawingByParam(drawing);
-                    }) as ISheetImage[];
-
-                    const eventParams: IBeforeOverGridImageRemoveParam = {
-                        workbook,
-                        images: this._createFOverGridImage(willRemoveDrawings),
-                    };
-
-                    this.fireEvent(this.Event.BeforeOverGridImageRemove, eventParams);
-
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeOverGridImageChange,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== SetSheetDrawingCommand.id) return;
-
-                    const params = commandInfo.params as ISetDrawingCommandParams;
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null || params == null) {
-                        return;
-                    }
-
-                    const { drawings } = params;
-                    const drawingManagerService = injector.get(IDrawingManagerService);
-
-                    const images: IBeforeOverGridImageChangeParamObject[] = [];
-                    drawings.forEach((drawing) => {
-                        const image = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage;
-                        if (image == null) {
-                            return;
-                        }
-
-                        images.push({
-                            changeParam: drawing,
-                            image: this._injector.createInstance(FOverGridImage, image),
-                        });
-                    });
-
-                    const eventParams: IBeforeOverGridImageChangeParam = {
-                        workbook,
-                        images,
-                    };
-
-                    this.fireEvent(this.Event.BeforeOverGridImageChange, eventParams);
-
-                    if (eventParams.cancel) {
-                        drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
-                        throw new CanceledError();
-                    }
+                    this.fireEvent(this.Event.FloatDomAdded, eventParams);
                 })
             )
         );
@@ -281,7 +149,7 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
                         return;
                     }
 
-                    const eventParams: IBeforeFloatDomUpdateParam = {
+                    const eventParams: IBeforeFloatDomUpdateEventParams = {
                         workbook,
                         drawings: floatDomDrawings,
                     };
@@ -324,10 +192,11 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
                         return;
                     }
 
-                    this.fireEvent(this.Event.FloatDomUpdated, {
+                    const eventParams: IFloatDomUpdatedEventParams = {
                         workbook,
                         drawings: floatDomDrawings,
-                    });
+                    };
+                    this.fireEvent(this.Event.FloatDomUpdated, eventParams);
                 })
             )
         );
@@ -358,7 +227,7 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
                         return;
                     }
 
-                    const eventParams: IBeforeFloatDomDeleteParam = {
+                    const eventParams: IBeforeFloatDomDeleteEventParams = {
                         workbook,
                         drawings: floatDomDrawings,
                     };
@@ -385,147 +254,14 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
                     }
 
                     const { drawings } = params;
-
-                    this.fireEvent(this.Event.FloatDomDeleted, {
+                    const eventParams: IFloatDomDeletedEventParams = {
                         workbook,
                         drawings: drawings.filter((i) => i.drawingType === DrawingTypeEnum.DRAWING_DOM).map((i) => i.drawingId),
-                    });
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.BeforeOverGridImageSelect,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== SetDrawingSelectedOperation.id) return;
-
-                    const drawings = commandInfo.params as IDrawingSearch[];
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null) {
-                        return;
-                    }
-                    const drawingManagerService = injector.get(IDrawingManagerService);
-
-                    const oldSelectedDrawings = drawingManagerService.getFocusDrawings() as ISheetImage[];
-                    const selectedDrawings = drawings.map((drawing) => {
-                        return drawingManagerService.getDrawingByParam(drawing);
-                    }) as ISheetImage[];
-
-                    const eventParams: IBeforeOverGridImageSelectParam = {
-                        workbook,
-                        selectedImages: this._createFOverGridImage(selectedDrawings),
-                        oldSelectedImages: this._createFOverGridImage(oldSelectedDrawings),
                     };
-
-                    this.fireEvent(this.Event.BeforeOverGridImageSelect, eventParams);
-
-                    if (eventParams.cancel) {
-                        throw new CanceledError();
-                    }
+                    this.fireEvent(this.Event.FloatDomDeleted, eventParams);
                 })
             )
         );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.OverGridImageInserted,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== InsertSheetDrawingCommand.id) return;
-
-                    const params = commandInfo.params as IInsertDrawingCommandParams;
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null || params == null) {
-                        return;
-                    }
-
-                    const { drawings } = params;
-                    this.fireEvent(this.Event.OverGridImageInserted, {
-                        workbook,
-                        images: this._createFOverGridImage(drawings as ISheetImage[]),
-                    });
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.OverGridImageRemoved,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== RemoveSheetDrawingCommand.id) return;
-
-                    const params = commandInfo.params as IDeleteDrawingCommandParams;
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null || params == null) {
-                        return;
-                    }
-
-                    const { drawings } = params;
-                    this.fireEvent(this.Event.OverGridImageRemoved, {
-                        workbook,
-                        removeImageParams: drawings,
-                    });
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.OverGridImageChanged,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== SetSheetDrawingCommand.id) return;
-
-                    const params = commandInfo.params as ISetDrawingCommandParams;
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null || params == null) {
-                        return;
-                    }
-
-                    const { drawings } = params;
-                    const drawingManagerService = injector.get(IDrawingManagerService);
-
-                    const images = drawings.map((drawing) => {
-                        return this._injector.createInstance(FOverGridImage, drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage);
-                    });
-
-                    this.fireEvent(this.Event.OverGridImageChanged, {
-                        workbook,
-                        images,
-                    });
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.OverGridImageSelected,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== SetDrawingSelectedOperation.id) return;
-
-                    const drawings = commandInfo.params as IDrawingSearch[];
-                    const workbook = this.getActiveWorkbook();
-                    if (workbook == null) {
-                        return;
-                    }
-                    const drawingManagerService = injector.get(IDrawingManagerService);
-
-                    const selectedDrawings = drawings.map((drawing) => {
-                        return drawingManagerService.getDrawingByParam(drawing);
-                    }) as ISheetImage[];
-
-                    this.fireEvent(this.Event.OverGridImageSelected, {
-                        workbook,
-                        selectedImages: this._createFOverGridImage(selectedDrawings as ISheetImage[]),
-                    });
-                })
-            )
-        );
-    }
-
-    private _createFOverGridImage(drawings: ISheetImage[]): FOverGridImage[] {
-        return drawings.map((drawing) => {
-            return this._injector.createInstance(FOverGridImage, drawing);
-        });
     }
 
     override registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
@@ -534,8 +270,8 @@ export class FUniverDrawingUIMixin extends FUniver implements IFUniverDrawingUIM
     }
 }
 
-FUniver.extend(FUniverDrawingUIMixin);
+FUniver.extend(FUniverSheetsDrawingUIMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverDrawingUIMixin { }
+    interface FUniver extends IFUniverSheetsDrawingUIMixin { }
 }

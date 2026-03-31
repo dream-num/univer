@@ -14,41 +14,175 @@
  * limitations under the License.
  */
 
-import type { Nullable, SheetSkeleton } from '@univerjs/core';
-import { Disposable, Inject, Injector } from '@univerjs/core';
+import type { Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+
+export interface ISheetSkeletonManagerParam {
+    unitId: string;
+    sheetId: string;
+    skeleton: SpreadsheetSkeleton;
+    dirty: boolean;
+    commandId?: string;
+}
 
 export class SheetSkeletonService extends Disposable {
-    private _sheetSkeletonStore: Map<string, Map<string, SheetSkeleton>> = new Map();
+    private _sheetSkeletonParamStore: Map<string, Map<string, ISheetSkeletonManagerParam>> = new Map();
 
     constructor(
-        @Inject(Injector) readonly _injector: Injector
+        @Inject(Injector) readonly _injector: Injector,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         // empty
         super();
 
-        this.disposeWithMe(() => {
-            this._sheetSkeletonStore = new Map();
-        });
+        this._init();
     }
 
-    getSkeleton(unitId: string, subUnitId: string): Nullable<SheetSkeleton> {
-        if (!this._sheetSkeletonStore.has(unitId)) {
-            return undefined;
-        }
-        return this._sheetSkeletonStore.get(unitId)!.get(subUnitId);
+    override dispose() {
+        super.dispose();
+
+        this._sheetSkeletonParamStore.forEach((subUnitMap) => subUnitMap.forEach((skeletonParam) => skeletonParam.skeleton.dispose()));
+        this._sheetSkeletonParamStore.clear();
     }
 
-    setSkeleton(unitId: string, subUnitId: string, skeleton: SheetSkeleton) {
-        if (!this._sheetSkeletonStore.has(unitId)) {
-            this._sheetSkeletonStore.set(unitId, new Map());
-        }
-        this._sheetSkeletonStore.get(unitId)!.set(subUnitId, skeleton);
-    }
-
-    deleteSkeleton(unitId: string, subUnitId: string) {
-        if (!this._sheetSkeletonStore.has(unitId)) {
+    private _disposeByUnitId(unitId: string) {
+        const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+        if (!sheetSkeletonMap) {
             return;
         }
-        this._sheetSkeletonStore.get(unitId)!.delete(subUnitId);
+
+        sheetSkeletonMap.forEach((skeletonParam) => skeletonParam.skeleton.dispose());
+        this._sheetSkeletonParamStore.delete(unitId);
+    }
+
+    private _init() {
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._initWorkbookSkeleton(workbook))
+        );
+
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._disposeByUnitId(workbook.getUnitId()))
+        );
+    }
+
+    private _initWorkbookSkeleton(workbook: Workbook) {
+        const unitId = workbook.getUnitId();
+
+        this._initSheetsSkeleton(workbook);
+
+        this.disposeWithMe(
+            workbook.sheetCreated$.subscribe((worksheet) => {
+                const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+                if (!sheetSkeletonMap) {
+                    return;
+                }
+
+                const sheetId = worksheet.getSheetId();
+                const skeleton = this._buildSkeleton(worksheet, workbook.getStyles());
+                sheetSkeletonMap.set(sheetId, {
+                    unitId,
+                    sheetId,
+                    skeleton,
+                    dirty: false,
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            workbook.sheetDisposed$.subscribe((worksheet) => {
+                const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+                if (!sheetSkeletonMap) {
+                    return;
+                }
+
+                const sheetId = worksheet.getSheetId();
+                const skeletonParam = sheetSkeletonMap.get(sheetId);
+                if (skeletonParam) {
+                    skeletonParam.skeleton.dispose();
+                }
+                sheetSkeletonMap.delete(sheetId);
+            })
+        );
+    }
+
+    private _initSheetsSkeleton(workbook: Workbook) {
+        const unitId = workbook.getUnitId();
+        const sheetSkeletonMap = new Map<string, ISheetSkeletonManagerParam>();
+
+        workbook.getWorksheets().forEach((worksheet) => {
+            const sheetId = worksheet.getSheetId();
+            const skeleton = this._buildSkeleton(worksheet, workbook.getStyles());
+            sheetSkeletonMap.set(sheetId, {
+                unitId,
+                sheetId,
+                skeleton,
+                dirty: false,
+            });
+        });
+
+        this._sheetSkeletonParamStore.set(unitId, sheetSkeletonMap);
+    }
+
+    private _buildSkeleton(worksheet: Worksheet, styles: Styles) {
+        const spreadsheetSkeleton = this._injector.createInstance(
+            SpreadsheetSkeleton,
+            worksheet,
+            styles
+        );
+        return spreadsheetSkeleton;
+    }
+
+    getSkeleton(unitId: string, subUnitId: string): Nullable<SpreadsheetSkeleton> {
+        return this.getSkeletonParam(unitId, subUnitId)?.skeleton;
+    }
+
+    getSkeletonParam(unitId: string, subUnitId: string): Nullable<ISheetSkeletonManagerParam> {
+        const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+        if (!sheetSkeletonMap) {
+            return;
+        }
+
+        return sheetSkeletonMap.get(subUnitId);
+    }
+
+    newSkeleton(unitId: string, subUnitId: string, worksheet: Worksheet, styles: Styles): SpreadsheetSkeleton {
+        return this.newSkeletonParam(unitId, subUnitId, worksheet, styles).skeleton;
+    }
+
+    newSkeletonParam(unitId: string, subUnitId: string, worksheet: Worksheet, styles: Styles): ISheetSkeletonManagerParam {
+        const skeleton = this._buildSkeleton(worksheet, styles);
+
+        let sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+        if (!sheetSkeletonMap) {
+            sheetSkeletonMap = new Map<string, ISheetSkeletonManagerParam>();
+            this._sheetSkeletonParamStore.set(unitId, sheetSkeletonMap);
+        }
+
+        const skeletonParam: ISheetSkeletonManagerParam = {
+            unitId,
+            sheetId: subUnitId,
+            skeleton,
+            dirty: false,
+        };
+
+        sheetSkeletonMap.set(subUnitId, skeletonParam);
+
+        return skeletonParam;
+    }
+
+    ensureSkeleton(unitId: string, subUnitId: string): SpreadsheetSkeleton | undefined {
+        const skeleton = this.getSkeleton(unitId, subUnitId);
+        if (skeleton) {
+            return skeleton;
+        }
+
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        if (!workbook) return;
+
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) return;
+
+        return this.newSkeleton(unitId, subUnitId, worksheet, workbook.getStyles());
     }
 }

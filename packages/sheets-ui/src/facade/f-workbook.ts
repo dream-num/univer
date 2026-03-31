@@ -18,8 +18,6 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IColumnsHeaderCfgParam, IMouseEvent, IPointerEvent, IRowsHeaderCfgParam, RenderComponentType, RenderManagerService, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
-
-import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetScrollManagerService } from '@univerjs/sheets-ui';
@@ -359,16 +357,6 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         const logService = this._injector.get(ILogService);
 
         logService.warn('[FWorkbook]', `${name} is deprecated. Please use the function of the same name on "FUniver".`);
-    }
-
-    generateCellParams(cell: IHoverRichTextPosition | ICellPosWithEvent): ICellEventParam {
-        const worksheet = this.getActiveSheet();
-        return {
-            row: cell.row,
-            column: cell.col,
-            workbook: this,
-            worksheet,
-        };
     }
 
     override onCellClick(callback: (cell: IHoverRichTextInfo) => void): IDisposable {

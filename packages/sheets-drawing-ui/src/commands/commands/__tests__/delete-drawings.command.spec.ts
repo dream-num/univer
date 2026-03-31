@@ -16,10 +16,9 @@
 
 import type { IAccessor } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService, RemoveSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { DeleteDrawingsCommand } from '../delete-drawings.command';
-import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
 
 describe('DeleteDrawingsCommand', () => {
     it('forwards focused drawings to the remove command', async () => {

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+export { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from './basics/transform-position';
+export { type IInsertDrawingCommandParams, InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
+export { type IDeleteDrawingCommandParam, type IDeleteDrawingCommandParams, RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
+export { type ISetDrawingArrangeCommandParams, SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
+export { type ISetDrawingCommandParams, SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
 export { DrawingApplyType, type ISetDrawingApplyMutationParams, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';

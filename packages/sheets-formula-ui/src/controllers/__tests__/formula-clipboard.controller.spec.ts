@@ -160,7 +160,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector, injector.get(SheetSkeletonService));
+    }, injector.get(SheetSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender('test', {

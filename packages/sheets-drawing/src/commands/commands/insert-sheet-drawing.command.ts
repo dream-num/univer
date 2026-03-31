@@ -16,8 +16,7 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-
-import type { IInsertDrawingCommandParams } from './interfaces';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     CommandType,
     ICommandService,
@@ -25,33 +24,27 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 
-/**
- * The command to insert new defined name
- */
+export interface IInsertDrawingCommandParams {
+    unitId: string;
+    drawings: ISheetDrawing[];
+}
+
 export const InsertSheetDrawingCommand: ICommand = {
     id: 'sheet.command.insert-sheet-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {
+        if (!params) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        if (!params) return false;
-
-        // const { drawingParam, imageParam } = params;
-
         const drawings = params.drawings;
-
-        // const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
-        const unitIds: string[] = drawings.map((param) => param.unitId);
-
-        // execute do mutations and add undo mutations to undo stack if completed
         const jsonOp = sheetDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
-
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         const intercepted = sheetInterceptorService.onCommandExecute({ id: InsertSheetDrawingCommand.id, params });
@@ -68,13 +61,11 @@ export const InsertSheetDrawingCommand: ICommand = {
                     ...(intercepted.preUndos ?? []),
                     undoInsertMutation,
                     ...(intercepted.undos),
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     insertMutation,
                     ...intercepted.redos,
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

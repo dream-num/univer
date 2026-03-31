@@ -41,6 +41,7 @@ import {
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
@@ -287,6 +288,7 @@ describe('Test auto fill rules in controller', () => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [DocSelectionManagerService],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
+            [SheetSkeletonService],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],

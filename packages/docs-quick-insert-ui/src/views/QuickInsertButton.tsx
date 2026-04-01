@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
+import type { MouseEventHandler } from 'react';
 import type { IDocPopup } from '../services/doc-quick-insert-popup.service';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
@@ -24,15 +25,14 @@ import { IncreaseIcon } from '@univerjs/icons';
 import { ILayoutService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
+import { DocQuickInsertMenuController } from '../menu/doc-quick-insert-menu.controller';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { QuickInsertButtonComponentKey } from './const';
-import { DocQuickInsertMenuController } from './doc-quick-insert-menu.controller';
 
-interface IQuickInsertButtonProps {
+export const QuickInsertButtonComponentKey = 'doc.quick-insert.button';
+
+export const QuickInsertButton = ({ className = '' }: {
     className?: string;
-}
-
-export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) => {
+}) => {
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -43,7 +43,7 @@ export const QuickInsertButton = ({ className = '' }: IQuickInsertButtonProps) =
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const editPopup = useObservable(docQuickInsertPopupService.editPopup$);
 
-    const onClick: React.MouseEventHandler<HTMLDivElement> = useEvent((event) => {
+    const onClick: MouseEventHandler<HTMLDivElement> = useEvent(() => {
         const p = docQuickInsertMenuController?.popup;
         if (!p) {
             return;

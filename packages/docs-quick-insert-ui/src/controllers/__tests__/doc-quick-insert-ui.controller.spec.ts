@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { QuickInsertButton } from '../../menu';
+import { QuickInsertButton } from '../../views/QuickInsertButton';
 import { DocQuickInsertUIController } from '../doc-quick-insert-ui.controller';
 
 describe('DocQuickInsertUIController', () => {

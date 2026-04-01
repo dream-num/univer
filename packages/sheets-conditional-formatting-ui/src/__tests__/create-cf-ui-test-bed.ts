@@ -25,6 +25,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    LocaleService,
     LocaleType,
     LogLevel,
     Plugin,
@@ -145,6 +146,9 @@ function createLocalSheetsTestBed(workbookData?: IWorkbookData, dependencies?: D
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+    injector.get(LocaleService).load({
+        [LocaleType.EN_US]: {},
+    });
     return {
         univer,
         injector,

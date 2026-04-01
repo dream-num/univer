@@ -21,6 +21,7 @@ import {
     IUniverInstanceService,
     PositionedObjectLayoutType,
     UniverInstanceType,
+    WrapTextType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
@@ -34,7 +35,7 @@ import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
-import { UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
+import { UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
 
 function waitNextTick() {
     return new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -138,6 +139,8 @@ function setupDrawingTestBed(docData: IDocumentData) {
         RemoveDocDrawingCommand,
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
+        UpdateDocDrawingDistanceCommand,
+        UpdateDocDrawingWrapTextCommand,
         UpdateDrawingDocTransformCommand,
         RichTextEditingMutation as unknown as ICommand,
     ].forEach((command) => commandService.registerCommand(command));
@@ -246,6 +249,83 @@ describe('docs drawing commands integration', () => {
             .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
 
         expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionH).toEqual({ posOffset: 3 });
+        expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('updates drawing wrap distances through the command pipeline', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(UpdateDocDrawingDistanceCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{
+                drawingId: 'shape-1',
+            }],
+            dist: {
+                distT: 12,
+                distB: 16,
+                distL: 8,
+                distR: 10,
+            },
+        })).toBe(true);
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSnapshot().drawings?.['shape-1']).toMatchObject({
+            distT: 12,
+            distB: 16,
+            distL: 8,
+            distR: 10,
+        });
+
+        testBed.univer.dispose();
+    });
+
+    it('updates drawing wrap text through the command pipeline', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(UpdateDocDrawingWrapTextCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{
+                drawingId: 'shape-1',
+            }],
+            wrapText: WrapTextType.RIGHT,
+        })).toBe(true);
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSnapshot().drawings?.['shape-1'].wrapText).toBe(WrapTextType.RIGHT);
+
+        testBed.univer.dispose();
+    });
+
+    it('updates drawing doc transform through the command pipeline', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{
+                drawingId: 'shape-1',
+                key: 'positionV',
+                value: {
+                    posOffset: 18,
+                },
+            }],
+        })).toBe(true);
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionV).toEqual({ posOffset: 18 });
         expect(testBed.refreshControls).toHaveBeenCalled();
 
         testBed.univer.dispose();

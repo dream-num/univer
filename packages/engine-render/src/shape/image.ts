@@ -25,6 +25,24 @@ import { RENDER_CLASS_TYPE, Transform, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import { Shape } from './shape';
 
+export interface IShapeClipBounds {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+export interface IImageShapeClipService {
+    /**
+     * Build the shape outline path and clip the canvas context.
+     * Assumes the coordinate system has (0,0) at the top-left of the shape area.
+     * The method calls ctx.beginPath(), builds the shape path, and calls ctx.clip().
+     * @returns The actual bounding rect of the clip region, or false if no clip was built.
+     *          For multi-path shapes the bounds may extend beyond (0, 0, width, height).
+     */
+    applyShapeClip(ctx: UniverRenderingContext, prstGeom: PresetGeometryType, width: number, height: number, adjustValues?: Nullable<Record<string, number>>): IShapeClipBounds | false;
+}
+
 export interface IImageProps extends IShapeProps {
     image?: HTMLImageElement;
     url?: string;
@@ -40,6 +58,12 @@ export interface IImageProps extends IShapeProps {
      */
     prstGeom?: Nullable<PresetGeometryType>;
 
+    /**
+     * Adjust values for the preset geometry (e.g. corner radius for roundRect).
+     * Keys are adjust handle names, values are numeric values.
+     */
+    adjustValues?: Nullable<Record<string, number>>;
+
     opacity?: number;
 }
 
@@ -51,6 +75,8 @@ export class Image extends Shape<IImageProps> {
     private _renderByCropper: boolean = false;
 
     private _transformCalculateSrcRect: boolean = true;
+
+    private _clipService: Nullable<IImageShapeClipService> = null;
 
     override objectType = ObjectType.IMAGE;
 
@@ -106,6 +132,14 @@ export class Image extends Shape<IImageProps> {
         this.makeDirty(true);
     }
 
+    setClipService(clipService: Nullable<IImageShapeClipService>) {
+        this._clipService = clipService;
+    }
+
+    getClipService(): Nullable<IImageShapeClipService> {
+        return this._clipService;
+    }
+
     override get classType(): RENDER_CLASS_TYPE {
         return RENDER_CLASS_TYPE.IMAGE;
     }
@@ -139,6 +173,14 @@ export class Image extends Shape<IImageProps> {
 
     setPrstGeom(prstGeom?: Nullable<PresetGeometryType>) {
         this._props.prstGeom = prstGeom;
+    }
+
+    setPrstGeomAdjValues(adjValues?: Nullable<Record<string, number>>) {
+        this._props.adjustValues = adjValues;
+    }
+
+    get prstGeomAdjValues() {
+        return this._props.adjustValues;
     }
 
     setSrcRect(srcRect?: Nullable<ISrcRect>) {
@@ -325,6 +367,46 @@ export class Image extends Shape<IImageProps> {
         }
         const w = renderWidth ?? this.width;
         const h = renderHeight ?? this.height;
+
+        // Shape clip: when prstGeom is set and a clip service is available,
+        // clip the image to the shape outline (e.g. ellipse, roundRect, etc.)
+        if (this.prstGeom && this._clipService) {
+            ctx.save();
+            ctx.translate(-w / 2, -h / 2); // move origin to top-left for clip path
+            // Clip to bounding rect first so that any shape path overshooting the
+            // bounding box (e.g. due to control-point curves) is safely contained.
+            ctx.beginPath();
+            // ctx.rect(0, 0, w, h);
+            // ctx.clip();
+            const clipBounds = this._clipService.applyShapeClip(ctx, this.prstGeom, w, h, this.prstGeomAdjValues);
+            if (clipBounds) {
+                // Use the actual clip bounds for image drawing — for multi-path shapes
+                // (e.g. cloudCallout) the clip region may extend beyond (0, 0, w, h).
+                const drawLeft = clipBounds.left;
+                const drawTop = clipBounds.top;
+                const drawWidth = clipBounds.width;
+                const drawHeight = clipBounds.height;
+                if (!this._renderByCropper && this.srcRect) {
+                    const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
+                    // Scale srcRect offsets proportionally to the actual clip bounds
+                    const scaleW = drawWidth / w;
+                    const scaleH = drawHeight / h;
+                    ctx.drawImage(
+                        this._native,
+                        drawLeft - left * scaleW,
+                        drawTop - top * scaleH,
+                        drawWidth + (right + left) * scaleW,
+                        drawHeight + (bottom + top) * scaleH
+                    );
+                } else {
+                    ctx.drawImage(this._native, drawLeft, drawTop, drawWidth, drawHeight);
+                }
+                ctx.restore();
+                return;
+            }
+            ctx.restore();
+        }
+
         if (!this._renderByCropper && this.srcRect) {
             const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
             ctx.beginPath();

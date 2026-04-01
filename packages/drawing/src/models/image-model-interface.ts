@@ -27,7 +27,13 @@ export interface IImageData extends IDrawingParam {
     /**
      * 20.1.9.18 prstGeom (Preset geometry)
      */
-    prstGeom?: Nullable<PresetGeometryType>;
+    prstGeom?: Nullable<string>;
+
+    /**
+     * Adjust values for the preset geometry (e.g. corner radius for roundRect).
+     * Keys are adjust handle names, values are numeric values.
+     */
+    adjustValues?: Nullable<Record<string, number>>;
 }
 
 export interface IDocFloatDomDataBase {

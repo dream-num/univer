@@ -27,7 +27,6 @@ import {
     generateRandomId,
     ICommandService,
     IContextService,
-    isValidRange,
     IUniverInstanceService,
     LocaleService,
     ThemeService,
@@ -37,7 +36,7 @@ import {
 import { borderClassName, Button, clsx, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
@@ -51,6 +50,7 @@ import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
+import { isBlankInput, resolveRangePayload } from './utils';
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
@@ -91,11 +91,11 @@ export const CellLinkEdit = () => {
 
     const [showError, setShowError] = useState(false);
 
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
+    const [isFocusRangeSelector, setIsFocusRangeSelector] = useState(false);
 
     const setByPayload = useRef(false);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
     // to polyfill the display value on old version data
@@ -245,7 +245,7 @@ export const CellLinkEdit = () => {
     }, [editing, markSelectionService, themeService, univerInstanceService]);
 
     useEffect(() => {
-        isFocusRangeSelectorSet(type === SheetHyperLinkType.RANGE);
+        setIsFocusRangeSelector(type === SheetHyperLinkType.RANGE);
     }, [type]);
 
     useEffect(() => {
@@ -349,15 +349,12 @@ export const CellLinkEdit = () => {
     };
 
     const handleRangeChange = useEvent((rangeText: string) => {
-        const newValue = rangeText.split(',').map(deserializeRangeWithSheet);
-        const range = newValue[0];
-        if (!range || !isValidRange(range.range)) {
+        const newPayload = resolveRangePayload(rangeText, workbook.getActiveSheet()?.getName() || '');
+        if (!newPayload) {
+            setPayload('');
             return;
         }
-        if (!range.sheetName) {
-            range.sheetName = workbook.getActiveSheet()?.getName() || '';
-        }
-        const newPayload = serializeRangeToRefString(range);
+
         setPayload(newPayload);
 
         if (newPayload && (setByPayload.current || !display)) {
@@ -367,7 +364,7 @@ export const CellLinkEdit = () => {
     });
 
     const handleSubmit = async () => {
-        if ((showLabel && !display) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
+        if ((showLabel && isBlankInput(display)) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
             setShowError(true);
             return;
         }
@@ -442,7 +439,7 @@ export const CellLinkEdit = () => {
                 ? (
                     <FormLayout
                         label={localeService.t('hyperLink.form.label')}
-                        error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
+                        error={showError && isBlankInput(display) ? localeService.t('hyperLink.form.inputError') : ''}
                     >
                         <Input
                             value={display}
@@ -539,7 +536,7 @@ export const CellLinkEdit = () => {
                                 setHide(false);
                             }
                         }}
-                        onFocusChange={(focus) => isFocusRangeSelectorSet(focus)}
+                        onFocusChange={(focus) => setIsFocusRangeSelector(focus)}
                     />
                 </FormLayout>
             )}

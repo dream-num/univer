@@ -30,7 +30,7 @@ To better assist you, we recommend:
 
 ### Install dependencies
 
-Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
+The development of Univer requires Node.js >= 22.18 and pnpm >= 10. Please make sure you have the correct versions installed.
 
 ```shell
 git clone https://github.com/dream-num/univer
@@ -41,7 +41,6 @@ npm i -g pnpm
 
 # install dependencies
 pnpm install
-
 ```
 
 ### Start dev server

@@ -14,182 +14,240 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import { ArrangeTypeEnum, Direction, ICommandService, IUniverInstanceService, JSONX, PositionedObjectLayoutType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
+import {
+    Direction,
+    ICommandService,
+    IUniverInstanceService,
+    PositionedObjectLayoutType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
+import { DocDrawingController as CoreDocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
+import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-notification.controller';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
-import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
 import { UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
 
-function createAccessor() {
-    const commandService = { syncExecuteCommand: vi.fn(() => true), executeCommand: vi.fn(() => true) };
-    const docDrawingService = {
-        getForwardDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-forward'], undo: ['undo'], objects: ['shape-1'] })),
-        getBackwardDrawingOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-backward'], undo: ['undo'], objects: ['shape-1'] })),
-        getFrontDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-front'], undo: ['undo'], objects: ['shape-1'] })),
-        getBackDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-back'], undo: ['undo'], objects: ['shape-1'] })),
-        getFocusDrawings: vi.fn(() => [{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'shape-1', drawingType: 'drawing' }]),
-    };
-    const renderManagerService = {
-        getRenderById: vi.fn(() => ({
-            scene: { getTransformerByCreate: () => ({ refreshControls: vi.fn() }) },
-            with: () => ({ getSegment: () => '' }),
-        })),
-    };
-    const currentDocument = {
-        getUnitId: vi.fn(() => 'doc-1'),
-        getSelfOrHeaderFooterModel: vi.fn(() => ({
-            getBody: () => ({ customBlocks: [{ blockId: 'shape-1', startIndex: 3 }] }),
-        })),
-        getSnapshot: vi.fn(() => ({ drawingsOrder: ['shape-1'] })),
-        getDrawings: vi.fn(() => ({ 'shape-1': { id: 'shape-1' } })),
-        getDrawingsOrder: vi.fn(() => ['shape-1']),
-    };
-    const univerInstanceService = {
-        getCurrentUniverDocInstance: vi.fn(() => currentDocument),
-        getUniverDocInstance: vi.fn(() => ({
-            getSnapshot: () => ({
-                drawings: {
-                    'shape-1': {
-                        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
-                        docTransform: { positionH: { posOffset: 1 }, positionV: { posOffset: 2 } },
-                    },
-                    'inline-1': {
-                        layoutType: PositionedObjectLayoutType.INLINE,
-                        docTransform: { positionH: { posOffset: 1 }, positionV: { posOffset: 2 } },
-                    },
-                },
-            }),
-        })),
-    };
-    const docSelectionManagerService = {
-        getActiveTextRange: vi.fn(() => ({ collapsed: true, startOffset: 1, segmentId: '' })),
-    };
+function waitNextTick() {
+    return new Promise<void>((resolve) => setTimeout(resolve, 0));
+}
 
+function createBaseDocData(): IDocumentData {
     return {
-        accessor: {
-            get(token: unknown) {
-                if (token === ICommandService) {
-                    return commandService;
-                }
-
-                if (token === IDocDrawingService) {
-                    return docDrawingService;
-                }
-
-                if (token === IRenderManagerService) {
-                    return renderManagerService;
-                }
-
-                if (token === IUniverInstanceService) {
-                    return univerInstanceService;
-                }
-
-                if (token === DocSelectionManagerService) {
-                    return docSelectionManagerService;
-                }
-
-                throw new Error(`Unknown dependency: ${String(token)}`);
+        id: 'test-doc',
+        body: {
+            dataStream: 'Hello\r\n',
+            customBlocks: [],
+        },
+        drawings: {},
+        drawingsOrder: [],
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
             },
-        } as IAccessor,
-        commandService,
-        currentDocument,
-        docDrawingService,
-        docSelectionManagerService,
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
     };
 }
 
-describe('docs drawing commands', () => {
-    it('arranges drawings by converting drawing order ops into rich-text mutations', () => {
-        const composeSpy = vi.spyOn(JSONX, 'compose').mockReturnValue(['composed'] as never);
-        const { accessor, commandService } = createAccessor();
+function createDrawingDocData(): IDocumentData {
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: '\b\r\n',
+            customBlocks: [{
+                startIndex: 0,
+                blockId: 'shape-1',
+            }],
+        },
+        drawings: {
+            'shape-1': {
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            } as never,
+        },
+        drawingsOrder: ['shape-1'],
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
 
-        expect(SetDocDrawingArrangeCommand.handler(accessor, {
-            unitId: 'doc-1',
-            subUnitId: 'doc-1',
-            drawingIds: ['shape-1'],
-            arrangeType: ArrangeTypeEnum.forward,
+function setupDrawingTestBed(docData: IDocumentData) {
+    const refreshControls = vi.fn();
+    let injector!: Injector;
+    const renderManagerService = {
+        getRenderById: () => ({
+            scene: {
+                getTransformerByCreate: () => ({
+                    refreshControls,
+                }),
+            },
+            with: <T>(token: T) => {
+                if (token === DocSelectionRenderService) {
+                    return {
+                        getSegment: () => '',
+                    } as T;
+                }
+
+                return injector.get(token as never);
+            },
+        }),
+    };
+    const testBed = createDocUiTestBed(docData, [
+        [IRenderManagerService, { useValue: renderManagerService }],
+    ]);
+    const { univer, get } = testBed;
+    injector = testBed.injector;
+
+    injector.add([DocDrawingService]);
+    injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
+    injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
+    injector.add([CoreDocDrawingController]);
+    injector.add([DocDrawingAddRemoveController]);
+
+    const commandService = get(ICommandService);
+    [
+        InsertDocDrawingCommand,
+        RemoveDocDrawingCommand,
+        DeleteDocDrawingsCommand,
+        MoveDocDrawingsCommand,
+        UpdateDrawingDocTransformCommand,
+        RichTextEditingMutation as unknown as ICommand,
+    ].forEach((command) => commandService.registerCommand(command));
+
+    const selectionManager = get(DocSelectionManagerService);
+    selectionManager.__TEST_ONLY_setCurrentSelection({
+        unitId: 'test-doc',
+        subUnitId: 'test-doc',
+    });
+
+    const coreDocDrawingController = injector.get(CoreDocDrawingController);
+    injector.get(DocDrawingAddRemoveController);
+    coreDocDrawingController.loadDrawingDataForUnit('test-doc');
+
+    return {
+        univer,
+        get,
+        injector,
+        commandService,
+        selectionManager,
+        docDrawingService: injector.get(IDocDrawingService),
+        drawingManagerService: injector.get(IDrawingManagerService),
+        refreshControls,
+    };
+}
+
+describe('docs drawing commands integration', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('inserts a drawing through the real mutation chain and synchronizes drawing services', async () => {
+        const testBed = setupDrawingTestBed(createBaseDocData());
+
+        testBed.selectionManager.__TEST_ONLY_add([{
+            startOffset: 5,
+            endOffset: 5,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+
+        expect(await testBed.commandService.executeCommand(InsertDocDrawingCommand.id, {
+            drawings: [{
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            }],
         })).toBe(true);
-        expect(composeSpy).toHaveBeenCalled();
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(RichTextEditingMutation.id, {
-            unitId: 'doc-1',
-            actions: ['composed'],
-            textRanges: null,
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('Hello\b\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 5, blockId: 'shape-1' }]);
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['shape-1']);
+        expect(doc.getSnapshot().drawings?.['shape-1']).toMatchObject({ drawingId: 'shape-1' });
+        expect(testBed.docDrawingService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toMatchObject({
+            drawingId: 'shape-1',
         });
+        expect(testBed.drawingManagerService.getDrawingOrder('test-doc', 'test-doc')).toEqual(['shape-1']);
+
+        testBed.univer.dispose();
     });
 
-    it('removes focused drawings and delegates deletion to the remove command', async () => {
-        const { accessor, commandService, docDrawingService } = createAccessor();
-        expect(await DeleteDocDrawingsCommand.handler(accessor)).toBe(true);
-        expect(commandService.executeCommand).toHaveBeenCalledWith('doc.command.remove-doc-image', {
-            unitId: 'doc-1',
-            drawings: [{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'shape-1', drawingType: 'drawing' }],
-        });
+    it('deletes a focused drawing through the command pipeline and removes it from the document and services', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
 
-        docDrawingService.getFocusDrawings.mockReturnValue([]);
-        expect(await DeleteDocDrawingsCommand.handler(accessor)).toBe(false);
+        testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
+
+        expect(await testBed.commandService.executeCommand(DeleteDocDrawingsCommand.id)).toBe(true);
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([]);
+        expect(doc.getSnapshot().drawings).toEqual({});
+        expect(doc.getSnapshot().drawingsOrder).toEqual([]);
+        expect(testBed.docDrawingService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
+        expect(testBed.drawingManagerService.getDrawingByParam({ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' })).toBeUndefined();
+
+        testBed.univer.dispose();
     });
 
-    it('builds rich-text removal mutations and moves floating drawings with keyboard nudges', () => {
-        const { accessor, commandService, docDrawingService } = createAccessor();
-        expect(RemoveDocDrawingCommand.handler(accessor, {
-            unitId: 'doc-1',
-            drawings: [{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'shape-1' }],
-        } as never)).toBe(true);
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(RichTextEditingMutation.id, expect.objectContaining({
-            unitId: 'doc-1',
-            textRanges: [{ startOffset: 3, endOffset: 3 }],
-        }));
+    it('moves a focused floating drawing by updating the persisted doc transform', async () => {
+        const testBed = setupDrawingTestBed(createDrawingDocData());
 
-        docDrawingService.getFocusDrawings.mockReturnValue([
-            { unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'shape-1', drawingType: 'drawing' },
-            { unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'inline-1', drawingType: 'drawing' },
-        ]);
-        expect(MoveDocDrawingsCommand.handler(accessor, { direction: Direction.RIGHT })).toBe(true);
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(UpdateDrawingDocTransformCommand.id, {
-            unitId: 'doc-1',
-            subUnitId: 'doc-1',
-            drawings: [{ drawingId: 'shape-1', key: 'positionH', value: { posOffset: 3 } }],
-        });
-    });
+        testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
 
-    it('inserts drawing placeholders into the active document selection', () => {
-        const composeSpy = vi.spyOn(JSONX, 'compose').mockReturnValue(['insert-composed'] as never);
-        const editOp = vi.fn(() => ['edit-op']);
-        const insertOp = vi.fn((path, value) => ({ path, value }));
-        vi.spyOn(JSONX, 'getInstance').mockReturnValue({
-            editOp,
-            insertOp,
-            removeOp: vi.fn(),
-        } as never);
-        const { accessor, commandService } = createAccessor();
+        expect(await testBed.commandService.executeCommand(MoveDocDrawingsCommand.id, {
+            direction: Direction.RIGHT,
+        })).toBe(true);
+        await waitNextTick();
 
-        expect(InsertDocDrawingCommand.handler(accessor, {
-            drawings: [{ drawingId: 'shape-2', unitId: 'doc-1', subUnitId: 'doc-1' }],
-        } as never)).toBe(true);
-        expect(editOp).toHaveBeenCalledTimes(1);
-        expect(insertOp).toHaveBeenCalledWith(['drawings', 'shape-2'], expect.objectContaining({ drawingId: 'shape-2' }));
-        expect(composeSpy).toHaveBeenCalled();
-        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(RichTextEditingMutation.id, {
-            unitId: 'doc-1',
-            actions: ['insert-composed'],
-            textRanges: [],
-        });
-    });
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
 
-    it('returns false when inserting drawings without an active text range', () => {
-        const { accessor, commandService, docSelectionManagerService } = createAccessor();
-        docSelectionManagerService.getActiveTextRange.mockReturnValue(null as never);
+        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionH).toEqual({ posOffset: 3 });
+        expect(testBed.refreshControls).toHaveBeenCalled();
 
-        expect(InsertDocDrawingCommand.handler(accessor, {
-            drawings: [{ drawingId: 'shape-2', unitId: 'doc-1', subUnitId: 'doc-1' }],
-        } as never)).toBe(false);
-        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
+        testBed.univer.dispose();
     });
 });

@@ -71,11 +71,11 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "typescript": "^6.0.2",
         "vitest": "^4.1.1"
     }

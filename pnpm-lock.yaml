@@ -1796,9 +1796,6 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1806,6 +1803,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       typescript:
         specifier: ^6.0.2
         version: 6.0.2

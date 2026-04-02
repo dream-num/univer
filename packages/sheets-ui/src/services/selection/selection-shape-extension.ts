@@ -590,26 +590,6 @@ export class SelectionShapeExtension {
         const selectionWithStyle: ISelectionWithStyle = { range, primary: primaryCell, style: null };
         const selectionRangeWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._targetSelection = { ...selectionRangeWithCoord.rangeWithCoord };
-        // const startCell = this._skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-        // const endCell = this._skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
-
-        // const startY = startCell?.startY || 0;
-        // const endY = endCell?.endY || 0;
-        // const startX = startCell?.startX || 0;
-        // const endX = endCell?.endX || 0;
-
-        // this._targetSelection = {
-        //     startY,
-        //     endY,
-        //     startX,
-        //     endX,
-        //     startRow,
-        //     endRow,
-        //     startColumn,
-        //     endColumn,
-        // };
-        // const primaryWithCoord = this._skeleton.getCellWithCoordByIndex(startRow, startColumn);
-        // this._control.updateRange(this._targetSelection, primaryWithCoord);
 
         this._control.updateRangeBySelectionWithCoord(selectionRangeWithCoord);
         this._control.selectionScaling$.next(this._targetSelection);

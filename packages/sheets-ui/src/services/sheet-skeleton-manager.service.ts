@@ -49,6 +49,9 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
     ) {
         super();
+
+        const { unitId, scene } = this._context;
+        this._sheetSkeletonService.setScene(unitId, scene);
     }
 
     override dispose(): void {

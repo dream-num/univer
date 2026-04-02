@@ -15,6 +15,7 @@
  */
 
 import type { Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
+import type { Scene } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 
@@ -27,6 +28,7 @@ export interface ISheetSkeletonManagerParam {
 }
 
 export class SheetSkeletonService extends Disposable {
+    private _sceneMap: Map<string, Scene> = new Map();
     private _sheetSkeletonParamStore: Map<string, Map<string, ISheetSkeletonManagerParam>> = new Map();
 
     constructor(
@@ -130,7 +132,26 @@ export class SheetSkeletonService extends Disposable {
             worksheet,
             styles
         );
+
+        const unitId = worksheet.getUnitId();
+        const scene = this._sceneMap.get(unitId);
+        if (scene) {
+            spreadsheetSkeleton.setScene(scene);
+        }
+
         return spreadsheetSkeleton;
+    }
+
+    setScene(unitId: string, scene: Scene) {
+        this._sceneMap.set(unitId, scene);
+
+        // update scene for all skeleton
+        const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
+        if (!sheetSkeletonMap) {
+            return;
+        }
+
+        sheetSkeletonMap.forEach((skeletonParam) => skeletonParam.skeleton.setScene(scene));
     }
 
     getSkeleton(unitId: string, subUnitId: string): Nullable<SpreadsheetSkeleton> {

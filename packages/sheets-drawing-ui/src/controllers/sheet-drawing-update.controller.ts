@@ -18,7 +18,7 @@ import type { IAccessor, IDrawingParam, IRange, Nullable, Workbook } from '@univ
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingArrangeCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import type { IInsertDrawingCommandParams, ISetDrawingArrangeCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import {
     BooleanNumber,
     BuildTextUtils,
@@ -59,7 +59,6 @@ import {
     drawingPositionToTransform,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
-    RemoveSheetDrawingCommand,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
     transformToAxisAlignPosition,
@@ -69,7 +68,6 @@ import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univ
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 
 /**
  * Calculate the bounding box after rotation
@@ -150,7 +148,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-        this._setDrawingListener();
         this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
@@ -590,33 +587,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 arrangeType,
             } as ISetDrawingArrangeCommandParams);
         }));
-    }
-
-    private _setDrawingListener() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.interceptCommand({
-                getMutations: (commandInfo) => {
-                    if (commandInfo.id === SetSheetDrawingCommand.id || InsertSheetDrawingCommand.id || commandInfo.id === RemoveSheetDrawingCommand.id) {
-                        const params = commandInfo.params as ISetDrawingCommandParams | IInsertDrawingCommandParams | IDeleteDrawingCommandParams;
-                        const { unitId } = params;
-                        const redos = [
-                            {
-                                id: ClearSheetDrawingTransformerOperation.id,
-                                params: [unitId],
-                            },
-                        ];
-                        const undos = [
-                            {
-                                id: ClearSheetDrawingTransformerOperation.id,
-                                params: [unitId],
-                            },
-                        ];
-                        return { redos, undos };
-                    }
-                    return { redos: [], undos: [] };
-                },
-            })
-        );
     }
 
     private _updateDrawingListener() {

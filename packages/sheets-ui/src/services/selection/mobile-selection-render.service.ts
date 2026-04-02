@@ -718,22 +718,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
         const newSelection: ISelectionWithStyle = { range: newSelectionRange, style: null, primary: null };
         const newSelectionRangeWithCoord = attachSelectionWithCoord(newSelection, skeleton);
-        // newSelectionRangeWithCoord.rangeWithCoord.unitId = unitId;
-        // newSelectionRangeWithCoord.rangeWithCoord.sheetId = sheetId;
-
-        // const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
-        // const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
-
-        // const newSelectionRangeWithCoord: IRangeWithCoord = {
-        //     startColumn: newSelectionRange.startColumn,
-        //     startRow: newSelectionRange.startRow,
-        //     endColumn: newSelectionRange.endColumn,
-        //     endRow: newSelectionRange.endRow,
-        //     startY: startCellXY?.startY || 0,
-        //     endY: endCellXY?.endY || 0,
-        //     startX: startCellXY?.startX || 0,
-        //     endX: endCellXY?.endX || 0,
-        // };
 
         const rangeChanged =
             currSelectionRange.startRow !== newSelectionRange.startRow ||

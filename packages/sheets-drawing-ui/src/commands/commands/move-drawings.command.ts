@@ -18,8 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;

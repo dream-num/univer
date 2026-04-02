@@ -55,8 +55,8 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, shee
 // use transform and originSize convert to  ISheetDrawingPosition
 export function transformToDrawingPosition(transform: ITransformState, skeleton: SpreadsheetSkeleton): ISheetDrawingPosition {
     const { left = 0, top = 0, width = 0, height = 0, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = transform;
-    const startSelectionCell = skeleton.getOffsetRelativeToRowCol(left, top);
-    const endSelectionCell = skeleton.getOffsetRelativeToRowCol(left + width, top + height);
+    const startSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left, top);
+    const endSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left + width, top + height);
 
     return {
         flipY,

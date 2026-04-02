@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'کراپ',
             start: 'شروع کراپ',
             mode: 'آزاد',
+            shape: 'کراپ به شکل',
         },
         group: {
             title: 'گروه',

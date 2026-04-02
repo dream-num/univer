@@ -46,6 +46,7 @@ const locale = {
             title: 'Crop',
             start: 'Start Crop',
             mode: 'Free',
+            shape: 'Crop to Shape',
         },
         group: {
             title: 'Group',

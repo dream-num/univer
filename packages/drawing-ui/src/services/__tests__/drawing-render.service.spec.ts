@@ -53,6 +53,10 @@ function createService(options?: { unitType?: UniverInstanceType; visible?: bool
         attachTransformerTo: vi.fn(),
     };
 
+    const drawingImageClipService = {
+        applyShapeClip: vi.fn(),
+    };
+
     return {
         drawingManagerService,
         imageIoService,
@@ -62,7 +66,8 @@ function createService(options?: { unitType?: UniverInstanceType; visible?: bool
             imageIoService as never,
             {} as never,
             urlImageService as never,
-            univerInstanceService as never
+            univerInstanceService as never,
+            drawingImageClipService as never
         ),
         univerInstanceService,
     };

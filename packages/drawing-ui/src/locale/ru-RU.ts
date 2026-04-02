@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'Обрезка',
             start: 'Начать обрезку',
             mode: 'Свободный',
+            shape: 'Обрезать по форме',
         },
         group: {
             title: 'Группировка',

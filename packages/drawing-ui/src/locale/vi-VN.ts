@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'Cắt',
             start: 'Bắt đầu cắt',
             mode: 'Cắt tự do tỷ lệ',
+            shape: 'Cắt theo hình dạng',
         },
         group: {
             title: 'Nhóm',

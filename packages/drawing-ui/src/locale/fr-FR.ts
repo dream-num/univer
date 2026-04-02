@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'Rogner',
             start: 'Commencer à rogner',
             mode: 'Libre',
+            shape: 'Rogner à la forme',
         },
         group: {
             title: 'Grouper',

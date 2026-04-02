@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, ITransformState, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { ISrcRect, ITransformState, Nullable } from '@univerjs/core';
 import type { Engine, IShapeProps, IViewportInfo, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
 import { Canvas, Rect, Shape } from '@univerjs/engine-render';
 
@@ -27,7 +27,7 @@ export interface IImageCropperObjectProps extends IShapeProps {
     /**
      * 20.1.9.18 prstGeom (Preset geometry)
      */
-    prstGeom?: Nullable<PresetGeometryType>;
+    prstGeom?: Nullable<string>;
     applyTransform?: ITransformState;
     dragPadding?: number;
 }
@@ -39,7 +39,7 @@ enum ImageCropperObjectType {
 
 export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropperObjectProps> extends Shape<T> {
     private _srcRect: Nullable<ISrcRect>;
-    private _prstGeom: Nullable<PresetGeometryType>;
+    private _prstGeom: Nullable<string>;
     private _applyTransform: Nullable<ITransformState>;
 
     private _dragPadding = 8;

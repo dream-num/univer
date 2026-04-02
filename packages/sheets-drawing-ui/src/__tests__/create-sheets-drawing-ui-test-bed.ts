@@ -75,6 +75,16 @@ export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, depen
                 }),
                 getObject: () => null,
             },
+            with: <T>(token: T) => injector.get(token as never),
+        }),
+        getRenderUnitById: () => ({
+            scene: {
+                getTransformer: () => ({
+                    debounceRefreshControls,
+                }),
+                getObject: () => null,
+            },
+            with: <T>(token: T) => injector.get(token as never),
         }),
     };
     const sheetSkeletonService = {

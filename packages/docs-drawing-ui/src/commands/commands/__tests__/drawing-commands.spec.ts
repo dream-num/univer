@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
 import {
+    ArrangeTypeEnum,
     Direction,
     ICommandService,
     IUniverInstanceService,
@@ -36,6 +37,7 @@ import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
+import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
 
 function waitNextTick() {
@@ -155,6 +157,44 @@ function createFloatingDrawingWithTextDocData(): IDocumentData {
     };
 }
 
+function createMultiDrawingDocData(): IDocumentData {
+    return {
+        ...createBaseDocData(),
+        body: {
+            dataStream: '\b\b\r\n',
+            customBlocks: [
+                { startIndex: 0, blockId: 'shape-1' },
+                { startIndex: 1, blockId: 'shape-2' },
+            ],
+        },
+        drawings: {
+            'shape-1': {
+                drawingId: 'shape-1',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 1 },
+                    positionV: { posOffset: 2 },
+                },
+            } as never,
+            'shape-2': {
+                drawingId: 'shape-2',
+                unitId: 'test-doc',
+                subUnitId: 'test-doc',
+                drawingType: 'image',
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                docTransform: {
+                    positionH: { posOffset: 5 },
+                    positionV: { posOffset: 6 },
+                },
+            } as never,
+        },
+        drawingsOrder: ['shape-1', 'shape-2'],
+    };
+}
+
 function setupDrawingTestBed(docData: IDocumentData) {
     const refreshControls = vi.fn();
     let currentSegment = '';
@@ -213,6 +253,7 @@ function setupDrawingTestBed(docData: IDocumentData) {
         RemoveDocDrawingCommand,
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
+        SetDocDrawingArrangeCommand,
         UpdateDocDrawingDistanceCommand,
         UpdateDocDrawingWrapTextCommand,
         UpdateDrawingDocTransformCommand,
@@ -317,6 +358,28 @@ describe('docs drawing commands integration', () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
 
         expect(await testBed.commandService.executeCommand(DeleteDocDrawingsCommand.id)).toBe(false);
+
+        testBed.univer.dispose();
+    });
+
+    it('deletes multiple focused drawings through the command pipeline', async () => {
+        const testBed = setupDrawingTestBed(createMultiDrawingDocData());
+
+        testBed.docDrawingService.focusDrawing([
+            { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' },
+            { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-2' },
+        ]);
+
+        expect(await testBed.commandService.executeCommand(DeleteDocDrawingsCommand.id)).toBe(true);
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getBody()?.dataStream).toBe('\r\n');
+        expect(doc.getBody()?.customBlocks).toEqual([]);
+        expect(doc.getSnapshot().drawings).toEqual({});
+        expect(doc.getSnapshot().drawingsOrder).toEqual([]);
 
         testBed.univer.dispose();
     });
@@ -426,6 +489,25 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionV).toEqual({ posOffset: 18 });
         expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('reorders drawings through the arrange command and persists the final drawing order', async () => {
+        const testBed = setupDrawingTestBed(createMultiDrawingDocData());
+
+        expect(await testBed.commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawingIds: ['shape-1'],
+            arrangeType: ArrangeTypeEnum.front,
+        })).toBe(true);
+        await waitNextTick();
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+
+        expect(doc.getSnapshot().drawingsOrder).toEqual(['shape-2', 'shape-1']);
 
         testBed.univer.dispose();
     });

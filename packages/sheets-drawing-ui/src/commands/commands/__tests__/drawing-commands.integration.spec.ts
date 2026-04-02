@@ -68,6 +68,17 @@ function createDrawing(drawingId: string): ISheetDrawing {
     };
 }
 
+function createShiftedDrawing(drawingId: string, left: number, top: number): ISheetDrawing {
+    return {
+        ...createDrawing(drawingId),
+        transform: {
+            ...createDrawing(drawingId).transform!,
+            left,
+            top,
+        },
+    };
+}
+
 function createGroupDrawing(drawingId: string): ISheetDrawing {
     return {
         ...createDrawing(drawingId),
@@ -156,6 +167,51 @@ describe('sheets drawing ui commands integration', () => {
             transform: expect.objectContaining({
                 left: 11,
                 top: 20,
+            }),
+        });
+        expect(debounceRefreshControls).toHaveBeenCalled();
+    });
+
+    it('moves all focused drawings through the real ui command', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createShiftedDrawing('drawing-move-1', 10, 20),
+                createShiftedDrawing('drawing-move-2', 35, 45),
+            ],
+        });
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        const drawingManagerService = get(IDrawingManagerService);
+        sheetDrawingService.focusDrawing([
+            { unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-move-1' },
+            { unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-move-2' },
+        ]);
+
+        expect(await commandService.executeCommand(MoveDrawingsCommand.id, {
+            direction: Direction.DOWN,
+        })).toBe(true);
+
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-move-1' })).toMatchObject({
+            transform: expect.objectContaining({
+                left: 10,
+                top: 21,
+            }),
+        });
+        expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-move-2' })).toMatchObject({
+            transform: expect.objectContaining({
+                left: 35,
+                top: 46,
+            }),
+        });
+        expect(drawingManagerService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-move-1' })).toMatchObject({
+            transform: expect.objectContaining({
+                top: 21,
+            }),
+        });
+        expect(drawingManagerService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-move-2' })).toMatchObject({
+            transform: expect.objectContaining({
+                top: 46,
             }),
         });
         expect(debounceRefreshControls).toHaveBeenCalled();

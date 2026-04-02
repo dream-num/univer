@@ -108,13 +108,22 @@ export const RemoveDocDrawingCommand: ICommand = {
         const path = getRichTextEditPath(documentDataModel, segmentId);
         rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
-        for (const block of removeCustomBlocks) {
-            const { blockId } = block!;
+        const drawingEntries = removeCustomBlocks
+            .map((block) => {
+                const { blockId } = block!;
+                const drawing = (documentDataModel.getDrawings() ?? {})[blockId];
+                const drawingOrder = documentDataModel.getDrawingsOrder();
+                const drawingIndex = drawingOrder!.indexOf(blockId);
 
-            const drawing = (documentDataModel.getDrawings() ?? {})[blockId];
-            const drawingOrder = documentDataModel.getDrawingsOrder();
-            const drawingIndex = drawingOrder!.indexOf(blockId);
+                return {
+                    blockId,
+                    drawing,
+                    drawingIndex,
+                };
+            })
+            .sort((a, b) => b.drawingIndex - a.drawingIndex);
 
+        for (const { blockId, drawing, drawingIndex } of drawingEntries) {
             const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
             const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
 

@@ -85,9 +85,17 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DrawingApplyType, drawingPositionToTransform, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    ClearSheetDrawingTransformerOperation,
+    DrawingApplyType,
+    drawingPositionToTransform,
+    ISheetDrawingService,
+    SetDrawingApplyMutation,
+    SheetDrawingAnchorType,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 
 enum RangeMoveUndoType {
     deleteLeft,

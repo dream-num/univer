@@ -180,27 +180,6 @@ export class Spreadsheet extends SheetComponent {
             return { startX: 0, startY: 0, endX: 0, endY: 0 };
         }
         return skeleton.getNoMergeCellWithCoordByIndex(rowIndex, columnIndex);
-        // const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
-        //     spreadsheetSkeleton;
-
-        // let { startY, endY, startX, endX } = getCellWithCoordByIndexCore(
-        //     rowIndex,
-        //     columnIndex,
-        //     rowHeightAccumulation,
-        //     columnWidthAccumulation
-        // );
-
-        // startY += columnHeaderHeight;
-        // endY += columnHeaderHeight;
-        // startX += rowHeaderWidth;
-        // endX += rowHeaderWidth;
-
-        // return {
-        //     startY,
-        //     endY,
-        //     startX,
-        //     endX,
-        // };
     }
 
     override getScrollXYByRelativeCoords(coord: Vector2) {

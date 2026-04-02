@@ -23,7 +23,6 @@ import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/com
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { menuSchema } from '../menu/schema';
@@ -59,7 +58,6 @@ export class SheetDrawingUIController extends Disposable {
             InsertFloatImageCommand,
             InsertCellImageCommand,
             SidebarSheetDrawingOperation,
-            ClearSheetDrawingTransformerOperation,
             EditSheetDrawingOperation,
             GroupSheetDrawingCommand,
             UngroupSheetDrawingCommand,

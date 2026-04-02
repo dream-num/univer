@@ -94,7 +94,6 @@ export class SheetSkeleton extends Skeleton {
     }
 
     resetCache() {
-        //
     }
 
     /**
@@ -121,12 +120,12 @@ export class SheetSkeleton extends Skeleton {
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
     /** Scale of Scene */
-    protected _scaleX: number;
-    protected _scaleY: number;
+    protected _scaleX: number = 1;
+    protected _scaleY: number = 1;
     /** Viewport scrolled value */
-    protected _scrollX: number;
+    protected _scrollX: number = 0;
     /** Viewport scrolled value */
-    protected _scrollY: number;
+    protected _scrollY: number = 0;
 
     set columnHeaderHeight(value: number) {
         this._columnHeaderHeight = value;
@@ -261,9 +260,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Calc columnWidthAccumulation by columnData
-     * @param colCount
-     * @param columnData
-     * @param defaultColumnWidth
      */
     private _generateColumnMatrixCache(
         colCount: number,
@@ -440,7 +436,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Refresh cache after markDirty by SheetSkeletonManagerService.reCalculate()
-     * @param bounds
      */
     calculate(): Nullable<SheetSkeleton> {
         this.resetCache();
@@ -486,7 +481,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * expand curr range if it's intersect with merge range.
-     * @param range
      * @returns {IRange} expanded range because merge info.
      */
     // eslint-disable-next-line max-lines-per-function
@@ -583,8 +577,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * New version to get merge data.
-     * @param row
-     * @param column
      * @returns {ISelectionCell} The cell info with merge data
      */
     protected _getCellMergeInfo(row: number, column: number): ISelectionCell {
@@ -592,24 +584,7 @@ export class SheetSkeleton extends Skeleton {
     }
 
     /**
-     * @deprecated use getNoMergeCellWithCoordByIndex instead.
-     * @param rowIndex
-     * @param columnIndex
-     * @param header
-     * @returns
-     */
-    getNoMergeCellPositionByIndex(
-        rowIndex: number,
-        columnIndex: number,
-        header: boolean = true
-    ) {
-        return this.getNoMergeCellWithCoordByIndex(rowIndex, columnIndex, header);
-    }
-
-    /**
      * Original name: getNoMergeCellPositionByIndex
-     * @param rowIndex
-     * @param columnIndex
      */
     getNoMergeCellWithCoordByIndex(
         rowIndex: number,
@@ -646,38 +621,7 @@ export class SheetSkeleton extends Skeleton {
     }
 
     /**
-     * @deprecated use getNoMergeCellWithCoordByIndex(row, col, false)
-     * @param rowIndex
-     * @param columnIndex
-     */
-    getNoMergeCellPositionByIndexWithNoHeader(
-        rowIndex: number,
-        columnIndex: number
-    ): IPosition {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this;
-
-        const { startY, endY, startX, endX } = getCellWithCoordByIndexCore(
-            rowIndex,
-            columnIndex,
-            rowHeightAccumulation,
-            columnWidthAccumulation
-        );
-
-        return {
-            startY,
-            endY,
-            startX,
-            endX,
-        };
-    }
-
-    /**
-     *
-     * @param offsetY scaled offset y
-     * @param scaleY scale y
-     * @param scrollXY
-     * @param scrollXY.x
-     * @param scrollXY.y
+     * Get row index by offset y.
      */
     getRowIndexByOffsetY(
         offsetY: number,
@@ -714,10 +658,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Get column index by offset x.
-     * @param offsetX scaled offset x
-     * @param scaleX scale x
-     * @param scrollXY scrollXY
-     * @returns column index
      */
     getColumnIndexByOffsetX(
         evtOffsetX: number,
@@ -760,7 +700,6 @@ export class SheetSkeleton extends Skeleton {
      * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
      * @param scrollXY.x
      * @param scrollXY.y
-     * @returns {row, col}
      */
     getCellIndexByOffset(
         offsetX: number,
@@ -791,11 +730,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Unlike getCellWithCoordByOffset, returning data doesn't include coord.
-     * @param offsetX
-     * @param offsetY
-     * @param scaleX
-     * @param scaleY
-     * @param scrollXY
      */
     getCellByOffset(
         offsetX: number,
@@ -824,7 +758,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Return cell information corresponding to the current coordinates, including the merged cell object.
-     *
      * @param row Specified Row Coordinate
      * @param column Specified Column Coordinate
      */
@@ -916,8 +849,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Original name: getOffsetByPositionX
-     * @param column
-     * @returns
      */
     getOffsetByColumn(column: number): number {
         const { columnWidthAccumulation, rowHeaderWidthAndMarginLeft } = this;
@@ -940,7 +871,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Original name: getOffsetByPositionY
-     * @param row
      */
     getOffsetByRow(row: number): number {
         const { rowHeightAccumulation, columnHeaderHeightAndMarginTop } = this;
@@ -961,8 +891,7 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * Original name: getDecomposedOffset
-     * @param offsetX
-     * @param offsetY
+     * Here, offsetX and offsetY are the coordinates in the main viewport, excluding the rowHeaderWidthAndMarginLeft and columnHeaderHeightAndMarginTop.
      */
     getOffsetRelativeToRowCol(
         offsetX: number,
@@ -993,6 +922,37 @@ export class SheetSkeleton extends Skeleton {
             column,
             columnOffset,
             rowOffset,
+        };
+    }
+
+    /**
+     * Here, offsetX and offsetY are the coordinates in the viewport, including the rowHeaderWidthAndMarginLeft and columnHeaderHeightAndMarginTop.
+     */
+    getCellIndexAndOffsetByPosition(
+        offsetX: number,
+        offsetY: number
+    ): {
+        row: number;
+        rowOffset: number;
+        column: number;
+        columnOffset: number;
+    } {
+        const { actualRow, actualColumn, startX, startY } = this.getCellWithCoordByOffset(
+            offsetX,
+            offsetY,
+            this._scaleX,
+            this._scaleY,
+            {
+                x: this._scrollX,
+                y: this._scrollY,
+            }
+        );
+
+        return {
+            row: actualRow,
+            rowOffset: offsetY - startY,
+            column: actualColumn,
+            columnOffset: offsetX - startX,
         };
     }
 
@@ -1098,23 +1058,6 @@ export function getCellCoordByIndexSimple(
         startX,
         endX,
     };
-}
-
-/**
- * @deprecated use `getCellCoordByIndexSimple` instead.
- * @param row
- * @param column
- * @param rowHeightAccumulation
- * @param columnWidthAccumulation
- * @returns
- */
-export function getCellPositionByIndexSimple(
-    row: number,
-    column: number,
-    rowHeightAccumulation: number[],
-    columnWidthAccumulation: number[]
-): IPosition {
-    return getCellCoordByIndexSimple(row, column, rowHeightAccumulation, columnWidthAccumulation);
 }
 
 /**

@@ -155,7 +155,7 @@ export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export * from './sheets/clone';
 export { Range } from './sheets/range';
-export { getCellCoordByIndexSimple, getCellPositionByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
+export { getCellCoordByIndexSimple, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
 export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
 export * from './sheets/sheet-skeleton';
 export {

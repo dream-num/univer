@@ -26,6 +26,7 @@ import {
 import { SheetInterceptorService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface ISetDrawingCommandParams {
     unitId: string;
@@ -50,12 +51,38 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
         const intercepted = sheetInterceptorService.onCommandExecute({ id: SetSheetDrawingCommand.id, params });
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
-            { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE } },
+            {
+                id: SetDrawingApplyMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    op: redo,
+                    objects,
+                    type: DrawingApplyType.UPDATE,
+                },
+            },
+            {
+                id: ClearSheetDrawingTransformerOperation.id,
+                params: [unitId],
+            },
             ...intercepted.redos,
         ];
         const undoMutations = [
             ...(intercepted.preUndos ?? []),
-            { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } },
+            {
+                id: SetDrawingApplyMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    op: undo,
+                    objects,
+                    type: DrawingApplyType.UPDATE,
+                },
+            },
+            {
+                id: ClearSheetDrawingTransformerOperation.id,
+                params: [unitId],
+            },
             ...intercepted.undos,
         ];
 

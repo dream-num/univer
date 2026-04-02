@@ -719,8 +719,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         newSelectionRangeWithCoord.rangeWithCoord.unitId = unitId;
         newSelectionRangeWithCoord.rangeWithCoord.sheetId = sheetId;
         newSelectionRangeWithCoord.rangeWithCoord.rangeType = rangeType;
-        // const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
-        // const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
 
         // Only notify when the selection changes
         const rangeChanged =
@@ -890,30 +888,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         };
         const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
         activeControl.updateRangeBySelectionWithCoord(selectionWithCoord);
-        // const startCell = skeleton.getNoMergeCellPositionByIndex(range.startRow, range.startColumn);
-        // const endCell = skeleton.getNoMergeCellPositionByIndex(range.endRow, range.endColumn);
-        // const newSelectionRange = {
-        //     startColumn: range.startColumn,
-        //     startRow: range.startRow,
-        //     endColumn: range.endColumn,
-        //     endRow: range.endRow,
-
-        //     startY: startCell.startY,
-        //     endY: endCell.endY,
-        //     startX: startCell.startX,
-        //     endX: endCell.endX,
-
-        //     rangeType,
-        // };
-
-        /**
-         * When expanding the selection with the Shift key,
-         * the original highlighted cell should remain unchanged.
-         * If the highlighted cell is a merged cell, the selection needs to be expanded.
-         */
-        // const activeCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
-
-        // activeControl.updateRange(newSelectionRange, currentCell);
     }
 
     isSelectionEnabled(): boolean {

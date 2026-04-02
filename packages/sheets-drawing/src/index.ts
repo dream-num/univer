@@ -20,6 +20,7 @@ export { type IDeleteDrawingCommandParam, type IDeleteDrawingCommandParams, Remo
 export { type ISetDrawingArrangeCommandParams, SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
 export { type ISetDrawingCommandParams, SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
 export { DrawingApplyType, type ISetDrawingApplyMutationParams, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
+export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';

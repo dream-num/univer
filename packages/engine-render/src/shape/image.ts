@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { ISrcRect, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
 import type { UniverRenderingContext } from '../context';
@@ -40,7 +40,7 @@ export interface IImageShapeClipService {
      * @returns The actual bounding rect of the clip region, or false if no clip was built.
      *          For multi-path shapes the bounds may extend beyond (0, 0, width, height).
      */
-    applyShapeClip(ctx: UniverRenderingContext, prstGeom: PresetGeometryType, width: number, height: number, adjustValues?: Nullable<Record<string, number>>): IShapeClipBounds | false;
+    applyShapeClip(ctx: UniverRenderingContext, prstGeom: string, width: number, height: number, adjustValues?: Nullable<Record<string, number>>): IShapeClipBounds | false;
 }
 
 export interface IImageProps extends IShapeProps {
@@ -56,7 +56,7 @@ export interface IImageProps extends IShapeProps {
     /**
      * 20.1.9.18 prstGeom (Preset geometry)
      */
-    prstGeom?: Nullable<PresetGeometryType>;
+    prstGeom?: Nullable<string>;
 
     /**
      * Adjust values for the preset geometry (e.g. corner radius for roundRect).
@@ -171,7 +171,7 @@ export class Image extends Shape<IImageProps> {
         this.setSrcRect(null);
     }
 
-    setPrstGeom(prstGeom?: Nullable<PresetGeometryType>) {
+    setPrstGeom(prstGeom?: Nullable<string>) {
         this._props.prstGeom = prstGeom;
     }
 

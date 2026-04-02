@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IImageShapeClipService, IShapeClipBounds, UniverRenderingContext } from '@univerjs/engine-render';
 import { Disposable, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
@@ -27,7 +27,7 @@ export const IMAGE_CLIP_SHAPE_PICKER_COMPONENT = 'sheet.image-clip.shape.picker.
  * Coordinate system: (0,0) is at the top-left of the shape area.
  * @returns The actual bounding rect of the clip region, or false if no clip was built
  */
-export type ImageShapeClipDelegate = (ctx: UniverRenderingContext, prstGeom: PresetGeometryType, width: number, height: number, adjustValues?: Nullable<Record<string, number>>) => IShapeClipBounds | false;
+export type ImageShapeClipDelegate = (ctx: UniverRenderingContext, prstGeom: string, width: number, height: number, adjustValues?: Nullable<Record<string, number>>) => IShapeClipBounds | false;
 
 /**
  * Bridge service that enables shape-based image clipping.
@@ -63,7 +63,7 @@ export class DrawingImageClipService extends Disposable implements IImageShapeCl
         });
     }
 
-    applyShapeClip(ctx: UniverRenderingContext, prstGeom: PresetGeometryType, width: number, height: number, adjustValues?: Nullable<Record<string, number>>): IShapeClipBounds | false {
+    applyShapeClip(ctx: UniverRenderingContext, prstGeom: string, width: number, height: number, adjustValues?: Nullable<Record<string, number>>): IShapeClipBounds | false {
         if (this._clipDelegate) {
             return this._clipDelegate(ctx, prstGeom, width, height, adjustValues);
         }

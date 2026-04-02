@@ -117,9 +117,3 @@ export enum SpecialShapes {
     ActionButtonReturn = 'actionButtonReturn',
     ActionButtonSound = 'actionButtonSound',
 }
-
-/**
- * 20.1.9.18 prstGeom (Preset geometry)
- */
-export type ShapeType = BasicShapes | ArrowsAndMarkersShapes | OtherShapes | SpecialShapes;
-export type PresetGeometryType = ShapeType | 'custom';

@@ -68,6 +68,8 @@ export function createDocUiTestBed(docData?: IDocumentData, dependencies?: Depen
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
+    const hasDependency = (identifier: DependencyIdentifier<unknown>) =>
+        dependencies?.some((dependency) => Array.isArray(dependency) && dependency[0] === identifier);
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
@@ -81,14 +83,16 @@ export function createDocUiTestBed(docData?: IDocumentData, dependencies?: Depen
 
         override onStarting(): void {
             this._injector.get(IUndoRedoService);
-            if (!dependencies?.some((dependency) => Array.isArray(dependency) && dependency[0] === IRenderManagerService)) {
+            if (!hasDependency(IRenderManagerService)) {
                 this._injector.add([IRenderManagerService, { useClass: MockRenderManagerService as unknown as Ctor<IRenderManagerService> }]);
             }
             this._injector.add([DocSelectionManagerService]);
             this._injector.add([DocStateEmitService]);
             this._injector.add([DocStateChangeManagerService]);
             this._injector.add([DocIMEInputManagerService]);
-            this._injector.add([DocSelectionRenderService]);
+            if (!hasDependency(DocSelectionRenderService)) {
+                this._injector.add([DocSelectionRenderService]);
+            }
             dependencies?.forEach((dependency) => this._injector.add(dependency));
         }
 

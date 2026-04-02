@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     ILogService,
@@ -65,6 +65,8 @@ export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, depen
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
+    const hasDependency = (identifier: DependencyIdentifier<unknown>) =>
+        dependencies?.some((dependency) => Array.isArray(dependency) && dependency[0] === identifier);
 
     const debounceRefreshControls = vi.fn();
     const renderManagerService = {
@@ -114,11 +116,11 @@ export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, depen
 
             ([
                 [SheetInterceptorService],
-                [IDrawingManagerService, { useClass: DrawingManagerService }],
-                [ISheetDrawingService, { useClass: DrawingManagerService as never }],
-                [IRenderManagerService, { useValue: renderManagerService as unknown as IRenderManagerService }],
-                [SheetSkeletonService, { useValue: sheetSkeletonService as unknown as SheetSkeletonService }],
-            ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
+                !hasDependency(IDrawingManagerService) && [IDrawingManagerService, { useClass: DrawingManagerService }],
+                !hasDependency(ISheetDrawingService) && [ISheetDrawingService, { useClass: DrawingManagerService as never }],
+                !hasDependency(IRenderManagerService) && [IRenderManagerService, { useValue: renderManagerService as unknown as IRenderManagerService }],
+                !hasDependency(SheetSkeletonService) && [SheetSkeletonService, { useValue: sheetSkeletonService as unknown as SheetSkeletonService }],
+            ].filter(Boolean) as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
             dependencies?.forEach((dependency) => this._injector.add(dependency));
         }

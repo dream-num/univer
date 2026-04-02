@@ -70,10 +70,11 @@ describe('DocDrawingPopupMenuController', () => {
                 setContextValue: vi.fn(),
             } as never
         );
+        const controllerRef = controller as any;
 
         transformer.createControl$.next();
 
-        expect(controller._canvasPopManagerService.attachPopupToObject).toHaveBeenCalledWith(
+        expect(controllerRef._canvasPopManagerService.attachPopupToObject).toHaveBeenCalledWith(
             selectedObject,
             expect.objectContaining({
                 componentKey: COMPONENT_IMAGE_POPUP_MENU,
@@ -85,7 +86,7 @@ describe('DocDrawingPopupMenuController', () => {
             }),
             'doc-1'
         );
-        expect(controller._drawingManagerService.focusDrawing).toHaveBeenCalledWith([{
+        expect(controllerRef._drawingManagerService.focusDrawing).toHaveBeenCalledWith([{
             unitId: 'doc-1',
             subUnitId: 'doc-1',
             drawingId: 'shape-1',
@@ -96,8 +97,8 @@ describe('DocDrawingPopupMenuController', () => {
         transformer.clearControl$.next();
 
         expect(popupDispose.dispose).toHaveBeenCalled();
-        expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, false);
-        expect(controller._drawingManagerService.focusDrawing).toHaveBeenLastCalledWith(null);
+        expect(controllerRef._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_COMMON_DRAWINGS, false);
+        expect(controllerRef._drawingManagerService.focusDrawing).toHaveBeenLastCalledWith(null);
 
         controller.dispose();
     });

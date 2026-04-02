@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'Recortar',
             start: 'Iniciar recorte',
             mode: 'Libre',
+            shape: 'Recortar a forma',
         },
         group: {
             title: 'Agrupar',

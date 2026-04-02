@@ -15,20 +15,27 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { ArrangeTypeEnum, Direction, ICommandService, IUniverInstanceService, JSONX, PositionedObjectLayoutType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { ArrangeTypeEnum, Direction, ICommandService, IUniverInstanceService, JSONX, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
-import { UpdateDrawingDocTransformCommand } from '../update-doc-drawing.command';
+import {
+    TextWrappingStyle,
+    UpdateDocDrawingDistanceCommand,
+    UpdateDocDrawingWrappingStyleCommand,
+    UpdateDocDrawingWrapTextCommand,
+    UpdateDrawingDocTransformCommand,
+} from '../update-doc-drawing.command';
 
 function createAccessor() {
     const commandService = { syncExecuteCommand: vi.fn(() => true), executeCommand: vi.fn(() => true) };
+    const refreshControls = vi.fn();
     const docDrawingService = {
         getForwardDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-forward'], undo: ['undo'], objects: ['shape-1'] })),
         getBackwardDrawingOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-backward'], undo: ['undo'], objects: ['shape-1'] })),
@@ -38,8 +45,25 @@ function createAccessor() {
     };
     const renderManagerService = {
         getRenderById: vi.fn(() => ({
-            scene: { getTransformerByCreate: () => ({ refreshControls: vi.fn() }) },
-            with: () => ({ getSegment: () => '' }),
+            scene: { getTransformerByCreate: () => ({ refreshControls }) },
+            with: (token: unknown) => {
+                if (token === DocSkeletonManagerService) {
+                    return {
+                        getSkeleton: () => ({
+                            getSkeletonData: () => ({
+                                pages: [],
+                                skeHeaders: new Map(),
+                                skeFooters: new Map(),
+                            }),
+                        }),
+                        getViewModel: () => ({
+                            getEditArea: () => DocumentEditArea.BODY,
+                        }),
+                    };
+                }
+
+                return { getSegment: () => '' };
+            },
         })),
     };
     const currentDocument = {
@@ -47,7 +71,21 @@ function createAccessor() {
         getSelfOrHeaderFooterModel: vi.fn(() => ({
             getBody: () => ({ customBlocks: [{ blockId: 'shape-1', startIndex: 3 }] }),
         })),
-        getSnapshot: vi.fn(() => ({ drawingsOrder: ['shape-1'] })),
+        getSnapshot: vi.fn(() => ({
+            drawingsOrder: ['shape-1'],
+            drawings: {
+                'shape-1': {
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    behindDoc: 0,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    distT: 1,
+                    distB: 1,
+                    distL: 1,
+                    distR: 1,
+                    docTransform: { positionH: { posOffset: 1 }, positionV: { posOffset: 2 } },
+                },
+            },
+        })),
         getDrawings: vi.fn(() => ({ 'shape-1': { id: 'shape-1' } })),
         getDrawingsOrder: vi.fn(() => ['shape-1']),
     };
@@ -102,6 +140,7 @@ function createAccessor() {
         currentDocument,
         docDrawingService,
         docSelectionManagerService,
+        refreshControls,
     };
 }
 
@@ -191,5 +230,51 @@ describe('docs drawing commands', () => {
             drawings: [{ drawingId: 'shape-2', unitId: 'doc-1', subUnitId: 'doc-1' }],
         } as never)).toBe(false);
         expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
+    });
+
+    it('updates wrapping style, wrap distance, and wrap text through rich-text mutations', () => {
+        const { accessor, commandService, refreshControls } = createAccessor();
+        const replaceOp = vi.fn(() => ['replace-op']);
+        vi.spyOn(JSONX, 'getInstance').mockReturnValue({
+            replaceOp,
+            editOp: vi.fn(),
+            insertOp: vi.fn(),
+            removeOp: vi.fn(),
+        } as never);
+
+        expect(UpdateDocDrawingWrappingStyleCommand.handler(accessor, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawings: [{ drawingId: 'shape-1' }],
+            wrappingStyle: TextWrappingStyle.BEHIND_TEXT,
+        } as never)).toBe(true);
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(RichTextEditingMutation.id, expect.objectContaining({
+            unitId: 'doc-1',
+            textRanges: null,
+        }));
+        expect(refreshControls).toHaveBeenCalledTimes(1);
+
+        expect(UpdateDocDrawingDistanceCommand.handler(accessor, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawings: [{ drawingId: 'shape-1' }],
+            dist: { distT: 4, distB: 5, distL: 6, distR: 7 },
+        } as never)).toBe(true);
+        expect(commandService.syncExecuteCommand).toHaveBeenLastCalledWith(RichTextEditingMutation.id, expect.objectContaining({
+            unitId: 'doc-1',
+            textRanges: null,
+        }));
+
+        expect(UpdateDocDrawingWrapTextCommand.handler(accessor, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawings: [{ drawingId: 'shape-1' }],
+            wrapText: WrapTextType.RIGHT,
+        } as never)).toBe(true);
+        expect(commandService.syncExecuteCommand).toHaveBeenLastCalledWith(RichTextEditingMutation.id, expect.objectContaining({
+            unitId: 'doc-1',
+            textRanges: null,
+        }));
+        expect(replaceOp).toHaveBeenCalled();
     });
 });

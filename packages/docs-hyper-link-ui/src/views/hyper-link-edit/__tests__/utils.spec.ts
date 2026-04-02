@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export const QuickInsertButtonComponentKey = 'doc.quick-insert.button';
+import { describe, expect, it } from 'vitest';
+import { isBlankInput } from '../utils';
+
+describe('DocHyperLinkEdit utils', () => {
+    it('treats whitespace-only input as blank', () => {
+        expect(isBlankInput('')).toBe(true);
+        expect(isBlankInput('   ')).toBe(true);
+        expect(isBlankInput('\n\t')).toBe(true);
+        expect(isBlankInput(' link ')).toBe(false);
+    });
+});

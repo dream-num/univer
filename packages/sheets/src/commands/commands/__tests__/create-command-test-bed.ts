@@ -78,6 +78,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
+    injector: Injector;
     sheet: Workbook;
 }
 
@@ -132,6 +133,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     return {
         univer,
         get: injector.get.bind(injector),
+        injector,
         sheet,
     };
 }

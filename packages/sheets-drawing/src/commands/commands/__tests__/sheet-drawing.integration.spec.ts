@@ -16,7 +16,7 @@
 
 import type { ICommandService, Injector, Univer } from '@univerjs/core';
 import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
-import { ArrangeTypeEnum, DrawingTypeEnum, ImageSourceType, IUniverInstanceService, UndoCommand } from '@univerjs/core';
+import { ArrangeTypeEnum, DrawingTypeEnum, ImageSourceType, IResourceManagerService, IUniverInstanceService, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -185,6 +185,32 @@ describe('sheet drawing integration', () => {
         });
         expect(get(IDrawingManagerService).getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-3' })).toMatchObject({
             drawingId: 'drawing-3',
+        });
+    });
+
+    it('serializes and reloads drawing resources through the resource manager', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [createSheetDrawing('drawing-resource')],
+        });
+
+        const resourceManagerService = get(IResourceManagerService);
+        const resource = resourceManagerService.getResourcesByType('test', UniverInstanceType.UNIVER_SHEET)
+            .find((item) => item.name === 'SHEET_DRAWING_PLUGIN');
+
+        expect(resource).toBeDefined();
+        expect(resource?.data).toContain('drawing-resource');
+
+        resourceManagerService.unloadResources('test', UniverInstanceType.UNIVER_SHEET);
+        expect(get(ISheetDrawingService).getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-resource' })).toBeUndefined();
+        expect(get(IDrawingManagerService).getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-resource' })).toBeUndefined();
+
+        resourceManagerService.loadResources('test', [resource!]);
+        expect(get(ISheetDrawingService).getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-resource' })).toMatchObject({
+            drawingId: 'drawing-resource',
+        });
+        expect(get(IDrawingManagerService).getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-resource' })).toMatchObject({
+            drawingId: 'drawing-resource',
         });
     });
 });

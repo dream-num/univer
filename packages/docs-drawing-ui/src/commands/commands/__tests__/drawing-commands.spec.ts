@@ -20,12 +20,14 @@ import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingM
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
+import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../insert-doc-drawing.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
 import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../set-drawing-arrange.command';
 import {
+    IMoveInlineDrawingCommand,
     TextWrappingStyle,
     UpdateDocDrawingDistanceCommand,
     UpdateDocDrawingWrappingStyleCommand,
@@ -36,12 +38,20 @@ import {
 function createAccessor() {
     const commandService = { syncExecuteCommand: vi.fn(() => true), executeCommand: vi.fn(() => true) };
     const refreshControls = vi.fn();
+    const selectionRenderService = {
+        getSegment: vi.fn(() => ''),
+        setSegment: vi.fn(),
+        setSegmentPage: vi.fn(),
+    };
     const docDrawingService = {
         getForwardDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-forward'], undo: ['undo'], objects: ['shape-1'] })),
         getBackwardDrawingOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-backward'], undo: ['undo'], objects: ['shape-1'] })),
         getFrontDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-front'], undo: ['undo'], objects: ['shape-1'] })),
         getBackDrawingsOp: vi.fn(() => ({ redo: ['r1', 'r2', 'r3', 'move-back'], undo: ['undo'], objects: ['shape-1'] })),
         getFocusDrawings: vi.fn(() => [{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'shape-1', drawingType: 'drawing' }]),
+    };
+    const docRefreshDrawingsService = {
+        refreshDrawings: vi.fn(),
     };
     const renderManagerService = {
         getRenderById: vi.fn(() => ({
@@ -62,14 +72,14 @@ function createAccessor() {
                     };
                 }
 
-                return { getSegment: () => '' };
+                return selectionRenderService;
             },
         })),
     };
     const currentDocument = {
         getUnitId: vi.fn(() => 'doc-1'),
         getSelfOrHeaderFooterModel: vi.fn(() => ({
-            getBody: () => ({ customBlocks: [{ blockId: 'shape-1', startIndex: 3 }] }),
+            getBody: () => ({ dataStream: 'abc\b\r\n', customBlocks: [{ blockId: 'shape-1', startIndex: 3 }] }),
         })),
         getSnapshot: vi.fn(() => ({
             drawingsOrder: ['shape-1'],
@@ -133,6 +143,10 @@ function createAccessor() {
                     return docSelectionManagerService;
                 }
 
+                if (token === DocRefreshDrawingsService) {
+                    return docRefreshDrawingsService;
+                }
+
                 throw new Error(`Unknown dependency: ${String(token)}`);
             },
         } as IAccessor,
@@ -141,6 +155,8 @@ function createAccessor() {
         docDrawingService,
         docSelectionManagerService,
         refreshControls,
+        selectionRenderService,
+        docRefreshDrawingsService,
     };
 }
 
@@ -276,5 +292,37 @@ describe('docs drawing commands', () => {
             textRanges: null,
         }));
         expect(replaceOp).toHaveBeenCalled();
+    });
+
+    it('moves an inline drawing by rebuilding its custom block location', () => {
+        const composeSpy = vi.spyOn(JSONX, 'compose').mockReturnValue(['inline-composed'] as never);
+        const editOp = vi.fn(() => ['edit-op']);
+        vi.spyOn(JSONX, 'getInstance').mockReturnValue({
+            replaceOp: vi.fn(),
+            editOp,
+            insertOp: vi.fn(),
+            removeOp: vi.fn(),
+        } as never);
+
+        const { accessor, commandService, refreshControls, selectionRenderService } = createAccessor();
+
+        expect(IMoveInlineDrawingCommand.handler(accessor, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawing: { drawingId: 'shape-1' },
+            offset: 1,
+            segmentId: '',
+            segmentPage: 0,
+        } as never)).toBe(true);
+
+        expect(editOp).toHaveBeenCalled();
+        expect(composeSpy).toHaveBeenCalled();
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(RichTextEditingMutation.id, {
+            unitId: 'doc-1',
+            actions: ['inline-composed'],
+            textRanges: null,
+        });
+        expect(selectionRenderService.setSegment).not.toHaveBeenCalled();
+        expect(refreshControls).toHaveBeenCalled();
     });
 });

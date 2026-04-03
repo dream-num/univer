@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.20.0](https://github.com/dream-num/univer/compare/v0.19.0...v0.20.0) (2026-04-03)
+
+
+### Features
+
+* **image:** feat img clip by shape in OSS ([#6765](https://github.com/dream-num/univer/issues/6765)) ([96ec7de](https://github.com/dream-num/univer/commit/96ec7dec6c1a86c0846ce94c02e4ab7203c24c0a))
+
 # [0.19.0](https://github.com/dream-num/univer/compare/v0.18.0...v0.19.0) (2026-03-28)
 
 

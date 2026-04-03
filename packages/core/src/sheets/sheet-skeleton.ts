@@ -46,6 +46,43 @@ import { getIntersectRange } from '../shared/range';
 import { Skeleton } from '../skeleton';
 import { BooleanNumber, HorizontalAlign } from '../types/enum';
 
+/**
+ * Configuration for a single gap (visual separator between rows or columns).
+ * The gap area is rendered with a background color and diagonal stripes.
+ */
+export interface IGapItem {
+    /** Gap size in pixels */
+    size: number;
+    /** Background color of the gap area. Falls back to ISheetGapConfig.defaultBackgroundColor. */
+    color?: string;
+    /** Diagonal stripe color. Falls back to ISheetGapConfig.defaultStripeColor. */
+    stripeColor?: string;
+}
+
+/**
+ * Configuration for row/column gaps in a sheet.
+ * Gaps are visual-only separators that do not affect the data model.
+ * They are stored as runtime configuration and are not persisted.
+ */
+export interface ISheetGapConfig {
+    /** Row gaps. Key is the row index; gap appears BEFORE that row. */
+    rowGaps?: IObjectArrayPrimitiveType<IGapItem>;
+    /** Column gaps. Key is the column index; gap appears BEFORE that column. */
+    colGaps?: IObjectArrayPrimitiveType<IGapItem>;
+    /** Default diagonal stripe color (theme primary). Used when gap items don't specify stripeColor. */
+    defaultStripeColor?: string;
+    /** Default background color (lighter primary). Used when gap items don't specify color. */
+    defaultBackgroundColor?: string;
+}
+
+/**
+ * Optional gap size getter for coordinate calculation functions.
+ */
+export interface IGapSizeGetter {
+    row: (r: number) => number;
+    col: (c: number) => number;
+}
+
 export interface IGetRowColByPosOptions {
     closeFirst?: boolean;
 
@@ -119,6 +156,15 @@ export class SheetSkeleton extends Skeleton {
     private _columnWidthAccumulation: number[] = [];
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
+
+    /**
+     * Runtime gap configuration for visual row/column separators.
+     */
+    private _gapConfig: ISheetGapConfig = {
+        rowGaps: { 3: { size: 30 } },
+        colGaps: { 2: { size: 40 } },
+    };
+
     /** Scale of Scene */
     protected _scaleX: number = 1;
     protected _scaleY: number = 1;
@@ -213,6 +259,94 @@ export class SheetSkeleton extends Skeleton {
         return this._imageCacheMap;
     }
 
+    // #region Gap Config
+
+    get gapConfig(): ISheetGapConfig {
+        return this._gapConfig;
+    }
+
+    /**
+     * Set runtime gap configuration for visual row/column separators.
+     * This triggers a recalculation of the layout (accumulation arrays, etc.).
+     */
+    setGapConfig(config: ISheetGapConfig): void {
+        this._gapConfig = config;
+        this.makeDirty(true);
+    }
+
+    /**
+     * Get the gap size (in px) BEFORE the given row.
+     */
+    getRowGapSize(row: number): number {
+        return this._gapConfig.rowGaps?.[row]?.size ?? 0;
+    }
+
+    /**
+     * Get the gap size (in px) BEFORE the given column.
+     */
+    getColGapSize(col: number): number {
+        return this._gapConfig.colGaps?.[col]?.size ?? 0;
+    }
+
+    /**
+     * Returns a gap size getter object for use with coordinate utility functions.
+     */
+    getGapSizeGetter(): IGapSizeGetter | undefined {
+        if (!this._gapConfig.rowGaps && !this._gapConfig.colGaps) {
+            return undefined;
+        }
+        return {
+            row: (r: number) => this.getRowGapSize(r),
+            col: (c: number) => this.getColGapSize(c),
+        };
+    }
+
+    /**
+     * Check if a Y position (in sheet content coordinates) falls within a row gap.
+     * @returns The row index that the gap precedes, or -1 if not in a gap.
+     */
+    getRowGapAtPosition(y: number): number {
+        const { rowGaps } = this._gapConfig;
+        if (!rowGaps) return -1;
+
+        for (const rowStr of Object.keys(rowGaps)) {
+            const row = Number(rowStr);
+            const gapSize = rowGaps[row]?.size ?? 0;
+            if (gapSize <= 0) continue;
+
+            const gapStart = this._rowHeightAccumulation[row - 1] ?? 0;
+            const gapEnd = gapStart + gapSize;
+            if (y >= gapStart && y < gapEnd) {
+                return row;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Check if an X position (in sheet content coordinates) falls within a column gap.
+     * @returns The column index that the gap precedes, or -1 if not in a gap.
+     */
+    getColGapAtPosition(x: number): number {
+        const { colGaps } = this._gapConfig;
+        if (!colGaps) return -1;
+
+        for (const colStr of Object.keys(colGaps)) {
+            const col = Number(colStr);
+            const gapSize = colGaps[col]?.size ?? 0;
+            if (gapSize <= 0) continue;
+
+            const gapStart = this._columnWidthAccumulation[col - 1] ?? 0;
+            const gapEnd = gapStart + gapSize;
+            if (x >= gapStart && x < gapEnd) {
+                return col;
+            }
+        }
+        return -1;
+    }
+
+    // #endregion
+
     private _generateRowMatrixCache(
         rowCount: number,
         rowData: IObjectArrayPrimitiveType<Partial<IRowData>>,
@@ -246,6 +380,10 @@ export class SheetSkeleton extends Skeleton {
                     rowHeight = 0;
                 }
             }
+
+            // Add gap BEFORE this row (gap appears between row r-1 and row r)
+            const gapSize = this._gapConfig.rowGaps?.[r]?.size ?? 0;
+            rowTotalHeight += gapSize;
 
             rowTotalHeight += rowHeight;
 
@@ -289,6 +427,10 @@ export class SheetSkeleton extends Skeleton {
                 }
             }
 
+            // Add gap BEFORE this column (gap appears between column c-1 and column c)
+            const gapSize = this._gapConfig.colGaps?.[c]?.size ?? 0;
+            columnTotalWidth += gapSize;
+
             columnTotalWidth += columnWidth;
             columnWidthAccumulation.push(columnTotalWidth);
         }
@@ -331,7 +473,9 @@ export class SheetSkeleton extends Skeleton {
                     row,
                     column,
                     this.rowHeightAccumulation,
-                    this.columnWidthAccumulation
+                    this.columnWidthAccumulation,
+                    undefined,
+                    this.getGapSizeGetter()
                 );
 
                 // For center alignment, the current cell's width needs to be divided in half for comparison.
@@ -367,7 +511,9 @@ export class SheetSkeleton extends Skeleton {
                 row,
                 column,
                 this.rowHeightAccumulation,
-                this.columnWidthAccumulation
+                this.columnWidthAccumulation,
+                undefined,
+                this.getGapSizeGetter()
             );
 
             if (
@@ -602,7 +748,9 @@ export class SheetSkeleton extends Skeleton {
             rowIndex,
             columnIndex,
             rowHeightAccumulation,
-            columnWidthAccumulation
+            columnWidthAccumulation,
+            undefined,
+            this.getGapSizeGetter()
         );
 
         if (header) {
@@ -778,7 +926,8 @@ export class SheetSkeleton extends Skeleton {
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this.worksheet?.getCellInfoInMergeData(row, column)
+            this.worksheet?.getCellInfoInMergeData(row, column),
+            this.getGapSizeGetter()
         );
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
@@ -1028,24 +1177,30 @@ export class SheetSkeleton extends Skeleton {
  * @param column
  * @param rowHeightAccumulation
  * @param columnWidthAccumulation
+ * @param rowGapSize Gap size (px) BEFORE this row. The cell startY is shifted by this amount.
+ * @param colGapSize Gap size (px) BEFORE this column. The cell startX is shifted by this amount.
  */
 export function getCellCoordByIndexSimple(
     row: number,
     column: number,
     rowHeightAccumulation: number[],
-    columnWidthAccumulation: number[]
+    columnWidthAccumulation: number[],
+    rowGapSize: number = 0,
+    colGapSize: number = 0
 ): IPosition {
     const startRow = row - 1;
     const startColumn = column - 1;
 
-    const startY = rowHeightAccumulation[startRow] || 0;
+    // Gap is included in the accumulation before the cell's height.
+    // So startY (bottom of prev row) + gap = actual cell top.
+    const startY = (rowHeightAccumulation[startRow] || 0) + rowGapSize;
     let endY = rowHeightAccumulation[row];
 
     if (endY == null) {
         endY = rowHeightAccumulation[rowHeightAccumulation.length - 1];
     }
 
-    const startX = columnWidthAccumulation[startColumn] || 0;
+    const startX = (columnWidthAccumulation[startColumn] || 0) + colGapSize;
     let endX = columnWidthAccumulation[column];
 
     if (endX == null) {
@@ -1066,7 +1221,8 @@ export function getCellCoordByIndexSimple(
  * @param {number} column The column index of the cell
  * @param {number[]} rowHeightAccumulation The accumulated height of each row
  * @param {number[]} columnWidthAccumulation The accumulated width of each column
- * @param {ICellInfo} mergeData The merge information of the cell
+ * @param {ICellInfo} mergeDataInfo The merge information of the cell
+ * @param {IGapSizeGetter} gapSizeGetter Optional getter for gap sizes before specific rows/columns
  * @returns {ICellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  */
 // eslint-disable-next-line max-lines-per-function
@@ -1075,7 +1231,8 @@ export function getCellWithCoordByIndexCore(
     column: number,
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
-    mergeDataInfo: Nullable<ICellInfo>
+    mergeDataInfo: Nullable<ICellInfo>,
+    gapSizeGetter?: IGapSizeGetter
 ): ICellWithCoord {
     row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
     column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
@@ -1084,7 +1241,9 @@ export function getCellWithCoordByIndexCore(
         row,
         column,
         rowHeightAccumulation,
-        columnWidthAccumulation
+        columnWidthAccumulation,
+        gapSizeGetter?.row(row) ?? 0,
+        gapSizeGetter?.col(column) ?? 0
     );
 
     if (!mergeDataInfo) {
@@ -1134,12 +1293,14 @@ export function getCellWithCoordByIndexCore(
     const columnAccumulationCount = columnWidthAccumulation.length - 1;
 
     if (isMerged && startRow !== -1 && startColumn !== -1) {
-        const mergeStartY = rowHeightAccumulation[startRow - 1] || 0;
+        const mergeRowGapSize = gapSizeGetter?.row(startRow) ?? 0;
+        const mergeColGapSize = gapSizeGetter?.col(startColumn) ?? 0;
+        const mergeStartY = (rowHeightAccumulation[startRow - 1] || 0) + mergeRowGapSize;
         const mergeEndY =
             rowHeightAccumulation[endRow] ||
             rowHeightAccumulation[rowAccumulationCount];
 
-        const mergeStartX = columnWidthAccumulation[startColumn - 1] || 0;
+        const mergeStartX = (columnWidthAccumulation[startColumn - 1] || 0) + mergeColGapSize;
         const mergeEndX =
             columnWidthAccumulation[endColumn] ||
             columnWidthAccumulation[columnAccumulationCount];

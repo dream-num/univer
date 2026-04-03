@@ -38,6 +38,11 @@ import { SheetComponent } from './sheet-component';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
+/** Default gap background color (light blue, used when no theme/color configured) */
+const DEFAULT_GAP_BACKGROUND_COLOR = 'rgba(73, 144, 226, 0.08)';
+/** Default gap diagonal stripe color (semi-transparent blue) */
+const DEFAULT_GAP_STRIPE_COLOR = 'rgba(73, 144, 226, 0.25)';
+
 export class Spreadsheet extends SheetComponent {
     private _backgroundExtension!: Background;
 
@@ -525,7 +530,7 @@ export class Spreadsheet extends SheetComponent {
      * draw gridlines
      * @param ctx
      */
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _drawAuxiliary(ctx: UniverRenderingContext2D) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
@@ -645,6 +650,9 @@ export class Spreadsheet extends SheetComponent {
         // clear line of overflow cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
+        // Draw gap areas AFTER merge/overflow clearing so gap visuals are always on top
+        this._drawGapAreas(ctx, spreadsheetSkeleton, rowStart, rowEnd, columnStart, columnEnd, startX, endX, startY, endY);
+
         ctx.restore();
     }
 
@@ -682,6 +690,87 @@ export class Spreadsheet extends SheetComponent {
             ctx.stroke();
             ctx.closePath();
         }
+    }
+
+    /**
+     * Draw gap areas for row and column gaps.
+     * Clears gridlines in gap regions and fills with gap style.
+     */
+    private _drawGapAreas(
+        ctx: UniverRenderingContext2D,
+        spreadsheetSkeleton: SpreadsheetSkeleton,
+        rowStart: number,
+        rowEnd: number,
+        columnStart: number,
+        columnEnd: number,
+        viewStartX: number,
+        viewEndX: number,
+        viewStartY: number,
+        viewEndY: number
+    ): void {
+        const { gapConfig, rowHeightAccumulation, columnWidthAccumulation } = spreadsheetSkeleton;
+        const rowGaps = gapConfig?.rowGaps;
+        const colGaps = gapConfig?.colGaps;
+        const defaultBg = gapConfig?.defaultBackgroundColor ?? DEFAULT_GAP_BACKGROUND_COLOR;
+        const defaultStripe = gapConfig?.defaultStripeColor ?? DEFAULT_GAP_STRIPE_COLOR;
+
+        if (rowGaps) {
+            for (let r = rowStart; r <= rowEnd; r++) {
+                const gapSize = rowGaps[r]?.size ?? 0;
+                if (gapSize <= 0) continue;
+                const gapTop = rowHeightAccumulation[r - 1] ?? 0;
+                this._drawSingleGapRect(ctx, rowGaps[r], viewStartX, gapTop, viewEndX - viewStartX, gapSize, defaultBg, defaultStripe);
+            }
+        }
+
+        if (colGaps) {
+            for (let c = columnStart; c <= columnEnd; c++) {
+                const gapSize = colGaps[c]?.size ?? 0;
+                if (gapSize <= 0) continue;
+                const gapLeft = columnWidthAccumulation[c - 1] ?? 0;
+                this._drawSingleGapRect(ctx, colGaps[c], gapLeft, viewStartY, gapSize, viewEndY - viewStartY, defaultBg, defaultStripe);
+            }
+        }
+    }
+
+    /**
+     * Render a single gap rectangle: clear gridlines, fill background, draw diagonal stripes.
+     */
+    private _drawSingleGapRect(
+        ctx: UniverRenderingContext2D,
+        gapItem: { size: number; color?: string; stripeColor?: string },
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        defaultBg: string,
+        defaultStripe: string
+    ): void {
+        ctx.clearRectByPrecision(x, y, w, h);
+
+        // Fill background
+        ctx.save();
+        ctx.fillStyle = gapItem.color ?? defaultBg;
+        ctx.fillRectByPrecision(x, y, w, h);
+        ctx.restore();
+
+        // Draw diagonal stripes
+        const stripeColor = gapItem.stripeColor ?? defaultStripe;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rectByPrecision(x, y, w, h);
+        ctx.clip();
+
+        ctx.strokeStyle = stripeColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const spacing = 6;
+        for (let d = -h; d < w; d += spacing) {
+            ctx.moveTo(x + d, y + h);
+            ctx.lineTo(x + d + h, y);
+        }
+        ctx.stroke();
+        ctx.restore();
     }
 
     testShowRuler(cacheCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): void {

@@ -160,10 +160,7 @@ export class SheetSkeleton extends Skeleton {
     /**
      * Runtime gap configuration for visual row/column separators.
      */
-    private _gapConfig: ISheetGapConfig = {
-        rowGaps: { 3: { size: 30 } },
-        colGaps: { 2: { size: 40 } },
-    };
+    private _gapConfig: ISheetGapConfig = {};
 
     /** Scale of Scene */
     protected _scaleX: number = 1;

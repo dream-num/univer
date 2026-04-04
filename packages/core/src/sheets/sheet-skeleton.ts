@@ -272,6 +272,7 @@ export class SheetSkeleton extends Skeleton {
     setGapConfig(config: ISheetGapConfig): void {
         this._gapConfig = config;
         this.makeDirty(true);
+        this._updateLayout();
     }
 
     /**

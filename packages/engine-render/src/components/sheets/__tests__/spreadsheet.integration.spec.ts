@@ -438,9 +438,7 @@ describe('spreadsheet integration', () => {
             },
         });
 
-        const drawSingleGapRectSpy = vi.spyOn(spreadsheet as any, '_drawSingleGapRect').mockImplementation(() => {
-            // This test focuses on verifying gapConfig defaults and branch calls.
-        });
+        const drawSingleGapRectSpy = vi.spyOn(spreadsheet as any, '_drawSingleGapRect');
 
         (spreadsheet as any)._drawGapAreas(
             context,
@@ -476,5 +474,19 @@ describe('spreadsheet integration', () => {
             'rgba(11, 22, 33, 0.08)',
             'rgba(11, 22, 33, 0.25)'
         );
+
+        // Cover fallback branch in _drawSingleGapRect: use default colors when item colors are absent.
+        expect(() => {
+            (spreadsheet as any)._drawSingleGapRect(
+                context,
+                { size: 3 },
+                1,
+                2,
+                30,
+                12,
+                'rgba(11, 22, 33, 0.08)',
+                'rgba(11, 22, 33, 0.25)'
+            );
+        }).not.toThrow();
     });
 });

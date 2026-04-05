@@ -334,13 +334,9 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
 
         render.with(SheetSkeletonManagerService).reCalculate();
 
-        const mainComponent = render.mainComponent;
-
-        if (!mainComponent) {
-            throw new Error('Main component not found');
-        }
-
-        mainComponent.makeDirty();
+        render.components.forEach((component) => {
+            component.makeDirty?.();
+        });
 
         return this;
     }

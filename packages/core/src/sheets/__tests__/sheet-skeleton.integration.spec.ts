@@ -21,6 +21,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { IConfigService } from '../../services/config/config.service';
 import { IContextService } from '../../services/context/context.service';
 import { LocaleService } from '../../services/locale/locale.service';
+import { ThemeService } from '../../services/theme/theme.service';
+import { ColorKit } from '../../shared';
 import { BooleanNumber, HorizontalAlign } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { SheetSkeleton } from '../sheet-skeleton';
@@ -302,5 +304,49 @@ describe('SheetSkeleton integration', () => {
         skeleton.dispose();
 
         expect(() => skeleton.getCellWithCoordByIndex(0, 0)).not.toThrow();
+    });
+
+    it('should fill gap default colors from theme and include gap sizes in accumulation arrays', () => {
+        const testBed = createCoreTestBed(workbookDataFactory());
+        const injector = testBed.univer.__getInjector();
+        const worksheet = testBed.sheet.getActiveSheet()!;
+        const skeleton = new SheetSkeleton(
+            worksheet,
+            testBed.sheet.getStyles(),
+            injector.get(LocaleService),
+            injector.get(IContextService),
+            injector.get(IConfigService),
+            injector as Injector
+        ).calculate()!;
+
+        disposables.push(() => testBed.univer.dispose());
+
+        skeleton.setGapConfig({
+            rowGaps: {
+                1: { size: 5 },
+            },
+            colGaps: {
+                2: { size: 7 },
+            },
+        });
+
+        const themeService = injector.get(ThemeService);
+        const baseColor = themeService.getColorFromTheme('primary.500');
+        const { r, g, b } = new ColorKit(baseColor).toRgb();
+
+        expect(skeleton.gapConfig.defaultBackgroundColor).toBe(`rgba(${r}, ${g}, ${b}, 0.08)`);
+        expect(skeleton.gapConfig.defaultStripeColor).toBe(`rgba(${r}, ${g}, ${b}, 0.25)`);
+        expect(skeleton.getRowGapSize(1)).toBe(5);
+        expect(skeleton.getColGapSize(2)).toBe(7);
+
+        // Gap sizes are included in cumulative arrays.
+        expect(skeleton.rowHeightAccumulation).toEqual([28, 57, 81, 105, 105, 129, 153, 177]);
+        expect(skeleton.columnWidthAccumulation).toEqual([72, 192, 271, 343, 343, 415]);
+
+        // Position queries should detect gap hit ranges.
+        expect(skeleton.getRowGapAtPosition(30)).toBe(1);
+        expect(skeleton.getRowGapAtPosition(10)).toBe(-1);
+        expect(skeleton.getColGapAtPosition(195)).toBe(2);
+        expect(skeleton.getColGapAtPosition(100)).toBe(-1);
     });
 });

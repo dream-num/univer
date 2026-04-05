@@ -22,6 +22,8 @@ function createCtx() {
         save: vi.fn(),
         restore: vi.fn(),
         beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
         moveToByPrecision: vi.fn(),
         lineToByPrecision: vi.fn(),
         stroke: vi.fn(),
@@ -115,5 +117,43 @@ describe('column header layout extension', () => {
         expect(ctx.translateWithPrecisionRatio).toHaveBeenCalled();
         expect(ctx.stroke).toHaveBeenCalled();
         expect(ctx.fillText).toHaveBeenCalled();
+    });
+
+    it('uses gapConfig default colors when drawing column gaps', () => {
+        const layout = new ColumnHeaderLayout();
+        const ctx = createCtx();
+        const fillStyles: string[] = [];
+        const strokeStyles: string[] = [];
+
+        ctx.fillRectByPrecision = vi.fn(() => {
+            fillStyles.push(ctx.fillStyle);
+        });
+        ctx.stroke = vi.fn(() => {
+            strokeStyles.push(ctx.strokeStyle);
+        });
+
+        const skeleton = {
+            rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            columnHeaderHeight: 20,
+            rowHeightAccumulation: [20],
+            columnWidthAccumulation: [60],
+            columnTotalWidth: 60,
+            rowTotalHeight: 20,
+            gapConfig: {
+                defaultBackgroundColor: 'rgba(1, 2, 3, 0.08)',
+                defaultStripeColor: 'rgba(4, 5, 6, 0.25)',
+                colGaps: {
+                    0: { size: 6 },
+                },
+            },
+            worksheet: {
+                getSheetId: vi.fn(() => 'sheet-main'),
+            },
+        } as any;
+
+        layout.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton);
+
+        expect(fillStyles).toContain('rgba(1, 2, 3, 0.08)');
+        expect(strokeStyles).toContain('rgba(4, 5, 6, 0.25)');
     });
 });

@@ -156,8 +156,10 @@ export class RowHeaderLayout extends SheetExtension {
                 const gapItem = rowGaps![r];
                 const gapTop = preRowPosition;
                 const gapBottom = preRowPosition + gapSize;
-                const defaultBg = spreadsheetSkeleton.gapConfig?.defaultBackgroundColor ?? 'rgba(73, 144, 226, 0.08)';
-                const defaultStripe = spreadsheetSkeleton.gapConfig?.defaultStripeColor ?? 'rgba(73, 144, 226, 0.25)';
+                // defaultBackgroundColor and defaultStripeColor are guaranteed by SheetSkeleton._fillDefaultGapThemeColors
+                const { defaultBackgroundColor = '', defaultStripeColor = '' } = spreadsheetSkeleton.gapConfig || {};
+                const defaultBg = defaultBackgroundColor;
+                const defaultStripe = defaultStripeColor;
 
                 // Fill gap background
                 ctx.save();

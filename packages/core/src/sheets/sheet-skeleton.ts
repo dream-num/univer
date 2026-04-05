@@ -40,7 +40,8 @@ import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { IConfigService } from '../services/config/config.service';
 import { IContextService } from '../services/context/context.service';
 import { LocaleService } from '../services/locale/locale.service';
-import { isCellCoverable, ObjectMatrix, Rectangle, searchArray, Tools } from '../shared';
+import { ThemeService } from '../services/theme/theme.service';
+import { ColorKit, isCellCoverable, ObjectMatrix, Rectangle, searchArray, Tools } from '../shared';
 import { ImageCacheMap } from '../shared/cache/image-cache';
 import { getIntersectRange } from '../shared/range';
 import { Skeleton } from '../skeleton';
@@ -267,9 +268,26 @@ export class SheetSkeleton extends Skeleton {
      * This triggers a recalculation of the layout (accumulation arrays, etc.).
      */
     setGapConfig(config: ISheetGapConfig): void {
-        this._gapConfig = config;
+        this._gapConfig = this._fillDefaultGapThemeColors(config);
         this.makeDirty(true);
         this._updateLayout();
+    }
+
+    private _fillDefaultGapThemeColors(config: ISheetGapConfig): ISheetGapConfig {
+        if (config.defaultBackgroundColor && config.defaultStripeColor) {
+            return config;
+        }
+
+        const themeService = this._injector.get(ThemeService);
+        const baseColor = themeService.getColorFromTheme('primary.500');
+
+        const { r, g, b } = new ColorKit(baseColor).toRgb();
+
+        return {
+            ...config,
+            defaultBackgroundColor: config.defaultBackgroundColor ?? `rgba(${r}, ${g}, ${b}, 0.08)`,
+            defaultStripeColor: config.defaultStripeColor ?? `rgba(${r}, ${g}, ${b}, 0.25)`,
+        };
     }
 
     /**

@@ -38,11 +38,6 @@ import { SheetComponent } from './sheet-component';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
-/** Default gap background color (light blue, used when no theme/color configured) */
-const DEFAULT_GAP_BACKGROUND_COLOR = 'rgba(73, 144, 226, 0.08)';
-/** Default gap diagonal stripe color (semi-transparent blue) */
-const DEFAULT_GAP_STRIPE_COLOR = 'rgba(73, 144, 226, 0.25)';
-
 export class Spreadsheet extends SheetComponent {
     private _backgroundExtension!: Background;
 
@@ -711,8 +706,10 @@ export class Spreadsheet extends SheetComponent {
         const { gapConfig, rowHeightAccumulation, columnWidthAccumulation } = spreadsheetSkeleton;
         const rowGaps = gapConfig?.rowGaps;
         const colGaps = gapConfig?.colGaps;
-        const defaultBg = gapConfig?.defaultBackgroundColor ?? DEFAULT_GAP_BACKGROUND_COLOR;
-        const defaultStripe = gapConfig?.defaultStripeColor ?? DEFAULT_GAP_STRIPE_COLOR;
+        // defaultBackgroundColor and defaultStripeColor are guaranteed to be filled by _fillDefaultGapThemeColors in SheetSkeleton
+        const { defaultBackgroundColor = '', defaultStripeColor = '' } = gapConfig || {};
+        const defaultBg = defaultBackgroundColor;
+        const defaultStripe = defaultStripeColor;
 
         if (rowGaps) {
             for (let r = rowStart; r <= rowEnd; r++) {

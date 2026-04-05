@@ -156,4 +156,42 @@ describe('row header layout extension', () => {
         expect(fillStyles).toContain('rgba(10, 20, 30, 0.08)');
         expect(strokeStyles).toContain('rgba(10, 20, 30, 0.25)');
     });
+
+    it('uses gap item custom colors before default colors in row gaps', () => {
+        const layout = new RowHeaderLayout();
+        const ctx = createCtx();
+        const fillStyles: string[] = [];
+        const strokeStyles: string[] = [];
+
+        ctx.fillRectByPrecision = vi.fn(() => {
+            fillStyles.push(ctx.fillStyle);
+        });
+        ctx.stroke = vi.fn(() => {
+            strokeStyles.push(ctx.strokeStyle);
+        });
+
+        const skeleton = {
+            rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            rowHeaderWidth: 30,
+            rowHeightAccumulation: [40],
+            columnWidthAccumulation: [30],
+            columnTotalWidth: 30,
+            rowTotalHeight: 40,
+            gapConfig: {
+                defaultBackgroundColor: 'rgba(10, 20, 30, 0.08)',
+                defaultStripeColor: 'rgba(10, 20, 30, 0.25)',
+                rowGaps: {
+                    0: { size: 8, color: '#223344', stripeColor: '#556677' },
+                },
+            },
+            worksheet: {
+                getSheetId: vi.fn(() => 'sheet-main'),
+            },
+        } as any;
+
+        layout.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton);
+
+        expect(fillStyles).toContain('#223344');
+        expect(strokeStyles).toContain('#556677');
+    });
 });

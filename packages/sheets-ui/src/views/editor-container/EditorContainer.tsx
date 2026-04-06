@@ -16,7 +16,7 @@
 
 import type { KeyCode } from '@univerjs/ui';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
+import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import * as React from 'react';
@@ -110,6 +110,35 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             cellEditorManagerService.setFocus(true);
         }
     }, [disableAutoFocus, state]);
+
+    useEffect(() => {
+        if (!visible?.visible) {
+            return;
+        }
+
+        let focusRetryFrame = 0;
+        let finalFocusRetryFrame = 0;
+
+        const focusEditor = () => {
+            const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
+
+            if (!docSelectionRenderService?.isFocusing) {
+                docSelectionRenderService?.focus();
+            }
+        };
+
+        focusEditor();
+        focusRetryFrame = requestAnimationFrame(() => {
+            focusEditor();
+            finalFocusRetryFrame = requestAnimationFrame(focusEditor);
+        });
+
+        return () => {
+            cancelAnimationFrame(focusRetryFrame);
+            cancelAnimationFrame(finalFocusRetryFrame);
+        };
+    }, [editorService, visible?.visible]);
 
     const handleClickSideBar = useEvent(() => {
         if (editorBridgeService.isVisible().visible) {

@@ -244,9 +244,23 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     }, []);
 
     useLayoutEffect(() => {
+        let focusRetryFrame = 0;
+        let finalFocusRetryFrame = 0;
+
+        const retryFocus = () => {
+            if (_isFocus && !docSelectionRenderService?.isFocusing) {
+                focus();
+            }
+        };
+
         if (_isFocus) {
             setIsFocus(_isFocus);
             focus();
+            // In Shadow DOM hosts, canvas dblclick can steal focus back after the editor becomes visible.
+            focusRetryFrame = requestAnimationFrame(() => {
+                retryFocus();
+                finalFocusRetryFrame = requestAnimationFrame(retryFocus);
+            });
         } else {
             if (resetSelectionOnBlur) {
                 editor?.blur();
@@ -254,7 +268,12 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             }
             setIsFocus(_isFocus);
         }
-    }, [_isFocus, editor, focus, resetSelection, resetSelectionOnBlur]);
+
+        return () => {
+            cancelAnimationFrame(focusRetryFrame);
+            cancelAnimationFrame(finalFocusRetryFrame);
+        };
+    }, [_isFocus, docSelectionRenderService, editor, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId, editorId, disableContextMenu);

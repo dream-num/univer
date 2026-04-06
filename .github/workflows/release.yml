@@ -45,6 +45,9 @@ jobs:
         needs: [prepare]
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
 
         steps:
             - name: Checkout
@@ -78,6 +81,7 @@ jobs:
                   fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NPM_CONFIG_PROVENANCE: true
 
     build-demo:
         runs-on: ubuntu-latest

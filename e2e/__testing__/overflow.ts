@@ -282845,10 +282845,6 @@ export const sheetData = {
             data: '{}',
         },
         {
-            name: 'SHEET_HYPER_LINK_PLUGIN',
-            data: '{"sheet-0011":[]}',
-        },
-        {
             name: 'SHEET_DATA_VALIDATION_PLUGIN',
             data: '{}',
         },

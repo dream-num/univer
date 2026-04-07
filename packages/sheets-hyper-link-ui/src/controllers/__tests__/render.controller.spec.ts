@@ -16,8 +16,7 @@
 
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-
-import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from '../render-controllers/render.controller';
+import { SheetsHyperLinkRenderController } from '../render-controllers/render.controller';
 
 describe('SheetsHyperLinkRenderController', () => {
     it('should mark skeleton dirty when link updates', async () => {
@@ -33,65 +32,6 @@ describe('SheetsHyperLinkRenderController', () => {
         // debounced by 16ms
         await new Promise((resolve) => setTimeout(resolve, 30));
         expect(makeForceDirty).toHaveBeenCalledTimes(1);
-
-        controller.dispose();
-    });
-});
-
-describe('SheetsHyperLinkRenderManagerController', () => {
-    it('should inject link fields into cell content interceptor', () => {
-        let interceptorHandler: any;
-
-        const sheetInterceptorService = {
-            intercept: vi.fn((_point: any, config: any) => {
-                interceptorHandler = config.handler;
-                return { dispose: vi.fn() };
-            }),
-        } as any;
-
-        const hyperLinkModel = {
-            getHyperLinkByLocation: vi.fn(() => ({ id: 'l1', payload: '#gid=s1&range=A1' })),
-        } as any;
-
-        const controller = new SheetsHyperLinkRenderManagerController(sheetInterceptorService, hyperLinkModel);
-        expect(sheetInterceptorService.intercept).toHaveBeenCalledTimes(1);
-
-        const next = vi.fn((v) => v);
-        const rawData = { v: 1 };
-        const cell = rawData;
-        const result = interceptorHandler(cell, { row: 0, col: 0, unitId: 'u1', subUnitId: 's1', rawData }, next);
-
-        expect(result).toEqual(expect.objectContaining({
-            linkUrl: '#gid=s1&range=A1',
-            linkId: 'l1',
-        }));
-        expect(next).toHaveBeenCalledTimes(1);
-        // should not mutate rawData
-        expect(rawData).toEqual({ v: 1 });
-
-        controller.dispose();
-    });
-
-    it('should passthrough when cell is empty or has no link', () => {
-        let interceptorHandler: any;
-
-        const sheetInterceptorService = {
-            intercept: vi.fn((_point: any, config: any) => {
-                interceptorHandler = config.handler;
-                return { dispose: vi.fn() };
-            }),
-        } as any;
-
-        const hyperLinkModel = {
-            getHyperLinkByLocation: vi.fn(() => null),
-        } as any;
-
-        const controller = new SheetsHyperLinkRenderManagerController(sheetInterceptorService, hyperLinkModel);
-
-        const next = vi.fn((v) => v);
-        const out = interceptorHandler(null, { row: 0, col: 0, unitId: 'u1', subUnitId: 's1', rawData: null }, next);
-        expect(out).toBe(null);
-        expect(next).toHaveBeenCalledWith(null);
 
         controller.dispose();
     });

@@ -23,7 +23,6 @@ import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.contr
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
 import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
-import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
 import { SheetsHyperLinkParserService } from './services/parser.service';
@@ -56,7 +55,6 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         registerDependencies(this._injector, [
             [HyperLinkModel],
             [SheetsHyperLinkParserService],
-            [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [SheetsHyperLinkRefRangeController],
             [SheetHyperLinkSetRangeController],
@@ -67,7 +65,6 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetsHyperLinkRefRangeController],
-            [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkRemoveSheetController],

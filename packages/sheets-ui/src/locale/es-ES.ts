@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'Copiar',
             alert: 'Alerta',
             search: 'Buscar',
+            ownerInherit: 'Propietario del documento, herencia habilitada',
+            ownerWithoutInherit: 'Propietario del documento, herencia no habilitada',
             alertContent: 'Este rango está protegido y no hay permisos de edición disponibles actualmente. Si necesitas editar, contacta al creador.',
             userEmpty: 'ninguna persona designada, comparte el enlace para invitar a personas específicas.',
             listEmpty: 'No has configurado ningún rango u hoja como protegido.',

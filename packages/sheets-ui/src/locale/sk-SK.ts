@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'Kopírovať',
             alert: 'Upozornenie',
             search: 'Hľadať',
+            ownerInherit: 'Vlastník dědí oprávnění',
+            ownerWithoutInherit: 'Vlastník bez dědění oprávnění',
             alertContent: 'Tento rozsah je chránený a momentálne nemáte povolenie na úpravy. Ak potrebujete upravovať, kontaktujte autora.',
             userEmpty: 'žiadna určená osoba, zdieľajte odkaz na pozvanie konkrétnych ľudí.',
             listEmpty: 'Nenastavili ste žiadne rozsahy ani hárky ako chránené.',

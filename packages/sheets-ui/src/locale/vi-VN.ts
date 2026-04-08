@@ -457,6 +457,8 @@ const locale: typeof enUS = {
             copy: 'Sao chép',
             alert: 'Thông báo',
             search: 'Tìm kiếm',
+            ownerInherit: 'Chủ sở hữu tài liệu, đã bật kế thừa',
+            ownerWithoutInherit: 'Chủ sở hữu tài liệu, chưa bật kế thừa',
             alertContent: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
             userEmpty: 'Không có người chỉ định, chia sẻ liên kết để mời người cụ thể.',
             listEmpty: 'Bạn chưa thiết lập bất kỳ phạm vi hoặc bảng tính nào ở trạng thái được bảo vệ.',

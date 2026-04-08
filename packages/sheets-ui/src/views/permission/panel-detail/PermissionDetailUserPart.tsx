@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
-import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Avatar, borderClassName, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
@@ -40,7 +40,6 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
     const dialogService = useDependency(IDialogService);
     const authzIoService = useDependency(IAuthzIoService);
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
-    const userManagerService = useDependency(UserManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
@@ -57,13 +56,12 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             unitID: unitId,
         });
 
-        const currentUser = userManagerService.getCurrentUser();
-        sheetPermissionUserManagerService.setCanEditUserList(userList.filter((user) => user.subject?.userID !== currentUser.userID));
+        sheetPermissionUserManagerService.setCanEditUserList(userList);
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
             title: { title: '' },
             children: { label: UNIVER_SHEET_PERMISSION_USER_DIALOG },
-            width: 280,
+            width: 'auto',
             destroyOnClose: true,
             closable: false,
             onClose: () => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID),

@@ -42,6 +42,11 @@ export class AuthzIoLocalService implements IAuthzIoService {
     private _permissionMap: Map<string, IPermissionData> = new Map([]);
     // Store explicit permission overrides: key is "objectID:action", value is the allowed state
     private _permissionOverrides: Map<string, boolean> = new Map();
+    /**
+     * Whether the document owner inherits permissions for all protected ranges.
+     * If true, the document owner cannot be selected when specifying user edits for a protected range, and the document owner will have edit permissions for all protected ranges by default.
+     */
+    private _cfgEnableObjInherit: boolean = false;
 
     constructor(
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
@@ -316,5 +321,13 @@ export class AuthzIoLocalService implements IAuthzIoService {
 
     async putCollaborators(config: IPutCollaboratorsRequest): Promise<void> {
         return undefined;
+    }
+
+    setCfgEnableObjInherit(enabled: boolean): void {
+        this._cfgEnableObjInherit = enabled;
+    }
+
+    getCfgEnableObjInherit(): boolean {
+        return this._cfgEnableObjInherit;
     }
 }

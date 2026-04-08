@@ -22,6 +22,7 @@ const borderBasicClassName = 'univer-border-gray-200 dark:!univer-border-gray-60
 export const borderClassName = clsx(borderBasicClassName, 'univer-border');
 export const borderLeftBottomClassName = clsx(borderBasicClassName, 'univer-border-l univer-border-b univer-border-t-0 univer-border-r-0');
 export const borderLeftClassName = clsx(borderBasicClassName, 'univer-border-l univer-border-b-0 univer-border-t-0 univer-border-r-0');
+export const borderLeftRTLClassName = clsx(borderBasicClassName, 'univer-border-b-0 univer-border-t-0 rtl:univer-border-l-0 rtl:univer-border-r');
 export const borderTopClassName = clsx(borderBasicClassName, 'univer-border-l-0 univer-border-b-0 univer-border-t univer-border-r-0');
 export const borderBottomClassName = clsx(borderBasicClassName, 'univer-border-l-0 univer-border-b univer-border-t-0 univer-border-r-0');
 export const borderRightClassName = clsx(borderBasicClassName, 'univer-border-l-0 univer-border-b-0 univer-border-t-0 univer-border-r');

@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'Copier',
             alert: 'Alerte',
             search: 'Rechercher',
+            ownerInherit: 'Propriétaire du document, héritage des permissions activé',
+            ownerWithoutInherit: 'Propriétaire du document, héritage des permissions non activé',
             alertContent: 'Cette plage est protégée et aucune permission de modification n\'est actuellement disponible. Si vous avez besoin de modifier, veuillez contacter le créateur.',
             userEmpty: 'aucune personne désignée, Partagez le lien pour inviter des personnes spécifiques.',
             listEmpty: 'Vous n\'avez défini aucune plage ou feuille comme protégée.',

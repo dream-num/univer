@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: '복사',
             alert: '경고',
             search: '검색',
+            ownerInherit: '문서 소유자, 권한 상속 활성화',
+            ownerWithoutInherit: '문서 소유자, 권한 상속이 활성화되지 않았습니다',
             alertContent: '이 범위는 보호되어 있어 현재 편집 권한이 없습니다. 편집하려면 작성자에게 문의하세요.',
             userEmpty: '지정된 사용자가 없습니다. 특정 사용자 초대를 위해 링크를 공유하세요.',
             listEmpty: '보호된 범위나 시트가 아직 설정되지 않았습니다.',

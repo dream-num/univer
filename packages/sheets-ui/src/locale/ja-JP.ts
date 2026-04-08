@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'コピー',
             alert: '警告',
             search: '検索',
+            ownerInherit: 'ドキュメント所有者、権限の継承が有効',
+            ownerWithoutInherit: 'ドキュメント所有者、権限の継承が有効ではない',
             alertContent: 'この範囲は保護されており、現在編集権限がありません。編集するには作成者に連絡してください。',
             userEmpty: '指定されたユーザーがいません。特定のユーザーを招待するためにリンクを共有してください。',
             listEmpty: '保護された範囲やシートがまだ設定されていません。',

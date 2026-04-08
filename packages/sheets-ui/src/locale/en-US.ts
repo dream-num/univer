@@ -458,6 +458,8 @@ const locale = {
             copy: 'Copy',
             alert: 'Alert',
             search: 'Search',
+            ownerInherit: 'Document owner, enabled permission inheritance',
+            ownerWithoutInherit: 'Document owner, not enabled permission inheritance',
             alertContent: 'This range has been protected and no editing permissions are currently available. If you need to edit, please contact the creator.',
             userEmpty: 'no designated person , Share link to invite specific people.',
             listEmpty: 'You haven\'t set up any ranges or sheets as protected.',

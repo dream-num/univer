@@ -53,6 +53,7 @@ import '@univerjs/sheets-hyper-link-ui/facade';
 import '@univerjs/sheets-thread-comment/facade';
 import '@univerjs/sheets-conditional-formatting/facade';
 import '@univerjs/sheets-find-replace/facade';
+import '@univerjs/sheets-drawing/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-crosshair-highlight/facade';

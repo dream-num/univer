@@ -71,8 +71,6 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
 
     const showMore = visible || isHovered;
 
-    const availableMenu = menuItems.filter((item) => !item.disable);
-
     return (
         <div
             onMouseEnter={handleMouseEnter}
@@ -80,9 +78,10 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
         >
             <DropdownMenu
                 align="start"
-                items={availableMenu.map((item) => ({
+                items={menuItems.map((item) => ({
                     type: 'item',
                     children: localeService.t(item.label),
+                    disabled: item.disable,
                     onSelect: () => handleClick(item),
                 }))}
                 open={visible}

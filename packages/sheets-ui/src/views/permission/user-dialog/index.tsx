@@ -68,7 +68,6 @@ export const SheetPermissionUserDialog = () => {
                             return (
                                 <div
                                     key={item.subject?.userID}
-                                    aria-disabled
                                     className={`
                                       univer-my-2 univer-flex univer-cursor-not-allowed univer-items-center
                                       univer-rounded-md
@@ -84,7 +83,6 @@ export const SheetPermissionUserDialog = () => {
                         return (
                             <div
                                 key={item.subject?.userID}
-                                aria-disabled
                                 className={`
                                   univer-my-2 univer-flex univer-items-center univer-rounded-md
                                   hover:univer-bg-gray-50

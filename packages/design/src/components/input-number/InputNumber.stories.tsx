@@ -66,3 +66,13 @@ export const InputNumberHideControls = {
         );
     },
 };
+
+export const InputNumberRtl = {
+    render() {
+        return (
+            <div dir="rtl">
+                <InputNumber defaultValue={12} />
+            </div>
+        );
+    },
+};

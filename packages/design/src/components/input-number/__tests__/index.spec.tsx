@@ -299,4 +299,28 @@ describe('InputNumber', () => {
         expect(onKeyDown).not.toHaveBeenCalled();
         expect(onLocalChange).not.toHaveBeenCalled();
     });
+
+    it('should support rtl layout classes and keep increment/decrement behavior', () => {
+        const onLocalChange = vi.fn();
+        const { container } = render(
+            <div dir="rtl">
+                <InputNumber defaultValue={1} onChange={onLocalChange} />
+            </div>
+        );
+
+        const incrementButton = container.querySelector('[aria-label="increment"]') as HTMLElement;
+        const decrementButton = container.querySelector('[aria-label="decrement"]') as HTMLElement;
+        const controlsWrapper = incrementButton.parentElement as HTMLElement;
+
+        expect(controlsWrapper.className).toContain('rtl:univer-left-px');
+        expect(controlsWrapper.className).toContain('rtl:univer-right-auto');
+        expect(controlsWrapper.className).toContain('rtl:univer-rounded-l-md');
+        expect(controlsWrapper.className).toContain('rtl:univer-border-r');
+
+        fireEvent.click(incrementButton);
+        expect(onLocalChange).toHaveBeenCalledWith(2);
+
+        fireEvent.click(decrementButton);
+        expect(onLocalChange).toHaveBeenCalledWith(1);
+    });
 });

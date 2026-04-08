@@ -17,16 +17,17 @@
 import type { IDisposable } from '@univerjs/core';
 import type { ISidebarMethodOptions } from '../../views/components/sidebar/Sidebar';
 import type { ISidebarService } from './sidebar.service';
-import { toDisposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
-export class DesktopSidebarService implements ISidebarService {
+export class DesktopSidebarService extends Disposable implements ISidebarService {
     private _sidebarOptions: ISidebarMethodOptions = {};
     readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
 
     readonly scrollEvent$ = new Subject<Event>();
 
     private _container?: HTMLElement;
+    private _openAnimationFrameId: number | null = null;
 
     get visible(): boolean {
         return this._sidebarOptions.visible || false;
@@ -34,6 +35,20 @@ export class DesktopSidebarService implements ISidebarService {
 
     get options() {
         return this._sidebarOptions;
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this.close();
+        this.sidebarOptions$.complete();
+        this.scrollEvent$.complete();
+    }
+
+    private _clearPendingOpenFrame() {
+        if (this._openAnimationFrameId !== null) {
+            cancelAnimationFrame(this._openAnimationFrameId);
+            this._openAnimationFrameId = null;
+        }
     }
 
     open(params: ISidebarMethodOptions): IDisposable {
@@ -44,7 +59,9 @@ export class DesktopSidebarService implements ISidebarService {
         };
 
         this.sidebarOptions$.next(this._sidebarOptions);
-        requestAnimationFrame(() => {
+        this._clearPendingOpenFrame();
+        this._openAnimationFrameId = requestAnimationFrame(() => {
+            this._openAnimationFrameId = null;
             this._sidebarOptions.onOpen && this._sidebarOptions.onOpen();
         });
 
@@ -57,12 +74,14 @@ export class DesktopSidebarService implements ISidebarService {
         if (id && this._sidebarOptions.id !== id) {
             return;
         }
+
+        this._clearPendingOpenFrame();
         this._sidebarOptions = {
             ...this._sidebarOptions,
             visible: false,
         };
         this.sidebarOptions$.next(this._sidebarOptions);
-        this._sidebarOptions.onClose && this._sidebarOptions.onClose();
+        this._sidebarOptions.onClose?.();
     }
 
     getContainer() {

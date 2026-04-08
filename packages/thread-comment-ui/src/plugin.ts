@@ -15,17 +15,20 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverThreadCommentUIConfig } from './controllers/config.schema';
+import type { IUniverThreadCommentUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
-import { defaultPluginConfig, THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { SetActiveCommentOperation } from './commands/operations/comment.operations';
+import { defaultPluginConfig, THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { PLUGIN_NAME } from './types/const';
 
 @DependentOn(UniverThreadCommentPlugin)
 export class UniverThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
@@ -55,7 +58,9 @@ export class UniverThreadCommentUIPlugin extends Plugin {
             this._injector.add(dep);
         });
 
-        [ToggleSheetCommentPanelOperation, SetActiveCommentOperation].forEach((command) => {
+        [
+            SetActiveCommentOperation,
+        ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
     }

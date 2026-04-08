@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
+import { isBlankInput } from './utils';
 
 function hasProtocol(urlString: string) {
     const pattern = /^[a-zA-Z]+:\/\//;
@@ -94,7 +95,7 @@ export const DocHyperLinkEdit = () => {
                 payload: linkFinal,
             });
         } else {
-            if (!label) {
+            if (isBlankInput(label)) {
                 return;
             }
 
@@ -125,7 +126,7 @@ export const DocHyperLinkEdit = () => {
                     ? (
                         <FormLayout
                             label={localeService.t('docLink.edit.label')}
-                            error={showError && !label ? localeService.t('docLink.edit.labelError') : ''}
+                            error={showError && isBlankInput(label) ? localeService.t('docLink.edit.labelError') : ''}
                         >
                             <Input
                                 value={label}
@@ -162,7 +163,7 @@ export const DocHyperLinkEdit = () => {
                 </Button>
                 <Button
                     variant="primary"
-                    disabled={!link}
+                    disabled={isBlankInput(link)}
                     onClick={handleConfirm}
                 >
                     {localeService.t('docLink.edit.confirm')}

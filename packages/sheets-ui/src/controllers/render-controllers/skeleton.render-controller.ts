@@ -16,7 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
+import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -28,10 +28,6 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-
-        this.disposeWithMe(this._context.unit.sheetDisposed$.subscribe((sheet) => {
-            this._sheetSkeletonManagerService.disposeSkeleton(sheet.getSheetId());
-        }));
 
         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
             this._updateSceneSize(param);
@@ -61,5 +57,6 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
         });
+        scene.getMainViewport().setMargin(rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
     }
 }

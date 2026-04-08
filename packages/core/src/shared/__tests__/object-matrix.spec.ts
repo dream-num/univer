@@ -15,7 +15,16 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { moveMatrixArray, ObjectMatrix, spliceArray } from '../object-matrix';
+import {
+    concatMatrixArray,
+    getArrayLength,
+    insertMatrixArray,
+    mapObjectMatrix,
+    moveMatrixArray,
+    ObjectMatrix,
+    sliceMatrixArray,
+    spliceArray,
+} from '../object-matrix';
 
 describe('test ObjectMatrix', () => {
     const getPrimitiveObj = () => ({
@@ -50,7 +59,7 @@ describe('test ObjectMatrix', () => {
 
         const rowList: number[] = [];
         const colList: number[] = [];
-        matrix.forValue((row, col, value) => {
+        matrix.forValue((row, col, _value) => {
             rowList.push(row);
             colList.push(col);
         });
@@ -206,5 +215,63 @@ describe('test ObjectMatrix', () => {
             startColumn: 0,
             startRow: 0,
         }]);
+    });
+
+    it('should map and measure sparse object matrices', () => {
+        expect(getArrayLength({ 2: 'a', 5: 'b' })).toBe(6);
+        expect(mapObjectMatrix({ 1: { 2: 3 }, 4: { 5: 6 } }, (row, col, value) => row + col + value)).toEqual({
+            1: { 2: 6 },
+            4: { 5: 15 },
+        });
+    });
+
+    it('should insert, concat and slice matrix arrays', () => {
+        const array = { 0: 'a', 2: 'c' };
+        insertMatrixArray(1, 'b', array);
+        expect(array).toEqual({ 0: 'a', 1: 'b', 3: 'c' });
+
+        expect(concatMatrixArray({ 0: 'a', 3: 'b' }, { 1: 'c' })).toEqual({
+            0: 'a',
+            1: 'b',
+            2: 'c',
+        });
+        expect(sliceMatrixArray(1, 3, { 0: 'a', 1: 'b', 3: 'd' })).toEqual({
+            0: 'b',
+            1: 'd',
+        });
+    });
+
+    it('should expose fragment, slice and array conversions', () => {
+        const matrix = new ObjectMatrix({
+            1: { 2: { value: 1 }, 3: { value: 2 } },
+            2: { 2: { value: 3 } },
+        });
+
+        expect(matrix.getFragment(1, 2, 2, 3).getMatrix()).toEqual({
+            0: { 0: { value: 1 }, 1: { value: 2 } },
+            1: { 0: { value: 3 }, 1: undefined },
+        });
+
+        const slice = matrix.getSlice(1, 2, 2, 3);
+        expect(slice.getMatrix()).toEqual({
+            1: { 2: { value: 1 }, 3: { value: 2 } },
+            2: { 2: { value: 3 } },
+        });
+        expect(slice.getValue(1, 2)).not.toBe(matrix.getValue(1, 2));
+
+        const expectedArray = new Array(3);
+        expectedArray[1] = new Array(4);
+        expectedArray[1][2] = { value: 1 };
+        expectedArray[1][3] = { value: 2 };
+        expectedArray[2] = new Array(3);
+        expectedArray[2][2] = { value: 3 };
+
+        expect(matrix.toArray()).toEqual(expectedArray);
+        expect(matrix.toFullArray()).toEqual([
+            [undefined, undefined, undefined, undefined],
+            [undefined, undefined, { value: 1 }, { value: 2 }],
+            [undefined, undefined, { value: 3 }, undefined],
+        ]);
+        expect(matrix.toNativeArray()).toEqual([{ value: 1 }, { value: 2 }, { value: 3 }]);
     });
 });

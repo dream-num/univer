@@ -14,16 +14,574 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
+import type { Dependency, ICellData, IDisposable, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
-import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
-import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { COPY_TYPE, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import { DisposableCollection, ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, ObjectMatrix, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder, SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { discreteRangeToRange, MoveRangeMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import { UpdateFormulaController } from '@univerjs/sheets-formula';
+import { COPY_TYPE, IMarkSelectionService, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME_PASTE, SheetClipboardController, SheetClipboardService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { BrowserClipboardService, DesktopMessageService, IClipboardInterfaceService, IMessageService, INotificationService, IPlatformService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getSetCellFormulaMutations } from '../formula-clipboard.controller';
 import { createCommandTestBed } from './create-command-test-bed';
+
+interface ITestSheetClipboardService extends ISheetClipboardService {
+    _generateCopyContent: (
+        unitId: string,
+        subUnitId: string,
+        range: IRange,
+        hooks: unknown[]
+    ) => {
+        matrixFragment: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
+        copyId: string;
+    };
+    _pasteInternal: (copyId: string, pasteType: string) => Promise<boolean>;
+}
+
+class testMarkSelectionService {
+    addShape(): string | null {
+        return null;
+    }
+
+    addShapeWithNoFresh(): string | null {
+        return null;
+    }
+
+    removeShape(id: string): void {
+        // empty
+    }
+
+    removeAllShapes(): void {
+        // empty
+    }
+
+    refreshShapes(): void {
+        // empty
+    }
+
+    getShapeMap(): Map<string, any> {
+        return new Map();
+    }
+}
+
+class testNotificationService {
+    show(): IDisposable {
+        return {
+            dispose: () => { /* empty */ },
+        };
+    }
+}
+
+class testPlatformService {
+    isWindows: boolean = false;
+    isMac: boolean = true;
+    isLinux: boolean = false;
+}
+
+export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
+
+    /**
+     * This plugin hooks into Sheet's DI system to expose API to test scripts
+     */
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+        }
+
+        override onStarting(): void {
+            const injector = this._injector;
+            injector.add([IUIPartsService, { useClass: UIPartsService }]);
+            injector.add([SheetsSelectionsService]);
+            injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
+            injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+            injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
+            injector.add([IMarkSelectionService, { useClass: testMarkSelectionService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
+            injector.add([INotificationService, { useClass: testNotificationService }]);
+            injector.add([IPlatformService, { useClass: testPlatformService }]);
+
+            // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
+            const sheetClipboardController = injector.createInstance(SheetClipboardController);
+
+            injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
+            injector.add([SheetInterceptorService]);
+            injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
+            injector.add([FormulaDataModel]);
+            injector.add([LexerTreeBuilder]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
+            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([SheetSkeletonService]);
+
+            dependencies?.forEach((d) => injector.add(d));
+
+            const localeService = injector.get(LocaleService);
+            localeService.load({});
+
+            injector.get(IUIPartsService);
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || {});
+
+    const univerInstanceService = get(IUniverInstanceService);
+    univerInstanceService.focusUnit('test');
+
+    const logService = get(ILogService);
+    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+
+    // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
+    // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+    const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
+        unit: sheet,
+        unitId: 'test',
+        type: UniverInstanceType.UNIVER_SHEET,
+        engine: null as any,
+        scene: null as any,
+        mainComponent: null as any,
+        components: null as any,
+        isMainScene: true,
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
+    }, injector.get(SheetSkeletonService));
+
+    injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
+    injector.get(IRenderManagerService).addRender('test', {
+        type: UniverInstanceType.UNIVER_SHEET,
+        unitId: 'test',
+        engine: new DisposableCollection() as any,
+        scene: new DisposableCollection() as any,
+        mainComponent: null as any,
+        components: new Map(),
+        isMainScene: true,
+        with: injector.get.bind(injector),
+        activated$: new BehaviorSubject(true),
+        activate: () => {},
+        deactivate: () => {},
+    });
+
+    return {
+        univer,
+        get,
+        sheet,
+    };
+}
+
+function createFormulaClipboardWorkbookData(): IWorkbookData {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        locale: LocaleType.EN_US,
+        name: '',
+        sheetOrder: ['sheet1', 'sheet2'],
+        styles: {},
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'Sheet1',
+                cellData: {
+                    0: {
+                        0: { v: 1 },
+                        1: { v: 2 },
+                        2: { f: '=A1' },
+                        3: { f: '=SUM(A1:B2)' },
+                        4: { f: '=$A1' },
+                        5: { f: '=A$1' },
+                        6: { f: '=$A$1' },
+                        7: { f: '=B1' },
+                        8: { f: '=H1' },
+                        9: { f: '=F3' },
+                        10: { f: '=A1', si: 'shared-ref' },
+                    },
+                    1: {
+                        0: { v: 3 },
+                        1: { v: 4 },
+                        10: { si: 'shared-ref' },
+                    },
+                    2: {
+                        0: { v: 'label' },
+                        1: { v: 7 },
+                        2: { f: '=B3' },
+                        3: { f: '=C3+1' },
+                        4: { v: 11 },
+                        5: { f: '=SUM(B3:E3)' },
+                    },
+                    3: {
+                        0: { f: '=SUM(Sheet3!A1:A3,B1)' },
+                    },
+                },
+            },
+            sheet2: {
+                id: 'sheet2',
+                name: 'Sheet2',
+                cellData: {
+                    0: {
+                        0: { f: '=Sheet1!A1' },
+                        1: { f: '=Sheet1!H1' },
+                    },
+                },
+            },
+            sheet3: {
+                id: 'sheet3',
+                name: 'Sheet3',
+                cellData: {
+                    0: {
+                        0: { v: 1 },
+                        1: { v: 2 },
+                        2: { v: 3 },
+                    },
+                },
+            },
+        },
+    };
+}
+
+describe('Test cut command with formulas', () => {
+    let univer: Univer;
+    let get: Injector['get'];
+    let commandService: ICommandService;
+    let sheetClipboardService: ISheetClipboardService;
+    let getValues: (
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number,
+        sheetId?: string
+    ) => Array<Array<Nullable<ICellData>>> | undefined;
+
+    beforeEach(() => {
+        const testBed = clipboardTestBed(createFormulaClipboardWorkbookData(), [
+            [UpdateFormulaController],
+        ]);
+
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(MoveRangeMutation);
+        commandService.registerCommand(SetWorksheetRowAutoHeightMutation);
+        commandService.registerCommand(SetFormulaDataMutation);
+        commandService.registerCommand(SetArrayFormulaDataMutation);
+        sheetClipboardService = get(ISheetClipboardService);
+
+        get(UpdateFormulaController);
+
+        getValues = (
+            startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number,
+            sheetId: string = 'sheet1'
+        ): Array<Array<Nullable<ICellData>>> | undefined =>
+            get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId(sheetId)
+                ?.getRange(startRow, startColumn, endRow, endColumn)
+                .getValues();
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    async function cutPaste(
+        fromRange: { rows: number[]; cols: number[] },
+        toRange: { startRow: number; startColumn: number; endRow: number; endColumn: number },
+        fromSubUnitId: string = 'sheet1',
+        toSubUnitId: string = fromSubUnitId
+    ) {
+        const testSheetClipboardService = sheetClipboardService as ITestSheetClipboardService;
+        const copyContentCache = sheetClipboardService.copyContentCache();
+        const workbook = get(IUniverInstanceService).getUniverSheetInstance('test');
+        const targetWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
+
+        if (targetWorksheet) {
+            workbook?.setActiveSheet(targetWorksheet);
+        }
+
+        const { matrixFragment, copyId } = testSheetClipboardService._generateCopyContent(
+            'test',
+            fromSubUnitId,
+            discreteRangeToRange(fromRange),
+            []
+        );
+
+        copyContentCache.set(copyId, {
+            unitId: 'test',
+            subUnitId: fromSubUnitId,
+            range: fromRange,
+            matrix: matrixFragment,
+            copyType: COPY_TYPE.CUT,
+        });
+
+        get(SheetsSelectionsService).addSelections([
+            {
+                range: { ...toRange, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        await testSheetClipboardService._pasteInternal(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+    }
+
+    it('cut-moving a referenced value range updates direct, range, mixed-absolute, cross-sheet, and shared formulas', async () => {
+        await cutPaste(
+            { rows: [0, 1], cols: [0, 1] },
+            { startRow: 3, startColumn: 3, endRow: 4, endColumn: 4 }
+        );
+
+        expect(getValues(0, 0, 1, 1)).toStrictEqual([
+            [null, null],
+            [null, null],
+        ]);
+        expect(getValues(3, 3, 4, 4)).toStrictEqual([
+            [{ v: 1 }, { v: 2 }],
+            [{ v: 3 }, { v: 4 }],
+        ]);
+
+        expect(getValues(0, 2, 0, 6)).toStrictEqual([
+            [
+                { f: '=D4' },
+                { f: '=SUM(D4:E5)' },
+                { f: '=$D4' },
+                { f: '=D$4' },
+                { f: '=$D$4' },
+            ],
+        ]);
+        expect(getValues(0, 10, 1, 10)).toStrictEqual([
+            [{ f: '=D4' }],
+            [{ f: '=D5' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!D4' }, { f: '=Sheet1!H1' }],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getValues(0, 2, 0, 6)).toStrictEqual([
+            [
+                { f: '=A1' },
+                { f: '=SUM(A1:B2)' },
+                { f: '=$A1' },
+                { f: '=A$1' },
+                { f: '=$A$1' },
+            ],
+        ]);
+        expect(getValues(0, 10, 1, 10)).toStrictEqual([
+            [{ f: '=A1', si: 'shared-ref' }],
+            [{ si: 'shared-ref' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }, { f: '=Sheet1!H1' }],
+        ]);
+    });
+
+    it('cut-pasting a referenced value range across sheets adds and removes sheet qualifiers correctly', async () => {
+        await cutPaste(
+            { rows: [0, 1], cols: [0, 1] },
+            { startRow: 2, startColumn: 2, endRow: 3, endColumn: 3 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(0, 0, 1, 1)).toStrictEqual([
+            [null, null],
+            [null, null],
+        ]);
+        expect(getValues(2, 2, 3, 3, 'sheet2')).toStrictEqual([
+            [{ v: 1 }, { v: 2 }],
+            [{ v: 3 }, { v: 4 }],
+        ]);
+
+        expect(getValues(0, 2, 0, 6)).toStrictEqual([
+            [
+                { f: '=Sheet2!C3' },
+                { f: '=SUM(Sheet2!C3:D4)' },
+                { f: '=Sheet2!$C3' },
+                { f: '=Sheet2!C$3' },
+                { f: '=Sheet2!$C$3' },
+            ],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=C3' }, { f: '=Sheet1!H1' }],
+        ]);
+    });
+
+    it('cut-moving a formula cell keeps its formula text stable while dependents update to the new address', async () => {
+        await cutPaste(
+            { rows: [0], cols: [7] },
+            { startRow: 3, startColumn: 9, endRow: 3, endColumn: 9 }
+        );
+
+        expect(getValues(0, 7, 0, 8)).toStrictEqual([
+            [null, { f: '=J4' }],
+        ]);
+        expect(getValues(3, 9, 3, 9)).toStrictEqual([
+            [{ f: '=B1' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }, { f: '=Sheet1!J4' }],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getValues(0, 7, 0, 8)).toStrictEqual([
+            [{ f: '=B1' }, { f: '=H1' }],
+        ]);
+        expect(getValues(0, 0, 0, 1, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }, { f: '=Sheet1!H1' }],
+        ]);
+    });
+
+    it('cut-moving a larger mixed value, text, and formula range preserves moved formulas and updates dependents', async () => {
+        await cutPaste(
+            { rows: [2], cols: [0, 1, 2, 3, 4, 5] },
+            { startRow: 5, startColumn: 0, endRow: 5, endColumn: 5 }
+        );
+
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+        expect(getValues(5, 0, 5, 5)).toStrictEqual([
+            [
+                { v: 'label' },
+                { v: 7 },
+                { f: '=B6' },
+                { f: '=C6+1' },
+                { v: 11 },
+                { f: '=SUM(B6:E6)' },
+            ],
+        ]);
+        expect(getValues(0, 9, 0, 9)).toStrictEqual([
+            [{ f: '=F6' }],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [
+                { v: 'label' },
+                { v: 7 },
+                { f: '=B3' },
+                { f: '=C3+1' },
+                { v: 11 },
+                { f: '=SUM(B3:E3)' },
+            ],
+        ]);
+        expect(getValues(0, 9, 0, 9)).toStrictEqual([
+            [{ f: '=F3' }],
+        ]);
+    });
+
+    it('cut-pasting a formula cell across worksheets, the reference range is not affected by the moved range', async () => {
+        await cutPaste(
+            { rows: [0], cols: [2] },
+            { startRow: 10, startColumn: 0, endRow: 10, endColumn: 0 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(0, 2, 0, 2)).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet2')).toStrictEqual([
+            [{ f: '=Sheet1!A1' }],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+        expect(getValues(0, 2, 0, 2)).toStrictEqual([
+            [{ f: '=A1' }],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet2')).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(10, 0, 10, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+    });
+
+    it('cut-pasting a formula cell across worksheets, the reference range is affected by the moved range', async () => {
+        await cutPaste(
+            { rows: [2], cols: [0, 1, 2, 3, 4, 5] },
+            { startRow: 11, startColumn: 0, endRow: 11, endColumn: 0 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet2')).toStrictEqual([
+            [{ v: 'label' }, { v: 7 }, { f: '=B12' }, { f: '=C12+1' }, { v: 11 }, { f: '=SUM(B12:E12)' }],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet1')).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+        expect(getValues(2, 0, 2, 5)).toStrictEqual([
+            [{ v: 'label' }, { v: 7 }, { f: '=B3' }, { f: '=C3+1' }, { v: 11 }, { f: '=SUM(B3:E3)' }],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet2')).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+        expect(getValues(11, 0, 11, 5, 'sheet1')).toStrictEqual([
+            [null, null, null, null, null, null],
+        ]);
+    });
+
+    it('cut-pasting a formula cell across worksheets, the reference range has Sheet3 range and Sheet1 range', async () => {
+        await cutPaste(
+            { rows: [3], cols: [0] },
+            { startRow: 12, startColumn: 0, endRow: 12, endColumn: 0 },
+            'sheet1',
+            'sheet2'
+        );
+
+        expect(getValues(3, 0, 3, 0)).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet2')).toStrictEqual([
+            [{ f: '=SUM(Sheet3!A1:A3,Sheet1!B1)' }],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+        expect(getValues(3, 0, 3, 0)).toStrictEqual([
+            [{ f: '=SUM(Sheet3!A1:A3,B1)' }],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet2')).toStrictEqual([
+            [null],
+        ]);
+        expect(getValues(12, 0, 12, 0, 'sheet1')).toStrictEqual([
+            [null],
+        ]);
+    });
+});
 
 describe('Test paste with formula', () => {
     let univer: Univer;

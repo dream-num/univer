@@ -15,7 +15,7 @@
  */
 
 import type { Injector, Nullable, Univer, Workbook } from '@univerjs/core';
-import type { IDeltaRowHeightCommand, ISetRowHeightCommandParams } from '../set-worksheet-row-height.command';
+import type { IDeltaRowHeightCommandParams, ISetRowHeightCommandParams } from '../set-worksheet-row-height.command';
 import {
     BooleanNumber,
     ICommandService,
@@ -108,7 +108,7 @@ describe('Test set row height commands', () => {
         it('Should change all row selections when anchor row is selected', async () => {
             expect(getRowHeight(1)).toBe(24);
 
-            await commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
+            await commandService.executeCommand<IDeltaRowHeightCommandParams>(DeltaRowHeightCommand.id, {
                 deltaY: -5,
                 anchorRow: 5,
             });
@@ -134,7 +134,7 @@ describe('Test set row height commands', () => {
             expect(getRowHeight(1)).toBe(24);
             expect(getRowHeight(7)).toBe(24);
 
-            await commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
+            await commandService.executeCommand<IDeltaRowHeightCommandParams>(DeltaRowHeightCommand.id, {
                 deltaY: -5,
                 anchorRow: 7,
             });

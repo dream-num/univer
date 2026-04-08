@@ -297,8 +297,11 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
 
         const pageWidth = (documentStyle.pageSize?.width ?? 800) - marginLeft - marginRight;
 
-        // eslint-disable-next-line ts/no-non-null-asserted-optional-chain
-        const tableColumns = snapshot?.tableSource?.[tableId].tableColumns!;
+        const tableColumns = snapshot?.tableSource?.[tableId]?.tableColumns;
+
+        if (!tableColumns) {
+            return false;
+        }
 
         const { newColWidth, widths } = getColumnWidths(pageWidth, tableColumns, columnIndex);
 

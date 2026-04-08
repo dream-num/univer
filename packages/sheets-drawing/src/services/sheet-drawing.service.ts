@@ -66,8 +66,8 @@ export interface IFloatDomData extends IDrawingParam {
     data?: Serializable;
     allowTransform?: boolean;
      /**
-     * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
-     */
+      * this property is used to store the excel drawing axis alignment position, which is not always the same as the sheetTransform.
+      */
     axisAlignSheetTransform: ISheetDrawingPosition;
 }
 

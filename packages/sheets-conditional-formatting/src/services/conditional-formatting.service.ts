@@ -76,43 +76,67 @@ export class ConditionalFormattingService extends Disposable {
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
         const cellCfs = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
 
-        if (cellCfs && cellCfs?.length) {
-            // High priority should be applied at the back, overwriting the previous results.
-            // reverse is a side-effect function that changes the original array.
-            const ruleList = cellCfs.map((item) => this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule).reverse();
-            const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
-            if (endIndex > -1) {
-                ruleList.splice(endIndex + 1);
-            }
-            const result = ruleList.reduce((pre, rule) => {
-                const type = rule.rule.type;
-                const ruleCacheItem = cellCfs.find((cache) => cache.cfId === rule.cfId);
-
-                if (type === CFRuleType.highlightCell) {
-                    ruleCacheItem!.result && merge(pre, { style: ruleCacheItem!.result });
-                } else if (type === CFRuleType.colorScale) {
-                    const ruleCache = ruleCacheItem?.result;
-                    if (ruleCache && typeof ruleCache === 'string') {
-                        pre.style = { ...(pre.style ?? {}), bg: { rgb: ruleCache } };
-                    }
-                } else if (type === CFRuleType.dataBar) {
-                    const ruleCache = ruleCacheItem?.result as IDataBarRenderParams;
-                    if (ruleCache) {
-                        pre.dataBar = ruleCache;
-                        pre.isShowValue = ruleCache.isShowValue;
-                    }
-                } else if (type === CFRuleType.iconSet) {
-                    const ruleCache = ruleCacheItem?.result as IIconSetRenderParams;
-                    if (ruleCache) {
-                        pre.iconSet = ruleCache;
-                        pre.isShowValue = ruleCache.isShowValue;
-                    }
-                }
-                return pre;
-            }, {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean });
-            return result;
+        if (!cellCfs?.length) {
+            return null;
         }
-        return null;
+
+        const matchedRules: Array<{
+            rule: IConditionFormattingRule;
+            cacheItem: (typeof cellCfs)[number];
+        }> = [];
+
+        let stopIfTrueIndex = -1;
+        for (const cacheItem of cellCfs) {
+            const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cacheItem.cfId);
+            if (!rule) {
+                continue;
+            }
+
+            matchedRules.push({ rule, cacheItem });
+
+            if (stopIfTrueIndex === -1 && rule.stopIfTrue) {
+                stopIfTrueIndex = matchedRules.length - 1;
+            }
+        }
+
+        if (!matchedRules.length) {
+            return null;
+        }
+
+        const effectiveRules = stopIfTrueIndex > -1
+            ? matchedRules.slice(0, stopIfTrueIndex + 1)
+            : matchedRules;
+
+        const result = {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean };
+
+        for (let i = effectiveRules.length - 1; i >= 0; i--) {
+            const { rule, cacheItem } = effectiveRules[i];
+            const type = rule.rule.type;
+
+            if (type === CFRuleType.highlightCell) {
+                cacheItem.result && merge(result, { style: cacheItem.result });
+            } else if (type === CFRuleType.colorScale) {
+                const ruleCache = cacheItem.result;
+                if (ruleCache && typeof ruleCache === 'string') {
+                    const preStyle = result.style || {};
+                    result.style = { ...preStyle, bg: { rgb: ruleCache } };
+                }
+            } else if (type === CFRuleType.dataBar) {
+                const ruleCache = cacheItem.result as IDataBarRenderParams;
+                if (ruleCache) {
+                    result.dataBar = ruleCache;
+                    result.isShowValue = ruleCache.isShowValue;
+                }
+            } else if (type === CFRuleType.iconSet) {
+                const ruleCache = cacheItem.result as IIconSetRenderParams;
+                if (ruleCache) {
+                    result.iconSet = ruleCache;
+                    result.isShowValue = ruleCache.isShowValue;
+                }
+            }
+        }
+
+        return result;
     }
 
     private _initSnapshot() {

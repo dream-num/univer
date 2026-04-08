@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: '자르기',
             start: '자르기 시작',
             mode: '자유 모드',
+            shape: '모양에 맞게 자르기',
         },
         group: {
             title: '그룹',

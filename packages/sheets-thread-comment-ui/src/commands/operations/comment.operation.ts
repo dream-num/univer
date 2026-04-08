@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { ISidebarService } from '@univerjs/ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
+import { SHEETS_THREAD_COMMENT_PANEL } from '../../types/const';
 
-export const ShowAddSheetCommentModalOperation: ICommand = {
+export const ShowAddSheetCommentModalOperation: IOperation = {
     type: CommandType.OPERATION,
-    id: 'sheets.operation.show-comment-modal',
+    id: 'sheet.operation.show-comment-modal',
     handler(accessor) {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -63,6 +65,29 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
                 trigger: 'context-menu',
             });
         }
+        return true;
+    },
+};
+
+export const ToggleSheetCommentPanelOperation: IOperation = {
+    id: 'sheet.operation.toggle-comment-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const sidebarService = accessor.get(ISidebarService);
+        const panelService = accessor.get(ThreadCommentPanelService);
+
+        if (panelService.panelVisible) {
+            sidebarService.close();
+            panelService.setPanelVisible(false);
+        } else {
+            sidebarService.open({
+                header: { title: 'threadCommentUI.panel.title' },
+                children: { label: SHEETS_THREAD_COMMENT_PANEL },
+                width: 360,
+            });
+            panelService.setPanelVisible(true);
+        }
+
         return true;
     },
 };

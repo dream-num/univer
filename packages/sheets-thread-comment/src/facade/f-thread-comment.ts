@@ -412,7 +412,6 @@ export class FThreadComment {
         return this._injector.createInstance(FRange, workbook, worksheet, range);
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `getRichText` as instead
      */
@@ -463,7 +462,6 @@ export class FThreadComment {
         );
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `deleteAsync` as instead.
      */
@@ -471,7 +469,6 @@ export class FThreadComment {
         return this.deleteAsync();
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `updateAsync` as instead
      */
@@ -525,7 +522,6 @@ export class FThreadComment {
         return res;
     }
 
-    // eslint-disable-next-line
     /**
      * @deprecated use `resolveAsync` as instead
      */

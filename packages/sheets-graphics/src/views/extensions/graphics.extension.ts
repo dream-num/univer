@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { IObjectMatrixPrimitiveType, IRange, IScale, ISelectionCellWithMergeInfo } from '@univerjs/core';
+import type { IRange, IScale, ISelectionCellWithMergeInfo } from '@univerjs/core';
 import type { IDrawInfo, SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { Range } from '@univerjs/core';
 import { SheetExtension } from '@univerjs/engine-render';
 import { GRAPHICS_EXTENSION_INDEX, UNIQUE_KEY } from '../../common/const';
-
-type IGraphicsCache = IObjectMatrixPrimitiveType<ISelectionCellWithMergeInfo>;
 
 type IGraphicsRenderer = (ctx: UniverRenderingContext, skeleton: SpreadsheetSkeleton, coordInfo: ISelectionCellWithMergeInfo) => void;
 type IGraphicsRenderMap = Map<string, IGraphicsRenderer>;

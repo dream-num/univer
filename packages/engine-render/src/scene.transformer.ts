@@ -170,7 +170,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private readonly _changing$ = new Subject<IChangeObserverConfig>();
     readonly changing$ = this._changing$.asObservable();
 
-    private readonly _changeEnd$ = new Subject<IChangeObserverConfig>();
+    private readonly _changeEnd$ = new Subject<IChangeObserverConfig & { event: IPointerEvent | IMouseEvent }>();
     readonly changeEnd$ = this._changeEnd$.asObservable();
 
     private readonly _clearControl$ = new Subject<boolean>();
@@ -466,6 +466,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         type: MoveObserverType.MOVE_END,
                         offsetX,
                         offsetY,
+                        event,
                     });
                 } else {
                     this._changeEnd$.next({
@@ -473,6 +474,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         type: MoveObserverType.MOVE_END,
                         offsetX,
                         offsetY,
+                        event,
                     });
                 }
             });
@@ -1038,6 +1040,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                                 type: MoveObserverType.MOVE_END,
                                 offsetX,
                                 offsetY,
+                                event,
                             });
                         } else {
                             this._recoverySizeBoundary([applyObject], ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
@@ -1046,6 +1049,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                                 type: MoveObserverType.MOVE_END,
                                 offsetX,
                                 offsetY,
+                                event,
                             });
                         }
                         this.refreshControls();
@@ -1139,6 +1143,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                             type: MoveObserverType.MOVE_END,
                             offsetX,
                             offsetY,
+                            event,
                         });
                     });
 
@@ -1609,6 +1614,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._transformerControlMap.clear();
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
         const { left = 0, top = 0, height = 0, width = 0 } = applyObject.getState();
         const angle = applyObject.angle;
@@ -1650,13 +1656,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     stroke: borderStroke,
                 });
 
-                const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
+                const { left: rotateLeft, top: rotateTop } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
                 const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
                 const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                     zIndex: zIndex - 1,
-                    left,
-                    top,
+                    left: rotateLeft,
+                    top: rotateTop,
                     height: rotateSize,
                     width: rotateSize,
                     radius: rotateCornerRadius,
@@ -1690,7 +1696,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
         transformerControl.zIndex = zIndex;
         transformerControl.evented = false;
         transformerControl.openSelfSizeMode();
-        transformerControl.transformByState({ left, top, angle, width, height });
+        transformerControl.transformByState({
+            left: applyObject.left || left,
+            top: applyObject.top || top,
+            angle: applyObject.angle || angle,
+            width: applyObject.width || width,
+            height: applyObject.height || height,
+        });
         const scene = this.getScene();
         scene.addObject(transformerControl, layerIndex);
 

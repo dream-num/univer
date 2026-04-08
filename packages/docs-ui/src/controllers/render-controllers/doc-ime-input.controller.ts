@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { IEditorInputConfig } from '../../services/selection/doc-selection-render.service';
@@ -24,8 +24,7 @@ import {
     Inject,
     Tools,
 } from '@univerjs/core';
-
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -46,6 +45,7 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocIMEInputManagerService) private readonly _docImeInputManagerService: DocIMEInputManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocStateEmitService) private readonly _docStateEmitService: DocStateEmitService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -120,6 +120,16 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
             return;
         }
 
+        /**
+         * IME composition is canceled when the composition content is the same as the previous one on composition end.
+         * In this case, we need to finalize the composition and reset the IME state.
+         */
+        if (!isUpdate && content === this._previousIMEContent) {
+            this._finalizeComposition();
+            this._resetIME();
+            return;
+        }
+
         await this._commandService.executeCommand(IMEInputCommand.id, {
             unitId,
             newText: content,
@@ -137,6 +147,31 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         } else {
             this._resetIME();
         }
+    }
+
+    // When the composition is canceled, we need to emit the state change info to update the selection and other states.
+    private _finalizeComposition() {
+        const previousActiveRange = this._docImeInputManagerService.getActiveRange();
+
+        if (previousActiveRange == null) {
+            return;
+        }
+
+        this._docStateEmitService.emitStateChangeInfo({
+            commandId: RichTextEditingMutation.id,
+            unitId: this._context.unitId,
+            segmentId: previousActiveRange.segmentId,
+            trigger: IMEInputCommand.id,
+            redoState: {
+                actions: [] as JSONXActions,
+                textRanges: [previousActiveRange],
+            },
+            undoState: {
+                actions: [] as JSONXActions,
+                textRanges: [previousActiveRange],
+            },
+            isCompositionEnd: true,
+        });
     }
 
     private _resetIME() {

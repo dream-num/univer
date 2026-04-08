@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
+import type { IConditionFormattingRule, IValueConfig } from '../type';
 import type { IContext } from './base-calculate-unit';
 import { BooleanNumber, CellValueType, ColorKit, dayjs, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue, FormulaResultStatus } from '@univerjs/engine-formula';

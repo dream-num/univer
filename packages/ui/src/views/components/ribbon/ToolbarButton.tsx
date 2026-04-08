@@ -95,7 +95,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
     return (
         <button
             type="button"
-            className={clsx(toolbarButtonClassName, {
+            className={clsx(toolbarButtonClassName, className, {
                 'univer-px-2': noIcon,
                 '!univer-bg-gray-200 dark:!univer-bg-gray-500': active,
             })}

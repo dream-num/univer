@@ -16,11 +16,11 @@
 
 import type { ITextRun } from '../types/interfaces/i-document-data';
 
-interface AnyObject {
-    [key: number | string]: AnyObject | AnyObject[] | Array<[number | string]> | any;
+interface IAnyObject {
+    [key: number | string]: IAnyObject | IAnyObject[] | Array<[number | string]> | any;
 }
 
-export function deepCompare(arg1: AnyObject, arg2: AnyObject): boolean {
+export function deepCompare(arg1: IAnyObject, arg2: IAnyObject): boolean {
     if (Object.prototype.toString.call(arg1) === Object.prototype.toString.call(arg2)) {
         if (
             Object.prototype.toString.call(arg1) === '[object Object]' ||
@@ -29,7 +29,7 @@ export function deepCompare(arg1: AnyObject, arg2: AnyObject): boolean {
             if (Object.keys(arg1).length !== Object.keys(arg2).length) {
                 return false;
             }
-            return Object.keys(arg1).every((key) => deepCompare(arg1[key] as AnyObject, arg2[key] as AnyObject));
+            return Object.keys(arg1).every((key) => deepCompare(arg1[key] as IAnyObject, arg2[key] as IAnyObject));
         }
         return arg1 === arg2;
     }

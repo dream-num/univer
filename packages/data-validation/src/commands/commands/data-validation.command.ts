@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, ILogService, IUndoRedoService } from '@univerjs/core';
 import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, Injector, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
+import { CommandType, ICommandService, ILogService, IUndoRedoService } from '@univerjs/core';
 import { getRuleOptions, getRuleSetting } from '../../common/util';
 import { DataValidationModel } from '../../models/data-validation-model';
 import { DataValidatorRegistryService } from '../../services/data-validator-registry.service';
 import { UpdateRuleType } from '../../types/enum/update-rule-type';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
-import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
 
 interface ISheetCommandSharedParams {
     unitId: string;

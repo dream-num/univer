@@ -44,7 +44,7 @@ export type {
     IUpdateCommentRefMutationParams,
 } from './commands/mutations/comment.mutation';
 export { getDT } from './common/utils';
-export type { IUniverThreadCommentConfig } from './controllers/config.schema';
+export type { IUniverThreadCommentConfig } from './config/config';
 export { SHEET_UNIVER_THREAD_COMMENT_PLUGIN, ThreadCommentResourceController } from './controllers/tc-resource.controller';
 export { type CommentUpdate, type IThreadInfo, ThreadCommentModel } from './models/thread-comment.model';
 export { UniverThreadCommentPlugin } from './plugin';

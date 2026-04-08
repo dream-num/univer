@@ -57,11 +57,6 @@ univer.registerPlugin(UniverUIPlugin, {
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin, {
     container: 'univerdoc',
-    layout: {
-        docContainerConfig: {
-            innerLeft: false,
-        },
-    },
 });
 
 univer.registerPlugin(UniverDocsDrawingUIPlugin);

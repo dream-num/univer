@@ -16,5 +16,5 @@
 
 import './global.css';
 
-export type { IUniverDebuggerConfig } from './controllers/config.schema';
+export type { IUniverDebuggerConfig } from './config/config';
 export { UniverDebuggerPlugin } from './plugin';

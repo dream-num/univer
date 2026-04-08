@@ -25,7 +25,7 @@ export {
     UpdateHyperLinkMutation,
     UpdateHyperLinkRefMutation,
 } from './commands/mutations/update-hyper-link.mutation';
-export type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
+export type { IUniverSheetsHyperLinkConfig } from './config/config';
 export { HyperLinkModel } from './models/hyper-link.model';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
 export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';

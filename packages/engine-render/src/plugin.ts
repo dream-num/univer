@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUniverEngineRenderConfig } from './controllers/config.schema';
-
+import type { IUniverEngineRenderConfig } from './config/config';
 import { createIdentifier, IConfigService, Inject, Injector, merge, Plugin, registerDependencies } from '@univerjs/core';
-import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+
+import pkg from '../package.json';
+import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './config/config';
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
 import { CanvasColorService, ICanvasColorService } from './services/canvas-color.service';
@@ -34,6 +35,8 @@ const PLUGIN_NAME = 'UNIVER_RENDER_ENGINE_PLUGIN';
 
 export class UniverRenderEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverEngineRenderConfig> = defaultPluginConfig,

@@ -16,9 +16,9 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { editor } from 'monaco-editor';
-import type { IUniverUniscriptConfig } from '../controllers/config.schema';
+import type { IUniverUniscriptConfig } from '../config/config';
 import { Disposable, IConfigService, toDisposable } from '@univerjs/core';
-import { UNISCRIPT_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { UNISCRIPT_PLUGIN_CONFIG_KEY } from '../config/config';
 
 /**
  * This service is for loading monaco editor and its resources. It also holds the

@@ -22,10 +22,10 @@ import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
+import { addLinkShortcut, DOC_LINK_ICON } from '../menu/menu';
+import { menuSchema } from '../menu/schema';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
-import { addLinkShortcut, DOC_LINK_ICON } from './menu';
-import { menuSchema } from './menu.schema';
 
 export interface IDocHyperLinkUIConfig {
     menu: MenuConfig;

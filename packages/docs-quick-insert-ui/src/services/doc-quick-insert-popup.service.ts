@@ -16,10 +16,11 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService, DocEventManagerService, getAnchorBounding, NodePositionConvertToCursor } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, tap } from 'rxjs';
 import { DeleteSearchKeyCommand } from '../commands/commands/doc-quick-insert.command';
@@ -52,6 +53,17 @@ export interface IDocPopup {
 const noopDisposable = {
     dispose: () => {},
 };
+
+interface IKeywordInputPlaceholderExtraProps {
+    fontSize?: number;
+    fontString?: string;
+    fontFamily?: string;
+    fontStyle?: 'normal' | 'italic';
+    fontWeight?: 'normal' | 'bold';
+    ascent?: number;
+    contentHeight?: number;
+}
+
 export class DocQuickInsertPopupService extends Disposable {
     private readonly _popups: Set<IDocPopup> = new Set();
     get popups() {
@@ -195,49 +207,104 @@ export class DocQuickInsertPopupService extends Disposable {
         return renderRoot;
     }
 
-    showPopup(options: { popup: IDocPopup; index: number; unitId: string }) {
-        const { popup, index, unitId } = options;
-        this.closePopup();
+    private _getParagraphBound(unitId: string, index: number) {
         const currentDoc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const paragraph = currentDoc?.getBody()?.paragraphs?.find((p) => p.startIndex > index);
         if (!paragraph) {
-            return;
+            return null;
         }
+
         const docEventManagerService = this.getDocEventManagerService(unitId);
-        const paragraphBound = docEventManagerService?.findParagraphBoundByIndex(paragraph.startIndex);
+        return docEventManagerService?.findParagraphBoundByIndex(paragraph.startIndex) ?? null;
+    }
+
+    private _getKeywordPlaceholderAnchorRect(
+        document: Documents,
+        skeleton: DocumentSkeleton,
+        activeRange: ITextRangeWithStyle,
+        fallbackRect: IBoundRectNoAngle
+    ): IBoundRectNoAngle {
+        const startPosition = skeleton.findNodePositionByCharIndex(activeRange.startOffset, true, activeRange.segmentId, activeRange.segmentPage);
+        if (!startPosition) {
+            return fallbackRect;
+        }
+
+        const documentOffsetConfig = document.getOffsetConfig();
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
+        const { contentBoxPointGroup } = convertor.getRangePointData(startPosition, startPosition);
+
+        if (contentBoxPointGroup.length === 0) {
+            return fallbackRect;
+        }
+
+        const anchor = getAnchorBounding(contentBoxPointGroup);
+        const left = anchor.left + documentOffsetConfig.docsLeft;
+        const top = anchor.top + documentOffsetConfig.docsTop;
+
+        return {
+            left,
+            right: left,
+            top,
+            bottom: top + anchor.height,
+        };
+    }
+
+    private _getKeywordPlaceholderExtraProps(curGlyph: IDocumentSkeletonGlyph): IKeywordInputPlaceholderExtraProps {
+        return {
+            fontSize: curGlyph.ts?.fs,
+            fontString: curGlyph.fontStyle?.fontString,
+            fontFamily: curGlyph.fontStyle?.fontFamily ?? curGlyph.ts?.ff ?? undefined,
+            fontStyle: curGlyph.ts?.it ? 'italic' : 'normal',
+            fontWeight: curGlyph.ts?.bl ? 'bold' : 'normal',
+            ascent: curGlyph.bBox?.ba,
+            contentHeight: ((curGlyph.bBox?.ba ?? 0) + (curGlyph.bBox?.bd ?? 0)) || undefined,
+        };
+    }
+
+    private _mountInputPlaceholder(unitId: string, fallbackRect: IBoundRectNoAngle): IDisposable {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const docSkeletonManagerService = currentRender?.with(DocSkeletonManagerService);
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
+        if (!currentRender || !docSkeletonManagerService || !activeRange) {
+            return noopDisposable;
+        }
+
+        const skeleton = docSkeletonManagerService.getSkeleton();
+        const curGlyph = skeleton.findNodeByCharIndex(activeRange.startOffset, activeRange.segmentId, activeRange.segmentPage);
+        const isEmptyLine = curGlyph?.content === '\r';
+        if (!isEmptyLine || !curGlyph) {
+            return noopDisposable;
+        }
+
+        const document = currentRender.mainComponent as Documents;
+        const placeholderAnchorRect = this._getKeywordPlaceholderAnchorRect(document, skeleton, activeRange, fallbackRect);
+        const extraProps = this._getKeywordPlaceholderExtraProps(curGlyph);
+
+        const disposable = this._docCanvasPopupManagerService.attachPopupToRect(
+            placeholderAnchorRect,
+            {
+                componentKey: KeywordInputPlaceholder.componentKey,
+                extraProps,
+                onClickOutside: () => {
+                    disposable.dispose();
+                },
+                direction: 'horizontal',
+            },
+            unitId
+        );
+
+        return disposable;
+    }
+
+    showPopup(options: { popup: IDocPopup; index: number; unitId: string }) {
+        const { popup, index, unitId } = options;
+        this.closePopup();
+        const paragraphBound = this._getParagraphBound(unitId, index);
         if (!paragraphBound) {
             return;
         }
 
-        this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => {
-            const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-            const activeRange = this._docSelectionManagerService.getActiveTextRange();
-            if (!docSkeletonManagerService || !activeRange) {
-                return noopDisposable;
-            }
-
-            const skeleton = docSkeletonManagerService.getSkeleton();
-            const curGlyph = skeleton.findNodeByCharIndex(activeRange.startOffset, activeRange.segmentId, activeRange.segmentPage);
-            const isEmptyLine = curGlyph?.content === '\r';
-            // Only show filter keyword placeholder on empty line
-            if (!isEmptyLine) {
-                return noopDisposable;
-            }
-
-            const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
-                { startOffset: index + 1, endOffset: index + 1, collapsed: false },
-                {
-                    componentKey: KeywordInputPlaceholder.componentKey,
-                    onClickOutside: () => {
-                        disposable.dispose();
-                    },
-                    direction: 'horizontal',
-                },
-                unitId
-            );
-
-            return disposable;
-        });
+        this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => this._mountInputPlaceholder(unitId, paragraphBound.firstLine));
         this._inputPlaceholderRenderRoot.mount();
 
         const disposable = this._docCanvasPopupManagerService.attachPopupToRect(

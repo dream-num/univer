@@ -14,12 +14,54 @@
  * limitations under the License.
  */
 
-import { render } from '@univerjs/design';
+import { clsx, render } from '@univerjs/design';
 import { defaultTheme } from '@univerjs/themes';
 import { ThemeSwitcherService } from '@univerjs/ui';
+import { useState } from 'react';
 import pkg from '../../package.json';
+import { demos } from './demos';
 
 import './global.css';
+
+type DemoCategoryKey = 'sheets' | 'docs' | 'slides' | 'others';
+
+const CATEGORY_ORDER: DemoCategoryKey[] = ['sheets', 'docs', 'slides', 'others'];
+const PRIMARY_CATEGORY_ORDER: DemoCategoryKey[] = ['sheets', 'docs', 'slides'];
+
+const CATEGORY_TITLES: Record<DemoCategoryKey, string> = {
+    sheets: 'Sheets',
+    docs: 'Docs',
+    slides: 'Slides',
+    others: 'Others',
+};
+
+function getDemoCategory(dir: string): DemoCategoryKey {
+    if (dir.startsWith('sheets') || dir.includes('sheets')) {
+        return 'sheets';
+    }
+
+    if (dir.startsWith('docs') || dir.includes('docs')) {
+        return 'docs';
+    }
+
+    if (dir.startsWith('slides') || dir.includes('slides')) {
+        return 'slides';
+    }
+
+    return 'others';
+}
+
+const groupedDemos = CATEGORY_ORDER.map((category) => ({
+    category,
+    title: CATEGORY_TITLES[category],
+    items: demos.filter((demo) => getDemoCategory(demo.dir) === category),
+})).filter((group) => group.items.length > 0);
+
+const primaryGroups = PRIMARY_CATEGORY_ORDER.map((category) => groupedDemos.find((group) => group.category === category)).filter(
+    (group): group is (typeof groupedDemos)[number] => Boolean(group)
+);
+
+const defaultCategory = primaryGroups[0]?.category ?? groupedDemos[0]?.category ?? 'sheets';
 
 // package info
 // eslint-disable-next-line node/prefer-global/process
@@ -37,84 +79,118 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
+function DemoList({ items }: { items: (typeof demos)[number][] }) {
+    return (
+        <ul>
+            {items.map((demo) => (
+                <li
+                    key={demo.dir}
+                >
+                    <a
+                        className="
+                          univer-flex univer-items-center univer-rounded-lg univer-px-4 univer-py-3 univer-no-underline
+                          hover:univer-bg-slate-50
+                        "
+                        href={demo.href}
+                    >
+                        <span
+                            className="
+                              univer-min-w-0 univer-shrink univer-truncate univer-font-medium univer-text-slate-900
+                            "
+                        >
+                            {demo.title}
+                        </span>
+                        <span
+                            aria-hidden="true"
+                            className="
+                              univer-mx-3 univer-min-w-4 univer-flex-1 univer-border-b univer-border-dotted
+                              univer-border-slate-300
+                            "
+                        />
+                        <span className="univer-shrink-0 univer-text-sm univer-text-slate-500">{demo.dir}</span>
+                    </a>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 function Examples() {
     new ThemeSwitcherService().injectThemeToHead(defaultTheme);
 
-    const demos = [{
-        title: '📊 Sheets',
-        href: './sheets/',
-    }, {
-        title: '📝 Docs',
-        href: './docs/',
-    }, {
-        title: '📽️ Slides',
-        href: './slides/',
-    }, {
-        title: '🗂️ Sheets No Worker',
-        href: './sheets-no-worker/',
-    }, {
-        title: '🗂️ Sheets Multi Instance',
-        href: './sheets-multi/',
-    }, {
-        title: '🗂️ Sheets With Webcomponent',
-        href: './sheets-webcomponent/',
-    }, {
-        title: '🏡 Sheets Multi Units',
-        href: './sheets-multi-units/',
-    }, {
-        title: '📄 Sheets Uniscript',
-        href: './sheets-uniscript/',
-    }, {
-        title: '📚 Docs Uniscript',
-        href: './docs-uniscript/',
-    }, {
-        title: '📱 Mobile',
-        href: './mobile-s/',
-    }];
+    const [activeCategory, setActiveCategory] = useState<DemoCategoryKey>(defaultCategory);
+    const activeGroup = primaryGroups.find((group) => group.category === activeCategory) ?? primaryGroups[0];
+    const otherGroup = groupedDemos.find((group) => group.category === 'others');
 
     return (
-        <section
-            className="univer-flex univer-h-full univer-flex-col univer-items-center univer-justify-center univer-gap-6"
+        <main
+            className="
+              univer-h-screen univer-overflow-y-auto univer-bg-white univer-px-6 univer-py-10 univer-text-slate-800
+            "
         >
-            <header className="univer-flex univer-items-center">
-                <img className="univer-w-24" src="/favicon.svg" alt="Univer" draggable={false} />
-                <h1 className="univer-text-slate-700">
-                    <span
-                        className={`
-                          univer-bg-[linear-gradient(121deg,#0048ff_18.89%,#0c81ed_39.58%,#029dce_59.87%,#00bbb0_74.37%,#00c5a8_79.64%)]
-                          univer-bg-clip-text univer-text-4xl univer-text-transparent
-                        `}
-                    >
-                        Univer
-                    </span>
-                    <sup
-                        className={`
-                          univer-relative -univer-top-1 univer-left-2 univer-rounded-xl univer-border
-                          univer-border-solid univer-border-current univer-px-2 univer-py-0.5 univer-text-xs
-                        `}
-                    >
-                        {pkg.version}
-                    </sup>
-                </h1>
-            </header>
+            <section className="univer-mx-auto univer-max-w-3xl">
+                <header className="univer-mb-8 univer-flex univer-items-center univer-gap-4">
+                    <img className="univer-w-12" src="/favicon.svg" alt="Univer" draggable={false} />
+                    <div>
+                        <h1 className="univer-text-3xl univer-font-semibold univer-text-slate-900">
+                            Univer
+                            <sup className="univer-ml-2 univer-text-sm univer-font-normal univer-text-slate-500">
+                                v
+                                {pkg.version}
+                            </sup>
+                        </h1>
+                    </div>
+                </header>
 
-            <section className="univer-container univer-flex univer-flex-wrap univer-justify-center univer-gap-6">
-                {demos.map((demo) => (
-                    <a
-                        key={demo.title}
-                        className={`
-                          univer-rounded-lg univer-bg-primary-500 univer-px-6 univer-py-2.5 univer-font-medium
-                          univer-text-white univer-no-underline univer-shadow-sm univer-transition-all
-                          univer-duration-300 univer-ease-in-out
-                          hover:univer-scale-105 hover:univer-bg-emerald-500
-                        `}
-                        href={demo.href}
-                    >
-                        <span>{demo.title}</span>
-                    </a>
-                ))}
+                <section className="univer-mb-8">
+                    <div className="univer-mb-4 univer-flex univer-gap-2">
+                        {primaryGroups.map((group) => {
+                            const isActive = group.category === activeCategory;
+
+                            return (
+                                <button
+                                    key={group.category}
+                                    className={clsx(`
+                                      univer-cursor-pointer univer-rounded-full univer-border-none univer-px-4
+                                      univer-py-2 univer-text-sm univer-font-medium
+                                    `, isActive
+                                        ? 'univer-bg-slate-900 univer-text-white'
+                                        : `
+                                          univer-bg-white univer-font-medium univer-text-slate-700
+                                          hover:univer-bg-slate-50
+                                        `)}
+                                    type="button"
+                                    onClick={() => setActiveCategory(group.category)}
+                                >
+                                    {group.title}
+                                    (
+                                    {group.items.length}
+                                    )
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {activeGroup && (
+                        <section>
+                            <h2 className="univer-mb-3 univer-text-lg univer-font-semibold univer-text-slate-900">
+                                {activeGroup.title}
+                            </h2>
+                            <DemoList items={activeGroup.items} />
+                        </section>
+                    )}
+                </section>
+
+                {otherGroup && (
+                    <section>
+                        <h2 className="univer-mb-3 univer-text-lg univer-font-semibold univer-text-slate-900">
+                            {otherGroup.title}
+                        </h2>
+                        <DemoList items={otherGroup.items} />
+                    </section>
+                )}
             </section>
-        </section>
+        </main>
     );
 }
 

@@ -17,13 +17,13 @@
 import type { Nullable } from '@univerjs/core';
 import type { ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import type { IUniverUIConfig } from '../../../controllers/config.schema';
+import type { IUniverUIConfig } from '../../../config/config';
 import { IConfigService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useEvent } from '../../../components/hooks/event';
-import { UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+import { UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { useDependency } from '../../../utils/di';
 
 interface IAbsolutePosition {

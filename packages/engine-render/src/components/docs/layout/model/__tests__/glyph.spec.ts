@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { describe, expect, it } from 'vitest';
 import { baseAdjustability, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 
 describe('Glyph utils test cases', () => {
     describe('test baseAdjustability', () => {

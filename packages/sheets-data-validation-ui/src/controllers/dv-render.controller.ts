@@ -23,8 +23,8 @@ import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationMode
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
 import { bufferTime, filter } from 'rxjs';
+import { menuSchema } from '../menu/schema';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
-import { menuSchema } from './menu.schema';
 
 const INVALID_MARK = {
     tr: {

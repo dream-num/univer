@@ -15,9 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
+import type { IUniverSheetsConditionalFormattingConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import pkg from '../package.json';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { AddCfCommand } from './commands/commands/add-cf.command';
 import { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
@@ -32,7 +33,7 @@ import { SetConditionalRuleMutation } from './commands/mutations/set-conditional
 import {
     defaultPluginConfig,
     SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY,
-} from './controllers/config.schema';
+} from './config/config';
 import { ConditionalFormattingRuleModel } from './models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from './models/conditional-formatting-view-model';
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
@@ -41,6 +42,8 @@ import { ConditionalFormattingService } from './services/conditional-formatting.
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

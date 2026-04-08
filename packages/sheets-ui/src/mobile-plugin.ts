@@ -16,12 +16,14 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
+import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -31,7 +33,6 @@ import { CellCustomRenderController } from './controllers/cell-custom-render.con
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
@@ -57,7 +58,7 @@ import { HeaderFreezeRenderController } from './controllers/render-controllers/f
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
-// import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { MobileHeaderResizeRenderController } from './controllers/render-controllers/mobile/mobile-header-resize.render-controller';
 import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
@@ -95,6 +96,8 @@ import { IStatusBarService, StatusBarService } from './services/status-bar.servi
 @DependentOn(UniverSheetsPlugin, UniverMobileUIPlugin)
 export class UniverSheetsMobileUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     /** @ignore */
@@ -262,7 +265,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [DragRenderController],
             [ForceStringRenderController],
             [CellCustomRenderController],
-            // [SheetContextMenuMobileRenderController],
+            [SheetContextMenuMobileRenderController],
             [MobileHeaderResizeRenderController],
             [MoveRangeRenderController],
 

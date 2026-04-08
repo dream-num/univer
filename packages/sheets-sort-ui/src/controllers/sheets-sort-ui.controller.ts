@@ -35,11 +35,11 @@ import {
     SortRangeDescExtInCtxMenuCommand,
     SortRangeDescInCtxMenuCommand,
 } from '../commands/commands/sheets-sort.command';
+import { menuSchema } from '../menu/schema';
+import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON } from '../menu/sheets-sort.menu';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import EmbedSortBtn from '../views/EmbedSortBtn';
-import { menuSchema } from './menu.schema';
-import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON } from './sheets-sort.menu';
 
 const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
 const CUSTOM_SORT_PANEL_WIDTH = 560;

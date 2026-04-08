@@ -18,9 +18,11 @@ import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx, Select } from '@univerjs/design';
 import { CreateCopyIcon } from '@univerjs/icons';
-import { useDependency } from '@univerjs/ui';
+import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+
 import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
+import { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from '../../services/drawing-image-clip.service';
 
 export interface IImageCropperProps {
     drawings: IDrawingParam[];
@@ -30,6 +32,9 @@ export interface IImageCropperProps {
 export const ImageCropper = (props: IImageCropperProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const clipService = useDependency(DrawingImageClipService);
+    const componentManager = useDependency(ComponentManager);
+    const canUseShapeClip = useObservable(clipService.canUseShapeClip$, false);
 
     const { drawings, cropperShow } = props;
 
@@ -140,6 +145,13 @@ export const ImageCropper = (props: IImageCropperProps) => {
 
                 <Select value={cropValue} options={cropOptions} onChange={handleCropChange} />
             </div>
+
+            {canUseShapeClip && (() => {
+                const ShapeClipPicker = componentManager.get(IMAGE_CLIP_SHAPE_PICKER_COMPONENT);
+                return ShapeClipPicker
+                    ? <ShapeClipPicker />
+                    : null;
+            })()}
         </div>
     );
 };

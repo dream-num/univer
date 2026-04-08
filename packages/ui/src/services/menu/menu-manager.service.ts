@@ -16,7 +16,7 @@
 
 import type { IAccessor, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { IMenuItem } from '../menu/menu';
+import type { IMenuItem } from './menu';
 import { createIdentifier, Disposable, IConfigService, Inject, Injector, merge } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
@@ -226,6 +226,12 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
             },
             [ContextMenuPosition.FOOTER_MENU]: {
                 order: 4,
+                [ContextMenuGroup.OTHERS]: {
+                    order: 3,
+                },
+            },
+            [ContextMenuPosition.DRAWING]: {
+                order: 5,
                 [ContextMenuGroup.OTHERS]: {
                     order: 3,
                 },

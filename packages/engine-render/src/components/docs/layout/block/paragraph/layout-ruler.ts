@@ -111,8 +111,7 @@ function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
         }
 
         if (isInWhiteSpace &&
-            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK
-        ) {
+            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK) {
             return false;
         }
     }
@@ -369,10 +368,9 @@ function _divideOperator(
                     } else {
                         newGlyphGroup = [spanGroupCached[0]];
                     }
-                    const column = currentLine.parent;
+                    const column = currentLine.parent!;
 
-                    // eslint-disable-next-line ts/no-non-null-asserted-optional-chain
-                    const { paragraphStart: lineIsStart } = column?.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
+                    const { paragraphStart: lineIsStart } = column.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
 
                     _lineOperator(
                         ctx,

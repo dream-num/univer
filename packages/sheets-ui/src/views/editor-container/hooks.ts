@@ -22,7 +22,7 @@ import { useMemo } from 'react';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 | 2>, unitId: string) {
+export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 | 2>, unitId?: string) {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const commandService = useDependency(ICommandService);
 
@@ -34,12 +34,16 @@ export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 |
         ],
         handler: (keycode: KeyCode) => {
             if (keycode === KeyCode.ENTER || keycode === KeyCode.ESC || keycode === KeyCode.TAB) {
+                if (unitId == null) {
+                    return;
+                }
+
                 editorBridgeService.disableForceKeepVisible();
                 commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode,
-                    unitId: unitId!,
+                    unitId,
                 });
             }
         },

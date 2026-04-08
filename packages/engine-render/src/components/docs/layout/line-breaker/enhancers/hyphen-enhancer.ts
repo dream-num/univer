@@ -15,10 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Break, BreakPointType } from '../break';
-import type { IBreakPoints, LineBreaker } from '../line-breaker';
 import type { Hyphen } from '../../hyphenation/hyphen';
 import type { Lang } from '../../hyphenation/lang';
+import type { IBreakPoints, LineBreaker } from '../line-breaker';
+import { Break, BreakPointType } from '../break';
 import { getSlicePosition, getWord } from './utils';
 
 function isUpperCase(word: string) {

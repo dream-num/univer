@@ -18,9 +18,9 @@ import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { AddNoteIcon, DeleteNoteIcon, HideNoteIcon } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddNotePopupOperation } from '../commands/operations/add-note-popup.operation';
+import { menuSchema } from '../menu/schema';
 import { SHEET_NOTE_COMPONENT } from '../views/config';
 import { SheetsNote } from '../views/note';
-import { menuSchema } from './menu.schema';
 
 export class SheetsNoteUIController extends Disposable {
     constructor(

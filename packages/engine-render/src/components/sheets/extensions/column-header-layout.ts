@@ -141,6 +141,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         ctx.setLineWidthByPrecision(1);
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
         let preColumnPosition = 0;
+        const colGaps = spreadsheetSkeleton.gapConfig?.colGaps;
 
         // draw each column header
         for (let c = startColumn - 1; c <= endColumn; c++) {
@@ -152,6 +153,49 @@ export class ColumnHeaderLayout extends SheetExtension {
             if (preColumnPosition === columnEndPosition) {
                 continue;// Skip hidden columns
             }
+
+            // Draw gap area in column header if a gap is configured before this column
+            const gapSize = colGaps?.[c]?.size ?? 0;
+            if (gapSize > 0) {
+                const gapItem = colGaps![c];
+                const gapLeft = preColumnPosition;
+                const gapRight = preColumnPosition + gapSize;
+                // defaultBackgroundColor and defaultStripeColor are guaranteed by SheetSkeleton._fillDefaultGapThemeColors
+                const { defaultBackgroundColor = '', defaultStripeColor = '' } = spreadsheetSkeleton.gapConfig || {};
+                const defaultBg = defaultBackgroundColor;
+                const defaultStripe = defaultStripeColor;
+
+                // Fill gap background
+                ctx.save();
+                ctx.fillStyle = gapItem.color ?? defaultBg;
+                ctx.fillRectByPrecision(gapLeft, 0, gapSize, columnHeaderHeight);
+                ctx.restore();
+
+                // Draw diagonal stripes
+                ctx.save();
+                ctx.beginPath();
+                ctx.rectByPrecision(gapLeft, 0, gapSize, columnHeaderHeight);
+                ctx.clip();
+                ctx.strokeStyle = gapItem.stripeColor ?? defaultStripe;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                const spacing = 6;
+                for (let d = -columnHeaderHeight; d < gapSize; d += spacing) {
+                    ctx.moveTo(gapLeft + d, columnHeaderHeight);
+                    ctx.lineTo(gapLeft + d + columnHeaderHeight, 0);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                preColumnPosition = gapRight;
+            }
+
+            // After gap, the column itself may still be hidden (width = 0)
+            if (preColumnPosition >= columnEndPosition) {
+                preColumnPosition = columnEndPosition;
+                continue;
+            }
+
             const cellBound = { left: preColumnPosition, top: 0, right: columnEndPosition, bottom: columnHeaderHeight, width: columnEndPosition - preColumnPosition, height: columnHeaderHeight };
             const [curColumnCfg, specStyle] = this.getCfgOfCurrentColumn(columnsCfg, headerStyle, c);
 

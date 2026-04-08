@@ -8,6 +8,7 @@ on:
 
 jobs:
     sync:
+        if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
         steps:
             - name: Sync Gitee

@@ -112,6 +112,43 @@ describe('test class HTTPRequest', () => {
 
             expect(request.getBody()).toBe('123');
         });
+
+        it('should stringify array bodies with the default JSON content type', () => {
+            const body = [1, 2, 3];
+            const request = new HTTPRequest('POST', 'https://example.com', {
+                body,
+                headers: new HTTPHeaders(),
+                responseType: 'json',
+                withCredentials: false,
+            });
+
+            expect(request.getBody()).toBe(JSON.stringify(body));
+        });
+
+        it('should treat falsy primitive bodies as empty according to current behavior', () => {
+            const zeroRequest = new HTTPRequest('POST', 'https://example.com', {
+                body: 0,
+                headers: new HTTPHeaders(),
+                responseType: 'text',
+                withCredentials: false,
+            });
+            const falseRequest = new HTTPRequest('POST', 'https://example.com', {
+                body: false,
+                headers: new HTTPHeaders(),
+                responseType: 'text',
+                withCredentials: false,
+            });
+            const emptyRequest = new HTTPRequest('POST', 'https://example.com', {
+                body: '',
+                headers: new HTTPHeaders(),
+                responseType: 'text',
+                withCredentials: false,
+            });
+
+            expect(zeroRequest.getBody()).toBeNull();
+            expect(falseRequest.getBody()).toBeNull();
+            expect(emptyRequest.getBody()).toBeNull();
+        });
     });
 
     describe('getHeadersInit', () => {

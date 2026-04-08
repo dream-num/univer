@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'トリミング',
             start: 'トリミングを開始',
             mode: '自由モード',
+            shape: '形状にトリミング',
         },
         group: {
             title: 'グループ',

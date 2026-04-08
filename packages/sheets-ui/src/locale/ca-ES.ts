@@ -479,6 +479,7 @@ const locale: typeof enUS = {
             printErr: 'El full de càlcul està protegit i no teniu permís per imprimir. Per imprimir, contacteu amb el creador.',
             formulaErr: 'L\'interval o l\'interval referenciat està protegit, i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
             hyperLinkErr: 'L\'interval està protegit i no teniu permís per establir hipervincles. Per establir hipervincles, contacteu amb el creador.',
+            commentErr: 'L\'interval está protegido y no tienes permiso para comentar. Para comentar, contacta con el creador.',
         },
         button: {
             confirm: 'Confirmar',

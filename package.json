@@ -1,9 +1,9 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.16.1",
+    "version": "0.20.0",
     "private": true,
-    "packageManager": "pnpm@10.30.2",
+    "packageManager": "pnpm@10.32.1",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -18,23 +18,33 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "engines": {
-        "node": ">=20",
-        "pnpm": ">=10"
+    "devEngines": {
+        "runtime": [
+            {
+                "name": "node",
+                "version": ">=22.18"
+            },
+            {
+                "name": "pnpm",
+                "version": ">=10"
+            }
+        ]
     },
     "scripts": {
         "prepare": "husky",
         "pre-commit": "lint-staged",
         "dev": "pnpm --filter univer-examples dev:demo -- --host 0.0.0.0",
-        "dev:libs": "pnpm --filter univer-examples dev:demo-libs",
+        "dev:umd": "serve .",
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
         "use:react16": "tsx ./scripts/react-version-manager.ts --react=16",
         "use:react19": "tsx ./scripts/react-version-manager.ts --react=19",
         "typecheck": "turbo typecheck",
+        "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
-        "build": "turbo build --concurrency=30% --filter=!./common/*",
-        "build:ci": "turbo build --concurrency=100% --filter=!./common/*",
+        "analyze:build": "tsx ./scripts/build-analysis.ts",
+        "build": "turbo build --filter=!./common/*",
+        "build:ci": "turbo build --filter=!./common/*",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
         "serve:e2e": "serve ./examples/local",
@@ -45,49 +55,47 @@
         "release": "release-it"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "^7.2.0",
-        "@commitlint/cli": "^20.4.2",
-        "@commitlint/config-conventional": "^20.4.2",
-        "@eslint-react/eslint-plugin": "^2.8.1",
+        "@antfu/eslint-config": "^7.7.3",
+        "@commitlint/cli": "^20.5.0",
+        "@commitlint/config-conventional": "^20.5.0",
+        "@eslint-react/eslint-plugin": "^2.13.0",
+        "@eslint/compat": "^2.0.3",
         "@playwright/test": "^1.57.0",
         "@release-it-plugins/workspaces": "^5.0.3",
-        "@release-it/conventional-changelog": "^10.0.5",
+        "@release-it/conventional-changelog": "^10.0.6",
         "@types/fs-extra": "^11.0.4",
-        "@types/node": "^25.3.0",
+        "@types/node": "^25.5.0",
         "@types/react": "19.2.14",
         "@types/react-dom": "19.2.3",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@vitejs/plugin-react": "^5.1.4",
-        "eslint": "9.39.2",
-        "eslint-plugin-format": "^1.4.0",
+        "eslint": "10.1.0",
+        "eslint-plugin-format": "^2.0.1",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "7.0.1",
         "eslint-plugin-react-refresh": "^0.5.2",
-        "fs-extra": "^11.3.3",
+        "fs-extra": "^11.3.4",
         "husky": "^9.1.7",
-        "lint-staged": "^16.2.7",
-        "posthog-node": "^5.25.0",
+        "lint-staged": "^16.4.0",
+        "posthog-node": "^5.28.5",
         "react": "19.2.4",
         "react-dom": "19.2.4",
         "release-it": "^19.2.4",
-        "serve": "^14.2.5",
+        "serve": "^14.2.6",
         "tailwindcss": "3.4.18",
         "tsx": "^4.21.0",
-        "turbo": "^2.8.10",
-        "typescript": "^5.9.3",
-        "vitest": "^4.0.18"
+        "turbo": "^2.8.20",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.1"
     },
     "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
-    },
-    "resolutions": {
-        "@types/react": "19.2.14",
-        "@types/react-dom": "19.2.3",
-        "react": "19.2.4",
-        "react-dom": "19.2.4"
+        "overrides": {
+            "@types/react": "19.2.14",
+            "@types/react-dom": "19.2.3",
+            "basic-ftp": "5.2.0",
+            "react": "19.2.4",
+            "react-dom": "19.2.4"
+        }
     },
     "lint-staged": {
         "*": "eslint --fix"

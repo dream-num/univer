@@ -15,11 +15,10 @@
  */
 
 import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, ILogService, Inject, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
 import { SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 

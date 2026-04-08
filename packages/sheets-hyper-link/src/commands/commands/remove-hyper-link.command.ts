@@ -104,7 +104,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
                 params: {
                     unitId,
                     subUnitId,
-                    id,
+                    id: link.id,
                 },
             });
             undos.push({

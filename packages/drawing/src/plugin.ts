@@ -15,21 +15,21 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDrawingConfig } from './controllers/config.schema';
-
+import type { IUniverDrawingConfig } from './config/config';
 import { ICommandService, IConfigService, Inject, Injector, IURLImageService, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import pkg from '../package.json';
 import { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
-import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
 import { DrawingManagerService } from './services/drawing-manager-impl.service';
 import { IDrawingManagerService } from './services/drawing-manager.service';
 import { ImageIoService } from './services/image-io-impl.service';
 import { IImageIoService } from './services/image-io.service';
 import { URLImageService } from './services/url-image.service';
 
-const PLUGIN_NAME = 'UNIVER_DRAWING_PLUGIN';
-
 export class UniverDrawingPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_DRAWING_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverDrawingConfig> = defaultPluginConfig,

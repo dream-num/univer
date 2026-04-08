@@ -16,8 +16,8 @@
 
 export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
 export { QuickSumCommand } from './commands/commands/quick-sum.command';
-export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './controllers/config.schema';
-export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
+export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config/config';
+export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
 export { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 export { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';

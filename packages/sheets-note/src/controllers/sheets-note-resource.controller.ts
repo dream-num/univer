@@ -77,7 +77,7 @@ export class SheetsNoteResourceController extends Disposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };

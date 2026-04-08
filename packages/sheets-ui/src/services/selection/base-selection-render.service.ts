@@ -15,7 +15,6 @@
  */
 
 import type {
-    ICellInfo,
     ICellWithCoord,
     IContextService,
     IDisposable,
@@ -32,7 +31,6 @@ import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-
 import {
     convertCellToRange,
     createIdentifier,
@@ -42,13 +40,12 @@ import {
     ThemeService,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertPrimaryWithCoordToPrimary, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
+import { attachSelectionWithCoord, convertPrimaryWithCoordToPrimary, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
-import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
 export interface IControlFillConfig {
     oldRange: IRange;
@@ -74,14 +71,6 @@ export interface ISheetSelectionRenderService {
     getSkeleton(): SpreadsheetSkeleton;
 
     getSelectionControls(): SelectionControl[];
-
-    // The following methods are used to get range locations in a worksheet. Though `attachRangeWithCoord` should not happens here.
-    // And `attachPrimaryWithCoord` is redundant.
-
-    /** @deprecated Use the function `attachSelectionWithCoord` instead. */
-    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoord;
-    /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    attachPrimaryWithCoord(primary: Nullable<Partial<ICellInfo>>): Nullable<ICellWithCoord>;
 
     /**
      * @deprecated Please use `getCellWithCoordByOffset` instead.
@@ -652,16 +641,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // #endregion
     }
 
-    /** @deprecated Use the function `attachSelectionWithCoord` instead`. */
-    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoord {
-        return attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-    }
-
-    /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    attachPrimaryWithCoord(primary: ICellInfo): ICellWithCoord {
-        return attachPrimaryWithCoord(this._skeleton, primary) as unknown as ICellWithCoord;
-    }
-
     /**
      * @deprecated Please use `getCellWithCoordByOffset` instead.
      */
@@ -740,8 +719,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         newSelectionRangeWithCoord.rangeWithCoord.unitId = unitId;
         newSelectionRangeWithCoord.rangeWithCoord.sheetId = sheetId;
         newSelectionRangeWithCoord.rangeWithCoord.rangeType = rangeType;
-        // const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
-        // const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
 
         // Only notify when the selection changes
         const rangeChanged =
@@ -911,30 +888,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         };
         const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
         activeControl.updateRangeBySelectionWithCoord(selectionWithCoord);
-        // const startCell = skeleton.getNoMergeCellPositionByIndex(range.startRow, range.startColumn);
-        // const endCell = skeleton.getNoMergeCellPositionByIndex(range.endRow, range.endColumn);
-        // const newSelectionRange = {
-        //     startColumn: range.startColumn,
-        //     startRow: range.startRow,
-        //     endColumn: range.endColumn,
-        //     endRow: range.endRow,
-
-        //     startY: startCell.startY,
-        //     endY: endCell.endY,
-        //     startX: startCell.startX,
-        //     endX: endCell.endX,
-
-        //     rangeType,
-        // };
-
-        /**
-         * When expanding the selection with the Shift key,
-         * the original highlighted cell should remain unchanged.
-         * If the highlighted cell is a merged cell, the selection needs to be expanded.
-         */
-        // const activeCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
-
-        // activeControl.updateRange(newSelectionRange, currentCell);
     }
 
     isSelectionEnabled(): boolean {

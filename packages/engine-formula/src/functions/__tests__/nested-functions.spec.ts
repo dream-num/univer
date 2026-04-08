@@ -37,7 +37,7 @@ import { Address } from '../lookup/address';
 import { Choose } from '../lookup/choose';
 import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
 import { Hyperlink } from '../lookup/hyperlink';
-import { Index } from '../lookup/index';
+import { Index } from '../lookup/index/index';
 import { Match } from '../lookup/match';
 import { Row } from '../lookup/row';
 import { Xlookup } from '../lookup/xlookup';
@@ -62,7 +62,8 @@ import { Left } from '../text/left';
 import { Len } from '../text/len';
 import { T } from '../text/t';
 import { Text } from '../text/text';
-import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
+import { getObjectValue } from '../util';
+import { createFunctionTestBed } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
     return {

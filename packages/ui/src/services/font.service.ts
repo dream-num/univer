@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IUniverUIConfig } from '../controllers/config.schema';
+import type { IUniverUIConfig } from '../config/config';
 import { createIdentifier, IConfigService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { UI_PLUGIN_CONFIG_KEY } from '../config/config';
 
 export const IFontService = createIdentifier<IFontService>('univer.font-service');
 

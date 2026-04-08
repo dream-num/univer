@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCellValue } from '../../basics/utils';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
 import { SheetsSelectionsService } from '../../services/selections';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -46,6 +46,93 @@ export const AutoFillCommand: ICommand = {
         const autoFillService = accessor.get(IAutoFillService);
         return autoFillService.triggerAutoFill(unitId, subUnitId, sourceRange, targetRange, applyType);
     },
+};
+
+function getSheetCopyFillRange(accessor: IAccessor, direction: 'down' | 'right'): IAutoFillCommandParams | null {
+    const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
+    if (!selection) {
+        return null;
+    }
+
+    const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+    if (!target) {
+        return null;
+    }
+
+    const { unitId, subUnitId } = target;
+    const { startRow, endRow, startColumn, endColumn } = selection.range;
+
+    if (direction === 'down') {
+        if (startRow === endRow) {
+            if (startRow === 0) {
+                return null;
+            }
+
+            return {
+                sourceRange: { startRow: startRow - 1, endRow: startRow - 1, startColumn, endColumn },
+                targetRange: { startRow: startRow - 1, endRow, startColumn, endColumn },
+                unitId,
+                subUnitId,
+                applyType: AUTO_FILL_APPLY_TYPE.COPY,
+            };
+        }
+
+        return {
+            sourceRange: { startRow, endRow: startRow, startColumn, endColumn },
+            targetRange: { startRow, endRow, startColumn, endColumn },
+            unitId,
+            subUnitId,
+            applyType: AUTO_FILL_APPLY_TYPE.COPY,
+        };
+    }
+
+    if (startColumn === endColumn) {
+        if (startColumn === 0) {
+            return null;
+        }
+
+        return {
+            sourceRange: { startRow, endRow, startColumn: startColumn - 1, endColumn: startColumn - 1 },
+            targetRange: { startRow, endRow, startColumn: startColumn - 1, endColumn },
+            unitId,
+            subUnitId,
+            applyType: AUTO_FILL_APPLY_TYPE.COPY,
+        };
+    }
+
+    return {
+        sourceRange: { startRow, endRow, startColumn, endColumn: startColumn },
+        targetRange: { startRow, endRow, startColumn, endColumn },
+        unitId,
+        subUnitId,
+        applyType: AUTO_FILL_APPLY_TYPE.COPY,
+    };
+}
+
+async function executeSheetCopyFill(accessor: IAccessor, direction: 'down' | 'right') {
+    const params = getSheetCopyFillRange(accessor, direction);
+    if (!params) {
+        return false;
+    }
+
+    const result = await accessor.get(ICommandService).executeCommand(AutoFillCommand.id, params);
+    if (result) {
+        accessor.get(IAutoFillService).setShowMenu(false);
+    }
+
+    return result;
+}
+
+export const SheetCopyDownCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.copy-down',
+    handler: async (accessor: IAccessor) => executeSheetCopyFill(accessor, 'down'),
+};
+
+export const SheetCopyRightCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.copy-right',
+    handler: async (accessor: IAccessor) => executeSheetCopyFill(accessor, 'right'),
 };
 
 export interface IAutoClearContentCommand {

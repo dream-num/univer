@@ -19,6 +19,7 @@ import type { defineComponent } from 'vue';
 import { DependentOn, Inject, Injector, Plugin } from '@univerjs/core';
 import { ComponentManager, UniverUIPlugin } from '@univerjs/ui';
 import { h, render } from 'vue';
+import pkg from '../package.json';
 
 /**
  * The plugin that allows Univer to use Vue 3 components as UI components.
@@ -26,6 +27,8 @@ import { h, render } from 'vue';
 @DependentOn(UniverUIPlugin)
 export class UniverVue3AdapterPlugin extends Plugin {
     static override pluginName = 'UNIVER_UI_ADAPTER_VUE3_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config = {},
@@ -39,9 +42,9 @@ export class UniverVue3AdapterPlugin extends Plugin {
         const { createElement, useEffect, useRef } = this._componentManager.reactUtils;
 
         this._componentManager.setHandler('vue3', (component: IComponent['component']) => {
-            return (props: Record<string, any>) => createElement(VueComponentWrapper, {
+            return (props: Record<string, unknown>) => createElement(VueComponentWrapper, {
                 component,
-                props: Object.keys(props).reduce<Record<string, any>>((acc, key) => {
+                props: Object.keys(props).reduce<Record<string, unknown>>((acc, key) => {
                     if (key !== 'key') {
                         acc[key] = props[key];
                     }
@@ -55,7 +58,7 @@ export class UniverVue3AdapterPlugin extends Plugin {
 
 export function VueComponentWrapper(options: {
     component: ReturnType<typeof defineComponent>;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     reactUtils: typeof ComponentManager.prototype.reactUtils;
 }) {
     const { component, props, reactUtils } = options;

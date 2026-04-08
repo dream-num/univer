@@ -17,7 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { InsertLinkShortcut } from './menu';
+import { InsertLinkShortcut } from '../menu/menu';
 
 export class SheetsHyperLinkPermissionController extends Disposable {
     constructor(

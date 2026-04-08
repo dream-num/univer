@@ -16,12 +16,14 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ComponentManager, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
+import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 import { AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -31,7 +33,6 @@ import { CellCustomRenderController } from './controllers/cell-custom-render.con
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
@@ -62,6 +63,7 @@ import { SheetsScrollRenderController } from './controllers/render-controllers/s
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { RepeatLastActionController } from './controllers/repeat-last-action.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoHeightService } from './services/auto-height.service';
@@ -85,6 +87,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
+import { IRepeatLastActionService, RepeatLastActionService } from './services/repeat-last-action.service';
 import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { SelectAllService } from './services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
@@ -98,6 +101,8 @@ import { IStatusBarService, StatusBarService } from './services/status-bar.servi
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     /** @ignore */
@@ -150,6 +155,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
             [IRefSelectionsService, { useClass: RefSelectionsService }],
             [SheetPrintInterceptorService],
+            [IRepeatLastActionService, { useClass: RepeatLastActionService }],
             [IStatusBarService, { useClass: StatusBarService }],
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [HoverManagerService],
@@ -174,6 +180,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [EditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
+            [RepeatLastActionController],
 
             // permission
             [SheetPermissionPanelModel],
@@ -220,6 +227,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [EditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
+            [RepeatLastActionController],
         ]);
     }
 

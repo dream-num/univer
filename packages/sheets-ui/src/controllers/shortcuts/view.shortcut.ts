@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { NilCommand } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
+import { NilCommand } from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-
 import { ChangeZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { whenSheetEditorFocused } from './utils';
 

@@ -30,6 +30,7 @@ import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../comman
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
 import { ParagraphMenu } from '../components/paragraph-menu';
+import { menuSchema } from '../menu/schema';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
@@ -49,7 +50,6 @@ import {
 import { DocFooter } from '../views/doc-footer';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/page-settings';
 import { DocSideMenu } from '../views/side-menu';
-import { menuSchema } from './menu.schema';
 
 export class DocUIController extends Disposable {
     constructor(

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { ISrcRect, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
 import type { UniverRenderingContext } from '../context';
@@ -24,6 +24,24 @@ import { ObjectType } from '../base-object';
 import { RENDER_CLASS_TYPE, Transform, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import { Shape } from './shape';
+
+export interface IShapeClipBounds {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+export interface IImageShapeClipService {
+    /**
+     * Build the shape outline path and clip the canvas context.
+     * Assumes the coordinate system has (0,0) at the top-left of the shape area.
+     * The method calls ctx.beginPath(), builds the shape path, and calls ctx.clip().
+     * @returns The actual bounding rect of the clip region, or false if no clip was built.
+     *          For multi-path shapes the bounds may extend beyond (0, 0, width, height).
+     */
+    applyShapeClip(ctx: UniverRenderingContext, prstGeom: string, width: number, height: number, adjustValues?: Nullable<Record<string, number>>): IShapeClipBounds | false;
+}
 
 export interface IImageProps extends IShapeProps {
     image?: HTMLImageElement;
@@ -38,7 +56,13 @@ export interface IImageProps extends IShapeProps {
     /**
      * 20.1.9.18 prstGeom (Preset geometry)
      */
-    prstGeom?: Nullable<PresetGeometryType>;
+    prstGeom?: Nullable<string>;
+
+    /**
+     * Adjust values for the preset geometry (e.g. corner radius for roundRect).
+     * Keys are adjust handle names, values are numeric values.
+     */
+    adjustValues?: Nullable<Record<string, number>>;
 
     opacity?: number;
 }
@@ -52,7 +76,11 @@ export class Image extends Shape<IImageProps> {
 
     private _transformCalculateSrcRect: boolean = true;
 
+    private _clipService: Nullable<IImageShapeClipService> = null;
+
     override objectType = ObjectType.IMAGE;
+
+    override isDrawingObject: boolean = true;
 
     constructor(id: string, config: IImageProps) {
         super(id, config);
@@ -104,6 +132,14 @@ export class Image extends Shape<IImageProps> {
         this.makeDirty(true);
     }
 
+    setClipService(clipService: Nullable<IImageShapeClipService>) {
+        this._clipService = clipService;
+    }
+
+    getClipService(): Nullable<IImageShapeClipService> {
+        return this._clipService;
+    }
+
     override get classType(): RENDER_CLASS_TYPE {
         return RENDER_CLASS_TYPE.IMAGE;
     }
@@ -135,8 +171,16 @@ export class Image extends Shape<IImageProps> {
         this.setSrcRect(null);
     }
 
-    setPrstGeom(prstGeom?: Nullable<PresetGeometryType>) {
+    setPrstGeom(prstGeom?: Nullable<string>) {
         this._props.prstGeom = prstGeom;
+    }
+
+    setPrstGeomAdjValues(adjValues?: Nullable<Record<string, number>>) {
+        this._props.adjustValues = adjValues;
+    }
+
+    get prstGeomAdjValues() {
+        return this._props.adjustValues;
     }
 
     setSrcRect(srcRect?: Nullable<ISrcRect>) {
@@ -270,15 +314,26 @@ export class Image extends Shape<IImageProps> {
             return this;
         }
 
+        if (!this.transform) {
+            return this;
+        }
+
+        let { width: realWidth, height: realHeight, left: realLeft, top: realTop } = this;
+
+        const realBound = this.getRealBound();
+        realWidth = realBound.width;
+        realHeight = realBound.height;
+        realLeft = realBound.left;
+        realTop = realBound.top;
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
         if (this.isRender(bounds)) {
             const { top, left, bottom, right } = bounds!.viewBound;
 
             if (
-                this.width + this.strokeWidth + this.left < left ||
-                right < this.left ||
-                this.height + this.strokeWidth + this.top < top ||
-                bottom < this.top
+                realWidth + this.strokeWidth + realLeft < left ||
+                right < realLeft ||
+                realHeight + this.strokeWidth + realTop < top ||
+                bottom < realTop
             ) {
                 return this;
             }
@@ -294,30 +349,72 @@ export class Image extends Shape<IImageProps> {
 
         //     mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         // }
-        const centerX = this.left + this.width / 2;
-        const centerY = this.top + this.height / 2;
+        const centerX = realLeft + realWidth / 2;
+        const centerY = realTop + realHeight / 2;
         mainCtx.transform(m[0], m[1], m[2], m[3], centerX, centerY);
         if (this.opacity !== 1) {
             mainCtx.globalAlpha = this.opacity;
         }
-        this._draw(mainCtx);
+        this._draw(mainCtx, undefined, realWidth, realHeight);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
     }
 
-    protected override _draw(ctx: UniverRenderingContext) {
+    protected override _draw(ctx: UniverRenderingContext, _bounds?: IViewportInfo, renderWidth?: number, renderHeight?: number) {
         if (this._native == null) {
             return;
         }
+        const w = renderWidth ?? this.width;
+        const h = renderHeight ?? this.height;
+
+        // Shape clip: when prstGeom is set and a clip service is available,
+        // clip the image to the shape outline (e.g. ellipse, roundRect, etc.)
+        if (this.prstGeom && this._clipService) {
+            ctx.save();
+            ctx.translate(-w / 2, -h / 2); // move origin to top-left for clip path
+            // Clip to bounding rect first so that any shape path overshooting the
+            // bounding box (e.g. due to control-point curves) is safely contained.
+            ctx.beginPath();
+            // ctx.rect(0, 0, w, h);
+            // ctx.clip();
+            const clipBounds = this._clipService.applyShapeClip(ctx, this.prstGeom, w, h, this.prstGeomAdjValues);
+            if (clipBounds) {
+                // Use the actual clip bounds for image drawing — for multi-path shapes
+                // (e.g. cloudCallout) the clip region may extend beyond (0, 0, w, h).
+                const drawLeft = clipBounds.left;
+                const drawTop = clipBounds.top;
+                const drawWidth = clipBounds.width;
+                const drawHeight = clipBounds.height;
+                if (!this._renderByCropper && this.srcRect) {
+                    const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
+                    // Scale srcRect offsets proportionally to the actual clip bounds
+                    const scaleW = drawWidth / w;
+                    const scaleH = drawHeight / h;
+                    ctx.drawImage(
+                        this._native,
+                        drawLeft - left * scaleW,
+                        drawTop - top * scaleH,
+                        drawWidth + (right + left) * scaleW,
+                        drawHeight + (bottom + top) * scaleH
+                    );
+                } else {
+                    ctx.drawImage(this._native, drawLeft, drawTop, drawWidth, drawHeight);
+                }
+                ctx.restore();
+                return;
+            }
+            ctx.restore();
+        }
+
         if (!this._renderByCropper && this.srcRect) {
             const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
             ctx.beginPath();
-            ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.rect(-w / 2, -h / 2, w, h);
             ctx.clip();
-            ctx.drawImage(this._native, -left - this.width / 2, -top - this.height / 2, this.width + right + left, this.height + bottom + top);
+            ctx.drawImage(this._native, -left - w / 2, -top - h / 2, w + right + left, h + bottom + top);
         } else {
-            ctx.drawImage(this._native, -this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.drawImage(this._native, -w / 2, -h / 2, w, h);
         }
     }
 
@@ -372,23 +469,42 @@ export class Image extends Shape<IImageProps> {
         }
     }
 
+    override set transform(trans: Transform) {
+        this._transform = trans;
+    }
+
+    override get transform() {
+        // when active sheet is changed, maybe the image is reused, the transform need to be recalculated by transform
+        if (!this._transform) {
+            this._setTransForm();
+        }
+
+        const transform = this._transform.clone();
+        return this.transformForAngle(transform);
+    }
+
     override isHit(coord: Vector2) {
         // Build the same effective transform used in render():
+        // Must use realBound to match render() method's coordinate system
         // [m[0], m[1], m[2], m[3], centerX, centerY]
+
+        const realBound = this.getRealBound();
+        const { left: realLeft, top: realTop, width: realWidth, height: realHeight } = realBound;
+        const centerX = realLeft + realWidth / 2;
+        const centerY = realTop + realHeight / 2;
         const m = this.transform.getMatrix();
-        const centerX = this.left + this.width / 2;
-        const centerY = this.top + this.height / 2;
         const renderTransform = new Transform([m[0], m[1], m[2], m[3], centerX, centerY]);
 
         // Account for parent group transforms if applicable
+        // This handles multi-level nesting and parent flipX/flipY transformations
         const parent = this.getParent();
         const effectiveTransform = this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP
             ? parent.ancestorTransform.multiply(renderTransform)
             : renderTransform;
 
         const oCoord = effectiveTransform.invert().applyPoint(coord);
-        const halfWidth = this.width / 2;
-        const halfHeight = this.height / 2;
+        const halfWidth = realWidth / 2;
+        const halfHeight = realHeight / 2;
         if (
             oCoord.x >= -halfWidth - this.strokeWidth / 2 &&
             oCoord.x <= halfWidth + this.strokeWidth / 2 &&
@@ -397,6 +513,7 @@ export class Image extends Shape<IImageProps> {
         ) {
             return true;
         }
+
         return false;
     }
 }

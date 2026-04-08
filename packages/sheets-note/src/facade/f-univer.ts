@@ -16,19 +16,13 @@
 
 import type { Injector } from '@univerjs/core';
 import type { IRemoveNoteMutationParams, IUpdateNoteMutationParams } from '@univerjs/sheets-note';
+import type { ISheetNoteAddEventParams, ISheetNoteDeleteEventParams, ISheetNoteHideEventParams, ISheetNoteShowEventParams, ISheetNoteUpdateEventParams } from './f-event';
 import { CanceledError, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 
-/**
- * @ignore
- */
-export interface IFUniverSheetNoteMixin {
-    // Add any note-specific methods here if needed
-}
-
-export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteMixin {
+export class FUniverSheetsNoteMixin extends FUniver {
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
@@ -46,14 +40,14 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                                 return;
                             }
                             const { workbook, worksheet } = target;
-
-                            this.fireEvent(this.Event.SheetNoteAdd, {
+                            const eventParams: ISheetNoteAddEventParams = {
                                 workbook,
                                 worksheet,
                                 row: newNote.row,
                                 col: newNote.col,
                                 note: newNote,
-                            });
+                            };
+                            this.fireEvent(this.Event.SheetNoteAdd, eventParams);
                         }
                     });
                 }
@@ -73,14 +67,14 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                                 return;
                             }
                             const { workbook, worksheet } = target;
-
-                            this.fireEvent(this.Event.SheetNoteDelete, {
+                            const eventParams: ISheetNoteDeleteEventParams = {
                                 workbook,
                                 worksheet,
                                 row: oldNote.row,
                                 col: oldNote.col,
                                 oldNote,
-                            });
+                            };
+                            this.fireEvent(this.Event.SheetNoteDelete, eventParams);
                         }
                     });
                 }
@@ -100,15 +94,15 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                                 return;
                             }
                             const { workbook, worksheet } = target;
-
-                            this.fireEvent(this.Event.SheetNoteUpdate, {
+                            const eventParams: ISheetNoteUpdateEventParams = {
                                 workbook,
                                 worksheet,
                                 row: newNote.row,
                                 col: newNote.col,
                                 note: newNote,
                                 oldNote,
-                            });
+                            };
+                            this.fireEvent(this.Event.SheetNoteUpdate, eventParams);
                         }
                     });
                 }
@@ -128,13 +122,13 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                                 return;
                             }
                             const { workbook, worksheet } = target;
-
-                            this.fireEvent(this.Event.SheetNoteShow, {
+                            const eventParams: ISheetNoteShowEventParams = {
                                 workbook,
                                 worksheet,
                                 row: newNote.row,
                                 col: newNote.col,
-                            });
+                            };
+                            this.fireEvent(this.Event.SheetNoteShow, eventParams);
                         }
                     });
                 }
@@ -154,13 +148,13 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                                 return;
                             }
                             const { workbook, worksheet } = target;
-
-                            this.fireEvent(this.Event.SheetNoteHide, {
+                            const eventParams: ISheetNoteHideEventParams = {
                                 workbook,
                                 worksheet,
                                 row: newNote.row,
                                 col: newNote.col,
-                            });
+                            };
+                            this.fireEvent(this.Event.SheetNoteHide, eventParams);
                         }
                     });
                 }
@@ -182,13 +176,14 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                         if (oldNote) return;
 
                         const { workbook, worksheet } = target;
-                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteAdd, {
+                        const eventParams: ISheetNoteAddEventParams = {
                             workbook,
                             worksheet,
                             row,
                             col,
                             note,
-                        });
+                        };
+                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteAdd, eventParams);
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -211,13 +206,14 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                         if (!oldNote) return;
 
                         const { workbook, worksheet } = target;
-                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteDelete, {
+                        const eventParams: ISheetNoteDeleteEventParams = {
                             workbook,
                             worksheet,
                             row,
                             col,
                             oldNote,
-                        });
+                        };
+                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteDelete, eventParams);
 
                         if (cancel) {
                             throw new CanceledError();
@@ -242,14 +238,15 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                         if (!oldNote) return;
 
                         const { workbook, worksheet } = target;
-                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteUpdate, {
+                        const eventParams: ISheetNoteUpdateEventParams = {
                             workbook,
                             worksheet,
                             row,
                             col,
                             note,
                             oldNote,
-                        });
+                        };
+                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteUpdate, eventParams);
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -280,13 +277,13 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                         const { actualColumn, actualRow } = selection.primary;
                         const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
                         if (!note || note.show) return;
-
-                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteShow, {
+                        const eventParams: ISheetNoteShowEventParams = {
                             workbook,
                             worksheet,
                             row: actualRow,
                             col: actualColumn,
-                        });
+                        };
+                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteShow, eventParams);
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -317,13 +314,13 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
                         const { actualColumn, actualRow } = selection.primary;
                         const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
                         if (!note || !note.show) return;
-
-                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteHide, {
+                        const eventParams: ISheetNoteHideEventParams = {
                             workbook,
                             worksheet,
                             row: actualRow,
                             col: actualColumn,
-                        });
+                        };
+                        const cancel = this.fireEvent(this.Event.BeforeSheetNoteHide, eventParams);
                         if (cancel) {
                             throw new CanceledError();
                         }
@@ -334,8 +331,4 @@ export class FUniverSheetNoteMixin extends FUniver implements IFUniverSheetNoteM
     }
 }
 
-FUniver.extend(FUniverSheetNoteMixin);
-declare module '@univerjs/core/facade' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverSheetNoteMixin {}
-}
+FUniver.extend(FUniverSheetsNoteMixin);

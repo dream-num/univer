@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import type { IAnchor } from '../anchor';
-import { anchorUndoFactory, moveByAnchor, transformSupportSymmetryAnchor } from '../anchor';
 import type { IConditionFormattingRule } from '../../models/type';
+import type { IAnchor } from '../anchor';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { anchorUndoFactory, moveByAnchor, transformSupportSymmetryAnchor } from '../anchor';
 
 describe('Test anchor', () => {
     let list: IConditionFormattingRule[] = [];

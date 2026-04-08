@@ -24,9 +24,9 @@ import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/she
 import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
+import { menuSchema } from '../menu/schema';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
-import { menuSchema } from './menu.schema';
 import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 

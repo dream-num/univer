@@ -15,5 +15,7 @@
  */
 
 import './f-univer';
+import './f-event';
 
+export type * from './f-event';
 export type * from './f-univer';

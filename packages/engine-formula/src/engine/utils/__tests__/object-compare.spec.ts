@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
-import { getObjectValue } from '../../../functions/__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../functions/util';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../value-object/array-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
 import { valueObjectCompare } from '../object-compare';

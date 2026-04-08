@@ -22,5 +22,5 @@ export { DeleteDocCommentComment } from './commands/commands/delete-doc-comment.
 export type { IDeleteDocCommentComment } from './commands/commands/delete-doc-comment.command';
 export { ShowCommentPanelOperation, StartAddCommentOperation } from './commands/operations/show-comment-panel.operation';
 export type { IShowCommentPanelOperationParams } from './commands/operations/show-comment-panel.operation';
-export type { IUniverDocsThreadCommentUIConfig } from './controllers/config.schema';
+export type { IUniverDocsThreadCommentUIConfig } from './config/config';
 export { UniverDocsThreadCommentUIPlugin } from './plugin';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
@@ -63,5 +63,34 @@ describe('Calendar', () => {
         const { getByText } = renderCalendar();
         // 15th is selected
         expect(getByText('15').className).toMatch(/univer-bg-primary-600/);
+    });
+
+    it('should switch year when navigating across month boundaries', () => {
+        const date = new Date(2023, 0, 15);
+        const { getByLabelText, getByText } = render(
+            <ConfigProvider mountContainer={null} locale={{ Calendar: enUS.design.Calendar }}>
+                <Calendar value={date} onValueChange={onChange} />
+            </ConfigProvider>
+        );
+
+        fireEvent.click(getByLabelText('Previous Month'));
+        expect(getByText('2022')).toBeInTheDocument();
+
+        fireEvent.click(getByLabelText('Next Month'));
+        expect(getByText('2023')).toBeInTheDocument();
+    });
+
+    it('should disable out-of-range days and propagate time changes', () => {
+        const min = new Date(2023, 7, 10, 0, 0, 0);
+        const max = new Date(2023, 7, 20, 23, 59, 59);
+        const { getByText, container } = renderCalendar({ min, max, showTime: true });
+
+        const outOfRangeDay = getByText('9').closest('button') as HTMLButtonElement;
+        expect(outOfRangeDay).toBeDisabled();
+        fireEvent.click(outOfRangeDay);
+
+        const timeInput = container.querySelector('input[type="time"]') as HTMLInputElement;
+        fireEvent.change(timeInput, { target: { value: '11:22:33' } });
+        expect(onChange).toHaveBeenCalled();
     });
 });

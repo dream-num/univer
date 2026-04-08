@@ -16,5 +16,5 @@
 
 import './global.css';
 
-export type { IUniverSheetsNumfmtUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsNumfmtUIConfig } from './config/config';
 export { UniverSheetsNumfmtUIPlugin } from './plugin';

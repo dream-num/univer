@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsQuickInsertUIConfig } from './controllers/config.schema';
+import type { IUniverDocsQuickInsertUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
@@ -23,18 +23,19 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { defaultPluginConfig, DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { DocQuickInsertMenuController } from './controllers/doc-quick-insert-menu.controller';
+import pkg from '../package.json';
+import { defaultPluginConfig, DOCS_QUICK_INSERT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 import { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
+import { DocQuickInsertMenuController } from './menu/doc-quick-insert-menu.controller';
 import { DocQuickInsertPopupService } from './services/doc-quick-insert-popup.service';
-
-const PLUGIN_NAME = 'DOC_QUICK_INSERT_UI_PLUGIN';
 
 @DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingUIPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
 export class UniverDocsQuickInsertUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'DOC_QUICK_INSERT_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverDocsQuickInsertUIConfig> = defaultPluginConfig,

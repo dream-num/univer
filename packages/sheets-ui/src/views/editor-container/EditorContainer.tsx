@@ -16,12 +16,11 @@
 
 import type { KeyCode } from '@univerjs/ui';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
+import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useDependency, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -112,6 +111,35 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         }
     }, [disableAutoFocus, state]);
 
+    useEffect(() => {
+        if (!visible?.visible) {
+            return;
+        }
+
+        let focusRetryFrame = 0;
+        let finalFocusRetryFrame = 0;
+
+        const focusEditor = () => {
+            const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            const docSelectionRenderService = editor?.render.with(DocSelectionRenderService);
+
+            if (!docSelectionRenderService?.isFocusing) {
+                docSelectionRenderService?.focus();
+            }
+        };
+
+        focusEditor();
+        focusRetryFrame = requestAnimationFrame(() => {
+            focusEditor();
+            finalFocusRetryFrame = requestAnimationFrame(focusEditor);
+        });
+
+        return () => {
+            cancelAnimationFrame(focusRetryFrame);
+            cancelAnimationFrame(finalFocusRetryFrame);
+        };
+    }, [editorService, visible?.visible]);
+
     const handleClickSideBar = useEvent(() => {
         if (editorBridgeService.isVisible().visible) {
             commandService.executeCommand(SetCellEditVisibleOperation.id, {
@@ -124,7 +152,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     useSidebarClick(handleClickSideBar);
 
-    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId!);
+    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId);
 
     const onMoveInEditor = useEvent((keycode: KeyCode, metaKey: MetaKeys) => {
         commandService.executeCommand(SetCellEditVisibleArrowOperation.id, {

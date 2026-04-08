@@ -16,25 +16,57 @@
 
 import type { IAccessor, IDrawingParam, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
-import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, generateRandomId, ICommandService, IContextService, ImageSourceType, Inject, Injector, IURLImageService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import type { IInsertDrawingCommandParams, ISetDrawingArrangeCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    BooleanNumber,
+    BuildTextUtils,
+    createDocumentModelWithStyle,
+    Disposable,
+    DrawingTypeEnum,
+    FOCUSING_COMMON_DRAWINGS,
+    generateRandomId,
+    ICommandService,
+    IContextService,
+    ImageSourceType,
+    Inject,
+    Injector,
+    IURLImageService,
+    LocaleService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    WrapTextType,
+} from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import {
+    DRAWING_IMAGE_ALLOW_IMAGE_LIST,
+    DRAWING_IMAGE_ALLOW_SIZE,
+    DRAWING_IMAGE_COUNT_LIMIT,
+    DRAWING_IMAGE_HEIGHT_LIMIT,
+    DRAWING_IMAGE_WIDTH_LIMIT,
+    getImageSize,
+    IDrawingManagerService,
+    IImageIoService,
+    ImageUploadStatusType,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachRangeWithCoord, SetRangeValuesCommand, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    drawingPositionToTransform,
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    SetDrawingArrangeCommand,
+    SetSheetDrawingCommand,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 /**
@@ -97,8 +129,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     private readonly _workbookSelections: WorkbookSelectionModel;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetSkeletonManagerService) private readonly _skeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ILocalFileService private readonly _fileOpenerService: ILocalFileService,
@@ -108,6 +140,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @Inject(Injector) private readonly _injector: Injector,
         @IURLImageService private readonly _urlImageService: IURLImageService
     ) {
@@ -115,7 +148,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-        this._updateImageListener();
+        this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
@@ -203,13 +236,16 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-        const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
+        const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
+        if (!sheetSkeletonParam) return;
 
-        if (sheetTransform == null) {
-            return;
-        }
+        const { skeleton } = sheetSkeletonParam;
+        const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight, skeleton);
+        if (!sheetTransform) return;
 
-        const newTransform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService)!;
+        const newTransform = drawingPositionToTransform(sheetTransform, sheetSkeletonParam);
+        if (!newTransform) return;
+
         const sheetDrawingParam: ISheetDrawing = {
             unitId,
             subUnitId,
@@ -219,7 +255,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             source,
             transform: newTransform,
             sheetTransform,
-            axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, this._selectionRenderService) ?? sheetTransform,
+            axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton) ?? sheetTransform,
         };
 
         return this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
@@ -461,7 +497,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
+    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number, skeleton: SpreadsheetSkeleton): Nullable<ISheetDrawingPosition> {
         const selections = this._workbookSelections.getCurrentSelections();
         let range: IRange = {
             startRow: 0,
@@ -473,7 +509,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             range = selections[selections.length - 1].range;
         }
 
-        const rangeWithCoord = attachRangeWithCoord(this._skeletonManagerService.getCurrent()!.skeleton, range);
+        const rangeWithCoord = attachRangeWithCoord(skeleton, range);
         if (rangeWithCoord == null) {
             return;
         }
@@ -553,7 +589,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _updateImageListener() {
+    private _updateDrawingListener() {
         this.disposeWithMe(this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<ISheetDrawing>[] = [];
 
@@ -562,33 +598,28 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             }
 
             (params as IImageData[]).forEach((param) => {
-                const { unitId, subUnitId, drawingId, drawingType, transform } = param;
-                if (transform == null) {
+                const { unitId, subUnitId, drawingId, transform } = param;
+                const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
+                if (!transform || !sheetSkeletonParam) {
                     return;
                 }
 
+                const { skeleton } = sheetSkeletonParam;
                 const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
-                // const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
                 if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
                     return;
                 }
 
-                const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
-                const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+                const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, skeleton);
+                const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, skeleton);
 
                 if (sheetTransform == null || axisAlignSheetTransform == null) {
                     return;
                 }
 
-                // const oldDrawing: Partial<ISheetDrawing> = {
-                //     ...sheetDrawing,
-                // };
-
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
-                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService) },
+                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, sheetSkeletonParam) },
                     sheetTransform: { ...sheetTransform },
                     axisAlignSheetTransform: { ...axisAlignSheetTransform },
                 };
@@ -605,26 +636,34 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _getSheetTransformByParam(param: IDrawingParam): Nullable<{
+    private _getSheetTransformByParam(param: IDrawingParam, isCreate: boolean): Nullable<{
         sheetTransform: ISheetDrawingPosition;
         axisAlignSheetTransform: ISheetDrawingPosition;
     }> {
         const { unitId, subUnitId, drawingId, transform } = param;
-        if (transform == null) {
+        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        if (!transform || !skeleton) {
             return null;
         }
+
         const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-        if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
+        let sheetDrawingTransform = sheetDrawing?.transform;
+        if (isCreate) {
+            sheetDrawingTransform = {};
+        }
+
+        if (!isCreate && (!sheetDrawing || sheetDrawing.unitId !== this._context.unitId)) {
             return null;
         }
-        const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
 
-        const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+        const sheetTransform = transformToDrawingPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
+        const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
 
-        if (sheetTransform == null || axisAlignSheetTransform == null) {
+        if (!sheetTransform || !axisAlignSheetTransform) {
             return null;
         }
+
         return { sheetTransform, axisAlignSheetTransform };
     }
 
@@ -632,11 +671,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             const grpParams = [];
             for (const param of params) {
-                const sheetTransform = this._getSheetTransformByParam(param.parent);
+                const grpSheetTransform = this._getSheetTransformByParam(param.parent, true);
 
                 const children = [];
                 for (const child of param.children) {
-                    const childSheetTransformInfo = this._getSheetTransformByParam(child);
+                    const childSheetTransformInfo = this._getSheetTransformByParam(child, false);
                     if (childSheetTransformInfo != null) {
                         children.push({
                             ...child,
@@ -647,7 +686,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 }
 
                 const grpParam = {
-                    parent: { ...param.parent, sheetTransform },
+                    parent: { ...param.parent, sheetTransform: grpSheetTransform?.sheetTransform, axisAlignSheetTransform: grpSheetTransform?.axisAlignSheetTransform },
                     children,
 
                 };
@@ -666,11 +705,12 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 const { children } = param;
                 const childParams = [];
                 for (const child of children) {
-                    const childSheetTransform = this._getSheetTransformByParam(child);
+                    const childSheetTransform = this._getSheetTransformByParam(child, false);
                     if (childSheetTransform != null) {
                         childParams.push({
                             ...child,
-                            sheetTransform: childSheetTransform,
+                            sheetTransform: childSheetTransform.sheetTransform,
+                            axisAlignSheetTransform: childSheetTransform.axisAlignSheetTransform,
                         });
                     }
                 }

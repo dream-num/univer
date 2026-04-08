@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui-adapter-vue3",
-    "version": "0.16.1",
+    "version": "0.20.0",
     "private": false,
     "description": "Vue adapter for Univer UI",
     "author": "DreamNum <developer@univer.ai>",
@@ -55,7 +55,9 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
-        "build": "univer-cli build"
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
         "vue": ">=3.0.0"
@@ -66,9 +68,8 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.9.3",
-        "vite": "^7.3.1",
-        "vitest": "^4.0.18",
-        "vue": "^3.5.27"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.1",
+        "vue": "^3.5.29"
     }
 }

@@ -15,18 +15,19 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFindReplaceConfig } from './controllers/config.schema';
+import type { IUniverSheetsFindReplaceConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { defaultPluginConfig, SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
-
-const NAME = 'SHEET_FIND_REPLACE_PLUGIN';
 
 @DependentOn(UniverSheetsPlugin, UniverSheetsPlugin, UniverFindReplacePlugin)
 export class UniverSheetsFindReplacePlugin extends Plugin {
-    static override pluginName = NAME;
+    static override pluginName = 'SHEET_FIND_REPLACE_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

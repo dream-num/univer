@@ -17,9 +17,9 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { SheetRangeThemeModel } from '../../model/range-theme-model';
-import { getSheetCommandTarget } from '../commands/utils/target-util';
 import { RegisterWorksheetRangeThemeStyleMutation } from '../mutations/register-range-theme.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../mutations/unregister-range-theme-style.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IUnregisterWorksheetRangeThemeStyleCommandParams {
     unitId: string;

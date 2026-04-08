@@ -50,7 +50,7 @@ export interface IRadioProps {
 export function Radio(props: IRadioProps) {
     const { children, checked, value, disabled = false, onChange } = props;
 
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null!);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         e.stopPropagation();
@@ -60,7 +60,7 @@ export function Radio(props: IRadioProps) {
         if (typeof value !== 'undefined') {
             onChange && onChange(value);
         } else {
-            const checked = inputRef?.current?.checked!;
+            const checked = inputRef.current.checked;
             onChange && onChange(checked);
         }
     }

@@ -17,11 +17,24 @@
 import './global.css';
 
 export { SetDrawingAlignOperation } from './commands/operations/drawing-align.operation';
+export {
+    type IDrawingArrangeOperationParams,
+    SetDrawingArrangeOperation,
+} from './commands/operations/drawing-arrange.operation';
+export {
+    CancelDrawingGroupOperation,
+    DRAWING_GROUP_TYPES,
+    type ICancelDrawingGroupOperationParams,
+    type IDrawingGroupOperationParams,
+    SetDrawingGroupOperation,
+} from './commands/operations/drawing-group.operation';
 export { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
-export type { IUniverDrawingUIConfig } from './controllers/config.schema';
+export type { IUniverDrawingUIConfig } from './config/config';
 export { getCurrentUnitInfo, insertGroupObject } from './controllers/utils';
 export { UniverDrawingUIPlugin } from './plugin';
+export { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from './services/drawing-image-clip.service';
+export type { ImageShapeClipDelegate } from './services/drawing-image-clip.service';
 export { DrawingRenderService } from './services/drawing-render.service';
 export { getUpdateParams } from './utils/get-update-params';
 export { ImageCropperObject } from './views/crop/image-cropper-object';

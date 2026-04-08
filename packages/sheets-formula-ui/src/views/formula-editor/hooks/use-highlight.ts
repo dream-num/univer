@@ -76,7 +76,7 @@ export function calcHighlightRanges(opts: {
     const currentSheetId = worksheet.getSheetId();
     const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
-    const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+    const skeleton = sheetSkeletonManagerService?.getSkeleton(currentSheetId);
     if (!skeleton) return;
     const endIndexes: number[] = [];
     for (let i = 0, len = refSelections.length; i < len; i++) {

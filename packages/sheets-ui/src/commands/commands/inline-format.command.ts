@@ -37,7 +37,7 @@ import {
     SetUnderlineCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { getFontStyleAtCursor } from '../../controllers/menu/utils';
+import { getFontStyleAtCursor } from '../../menu/utils';
 
 /**
  * It is used to set the bold style of selections or one cell, need to distinguish between

@@ -19,7 +19,21 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
+    HorizontalAlign,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    Tools,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
@@ -150,42 +164,50 @@ export class EditorDataSyncController extends Disposable {
         const needUpdateFormulaEditorContentCommandList = [SetRangeValuesMutation.id, MoveRangeMutation.id];
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (needUpdateFormulaEditorContentCommandList.includes(command.id)) {
-                    const editCellState = this._editorBridgeService.getLatestEditCellState();
+                if (!needUpdateFormulaEditorContentCommandList.includes(command.id)) {
+                    return;
+                }
 
-                    if (editCellState == null) {
-                        return;
-                    }
+                const editCellState = this._editorBridgeService.getEditLocation();
 
-                    let needUpdate = false;
+                if (editCellState == null) {
+                    return;
+                }
 
-                    const { row, column } = editCellState;
+                const { row, column } = editCellState;
 
-                    if (command.id === SetRangeValuesMutation.id && command.params) {
-                        const params = command.params as ISetRangeValuesMutationParams;
-                        if (params.cellValue?.[row]?.[column]) {
-                            needUpdate = true;
-                        }
-                    } else if (command.id === MoveRangeMutation.id && command.params) {
-                        const params = command.params as IMoveRangeMutationParams;
-                        if (params.to.value?.[row]?.[column]) {
-                            needUpdate = true;
-                        }
-                    }
-
-                    if (needUpdate) {
-                        const body = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.getBody());
-                        const drawings = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.drawings);
-                        const drawingsOrder = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.getDrawingsOrder());
-
-                        if (body == null) {
-                            return;
-                        }
-                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body, drawings, drawingsOrder);
-                    }
+                if (this._shouldRefreshCurrentEditCell(command, row, column)) {
+                    /**
+                     * Refresh the current edit-cell snapshot so both the hidden cell editor and
+                     * the formula bar stay aligned with external cell mutations.
+                     */
+                    this._editorBridgeService.refreshEditCellState();
                 }
             })
         );
+    }
+
+    private _shouldRefreshCurrentEditCell(command: ICommandInfo, row: number, column: number): boolean {
+        if (command.id === SetRangeValuesMutation.id && command.params) {
+            const params = command.params as ISetRangeValuesMutationParams;
+            return this._hasMatrixCell(params.cellValue, row, column);
+        }
+
+        if (command.id === MoveRangeMutation.id && command.params) {
+            const params = command.params as IMoveRangeMutationParams;
+            return this._hasMatrixCell(params.from.value, row, column) || this._hasMatrixCell(params.to.value, row, column);
+        }
+
+        return false;
+    }
+
+    private _hasMatrixCell(
+        matrix: ISetRangeValuesMutationParams['cellValue'] | IMoveRangeMutationParams['from']['value'],
+        row: number,
+        column: number
+    ): boolean {
+        const rowData = matrix?.[row];
+        return rowData != null && Object.prototype.hasOwnProperty.call(rowData, column);
     }
 
     // Sync actions between cell editor and formula editor, and make `dataStream` and `paragraph` is the same.

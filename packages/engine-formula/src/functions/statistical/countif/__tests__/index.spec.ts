@@ -28,7 +28,8 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Countif } from '../index';
 

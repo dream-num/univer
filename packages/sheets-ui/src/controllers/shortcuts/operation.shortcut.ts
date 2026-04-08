@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
 import type { IShortcutItem } from '@univerjs/ui';
+import { SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-
 import { whenSheetEditorFocused } from './utils';
 
 export const SetRowHiddenShortcutItem: IShortcutItem = {

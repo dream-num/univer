@@ -26,7 +26,7 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
-import { ThreadCommentTree } from '../thread-comment-tree';
+import { ThreadCommentTree, ThreadCommentTreeLocation } from '../thread-comment-tree';
 
 export interface IThreadCommentPanelProps {
     unitId: string;
@@ -78,7 +78,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
     const shouldScroll = useRef(true);
-    const prefix = 'panel';
+    const location = ThreadCommentTreeLocation.PANEL;
     const currentUser = useObservable(userService.currentUser$);
     const comments = useMemo(() => {
         const allComments =
@@ -154,13 +154,13 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             return;
         }
         const { unitId, subUnitId, commentId } = activeCommentId;
-        const id = `${prefix}-${unitId}-${subUnitId}-${commentId}`;
+        const id = `${location}-${unitId}-${subUnitId}-${commentId}`;
         document.getElementById(id)?.scrollIntoView({ block: 'center' });
     }, [activeCommentId]);
 
     const renderComment = (comment: IThreadComment) => (
         <ThreadCommentTree
-            prefix={prefix}
+            location={location}
             getSubUnitName={getSubUnitName}
             key={comment.id}
             id={comment.id}

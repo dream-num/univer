@@ -15,14 +15,17 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsDrawingConfig } from './controllers/config.schema';
+import type { IUniverDocsDrawingConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { defaultPluginConfig, DOCS_DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { defaultPluginConfig, DOCS_DRAWING_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocDrawingController, DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
 import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 
 export class UniverDocsDrawingPlugin extends Plugin {
     static override pluginName = DOCS_DRAWING_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(

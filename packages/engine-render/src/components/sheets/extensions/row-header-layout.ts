@@ -140,6 +140,7 @@ export class RowHeaderLayout extends SheetExtension {
 
         let preRowPosition = 0;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
+        const rowGaps = spreadsheetSkeleton.gapConfig?.rowGaps;
         for (let r = startRow - 1; r <= endRow; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
@@ -148,6 +149,49 @@ export class RowHeaderLayout extends SheetExtension {
             if (preRowPosition === rowEndPosition) {
                 continue; // Skip hidden rows
             }
+
+            // Draw gap area in row header if a gap is configured before this row
+            const gapSize = rowGaps?.[r]?.size ?? 0;
+            if (gapSize > 0) {
+                const gapItem = rowGaps![r];
+                const gapTop = preRowPosition;
+                const gapBottom = preRowPosition + gapSize;
+                // defaultBackgroundColor and defaultStripeColor are guaranteed by SheetSkeleton._fillDefaultGapThemeColors
+                const { defaultBackgroundColor = '', defaultStripeColor = '' } = spreadsheetSkeleton.gapConfig || {};
+                const defaultBg = defaultBackgroundColor;
+                const defaultStripe = defaultStripeColor;
+
+                // Fill gap background
+                ctx.save();
+                ctx.fillStyle = gapItem.color ?? defaultBg;
+                ctx.fillRectByPrecision(0, gapTop, rowHeaderWidth, gapSize);
+                ctx.restore();
+
+                // Draw diagonal stripes
+                ctx.save();
+                ctx.beginPath();
+                ctx.rectByPrecision(0, gapTop, rowHeaderWidth, gapSize);
+                ctx.clip();
+                ctx.strokeStyle = gapItem.stripeColor ?? defaultStripe;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                const spacing = 6;
+                for (let d = -gapSize; d < rowHeaderWidth; d += spacing) {
+                    ctx.moveTo(d, gapBottom);
+                    ctx.lineTo(d + gapSize, gapTop);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                preRowPosition = gapBottom;
+            }
+
+            // After gap, the row itself may still be hidden (height = 0)
+            if (preRowPosition >= rowEndPosition) {
+                preRowPosition = rowEndPosition;
+                continue;
+            }
+
             const cellBound = {
                 left: 0,
                 top: preRowPosition,

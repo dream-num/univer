@@ -15,11 +15,11 @@
  */
 
 import type { IDropdownMenuProps } from '@univerjs/design';
-import type { IUniverDebuggerConfig } from '../controllers/config.schema';
+import type { IUniverDebuggerConfig } from '../config/config';
 import { IConfigService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import { DEBUGGER_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { DEBUGGER_PLUGIN_CONFIG_KEY } from '../config/config';
 import { useCellContent } from './use-cell-content';
 import { useDarkMode } from './use-dark-mode';
 import { useDialog } from './use-dialog';

@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDocsUIConfig } from './controllers/config.schema';
+import type { IUniverDocsUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -33,7 +33,7 @@ import {
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
-import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
+import pkg from '../package.json';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DocCopyCommand, DocCopyCurrentParagraphCommand, DocCutCommand, DocCutCurrentParagraphCommand, DocPasteCommand } from './commands/commands/clipboard.command';
@@ -94,8 +94,7 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocOpenPageSettingCommand } from './commands/operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { AppUIController } from './controllers';
-import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
@@ -143,7 +142,9 @@ import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
-    static override pluginName = DOC_UI_PLUGIN_NAME;
+    static override pluginName = 'DOC_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
@@ -184,7 +185,6 @@ export class UniverDocsUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._initUI();
         this._initRenderModules();
 
         touchDependencies(this._injector, [
@@ -324,7 +324,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocAutoFormatController],
             [DocTableController],
             [DocMoveCursorController],
-            [AppUIController],
             [DocParagraphSettingController],
             [IEditorService, { useClass: EditorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
@@ -352,10 +351,6 @@ export class UniverDocsUIPlugin extends Plugin {
         } catch (err) {
             this._logService.warn(err);
         }
-    }
-
-    private _initUI(): void {
-        this._injector.get(AppUIController);
     }
 
     private _initRenderBasics(): void {

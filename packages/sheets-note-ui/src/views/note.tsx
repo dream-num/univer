@@ -17,14 +17,14 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
-import type { IUniverSheetsNoteUIConfig } from '../controllers/config.schema';
+import type { IUniverSheetsNoteUIConfig } from '../config/config';
 import { generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { SheetsNotePopupService } from '../services/sheets-note-popup.service';
 
 type INotePopupLocation = ISheetLocationBase & {

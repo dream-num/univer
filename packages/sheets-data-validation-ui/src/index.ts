@@ -16,7 +16,7 @@
 
 import './global.css';
 
-export type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsDataValidationUIConfig } from './config/config';
 export { UniverSheetsDataValidationMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsDataValidationUIPlugin } from './plugin';
 export { BaseSheetDataValidatorView } from './views/validator-views/sheet-validator-view';

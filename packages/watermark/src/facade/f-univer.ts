@@ -19,6 +19,16 @@ import { FEnum, FUniver } from '@univerjs/core/facade';
 import { IWatermarkTypeEnum } from '@univerjs/engine-render';
 import { WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
+interface IFWatermarkEnumMixin {
+    IWatermarkTypeEnum: typeof IWatermarkTypeEnum;
+}
+
+export class FWatermarkEnumMixin extends FEnum implements IFWatermarkEnumMixin {
+    override get IWatermarkTypeEnum(): typeof IWatermarkTypeEnum {
+        return IWatermarkTypeEnum;
+    };
+}
+
 /**
  * @ignore
  */
@@ -116,17 +126,13 @@ export class FUniverWatermarkMixin extends FUniver {
     }
 }
 
-export class FWatermarkEnum {
-    get IWatermarkTypeEnum(): typeof IWatermarkTypeEnum {
-        return IWatermarkTypeEnum;
-    };
-}
-
 FUniver.extend(FUniverWatermarkMixin);
-FEnum.extend(FWatermarkEnum);
+FEnum.extend(FWatermarkEnumMixin);
 
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverWatermarkMixin { }
-    interface FEnum extends FWatermarkEnum { }
+    // eslint-disable-next-line ts/naming-convention
+    export interface FEnum extends IFWatermarkEnumMixin {
+    }
 }

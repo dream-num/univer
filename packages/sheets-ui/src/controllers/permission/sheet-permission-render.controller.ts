@@ -16,13 +16,14 @@
 
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from '../config.schema';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import { Disposable, IConfigService, Inject, Injector, IPermissionService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon, DeleteIcon, LockIcon, ProtectIcon, WriteIcon } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ComponentManager } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
+import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import {
     permissionCheckIconKey,
     permissionDeleteIconKey,
@@ -40,7 +41,6 @@ import { AlertDialog } from '../../views/permission/error-msg-dialog';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
-import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;

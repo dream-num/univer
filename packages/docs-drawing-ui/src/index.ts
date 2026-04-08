@@ -27,7 +27,7 @@ export { UngroupDocDrawingCommand } from './commands/commands/ungroup-doc-drawin
 export { ClearDocDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.operation';
 export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';
-export { type IUniverDocsDrawingUIConfig } from './controllers/config.schema';
+export { type IUniverDocsDrawingUIConfig } from './config/config';
 export { DocFloatDomController } from './controllers/doc-float-dom.controller';
+export { DOCS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverDocsDrawingUIPlugin } from './plugin';
-export { DOCS_IMAGE_MENU_ID } from './views/menu/image.menu';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from './controllers/config.schema';
-export { PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './controllers/config.schema';
+export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from './config/config';
+export { PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './config/config';
 export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 export { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 export {

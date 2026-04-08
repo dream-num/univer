@@ -17,13 +17,12 @@
 import './global.css';
 
 export { SheetCopyFormulaOnlyCommand, SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
-export { SelectEditorFormulaOperation } from './commands/operations/editor-formula.operation';
 export { HelpFunctionOperation } from './commands/operations/help-function.operation';
 export { InsertFunctionOperation } from './commands/operations/insert-function.operation';
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
-export type { IUniverSheetsFormulaUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsFormulaUIConfig } from './config/config';
 export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { UniverSheetsFormulaUIPlugin } from './plugin';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';

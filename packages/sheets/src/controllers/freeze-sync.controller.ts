@@ -17,13 +17,13 @@
 import type { IExecutionOptions, IFreeze, Workbook } from '@univerjs/core';
 import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams } from '../basics';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
-import type { IUniverSheetsConfig } from './config.schema';
+import type { IUniverSheetsConfig } from '../config/config';
 import { Disposable, DisposableCollection, ICommandService, IConfigService, Inject, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
-import { SHEETS_PLUGIN_CONFIG_KEY } from './config.schema';
+import { SHEETS_PLUGIN_CONFIG_KEY } from '../config/config';
 
 const sheetsFreezeOnlyLocalMutationIds = [
     SetFrozenMutation.id,

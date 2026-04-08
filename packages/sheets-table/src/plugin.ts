@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsTableConfig } from './controllers/config.schema';
+import type { IUniverSheetsTableConfig } from './config/config';
 import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import pkg from '../package.json';
 import { AddSheetTableCommand } from './commands/commands/add-sheet-table.command';
 import { AddTableThemeCommand } from './commands/commands/add-table-theme.command';
 import { DeleteSheetTableCommand } from './commands/commands/delete-sheet-table.command';
@@ -27,8 +28,8 @@ import { AddSheetTableMutation } from './commands/mutations/add-sheet-table.muta
 import { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
 import { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
+import { defaultPluginConfig, SHEETS_TABLE_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
-import { defaultPluginConfig, SHEETS_TABLE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetTableFormulaController } from './controllers/sheet-table-formula.controller';
 import { SheetTableRangeController } from './controllers/sheet-table-range.controller';
 import { SheetTableRefRangeController } from './controllers/sheet-table-ref-range.controller';
@@ -40,6 +41,8 @@ import { SheetTableService } from './services/table-service';
 
 export class UniverSheetsTablePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

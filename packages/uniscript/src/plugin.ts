@@ -15,18 +15,19 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverUniscriptConfig } from './controllers/config.schema';
+import type { IUniverUniscriptConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
-import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './config/config';
 import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
 
-const PLUGIN_NAME = 'UNIVER_UNISCRIPT_PLUGIN';
-
 export class UniverUniscriptPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'UNIVER_UNISCRIPT_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverUniscriptConfig> = defaultPluginConfig,

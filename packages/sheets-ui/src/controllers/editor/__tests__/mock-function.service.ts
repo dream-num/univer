@@ -15,8 +15,8 @@
  */
 
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
-import { FunctionType } from '@univerjs/engine-formula';
 import { createIdentifier } from '@univerjs/core';
+import { FunctionType } from '@univerjs/engine-formula';
 
 export class MockFunctionService {
     getDescriptions(): Map<IFunctionNames, IFunctionInfo> {

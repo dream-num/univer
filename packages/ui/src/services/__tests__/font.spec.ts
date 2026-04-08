@@ -15,7 +15,7 @@
  */
 
 import { IConfigService, Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FontService } from '../font.service';
 
 describe('FontService', () => {
@@ -31,6 +31,10 @@ describe('FontService', () => {
 
         injector.add([IConfigService, { useValue: configService }]);
         injector.add([FontService]);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('should initialize with default fonts when no config is provided', () => {
@@ -128,5 +132,66 @@ describe('FontService', () => {
         fontService.resetToDefaults();
         expect(fontService.getFontByValue('Arial')).toBeDefined();
         expect(fontService.getFonts()).toHaveLength(13);
+    });
+
+    it('should reset and complete subject when disposed', () => {
+        vi.mocked(configService.getConfig).mockReturnValue(undefined);
+        fontService = injector.get(FontService);
+        fontService.addFont({ value: 'Disposable', label: 'Disposable Font' });
+
+        expect(fontService.getFontByValue('Disposable')).toBeDefined();
+        fontService.dispose();
+
+        expect(fontService.getFontByValue('Disposable')).toBeUndefined();
+        expect(fontService.getFonts()).toHaveLength(13);
+        expect(fontService.fonts$.isStopped).toBe(true);
+    });
+
+    it('should return false when canvas context is unavailable', () => {
+        vi.mocked(configService.getConfig).mockReturnValue(undefined);
+        fontService = injector.get(FontService);
+
+        const canvas = {
+            getContext: vi.fn(() => null),
+        } as unknown as HTMLCanvasElement;
+        vi.spyOn(document, 'createElement').mockReturnValue(canvas as never);
+
+        expect(fontService.isFontSupported('Any Font')).toBe(false);
+    });
+
+    it('should return true when measured width changes for candidate font', () => {
+        vi.mocked(configService.getConfig).mockReturnValue(undefined);
+        fontService = injector.get(FontService);
+
+        const context = {
+            font: '',
+            measureText: vi.fn(() => ({
+                width: context.font.includes('"Supported Font"') ? 120 : 100,
+            })),
+        } as unknown as CanvasRenderingContext2D;
+        const canvas = {
+            getContext: vi.fn(() => context),
+        } as unknown as HTMLCanvasElement;
+        vi.spyOn(document, 'createElement').mockReturnValue(canvas as never);
+
+        expect(fontService.isFontSupported('Supported Font')).toBe(true);
+    });
+
+    it('should return false when candidate font keeps the same width', () => {
+        vi.mocked(configService.getConfig).mockReturnValue(undefined);
+        fontService = injector.get(FontService);
+
+        const context = {
+            font: '',
+            measureText: vi.fn(() => ({
+                width: 100,
+            })),
+        } as unknown as CanvasRenderingContext2D;
+        const canvas = {
+            getContext: vi.fn(() => context),
+        } as unknown as HTMLCanvasElement;
+        vi.spyOn(document, 'createElement').mockReturnValue(canvas as never);
+
+        expect(fontService.isFontSupported('Unsupported Font')).toBe(false);
     });
 });

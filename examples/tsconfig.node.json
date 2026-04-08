@@ -1,0 +1,7 @@
+{
+    "extends": "@univerjs-infra/shared/tsconfigs/node",
+    "compilerOptions": {
+        "target": "ESNext"
+    },
+    "include": ["esbuild.config.ts", "scripts/**/*.ts"]
+}

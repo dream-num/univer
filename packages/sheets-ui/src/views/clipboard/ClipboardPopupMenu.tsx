@@ -74,7 +74,7 @@ const useMenuPosition = (range?: IDiscreteRange) => {
     const canvas = scene.getEngine()?.getCanvas();
     if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
 
-    const endPosition = skeleton?.getNoMergeCellPositionByIndex(anchor.endRow, anchor.endCol);
+    const endPosition = skeleton?.getNoMergeCellWithCoordByIndex(anchor.endRow, anchor.endCol);
     const endX = endPosition?.endX ?? 0;
     const endY = endPosition?.endY ?? 0;
 

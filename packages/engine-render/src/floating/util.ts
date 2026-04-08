@@ -176,8 +176,7 @@ function autoClientRect(
             (nextRefRect.x !== prevRefRect.x ||
                 nextRefRect.y !== prevRefRect.y ||
                 nextRefRect.width !== prevRefRect.width ||
-                nextRefRect.height !== prevRefRect.height)
-        ) {
+                nextRefRect.height !== prevRefRect.height)) {
             update();
         }
 

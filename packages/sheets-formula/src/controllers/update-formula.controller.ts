@@ -28,7 +28,7 @@ import type {
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
@@ -39,6 +39,7 @@ import {
     Injector,
     IUniverInstanceService,
     ObjectMatrix,
+    Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -54,7 +55,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
-import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
@@ -343,14 +344,21 @@ export class UpdateFormulaController extends Disposable {
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, oldFormulaData: {} };
+        if (!Tools.isDefine(formulaData)) return { newFormulaData: {} };
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        if (formulaDataKeys.length === 0) return { newFormulaData: {}, oldFormulaData: {} };
+        if (formulaDataKeys.length === 0) return { newFormulaData: {} };
 
-        const oldFormulaData: IFormulaData = {};
         const newFormulaData: IFormulaData = {};
+
+        const { unitId: fromUnitId, sheetId: fromSheetId, sheetName: fromSheetName, targetUnitId, targetSheetId, type, from, to } = formulaReferenceMoveParam;
+
+        const inCrossSheetCutRangeNewFormulas: Array<{
+            fromRow: number;
+            fromColumn: number;
+            formulaString: string;
+        }> = [];
 
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
@@ -360,10 +368,6 @@ export class UpdateFormulaController extends Disposable {
             }
 
             const sheetDataKeys = Object.keys(sheetData);
-
-            if (!Tools.isDefine(oldFormulaData[unitId])) {
-                oldFormulaData[unitId] = {};
-            }
 
             if (!Tools.isDefine(newFormulaData[unitId])) {
                 newFormulaData[unitId] = {};
@@ -388,7 +392,18 @@ export class UpdateFormulaController extends Disposable {
 
                     let shouldModify = false;
                     const refChangeIds: number[] = [];
-                    const { type, from } = formulaReferenceMoveParam;
+
+                    // Whether the formula cell is in the moved range and the move is a cross-worksheet cut operation
+                    const inCrossSheetCutRange = type === FormulaReferenceMoveType.MoveRange &&
+                        (targetUnitId !== fromUnitId || targetSheetId !== fromSheetId) &&
+                        unitId === fromUnitId &&
+                        sheetId === fromSheetId &&
+                        from &&
+                        from.startRow <= row &&
+                        row <= from.endRow &&
+                        from.startColumn <= column &&
+                        column <= from.endColumn;
+                    const inCrossSheetCutRangeSequenceNodes = [...sequenceNodes];
 
                     for (let i = 0, len = sequenceNodes.length; i < len; i++) {
                         const node = sequenceNodes[i];
@@ -512,7 +527,10 @@ export class UpdateFormulaController extends Disposable {
                                 sequenceUnitRangeWidthOffset,
                                 formulaReferenceMoveParam,
                                 unitId,
-                                sheetId
+                                sheetId,
+                                {
+                                    inCrossSheetCutRange,
+                                }
                             );
                         }
 
@@ -527,6 +545,34 @@ export class UpdateFormulaController extends Disposable {
 
                             // If the formula cell has an si, it means the formula cell is source of other same si cells, so the si cells needs to be updated.
                             if (si && (x ?? 0) === 0 && (y ?? 0) === 0) shouldModifySi.push(si);
+                        }
+
+                        /**
+                         * If the reference sequence range is not affected by the move, and the move is a cross-worksheet cut operation, it may be necessary to rewrite the sheet name in the ref string after move, to make sure the ref still works after move.
+                         * For example, if a formula cell is `=SUM(A1:A5)` in Sheet1, and formula cell cut to Sheet2, the formula should be rewritten to `=SUM(Sheet1!A1:A5)`, otherwise it will become `=SUM(A1:A5)` and reference the wrong range in Sheet2.
+                         */
+                        if (inCrossSheetCutRange) {
+                            if (newRefString != null) {
+                                inCrossSheetCutRangeSequenceNodes[i] = {
+                                    ...node,
+                                    token: newRefString,
+                                };
+                            } else if ((!sequenceUnitId || sequenceUnitId === fromUnitId) && (!sequenceSheetId || sequenceSheetId === fromSheetId)) {
+                                /**
+                                 * Only the reference range is in the from worksheet need to rewrite the sheet name, otherwise the ref string will be rewritten unnecessarily when moving between other worksheets.
+                                 * For example, if a formula cell is `=SUM(Sheet3!A1:A5)` in Sheet1, and formula cell cut to Sheet2, the formula should not be rewritten, otherwise it will become `=SUM(Sheet1!A1:A5)` and reference the wrong range in Sheet1, while the original ref is referencing Sheet3 and should not be affected by the move between Sheet1 and Sheet2.
+                                 */
+                                const sequenceRange = Rectangle.moveOffset(range, x || 0, y || 0);
+                                inCrossSheetCutRangeSequenceNodes[i] = {
+                                    ...node,
+                                    token: serializeRangeToRefString({
+                                        range: sequenceRange,
+                                        sheetName: fromSheetName || sheetName,
+                                        unitId: targetUnitId !== fromUnitId ? fromUnitId : '',
+                                    }),
+                                };
+                                shouldModify = true;
+                            }
                         }
                     }
 
@@ -550,6 +596,16 @@ export class UpdateFormulaController extends Disposable {
                         }
                     }
 
+                    if (inCrossSheetCutRange) {
+                        const newSequenceNodes = updateRefOffset(inCrossSheetCutRangeSequenceNodes, refChangeIds, x, y);
+                        inCrossSheetCutRangeNewFormulas.push({
+                            fromRow: row,
+                            fromColumn: column,
+                            formulaString: `=${generateStringWithSequence(newSequenceNodes)}`,
+                        });
+                        return true;
+                    }
+
                     const newSequenceNodes = updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
                     newFormulaDataItem.setValue(row, column, {
@@ -560,6 +616,30 @@ export class UpdateFormulaController extends Disposable {
                 if (newFormulaData[unitId]) {
                     newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();
                 }
+            }
+        }
+
+        if (inCrossSheetCutRangeNewFormulas.length > 0 && targetUnitId && targetSheetId) {
+            if (!newFormulaData[targetUnitId]) {
+                newFormulaData[targetUnitId] = {};
+            }
+
+            if (!newFormulaData[targetUnitId][targetSheetId]) {
+                newFormulaData[targetUnitId][targetSheetId] = {};
+            }
+
+            for (const newFormula of inCrossSheetCutRangeNewFormulas) {
+                const { fromRow, fromColumn, formulaString } = newFormula;
+                const targetRow = fromRow + ((to?.startRow ?? 0) - (from?.startRow ?? 0));
+                const targetColumn = fromColumn + ((to?.startColumn ?? 0) - (from?.startColumn ?? 0));
+
+                if (!newFormulaData[targetUnitId][targetSheetId][targetRow]) {
+                    newFormulaData[targetUnitId][targetSheetId][targetRow] = {};
+                }
+
+                newFormulaData[targetUnitId][targetSheetId][targetRow][targetColumn] = {
+                    f: formulaString,
+                };
             }
         }
 

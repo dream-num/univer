@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'Orezanie',
             start: 'Začať orezanie',
             mode: 'Voľne',
+            shape: 'Oříznout podle tvaru',
         },
         group: {
             title: 'Zoskupiť',

@@ -284,5 +284,3 @@ export function stripArrayValue(array: (string | number | boolean | null)[][]) {
         return cell;
     }));
 }
-
-export { getObjectValue } from '@univerjs/engine-formula';

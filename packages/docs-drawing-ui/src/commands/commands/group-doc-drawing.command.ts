@@ -15,13 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-} from '@univerjs/core';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
+import { CommandType } from '@univerjs/core';
+// import { IDocDrawingService } from '@univerjs/docs-drawing';
 
 /**
  * The command to insert new defined name
@@ -30,24 +26,24 @@ export const GroupDocDrawingCommand: ICommand = {
     id: 'doc.command.group-doc-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IDrawingGroupUpdateParam[]) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const docDrawingService = accessor.get(IDocDrawingService);
+        // const docDrawingService = accessor.get(IDocDrawingService);
 
-        if (!params) return false;
+        // if (!params) return false;
 
-        const unitIds: string[] = [];
-        params.forEach(({ parent, children }) => {
-            unitIds.push(parent.unitId);
-            children.forEach((child) => {
-                unitIds.push(child.unitId);
-            });
-        });
+        // // if the subunit is not a doc type, return false
+
+        // const unitIds: string[] = [];
+        // params.forEach(({ parent, children }) => {
+        //     unitIds.push(parent.unitId);
+        //     children.forEach((child) => {
+        //         unitIds.push(child.unitId);
+        //     });
+        // });
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const jsonOp = docDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
+        // const jsonOp = docDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
 
-        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
+        // const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         // const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP });
 

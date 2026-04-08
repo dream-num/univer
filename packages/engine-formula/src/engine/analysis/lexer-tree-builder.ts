@@ -440,8 +440,7 @@ export class LexerTreeBuilder extends Disposable {
             return false;
         }
 
-        if (
-            OPERATOR_TOKEN_SET.has(lastNode)) {
+        if (OPERATOR_TOKEN_SET.has(lastNode)) {
             return true;
         }
 
@@ -1493,8 +1492,7 @@ export class LexerTreeBuilder extends Disposable {
                 this.isDoubleQuotationClose() &&
                 this.isBracesClose() &&
                 this.isSquareBracketClose() &&
-                this._checkIfErrorObject(cur, formulaChars)
-            ) {
+                this._checkIfErrorObject(cur, formulaChars)) {
                 const errorType = this._findErrorObject(cur, formulaChars);
                 if (errorType == null) {
                     return ErrorType.VALUE;

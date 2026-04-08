@@ -18,14 +18,15 @@ import type { Dependency } from '@univerjs/core';
 import type {
     IUniverRPCMainThreadConfig,
     IUniverRPCWorkerThreadConfig,
-} from './controllers/config.schema';
+} from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import pkg from '../package.json';
 import {
     defaultPluginMainThreadConfig,
     defaultPluginWorkerThreadConfig,
     PLUGIN_CONFIG_KEY_MAIN_THREAD,
     PLUGIN_CONFIG_KEY_WORKER_THREAD,
-} from './controllers/config.schema';
+} from './config/config';
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 import {
@@ -46,6 +47,8 @@ import {
  */
 export class UniverRPCMainThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_MAIN_THREAD_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     private _internalWorker: Worker | null = null;
 
@@ -88,6 +91,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
             [
                 IRPCChannelService,
                 {
+                    // eslint-disable-next-line react/no-unnecessary-use-prefix
                     useFactory: () => new ChannelService(messageProtocol),
                 },
             ],
@@ -107,6 +111,8 @@ export class UniverRPCMainThreadPlugin extends Plugin {
  */
 export class UniverRPCWorkerThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_WORKER_THREAD_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverRPCWorkerThreadConfig> = defaultPluginWorkerThreadConfig,
@@ -131,6 +137,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
                 [
                     IRPCChannelService,
                     {
+                        // eslint-disable-next-line react/no-unnecessary-use-prefix
                         useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
                     },
                 ],

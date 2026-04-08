@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAverageHighlightCell, IConditionFormattingRule, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../../models/type';
+import type { IAverageHighlightCell, IConditionFormattingRule, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../type';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator } from '../../../base/const';
 import { createTestBed } from './test.util';

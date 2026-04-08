@@ -33,7 +33,7 @@ export {
     SetSheetsFilterRangeMutation,
 } from './commands/mutations/sheets-filter.mutation';
 export { FILTER_MUTATIONS } from './common/const';
-export type { IUniverSheetsFilterConfig } from './controllers/config.schema';
+export type { IUniverSheetsFilterConfig } from './config/config';
 export { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 export {
     equals,

@@ -16,14 +16,14 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ComponentType } from 'react';
-import type { IUniverSheetsUIConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IStatusBarServiceStatus, StatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { useConfigValue, useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 

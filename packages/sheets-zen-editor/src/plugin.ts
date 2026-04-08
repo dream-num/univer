@@ -15,16 +15,18 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
-
+import type { IUniverSheetsZenEditorConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { defaultPluginConfig, SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY } from './config/config';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { ZenEditorController } from './controllers/zen-editor.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'SHEET_ZEN_EDITOR_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

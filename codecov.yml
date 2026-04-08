@@ -1,13 +1,13 @@
 coverage:
-    patch: false
     status:
         project:
             default:
                 # basic
-                target: auto
+                target: 60%
                 threshold: 0
                 base: auto
                 # advanced settings
                 if_ci_failed: error
                 informational: false
                 only_pulls: false
+        patch: off

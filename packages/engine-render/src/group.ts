@@ -26,8 +26,8 @@ import { getGroupState, transformObjectOutOfGroup } from './basics/group-transfo
 import { isString } from './basics/tools';
 
 export class Group extends BaseObject {
-    private _objects: BaseObject[] = [];
-    private _selfSizeMode = false;
+    protected _objects: BaseObject[] = [];
+    protected _selfSizeMode = false;
 
     constructor(key?: string, ...objects: BaseObject[]) {
         super(key);
@@ -233,6 +233,7 @@ export class Group extends BaseObject {
     override render(ctx: UniverRenderingContext, bounds: IViewportInfo) {
         ctx.save();
         const m = this.transform.getMatrix();
+
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         const objects = this.getObjectsByOrder();
 

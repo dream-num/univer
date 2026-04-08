@@ -19,7 +19,7 @@ import type { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Group } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group } from '@univerjs/engine-render';
 
 export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObject, scene: Scene, drawingManagerService: IDrawingManagerService) {
     const groupParam = drawingManagerService.getDrawingByParam(objectParam);
@@ -28,30 +28,52 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     }
 
     const groupKey = getDrawingShapeKeyByDrawingSearch(objectParam);
-    const groupObject = scene.getObject(groupKey);
+    const groupObject = scene.getObjectIncludeInGroup(groupKey);
 
     if (groupObject && !(groupObject instanceof Group)) {
         return;
     }
 
     if (groupObject != null) {
+        const objects = groupObject.getObjects();
+        for (const obj of objects) {
+            if (obj.oKey === object.oKey) {
+                return;
+            }
+        }
         groupObject.addObject(object);
         return;
     }
 
-    const group = new Group(groupKey);
+    const group = new DrawingGroupObject(groupKey);
 
     scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
     group.addObject(object);
 
-    const { transform } = groupParam;
+    const { transform, groupBaseBound } = groupParam;
+
+    if (groupBaseBound) {
+        group.setBaseBound(groupBaseBound);
+    }
+
+    if (groupParam.groupId) {
+        group.isInGroup = true;
+        insertGroupObject(
+            { drawingId: groupParam.groupId, unitId: objectParam.unitId, subUnitId: objectParam.subUnitId },
+            group,
+            scene,
+            drawingManagerService
+        );
+    }
 
     transform && group.transformByState(
         {
             left: transform.left,
             top: transform.top,
             angle: transform.angle,
+            width: transform.width,
+            height: transform.height,
         }
     );
 }

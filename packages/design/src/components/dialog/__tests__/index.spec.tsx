@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Dialog } from '../Dialog';
 import '@testing-library/jest-dom/vitest';
@@ -69,5 +69,51 @@ describe('Dialog', () => {
             mask.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             expect(onOpenChange).not.toHaveBeenCalledWith(false);
         }
+    });
+
+    it('should apply width and draggable styles', () => {
+        const { rerender } = render(
+            <Dialog open title="drag" width={320} draggable>
+                content
+            </Dialog>
+        );
+
+        const content = document.querySelector('[role="dialog"]') as HTMLElement;
+        expect(content.style.width).toBe('320px');
+        expect(content.style.transform).toContain('translate(');
+
+        const header = document.querySelector('[data-drag-handle="true"]') as HTMLElement;
+        expect(header).toBeInTheDocument();
+        fireEvent.mouseDown(header, { clientX: 20, clientY: 20 });
+        fireEvent.mouseMove(document, { clientX: 40, clientY: 50 });
+        fireEvent.mouseUp(document);
+
+        rerender(
+            <Dialog open title="drag" width="40rem" draggable>
+                content
+            </Dialog>
+        );
+        expect((document.querySelector('[role="dialog"]') as HTMLElement).style.width).toBe('40rem');
+    });
+
+    it('should honor keyboard=false and trigger open change from close button', () => {
+        const onOpenChange = vi.fn();
+        const onClose = vi.fn();
+        render(
+            <Dialog open keyboard={false} onOpenChange={onOpenChange} onClose={onClose}>
+                content
+            </Dialog>
+        );
+
+        fireEvent.keyDown(document, { key: 'Escape' });
+
+        const closeBtn = (document.querySelector('.univer-sr-only') as HTMLElement | null)?.parentElement as HTMLElement | null;
+        expect(closeBtn).toBeInTheDocument();
+        if (!closeBtn) {
+            throw new Error('Close button should exist');
+        }
+        closeBtn.click();
+        expect(onOpenChange).toHaveBeenCalledWith(false);
+        expect(onClose).toHaveBeenCalled();
     });
 });

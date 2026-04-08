@@ -34,6 +34,7 @@ import {
     OpenFindDialogOperation,
     OpenReplaceDialogOperation,
 } from '../commands/operations/find-replace.operation';
+import { menuSchema } from '../menu/schema';
 import { IFindReplaceService } from '../services/find-replace.service';
 import { FindReplaceDialog } from '../views/dialog/FindReplaceDialog';
 import {
@@ -44,7 +45,6 @@ import {
     OpenFindDialogShortcutItem,
     OpenReplaceDialogShortcutItem,
 } from './find-replace.shortcut';
-import { menuSchema } from './menu.schema';
 
 const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 

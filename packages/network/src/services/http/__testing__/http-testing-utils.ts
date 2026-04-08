@@ -18,13 +18,12 @@
 /* eslint-disable ts/no-this-alias */
 
 import type { Observer } from 'rxjs';
-import { Observable, Subject } from 'rxjs';
-import { Disposable, Injector } from '@univerjs/core';
-
-import { IHTTPImplementation } from '../implementations/implementation';
 import type { HTTPRequest } from '../request';
-import type { HTTPEvent, HTTPResponse, HTTPResponseError } from '../response';
+import type { HTTPEvent, HTTPResponseError } from '../response';
+import { Disposable, Injector } from '@univerjs/core';
+import { Observable, Subject } from 'rxjs';
 import { HTTPService } from '../http.service';
+import { IHTTPImplementation } from '../implementations/implementation';
 
 /**
  * A mocked HTTP implementation service for testing purposes. Besides methods in the interface, it
@@ -83,7 +82,7 @@ export interface IMockHTTPHandler {
     /**
      * Emit a response event to the observer.
      */
-    emitResponse<T>(response: HTTPResponse<T>): void;
+    emitResponse<T>(response: HTTPEvent<T>): void;
 
     /**
      * Emit an error event to the observer.

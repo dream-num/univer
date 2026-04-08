@@ -17,5 +17,5 @@
 import './global.css';
 
 export { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from './commands/commands/zen-editor.command';
-export type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
+export type { IUniverSheetsZenEditorConfig } from './config/config';
 export { UniverSheetsZenEditorPlugin } from './plugin';

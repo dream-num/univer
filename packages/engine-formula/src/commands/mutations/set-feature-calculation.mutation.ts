@@ -15,9 +15,8 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
+import { CommandType } from '@univerjs/core';
 
 export interface ISetFeatureCalculationMutation {
     featureId: string;

@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
-import type { IUniverSheetsConfig } from '../../controllers/config.schema';
+import type { IUniverSheetsConfig } from '../../config/config';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
     cloneWorksheetData,
@@ -29,7 +29,7 @@ import {
     LocaleService,
     sequenceExecute,
 } from '@univerjs/core';
-import { defaultLargeSheetOperationConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
+import { defaultLargeSheetOperationConfig, SHEETS_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetLazyExecuteScheduleService } from '../../services/lazy-execute-schedule.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { CopyWorksheetEndMutation } from '../mutations/copy-worksheet-end.mutation';

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
+import type { IUniverSheetsHyperLinkConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
 import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
-import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
 import { SheetsHyperLinkParserService } from './services/parser.service';
@@ -31,6 +31,8 @@ import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsHyperLinkPlugin extends Plugin {
     static override pluginName = SHEET_HYPER_LINK_PLUGIN;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
@@ -53,7 +55,6 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         registerDependencies(this._injector, [
             [HyperLinkModel],
             [SheetsHyperLinkParserService],
-            [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [SheetsHyperLinkRefRangeController],
             [SheetHyperLinkSetRangeController],
@@ -64,7 +65,6 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetsHyperLinkRefRangeController],
-            [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkRemoveSheetController],

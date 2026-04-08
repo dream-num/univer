@@ -16,8 +16,8 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { ComponentType } from 'react';
+import type { IUniverUIConfig } from '../../config/config';
 import type { IUniverWorkbenchProps } from '../../views/workbench/Workbench';
-import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { ColorPicker, render as createRoot, unmount } from '@univerjs/design';
@@ -30,6 +30,7 @@ import { FontFamily, FontFamilyItem } from '../../components/font-family';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family/interface';
 import { FontSize } from '../../components/font-size/FontSize';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size/interface';
+import { menuSchema } from '../../menu/schema';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
@@ -38,7 +39,6 @@ import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { Ribbon } from '../../views/components/ribbon/Ribbon';
 import { DesktopWorkbench } from '../../views/workbench/Workbench';
-import { menuSchema } from '../menus/menu.schema';
 import { SingleUnitUIController } from './ui-shared.controller';
 
 export class DesktopUIController extends SingleUnitUIController {

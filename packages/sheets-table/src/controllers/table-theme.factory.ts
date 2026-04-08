@@ -15,8 +15,8 @@
  */
 
 import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from '@univerjs/sheets';
-import type { ITableDefaultThemeStyle } from './config.schema';
-import { tableDefaultBorderStyle } from './config.schema';
+import type { ITableDefaultThemeStyle } from '../config/config';
+import { tableDefaultBorderStyle } from '../config/config';
 
 export const customEmptyThemeWithBorderStyle: Omit<IRangeThemeStyleJSON, 'name'> = {
     headerRowStyle: {

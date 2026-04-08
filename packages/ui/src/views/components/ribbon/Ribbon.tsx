@@ -232,7 +232,7 @@ export function Ribbon(props: IRibbonProps) {
                     'univer-grid-cols-none': ribbon.length === 1,
                 }, borderBottomClassName)}
             >
-                {ribbonType === 'default' && ribbon.length > 1 && (
+                {ribbonType === 'collapsed' && ribbon.length > 1 && (
                     <DefaultMenu
                         ribbon={ribbon}
                         activatedTab={activatedTab}

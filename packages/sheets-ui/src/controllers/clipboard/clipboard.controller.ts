@@ -31,6 +31,7 @@ import type {
     ISetRangeValuesMutationParams,
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -39,7 +40,6 @@ import type {
     ISheetDiscreteRangeLocation,
 } from '../../services/clipboard/type';
 import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
-import type { IUniverSheetsUIConfig } from '../config.schema';
 import {
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
@@ -92,10 +92,10 @@ import {
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
 import { RemovePasteMenuCommands } from './const';
 import {

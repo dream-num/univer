@@ -16,7 +16,7 @@
 
 import './global.css';
 
-export type { IUniverSheetsNoteUIConfig } from './controllers/config.schema';
+export type { IUniverSheetsNoteUIConfig } from './config/config';
 export { SheetsCellContentController } from './controllers/sheets-cell-content.controller';
 export { SheetsNotePopupController } from './controllers/sheets-note-popup.controller';
 export { UniverSheetsNoteUIPlugin } from './plugin';

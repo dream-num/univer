@@ -18,8 +18,8 @@ import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 
 import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
+import { menuSchema } from '../menu/schema';
 import { ScriptEditorPanel } from '../views/components/ScriptEditorPanel';
-import { menuSchema } from './menu.schema';
 
 export class UniscriptController extends Disposable {
     constructor(

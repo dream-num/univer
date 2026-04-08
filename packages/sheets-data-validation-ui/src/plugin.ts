@@ -15,10 +15,11 @@
  */
 
 import type { Dependency, Workbook } from '@univerjs/core';
-import type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
+import type { IUniverSheetsDataValidationUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import pkg from '../package.json';
 import { AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation-ui.command';
 import {
     CloseValidationPanelOperation,
@@ -27,7 +28,7 @@ import {
     ShowDataValidationDropdown,
     ToggleValidationPanelOperation,
 } from './commands/operations/data-validation.operation';
-import { defaultPluginConfig, SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
@@ -39,11 +40,11 @@ import { SheetsDataValidationUIController } from './controllers/dv-ui.controller
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 
-const PLUGIN_NAME = 'SHEET_DATA_VALIDATION_UI_PLUGIN';
-
 @DependentOn(UniverSheetsDataValidationPlugin)
 export class UniverSheetsDataValidationUIPlugin extends Plugin {
-    static override pluginName: string = PLUGIN_NAME;
+    static override pluginName: string = 'SHEET_DATA_VALIDATION_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

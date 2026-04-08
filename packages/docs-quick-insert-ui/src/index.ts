@@ -16,7 +16,7 @@
 
 import './global.css';
 
-export type { IUniverDocsQuickInsertUIConfig } from './controllers/config.schema';
+export type { IUniverDocsQuickInsertUIConfig } from './config/config';
 export { DocQuickInsertTriggerController } from './controllers/doc-quick-insert-trigger.controller';
 export { DocQuickInsertUIController } from './controllers/doc-quick-insert-ui.controller';
 export { UniverDocsQuickInsertUIPlugin } from './plugin';

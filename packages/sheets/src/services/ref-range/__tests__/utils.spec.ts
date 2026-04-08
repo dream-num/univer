@@ -940,7 +940,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.LEFT },
                 },
                 targetRange
             );
@@ -952,7 +952,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.LEFT },
                 },
                 targetRange
             );
@@ -964,7 +964,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.LEFT },
                 },
                 targetRange
             );
@@ -976,7 +976,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.LEFT },
                 },
                 targetRange
             );
@@ -989,7 +989,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.LEFT },
                 },
                 targetRange
             );
@@ -1003,7 +1003,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertCol(
                 {
                     id: EffectRefRangId.InsertColCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.LEFT },
                 },
                 targetRange
             );
@@ -1022,7 +1022,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );
@@ -1034,7 +1034,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );
@@ -1046,7 +1046,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );
@@ -1058,7 +1058,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );
@@ -1070,7 +1070,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );
@@ -1083,7 +1083,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );
@@ -1096,7 +1096,7 @@ describe('test ref-range move', () => {
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
-                    params: { range, unitId: '', subUnitId: '', direction: '' as any },
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.UP },
                 },
                 targetRange
             );

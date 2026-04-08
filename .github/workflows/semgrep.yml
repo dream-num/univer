@@ -1,0 +1,176 @@
+name: 🔐 Semgrep
+
+on:
+    push:
+        branches: [main, dev]
+    pull_request:
+        branches: [main, dev]
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    actions: read
+    contents: read
+    security-events: write
+
+jobs:
+    semgrep:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: Install Semgrep
+              id: install-semgrep
+              continue-on-error: true
+              run: python -m pip install --upgrade pip semgrep
+
+            - name: Run Semgrep
+              id: semgrep
+              if: ${{ always() }}
+              shell: bash
+              env:
+                  INSTALL_OUTCOME: ${{ steps.install-semgrep.outcome }}
+              run: |
+                  mkdir -p reports
+
+                  if [ "$INSTALL_OUTCOME" = "success" ]; then
+                    set +e
+                    semgrep scan \
+                      --config auto \
+                      --sarif \
+                      --output reports/semgrep.sarif \
+                      --error
+                    exit_code=$?
+                    set -e
+                  else
+                    exit_code=2
+                  fi
+
+                  if [ ! -s reports/semgrep.sarif ]; then
+                    printf '%s\n' \
+                      '{' \
+                      '  "version": "2.1.0",' \
+                      '  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",' \
+                      '  "runs": [' \
+                      '    {' \
+                      '      "tool": {' \
+                      '        "driver": {' \
+                      '          "name": "Semgrep",' \
+                      '          "informationUri": "https://semgrep.dev"' \
+                      '        }' \
+                      '      },' \
+                      '      "invocations": [' \
+                      '        {' \
+                      '          "executionSuccessful": false,' \
+                      '          "toolExecutionNotifications": [' \
+                      '            {' \
+                      '              "level": "error",' \
+                      '              "message": {' \
+                      '                "text": "Semgrep did not produce a SARIF report. Check the workflow logs for the setup or scan failure."' \
+                      '              }' \
+                      '            }' \
+                      '          ]' \
+                      '        }' \
+                      '      ],' \
+                      '      "results": []' \
+                      '    }' \
+                      '  ]' \
+                      '}' > reports/semgrep.sarif
+                  fi
+
+                  echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+
+            - name: Upload Semgrep SARIF to GitHub
+              id: upload-sarif
+              if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+              continue-on-error: true
+              uses: github/codeql-action/upload-sarif@v4
+              with:
+                  sarif_file: reports/semgrep.sarif
+                  category: semgrep
+
+            - name: Upload Semgrep report artifact
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: semgrep-sarif-${{ github.run_id }}
+                  path: reports/semgrep.sarif
+                  if-no-files-found: error
+                  retention-days: 14
+
+            - name: Summarize Semgrep report
+              if: ${{ always() }}
+              shell: bash
+              env:
+                  SEMGREP_EXIT_CODE: ${{ steps.semgrep.outputs.exit_code }}
+                  INSTALL_OUTCOME: ${{ steps.install-semgrep.outcome }}
+                  SARIF_UPLOAD_OUTCOME: ${{ steps.upload-sarif.outcome }}
+              run: |
+                  python - <<'PY'
+                  import json
+                  import os
+                  from pathlib import Path
+
+                  report_path = Path("reports/semgrep.sarif")
+                  with report_path.open() as file:
+                      sarif = json.load(file)
+
+                  results = []
+                  for run in sarif.get("runs", []):
+                      results.extend(run.get("results", []))
+
+                  counts = {"error": 0, "warning": 0, "note": 0, "other": 0}
+                  for result in results:
+                      level = result.get("level", "warning")
+                      counts[level if level in counts else "other"] += 1
+
+                  sarif_upload_outcome = os.environ.get("SARIF_UPLOAD_OUTCOME") or "skipped"
+
+                  with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+                      summary.write("## Semgrep report\n")
+                      summary.write(f"- Total findings: {len(results)}\n")
+                      summary.write(f"- Error: {counts['error']}\n")
+                      summary.write(f"- Warning: {counts['warning']}\n")
+                      summary.write(f"- Note: {counts['note']}\n")
+                      summary.write(f"- Other: {counts['other']}\n")
+                      summary.write(f"- Exit code: {os.environ['SEMGREP_EXIT_CODE']}\n")
+                      summary.write(f"- Semgrep install: {os.environ['INSTALL_OUTCOME']}\n")
+                      summary.write("- Artifact: `semgrep-sarif-${{ github.run_id }}`\n")
+                      summary.write(f"- Code scanning upload: {sarif_upload_outcome}\n")
+                  PY
+
+            - name: Fail on Semgrep execution errors
+              if: ${{ always() }}
+              shell: bash
+              env:
+                  SEMGREP_EXIT_CODE: ${{ steps.semgrep.outputs.exit_code }}
+              run: |
+                  if [ -z "$SEMGREP_EXIT_CODE" ]; then
+                    echo "Semgrep exit code is missing."
+                    exit 2
+                  fi
+
+                  if [ "$SEMGREP_EXIT_CODE" -eq 1 ]; then
+                    echo "Semgrep reported findings."
+                    echo "The SARIF report has been uploaded and the job will continue."
+                    exit 0
+                  fi
+
+                  if [ "$SEMGREP_EXIT_CODE" -ne 0 ]; then
+                    echo "Semgrep execution failed."
+                    echo "See the uploaded SARIF artifact for details."
+                    exit "$SEMGREP_EXIT_CODE"
+                  fi

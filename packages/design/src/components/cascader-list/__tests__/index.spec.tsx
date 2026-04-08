@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CascaderList } from '../CascaderList';
 
 afterEach(cleanup);
@@ -46,5 +46,57 @@ describe('CascaderList', () => {
         const { container } = render(<CascaderList value={[]} onChange={() => {}} />);
 
         expect(container).toBeTruthy();
+    });
+
+    it('should select parent and child options', () => {
+        const onChange = vi.fn();
+        const options = [
+            {
+                label: 'A',
+                value: 'a',
+                children: [
+                    { label: 'A-1', value: 'a-1' },
+                    { label: 'A-2', value: 'a-2' },
+                ],
+            },
+            {
+                label: 'B',
+                value: 'b',
+            },
+        ];
+
+        const { getByText, rerender } = render(<CascaderList value={[]} options={options} onChange={onChange} />);
+        fireEvent.click(getByText('A'));
+        expect(onChange).toHaveBeenCalledWith(['a']);
+
+        rerender(<CascaderList value={['a']} options={options} onChange={onChange} />);
+        fireEvent.click(getByText('A-2'));
+        expect(onChange).toHaveBeenCalledWith(['a', 'a-2']);
+    });
+
+    it('should ignore same value click and rewrite path when parent changes', () => {
+        const onChange = vi.fn();
+        const options = [
+            {
+                label: 'A',
+                value: 'a',
+                children: [{ label: 'A-1', value: 'a-1' }],
+            },
+            {
+                label: 'B',
+                value: 'b',
+                children: [{ label: 'B-1', value: 'b-1' }],
+            },
+        ];
+
+        const { getByText } = render(
+            <CascaderList value={['a', 'a-1']} options={options} onChange={onChange} />
+        );
+
+        fireEvent.click(getByText('A'));
+        expect(onChange).not.toHaveBeenCalledWith(['a', 'a-1']);
+
+        fireEvent.click(getByText('B'));
+        expect(onChange).toHaveBeenCalledWith(['b']);
     });
 });

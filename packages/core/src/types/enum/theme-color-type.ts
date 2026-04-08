@@ -43,10 +43,9 @@ export enum ThemeColorType {
     FOLLOWED_HYPERLINK,
 }
 
-// TODO: get color list to color picker
-// TODO: 取色
-
 /**
+ * Preset theme names.
+ *
  * @deprecated
  */
 export enum ThemeColors {

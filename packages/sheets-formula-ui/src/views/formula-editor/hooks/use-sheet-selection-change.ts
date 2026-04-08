@@ -36,9 +36,9 @@ import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-se
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/get-offset-from-sequence-nodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequence-node-to-text';
 import { unitRangesToText } from '../../range-selector/utils/unit-ranges-to-text';
-import { useStateRef } from '../hooks/use-state-ref';
 import { FormulaSelectingType } from './use-formula-selection';
 import { calcHighlightRanges } from './use-highlight';
+import { useStateRef } from './use-state-ref';
 
 const prepareSelectionChangeContext = (opts: { editor?: Editor; lexerTreeBuilder: LexerTreeBuilder }) => {
     const { editor, lexerTreeBuilder } = opts;

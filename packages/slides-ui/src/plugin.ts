@@ -15,25 +15,26 @@
  */
 
 import type { Dependency, SlideDataModel } from '@univerjs/core';
-import type { IUniverSlidesUIConfig } from './controllers/config.schema';
+import type { IUniverSlidesUIConfig } from './config/config';
 import { IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import pkg from '../package.json';
+import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { CanvasView } from './controllers/canvas-view';
-import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { SlidePopupMenuController } from './controllers/popup-menu.controller';
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
 import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
 import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
+import { SlidePopupMenuController } from './menu/popup-menu.controller';
 import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/slide-editor-bridge.service';
 import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 import { SlideRenderService } from './services/slide-render.service';
 
-export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
-
 export class UniverSlidesUIPlugin extends Plugin {
-    static override pluginName = SLIDE_UI_PLUGIN_NAME;
+    static override pluginName = 'UNIVER_SLIDES_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(

@@ -15,14 +15,13 @@
  */
 
 import type { IAccessor, IColumnData, IMutation, IObjectArrayPrimitiveType, IRowData, Worksheet } from '@univerjs/core';
-import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray, spliceArray } from '@univerjs/core';
-
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray, spliceArray } from '@univerjs/core';
 
 export const RemoveRowsUndoMutationFactory = (
     params: IRemoveRowsMutationParams,

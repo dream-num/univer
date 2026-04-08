@@ -15,6 +15,6 @@
  */
 
 export { WATERMARK_IMAGE_ALLOW_IMAGE_LIST, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
-export type { IUniverWatermarkConfig } from './controllers/config.schema';
+export type { IUniverWatermarkConfig } from './config/config';
 export { UniverWatermarkPlugin } from './plugin';
 export { WatermarkService } from './services/watermark.service';

@@ -26,11 +26,11 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, DrawingGroupObject, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { getUpdateParams } from '../utils/get-update-params';
-import { getCurrentUnitInfo } from './utils';
+import { getCurrentUnitInfo, insertGroupObject } from './utils';
 
 interface IDrawingTransformCache {
     unitId: string;
@@ -229,13 +229,26 @@ export class DrawingUpdateController extends Disposable {
         }
 
         const groupKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-        const group = new Group(groupKey);
+        const group = new DrawingGroupObject(groupKey);
 
         scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
         group.addObjects(...objects);
+        if (parent.groupBaseBound) {
+            group.setBaseBound(parent.groupBaseBound);
+        }
+
+        if (parent.groupId) {
+            group.isInGroup = true;
+            insertGroupObject(
+                { drawingId: parent.groupId, unitId, subUnitId },
+                group,
+                scene,
+                this._drawingManagerService
+            );
+        }
         // group.reCalculateObjects();
-        parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top });
+        parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top, width: parent.transform.width, height: parent.transform.height, angle: parent.transform.angle });
 
         transformer.clearSelectedObjects();
         transformer.setSelectedControl(group);
@@ -370,7 +383,7 @@ export class DrawingUpdateController extends Disposable {
 
     private _drawingAlign(params: ISetDrawingAlignOperationParams) {
         const { alignType } = params;
-        const drawings = this._drawingManagerService.getFocusDrawings();
+        const drawings = params.drawings || this._drawingManagerService.getFocusDrawings();
 
         if (alignType === AlignType.default) {
             return;

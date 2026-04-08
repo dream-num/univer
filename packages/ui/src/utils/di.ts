@@ -19,7 +19,18 @@ import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import { useEffect, useRef } from 'react';
 
-export * from '@wendellhu/redi/react-bindings';
+export {
+    connectDependencies,
+    connectInjector,
+    RediConsumer,
+    RediContext,
+    RediProvider,
+    useDependency,
+    useInjector,
+    useObservable,
+    useUpdateBinder,
+    WithDependency,
+} from '@wendellhu/redi/react-bindings';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IConditionFormattingRule, IDataBar } from '../../../models/type';
+import type { IConditionFormattingRule, IDataBar } from '../../type';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CFRuleType, CFValueType } from '../../../base/const';
 import { createTestBed } from './test.util';

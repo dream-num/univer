@@ -15,13 +15,38 @@
  */
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Textarea } from '../Textarea';
 import '@testing-library/jest-dom/vitest';
 
-afterEach(cleanup);
-
 describe('Textarea', () => {
+    let observeMock: ReturnType<typeof vi.fn>;
+    let unobserveMock: ReturnType<typeof vi.fn>;
+    let disconnectMock: ReturnType<typeof vi.fn>;
+    let triggerResize: (entries: { target: { getBoundingClientRect: () => { width: number; height: number } } }[]) => void;
+
+    beforeEach(() => {
+        observeMock = vi.fn();
+        unobserveMock = vi.fn();
+        disconnectMock = vi.fn();
+
+        // @ts-ignore
+        window.ResizeObserver = class ResizeObserver {
+            constructor(callback: any) {
+                triggerResize = callback;
+            }
+
+            observe = observeMock;
+            unobserve = unobserveMock;
+            disconnect = disconnectMock;
+        };
+    });
+
+    afterEach(() => {
+        cleanup();
+        vi.restoreAllMocks();
+    });
+
     it('should support controlled value', () => {
         const { rerender } = render(<Textarea value="foo" onValueChange={() => {}} />);
         const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
@@ -30,14 +55,74 @@ describe('Textarea', () => {
         expect(textarea.value).toBe('bar');
     });
 
-    it('calls onResize when size changes', () => {
+    it('should call onResize when size changes', () => {
         const onResize = vi.fn();
         render(<Textarea onResize={onResize} />);
-        const textarea = document.querySelector('textarea[data-u-comp="textarea"]')!;
-        // mock ResizeObserver
-        const event = new Event('resize');
-        textarea.dispatchEvent(event);
-        expect(typeof onResize).toBe('function');
+
+        expect(observeMock).toHaveBeenCalled();
+
+        // Trigger resize with valid dimensions
+        triggerResize([{
+            target: {
+                getBoundingClientRect: () => ({ width: 100, height: 100 }),
+            },
+        }]);
+
+        expect(onResize).toHaveBeenCalledWith(100, 100);
+
+        // Trigger resize with different dimensions
+        triggerResize([{
+            target: {
+                getBoundingClientRect: () => ({ width: 200, height: 200 }),
+            },
+        }]);
+
+        expect(onResize).toHaveBeenCalledWith(200, 200);
+    });
+
+    it('should not call onResize when size is 0', () => {
+        const onResize = vi.fn();
+        render(<Textarea onResize={onResize} />);
+
+        // Trigger resize with 0 dimensions
+        triggerResize([{
+            target: {
+                getBoundingClientRect: () => ({ width: 0, height: 0 }),
+            },
+        }]);
+
+        expect(onResize).not.toHaveBeenCalled();
+    });
+
+    it('should not call onResize when size does not change', () => {
+        const onResize = vi.fn();
+        render(<Textarea onResize={onResize} />);
+
+        // First call
+        triggerResize([{
+            target: {
+                getBoundingClientRect: () => ({ width: 100, height: 100 }),
+            },
+        }]);
+        expect(onResize).toHaveBeenCalledTimes(1);
+
+        // Second call with same dimensions
+        triggerResize([{
+            target: {
+                getBoundingClientRect: () => ({ width: 100, height: 100 }),
+            },
+        }]);
+        expect(onResize).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cleanup observer on unmount', () => {
+        const onResize = vi.fn();
+        const { unmount } = render(<Textarea onResize={onResize} />);
+
+        unmount();
+
+        expect(unobserveMock).toHaveBeenCalled();
+        expect(disconnectMock).toHaveBeenCalled();
     });
 
     it('should forward ref', () => {
@@ -64,6 +149,7 @@ describe('Textarea', () => {
         const textarea = screen.getByRole('textbox');
         expect(textarea).toHaveAttribute('rows', '5');
     });
+
     it('renders with default props', () => {
         render(<Textarea />);
         const textarea = screen.getByRole('textbox');

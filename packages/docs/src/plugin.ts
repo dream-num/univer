@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, ICommand } from '@univerjs/core';
-import type { IUniverDocsConfig } from './controllers/config.schema';
+import type { IUniverDocsConfig } from './config/config';
 import {
     ICommandService,
     IConfigService,
@@ -24,18 +24,19 @@ import {
     merge,
     Plugin,
 } from '@univerjs/core';
+import pkg from '../package.json';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
 
-const PLUGIN_NAME = 'DOCS_PLUGIN';
-
 export class UniverDocsPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = 'DOCS_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
     // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(

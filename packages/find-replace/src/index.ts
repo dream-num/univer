@@ -18,7 +18,7 @@ import './global.css';
 
 export { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from './commands/commands/replace.command';
 export { GoToNextMatchOperation, GoToPreviousMatchOperation, OpenFindDialogOperation, OpenReplaceDialogOperation } from './commands/operations/find-replace.operation';
-export type { IUniverFindReplaceConfig } from './controllers/config.schema';
+export type { IUniverFindReplaceConfig } from './config/config';
 export { FindReplaceController } from './controllers/find-replace.controller';
 export { UniverFindReplacePlugin } from './plugin';
 export type {

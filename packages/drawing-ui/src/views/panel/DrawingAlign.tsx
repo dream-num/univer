@@ -30,7 +30,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
 
-    const { alignShow } = props;
+    const { drawings, alignShow } = props;
 
     const [alignValue, setAlignValue] = useState<string>(AlignType.default as string);
     const alignOptions = [
@@ -88,6 +88,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
         setAlignValue((value as string));
         commandService.executeCommand(SetDrawingAlignOperation.id, {
             alignType: value as AlignType,
+            drawings,
         });
     }
 

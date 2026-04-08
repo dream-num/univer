@@ -15,7 +15,6 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-
 import type { IRangeSelectorInstance } from '@univerjs/sheets-formula-ui';
 import { ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { Button } from '@univerjs/design';

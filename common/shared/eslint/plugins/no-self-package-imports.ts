@@ -1,7 +1,32 @@
 /* eslint-disable header/header */
+import type { Rule } from 'eslint';
 import path from 'node:path';
 
-export default {
+function getImportSourceValue(node: Rule.Node): string | null {
+    if (!('source' in node)) {
+        return null;
+    }
+
+    const source = (node as { source?: { value?: unknown } }).source;
+    if (!source || typeof source.value !== 'string') {
+        return null;
+    }
+
+    return source.value;
+}
+
+function getRuleFilename(context: Rule.RuleContext): string {
+    const filenameFromProperty = (context as { filename?: unknown }).filename;
+
+    if (typeof filenameFromProperty === 'string' && filenameFromProperty) {
+        return filenameFromProperty;
+    }
+
+    const getFilename = (context as { getFilename?: () => string }).getFilename;
+    return typeof getFilename === 'function' ? getFilename.call(context) : '';
+}
+
+const rule: Rule.RuleModule = {
     meta: {
         type: 'problem',
         docs: {
@@ -13,7 +38,7 @@ export default {
     },
 
     create(context) {
-        const filename = context.getFilename();
+        const filename = getRuleFilename(context);
         const normalizedPath = filename.split(path.sep).join('/');
 
         const isInPackages = normalizedPath.includes('/packages/');
@@ -50,10 +75,10 @@ export default {
         const possiblePackageName = `${packagePrefix}${packageName}`;
 
         return {
-            ImportDeclaration(node) {
-                const importPath = node.source.value;
+            ImportDeclaration(node: Rule.Node) {
+                const importPath = getImportSourceValue(node);
 
-                if (importPath === possiblePackageName) {
+                if (importPath && importPath === possiblePackageName) {
                     context.report({
                         node,
                         messageId: 'noSelfImport',
@@ -67,3 +92,5 @@ export default {
         };
     },
 };
+
+export default rule;

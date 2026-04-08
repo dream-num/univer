@@ -15,12 +15,10 @@
  */
 
 import type { IAccessor, IMutation } from '@univerjs/core';
-import {
-    CommandType,
-} from '@univerjs/core';
-import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import type { IConditionFormattingRule } from '../../models/type';
 import type { IDeleteConditionalRuleMutationParams } from './delete-conditional-rule.mutation';
+import { CommandType } from '@univerjs/core';
+import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { DeleteConditionalRuleMutation } from './delete-conditional-rule.mutation';
 
 export interface IAddConditionalRuleMutationParams {

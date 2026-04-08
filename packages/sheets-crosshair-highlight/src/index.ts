@@ -23,6 +23,6 @@ export {
     SetCrosshairHighlightColorOperation,
     ToggleCrosshairHighlightOperation,
 } from './commands/operations/operation';
-export type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config.schema';
+export type { IUniverSheetsCrosshairHighlightConfig } from './config/config';
 export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
 export { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from './services/crosshair.service';

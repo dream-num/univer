@@ -347,7 +347,8 @@ export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
                     dateRange,
                 },
             };
-        } else if (compareType === TableDateCompareTypeEnum.Today
+        } else if (
+            compareType === TableDateCompareTypeEnum.Today
             || compareType === TableDateCompareTypeEnum.Yesterday
             || compareType === TableDateCompareTypeEnum.Tomorrow
             || compareType === TableDateCompareTypeEnum.ThisWeek

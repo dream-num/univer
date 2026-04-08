@@ -110,6 +110,7 @@ jobs:
               with:
                   repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
+                  persist-credentials: false
 
             - name: Setup pnpm
               uses: pnpm/action-setup@v4
@@ -180,6 +181,7 @@ jobs:
               with:
                   repository: ${{ needs.setup.outputs.repo }}
                   ref: ${{ needs.setup.outputs.ref }}
+                  persist-credentials: false
 
             - name: Setup pnpm
               uses: pnpm/action-setup@v4

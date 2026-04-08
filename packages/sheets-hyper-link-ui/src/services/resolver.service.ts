@@ -17,7 +17,7 @@
 import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { ISheetHyperLinkInfo, ISheetUrlParams } from '@univerjs/sheets-hyper-link';
-import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
+import type { IUniverSheetsHyperLinkUIConfig } from '../config/config';
 import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService } from '@univerjs/engine-formula';
@@ -25,7 +25,7 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import { SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();

@@ -32,7 +32,7 @@ export {
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-export type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
+export type { IUniverSheetsDataValidationConfig } from './config/config';
 export { DataValidationFormulaController } from './controllers/dv-formula.controller';
 export { type IValidStatusChange, SheetDataValidationModel } from './models/sheet-data-validation-model';
 export { UniverSheetsDataValidationPlugin } from './plugin';

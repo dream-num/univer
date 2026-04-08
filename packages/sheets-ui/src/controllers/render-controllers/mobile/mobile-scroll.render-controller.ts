@@ -16,11 +16,9 @@
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
-import type { IScrollToCellOperationParams } from '@univerjs/sheets';
+import type { IScrollToCellOperationParams, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
-
-import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 import {
     Direction,
     Disposable,

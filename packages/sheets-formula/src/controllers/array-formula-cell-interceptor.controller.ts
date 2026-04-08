@@ -17,11 +17,11 @@
 import type { ICellData, ICommandInfo } from '@univerjs/core';
 import type { IArrayFormulaEmbeddedMap, IArrayFormulaRangeType, IArrayFormulaUnitCellType, ISetArrayFormulaDataMutationParams, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import { CellValueType, Disposable, ICommandService, IConfigService, Inject, InterceptorEffectEnum, isRealNum, ObjectMatrix } from '@univerjs/core';
 import { FormulaDataModel, IDefinedNamesService, IFunctionService, LexerTreeBuilder, serializeRange, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaCalculationResultMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { PLUGIN_CONFIG_KEY_BASE } from './config.schema';
+import { PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 
 export class ArrayFormulaCellInterceptorController extends Disposable {
     constructor(

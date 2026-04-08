@@ -23,7 +23,7 @@ export {
     UpdateDataValidationMutation,
 } from './commands/mutations/data-validation.mutation';
 export { getRuleOptions, getRuleSetting } from './common/util';
-export { type IUniverDataValidationConfig } from './controllers/config.schema';
+export { type IUniverDataValidationConfig } from './config/config';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 export { type DataValidationChangeSource, type DataValidationChangeType, DataValidationModel, type IRuleChange } from './models/data-validation-model';
 export { UniverDataValidationPlugin } from './plugin';

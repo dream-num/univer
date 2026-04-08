@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IUniverNetworkConfig } from './controllers/config.schema';
+import type { IUniverNetworkConfig } from './config/config';
 import { IConfigService, ILogService, Inject, Injector, LookUp, merge, mergeOverrideWithDependencies, Plugin, Quantity, registerDependencies } from '@univerjs/core';
-import { defaultPluginConfig, NETWORK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import pkg from '../package.json';
+import { defaultPluginConfig, NETWORK_PLUGIN_CONFIG_KEY } from './config/config';
 import { HTTPService } from './services/http/http.service';
 import { FetchHTTPImplementation } from './services/http/implementations/fetch';
 import { IHTTPImplementation } from './services/http/implementations/implementation';
@@ -27,6 +28,8 @@ import { XHRHTTPImplementation } from './services/http/implementations/xhr';
  */
 export class UniverNetworkPlugin extends Plugin {
     static override pluginName = 'UNIVER_NETWORK_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
 
     constructor(
         private readonly _config: Partial<IUniverNetworkConfig> = defaultPluginConfig,

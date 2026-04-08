@@ -3,6 +3,7 @@ import type { Rules } from '@antfu/eslint-config';
 import type { Linter } from 'eslint';
 import os from 'node:os';
 import path from 'node:path';
+import { fixupPluginRules } from '@eslint/compat';
 import typescriptParser from '@typescript-eslint/parser';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import header from 'eslint-plugin-header';
@@ -235,7 +236,11 @@ export const typescriptPreset = (): Linter.Config => {
  *
  * @returns ESLint configuration object for Univer source files
  */
-export const univerSourcePreset = (): Linter.Config => {
+export const univerSourcePreset = (options: {
+    noFacadeImportsOutsideFacade?: {
+        ignore?: string[];
+    };
+} = {}): Linter.Config => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
@@ -245,7 +250,9 @@ export const univerSourcePreset = (): Linter.Config => {
         ],
         rules: {
             'univer/no-self-package-imports': 'error',
-            'univer/no-facade-imports-outside-facade': 'error',
+            'univer/no-facade-imports-outside-facade': ['error', {
+                ignore: options.noFacadeImportsOutsideFacade?.ignore ?? [],
+            }],
         },
         languageOptions: {
             parser: typescriptParser,
@@ -346,7 +353,7 @@ export const penetratingPreset = (): Linter.Config => {
         // Not penetrating for source files
         files: ['**/*.ts', '**/*.tsx'],
         plugins: {
-            penetrating,
+            penetrating: fixupPluginRules(penetrating),
         },
         ignores: [
             '**/__tests__/**/*',
@@ -372,7 +379,7 @@ export const noBarrelImportPreset = (): Linter.Config => {
             'packages/engine-render/src/components/docs/**/*.ts',
             '**/*.tsx',
             '**/*.d.ts',
-            '**/vite.config.ts',
+            '**/tsdown.config.ts',
             'playwright.config.ts',
             '**/*.spec.ts',
             '**/*.spec.tsx',
@@ -380,7 +387,7 @@ export const noBarrelImportPreset = (): Linter.Config => {
             '**/*.test.tsx',
         ], // do not check test files
         plugins: {
-            barrel,
+            barrel: fixupPluginRules(barrel),
         },
         rules: {
             'barrel/no-barrel-import': 2,
@@ -403,13 +410,12 @@ export const headerPreset = (): Linter.Config => {
         files: ['**/*.ts', '**/*.tsx'],
         ignores: [
             '**/*.d.ts',
-            '**/vite.config.ts',
             '**/vitest.config.ts',
             '**/vitest.workspace.ts',
             'playwright.config.ts',
         ],
         plugins: {
-            header,
+            header: fixupPluginRules(header),
         },
         rules: {
             'header/header': [

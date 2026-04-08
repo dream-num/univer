@@ -15,9 +15,8 @@
  */
 
 import type { IDocumentBody, Nullable } from '@univerjs/core';
-import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType } from '@univerjs/core';
-
 import type { IDocumentSkeletonGlyph } from './i-document-skeleton-cached';
+import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType } from '@univerjs/core';
 import { GlyphType } from './i-document-skeleton-cached';
 
 export function hasListGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {

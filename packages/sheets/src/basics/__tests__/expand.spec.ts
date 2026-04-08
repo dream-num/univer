@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
 import type { Workbook } from '@univerjs/core';
 import { createCoreTestBed } from '@univerjs/core/sheets/__tests__/create-core-test-bed.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { expandToContinuousRange } from '../expand-range';
 import { snapshot } from './expand.data';
 

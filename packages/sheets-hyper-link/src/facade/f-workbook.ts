@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
 import type { FRange } from '@univerjs/sheets/facade';
 import { Inject } from '@univerjs/core';
@@ -41,11 +40,6 @@ export class SheetHyperLinkBuilder {
  */
 export interface IFWorkbookHyperlinkMixin {
     /**
-     * @deprecated use `getUrl` method in `FRange` or `FWorksheet` instead.
-     */
-    createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
-
-    /**
      * Parse the hyperlink string to get the hyperlink info.
      * @param {string} hyperlink - The hyperlink string.
      * @returns {ISheetHyperLinkInfo} The hyperlink info.
@@ -65,12 +59,7 @@ export interface IFWorkbookHyperlinkMixin {
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
 }
 
-export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHyperlinkMixin {
-    override createSheetHyperlink(sheetId: string, range?: string | IRange): string {
-        const parserService = this._injector.get(SheetsHyperLinkParserService);
-        return parserService.buildHyperLink(this.getId(), sheetId, range);
-    }
-
+export class FWorkbookHyperlinkMixin extends FWorkbook implements IFWorkbookHyperlinkMixin {
     /**
      * Parse the hyperlink string to get the hyperlink info.
      * @param {string} hyperlink the hyperlink string
@@ -82,8 +71,8 @@ export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHype
     }
 }
 
-FWorkbook.extend(FWorkbookHyperLinkMixin);
+FWorkbook.extend(FWorkbookHyperlinkMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookHyperlinkMixin {}
+    interface FWorkbook extends IFWorkbookHyperlinkMixin { }
 }

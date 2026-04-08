@@ -83,17 +83,22 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
                     }
 
                     let collaborators = sheetPermissionUserManagerService.selectUserList;
-                    if (activeRule.editState === EditStateEnum.OnlyMe) {
-                        collaborators = [];
-                        sheetPermissionUserManagerService.setSelectUserList([]);
-                    }
+
                     const scopeObj = {
                         read: activeRule.viewState === ViewStateEnum.OthersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                         edit: activeRule.editState === EditStateEnum.DesignedUserCanEdit ? ObjectScope.SomeCollaborator : ObjectScope.OneSelf,
                     };
-                    if (activeRule.editState === EditStateEnum.DesignedUserCanEdit && collaborators.length === 0) {
+
+                    if (activeRule.editState === EditStateEnum.OnlyMe) {
                         collaborators = [];
-                        scopeObj.edit = ObjectScope.OneSelf;
+                        sheetPermissionUserManagerService.setSelectUserList([]);
+                    } else if (activeRule.editState === EditStateEnum.DesignedUserCanEdit) {
+                        if (collaborators.length === 0) {
+                            collaborators = [];
+                            scopeObj.edit = ObjectScope.OneSelf;
+                        } else {
+                            collaborators = collaborators.map((user) => ({ ...user, role: UnitRole.Editor }));
+                        }
                     }
 
                     // Editing existing permission rules

@@ -15,8 +15,8 @@
  */
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import dayjs from 'dayjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { formatDateWithPattern } from '../../../helper/date';
 import { TimeInput } from '../TimeInput';
 import '@testing-library/jest-dom/vitest';
 
@@ -26,7 +26,7 @@ describe('TimeInput', () => {
     it('should render with current value and custom class', () => {
         const value = new Date('2024-01-01T01:02:03.000Z');
         const { container, getByDisplayValue } = render(<TimeInput value={value} className="custom-time" />);
-        const expected = dayjs(value).format('HH:mm:ss');
+        const expected = formatDateWithPattern(value, 'HH:mm:ss');
 
         expect(container.querySelector('[data-u-comp="time-input"]')).toBeInTheDocument();
         expect(container.querySelector('.custom-time')).toBeInTheDocument();

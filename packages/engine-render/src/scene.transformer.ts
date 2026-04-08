@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
+import type { IAbsoluteTransform, Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 
 import type { BaseObject } from './base-object';
@@ -535,7 +535,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 return true;
             }
 
-            (this as IKeyValue)[key] = props[key as keyof ITransformerConfig];
+            (this as Record<string, any>)[key] = props[key as keyof ITransformerConfig];
         });
     }
 

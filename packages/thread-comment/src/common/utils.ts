@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { dayjs } from '@univerjs/core';
+import { dateKit } from '@univerjs/core';
 
 export function getDT(date?: Date) {
-    return dayjs(date).format('YYYY/MM/DD HH:mm');
+    return dateKit(date).format('YYYY/MM/DD HH:mm');
 }

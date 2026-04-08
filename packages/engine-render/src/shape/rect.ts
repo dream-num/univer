@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
@@ -129,7 +129,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         RECT_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Rect]) {
                 props[key] = this[key as keyof Rect];

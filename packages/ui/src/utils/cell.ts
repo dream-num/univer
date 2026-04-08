@@ -18,7 +18,6 @@ import type {
     IBorderData,
     ICellData,
     IDocumentData,
-    IKeyValue,
     IRange,
     IStyleData,
     ITextDecoration,
@@ -434,11 +433,11 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
                     },
                 };
                 for (const k in colors) {
-                    (styleList.bd as IKeyValue)[k].cl.rgb = colors[k as keyof IBorderData];
+                    (styleList.bd as Record<string, any>)[k].cl.rgb = colors[k as keyof IBorderData];
                 }
             } else {
                 for (const k in colors) {
-                    (styleList.bd as IKeyValue)[k].cl.rgb = colors[k as keyof IBorderData];
+                    (styleList.bd as Record<string, any>)[k].cl.rgb = colors[k as keyof IBorderData];
                 }
             }
         }
@@ -446,7 +445,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         if (key === 'border-width' || key === 'border-style') {
             const width = handleBorder(value, ' ');
             for (const k in width) {
-                (borderInfo as IKeyValue)[k] += ` ${width[k as keyof IBorderData]}`;
+                (borderInfo as Record<string, any>)[k] += ` ${width[k as keyof IBorderData]}`;
             }
             if (!styleList.bd) {
                 styleList.bd = {
@@ -901,8 +900,8 @@ export function handelExcelToJson(html: string) {
     return data;
 }
 
-function getStyles(styleText: string): IKeyValue {
-    const output: IKeyValue = {};
+function getStyles(styleText: string): Record<string, any> {
+    const output: Record<string, any> = {};
     const string = styleText.replaceAll('<!--', '').replaceAll('-->', '').trim();
     const style = string?.replaceAll('\t', '').replaceAll('\n', '').split('}');
     for (let i = 0; i < style.length; i++) {

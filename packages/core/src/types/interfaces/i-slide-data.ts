@@ -15,7 +15,7 @@
  */
 
 import type { ISize } from '../../shared/shape';
-import type { IKeyType, Nullable } from '../../shared/types';
+import type { Nullable } from '../../shared/types';
 import type { IWorksheetData } from '../../sheets/typedef';
 import type { LocaleType, ThemeColorType } from '../enum';
 import type { ShapeType } from '../enum/prst-geom-type';
@@ -121,7 +121,7 @@ export interface IPageElement {
     /** @deprecated */
     spreadsheet?: {
         worksheet: IWorksheetData;
-        styles: IKeyType<Nullable<IStyleData>>;
+        styles: Record<string, Nullable<IStyleData>>;
     };
     /** @deprecated */
     document?: IDocumentData;

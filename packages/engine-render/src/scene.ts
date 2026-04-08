@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
@@ -443,8 +443,8 @@ export class Scene extends Disposable {
 
         transformStateKeys.forEach((pKey) => {
             if (state[pKey as keyof ISceneTransformState] !== undefined) {
-                (preKeys as IKeyValue)[pKey] = this[pKey as keyof Scene];
-                (this as IKeyValue)[pKey] = state[pKey as keyof ISceneTransformState];
+                (preKeys as Record<string, any>)[pKey] = this[pKey as keyof Scene];
+                (this as Record<string, any>)[pKey] = state[pKey as keyof ISceneTransformState];
             }
         });
 

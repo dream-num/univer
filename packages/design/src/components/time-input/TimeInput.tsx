@@ -16,9 +16,9 @@
 
 import type { ChangeEvent } from 'react';
 import { ClockIcon } from '@univerjs/icons';
-import dayjs from 'dayjs';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { formatDateWithPattern } from '../../helper/date';
 
 interface ITimeInputProps {
     className?: string;
@@ -59,7 +59,7 @@ export function TimeInput(props: ITimeInputProps) {
                 `, borderClassName, className)}
                 type="time"
                 step="1"
-                value={dayjs(value).format('HH:mm:ss')}
+                value={formatDateWithPattern(value, 'HH:mm:ss')}
                 onChange={handleChangeTime}
             />
         </div>

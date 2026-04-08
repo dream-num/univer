@@ -780,9 +780,6 @@ importers:
       async-lock:
         specifier: ^1.4.1
         version: 1.4.1
-      dayjs:
-        specifier: ^1.11.20
-        version: 1.11.20
       fast-diff:
         specifier: 1.3.0
         version: 1.3.0
@@ -881,9 +878,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      dayjs:
-        specifier: ^1.11.20
-        version: 1.11.20
       react-transition-group:
         specifier: ^4.4.5
         version: 4.4.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -6782,9 +6776,6 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
-
-  dayjs@1.11.20:
-    resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -14708,8 +14699,6 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-data-view: 1.0.2
-
-  dayjs@1.11.20: {}
 
   debug@2.6.9:
     dependencies:

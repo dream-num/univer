@@ -79,7 +79,6 @@
         "@univerjs/icons": "^1.1.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "dayjs": "^1.11.20",
         "react-transition-group": "^4.4.5",
         "sonner": "^2.0.7",
         "tailwind-merge": "2.6.0"

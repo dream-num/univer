@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { CellValueType, HorizontalAlign, TextDecoration, VerticalAlign } from '@univerjs/core';
@@ -268,7 +268,7 @@ export class Text extends Shape<ITextProps> {
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         TEXT_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Text]) {
                 props[key] = this[key as keyof Text];

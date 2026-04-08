@@ -17,7 +17,7 @@
 import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IConditionFormattingRule, IValueConfig } from '../type';
 import type { IContext } from './base-calculate-unit';
-import { BooleanNumber, CellValueType, ColorKit, dayjs, ObjectMatrix, Range } from '@univerjs/core';
+import { BooleanNumber, CellValueType, ColorKit, dateKit, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFValueType } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
@@ -85,7 +85,7 @@ export const serialTimeToTimestamp = (value: number) => {
     const mm = Math.floor(x / 60) % 60;
     const ss = Math.floor(x) % 60;
     // return it as a native date object
-    const dt = dayjs(`${y}/${m}/${d} ${hh}:${mm}:${ss}`);
+    const dt = dateKit(`${y}/${m}/${d} ${hh}:${mm}:${ss}`);
     const result = dt.valueOf();
     return result;
 };

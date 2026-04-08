@@ -15,10 +15,10 @@
  */
 
 import { CalendarIcon } from '@univerjs/icons';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { formatDateWithPattern } from '../../helper/date';
 import { Calendar } from '../calendar/Calendar';
 import { Dropdown } from '../dropdown/Dropdown';
 
@@ -69,7 +69,7 @@ export function DatePicker(props: IDatePickerProps) {
                 `, borderClassName, className)}
                 type="button"
             >
-                {dayjs(value).format('YYYY-MM-DD')}
+                {formatDateWithPattern(value, 'YYYY-MM-DD')}
 
                 <CalendarIcon
                     className={`

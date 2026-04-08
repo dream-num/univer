@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable } from '@univerjs/core';
+import type { EventState, Nullable } from '@univerjs/core';
 
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import type { Vector2 } from '../basics/vector2';
@@ -155,7 +155,7 @@ export class ScrollBar extends Disposable {
 
         themeKeys.forEach((key) => {
             if (props[key as keyof IScrollBarProps] !== undefined) {
-                (this as IKeyValue)[`_${key}`] = props[key as keyof IScrollBarProps];
+                (this as Record<string, any>)[`_${key}`] = props[key as keyof IScrollBarProps];
             }
         });
 

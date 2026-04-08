@@ -419,6 +419,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     if (isChart) {
                         rect.setObjectType(ObjectType.CHART);
+                    } else if (drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                        rect.setObjectType(ObjectType.DRAWING_DOM);
                     }
 
                     scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);

@@ -311,12 +311,12 @@ export class SheetPermissionCheckController extends Disposable {
         }
     }
 
-    public permissionCheckWithoutRange(permissionTypes: IPermissionTypes) {
-        const target = getSheetCommandTarget(this._univerInstanceService);
+    public permissionCheckWithoutRange(permissionTypes: IPermissionTypes, unitId?: string, subUnitId?: string) {
+        const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
         if (!target) {
             return false;
         }
-        const { worksheet, unitId, subUnitId } = target;
+        const { worksheet, unitId: _unitId, subUnitId: _subUnitId } = target;
         const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return true;
@@ -326,7 +326,7 @@ export class SheetPermissionCheckController extends Disposable {
         const { workbookTypes, worksheetTypes, rangeTypes } = permissionTypes;
         if (workbookTypes) {
             const workbookDisable = workbookTypes.some((F) => {
-                const instance = new F(unitId);
+                const instance = new F(_unitId);
                 const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;
                 return permission === false;
             });
@@ -336,7 +336,7 @@ export class SheetPermissionCheckController extends Disposable {
         }
         if (worksheetTypes) {
             const worksheetDisable = worksheetTypes.some((F) => {
-                const instance = new F(unitId, subUnitId);
+                const instance = new F(_unitId, _subUnitId);
                 const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;
                 return permission === false;
             });
@@ -350,11 +350,11 @@ export class SheetPermissionCheckController extends Disposable {
                 if (!cellInfo?.ruleId) {
                     return false;
                 }
-                const permissionId = this._rangeProtectionRuleModel.getRule(unitId, subUnitId, cellInfo.ruleId)?.permissionId;
+                const permissionId = this._rangeProtectionRuleModel.getRule(_unitId, _subUnitId, cellInfo.ruleId)?.permissionId;
                 if (!permissionId) {
                     return false;
                 }
-                const instance = new F(unitId, subUnitId, permissionId);
+                const instance = new F(_unitId, _subUnitId, permissionId);
                 const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;
                 return permission === false;
             });

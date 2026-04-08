@@ -54,6 +54,7 @@ export enum ObjectType {
     RECT,
     CIRCLE,
     CHART,
+    DRAWING_DOM,
 }
 
 export abstract class BaseObject extends Disposable {

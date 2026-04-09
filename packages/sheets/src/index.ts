@@ -385,7 +385,6 @@ export {
     WorkbookEditablePermission,
     WorkbookExportPermission,
     WorkbookHideSheetPermission,
-    WorkbookHistoryPermission,
     WorkbookManageCollaboratorPermission,
     WorkbookMoveSheetPermission,
     WorkbookPrintPermission,

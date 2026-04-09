@@ -28,7 +28,6 @@ export { WorkbookDuplicatePermission } from './workbook/duplicate';
 export { WorkbookEditablePermission } from './workbook/editable';
 export { WorkbookExportPermission } from './workbook/export';
 export { WorkbookHideSheetPermission } from './workbook/hide-sheet';
-export { WorkbookHistoryPermission } from './workbook/history';
 export { WorkbookInsertColumnPermission } from './workbook/insert-column';
 export { WorkbookInsertRowPermission } from './workbook/insert-row';
 export { WorkbookManageCollaboratorPermission } from './workbook/manage-collaborator';
@@ -38,7 +37,6 @@ export { WorkbookRecoverHistoryPermission } from './workbook/recover-history';
 export { WorkbookRenameSheetPermission } from './workbook/rename-sheet';
 export { WorkbookSharePermission } from './workbook/share';
 export { WorkbookViewPermission } from './workbook/view';
-
 export { WorkbookViewHistoryPermission } from './workbook/view-history';
 export { WorksheetCopyPermission } from './worksheet/copy';
 export { WorksheetDeleteColumnPermission } from './worksheet/delete-column';

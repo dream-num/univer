@@ -282,9 +282,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     setSelectedControl(applyObject: BaseObject) {
-        applyObject = this._findGroupObject(applyObject);
-        this._selectedObjectMap.set(applyObject.oKey, applyObject);
-        this._createControl(applyObject);
+        const realApplyObject = this._findGroupObject(applyObject);
+        this._selectedObjectMap.set(realApplyObject.oKey, realApplyObject);
+        this._createControl(realApplyObject);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -541,26 +541,28 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _checkMoveBoundary(moveObject: BaseObject, moveLeft: number, moveTop: number, ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
         const { left, top, width, height } = moveObject;
+        let resultMoveLeft = moveLeft;
+        let resultMoveTop = moveTop;
 
-        if (moveLeft + left + ancestorLeft < this.zeroLeft) {
-            moveLeft = -ancestorLeft;
+        if (resultMoveLeft + left + ancestorLeft < this.zeroLeft) {
+            resultMoveLeft = -ancestorLeft;
         }
 
-        if (moveTop + top + ancestorTop < this.zeroTop) {
-            moveTop = -ancestorTop;
+        if (resultMoveTop + top + ancestorTop < this.zeroTop) {
+            resultMoveTop = -ancestorTop;
         }
 
-        if (moveLeft + left + width + ancestorLeft > topSceneWidth + this.zeroLeft) {
-            moveLeft = this.zeroLeft + topSceneWidth - width - left - ancestorLeft;
+        if (resultMoveLeft + left + width + ancestorLeft > topSceneWidth + this.zeroLeft) {
+            resultMoveLeft = this.zeroLeft + topSceneWidth - width - left - ancestorLeft;
         }
 
-        if (moveTop + top + height + ancestorTop > topSceneHeight + this.zeroTop) {
-            moveTop = this.zeroTop + topSceneHeight - height - top - ancestorTop;
+        if (resultMoveTop + top + height + ancestorTop > topSceneHeight + this.zeroTop) {
+            resultMoveTop = this.zeroTop + topSceneHeight - height - top - ancestorTop;
         }
 
         return {
-            moveLeft,
-            moveTop,
+            moveLeft: resultMoveLeft,
+            moveTop: resultMoveTop,
         };
     }
 
@@ -1736,22 +1738,22 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
         const { isCropper } = this._getConfig(applyObject);
 
-        applyObject = this._findGroupObject(applyObject);
+        const targetObject = this._findGroupObject(applyObject);
 
-        if (this._selectedObjectMap.has(applyObject.oKey)) {
+        if (this._selectedObjectMap.has(targetObject.oKey)) {
             return;
         }
 
-        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(applyObject.objectType)) {
+        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(targetObject.objectType)) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }
 
         if (!isCropper) {
-            this._selectedObjectMap.set(applyObject.oKey, applyObject);
+            this._selectedObjectMap.set(targetObject.oKey, targetObject);
         }
 
-        this._createControl(applyObject);
+        this._createControl(targetObject);
     }
 
     private _findGroupObject(applyObject: BaseObject) {

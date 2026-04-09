@@ -25,7 +25,6 @@ import { WorkbookDuplicatePermission } from './workbook/duplicate';
 import { WorkbookEditablePermission } from './workbook/editable';
 import { WorkbookExportPermission } from './workbook/export';
 import { WorkbookHideSheetPermission } from './workbook/hide-sheet';
-import { WorkbookHistoryPermission } from './workbook/history';
 import { WorkbookManageCollaboratorPermission } from './workbook/manage-collaborator';
 import { WorkbookMoveSheetPermission } from './workbook/move-sheet';
 import { WorkbookPrintPermission } from './workbook/print';
@@ -101,11 +100,6 @@ export const PermissionPointsDefinitions = {
      * The permission point for hiding sheets in a workbook
      */
     WorkbookHideSheetPermission,
-
-    /**
-     * The permission point for viewing and managing workbook history
-     */
-    WorkbookHistoryPermission,
 
     /**
      * The permission point for managing collaborators in a workbook

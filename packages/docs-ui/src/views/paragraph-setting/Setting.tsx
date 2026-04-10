@@ -183,6 +183,7 @@ export function ParagraphSetting() {
                             options={[
                                 { label: localeService.t('doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
                                 { label: localeService.t('doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
+                                { label: localeService.t('doc.paragraphSetting.exactValue'), value: `${SpacingRule.EXACT}` },
                             ]}
                             onChange={(v) => setSpacingRule(Number(v))}
                         />

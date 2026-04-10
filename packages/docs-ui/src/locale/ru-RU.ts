@@ -97,6 +97,7 @@ const locale: typeof enUS = {
             lineSpace: 'Высота строки',
             multiSpace: 'Двойной отступ',
             fixedValue: 'Фиксированное значение (px)',
+            exactValue: 'Точное значение',
         },
     },
     rightClick: {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, ISelectionCell, IStyleData, Nullable, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
@@ -31,6 +31,7 @@ import {
     Rectangle,
     sequenceExecute,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -235,90 +236,84 @@ export function getMoveRangeUndoRedoMutations(
     to: IRangeUnit,
     ignoreMerge = false
 ) {
-    const redos: IMutationInfo[] = [];
-    const undos: IMutationInfo[] = [];
-    const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
-    const { range: toRange, subUnitId: toSubUnitId } = to;
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-    const toWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
-    const fromWorksheet = workbook?.getSheetBySheetId(fromSubUnitId);
-    const toCellMatrix = toWorksheet?.getCellMatrix();
-    const fromCellMatrix = fromWorksheet?.getCellMatrix();
-    if (toWorksheet && fromWorksheet && toCellMatrix && fromCellMatrix) {
-        const alignedRangeWithToRange = alignToMergedCellsBorders(toRange, toWorksheet, false);
-
-        if (!Rectangle.equals(toRange, alignedRangeWithToRange) && !ignoreMerge) {
-            return null;
-        }
-
-        const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-        const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-        const fromCellStyle = new ObjectMatrix<Nullable<IStyleData>>();
-
-        Range.foreach(fromRange, (row, col) => {
-            const cellData = fromCellMatrix.getValue(row, col);
-            fromCellValue.setValue(row, col, Tools.deepClone(cellData));
-            if (cellData) {
-                const style = workbook?.getStyles().get(cellData.s);
-                fromCellStyle.setValue(row, col, Tools.deepClone(style));
-            }
-            newFromCellValue.setValue(row, col, null);
-        });
-        const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
-        const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
-
-        Range.foreach(toRange, (row, col) => {
-            toCellValue.setValue(row, col, Tools.deepClone(toCellMatrix.getValue(row, col)));
-        });
-
-        Range.foreach(fromRange, (row, col) => {
-            const cellRange = cellToRange(row, col);
-            const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
-            const range = Rectangle.getPositionRange(relativeRange, toRange);
-
-            const styleValue = Tools.deepClone(fromCellStyle.getValue(row, col));
-            const cellValue = Tools.deepClone(fromCellValue.getValue(row, col));
-            if (cellValue && styleValue) {
-                cellValue.s = styleValue;
-            }
-            newToCellValue.setValue(range.startRow, range.startColumn, cellValue);
-        });
-
-        const doMoveRangeMutation: IMoveRangeMutationParams = {
-            fromRange: from.range,
-            toRange: to.range,
-            from: {
-                value: newFromCellValue.getMatrix(),
-                subUnitId: fromSubUnitId,
-            },
-            to: {
-                value: newToCellValue.getMatrix(),
-                subUnitId: toSubUnitId,
-            },
-            unitId,
-        };
-        const undoMoveRangeMutation: IMoveRangeMutationParams = {
-            fromRange: to.range,
-            toRange: from.range,
-            from: {
-                value: fromCellValue.getMatrix(),
-                subUnitId: fromSubUnitId,
-            },
-            to: {
-                value: toCellValue.getMatrix(),
-                subUnitId: toSubUnitId,
-            },
-            unitId,
-        };
-
-        redos.push({ id: MoveRangeMutation.id, params: doMoveRangeMutation });
-        undos.push({ id: MoveRangeMutation.id, params: undoMoveRangeMutation });
+    const unitId = from.unitId;
+    const workbook = accessor.get(IUniverInstanceService).getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+    if (!workbook) {
+        return null;
     }
 
+    const { subUnitId: fromSubUnitId, range: fromRange } = from;
+    const { subUnitId: toSubUnitId, range: toRange } = to;
+    const fromWorksheet = workbook.getSheetBySheetId(fromSubUnitId);
+    const toWorksheet = workbook.getSheetBySheetId(toSubUnitId);
+    if (!fromWorksheet || !toWorksheet) {
+        return null;
+    }
+
+    const alignedRangeWithToRange = alignToMergedCellsBorders(toRange, toWorksheet, false);
+    if (!Rectangle.equals(toRange, alignedRangeWithToRange) && !ignoreMerge) {
+        return null;
+    }
+
+    const fromWorksheetCellMatrix = fromWorksheet.getCellMatrix();
+    const toWorksheetCellMatrix = toWorksheet.getCellMatrix();
+
+    const fromRedoCellValue = new ObjectMatrix<Nullable<ICellData>>();
+    const fromUndoCellValue = new ObjectMatrix<Nullable<ICellData>>();
+
+    const toRedoCellValue = new ObjectMatrix<Nullable<ICellData>>();
+    const toUndoCellValue = new ObjectMatrix<Nullable<ICellData>>();
+
+    Range.foreach(fromRange, (row, col) => {
+        const cellData = Tools.deepClone(fromWorksheetCellMatrix.getValue(row, col)) ?? null;
+        if (cellData?.s) {
+            cellData.s = workbook.getStyles().get(cellData.s);
+        }
+
+        fromRedoCellValue.setValue(row, col, null);
+        fromUndoCellValue.setValue(row, col, cellData);
+
+        const cellRange = cellToRange(row, col);
+        const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
+        const range = Rectangle.getPositionRange(relativeRange, toRange);
+        toRedoCellValue.setValue(range.startRow, range.startColumn, Tools.deepClone(cellData));
+    });
+
+    Range.foreach(toRange, (row, col) => {
+        const cellData = Tools.deepClone(toWorksheetCellMatrix.getValue(row, col)) ?? null;
+        toUndoCellValue.setValue(row, col, cellData);
+    });
+
+    const redoMoveRangeMutationParams: IMoveRangeMutationParams = {
+        fromRange: from.range,
+        toRange: to.range,
+        from: {
+            value: fromRedoCellValue.getMatrix(),
+            subUnitId: fromSubUnitId,
+        },
+        to: {
+            value: toRedoCellValue.getMatrix(),
+            subUnitId: toSubUnitId,
+        },
+        unitId,
+    };
+    const undoMoveRangeMutationParams: IMoveRangeMutationParams = {
+        fromRange: to.range,
+        toRange: from.range,
+        from: {
+            value: toUndoCellValue.getMatrix(),
+            subUnitId: toSubUnitId,
+        },
+        to: {
+            value: fromUndoCellValue.getMatrix(),
+            subUnitId: fromSubUnitId,
+        },
+        unitId,
+    };
+
     return {
-        redos,
-        undos,
+        redos: [{ id: MoveRangeMutation.id, params: redoMoveRangeMutationParams }],
+        undos: [{ id: MoveRangeMutation.id, params: undoMoveRangeMutationParams }],
     };
 }
 

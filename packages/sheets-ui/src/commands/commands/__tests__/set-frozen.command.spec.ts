@@ -22,6 +22,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../set-frozen.command';
@@ -124,7 +126,7 @@ describe('Test commands used for change selections', () => {
             expect(config?.startRow === 2 && config.startColumn === 2).toBeTruthy();
         });
 
-        it('Should cancel all freeze', async () => {
+        it('Should keep default freeze config when selection is invalid', async () => {
             await commandService.executeCommand(CancelFrozenCommand.id);
 
             const config = getFreeze();
@@ -168,6 +170,55 @@ describe('Test commands used for change selections', () => {
             expect(config?.startRow === 2 && config.startColumn === 2).toBeTruthy();
             expect(config?.ySplit).toBe(1);
             expect(config?.xSplit).toBe(1);
+        });
+
+        it('Should freeze first row and first column based on current viewport', async () => {
+            scrollTo(4, 6);
+
+            await commandService.executeCommand(SetFirstRowFrozenCommand.id);
+            let config = getFreeze();
+            expect(config?.startRow).toBe(5);
+            expect(config?.startColumn).toBe(-1);
+            expect(config?.ySplit).toBe(1);
+
+            await commandService.executeCommand(SetFirstColumnFrozenCommand.id);
+            config = getFreeze();
+            expect(config?.startRow).toBe(-1);
+            expect(config?.startColumn).toBe(7);
+            expect(config?.xSplit).toBe(1);
+        });
+
+        it('Should not freeze when the whole sheet is selected', async () => {
+            selectionManagerService.setSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 19,
+                        endColumn: 19,
+                        rangeType: RANGE_TYPE.ALL,
+                    },
+                    primary: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 19,
+                        endColumn: 19,
+                        actualRow: 0,
+                        actualColumn: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+
+            await expect(commandService.executeCommand(SetSelectionFrozenCommand.id)).resolves.toBe(false);
+            expect(getFreeze()).toEqual({
+                startRow: -1,
+                startColumn: -1,
+                xSplit: 0,
+                ySplit: 0,
+            });
         });
 
         it('Should cancel all freeze', async () => {

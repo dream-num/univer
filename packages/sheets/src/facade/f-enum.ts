@@ -21,7 +21,7 @@ import { RangePermissionPoint, UnitRole, WorkbookPermissionPoint, WorksheetPermi
 /**
  * @ignore
  */
-export interface IFSheetsEnum {
+export interface IFSheetsEnumMixin {
     /**
      * Sheet value change command types. These commands affect the content or style of cells.
      * Includes operations like setting cell values, moving ranges, merging cells, and applying styles.
@@ -60,39 +60,39 @@ export interface IFSheetsEnum {
     RangePermissionPoint: typeof RangePermissionPoint;
 }
 
-export class FSheetsEnum implements IFSheetsEnum {
-    get SheetValueChangeType(): typeof SheetValueChangeType {
+export class FSheetsEnumMixin extends FEnum implements IFSheetsEnumMixin {
+    override get SheetValueChangeType(): typeof SheetValueChangeType {
         return SheetValueChangeType;
     }
 
-    get SheetSkeletonChangeType(): typeof SheetSkeletonChangeType {
+    override get SheetSkeletonChangeType(): typeof SheetSkeletonChangeType {
         return SheetSkeletonChangeType;
     }
 
-    get SplitDelimiterType(): typeof SplitDelimiterEnum {
+    override get SplitDelimiterType(): typeof SplitDelimiterEnum {
         return SplitDelimiterEnum;
     }
 
-    get UnitRole(): typeof UnitRole {
+    override get UnitRole(): typeof UnitRole {
         return UnitRole;
     }
 
-    get WorkbookPermissionPoint(): typeof WorkbookPermissionPoint {
+    override get WorkbookPermissionPoint(): typeof WorkbookPermissionPoint {
         return WorkbookPermissionPoint;
     }
 
-    get WorksheetPermissionPoint(): typeof WorksheetPermissionPoint {
+    override get WorksheetPermissionPoint(): typeof WorksheetPermissionPoint {
         return WorksheetPermissionPoint;
     }
 
-    get RangePermissionPoint(): typeof RangePermissionPoint {
+    override get RangePermissionPoint(): typeof RangePermissionPoint {
         return RangePermissionPoint;
     }
 }
 
-FEnum.extend(FSheetsEnum);
+FEnum.extend(FSheetsEnumMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    export interface FEnum extends IFSheetsEnum {
+    export interface FEnum extends IFSheetsEnumMixin {
     }
 }

@@ -16,7 +16,7 @@
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
 import { forwardRef, useEffect, useRef, useState } from 'react';
-import { borderLeftClassName } from '../../helper/class-utilities';
+import { borderLeftClassName, borderLeftRTLClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { Input } from '../input/Input';
 
@@ -339,9 +339,12 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                                   before:univer-absolute before:univer-top-1/2 before:univer-block before:univer-h-px
                                   before:univer-w-full before:-univer-translate-y-1/2 before:univer-bg-gray-200
                                   before:univer-content-[""]
+                                  rtl:univer-left-px rtl:univer-right-auto rtl:univer-rounded-l-md
+                                  rtl:univer-rounded-r-none
                                   dark:before:!univer-bg-gray-600
                                 `,
                                 borderLeftClassName,
+                                borderLeftRTLClassName,
                                 controlsClassName
                             )}
                         >

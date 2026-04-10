@@ -35,11 +35,9 @@ import {
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, convertTransformToOffsetX, convertTransformToOffsetY, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { BEFORE_CELL_EDIT, SheetInterceptorService } from '@univerjs/sheets';
+import { attachPrimaryWithCoord, BEFORE_CELL_EDIT, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
-import { attachPrimaryWithCoord } from './selection/util';
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
@@ -146,6 +144,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -183,36 +182,30 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     refreshEditCellPosition(resetSizeOnly?: boolean) {
-        const currentEditCell = this._currentEditCell;
-        if (currentEditCell == null) {
-            return;
-        }
+        if (!this._currentEditCell || !this._currentEditCellState) return;
 
-        const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
-        if (!currentSheet) return;
+        const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook || workbook.getUnitId() !== unitId) return;
 
-        const ru = this._renderManagerService.getRenderUnitById(currentSheet.getUnitId());
-        if (!ru) return;
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet || worksheet.getSheetId() !== sheetId) return;
 
-        const skeleton = ru.with(SheetSkeletonManagerService).getSkeletonParam(currentEditCell.sheetId)?.skeleton;
-        const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
+        if (!renderUnit) return;
+
+        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
         if (!skeleton) return;
-        if (!this._currentEditCellState) return;
 
-        const { primary, scene, engine } = currentEditCell;
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
-        if (primaryWithCoord == null) {
-            return;
-        }
-
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
+        const scrollXY = scene.getViewportScrollXY(renderUnit.with(ISheetSelectionRenderService).getViewPort());
 
-        const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
         endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
@@ -306,39 +299,35 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     // eslint-disable-next-line max-lines-per-function, complexity
     getLatestEditCellState() {
-        const currentEditCell = this._currentEditCell;
-        if (currentEditCell == null) return;
+        if (!this._currentEditCell) return;
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) return;
+        const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook || workbook.getUnitId() !== unitId) return;
 
-        const ru = this._renderManagerService.getRenderUnitById(workbook.getUnitId());
-        if (!ru) return;
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet || worksheet.getSheetId() !== sheetId) return;
 
-        const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
-        const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
+        if (!renderUnit) return;
+
+        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
         if (!skeleton) return;
 
-        const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
-        if (primaryWithCoord == null) return;
-
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
+        const scrollXY = scene.getViewportScrollXY(renderUnit.with(ISheetSelectionRenderService).getViewPort());
 
-        const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
         endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
         endY = convertTransformToOffsetY(endY, scaleY, scrollXY);
-
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return;
 
         const location = {
             workbook,

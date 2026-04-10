@@ -33,6 +33,9 @@ function createService(options?: { hasFocusEditor?: boolean }) {
                 fetchThroughInterceptors: vi.fn(() => (cell: unknown) => cell),
             },
         },
+        sheetSkeletonService: {
+            getSkeleton: vi.fn(() => null),
+        },
         renderManagerService: {
             getRenderUnitById: vi.fn(() => null),
         },
@@ -54,6 +57,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
 
     const service = new EditorBridgeService(
         mocks.sheetInterceptorService as any,
+        mocks.sheetSkeletonService as any,
         mocks.renderManagerService as any,
         mocks.themeService as any,
         mocks.univerInstanceService as any,

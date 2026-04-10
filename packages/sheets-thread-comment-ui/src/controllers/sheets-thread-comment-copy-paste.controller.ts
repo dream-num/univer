@@ -21,7 +21,7 @@ import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula'
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
 import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
-import { SHEETS_THREAD_COMMENT } from '../types/const';
+import { PLUGIN_NAME } from '../types/const';
 
 const transformRef = (ref: string, source: { row: number; column: number }, target: { row: number; column: number }) => {
     const refObj = singleReferenceToGrid(ref);
@@ -56,7 +56,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
     private _initClipboardHook() {
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
-                id: SHEETS_THREAD_COMMENT,
+                id: PLUGIN_NAME,
                 onBeforeCopy: (unitId, subUnitId, range) => {
                     this._copyInfo = {
                         unitId,

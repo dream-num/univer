@@ -34,12 +34,14 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { DrawingContextMenuController } from './controllers/drawing-context-menu.controller';
 import { SheetCellImageHoverRenderController } from './controllers/render-controllers/sheet-celll-image-hover.render-controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
 import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
 import { SheetCellImageCopyPasteController } from './controllers/sheet-cell-image-copy-paste.controller';
 import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
+import { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
@@ -84,10 +86,12 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
+            [SheetsDrawingGroupCopyPasteController],
             [SheetCellImageController],
             [SheetCellImageAutofillController],
             [SheetCellImageCopyPasteController],
             [IBatchSaveImagesService, { useClass: BatchSaveImagesService }],
+            [DrawingContextMenuController],
         ]);
 
         touchDependencies(this._injector, [
@@ -99,6 +103,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetsDrawingCopyPasteController],
             [SheetCellImageCopyPasteController],
+            [SheetsDrawingGroupCopyPasteController],
         ]);
     }
 
@@ -116,6 +121,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
     override onSteady(): void {
         this._injector.get(DrawingPopupMenuController);
+        this._injector.get(DrawingContextMenuController);
     }
 
     private _registerRenderModules(): void {

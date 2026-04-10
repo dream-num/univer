@@ -15,10 +15,48 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { toggleReferenceAbsoluteAtCursor } from '../utils/reference-absolute';
 
 export const ReferenceAbsoluteOperation: ICommand = {
     id: 'formula-ui.operation.change-ref-to-absolute',
     type: CommandType.OPERATION,
-    handler: async (accessor: IAccessor) => true,
+    handler: async (accessor: IAccessor) => {
+        const editorService = accessor.get(IEditorService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const lexerTreeBuilder = accessor.get(LexerTreeBuilder);
+        const focusEditor = editorService.getFocusEditor();
+
+        if (!focusEditor) {
+            return false;
+        }
+
+        const editorId = focusEditor.getEditorId();
+        if (editorId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && editorId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            return false;
+        }
+
+        const activeTextRange = docSelectionManagerService.getActiveTextRange();
+        if (!activeTextRange) {
+            return false;
+        }
+
+        const formulaText = BuildTextUtils.transform.getPlainText(focusEditor.getDocumentData().body?.dataStream ?? '');
+        const nextReferenceState = toggleReferenceAbsoluteAtCursor(lexerTreeBuilder, formulaText, activeTextRange.endOffset);
+
+        if (!nextReferenceState) {
+            return false;
+        }
+
+        focusEditor.replaceText(nextReferenceState.formulaText, [{
+            startOffset: nextReferenceState.cursorOffset,
+            endOffset: nextReferenceState.cursorOffset,
+            collapsed: true,
+        }]);
+
+        return true;
+    },
 };

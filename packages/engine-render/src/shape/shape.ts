@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, IOffset, IScale, ISize, Nullable } from '@univerjs/core';
+import type { IOffset, IScale, ISize, Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
 import type { IViewportInfo, Vector2 } from '../basics/vector2';
@@ -359,12 +359,12 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
             return this;
         }
         themeKeys.forEach((key) => {
-            if ((props as IKeyValue)[key] === undefined) {
+            if ((props as Record<string, any>)[key] === undefined) {
                 return true;
             }
 
             if (!BASE_OBJECT_ARRAY_Set.has(key)) {
-                (this as IKeyValue)[`_${key}`] = (props as IKeyValue)[key];
+                (this as Record<string, any>)[`_${key}`] = (props as Record<string, any>)[key];
             }
         });
         this.makeDirty(true);
@@ -372,11 +372,11 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     }
 
     getPropByKey<K extends keyof T>(key: K): T[K] {
-        return (this as IKeyValue)[`_${String(key)}`] as T[K];
+        return (this as Record<string, any>)[`_${String(key)}`] as T[K];
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         SHAPE_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Shape<T>]) {
                 props[key] = this[key as keyof Shape<T>];
@@ -424,15 +424,15 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         }
 
         themeKeys.forEach((key) => {
-            if ((props as IKeyValue)[key] === undefined) {
+            if ((props as Record<string, any>)[key] === undefined) {
                 return true;
             }
 
             if (BASE_OBJECT_ARRAY_Set.has(key)) {
-                transformState[key as keyof IObjectFullState] = (props as IKeyValue)[key];
+                transformState[key as keyof IObjectFullState] = (props as Record<string, any>)[key];
                 hasTransformState = true;
             } else {
-                (this as IKeyValue)[`_${key}`] = (props as IKeyValue)[key];
+                (this as Record<string, any>)[`_${key}`] = (props as Record<string, any>)[key];
             }
         });
 

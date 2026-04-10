@@ -262,21 +262,21 @@ describe('DraggableList', () => {
         expect(onListChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should render ghost with itemRender fallback when innerHTML is empty', async () => {
+    it('should render ghost from cloned item dom', async () => {
         const onListChange = vi.fn();
-        const itemRender = vi.fn(() => null);
 
         const { container } = render(
             <DraggableList<IItem>
                 list={BASE_LIST.slice(0, 1)}
                 idKey="id"
                 onListChange={onListChange}
-                itemRender={itemRender}
+                itemRender={(item) => <div className="drag-content">{item.label}</div>}
             />
         );
 
         const itemA = container.querySelector('[data-draggable-list-item-id="a"]') as HTMLDivElement;
         mockRect(itemA);
+        const cloneNodeSpy = vi.spyOn(itemA, 'cloneNode');
         Object.defineProperty(itemA, 'setPointerCapture', {
             configurable: true,
             value: vi.fn(),
@@ -289,7 +289,8 @@ describe('DraggableList', () => {
         });
 
         await waitFor(() => {
-            expect(itemRender.mock.calls.length).toBeGreaterThanOrEqual(3);
+            expect(cloneNodeSpy).toHaveBeenCalledWith(true);
+            expect(container.querySelectorAll('.drag-content')).toHaveLength(2);
         });
 
         fireEvent.pointerUp(window, {

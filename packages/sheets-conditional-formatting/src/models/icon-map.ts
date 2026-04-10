@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import ICON_MAP from '../assets/icon-map.json';
+import { ICON_MAP } from '../assets/icon-map';
 
 export type IIconItem = string;
 

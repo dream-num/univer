@@ -35,6 +35,7 @@ import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService }
 
 import {
     SheetInterceptorService,
+    SheetSkeletonService,
 } from '@univerjs/sheets';
 
 import '../f-sheet-hooks';
@@ -124,6 +125,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         override onStarting(): void {
             const injector = this._injector;
             injector.add([SheetInterceptorService]);
+            injector.add([SheetSkeletonService]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([LexerTreeBuilder]);

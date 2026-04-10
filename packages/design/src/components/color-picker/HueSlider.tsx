@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface IHueSliderProps {
     hsv: [number, number, number];
@@ -27,22 +27,24 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
 
-    const thumbSize = useMemo(() => {
-        return thumbRef.current?.clientWidth ?? 0;
-    }, []);
-
     const calculateHue = useCallback((clientX: number) => {
         const slider = sliderRef.current;
         if (!slider) return;
 
+        const thumbSize = thumbRef.current?.clientWidth ?? 0;
+
         const rect = slider.getBoundingClientRect();
         const maxX = rect.width - thumbSize;
+        if (maxX <= 0) {
+            onChange(0, hsv[1], hsv[2]);
+            return;
+        }
 
         const x = Math.max(0, Math.min(clientX - rect.left, maxX));
 
         const newHue = Math.round((x / maxX) * 360);
         onChange(newHue, hsv[1], hsv[2]);
-    }, [hsv, thumbSize, onChange]);
+    }, [hsv, onChange]);
 
     const handlePointerMove = useCallback((e: PointerEvent) => {
         e.stopPropagation();
@@ -71,7 +73,11 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
 
     const getThumbPosition = () => {
         const safeHue = Math.min(Math.max(hsv[0], 0), 360);
-        return `${(safeHue / 360) * (100 - (thumbSize / sliderRef.current?.clientWidth! * 100))}%`;
+        const thumbSize = thumbRef.current?.clientWidth ?? 0;
+        const sliderWidth = sliderRef.current?.clientWidth ?? 0;
+        const thumbOffsetPercent = sliderWidth > 0 ? (thumbSize / sliderWidth) * 100 : 0;
+
+        return `${(safeHue / 360) * (100 - thumbOffsetPercent)}%`;
     };
 
     return (

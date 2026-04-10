@@ -457,6 +457,8 @@ const locale: typeof enUS = {
             copy: 'Sao chép',
             alert: 'Thông báo',
             search: 'Tìm kiếm',
+            ownerInherit: 'Chủ sở hữu tài liệu, đã bật kế thừa quyền',
+            ownerWithoutInherit: 'Chủ sở hữu tài liệu, chưa bật kế thừa quyền',
             alertContent: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
             userEmpty: 'Không có người chỉ định, chia sẻ liên kết để mời người cụ thể.',
             listEmpty: 'Bạn chưa thiết lập bất kỳ phạm vi hoặc bảng tính nào ở trạng thái được bảo vệ.',
@@ -476,6 +478,7 @@ const locale: typeof enUS = {
             printErr: 'Trang bảng này đã được bảo vệ, hiện không có quyền in. Nếu cần in, vui lòng liên hệ với người tạo.',
             formulaErr: 'Phạm vi hoặc phạm vi tham chiếu này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
             hyperLinkErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập liên kết. Nếu cần thiết lập liên kết, vui lòng liên hệ với người tạo.',
+            commentErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền bình luận. Nếu cần bình luận, vui lòng liên hệ với người tạo.',
         },
         button: {
             confirm: 'Xác nhận',

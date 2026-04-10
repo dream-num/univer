@@ -46,7 +46,6 @@ import { UnionNodeFactory } from '../../engine/ast-node/union-node';
 import { ValueNodeFactory } from '../../engine/ast-node/value-node';
 import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
-import { stripErrorMargin } from '../../engine/utils/math-kit';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { CalculateFormulaService, ICalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -238,14 +237,3 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
         sheetData,
     };
 }
-
-export function stripArrayValue(array: (string | number | boolean | null)[][]) {
-    return array.map((row) => row.map((cell) => {
-        if (typeof cell === 'number') {
-            return stripErrorMargin(cell);
-        }
-        return cell;
-    }));
-}
-
-export { getObjectValue } from '../util';

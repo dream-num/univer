@@ -254,7 +254,7 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
 
         case DataStreamTreeNodeType.PARAGRAPH: {
             const { children, startIndex, endIndex } = node;
-            const paragraph = doc.body?.paragraphs!.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
+            const paragraph = doc.body?.paragraphs?.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
             const { paragraphStyle = {} } = paragraph;
             const { spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
             const style = [];

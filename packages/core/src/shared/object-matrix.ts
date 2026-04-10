@@ -712,10 +712,10 @@ export class ObjectMatrix<T> {
      * @returns {IRange} the start and end scope of the matrix
      */
     getStartEndScope(): IRange {
-        let startRow = Infinity;
-        let endRow = -Infinity;
-        let startColumn = Infinity;
-        let endColumn = -Infinity;
+        let startRow = -1;
+        let endRow = -1;
+        let startColumn = -1;
+        let endColumn = -1;
 
         const rows = Object.keys(this._matrix);
         if (rows.length > 0) {
@@ -726,7 +726,7 @@ export class ObjectMatrix<T> {
         for (const row of rows) {
             const columns = Object.keys(this._matrix[row as unknown as number]);
             if (columns.length > 0) {
-                startColumn = Math.min(startColumn, +columns[0]);
+                startColumn = startColumn === -1 ? +columns[0] : Math.min(startColumn, +columns[0]);
                 endColumn = Math.max(endColumn, +columns[columns.length - 1]);
             }
         }

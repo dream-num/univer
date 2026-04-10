@@ -20,7 +20,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { IRefSelectionsService, RangeProtectionRuleModel, RefSelectionsService, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { IRefSelectionsService, RangeProtectionRuleModel, RefSelectionsService, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { EditorBridgeService, IEditorBridgeService, ISheetSelectionRenderService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FormulaPromptService, IFormulaPromptService } from '../../../services/prompt.service';
 
@@ -79,6 +79,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             const injector = this._injector;
             addDependency([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             addDependency([SheetsSelectionsService]);
+            addDependency([SheetSkeletonService]);
             addDependency([LexerTreeBuilder]);
             addDependency([DocSelectionManagerService]);
             addDependency([IFormulaPromptService, { useClass: FormulaPromptService }]);

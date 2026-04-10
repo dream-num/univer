@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-drawing",
-    "version": "0.16.1",
+    "version": "0.20.0",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -39,6 +40,16 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
+            "./lib/facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
             "./lib/*": "./lib/*"
         }
     },
@@ -53,17 +64,19 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
-        "build": "univer-cli build"
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.9.3",
-        "vite": "^7.3.1",
-        "vitest": "^4.0.18"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.1"
     }
 }

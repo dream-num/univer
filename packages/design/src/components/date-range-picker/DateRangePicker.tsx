@@ -15,10 +15,10 @@
  */
 
 import { CalendarIcon } from '@univerjs/icons';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { formatDateWithPattern } from '../../helper/date';
 import { Calendar } from '../calendar/Calendar';
 import { Dropdown } from '../dropdown/Dropdown';
 
@@ -90,9 +90,9 @@ export function DateRangePicker(props: IDateRangePickerProps) {
                 type="button"
             >
                 <span className="univer-flex univer-gap-1">
-                    <span>{dayjs(value[0]).format('YYYY-MM-DD')}</span>
+                    <span>{formatDateWithPattern(value[0], 'YYYY-MM-DD')}</span>
                     <span>-</span>
-                    <span>{dayjs(value[1]).format('YYYY-MM-DD')}</span>
+                    <span>{formatDateWithPattern(value[1], 'YYYY-MM-DD')}</span>
                 </span>
 
                 <CalendarIcon

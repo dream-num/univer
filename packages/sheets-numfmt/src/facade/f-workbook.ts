@@ -18,7 +18,7 @@ import type { INumfmtLocaleTag } from '@univerjs/core';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
-export interface IFWorkbookNumfmtMixin {
+export interface IFWorkbookSheetsNumfmtMixin {
     /**
      * Set the locale for number formatting.
      * @param {INumfmtLocaleTag} locale zh_CN,zh_TW,zh_HK,ja,ko,th,cs,da,nl,en,en_AU,en_CA,en_GB,en_IE,fi,fr,fr_CA,fr_CH,de,de_CH,el,hu,is,id,it,it_CH,nb,no,pl,pt,pt_BR,ru,sk,es,es_AR,es_BO,es_CL,es_CO,es_EC,es_MX,es_PY,es_UY,es_VE,sv,tr,cy,az,be,bg,ca,fil,gu,he,hr,hy,ka,kk,kn,lt,lv,ml,mn,mr,my,pa,ro,sl,sr,ta,te,uk,vi,ar,bn,hi
@@ -42,15 +42,15 @@ export interface IFWorkbookNumfmtMixin {
      */
     setNumfmtLocal(locale: INumfmtLocaleTag): FWorkbook;
 }
-export class FWorkbookLegacy extends FWorkbook implements IFWorkbookNumfmtMixin {
+export class FWorkbookSheetsNumfmtMixin extends FWorkbook implements IFWorkbookSheetsNumfmtMixin {
     override setNumfmtLocal(locale: INumfmtLocaleTag): FWorkbook {
         const sheetsNumfmtCellContentController = this._injector.get(SheetsNumfmtCellContentController);
         sheetsNumfmtCellContentController.setNumfmtLocal(locale);
         return this;
     }
 }
-FWorkbook.extend(FWorkbookLegacy);
+FWorkbook.extend(FWorkbookSheetsNumfmtMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookNumfmtMixin { }
+    interface FWorkbook extends IFWorkbookSheetsNumfmtMixin { }
 }

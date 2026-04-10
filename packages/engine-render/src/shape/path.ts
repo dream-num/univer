@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
 import type { UniverRenderingContext } from '../context';
@@ -799,7 +799,7 @@ export class Path extends Shape<IPathProps> {
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         PATH_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Path]) {
                 props[key] = this[key as keyof Path];

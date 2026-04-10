@@ -108,6 +108,7 @@ export class SheetInterceptorService extends Disposable {
 
     private _interceptorsDirty = false;
     private _composedInterceptorByKey: Map<string, ReturnType<IComposeInterceptors<any, any>>> = new Map();
+    private _composedInterceptorsLengthByKey: Map<string, number> = new Map();
 
     readonly writeCellInterceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
@@ -385,8 +386,9 @@ export class SheetInterceptorService extends Disposable {
         const byNamesKey = effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`;
         const key = _key ?? byNamesKey;
         let composed = this._composedInterceptorByKey.get(key);
+        const composedInterceptorsLength = this._composedInterceptorsLengthByKey.get(key) || 0;
 
-        if (!composed || !this._interceptorsDirty) {
+        if (!composed || !this._interceptorsDirty || composedInterceptorsLength !== (this._interceptorsByName.get(byNamesKey)?.length || 0)) {
             let interceptors = this._interceptorsByName.get(byNamesKey) as unknown as Array<IInterceptor<any, any>> | undefined;
             if (interceptors && filter) {
                 interceptors = interceptors.filter(filter);
@@ -394,6 +396,7 @@ export class SheetInterceptorService extends Disposable {
 
             composed = composeInterceptors<T, C>(interceptors || []);
             this._composedInterceptorByKey.set(key, composed);
+            this._composedInterceptorsLengthByKey.set(key, interceptors?.length || 0);
         }
 
         return composed;

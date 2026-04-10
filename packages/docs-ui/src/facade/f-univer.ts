@@ -45,7 +45,7 @@ export interface IFUniverDocsUIMixin {
     getActiveDocument(): FDocument | null;
 }
 
-export class FUniverDocsMixin extends FUniver implements IFUniverDocsUIMixin {
+export class FUniverDocsUIMixin extends FUniver implements IFUniverDocsUIMixin {
     override createUniverDoc(data: Partial<IDocumentData>): FDocument {
         const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
         return this._injector.createInstance(FDocument, document);
@@ -70,7 +70,7 @@ export class FUniverDocsMixin extends FUniver implements IFUniverDocsUIMixin {
     }
 }
 
-FUniver.extend(FUniverDocsMixin);
+FUniver.extend(FUniverDocsUIMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverDocsUIMixin {}

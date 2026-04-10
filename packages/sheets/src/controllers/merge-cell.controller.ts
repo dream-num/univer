@@ -418,80 +418,96 @@ export class MergeCellController extends Disposable {
         if (!workbook) {
             return this._handleNull();
         }
-        const worksheet = getWorksheet(workbook, subUnitId);
-        if (!worksheet) {
+
+        const sourceSubUnitId = params.fromSubUnitId ?? subUnitId;
+        const targetSubUnitId = params.toSubUnitId ?? sourceSubUnitId;
+        const sourceWorksheet = getWorksheet(workbook, sourceSubUnitId);
+        const targetWorksheet = getWorksheet(workbook, targetSubUnitId);
+        if (!sourceWorksheet || !targetWorksheet) {
             return this._handleNull();
         }
-        const mergeData = worksheet.getMergeData();
-        const fromMergeRanges = mergeData.filter((item) => Rectangle.intersects(item, params.fromRange));
-        const toMergeRanges = mergeData.filter((item) => Rectangle.intersects(item, params.toRange));
+
+        const fromMergeRanges = sourceWorksheet.getMergeData().filter((item) => Rectangle.intersects(item, params.fromRange));
+        const toMergeRanges = targetWorksheet.getMergeData().filter((item) => Rectangle.intersects(item, params.toRange));
 
         const willMoveToMergeRanges = fromMergeRanges
             .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, params.fromRange))
             .map((relativeRange) => Rectangle.getPositionRange(relativeRange, params.toRange));
 
         const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges).filter(
-            (range) => !mergeData.some((mergeRange) => Rectangle.equals(range, mergeRange))
+            (range) => !targetWorksheet.getMergeData().some((mergeRange) => Rectangle.equals(range, mergeRange))
         );
 
         const redos: Array<{
             id: string;
             params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
-        }> = [
-            {
-                id: RemoveWorksheetMergeMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: fromMergeRanges,
-                },
-            },
-            {
-                id: RemoveWorksheetMergeMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: toMergeRanges,
-                },
-            },
-            {
-                id: AddWorksheetMergeMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: addMergeCellRanges,
-                },
-            },
-        ];
+        }> = [];
         const undos: Array<{
             id: string;
             params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
-        }> = [
-            {
+        }> = [];
+
+        if (subUnitId === sourceSubUnitId && fromMergeRanges.length > 0) {
+            redos.push({
                 id: RemoveWorksheetMergeMutation.id,
                 params: {
                     unitId,
-                    subUnitId,
-                    ranges: addMergeCellRanges,
-                },
-            },
-            {
-                id: AddWorksheetMergeMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: toMergeRanges,
-                },
-            },
-            {
-                id: AddWorksheetMergeMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
+                    subUnitId: sourceSubUnitId,
                     ranges: fromMergeRanges,
                 },
-            },
-        ];
+            });
+            undos.push({
+                id: AddWorksheetMergeMutation.id,
+                params: {
+                    unitId,
+                    subUnitId: sourceSubUnitId,
+                    ranges: fromMergeRanges,
+                },
+            });
+        }
+
+        if (subUnitId === targetSubUnitId && toMergeRanges.length > 0) {
+            redos.push({
+                id: RemoveWorksheetMergeMutation.id,
+                params: {
+                    unitId,
+                    subUnitId: targetSubUnitId,
+                    ranges: toMergeRanges,
+                },
+            });
+            undos.push({
+                id: AddWorksheetMergeMutation.id,
+                params: {
+                    unitId,
+                    subUnitId: targetSubUnitId,
+                    ranges: toMergeRanges,
+                },
+            });
+        }
+
+        if (subUnitId === targetSubUnitId && addMergeCellRanges.length > 0) {
+            redos.push({
+                id: AddWorksheetMergeMutation.id,
+                params: {
+                    unitId,
+                    subUnitId: targetSubUnitId,
+                    ranges: addMergeCellRanges,
+                },
+            });
+            undos.unshift({
+                id: RemoveWorksheetMergeMutation.id,
+                params: {
+                    unitId,
+                    subUnitId: targetSubUnitId,
+                    ranges: addMergeCellRanges,
+                },
+            });
+        }
+
+        if (redos.length === 0) {
+            return this._handleNull();
+        }
+
         return { redos, undos };
     }
 

@@ -18,6 +18,7 @@ export default antfu(
             'mockdata/**/*.json',
             'pnpm-lock.yaml',
             'examples/src/demos.ts',
+            'examples/public',
         ],
         stylistic: {
             indent: 4,

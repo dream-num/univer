@@ -16,22 +16,16 @@
 
 import './global.css';
 
-export { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from './basics/transform-position';
 export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
 export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
 export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';
-export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
-export type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from './commands/commands/interfaces';
 export { MoveDrawingsCommand } from './commands/commands/move-drawings.command';
-export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
 export { SaveCellImagesCommand } from './commands/commands/save-cell-images.command';
-export { SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
-export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
 export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
-export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 export type { IUniverSheetsDrawingUIConfig } from './config/config';
+export { SheetsDrawingGroupCopyPasteController } from './controllers/sheet-drawing-group-copy-paste.controller';
 export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { UniverSheetsDrawingUIPlugin } from './plugin';

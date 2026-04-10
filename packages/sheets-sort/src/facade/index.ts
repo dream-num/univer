@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import './f-univer';
 import './f-range';
 import './f-worksheet';
 import './f-event';
 
 export type * from './f-event';
 export type * from './f-range';
+export type * from './f-univer';
 export type * from './f-worksheet';

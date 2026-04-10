@@ -23,7 +23,7 @@ import { FFilter } from './f-filter';
 /**
  * @ignore
  */
-export interface IFWorksheetFilter {
+export interface IFWorksheetFilterMixin {
     /**
      * Get the filter for the current worksheet.
      * @returns {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
@@ -39,7 +39,7 @@ export interface IFWorksheetFilter {
     getFilter(): FFilter | null;
 }
 
-export class FWorksheetFilter extends FWorksheet implements IFWorksheetFilter {
+export class FWorksheetFilterMixin extends FWorksheet implements IFWorksheetFilterMixin {
     override getFilter(): FFilter | null {
         const filterModel = this._getFilterModel();
         if (!filterModel) return null;
@@ -55,8 +55,8 @@ export class FWorksheetFilter extends FWorksheet implements IFWorksheetFilter {
     }
 }
 
-FWorksheet.extend(FWorksheetFilter);
+FWorksheet.extend(FWorksheetFilterMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetFilter { }
+    interface FWorksheet extends IFWorksheetFilterMixin { }
 }

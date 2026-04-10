@@ -73,6 +73,10 @@ export enum ContextMenuPosition {
      * paragraph context menu in doc
      */
     PARAGRAPH = 'contextMenu.paragraph',
+    /**
+     * drawing context menu, now only used in drawing group operation
+     */
+    DRAWING = 'contextMenu.drawing',
 }
 
 export enum ContextMenuGroup {

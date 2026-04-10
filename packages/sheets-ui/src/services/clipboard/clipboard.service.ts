@@ -455,6 +455,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const discreteRange: IDiscreteRange = { rows: [], cols: [] };
 
         const handleMatrixOnCellHook = copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY ? hooks.find((h) => h.handleMatrixOnCell) : undefined;
+        const getCellValueBySpecialMatrixHooks = hooks.filter((h) => h.getCellValueBySpecialMatrix);
 
         for (let r = startRow; r <= endRow; r++) {
             if (filteredRows.has(r)) {
@@ -467,7 +468,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     continue;
                 }
 
-                const cellData = matrix.getValue(r, c);
+                const cellData = getCellValueBySpecialMatrixHooks.reduce<ICellDataWithSpanAndDisplay | undefined>(
+                    (acc, hook) => acc || hook.getCellValueBySpecialMatrix!(r, c),
+                    undefined
+                ) || matrix.getValue(r, c);
                 if (cellData) {
                     const newCellData = cloneCellDataWithSpanAndDisplay(cellData)!;
                     plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
@@ -679,7 +683,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             const cellData = worksheet?.getCellRaw(actualRow, actualColumn);
             const style = worksheet?.getComposedCellStyleByCellData(actualRow, actualColumn, cellData);
             const newValue = cloneCellDataWithSpanInfo(value)!;
-            newValue.s = style;
+            if (style && Object.keys(style).length > 0) {
+                newValue.s = style;
+            }
             cellMatrix.setValue(row, col, newValue);
 
             if (value.colSpan || value.rowSpan) {

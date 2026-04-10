@@ -30,6 +30,7 @@ import {
 } from '@univerjs/core';
 import { Rect } from '@univerjs/engine-render';
 import {
+    attachSelectionWithCoord,
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
     SheetsSelectionsService,
@@ -37,7 +38,6 @@ import {
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../../common/keys';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
-import { attachSelectionWithCoord } from '../../../services/selection/util';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_SIZE,

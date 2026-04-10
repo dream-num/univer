@@ -161,7 +161,7 @@ describe('Test CommandService', () => {
                 commandService.syncExecuteCommand(anotherCommandID);
             }).toThrowError(`[CommandService]: command "${anotherCommandID}" is not registered.`);
 
-            expect(commandService.executeCommand(anotherCommandID)).rejects.toThrowError(
+            await expect(commandService.executeCommand(anotherCommandID)).rejects.toThrowError(
                 `[CommandService]: command "${anotherCommandID}" is not registered.`
             );
         });
@@ -249,7 +249,7 @@ describe('Test CommandService', () => {
             expect(str).toEqual(['A', 'B', 'B']);
 
             secondDisposable.dispose();
-            expect(commandService.executeCommand(commandID)).rejects.toThrowError(
+            await expect(commandService.executeCommand(commandID)).rejects.toThrowError(
                 `[CommandService]: command "${commandID}" is not registered.`
             );
         });

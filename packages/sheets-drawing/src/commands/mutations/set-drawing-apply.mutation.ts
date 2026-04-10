@@ -64,9 +64,11 @@ export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> 
                 break;
             case DrawingApplyType.GROUP:
                 drawingManagerService.groupUpdateNotification(objects as IDrawingGroupUpdateParam[]);
+                sheetDrawingService.groupUpdateNotification(objects as IDrawingGroupUpdateParam[]);
                 break;
             case DrawingApplyType.UNGROUP:
                 drawingManagerService.ungroupUpdateNotification(objects as IDrawingGroupUpdateParam[]);
+                sheetDrawingService.ungroupUpdateNotification(objects as IDrawingGroupUpdateParam[]);
                 break;
         }
 

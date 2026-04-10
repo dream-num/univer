@@ -2219,10 +2219,6 @@ export const snapshot: IWorkbookData = {
             name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
         },
         {
-            data: '{}',
-            name: 'SHEET_HYPER_LINK_PLUGIN',
-        },
-        {
             data: '',
             name: 'SHEET_DRAWING_PLUGIN',
         },

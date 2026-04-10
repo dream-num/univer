@@ -58,7 +58,7 @@ import { HeaderFreezeRenderController } from './controllers/render-controllers/f
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
-// import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { MobileHeaderResizeRenderController } from './controllers/render-controllers/mobile/mobile-header-resize.render-controller';
 import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
@@ -265,7 +265,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [DragRenderController],
             [ForceStringRenderController],
             [CellCustomRenderController],
-            // [SheetContextMenuMobileRenderController],
+            [SheetContextMenuMobileRenderController],
             [MobileHeaderResizeRenderController],
             [MoveRangeRenderController],
 

@@ -227,6 +227,15 @@ describe('cell utils', () => {
         expect(irregular[1][0].v).toBe('B');
     });
 
+    it('should parse table html from an inert document', () => {
+        const table = handelTableToJson(
+            '<table><tr><td onclick="alert(1)">A</td></tr></table><script>window.__cellSpecExecuted = true;</script>'
+        );
+
+        expect(table[0][0].v).toBe('A');
+        expect((window as Window & { __cellSpecExecuted?: boolean }).__cellSpecExecuted).toBeUndefined();
+    });
+
     it('should parse plain text grid and drop broken rows', () => {
         const plain = handlePlainToJson('A\tB\nC\tD\nE');
         expect(plain.length).toBe(2);
@@ -307,5 +316,23 @@ describe('cell utils', () => {
 
         expect(irregular?.[0][0].v).toBe('A');
         expect(irregular?.[1][0].v).toBe('B');
+    });
+
+    it('should preserve excel parsing after removing executable nodes', () => {
+        const result = handelExcelToJson(`
+            <html>
+                <style>.x { font-weight: bold; }</style>
+                <body>
+                    <script>window.__excelCellSpecExecuted = true;</script>
+                    <table>
+                        <tr><td class="x" onmouseover="alert(1)">A</td></tr>
+                    </table>
+                </body>
+            </html>
+        `);
+
+        expect(result?.[0][0].v).toBe('A');
+        expect(result?.[0][0].s).toBeDefined();
+        expect((window as Window & { __excelCellSpecExecuted?: boolean }).__excelCellSpecExecuted).toBeUndefined();
     });
 });

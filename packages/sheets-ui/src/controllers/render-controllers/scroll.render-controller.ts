@@ -20,8 +20,6 @@ import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, Sheet
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
-
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import {
     Direction,
     Disposable,
@@ -37,12 +35,10 @@ import {
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
+import { ExpandSelectionCommand } from '../../commands/commands/set-selection.command';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
-
-const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 /**
@@ -229,17 +225,14 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 if (skeleton == null || sheetObject == null) {
                     return;
                 }
+
                 const { viewportScrollX = 0, viewportScrollY = 0 } = param;
-
-                const freeze = this._getFreeze();
-
                 const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
 
                 // NOT same as SetScrollRelativeCommand. that was exec in sheetRenderController
-                // const freeze = this._getFreeze();
                 this._commandService.executeCommand(ScrollCommand.id, {
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
@@ -464,34 +457,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
 
         return snapshot.freeze;
-    }
-
-    private _updateSceneSize(param: ISheetSkeletonManagerParam) {
-        if (param == null) {
-            return;
-        }
-
-        const { unitId } = this._context;
-        const { skeleton } = param;
-        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
-
-        if (skeleton == null || scene == null) {
-            return;
-        }
-
-        const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
-            skeleton;
-        const workbook = this._context.unit;
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return;
-
-        // @TODO lumixraku why handle zoom in scroll.render-controller ???
-        // const zoomRatio = worksheet.getZoomRatio() || 1;
-        // scene?.setScaleValueOnly(zoomRatio, zoomRatio);
-        scene?.transformByState({
-            width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
-            height: columnHeaderHeightAndMarginTop + rowTotalHeight,
-        });
     }
 
     private _getSheetObject() {

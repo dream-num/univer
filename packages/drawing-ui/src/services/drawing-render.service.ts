@@ -17,11 +17,12 @@
 import type { IDrawingSearch, Workbook } from '@univerjs/core';
 import type { IDocFloatDomData, IImageData } from '@univerjs/drawing';
 import type { IImageProps, IRectProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
+import { DrawingImageClipService } from './drawing-image-clip.service';
 
 // const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
@@ -31,7 +32,8 @@ export class DrawingRenderService {
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IGalleryService private readonly _galleryService: IGalleryService,
         @IURLImageService private readonly _urlImageService: IURLImageService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DrawingImageClipService) private readonly _drawingImageClipService: DrawingImageClipService
     ) { }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -49,6 +51,7 @@ export class DrawingRenderService {
             drawingId,
             isMultiTransform,
             transforms: multiTransforms,
+            adjustValues,
         } = imageParam;
 
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
@@ -118,6 +121,7 @@ export class DrawingRenderService {
 
             imageConfig.printable = true;
             const image = new Image(imageShapeKey, imageConfig);
+            image.setClipService(this._drawingImageClipService);
             if (shouldBeCache) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
             }
@@ -131,6 +135,9 @@ export class DrawingRenderService {
 
             if (prstGeom != null) {
                 image.setPrstGeom(prstGeom);
+            }
+            if (adjustValues != null) {
+                image.setPrstGeomAdjValues(adjustValues);
             }
             if (srcRect != null) {
                 image.setSrcRect(srcRect);

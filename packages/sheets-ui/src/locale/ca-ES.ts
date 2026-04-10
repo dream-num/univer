@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'Copiar',
             alert: 'Alerta',
             search: 'Cercar',
+            ownerInherit: 'Propietario del documento, herencia de permisos habilitada',
+            ownerWithoutInherit: 'Propietario del documento, herencia de permisos no habilitada',
             alertContent: 'Aquest interval està protegit i actualment no hi ha permisos d\'edició disponibles. Si necessiteu editar, contacteu amb el creador.',
             userEmpty: 'cap persona designada, compartiu l\'enllaç per convidar persones específiques.',
             listEmpty: 'No heu configurat cap interval o full com a protegit.',
@@ -479,6 +481,7 @@ const locale: typeof enUS = {
             printErr: 'El full de càlcul està protegit i no teniu permís per imprimir. Per imprimir, contacteu amb el creador.',
             formulaErr: 'L\'interval o l\'interval referenciat està protegit, i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
             hyperLinkErr: 'L\'interval està protegit i no teniu permís per establir hipervincles. Per establir hipervincles, contacteu amb el creador.',
+            commentErr: 'L\'interval está protegido y no tienes permiso para comentar. Para comentar, contacta con el creador.',
         },
         button: {
             confirm: 'Confirmar',

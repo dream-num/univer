@@ -36,7 +36,10 @@ export interface IUniverAppProps extends IWorkbenchOptions {
 export function MobileWorkbench(props: IUniverAppProps) {
     const {
         header = true,
+        toolbar = true,
         footer = true,
+        headerMenu = true,
+        ribbonType = 'classic',
         contextMenu = true,
         mountContainer,
         onRendered,
@@ -50,9 +53,11 @@ export function MobileWorkbench(props: IUniverAppProps) {
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
+    const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
+    const toolbarComponents = useComponentsOfPart(BuiltInUIPart.TOOLBAR);
 
     const [darkMode, setDarkMode] = useState<boolean>(false);
     useEffect(() => {
@@ -121,10 +126,24 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 })}
                 tabIndex={-1}
                 onBlur={(e) => e.stopPropagation()}
+                onContextMenu={(e) => e.preventDefault()}
             >
                 {/* header */}
-                {header && (
-                    <header className="univer-relative univer-z-10 univer-w-full" />
+                {header && toolbar && (
+                    <header
+                        data-u-comp="headerbar"
+                        className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
+                    >
+                        <ComponentContainer
+                            key="toolbar"
+                            components={toolbarComponents}
+                            sharedProps={{
+                                ribbonType,
+                                headerMenuComponents,
+                                headerMenu,
+                            }}
+                        />
+                    </header>
                 )}
 
                 {/* content */}

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { CellValue, DateKit, IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
-import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dayjs, Disposable, DisposableCollection, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dateKit, Disposable, DisposableCollection, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
@@ -52,13 +52,13 @@ const transformDate = (value: Nullable<CellValue>) => {
     }
 
     // If the value is an empty string, return the current date
-    if (value === '') return dayjs();
+    if (value === '') return dateKit();
 
     if (typeof value === 'number' || !Number.isNaN(+value)) {
-        return dayjs(numfmt.format('yyyy-MM-dd HH:mm:ss', Number(value)));
+        return dateKit(numfmt.format('yyyy-MM-dd HH:mm:ss', Number(value)));
     }
 
-    const date = dayjs(value);
+    const date = dateKit(value);
     if (date.isValid()) {
         return date;
     }
@@ -184,7 +184,7 @@ export class DataValidationDropdownManagerService extends Disposable {
 
         let popupDisposable: Nullable<IDisposable>;
 
-        const handleSave = async (date: dayjs.Dayjs | undefined, targetPatternType: 'datetime' | 'date' | 'time') => {
+        const handleSave = async (date: DateKit | undefined, targetPatternType: 'datetime' | 'date' | 'time') => {
             if (!date) {
                 return true;
             }

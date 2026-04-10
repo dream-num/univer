@@ -29,6 +29,7 @@ import { useFloatingDom } from './use-floating-dom';
 import { useLocale } from './use-locale';
 import { useMessage } from './use-message';
 import { useNotification } from './use-notification';
+import { useRTL } from './use-rtl';
 import { useSidebar } from './use-sidebar';
 import { useSnapshot } from './use-snapshot';
 import { useTheme } from './use-theme';
@@ -43,6 +44,7 @@ export function Fab() {
     const fabEntryUnitType = configs?.fabEntryUnitType;
 
     const locale = useLocale();
+    const rtl = useRTL();
     const darkMode = useDarkMode();
     const theme = useTheme();
     const watermark = useWatermark();
@@ -64,6 +66,7 @@ export function Fab() {
 
     const items: IDropdownMenuProps['items'] = [
         locale,
+        rtl,
         darkMode,
         theme,
         watermark,

@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Proper } from '../index';
 

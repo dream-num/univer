@@ -105,6 +105,7 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
                 label: {
                     name: COLOR_PICKER_COMPONENT,
                     hoverable: false,
+                    selectable: false,
                 },
             },
         ],

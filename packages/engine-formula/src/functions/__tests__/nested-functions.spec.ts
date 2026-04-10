@@ -62,7 +62,8 @@ import { Left } from '../text/left';
 import { Len } from '../text/len';
 import { T } from '../text/t';
 import { Text } from '../text/text';
-import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
+import { getObjectValue } from '../util';
+import { createFunctionTestBed } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
     return {

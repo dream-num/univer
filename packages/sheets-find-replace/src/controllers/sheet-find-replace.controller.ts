@@ -506,7 +506,7 @@ export class SheetFindModel extends FindModel {
     private _updateFindHighlight(): void {
         this._disposeHighlights();
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
         if (!skeleton) {
             return;
         }

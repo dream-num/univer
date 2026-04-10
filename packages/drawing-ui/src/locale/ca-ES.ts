@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: 'Retalla',
             start: 'Inicia retallada',
             mode: 'Lliure',
+            shape: 'Retalla a forma',
         },
         group: {
             title: 'Agrupa',

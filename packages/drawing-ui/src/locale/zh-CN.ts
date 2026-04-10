@@ -48,6 +48,7 @@ const locale: typeof enUS = {
             title: '裁剪',
             start: '开始裁剪',
             mode: '自由比例裁剪',
+            shape: '裁剪为形状',
         },
         group: {
             title: '组合',

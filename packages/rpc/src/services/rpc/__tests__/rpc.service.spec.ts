@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import type { Observable } from 'rxjs';
 import type { IMessageProtocol } from '../rpc.service';
 import { awaitTime } from '@univerjs/core';
@@ -70,7 +68,7 @@ describe('test ChannelClient & ChannelServer', () => {
         server = new ChannelServer(serverProtocol);
     });
 
-    describe('test fromModule and toModule', async () => {
+    describe('test fromModule and toModule', () => {
         it('should remote call work', async () => {
             interface INameService {
                 getName(): Promise<string>;

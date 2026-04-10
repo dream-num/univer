@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'Kopírovať',
             alert: 'Upozornenie',
             search: 'Hľadať',
+            ownerInherit: 'Vlastník dokumentu, dědičnost oprávnění povolena',
+            ownerWithoutInherit: 'Vlastník dokumentu, dědičnost oprávnění není povolena',
             alertContent: 'Tento rozsah je chránený a momentálne nemáte povolenie na úpravy. Ak potrebujete upravovať, kontaktujte autora.',
             userEmpty: 'žiadna určená osoba, zdieľajte odkaz na pozvanie konkrétnych ľudí.',
             listEmpty: 'Nenastavili ste žiadne rozsahy ani hárky ako chránené.',
@@ -479,6 +481,7 @@ const locale: typeof enUS = {
             printErr: 'Hárok je chránený a nemáte oprávnenie na tlač. Ak chcete tlačiť, kontaktujte autora.',
             formulaErr: 'Rozsah alebo referenčný rozsah je chránený a nemáte oprávnenie na úpravu. Ak chcete upravovať, kontaktujte autora.',
             hyperLinkErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať hypertextové odkazy. Ak chcete nastavovať hypertextové odkazy, kontaktujte autora.',
+            commentErr: 'Rozsah je chránený a nemáte oprávnění pro komentování. Pokud chcete komentovat, kontaktujte autora.',
         },
         button: {
             confirm: 'Potvrdiť',

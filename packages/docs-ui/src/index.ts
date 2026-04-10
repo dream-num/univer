@@ -16,7 +16,6 @@
 
 import './global.css';
 
-export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';

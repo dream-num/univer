@@ -1,5 +1,87 @@
 # Changelog
 
+# [0.20.0](https://github.com/dream-num/univer/compare/v0.19.0...v0.20.0) (2026-04-03)
+
+
+### Features
+
+* **image:** feat img clip by shape in OSS ([#6765](https://github.com/dream-num/univer/issues/6765)) ([96ec7de](https://github.com/dream-num/univer/commit/96ec7dec6c1a86c0846ce94c02e4ab7203c24c0a))
+
+# [0.19.0](https://github.com/dream-num/univer/compare/v0.18.0...v0.19.0) (2026-03-28)
+
+
+### Bug Fixes
+
+* **cf:** fix cross-worksheet copy/cut/paste issues with conditional formatting ([#6727](https://github.com/dream-num/univer/issues/6727)) ([a3a40ba](https://github.com/dream-num/univer/commit/a3a40baa238f1b22e44d37208e825ee4ac83da45))
+* **comment:** fix comments-related issues ([#6712](https://github.com/dream-num/univer/issues/6712)) ([f1fbcfe](https://github.com/dream-num/univer/commit/f1fbcfea2a8a7c19ceb55447aaf278aec3be6794))
+* **design:** prevent popup flicker before initial position is calculated ([#6726](https://github.com/dream-num/univer/issues/6726)) ([de505b5](https://github.com/dream-num/univer/commit/de505b5156a1e35048daca2cbf45d705809e5361))
+* **docs-ui:** avoid duplicate sheet editor inserts after IME composition ([#6734](https://github.com/dream-num/univer/issues/6734)) ([3d8759a](https://github.com/dream-num/univer/commit/3d8759a973f121991fc580102869c6bf6924abce))
+* **drawing:** fix drawing delete err ([#6716](https://github.com/dream-num/univer/issues/6716)) ([75b0e0d](https://github.com/dream-num/univer/commit/75b0e0dff6d0ea59bc9b771052dde7c1abd5bbe2))
+* fix and supplement the relevant logic for the F4 shortcut key ([#6736](https://github.com/dream-num/univer/issues/6736)) ([bab5bc9](https://github.com/dream-num/univer/commit/bab5bc9cfbd9e4d945caac3e897ead92d6f23030))
+* **formula:** fix some issues with the cross-worksheet cut formula ([#6722](https://github.com/dream-num/univer/issues/6722)) ([66631d4](https://github.com/dream-num/univer/commit/66631d4bbf0ebb9a172ecbb16b703f505e4c1439))
+* **paste:** fix cross-worksheet copy/cut/paste issues in data validation ([#6729](https://github.com/dream-num/univer/issues/6729)) ([361d467](https://github.com/dream-num/univer/commit/361d467834069985c4c403aed3c10d6d16613dfa))
+* **sheets-filter-ui:** refresh filter range and buttons on theme changes ([#6723](https://github.com/dream-num/univer/issues/6723)) ([dc752c4](https://github.com/dream-num/univer/commit/dc752c420cf1bcde5984109244f6f651851f5a51))
+* **sheets-ui:** sanitize clipboard HTML parsing ([#6738](https://github.com/dream-num/univer/issues/6738)) ([57f9ba8](https://github.com/dream-num/univer/commit/57f9ba830c805735a0bac5838172eb3fb6c60b1a))
+* **sheets-ui:** sync active editor after external cell updates ([#6728](https://github.com/dream-num/univer/issues/6728)) ([13e4a10](https://github.com/dream-num/univer/commit/13e4a1095e9f7d5a6d4ab024c1337b87794628cf))
+* **sheets:** update formula refs on clipboard cut/paste ([#6686](https://github.com/dream-num/univer/issues/6686)) ([0d37309](https://github.com/dream-num/univer/commit/0d373095f051cbcd2ffe6b6afe6fc8b409311d86))
+* **ui:** parse cell HTML with DOMParser ([#6735](https://github.com/dream-num/univer/issues/6735)) ([16db923](https://github.com/dream-num/univer/commit/16db923f64e3a4bbcc26fc1d166869566aaf68f2))
+* **ui:** sanitize legacy clipboard html copy and share base html sanitizer ([#6739](https://github.com/dream-num/univer/issues/6739)) ([4982cfd](https://github.com/dream-num/univer/commit/4982cfd12f78d61ae28ae16bdeacc737e90a9fcc))
+
+
+### Features
+
+* add theme builder example ([#6721](https://github.com/dream-num/univer/issues/6721)) ([6fc34df](https://github.com/dream-num/univer/commit/6fc34df1a6b45bbe8a15c70b754888ad613bcae2))
+* **sheets:** add excel-style f4 parity ([#6702](https://github.com/dream-num/univer/issues/6702)) ([89e5ded](https://github.com/dream-num/univer/commit/89e5ded4e11e3275bed1be42c12c43699303adc4))
+
+
+### Reverts
+
+* **tsdown:** stop bundling third-party deps ([#6742](https://github.com/dream-num/univer/issues/6742)) ([f57e7df](https://github.com/dream-num/univer/commit/f57e7dfbaa9415ff612b5f4637af56e4284d9573))
+
+# [0.18.0](https://github.com/dream-num/univer/compare/v0.17.0...v0.18.0) (2026-03-18)
+
+
+### Bug Fixes
+
+* **condition:** fix stopif ture err & refactor performance ([#6680](https://github.com/dream-num/univer/issues/6680)) ([3b7e5bd](https://github.com/dream-num/univer/commit/3b7e5bdc7547464cffa5d615720f459513bd25bd))
+* **drawing:** fix drawing init with multiple drawings should show grp… ([#6663](https://github.com/dream-num/univer/issues/6663)) ([55529eb](https://github.com/dream-num/univer/commit/55529eb264cc5214fd86b2bdcce879f5b164e8dc))
+* **drawing:** group init & dispose fix ([#6672](https://github.com/dream-num/univer/issues/6672)) ([5a4b955](https://github.com/dream-num/univer/commit/5a4b95540aed879ccb833249840d26a6c4686434))
+* fix null assertion issues ([#6682](https://github.com/dream-num/univer/issues/6682)) ([b77fbb8](https://github.com/dream-num/univer/commit/b77fbb80272fa48c96d3c6cd54e56046d9768c63))
+* **formula:** other formula update ([#6671](https://github.com/dream-num/univer/issues/6671)) ([0286df9](https://github.com/dream-num/univer/commit/0286df90daf7812e3e891bdaf6fef1e2ae000bb8))
+* **group:** fix group shape copy paste ([#6700](https://github.com/dream-num/univer/issues/6700)) ([6d9ee52](https://github.com/dream-num/univer/commit/6d9ee528737450823d11903b051d6ca2c45e44f0))
+* **paste:** fix copy and paste of data in pivot table rendering ([#6693](https://github.com/dream-num/univer/issues/6693)) ([bd84cd3](https://github.com/dream-num/univer/commit/bd84cd37d3c7d6cc182b478a31a95a9ed23973cf))
+* **render:** fix the issue of splitting strings containing emojis into glyphGroups ([#6697](https://github.com/dream-num/univer/issues/6697)) ([ef5f1f4](https://github.com/dream-num/univer/commit/ef5f1f4d0ba6a6092e6e0efb12c45bd4ff3a83c2))
+* **sheets:** prevent crash when accessing worksheet after skeleton disposed ([#6699](https://github.com/dream-num/univer/issues/6699)) ([952a701](https://github.com/dream-num/univer/commit/952a7014bf3797f6df5dfc0e0b3743d311844dea))
+* tiny menu quick tile text wrap in some localizations ([#6667](https://github.com/dream-num/univer/issues/6667)) ([d875cdf](https://github.com/dream-num/univer/commit/d875cdfd05f1854dd02ae68a172c505701a133c3))
+* **ui:** avoid nested button markup in context menu custom selectors ([#6698](https://github.com/dream-num/univer/issues/6698)) ([8ddbb4b](https://github.com/dream-num/univer/commit/8ddbb4b86a78f6187cb77c066d7ba7c189443faa))
+
+
+### Features
+
+* **docs-quick-insert-ui:** enhance placeholder rendering with dynamic styles ([#6673](https://github.com/dream-num/univer/issues/6673)) ([27b363f](https://github.com/dream-num/univer/commit/27b363fcd03782186d597999e104b410d5bfec2d))
+* **drawing:** add drawing group/arrange/align context menu ([#6678](https://github.com/dream-num/univer/issues/6678)) ([275d2f9](https://github.com/dream-num/univer/commit/275d2f9fd2c7447d34e49616ba9d0eee0363c231))
+* **sheets-ui:** add Ctrl+D (Copy Down) and Ctrl+R (Copy Right) shortcuts ([#6690](https://github.com/dream-num/univer/issues/6690)) ([c4988ba](https://github.com/dream-num/univer/commit/c4988baea55ad9180652a5a35afd3f77d276bdb1))
+* **ui:** add mobile context menu support and related functionalities ([#6674](https://github.com/dream-num/univer/issues/6674)) ([8569fe8](https://github.com/dream-num/univer/commit/8569fe8cb4162520b16b42dd861bfeac99e43d9b))
+* **ui:** add mobile ribbon ([#6677](https://github.com/dream-num/univer/issues/6677)) ([c25feda](https://github.com/dream-num/univer/commit/c25feda5bd48a0d977b772d1d1d0dcd14aac958c))
+
+# [0.17.0](https://github.com/dream-num/univer/compare/v0.16.1...v0.17.0) (2026-03-11)
+
+
+### Bug Fixes
+
+* change font size props value to number; increase font ([#6649](https://github.com/dream-num/univer/issues/6649)) ([66974b0](https://github.com/dream-num/univer/commit/66974b0f57148b3cf38fab75e8c82f2951673334))
+* **design:** vertically center Tree node title ([#6661](https://github.com/dream-num/univer/issues/6661)) ([1f504d6](https://github.com/dream-num/univer/commit/1f504d6f1d12ed45d59a5158887c07812107668a))
+* **drawing:** fix drawing group error ([#6635](https://github.com/dream-num/univer/issues/6635)) ([7393097](https://github.com/dream-num/univer/commit/73930971a53542245740f858af7b8c3ee849fd30))
+* **formula:** fix =((10-9)%)% ([#6630](https://github.com/dream-num/univer/issues/6630)) ([c15b3c3](https://github.com/dream-num/univer/commit/c15b3c3dc778af8a94d374e7d843a701271424e8))
+* **formula:** fix formula calculation errors caused by setting the worksheet rows and columns count ([#6668](https://github.com/dream-num/univer/issues/6668)) ([1f4b5ae](https://github.com/dream-num/univer/commit/1f4b5aeb774c3680955849b47a6f567c742071d6))
+* **formula:** fix where formulas like COUNTIFS would cause memory overflow when the range and condition values ​​were very large ([#6647](https://github.com/dream-num/univer/issues/6647)) ([9ca7e2e](https://github.com/dream-num/univer/commit/9ca7e2e92986de2ffffeca36abca2b5428adb6e5))
+* **render:** fix scrollbar calculation issue that caused an extra blank area on the far right ([#6659](https://github.com/dream-num/univer/issues/6659)) ([281804d](https://github.com/dream-num/univer/commit/281804d36b4024b589272d61d6f9de55f687bc66))
+
+
+### Features
+
+* **core:** add version and package name validation for plugins ([#6653](https://github.com/dream-num/univer/issues/6653)) ([a1b83e5](https://github.com/dream-num/univer/commit/a1b83e5da4e8612426f8e21beb9bdb5346a70731))
+
 ## [0.16.1](https://github.com/dream-num/univer/compare/v0.16.0...v0.16.1) (2026-03-03)
 
 # [0.16.0](https://github.com/dream-num/univer/compare/v0.15.5...v0.16.0) (2026-02-28)

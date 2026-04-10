@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from '@univerjs/core';
-
 import type { IObjectFullState } from '../basics/interfaces';
 import type { IPoint, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
@@ -161,7 +159,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         REGULAR_POLYGON_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof RegularPolygon]) {
                 props[key] = this[key as keyof RegularPolygon];

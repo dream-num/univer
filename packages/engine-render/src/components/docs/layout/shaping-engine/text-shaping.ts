@@ -20,7 +20,7 @@ import { BooleanNumber } from '@univerjs/core';
 // @ts-ignore
 import { parse } from 'opentype.js/dist/opentype.module';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
-import { EMOJI_REG } from '../../../../basics/tools';
+import { getFirstGrapheme, isEmojiGrapheme } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';
 import { prepareTextChunks } from './utils';
 
@@ -116,24 +116,24 @@ function shapeChunk(
         } else {
             const start = startIndex;
             const subStr = content.substring(start);
-            const emojiMatch = subStr.match(EMOJI_REG);
+            const firstGrapheme = getFirstGrapheme(subStr);
 
-            if (emojiMatch) {
+            if (firstGrapheme && isEmojiGrapheme(firstGrapheme)) {
                 let acc = 0;
                 do {
                     acc += chars[gi].length;
                     startIndex += chars[gi].length;
                     gi++;
-                } while (acc < emojiMatch[0].length);
+                } while (acc < firstGrapheme.length);
 
-                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families, style));
+                results.push(...shapeChunk(content.slice(start, start + firstGrapheme.length), charPosition + start, used, families, style));
 
                 continue;
             } else {
                 let nextGlyph = glyphs[gi + 1];
                 let nextChar = chars[gi + 1];
 
-                while (nextGlyph?.index === 0 && !EMOJI_REG.test(nextChar)) {
+                while (nextGlyph?.index === 0 && !isEmojiGrapheme(nextChar)) {
                     startIndex += chars[gi].length;
                     gi++;
                     nextGlyph = glyphs[gi + 1];

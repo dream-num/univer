@@ -54,9 +54,24 @@ export function getNewRangeByMoveParam(
     unitRangeWidthOffset: IUnitRangeWithOffset,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam,
     currentFormulaUnitId: string,
-    currentFormulaSheetId: string
+    currentFormulaSheetId: string,
+    options: {
+        preserveSheetQualifier?: boolean;
+        inCrossSheetCutRange?: boolean;
+    } = {}
 ) {
-    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to, rangeFilteredRows } = formulaReferenceMoveParam;
+    const {
+        type,
+        unitId: userUnitId,
+        sheetId: userSheetId,
+        targetUnitId,
+        targetSheetId,
+        targetSheetName,
+        range,
+        from,
+        to,
+        rangeFilteredRows,
+    } = formulaReferenceMoveParam;
 
     const {
         range: unitRange,
@@ -66,6 +81,7 @@ export function getNewRangeByMoveParam(
         refOffsetX,
         refOffsetY,
     } = unitRangeWidthOffset;
+    const { preserveSheetQualifier = false, inCrossSheetCutRange = false } = options;
 
     if (
         !checkIsSameUnitAndSheet(
@@ -353,10 +369,24 @@ export function getNewRangeByMoveParam(
         return;
     }
 
+    const shouldRewriteSheet = type === FormulaReferenceMoveType.MoveRange
+        && !!targetSheetId
+        && targetSheetId !== userSheetId
+        && !inCrossSheetCutRange;
+    const rewrittenSheetId = shouldRewriteSheet ? targetSheetId : sequenceRangeSheetId;
+    const rewrittenSheetName = shouldRewriteSheet ? (targetSheetName || sequenceRangeSheetName) : sequenceRangeSheetName;
+    const rewrittenUnitId = shouldRewriteSheet ? (targetUnitId || sequenceRangeUnitId) : sequenceRangeUnitId;
+    // We need the destination sheet to decide whether a rewritten ref should stay local (`A1`)
+    // or become explicitly qualified (`Sheet2!A1`) after a move.
+    const isCurrentFormulaWorkbook = rewrittenUnitId == null
+        || rewrittenUnitId.length === 0
+        || rewrittenUnitId === currentFormulaUnitId;
+    const isCurrentFormulaSheet = rewrittenSheetId === currentFormulaSheetId;
+
     return serializeRangeToRefString({
         range: newRange,
-        sheetName: sequenceRangeSheetName,
-        unitId: sequenceRangeUnitId,
+        sheetName: preserveSheetQualifier || !(isCurrentFormulaWorkbook && isCurrentFormulaSheet) ? rewrittenSheetName : '',
+        unitId: isCurrentFormulaWorkbook ? '' : rewrittenUnitId,
     });
 }
 

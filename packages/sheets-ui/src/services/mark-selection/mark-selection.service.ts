@@ -19,11 +19,9 @@ import type { RenderUnit } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Disposable, generateRandomId, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
+import { attachSelectionWithCoord, SheetSkeletonService } from '@univerjs/sheets';
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';
 import { SelectionControl } from '../selection/selection-control';
-import { attachSelectionWithCoord } from '../selection/util';
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
@@ -56,6 +54,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
     constructor(
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
@@ -116,7 +115,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             const renderUnit = this._renderManagerService.getRenderById(unitId) as RenderUnit;
             if (!renderUnit) return;
 
-            const skeleton = renderUnit.with(SheetSkeletonManagerService).getCurrentSkeleton();
+            const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
             if (!skeleton) return;
 
             const { scene } = renderUnit;

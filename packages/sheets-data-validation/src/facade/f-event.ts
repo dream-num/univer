@@ -23,10 +23,10 @@ import { FEventName } from '@univerjs/core/facade';
 
 /**
  * Event interface triggered when a data validation rule is changed
- * @interface ISheetDataValidationChangedEvent
+ * @interface ISheetDataValidationChangedEventParams
  * @augments {IEventBase}
  */
-export interface ISheetDataValidationChangedEvent extends IEventBase {
+export interface ISheetDataValidationChangedEventParams extends IEventBase {
     /** The source of the rule change */
     origin: IRuleChange;
     /** The worksheet containing the validation rule */
@@ -43,10 +43,10 @@ export interface ISheetDataValidationChangedEvent extends IEventBase {
 
 /**
  * Event interface triggered when a data validation status changes
- * @interface ISheetDataValidatorStatusChangedEvent
+ * @interface ISheetDataValidatorStatusChangedEventParams
  * @augments {IEventBase}
  */
-export interface ISheetDataValidatorStatusChangedEvent extends IEventBase {
+export interface ISheetDataValidatorStatusChangedEventParams extends IEventBase {
     /** The worksheet containing the validation */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -63,10 +63,10 @@ export interface ISheetDataValidatorStatusChangedEvent extends IEventBase {
 
 /**
  * Event interface triggered before adding a new data validation rule
- * @interface IBeforeSheetDataValidationAddEvent
+ * @interface IBeforeSheetDataValidationAddEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetDataValidationAddEvent extends IEventBase {
+export interface IBeforeSheetDataValidationAddEventParams extends IEventBase {
     /** The worksheet to add the validation to */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -77,10 +77,10 @@ export interface IBeforeSheetDataValidationAddEvent extends IEventBase {
 
 /**
  * Event interface triggered before deleting a data validation rule
- * @interface IBeforeSheetDataValidationDeleteEvent
+ * @interface IBeforeSheetDataValidationDeleteEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetDataValidationDeleteEvent extends IEventBase {
+export interface IBeforeSheetDataValidationDeleteEventParams extends IEventBase {
     /** The worksheet containing the validation */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -93,10 +93,10 @@ export interface IBeforeSheetDataValidationDeleteEvent extends IEventBase {
 
 /**
  * Event interface triggered before updating a data validation rule's criteria
- * @interface IBeforeSheetDataValidationCriteriaUpdateEvent
+ * @interface IBeforeSheetDataValidationCriteriaUpdateEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetDataValidationCriteriaUpdateEvent extends IEventBase {
+export interface IBeforeSheetDataValidationCriteriaUpdateEventParams extends IEventBase {
     /** The worksheet containing the validation */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -111,10 +111,10 @@ export interface IBeforeSheetDataValidationCriteriaUpdateEvent extends IEventBas
 
 /**
  * Event interface triggered before updating a data validation rule's ranges
- * @interface IBeforeSheetDataValidationRangeUpdateEvent
+ * @interface IBeforeSheetDataValidationRangeUpdateEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetDataValidationRangeUpdateEvent extends IEventBase {
+export interface IBeforeSheetDataValidationRangeUpdateEventParams extends IEventBase {
     /** The worksheet containing the validation */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -129,10 +129,10 @@ export interface IBeforeSheetDataValidationRangeUpdateEvent extends IEventBase {
 
 /**
  * Event interface triggered before updating a data validation rule's options
- * @interface IBeforeSheetDataValidationOptionsUpdateEvent
+ * @interface IBeforeSheetDataValidationOptionsUpdateEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetDataValidationOptionsUpdateEvent extends IEventBase {
+export interface IBeforeSheetDataValidationOptionsUpdateEventParams extends IEventBase {
     /** The worksheet containing the validation */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -147,10 +147,10 @@ export interface IBeforeSheetDataValidationOptionsUpdateEvent extends IEventBase
 
 /**
  * Event interface triggered before deleting all data validation rules
- * @interface IBeforeSheetDataValidationDeleteAllEvent
+ * @interface IBeforeSheetDataValidationDeleteAllEventParams
  * @augments {IEventBase}
  */
-export interface IBeforeSheetDataValidationDeleteAllEvent extends IEventBase {
+export interface IBeforeSheetDataValidationDeleteAllEventParams extends IEventBase {
     /** The worksheet containing the validations */
     worksheet: FWorksheet;
     /** The workbook instance */
@@ -163,23 +163,23 @@ export interface IBeforeSheetDataValidationDeleteAllEvent extends IEventBase {
  * @ignore
  */
 export interface IDataValidationEventParamConfig {
-    SheetDataValidationChanged: ISheetDataValidationChangedEvent;
-    SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEvent;
-    BeforeSheetDataValidationAdd: IBeforeSheetDataValidationAddEvent;
-    BeforeSheetDataValidationDelete: IBeforeSheetDataValidationDeleteEvent;
-    BeforeSheetDataValidationDeleteAll: IBeforeSheetDataValidationDeleteAllEvent;
-    BeforeSheetDataValidationCriteriaUpdate: IBeforeSheetDataValidationCriteriaUpdateEvent;
-    BeforeSheetDataValidationRangeUpdate: IBeforeSheetDataValidationRangeUpdateEvent;
-    BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEvent;
+    SheetDataValidationChanged: ISheetDataValidationChangedEventParams;
+    SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEventParams;
+    BeforeSheetDataValidationAdd: IBeforeSheetDataValidationAddEventParams;
+    BeforeSheetDataValidationDelete: IBeforeSheetDataValidationDeleteEventParams;
+    BeforeSheetDataValidationDeleteAll: IBeforeSheetDataValidationDeleteAllEventParams;
+    BeforeSheetDataValidationCriteriaUpdate: IBeforeSheetDataValidationCriteriaUpdateEventParams;
+    BeforeSheetDataValidationRangeUpdate: IBeforeSheetDataValidationRangeUpdateEventParams;
+    BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEventParams;
 }
 
 /**
  * @ignore
  */
-interface IDataValidationEvent {
+interface IFSheetsDataValidationEventNameMixin {
     /**
      * Event fired when a rule is added, deleted, or modified
-     * @see {@link ISheetDataValidationChangedEvent}
+     * @see {@link ISheetDataValidationChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidationChanged, (params) => {
@@ -194,7 +194,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired when a cell validator status is changed
-     * @see {@link ISheetDataValidatorStatusChangedEvent}
+     * @see {@link ISheetDataValidatorStatusChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDataValidatorStatusChanged, (params) => {
@@ -209,7 +209,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired before a rule is added
-     * @see {@link IBeforeSheetDataValidationAddEvent}
+     * @see {@link IBeforeSheetDataValidationAddEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationAdd, (params) => {
@@ -227,7 +227,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired before a rule is deleted
-     * @see {@link IBeforeSheetDataValidationDeleteEvent}
+     * @see {@link IBeforeSheetDataValidationDeleteEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDelete, (params) => {
@@ -245,7 +245,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired before all rules are deleted
-     * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
+     * @see {@link IBeforeSheetDataValidationDeleteAllEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (params) => {
@@ -263,7 +263,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired before the criteria of a rule are updated
-     * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
+     * @see {@link IBeforeSheetDataValidationCriteriaUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (params) => {
@@ -281,7 +281,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired before the range of a rule is updated
-     * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
+     * @see {@link IBeforeSheetDataValidationRangeUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (params) => {
@@ -299,7 +299,7 @@ interface IDataValidationEvent {
 
     /**
      * Event fired before the options of a rule are updated
-     * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
+     * @see {@link IBeforeSheetDataValidationOptionsUpdateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (params) => {
@@ -319,36 +319,36 @@ interface IDataValidationEvent {
 /**
  * @ignore
  */
-export class FDataValidationEvent implements IDataValidationEvent {
-    get SheetDataValidationChanged(): 'SheetDataValidationChanged' {
+export class FSheetsDataValidationEventNameMixin extends FEventName implements IFSheetsDataValidationEventNameMixin {
+    override get SheetDataValidationChanged(): 'SheetDataValidationChanged' {
         return 'SheetDataValidationChanged';
     }
 
-    get SheetDataValidatorStatusChanged(): 'SheetDataValidatorStatusChanged' {
+    override get SheetDataValidatorStatusChanged(): 'SheetDataValidatorStatusChanged' {
         return 'SheetDataValidatorStatusChanged';
     }
 
-    get BeforeSheetDataValidationAdd(): 'BeforeSheetDataValidationAdd' {
+    override get BeforeSheetDataValidationAdd(): 'BeforeSheetDataValidationAdd' {
         return 'BeforeSheetDataValidationAdd';
     }
 
-    get BeforeSheetDataValidationDelete(): 'BeforeSheetDataValidationDelete' {
+    override get BeforeSheetDataValidationDelete(): 'BeforeSheetDataValidationDelete' {
         return 'BeforeSheetDataValidationDelete';
     }
 
-    get BeforeSheetDataValidationDeleteAll(): 'BeforeSheetDataValidationDeleteAll' {
+    override get BeforeSheetDataValidationDeleteAll(): 'BeforeSheetDataValidationDeleteAll' {
         return 'BeforeSheetDataValidationDeleteAll';
     }
 
-    get BeforeSheetDataValidationCriteriaUpdate(): 'BeforeSheetDataValidationCriteriaUpdate' {
+    override get BeforeSheetDataValidationCriteriaUpdate(): 'BeforeSheetDataValidationCriteriaUpdate' {
         return 'BeforeSheetDataValidationCriteriaUpdate';
     }
 
-    get BeforeSheetDataValidationRangeUpdate(): 'BeforeSheetDataValidationRangeUpdate' {
+    override get BeforeSheetDataValidationRangeUpdate(): 'BeforeSheetDataValidationRangeUpdate' {
         return 'BeforeSheetDataValidationRangeUpdate';
     }
 
-    get BeforeSheetDataValidationOptionsUpdate(): 'BeforeSheetDataValidationOptionsUpdate' {
+    override get BeforeSheetDataValidationOptionsUpdate(): 'BeforeSheetDataValidationOptionsUpdate' {
         return 'BeforeSheetDataValidationOptionsUpdate';
     }
 }
@@ -356,23 +356,23 @@ export class FDataValidationEvent implements IDataValidationEvent {
 /**
  * @ignore
  */
-export interface IDataValidationEventConfig {
-    SheetDataValidationChanged: ISheetDataValidationChangedEvent;
-    SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEvent;
-    BeforeSheetDataValidationAdd: IBeforeSheetDataValidationAddEvent;
-    BeforeSheetDataValidationDelete: IBeforeSheetDataValidationDeleteEvent;
-    BeforeSheetDataValidationDeleteAll: IBeforeSheetDataValidationDeleteAllEvent;
-    BeforeSheetDataValidationCriteriaUpdate: IBeforeSheetDataValidationCriteriaUpdateEvent;
-    BeforeSheetDataValidationRangeUpdate: IBeforeSheetDataValidationRangeUpdateEvent;
-    BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEvent;
+export interface ISheetsDataValidationEventParamConfig {
+    SheetDataValidationChanged: ISheetDataValidationChangedEventParams;
+    SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEventParams;
+    BeforeSheetDataValidationAdd: IBeforeSheetDataValidationAddEventParams;
+    BeforeSheetDataValidationDelete: IBeforeSheetDataValidationDeleteEventParams;
+    BeforeSheetDataValidationDeleteAll: IBeforeSheetDataValidationDeleteAllEventParams;
+    BeforeSheetDataValidationCriteriaUpdate: IBeforeSheetDataValidationCriteriaUpdateEventParams;
+    BeforeSheetDataValidationRangeUpdate: IBeforeSheetDataValidationRangeUpdateEventParams;
+    BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEventParams;
 }
 
-FEventName.extend(FDataValidationEvent);
+FEventName.extend(FSheetsDataValidationEventNameMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends IDataValidationEvent {
+    interface FEventName extends IFSheetsDataValidationEventNameMixin {
     }
 
-    interface IEventParamConfig extends IDataValidationEventParamConfig {
+    interface IEventParamConfig extends ISheetsDataValidationEventParamConfig {
     }
 }

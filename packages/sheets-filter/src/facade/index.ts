@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import './f-univer';
 import './f-filter';
 import './f-range';
 import './f-worksheet';
@@ -25,4 +26,5 @@ export type * from './f-event';
 export { FFilter } from './f-filter';
 export type * from './f-filter';
 export type * from './f-range';
+export type * from './f-univer';
 export type * from './f-worksheet';

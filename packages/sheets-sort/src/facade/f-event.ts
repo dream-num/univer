@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Injector } from '@univerjs/core';
 import type { IEventBase } from '@univerjs/core/facade';
-import type { ISortRangeCommandParams } from '@univerjs/sheets-sort';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { ICommandService } from '@univerjs/core';
-import { FEventName, FUniver } from '@univerjs/core/facade';
-import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
-import { FSheetEventName } from '@univerjs/sheets/facade';
+import { FEventName } from '@univerjs/core/facade';
 
 /**
  * @ignore
  */
-export interface IFSheetSortEventMixin {
+export interface IFSheetsSortEventNameMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.
      * @see {@link ISheetRangeSortParams}
@@ -61,7 +56,7 @@ export interface IFSheetSortEventMixin {
     SheetBeforeRangeSort: 'SheetBeforeRangeSort';
 }
 
-export class FSheetSortEventName implements IFSheetSortEventMixin {
+export class FSheetsSortEventNameMixin implements IFSheetsSortEventNameMixin {
     get SheetRangeSorted(): 'SheetRangeSorted' { return 'SheetRangeSorted' as const; }
     get SheetBeforeRangeSort(): 'SheetBeforeRangeSort' { return 'SheetBeforeRangeSort' as const; }
 }
@@ -71,7 +66,7 @@ interface ISortColumn {
     ascending: boolean;
 }
 
-export interface ISheetRangeSortParams extends IEventBase {
+export interface ISheetsRangeSortEventParams extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     range: FRange;
@@ -81,91 +76,14 @@ export interface ISheetRangeSortParams extends IEventBase {
 /**
  * @ignore
  */
-export interface ISheetRangeSortEventParamConfig {
-    SheetBeforeRangeSort: ISheetRangeSortParams;
-    SheetRangeSorted: ISheetRangeSortParams;
+export interface ISheetsSortEventParamConfig {
+    SheetBeforeRangeSort: ISheetsRangeSortEventParams;
+    SheetRangeSorted: ISheetsRangeSortEventParams;
 }
 
-FEventName.extend(FSheetEventName);
-
-class FUniverSheetsSortEventMixin extends FUniver {
-    /**
-     * @ignore
-     */
-    override _initialize(injector: Injector): void {
-        const commandService = injector.get(ICommandService);
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetBeforeRangeSort,
-                () => commandService.beforeCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== SortRangeCommand.id) return;
-                    this._beforeRangeSort(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            this.registerEventHandler(
-                this.Event.SheetRangeSorted,
-                () => commandService.onCommandExecuted((commandInfo) => {
-                    if (commandInfo.id !== SortRangeCommand.id) return;
-                    this._onRangeSorted(commandInfo as Readonly<ICommandInfo<ISortRangeCommandParams>>);
-                })
-            )
-        );
-    }
-
-    private _beforeRangeSort(commandInfo: Readonly<ICommandInfo<ISortRangeCommandParams>>): void {
-        const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
-        const fWorksheet = fWorkbook.getSheetBySheetId(params.subUnitId)!;
-        const { startColumn, endColumn, startRow, endRow } = params.range;
-        const fRange = fWorksheet.getRange(startRow, startColumn, endRow - startRow + 1, endColumn - startColumn + 1);
-        const eventParams: ISheetRangeSortParams = {
-            workbook: fWorkbook,
-            worksheet: fWorksheet,
-            range: fRange,
-            sortColumn: params.orderRules.map((rule) => ({
-                column: rule.colIndex - startColumn,
-                ascending: rule.type === SortType.ASC,
-            })),
-        };
-
-        this.fireEvent(this.Event.SheetBeforeRangeSort, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('SortRangeCommand canceled.');
-        }
-    }
-
-    private _onRangeSorted(commandInfo: Readonly<ICommandInfo<ISortRangeCommandParams>>): void {
-        const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
-        const fWorksheet = fWorkbook.getSheetBySheetId(params.subUnitId)!;
-        const { startColumn, endColumn, startRow, endRow } = params.range;
-        const fRange = fWorksheet.getRange(startRow, startColumn, endRow - startRow + 1, endColumn - startColumn + 1);
-        const eventParams: ISheetRangeSortParams = {
-            workbook: fWorkbook,
-            worksheet: fWorksheet,
-            range: fRange,
-            sortColumn: params.orderRules.map((rule) => ({
-                column: rule.colIndex - startColumn,
-                ascending: rule.type === SortType.ASC,
-            })),
-        };
-
-        this.fireEvent(this.Event.SheetRangeSorted, eventParams);
-        if (eventParams.cancel) {
-            throw new Error('SortRangeCommand canceled.');
-        }
-    }
-}
-
-FUniver.extend(FUniverSheetsSortEventMixin);
-FEventName.extend(FSheetSortEventName);
-
+FEventName.extend(FSheetsSortEventNameMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends IFSheetSortEventMixin { }
-    interface IEventParamConfig extends ISheetRangeSortEventParamConfig { }
+    interface FEventName extends IFSheetsSortEventNameMixin { }
+    interface IEventParamConfig extends ISheetsSortEventParamConfig { }
 }

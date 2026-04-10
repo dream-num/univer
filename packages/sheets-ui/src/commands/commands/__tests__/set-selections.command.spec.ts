@@ -18,9 +18,11 @@ import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
+    IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
 } from '../set-selection.command';
 import { Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     SetColHiddenCommand,
     SetColHiddenMutation,
@@ -30,10 +32,14 @@ import {
     SetRowVisibleMutation,
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
+    SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
+import { KeyCode } from '@univerjs/ui';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SelectAllService } from '../../../services/select-all/select-all.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, SelectAllCommand } from '../set-selection.command';
 import {
     createSelectionCommandTestBed,
     SELECTION_WITH_EMPTY_CELLS_DATA,
@@ -360,6 +366,199 @@ describe('Test commands used for change selections', () => {
         });
     });
 
+    describe('Formula editor movement semantics', () => {
+        it('should use merged range bounds when moving in formula editor without a primary cell', async () => {
+            prepareSelectionsTestBed(SELECTION_WITH_MERGED_CELLS_DATA);
+
+            selectionManagerService.clear();
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                extra: 'formula-editor',
+            });
+
+            expectSelectionToBe(0, 2, 0, 2);
+        });
+
+        it('should reuse remembered primary cell in formula editor for move and expand', async () => {
+            prepareSelectionsTestBed();
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 1,
+                        startColumn: 1,
+                        endRow: 1,
+                        endColumn: 1,
+                        actualRow: 1,
+                        actualColumn: 1,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                extra: 'formula-editor',
+            });
+            expectSelectionToBe(1, 2, 1, 2);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                extra: 'formula-editor',
+            });
+            expectSelectionToBe(0, 0, 1, 2);
+        });
+
+        it('should expand from merged bounds in formula editor', async () => {
+            prepareSelectionsTestBed(SELECTION_WITH_MERGED_CELLS_DATA);
+
+            selectionManagerService.clear();
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                extra: 'formula-editor',
+            });
+
+            const selection = selectionManagerService.getCurrentLastSelection()!.range;
+            expect(selection.startRow).toBe(0);
+            expect(selection.startColumn).toBe(1);
+            expect(selection.endColumn).toBe(2);
+        });
+
+        it('should preserve remembered primary when expanding a merged formula reference', async () => {
+            prepareSelectionsTestBed(SELECTION_WITH_MERGED_CELLS_DATA);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 1,
+                        startColumn: 1,
+                        endRow: 1,
+                        endColumn: 1,
+                        actualRow: 1,
+                        actualColumn: 1,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 0, startColumn: 1, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                extra: 'formula-editor',
+            });
+
+            expectSelectionToBe(0, 1, 1, 2);
+        });
+    });
+
+    describe('Guard branches', () => {
+        beforeEach(() => {
+            prepareSelectionsTestBed();
+            commandService.registerCommand(MoveSelectionEnterAndTabCommand);
+        });
+
+        it('should return false for movement commands when params are missing', async () => {
+            await expect(commandService.executeCommand(MoveSelectionCommand.id, undefined)).resolves.toBe(false);
+            await expect(commandService.executeCommand(ExpandSelectionCommand.id, undefined)).resolves.toBe(false);
+            await expect(commandService.executeCommand(MoveSelectionEnterAndTabCommand.id, undefined)).resolves.toBe(false);
+        });
+
+        it('should return false when there is no current selection', async () => {
+            selectionManagerService.clear();
+
+            await expect(commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
+                loop: false,
+                expandToGapFirst: true,
+            })).resolves.toBe(false);
+        });
+
+        it('should return false when there is no active workbook target', async () => {
+            const univerInstanceService = get(IUniverInstanceService);
+            vi.spyOn(univerInstanceService, 'getCurrentUnitForType').mockReturnValue(null as never);
+
+            await expect(commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
+                loop: true,
+                expandToGapFirst: true,
+            })).resolves.toBe(false);
+        });
+
+        it('should return false when enter/tab flow has no active primary selection', async () => {
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            })).resolves.toBe(false);
+        });
+    });
+
     describe('Expand to next selection or shrink to previous selection', () => {
         beforeEach(() => prepareSelectionsTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
 
@@ -504,6 +703,170 @@ describe('Test commands used for change selections', () => {
         });
     });
 
+    describe('Move selection for enter/tab in editing flow', () => {
+        beforeEach(() => {
+            prepareSelectionsTestBed();
+            commandService.registerCommand(MoveSelectionEnterAndTabCommand);
+        });
+
+        it('should move active cell inside multi-selections and wrap to the next selection', async () => {
+            const refreshSelectionMoveEnd = vi.fn();
+            const renderManagerService = get(IRenderManagerService);
+            vi.spyOn(renderManagerService, 'getRenderById').mockReturnValue({
+                with: (identifier: unknown) => {
+                    if (identifier === ISheetSelectionRenderService) {
+                        return { refreshSelectionMoveEnd };
+                    }
+
+                    return null;
+                },
+            } as never);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        actualRow: 0,
+                        actualColumn: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+                {
+                    range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 1,
+                        startColumn: 0,
+                        endRow: 1,
+                        endColumn: 0,
+                        actualRow: 1,
+                        actualColumn: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            });
+
+            let activeSelection = selectionManagerService.getCurrentSelections().find((selection) => selection.primary);
+            expect(activeSelection?.range).toEqual({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 0,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+            expect(activeSelection?.primary?.startColumn).toBe(1);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            });
+
+            activeSelection = selectionManagerService.getCurrentSelections().find((selection) => selection.primary);
+            expect(activeSelection?.range).toEqual({
+                startRow: 1,
+                startColumn: 0,
+                endRow: 1,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+            expect(activeSelection?.primary?.startRow).toBe(1);
+            expect(activeSelection?.primary?.startColumn).toBe(0);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.LEFT,
+                keycode: KeyCode.TAB,
+            });
+
+            activeSelection = selectionManagerService.getCurrentSelections().find((selection) => selection.primary);
+            expect(activeSelection?.range).toEqual({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 0,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+            expect(activeSelection?.primary?.startRow).toBe(0);
+            expect(activeSelection?.primary?.startColumn).toBe(1);
+            expect(refreshSelectionMoveEnd).toHaveBeenCalledTimes(3);
+        });
+
+        it('should remember tab origin for enter and stop at sheet boundaries', async () => {
+            selectTopLeft();
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            });
+            expectSelectionToBe(0, 1, 0, 1);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.DOWN,
+                keycode: KeyCode.ENTER,
+            });
+            expectSelectionToBe(1, 0, 1, 0);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 19, startColumn: 19, endRow: 19, endColumn: 19, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 19,
+                        startColumn: 19,
+                        endRow: 19,
+                        endColumn: 19,
+                        actualRow: 19,
+                        actualColumn: 19,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+
+            await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            })).resolves.toBe(false);
+            expectSelectionToBe(19, 19, 19, 19);
+
+            await expect(commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.DOWN,
+                keycode: KeyCode.ENTER,
+            })).resolves.toBe(false);
+            expectSelectionToBe(19, 19, 19, 19);
+        });
+
+        it('should keep the original tab anchor across repeated tab moves before enter', async () => {
+            selectTopLeft();
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            });
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            });
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.DOWN,
+                keycode: KeyCode.ENTER,
+            });
+
+            expectSelectionToBe(1, 0, 1, 0);
+        });
+    });
+
     describe('Select all', () => {
         beforeEach(() => prepareSelectionsTestBed());
 
@@ -589,6 +952,28 @@ describe('Test commands used for change selections', () => {
             });
         });
 
+        it('should use default select-all params when none are provided', async () => {
+            selectTopLeft();
+
+            await commandService.executeCommand(SelectAllCommand.id);
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 1,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+
+            await commandService.executeCommand(SelectAllCommand.id);
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 19,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.ALL,
+            });
+        });
+
         it('Should not loop selection when `loop` is false', async () => {
             selectTopLeft();
 
@@ -608,6 +993,98 @@ describe('Test commands used for change selections', () => {
                 loop: false,
                 expandToGapFirst: false,
             });
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 19,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.ALL,
+            });
+        });
+
+        it('should append interceptor redos to select-all execution', async () => {
+            selectTopLeft();
+
+            get(SheetInterceptorService).interceptCommand({
+                getMutations: (command) => {
+                    if (command.id !== SelectAllCommand.id) {
+                        return { undos: [], redos: [] };
+                    }
+
+                    return {
+                        undos: [],
+                        redos: [
+                            {
+                                id: 'sheet.operation.set-selections',
+                                params: {
+                                    unitId: 'test',
+                                    subUnitId: 'sheet1',
+                                    reveal: true,
+                                    selections: [
+                                        {
+                                            range: {
+                                                startRow: 2,
+                                                startColumn: 2,
+                                                endRow: 2,
+                                                endColumn: 2,
+                                                rangeType: RANGE_TYPE.NORMAL,
+                                            },
+                                            primary: {
+                                                startRow: 2,
+                                                startColumn: 2,
+                                                endRow: 2,
+                                                endColumn: 2,
+                                                actualRow: 2,
+                                                actualColumn: 2,
+                                                isMerged: false,
+                                                isMergedMainCell: false,
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    };
+                },
+            });
+
+            await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
+                loop: false,
+                expandToGapFirst: false,
+            });
+
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 2,
+                startColumn: 2,
+                endRow: 2,
+                endColumn: 2,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+        });
+
+        it('should stop looping when the current whole-sheet selection is not the last stacked range', async () => {
+            const selectAllService = get(SelectAllService);
+
+            selectTopLeft();
+
+            await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
+                loop: true,
+                expandToGapFirst: false,
+            });
+
+            selectAllService.rangesStack.push({
+                startRow: 0,
+                startColumn: 0,
+                endRow: 0,
+                endColumn: 0,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+
+            await expect(commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
+                loop: true,
+                expandToGapFirst: false,
+            })).resolves.toBe(false);
+
             expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,

@@ -25,7 +25,7 @@ import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
 /**
  * @ignore
  */
-export interface IFRangeCommentMixin {
+export interface IFRangeSheetsThreadCommentMixin {
     /**
      * Get the comment of the start cell in the current range.
      * @returns {FThreadComment | null} The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
@@ -115,7 +115,7 @@ export interface IFRangeCommentMixin {
 /**
  * @ignore
  */
-export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
+export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeSheetsThreadCommentMixin {
     override getComment(): Nullable<FThreadComment> {
         const injector = this._injector;
         const sheetsTheadCommentModel = injector.get(SheetsThreadCommentModel);
@@ -221,8 +221,8 @@ export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
     }
 }
 
-FRange.extend(FRangeCommentMixin);
+FRange.extend(FRangeSheetsThreadCommentMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeCommentMixin {}
+    interface FRange extends IFRangeSheetsThreadCommentMixin { }
 }

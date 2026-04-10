@@ -458,6 +458,8 @@ const locale = {
             copy: 'Copy',
             alert: 'Alert',
             search: 'Search',
+            ownerInherit: 'Document owner, enabled permission inheritance',
+            ownerWithoutInherit: 'Document owner, not enabled permission inheritance',
             alertContent: 'This range has been protected and no editing permissions are currently available. If you need to edit, please contact the creator.',
             userEmpty: 'no designated person , Share link to invite specific people.',
             listEmpty: 'You haven\'t set up any ranges or sheets as protected.',
@@ -477,6 +479,7 @@ const locale = {
             printErr: 'The worksheet is protected, and you do not have permission to print. To print, please contact the creator.',
             formulaErr: 'The range or the referenced range is protected, and you do not have edit permission. To edit, please contact the creator.',
             hyperLinkErr: 'The range is protected, and you do not have permission to set hyperlinks. To set hyperlinks, please contact the creator.',
+            commentErr: 'The range is protected, and you do not have permission to comment. To comment, please contact the creator.',
         },
         button: {
             confirm: 'Confirm',

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "0.16.1",
+    "version": "0.20.0",
     "private": false,
     "description": "UniverSheet normal base-render",
     "author": "DreamNum <developer@univer.ai>",
@@ -51,11 +51,14 @@
         "lib"
     ],
     "scripts": {
+        "prepare": "node --experimental-strip-types ./scripts/generate-hyphen-pattern-loaders.mts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
-        "build": "univer-cli build"
+        "build:bundle": "univer-cli build",
+        "build:types": "tsc -p tsconfig.node.json",
+        "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
         "rxjs": ">=7.0.0"
@@ -73,9 +76,8 @@
         "@univerjs-infra/shared": "workspace:*",
         "jest-canvas-mock": "^2.5.2",
         "rxjs": "^7.8.2",
-        "typescript": "^5.9.3",
-        "vite": "^7.3.1",
-        "vitest": "^4.0.18"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.1"
     },
     "browser": {
         "fs": false

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType } from '@univerjs/core';
+import { ColumnSeparatorType, createDocumentModelWithStyle, LocaleService, Univer } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
+import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
 
 function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
@@ -339,5 +340,47 @@ describe('doc skeleton', () => {
 
         const noNode = skeleton.findNodeByCharIndex(9999);
         expect(noNode).toBeUndefined();
+    });
+
+    it('calculates real skeleton layout from document view model', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+
+        const documentModel = createDocumentModelWithStyle(
+            'This is a long sentence to trigger wrapping in layout ruler.\rSecond paragraph with tabs\tand punctuation.\r',
+            {}
+        );
+        documentModel.updateDocumentDataPageSize(160, 220);
+
+        const viewModel = new DocumentViewModel(documentModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        skeleton.calculate();
+
+        const skeletonData = skeleton.getSkeletonData();
+        expect(skeletonData?.pages.length).toBeGreaterThan(0);
+
+        const glyphGroup = skeletonData?.pages[0]
+            ?.sections[0]
+            ?.columns[0]
+            ?.lines[0]
+            ?.divides[0]
+            ?.glyphGroup;
+        const glyph = glyphGroup?.find((item) => item.content && item.content.trim().length > 0);
+        expect(glyph).toBeTruthy();
+
+        const position = skeleton.findPositionByGlyph(glyph as any, 0);
+        expect(position?.pageType).toBe(DocumentSkeletonPageType.BODY);
+
+        if (position) {
+            const index = skeleton.findCharIndexByPosition({
+                ...position,
+                isBack: true,
+            });
+            expect(typeof index).toBe('number');
+            expect(skeleton.findNodeByCharIndex(index as number)).toBeTruthy();
+        }
+
+        skeleton.dispose();
+        univer.dispose();
     });
 });

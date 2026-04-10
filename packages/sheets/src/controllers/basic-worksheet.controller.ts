@@ -22,7 +22,7 @@ import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMerg
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
 import { AppendRowCommand } from '../commands/commands/append-row.command';
-import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
+import { AutoClearContentCommand, AutoFillCommand, SheetCopyDownCommand, SheetCopyRightCommand } from '../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -130,7 +130,7 @@ import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/de
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
-import { CancelMarkDirtyRowAutoHeightMutation, MarkDirtyRowAutoHeightMutation } from '../commands/mutations/mark-dirty-auto-height.mutation';
+import { MarkDirtyFilterChangeMutation } from '../commands/mutations/mark-dirty-filter-change.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
@@ -167,6 +167,7 @@ import {
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
+import { CancelMarkDirtyRowAutoHeightOperation, MarkDirtyRowAutoHeightOperation } from '../commands/operations/mark-dirty-auto-height.operation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SelectRangeCommand, SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
@@ -190,6 +191,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     ) {
         super();
 
+        /**
+         * Mutations that effect formula calculation should be registered here.
+         * Because these mutations should be synced to the worker (if the worker is enabled) to trigger the formula recalculation.
+         * SetWorksheetRowCountMutation and SetWorksheetColumnCountMutation effect reference node generation, so they should also be registered here to avoid generating incorrect reference nodes in the worker.
+         */
         ([
             SetRangeValuesMutation,
             InsertColMutation,
@@ -212,14 +218,23 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetRowHiddenMutation, // formula SUBTOTAL
             SetRowVisibleMutation,
 
-            MarkDirtyRowAutoHeightMutation,
-            CancelMarkDirtyRowAutoHeightMutation,
+            MarkDirtyRowAutoHeightOperation,
+            CancelMarkDirtyRowAutoHeightOperation,
             CopyWorksheetEndMutation,
+
+            SetWorksheetRowCountMutation,
+            SetWorksheetColumnCountMutation,
+
+            MarkDirtyFilterChangeMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
         });
 
+        /**
+         * Worker do not need to know about the mutations that do not effect formula calculation, so set the config to true in the worker.
+         * Default is false, which means all mutations should be registered, so the main thread do not need to care about the config and just register all mutations.
+         */
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
         if (!onlyRegisterFormulaRelatedMutations) {
             [
@@ -314,9 +329,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 // SetWorksheetColIsAutoWidthCommand,
 
                 SetWorksheetRowCountCommand,
-                SetWorksheetRowCountMutation,
                 SetWorksheetColumnCountCommand,
-                SetWorksheetColumnCountMutation,
 
                 SelectRangeCommand,
                 SetSelectionsOperation,
@@ -371,6 +384,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RemoveRangeThemeMutation,
 
                 AutoFillCommand,
+                SheetCopyDownCommand,
+                SheetCopyRightCommand,
                 AutoClearContentCommand,
                 RefillCommand,
 

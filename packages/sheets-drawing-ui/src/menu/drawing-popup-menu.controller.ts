@@ -23,10 +23,10 @@ import { MessageType } from '@univerjs/design';
 import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { RemoveSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
-import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
 export class DrawingPopupMenuController extends RxDisposable {

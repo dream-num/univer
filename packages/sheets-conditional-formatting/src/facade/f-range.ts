@@ -39,7 +39,7 @@ import { FConditionalFormattingBuilder } from './f-conditional-formatting-builde
 /**
  * @ignore
  */
-export interface IFRangeConditionalFormattingMixin {
+export interface IFRangeSheetsConditionalFormattingMixin {
     /**
      * Gets all the conditional formatting for the current range.
      * @returns {IConditionFormattingRule[]} conditional formatting rules for the current range.
@@ -146,7 +146,7 @@ export interface IFRangeConditionalFormattingMixin {
     clearConditionalFormatRules(): FRange;
 }
 
-export class FRangeConditionalFormattingMixin extends FRange implements IFRangeConditionalFormattingMixin {
+export class FRangeSheetsConditionalFormattingMixin extends FRange implements IFRangeSheetsConditionalFormattingMixin {
     private _getConditionalFormattingRuleModel(): ConditionalFormattingRuleModel {
         return this._injector.get(ConditionalFormattingRuleModel);
     }
@@ -213,8 +213,8 @@ export class FRangeConditionalFormattingMixin extends FRange implements IFRangeC
     }
 }
 
-FRange.extend(FRangeConditionalFormattingMixin);
+FRange.extend(FRangeSheetsConditionalFormattingMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeConditionalFormattingMixin { }
+    interface FRange extends IFRangeSheetsConditionalFormattingMixin { }
 }

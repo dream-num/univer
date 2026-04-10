@@ -19,24 +19,6 @@
  */
 export type Nullable<T> = T | null | undefined | void;
 
-/**
- * Key value object
- *
- * @ignore
- * @deprecated As it has
- */
-export interface IKeyValue {
-    [key: string]: any;
-}
-
-/**
- * @ignore
- * @deprecated, use {@link Record} instead.
- */
-export interface IKeyType<T> {
-    [key: string]: T;
-}
-
 export type DeepReadonly<T> = {
     readonly [P in keyof T]: DeepReadonly<T[P]>;
 };

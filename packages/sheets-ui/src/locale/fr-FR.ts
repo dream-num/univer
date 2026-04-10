@@ -460,6 +460,8 @@ const locale: typeof enUS = {
             copy: 'Copier',
             alert: 'Alerte',
             search: 'Rechercher',
+            ownerInherit: 'Propriétaire du document, héritage des permissions activé',
+            ownerWithoutInherit: 'Propriétaire du document, héritage des permissions non activé',
             alertContent: 'Cette plage est protégée et aucune permission de modification n\'est actuellement disponible. Si vous avez besoin de modifier, veuillez contacter le créateur.',
             userEmpty: 'aucune personne désignée, Partagez le lien pour inviter des personnes spécifiques.',
             listEmpty: 'Vous n\'avez défini aucune plage ou feuille comme protégée.',
@@ -479,6 +481,7 @@ const locale: typeof enUS = {
             printErr: 'La feuille de calcul est protégée, et vous n\'avez pas la permission d\'imprimer. Pour imprimer, veuillez contacter le créateur.',
             formulaErr: 'La plage ou la plage référencée est protégée, et vous n\'avez pas la permission de modifier. Pour modifier, veuillez contacter le créateur.',
             hyperLinkErr: 'La plage est protégée, et vous n\'avez pas la permission de définir des liens hypertextes. Pour définir des liens hypertextes, veuillez contacter le créateur.',
+            commentErr: 'La plage est protégée, et vous n\'avez pas la permission de commenter. Pour commenter, veuillez contacter le créateur.',
         },
         button: {
             confirm: 'Confirmer',

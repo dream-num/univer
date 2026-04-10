@@ -16,7 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DragManagerService } from '../services/drag-manager.service';

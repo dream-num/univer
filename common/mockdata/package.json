@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/mockdata",
-    "version": "0.16.1",
+    "version": "0.20.0",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -24,7 +24,7 @@
     },
     "main": "./src/index.ts",
     "scripts": {
-        "prepare": "tsx ./scripts/generate-locales.ts"
+        "prepare": "node --experimental-strip-types ./scripts/generate-locales.mts"
     },
     "dependencies": {
         "@univerjs/action-recorder": "workspace:*",
@@ -74,6 +74,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "fs-extra": "^11.3.4",
-        "typescript": "^5.9.3"
+        "typescript": "^6.0.2"
     }
 }

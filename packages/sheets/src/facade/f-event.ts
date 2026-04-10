@@ -27,7 +27,7 @@ import { FEventName } from '@univerjs/core/facade';
  * Provides event names for sheet creation, workbook creation, and gridline changes
  * @ignore
  */
-export interface IFSheetEventMixin {
+export interface IFSheetsEventNameMixin {
     /**
      * Event fired after a sheet is created
      * @see {@link ISheetCreatedEventParams}
@@ -41,7 +41,7 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get SheetCreated(): 'SheetCreated';
+    readonly SheetCreated: 'SheetCreated';
 
     /**
      * Event fired before a sheet is created
@@ -59,11 +59,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeSheetCreate(): 'BeforeSheetCreate';
+    readonly BeforeSheetCreate: 'BeforeSheetCreate';
 
     /**
      * Event fired before the active sheet changes
-     * @see {@link IBeforeActiveSheetChangeEvent}
+     * @see {@link IBeforeActiveSheetChangeEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeActiveSheetChange, (params) => {
@@ -77,11 +77,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeActiveSheetChange(): 'BeforeActiveSheetChange';
+    readonly BeforeActiveSheetChange: 'BeforeActiveSheetChange';
 
     /**
      * Event fired after the active sheet changes
-     * @see {@link IActiveSheetChangedEvent}
+     * @see {@link IActiveSheetChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.ActiveSheetChanged, (params) => {
@@ -92,11 +92,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get ActiveSheetChanged(): 'ActiveSheetChanged';
+    readonly ActiveSheetChanged: 'ActiveSheetChanged';
 
     /**
      * Event fired after a sheet is deleted
-     * @see {@link ISheetDeletedEvent}
+     * @see {@link ISheetDeletedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetDeleted, (params) => {
@@ -107,11 +107,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get SheetDeleted(): 'SheetDeleted';
+    readonly SheetDeleted: 'SheetDeleted';
 
     /**
      * Event fired before a sheet is deleted
-     * @see {@link IBeforeSheetDeleteEvent}
+     * @see {@link IBeforeSheetDeleteEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetDelete, (params) => {
@@ -125,11 +125,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeSheetDelete(): 'BeforeSheetDelete';
+    readonly BeforeSheetDelete: 'BeforeSheetDelete';
 
     /**
      * Event fired after a sheet is moved
-     * @see {@link ISheetMovedEvent}
+     * @see {@link ISheetMovedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetMoved, (params) => {
@@ -140,11 +140,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get SheetMoved(): 'SheetMoved';
+    readonly SheetMoved: 'SheetMoved';
 
     /**
      * Event fired before a sheet is moved
-     * @see {@link IBeforeSheetMoveEvent}
+     * @see {@link IBeforeSheetMoveEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetMove, (params) => {
@@ -158,11 +158,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeSheetMove(): 'BeforeSheetMove';
+    readonly BeforeSheetMove: 'BeforeSheetMove';
 
     /**
      * Event fired after a sheet name is changed
-     * @see {@link ISheetNameChangedEvent}
+     * @see {@link ISheetNameChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetNameChanged, (params) => {
@@ -173,11 +173,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get SheetNameChanged(): 'SheetNameChanged';
+    readonly SheetNameChanged: 'SheetNameChanged';
 
     /**
      * Event fired before a sheet name is changed
-     * @see {@link IBeforeSheetNameChangeEvent}
+     * @see {@link IBeforeSheetNameChangeEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetNameChange, (params) => {
@@ -191,11 +191,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeSheetNameChange(): 'BeforeSheetNameChange';
+    readonly BeforeSheetNameChange: 'BeforeSheetNameChange';
 
     /**
      * Event fired after a sheet tab color is changed
-     * @see {@link ISheetTabColorChangedEvent}
+     * @see {@link ISheetTabColorChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetTabColorChanged, (params) => {
@@ -206,11 +206,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get SheetTabColorChanged(): 'SheetTabColorChanged';
+    readonly SheetTabColorChanged: 'SheetTabColorChanged';
 
     /**
      * Event fired before a sheet tab color is changed
-     * @see {@link IBeforeSheetTabColorChangeEvent}
+     * @see {@link IBeforeSheetTabColorChangeEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetTabColorChange, (params) => {
@@ -224,11 +224,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange';
+    readonly BeforeSheetTabColorChange: 'BeforeSheetTabColorChange';
 
     /**
      * Event fired after a sheet is hidden
-     * @see {@link ISheetHideChangedEvent}
+     * @see {@link ISheetHideChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetHideChanged, (params) => {
@@ -239,11 +239,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get SheetHideChanged(): 'SheetHideChanged';
+    readonly SheetHideChanged: 'SheetHideChanged';
 
     /**
      * Event fired before a sheet is hidden
-     * @see {@link IBeforeSheetHideChangeEvent}
+     * @see {@link IBeforeSheetHideChangeEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeSheetHideChange, (params) => {
@@ -257,11 +257,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeSheetHideChange(): 'BeforeSheetHideChange';
+    readonly BeforeSheetHideChange: 'BeforeSheetHideChange';
 
     /**
      * Event fired after a workbook is created
-     * @see {@link IWorkbookCreateParam}
+     * @see {@link IWorkbookCreateEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.WorkbookCreated, (params) => {
@@ -272,11 +272,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get WorkbookCreated(): 'WorkbookCreated';
+    readonly WorkbookCreated: 'WorkbookCreated';
 
     /**
      * Event fired after a workbook is disposed
-     * @see {@link IWorkbookDisposedEvent}
+     * @see {@link IWorkbookDisposedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.WorkbookDisposed, (params) => {
@@ -287,11 +287,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get WorkbookDisposed(): 'WorkbookDisposed';
+    readonly WorkbookDisposed: 'WorkbookDisposed';
 
     /**
      * Event fired when gridline changed
-     * @see {@link IGridlineChangedEvent}
+     * @see {@link IGridlineChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.GridlineChanged, (params) => {
@@ -302,11 +302,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get GridlineChanged(): 'GridlineChanged';
+    readonly GridlineChanged: 'GridlineChanged';
 
     /**
      * Event fired before gridline enable changed
-     * @see {@link IBeforeGridlineEnableChange}
+     * @see {@link IBeforeGridlineEnableChangeEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeGridlineEnableChange, (params) => {
@@ -320,11 +320,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange';
+    readonly BeforeGridlineEnableChange: 'BeforeGridlineEnableChange';
 
     /**
      * Event fired before gridline color changed
-     * @see {@link IBeforeGridlineColorChanged}
+     * @see {@link IBeforeGridlineColorChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.BeforeGridlineColorChange, (params) => {
@@ -338,11 +338,11 @@ export interface IFSheetEventMixin {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeGridlineColorChange(): 'BeforeGridlineColorChange';
+    readonly BeforeGridlineColorChange: 'BeforeGridlineColorChange';
 
     /**
      * Event fired when sheet value changed
-     * @see {@link ISheetValueChangedEvent}
+     * @see {@link ISheetValueChangedEventParams}
      * @example
      * ```ts
      * const disposable = univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (params)=> {
@@ -360,7 +360,7 @@ export interface IFSheetEventMixin {
  * Interface for workbook creation parameters
  * Extends the base event interface and includes workbook initialization details
  */
-export interface IWorkbookCreateParam extends IEventBase {
+export interface IWorkbookCreateEventParams extends IEventBase {
     /** Unique identifier for the workbook unit */
     unitId: string;
     /** Type identifier specifying this is a sheet instance */
@@ -375,7 +375,7 @@ export interface IWorkbookCreateParam extends IEventBase {
  * Interface for workbook disposal event
  * Contains information about the disposed workbook including its snapshot data
  */
-export interface IWorkbookDisposedEvent extends IEventBase {
+export interface IWorkbookDisposedEventParams extends IEventBase {
     /** Unique identifier of the disposed workbook unit */
     unitId: string;
     /** Type identifier specifying this was a sheet instance */
@@ -388,7 +388,7 @@ export interface IWorkbookDisposedEvent extends IEventBase {
  * Interface for gridline change event
  * Triggered when gridline visibility or color changes in a worksheet
  */
-export interface IGridlineChangedEvent extends IEventBase {
+export interface IGridlineChangedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet where gridline changes occurred */
@@ -403,7 +403,7 @@ export interface IGridlineChangedEvent extends IEventBase {
  * Interface for event before gridline enable/disable
  * Triggered before changing the gridline visibility state
  */
-export interface IBeforeGridlineEnableChange extends IEventBase {
+export interface IBeforeGridlineEnableChangeEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet where gridline state will change */
@@ -416,7 +416,7 @@ export interface IBeforeGridlineEnableChange extends IEventBase {
  * Interface for event before gridline color change
  * Triggered before changing the gridline color
  */
-export interface IBeforeGridlineColorChanged extends IEventBase {
+export interface IBeforeGridlineColorChangedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet where gridline color will change */
@@ -453,7 +453,7 @@ export interface ISheetCreatedEventParams extends IEventBase {
  * Interface for sheet active change event
  * Contains information about the sheet that will become active
  */
-export interface IBeforeActiveSheetChangeEvent extends IEventBase {
+export interface IBeforeActiveSheetChangeEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that will become active */
@@ -466,7 +466,7 @@ export interface IBeforeActiveSheetChangeEvent extends IEventBase {
  * Interface for sheet active changed event
  * Contains information about the newly activated sheet
  */
-export interface IActiveSheetChangedEvent extends IEventBase {
+export interface IActiveSheetChangedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that has become active */
@@ -477,7 +477,7 @@ export interface IActiveSheetChangedEvent extends IEventBase {
  * Interface for sheet deletion event
  * Contains information about the sheet that was deleted
  */
-export interface ISheetDeletedEvent extends IEventBase {
+export interface ISheetDeletedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that was deleted */
@@ -488,7 +488,7 @@ export interface ISheetDeletedEvent extends IEventBase {
  * Interface for before sheet deletion event
  * Contains information about the sheet that will be deleted
  */
-export interface IBeforeSheetDeleteEvent extends IEventBase {
+export interface IBeforeSheetDeleteEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that will be deleted */
@@ -499,7 +499,7 @@ export interface IBeforeSheetDeleteEvent extends IEventBase {
  * Interface for sheet moved event
  * Contains information about the sheet movement
  */
-export interface ISheetMovedEvent extends IEventBase {
+export interface ISheetMovedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that was moved */
@@ -512,7 +512,7 @@ export interface ISheetMovedEvent extends IEventBase {
  * Interface for before sheet move event
  * Contains information about the planned sheet movement
  */
-export interface IBeforeSheetMoveEvent extends IEventBase {
+export interface IBeforeSheetMoveEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that will be moved */
@@ -527,7 +527,7 @@ export interface IBeforeSheetMoveEvent extends IEventBase {
  * Interface for sheet name change event
  * Contains information about the sheet name change
  */
-export interface ISheetNameChangedEvent extends IEventBase {
+export interface ISheetNameChangedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet whose name was changed */
@@ -540,7 +540,7 @@ export interface ISheetNameChangedEvent extends IEventBase {
  * Interface for before sheet name change event
  * Contains information about the planned sheet name change
  */
-export interface IBeforeSheetNameChangeEvent extends IEventBase {
+export interface IBeforeSheetNameChangeEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet whose name will be changed */
@@ -555,7 +555,7 @@ export interface IBeforeSheetNameChangeEvent extends IEventBase {
  * Interface for sheet tab color change event
  * Contains information about the sheet tab color change
  */
-export interface ISheetTabColorChangedEvent extends IEventBase {
+export interface ISheetTabColorChangedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet whose tab color was changed */
@@ -568,7 +568,7 @@ export interface ISheetTabColorChangedEvent extends IEventBase {
  * Interface for before sheet tab color change event
  * Contains information about the planned sheet tab color change
  */
-export interface IBeforeSheetTabColorChangeEvent extends IEventBase {
+export interface IBeforeSheetTabColorChangeEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet whose tab color will be changed */
@@ -583,7 +583,7 @@ export interface IBeforeSheetTabColorChangeEvent extends IEventBase {
  * Interface for sheet hide state change event
  * Contains information about the sheet visibility change
  */
-export interface ISheetHideChangedEvent extends IEventBase {
+export interface ISheetHideChangedEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet whose visibility was changed */
@@ -596,7 +596,7 @@ export interface ISheetHideChangedEvent extends IEventBase {
  * Interface for before sheet hide state change event
  * Contains information about the planned sheet visibility change
  */
-export interface IBeforeSheetHideChangeEvent extends IEventBase {
+export interface IBeforeSheetHideChangeEventParams extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet whose visibility will be changed */
@@ -609,7 +609,7 @@ export interface IBeforeSheetHideChangeEvent extends IEventBase {
  * Interface for sheet value changed event
  * Contains information about the sheet value change
  */
-export interface ISheetValueChangedEvent extends IEventBase {
+export interface ISheetValueChangedEventParams extends IEventBase {
     /** The affected ranges of the sheet */
     effectedRanges: FRange[];
     /** The payload of the value change */
@@ -621,134 +621,134 @@ export interface ISheetValueChangedEvent extends IEventBase {
  * Provides event names and their corresponding event parameter interfaces
  * @ignore
  */
-export interface ISheetEventParamConfig {
+export interface ISheetsEventParamConfig {
     /** Event fired after a worksheet is created */
     SheetCreated: ISheetCreatedEventParams;
     /** Event fired before creating a worksheet */
     BeforeSheetCreate: IBeforeSheetCreateEventParams;
     /** Event fired after a workbook is created */
-    WorkbookCreated: IWorkbookCreateParam;
+    WorkbookCreated: IWorkbookCreateEventParams;
     /** Event fired when a workbook is disposed */
-    WorkbookDisposed: IWorkbookDisposedEvent;
+    WorkbookDisposed: IWorkbookDisposedEventParams;
     /** Event fired when gridline changed */
-    GridlineChanged: IGridlineChangedEvent;
+    GridlineChanged: IGridlineChangedEventParams;
     /** Event fired before gridline enable changed */
-    BeforeGridlineEnableChange: IBeforeGridlineEnableChange;
+    BeforeGridlineEnableChange: IBeforeGridlineEnableChangeEventParams;
     /** Event fired before gridline color changed */
-    BeforeGridlineColorChange: IBeforeGridlineColorChanged;
+    BeforeGridlineColorChange: IBeforeGridlineColorChangedEventParams;
     /** Event fired before active sheet changes */
-    BeforeActiveSheetChange: IBeforeActiveSheetChangeEvent;
+    BeforeActiveSheetChange: IBeforeActiveSheetChangeEventParams;
     /** Event fired after active sheet changed */
-    ActiveSheetChanged: IActiveSheetChangedEvent;
+    ActiveSheetChanged: IActiveSheetChangedEventParams;
     /** Event fired after a sheet is deleted */
-    SheetDeleted: ISheetDeletedEvent;
+    SheetDeleted: ISheetDeletedEventParams;
     /** Event fired before a sheet is deleted */
-    BeforeSheetDelete: IBeforeSheetDeleteEvent;
+    BeforeSheetDelete: IBeforeSheetDeleteEventParams;
     /** Event fired after a sheet is moved */
-    SheetMoved: ISheetMovedEvent;
+    SheetMoved: ISheetMovedEventParams;
     /** Event fired before a sheet is moved */
-    BeforeSheetMove: IBeforeSheetMoveEvent;
+    BeforeSheetMove: IBeforeSheetMoveEventParams;
     /** Event fired after a sheet name is changed */
-    SheetNameChanged: ISheetNameChangedEvent;
+    SheetNameChanged: ISheetNameChangedEventParams;
     /** Event fired before a sheet name is changed */
-    BeforeSheetNameChange: IBeforeSheetNameChangeEvent;
+    BeforeSheetNameChange: IBeforeSheetNameChangeEventParams;
     /** Event fired after a sheet tab color is changed */
-    SheetTabColorChanged: ISheetTabColorChangedEvent;
+    SheetTabColorChanged: ISheetTabColorChangedEventParams;
     /** Event fired before a sheet tab color is changed */
-    BeforeSheetTabColorChange: IBeforeSheetTabColorChangeEvent;
+    BeforeSheetTabColorChange: IBeforeSheetTabColorChangeEventParams;
     /** Event fired after a sheet visibility is changed */
-    SheetHideChanged: ISheetHideChangedEvent;
+    SheetHideChanged: ISheetHideChangedEventParams;
     /** Event fired before a sheet visibility is changed */
-    BeforeSheetHideChange: IBeforeSheetHideChangeEvent;
+    BeforeSheetHideChange: IBeforeSheetHideChangeEventParams;
     /** Event fired after a sheet value is changed */
-    SheetValueChanged: ISheetValueChangedEvent;
+    SheetValueChanged: ISheetValueChangedEventParams;
 }
 
-export class FSheetEventName implements IFSheetEventMixin {
-    get SheetCreated(): 'SheetCreated' {
+export class FSheetsEventNameMixin extends FEventName implements IFSheetsEventNameMixin {
+    override get SheetCreated(): 'SheetCreated' {
         return 'SheetCreated' as const;
     }
 
-    get BeforeSheetCreate(): 'BeforeSheetCreate' {
+    override get BeforeSheetCreate(): 'BeforeSheetCreate' {
         return 'BeforeSheetCreate' as const;
     }
 
-    get WorkbookCreated(): 'WorkbookCreated' {
+    override get WorkbookCreated(): 'WorkbookCreated' {
         return 'WorkbookCreated' as const;
     }
 
-    get WorkbookDisposed(): 'WorkbookDisposed' {
+    override get WorkbookDisposed(): 'WorkbookDisposed' {
         return 'WorkbookDisposed' as const;
     }
 
-    get GridlineChanged(): 'GridlineChanged' {
+    override get GridlineChanged(): 'GridlineChanged' {
         return 'GridlineChanged' as const;
     }
 
-    get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange' {
+    override get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange' {
         return 'BeforeGridlineEnableChange' as const;
     }
 
-    get BeforeGridlineColorChange(): 'BeforeGridlineColorChange' {
+    override get BeforeGridlineColorChange(): 'BeforeGridlineColorChange' {
         return 'BeforeGridlineColorChange' as const;
     }
 
-    get BeforeActiveSheetChange(): 'BeforeActiveSheetChange' {
+    override get BeforeActiveSheetChange(): 'BeforeActiveSheetChange' {
         return 'BeforeActiveSheetChange' as const;
     }
 
-    get ActiveSheetChanged(): 'ActiveSheetChanged' {
+    override get ActiveSheetChanged(): 'ActiveSheetChanged' {
         return 'ActiveSheetChanged' as const;
     }
 
-    get SheetDeleted(): 'SheetDeleted' {
+    override get SheetDeleted(): 'SheetDeleted' {
         return 'SheetDeleted' as const;
     }
 
-    get BeforeSheetDelete(): 'BeforeSheetDelete' {
+    override get BeforeSheetDelete(): 'BeforeSheetDelete' {
         return 'BeforeSheetDelete' as const;
     }
 
-    get SheetMoved(): 'SheetMoved' {
+    override get SheetMoved(): 'SheetMoved' {
         return 'SheetMoved' as const;
     }
 
-    get BeforeSheetMove(): 'BeforeSheetMove' {
+    override get BeforeSheetMove(): 'BeforeSheetMove' {
         return 'BeforeSheetMove' as const;
     }
 
-    get SheetNameChanged(): 'SheetNameChanged' {
+    override get SheetNameChanged(): 'SheetNameChanged' {
         return 'SheetNameChanged' as const;
     }
 
-    get BeforeSheetNameChange(): 'BeforeSheetNameChange' {
+    override get BeforeSheetNameChange(): 'BeforeSheetNameChange' {
         return 'BeforeSheetNameChange' as const;
     }
 
-    get SheetTabColorChanged(): 'SheetTabColorChanged' {
+    override get SheetTabColorChanged(): 'SheetTabColorChanged' {
         return 'SheetTabColorChanged' as const;
     }
 
-    get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange' {
+    override get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange' {
         return 'BeforeSheetTabColorChange' as const;
     }
 
-    get SheetHideChanged(): 'SheetHideChanged' {
+    override get SheetHideChanged(): 'SheetHideChanged' {
         return 'SheetHideChanged' as const;
     }
 
-    get BeforeSheetHideChange(): 'BeforeSheetHideChange' {
+    override get BeforeSheetHideChange(): 'BeforeSheetHideChange' {
         return 'BeforeSheetHideChange' as const;
     }
 
-    get SheetValueChanged(): 'SheetValueChanged' {
+    override get SheetValueChanged(): 'SheetValueChanged' {
         return 'SheetValueChanged' as const;
     }
 }
 
-FEventName.extend(FSheetEventName);
+FEventName.extend(FSheetsEventNameMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEventName extends IFSheetEventMixin { }
-    interface IEventParamConfig extends ISheetEventParamConfig { }
+    interface FEventName extends IFSheetsEventNameMixin { }
+    interface IEventParamConfig extends ISheetsEventParamConfig { }
 }

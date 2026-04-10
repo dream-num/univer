@@ -458,6 +458,8 @@ const locale: typeof enUS = {
             copy: '复制',
             alert: '提示',
             search: '搜索',
+            ownerInherit: '文档所有者，已开启权限继承',
+            ownerWithoutInherit: '文档所有者，未开启权限继承',
             alertContent: '该范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
             userEmpty: '没有指定的人员，分享链接以邀请特定的人。',
             listEmpty: '你还没有设置任何范围或工作表为受保护状态。',
@@ -477,6 +479,7 @@ const locale: typeof enUS = {
             printErr: '该工作表已被保护，目前无打印权限。如需打印，请联系创建者。',
             formulaErr: '该范围或者引用范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
             hyperLinkErr: '该范围已被保护，目前无设置超链接权限。如需设置超链接，请联系创建者。',
+            commentErr: '该范围已被保护，目前无评论权限。如需评论，请联系创建者。',
         },
         button: {
             confirm: '确认',

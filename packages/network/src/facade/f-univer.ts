@@ -36,7 +36,7 @@ interface IFUniverNetworkMixin {
      * @example
      * ```typescript
      * // Replace the URL with the address of your own WebSocket service
-     * const ws = univerAPI.createSocket('ws://47.100.177.253:8449/ws');
+     * const ws = univerAPI.createSocket('wss://47.100.177.253:8449/ws');
      *
      * ws.open$.subscribe(() => {
      *   console.log('websocket opened');

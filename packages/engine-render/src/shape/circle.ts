@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from '@univerjs/core';
-
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { ObjectType } from '../base-object';
@@ -74,7 +72,7 @@ export class Circle extends Shape<ICircleProps> {
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         CIRCLE_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Circle]) {
                 props[key] = this[key as keyof Circle];

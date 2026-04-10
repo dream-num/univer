@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IGroupBaseBound, IKeyValue, ITransformState, Nullable } from '@univerjs/core';
+import type { IGroupBaseBound, ITransformState, Nullable } from '@univerjs/core';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
@@ -54,6 +54,7 @@ export enum ObjectType {
     RECT,
     CIRCLE,
     CHART,
+    DRAWING_DOM,
 }
 
 export abstract class BaseObject extends Disposable {
@@ -129,7 +130,7 @@ export abstract class BaseObject extends Disposable {
 
     private _debounceParentDirty: boolean = true;
 
-    private _transform = new Transform();
+    protected _transform = new Transform();
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
@@ -563,7 +564,7 @@ export abstract class BaseObject extends Disposable {
         optionKeys.forEach((pKey) => {
             if (option[pKey as keyof IObjectFullState] !== undefined) {
                 preKeys[pKey as keyof IObjectFullState] = this[pKey as keyof BaseObject];
-                (this as IKeyValue)[pKey] = option[pKey as keyof IObjectFullState];
+                (this as Record<string, any>)[pKey] = option[pKey as keyof IObjectFullState];
             }
         });
 
@@ -846,7 +847,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         BASE_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof BaseObject]) {
                 props[key] = this[key as keyof BaseObject];

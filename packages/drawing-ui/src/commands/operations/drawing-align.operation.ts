@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { IDrawingParam, IOperation } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 
 export enum AlignType {
     default = '0',
@@ -31,12 +31,80 @@ export enum AlignType {
 
 export interface ISetDrawingAlignOperationParams {
     alignType: AlignType;
+    drawings?: IDrawingParam[];
 }
 
+/**
+ * Set drawing align operation, including left, center, right, top, middle, bottom, horizon and vertical align.
+ */
 export const SetDrawingAlignOperation: IOperation<ISetDrawingAlignOperationParams> = {
     id: 'sheet.operation.set-image-align',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         return true;
+    },
+};
+
+export const SetDrawingAlignLeftOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-left',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.left });
+    },
+};
+
+export const SetDrawingAlignCenterOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-center',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.center });
+    },
+};
+
+export const SetDrawingAlignRightOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-right',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.right });
+    },
+};
+
+export const SetDrawingAlignTopOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-top',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.top });
+    },
+};
+
+export const SetDrawingAlignMiddleOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-middle',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.middle });
+    },
+};
+
+export const SetDrawingAlignBottomOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-bottom',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.bottom });
+    },
+};
+
+export const SetDrawingAlignHorizonOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-horizon',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.horizon });
+    },
+};
+
+export const SetDrawingAlignVerticalOperation: IOperation = {
+    id: 'sheet.operation.set-drawing-align-vertical',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        return accessor.get(ICommandService).syncExecuteCommand(SetDrawingAlignOperation.id, { alignType: AlignType.vertical });
     },
 };

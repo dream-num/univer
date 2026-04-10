@@ -32,6 +32,8 @@ export interface IAuthzIoService {
     deleteCollaborator(config: IDeleteCollaboratorRequest, context?: ILogContext): Promise<void>;
     createCollaborator(config: ICreateCollaboratorRequest, context?: ILogContext): Promise<void>;
     putCollaborators(config: IPutCollaboratorsRequest, context?: ILogContext): Promise<void>;
+    setCfgEnableObjInherit?(enabled: boolean): void;
+    getCfgEnableObjInherit?(): boolean;
 }
 
 export const IAuthzIoService = createIdentifier<IAuthzIoService>('IAuthzIoIoService');

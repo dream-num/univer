@@ -226,7 +226,7 @@ exports[`ColorPicker > should render correctly 1`] = `
         />
         <button
           class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
-          style="background-color: #771D1D;"
+          style="background-color: #8A2C0D;"
           type="button"
         />
         <button
@@ -497,7 +497,7 @@ exports[`ColorPicker > should render with value 1`] = `
         />
         <button
           class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
-          style="background-color: #771D1D;"
+          style="background-color: #8A2C0D;"
           type="button"
         />
         <button
@@ -768,7 +768,7 @@ exports[`ColorPicker > should support format hex 1`] = `
         />
         <button
           class="univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow"
-          style="background-color: #771D1D;"
+          style="background-color: #8A2C0D;"
           type="button"
         />
         <button

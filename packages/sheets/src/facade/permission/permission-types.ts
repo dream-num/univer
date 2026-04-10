@@ -88,8 +88,6 @@ export enum WorkbookPermissionPoint {
     HideSheet = 'WorkbookHideSheet',
     /** View history permission */
     ViewHistory = 'WorkbookViewHistory',
-    /** Manage history permission */
-    ManageHistory = 'WorkbookHistory',
     /** Recover history permission */
     RecoverHistory = 'WorkbookRecoverHistory',
     /** Create protection permission */

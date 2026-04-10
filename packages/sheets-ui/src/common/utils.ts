@@ -17,8 +17,7 @@
 import type { IPosition, IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICollaborator } from '@univerjs/protocol';
-import type { ISheetLocation } from '@univerjs/sheets';
-import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import type { ISheetLocation, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 
 export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {

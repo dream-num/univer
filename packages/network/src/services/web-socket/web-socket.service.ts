@@ -19,7 +19,7 @@ import { createIdentifier, Disposable, DisposableCollection, toDisposable } from
 import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
 
-export type SocketBodyType = string | ArrayBufferLike | Blob | ArrayBufferView;
+export type SocketBodyType = Parameters<WebSocket['send']>[0];
 
 /**
  * This service is responsible for establishing bidi-directional connection to a remote server.

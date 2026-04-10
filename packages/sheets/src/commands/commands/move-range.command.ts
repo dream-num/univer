@@ -302,11 +302,11 @@ export function getMoveRangeUndoRedoMutations(
         toRange: from.range,
         from: {
             value: toUndoCellValue.getMatrix(),
-            subUnitId: fromSubUnitId,
+            subUnitId: toSubUnitId,
         },
         to: {
             value: fromUndoCellValue.getMatrix(),
-            subUnitId: toSubUnitId,
+            subUnitId: fromSubUnitId,
         },
         unitId,
     };

@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange } from '@univerjs/core';
+import type { IOperation, IRange } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-export interface IMarkDirtyRowAutoHeightMutationParams {
+export interface IMarkDirtyRowAutoHeightOperationParams {
     unitId: string;
     subUnitId: string;
     ranges: IRange[];
     id: string;
 }
 
-export const MarkDirtyRowAutoHeightMutation: IMutation<IMarkDirtyRowAutoHeightMutationParams> = {
-    id: 'sheet.mutation.mark-dirty-row-auto-height',
-    type: CommandType.MUTATION,
+export const MarkDirtyRowAutoHeightOperation: IOperation<IMarkDirtyRowAutoHeightOperationParams> = {
+    id: 'sheet.operation.mark-dirty-row-auto-height',
+    type: CommandType.OPERATION,
     handler: () => {
         return true;
     },
 };
 
-export interface ICancelMarkDirtyRowAutoHeightMutationParams {
+export interface ICancelMarkDirtyRowAutoHeightOperationParams {
     unitId: string;
     subUnitId: string;
     id: string;
 }
 
-export const CancelMarkDirtyRowAutoHeightMutation: IMutation<ICancelMarkDirtyRowAutoHeightMutationParams> = {
-    id: 'sheet.mutation.cancel-mark-dirty-row-auto-height',
-    type: CommandType.MUTATION,
+export const CancelMarkDirtyRowAutoHeightOperation: IOperation<ICancelMarkDirtyRowAutoHeightOperationParams> = {
+    id: 'sheet.operation.cancel-mark-dirty-row-auto-height',
+    type: CommandType.OPERATION,
     handler: () => {
         return true;
     },

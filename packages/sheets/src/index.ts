@@ -236,6 +236,7 @@ export {
     type IMarkDirtyRowAutoHeightMutationParams,
     MarkDirtyRowAutoHeightMutation,
 } from './commands/mutations/mark-dirty-auto-height.mutation';
+export { type IMarkDirtyFilterChangeMutationParams, MarkDirtyFilterChangeMutation } from './commands/mutations/mark-dirty-filter-change.mutation';
 export { type IMoveRangeMutationParams, MoveRangeMutation } from './commands/mutations/move-range.mutation';
 export {
     type IMoveColumnsMutationParams,

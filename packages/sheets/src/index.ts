@@ -230,12 +230,6 @@ export {
     InsertRowMutationUndoFactory,
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
-export {
-    CancelMarkDirtyRowAutoHeightMutation,
-    type ICancelMarkDirtyRowAutoHeightMutationParams,
-    type IMarkDirtyRowAutoHeightMutationParams,
-    MarkDirtyRowAutoHeightMutation,
-} from './commands/mutations/mark-dirty-auto-height.mutation';
 export { type IMarkDirtyFilterChangeMutationParams, MarkDirtyFilterChangeMutation } from './commands/mutations/mark-dirty-filter-change.mutation';
 export { type IMoveRangeMutationParams, MoveRangeMutation } from './commands/mutations/move-range.mutation';
 export {
@@ -323,6 +317,12 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type IToggleGridlinesMutationParams, ToggleGridlinesMutation } from './commands/mutations/toggle-gridlines.mutation';
 export { type IUnregisterWorksheetRangeThemeStyleMutationParams, UnregisterWorksheetRangeThemeStyleMutation } from './commands/mutations/unregister-range-theme-style.mutation';
+export {
+    CancelMarkDirtyRowAutoHeightOperation,
+    type ICancelMarkDirtyRowAutoHeightOperationParams,
+    type IMarkDirtyRowAutoHeightOperationParams,
+    MarkDirtyRowAutoHeightOperation,
+} from './commands/operations/mark-dirty-auto-height.operation';
 export { type IScrollToCellOperationParams, ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export { type ISelectRangeCommandParams, type ISetSelectionsOperationParams, SelectRangeCommand, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';

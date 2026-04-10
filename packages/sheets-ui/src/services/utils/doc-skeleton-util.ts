@@ -145,10 +145,10 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
             ? Array.from(drawings.keys()).map((key) => ({
                 drawingId: key,
                 rect: {
-                    top: drawings!.get(key)!.aTop,
-                    bottom: drawings!.get(key)!.aTop + drawings!.get(key)!.width,
-                    left: drawings!.get(key)!.aLeft,
-                    right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
+                    top: drawings!.get(key)!.aTop + paddingTop,
+                    bottom: drawings!.get(key)!.aTop + drawings!.get(key)!.height + paddingTop,
+                    left: drawings!.get(key)!.aLeft + paddingLeft,
+                    right: drawings!.get(key)!.aLeft + drawings!.get(key)!.width + paddingLeft,
                 },
                 drawing: drawings.get(key)!,
             }))

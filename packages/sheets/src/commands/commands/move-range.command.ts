@@ -239,7 +239,7 @@ export function getMoveRangeUndoRedoMutations(
     const unitId = from.unitId;
     const workbook = accessor.get(IUniverInstanceService).getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     if (!workbook) {
-        return { redos: [], undos: [] };
+        return null;
     }
 
     const { subUnitId: fromSubUnitId, range: fromRange } = from;
@@ -247,12 +247,12 @@ export function getMoveRangeUndoRedoMutations(
     const fromWorksheet = workbook.getSheetBySheetId(fromSubUnitId);
     const toWorksheet = workbook.getSheetBySheetId(toSubUnitId);
     if (!fromWorksheet || !toWorksheet) {
-        return { redos: [], undos: [] };
+        return null;
     }
 
     const alignedRangeWithToRange = alignToMergedCellsBorders(toRange, toWorksheet, false);
     if (!Rectangle.equals(toRange, alignedRangeWithToRange) && !ignoreMerge) {
-        return { redos: [], undos: [] };
+        return null;
     }
 
     const fromWorksheetCellMatrix = fromWorksheet.getCellMatrix();

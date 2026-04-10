@@ -14,32 +14,18 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
+import type { IRange } from '@univerjs/protocol';
 import { CommandType } from '@univerjs/core';
 
-export interface IMarkDirtyRowAutoHeightMutationParams {
+export interface IMarkDirtyFilterChangeMutationParams {
     unitId: string;
     subUnitId: string;
-    ranges: IRange[];
-    id: string;
+    filterRange: IRange;
 }
 
-export const MarkDirtyRowAutoHeightMutation: IMutation<IMarkDirtyRowAutoHeightMutationParams> = {
-    id: 'sheet.mutation.mark-dirty-row-auto-height',
-    type: CommandType.MUTATION,
-    handler: () => {
-        return true;
-    },
-};
-
-export interface ICancelMarkDirtyRowAutoHeightMutationParams {
-    unitId: string;
-    subUnitId: string;
-    id: string;
-}
-
-export const CancelMarkDirtyRowAutoHeightMutation: IMutation<ICancelMarkDirtyRowAutoHeightMutationParams> = {
-    id: 'sheet.mutation.cancel-mark-dirty-row-auto-height',
+export const MarkDirtyFilterChangeMutation: IMutation<IMarkDirtyFilterChangeMutationParams> = {
+    id: 'sheet.mutation.mark-dirty-filter-change',
     type: CommandType.MUTATION,
     handler: () => {
         return true;

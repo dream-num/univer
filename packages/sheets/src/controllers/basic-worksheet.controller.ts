@@ -131,6 +131,7 @@ import { EmptyMutation } from '../commands/mutations/empty.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { CancelMarkDirtyRowAutoHeightMutation, MarkDirtyRowAutoHeightMutation } from '../commands/mutations/mark-dirty-auto-height.mutation';
+import { MarkDirtyFilterChangeMutation } from '../commands/mutations/mark-dirty-filter-change.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
@@ -223,6 +224,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             SetWorksheetRowCountMutation,
             SetWorksheetColumnCountMutation,
+
+            MarkDirtyFilterChangeMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);

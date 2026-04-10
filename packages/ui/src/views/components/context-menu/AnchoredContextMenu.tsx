@@ -124,7 +124,6 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             }
 
             event.preventDefault();
-            event.stopPropagation();
         };
 
         document.addEventListener('pointerdown', handlePointerDown);

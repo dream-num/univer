@@ -20,11 +20,13 @@ import { Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
 import { useEffect, useState } from 'react';
 import { IFontService } from '../../services/font.service';
+import { ILayoutService } from '../../services/layout/layout.service';
 import { useDependency } from '../../utils/di';
 
 export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => {
     const commandService = useDependency(ICommandService);
     const fontService = useDependency(IFontService);
+    const layoutService = useDependency(ILayoutService);
 
     const [fonts, setFonts] = useState<IFontConfig[]>([]);
 
@@ -41,6 +43,7 @@ export const FontFamilyItem = ({ id, value }: { id: string; value: string }) => 
     const localeService = useDependency(LocaleService);
 
     function handleSelectFont(value: string) {
+        layoutService.focus();
         commandService.executeCommand(id, { value });
     }
 

@@ -97,6 +97,7 @@ const locale: typeof enUS = {
             lineSpace: 'Espai entre línies',
             multiSpace: 'Espai múltiple',
             fixedValue: 'Valor fix (px)',
+            exactValue: 'Exact Value',
         },
     },
     rightClick: {

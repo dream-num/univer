@@ -97,6 +97,7 @@ const locale: typeof enUS = {
             lineSpace: 'Riadkovanie',
             multiSpace: 'Viacnásobné',
             fixedValue: 'Pevná hodnota (px)',
+            exactValue: 'Exact Value',
         },
     },
     rightClick: {

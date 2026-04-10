@@ -97,6 +97,7 @@ const locale: typeof enUS = {
             lineSpace: '줄 간격',
             multiSpace: '복수 줄 간격',
             fixedValue: '고정 값(px)',
+            exactValue: 'Exact Value',
         },
     },
     rightClick: {

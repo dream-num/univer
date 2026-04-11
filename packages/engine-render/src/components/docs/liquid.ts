@@ -171,9 +171,12 @@ export class Liquid {
         };
     }
 
-    translateDivide(divide: IDocumentSkeletonDivide) {
+    translateDivide(divide: IDocumentSkeletonDivide, isVerticalAndWrap = false) {
         const { left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
-        const left = divideLeft + dividePaddingLeft;
+        let left = divideLeft;
+        if (!isVerticalAndWrap) {
+            left += dividePaddingLeft;
+        }
         this.translate(left, 0);
 
         return {

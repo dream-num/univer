@@ -46,10 +46,8 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
     const viewValue = useMemo(() => {
         if (value == null) return '';
 
-        const fixedValue = (`${value ?? ''}`).replace(/\s/g, '');
-
         const font = fonts.find((font) => {
-            return font.value === fixedValue;
+            return font.value === value;
         });
 
         if (!font) {
@@ -57,14 +55,14 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
         }
 
         return localeService.t(font.label);
-    }, [value, fonts]);
+    }, [value, fonts, localeService]);
 
     useMemo(() => {
         setInputValue(viewValue);
     }, [value]);
 
     function resetValue() {
-        setInputValue(value);
+        setInputValue(viewValue);
     }
 
     function handleChangeSelection(e: ChangeEvent<HTMLInputElement>) {
@@ -89,12 +87,10 @@ export const FontFamily = ({ id, value, disabled$ }: IFontFamilyProps) => {
     }
 
     function confirm() {
-        if (inputValue.toLowerCase() === value.toLowerCase()) {
-            resetValue();
-            return;
-        }
-
-        const font = fonts.find((item) => item.value.toLowerCase() === inputValue.trim().toLowerCase());
+        const font = fonts.find((item) => {
+            const label = localeService.t(item.label);
+            return label.toLowerCase().includes(inputValue.trim().toLowerCase());
+        });
 
         if (!font) {
             resetValue();

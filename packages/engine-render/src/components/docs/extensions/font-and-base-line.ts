@@ -53,7 +53,7 @@ export class FontAndBaseLine extends docExtension {
     }
 
     // invoked by document.ts
-    override draw(ctx: UniverRenderingContext, _parentScale: IScale, glyph: IDocumentSkeletonGlyph, _?: IBoundRectNoAngle, more?: IDrawInfo) {
+    override draw(ctx: UniverRenderingContext, _parentScale: IScale, glyph: IDocumentSkeletonGlyph, _?: IBoundRectNoAngle, _more?: IDrawInfo) {
         // _parentScale: IScale, _skeleton: T, _diffBounds?: V, _more?: IDrawInfo
 
         const line = glyph.parent?.parent;
@@ -150,7 +150,14 @@ export class FontAndBaseLine extends docExtension {
                 });
                 ctx.restore();
             } else {
-                ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
+                let x_offset = 0;
+                let y_offset = 0;
+                if (isVertical) {
+                    const fontHeight = glyph.bBox.aba - glyph.bBox.abd;
+                    x_offset = (glyph.width - glyph.bBox.width) / 2;
+                    y_offset = -(glyph.width - fontHeight) / 2;
+                }
+                ctx.fillText(content, spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
             }
         }
     }

@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.20.1](https://github.com/dream-num/univer/compare/v0.20.0...v0.20.1) (2026-04-11)
+
+
+### Bug Fixes
+
+* after select font family cant write text (docs and sheets) ([#6665](https://github.com/dream-num/univer/issues/6665)) ([c1f0b71](https://github.com/dream-num/univer/commit/c1f0b717bce0565b7fd6b741b413cf7edca0a325))
+* **docs:** double click trigger defaule value (fs,ff,cl,bg) ([#6664](https://github.com/dream-num/univer/issues/6664)) ([bbb41bb](https://github.com/dream-num/univer/commit/bbb41bb2aa461673c24f4cd0844cfb410896fa36))
+* fix font family search ([#6793](https://github.com/dream-num/univer/issues/6793)) ([0410bd8](https://github.com/dream-num/univer/commit/0410bd8f2434148fa9e248e4acebef865a0b4426))
+* fix the issue of move range undo ([#6788](https://github.com/dream-num/univer/issues/6788)) ([e00a9e2](https://github.com/dream-num/univer/commit/e00a9e2bafd531954a9152dc84ee8aa16d4981ef))
+* **permission:** fix permission issues related to drawing (floating images, charts, shapes) ([#6779](https://github.com/dream-num/univer/issues/6779)) ([51304b0](https://github.com/dream-num/univer/commit/51304b049e12dbd5655a6d33dad4a3d982c0c6fa))
+* **scene:** fix code lint warning err ([#6785](https://github.com/dream-num/univer/issues/6785)) ([2144496](https://github.com/dream-num/univer/commit/2144496b879d9329fb168939072b36bb36ea2f0d))
+* **sheets-ui:** fix doc drawing skeleton calc wrong ([#6747](https://github.com/dream-num/univer/issues/6747)) ([3bf7f2d](https://github.com/dream-num/univer/commit/3bf7f2dafd50887a306abc44cc86357e8afbd09a))
+* **sheets-ui:** improve focus handling EditorContainer ([#6770](https://github.com/dream-num/univer/issues/6770)) ([7072024](https://github.com/dream-num/univer/commit/70720246cebc03bb8bea239980f71a4933544319))
+* **ui:** invoke onOpen callback when sidebar is opened ([#6636](https://github.com/dream-num/univer/issues/6636)) ([804206b](https://github.com/dream-num/univer/commit/804206b8aa785c3b4224916153b9aa7b4babef5d))
+* **vertical:** vertical aligan ([#6794](https://github.com/dream-num/univer/issues/6794)) ([7225fe1](https://github.com/dream-num/univer/commit/7225fe137477dd7d53b2b3055d940410ad4b333c))
+
+
+### Features
+
+* add MarkDirtyFilterChangeMutation ([#6786](https://github.com/dream-num/univer/issues/6786)) ([77d648c](https://github.com/dream-num/univer/commit/77d648ce5fe4335604500823f556c7bd9e3f5fb1))
+* **design:** support rtl for input number ([#6780](https://github.com/dream-num/univer/issues/6780)) ([2640d63](https://github.com/dream-num/univer/commit/2640d638d2449df6bd9bf71cbe8c5a01c7d30de0))
+* **docs:** ff component did not receive command in props ([#6666](https://github.com/dream-num/univer/issues/6666)) ([09e0603](https://github.com/dream-num/univer/commit/09e060310456f7389dea5d54e45ad715456daaf5))
+* **permission:** add owner permission inherit marker ([#6782](https://github.com/dream-num/univer/issues/6782)) ([445e1f4](https://github.com/dream-num/univer/commit/445e1f47a880ca211f98a22e336c6a9211bb0631))
+* **sheet:** row col gap render ([#6776](https://github.com/dream-num/univer/issues/6776)) ([d6a9675](https://github.com/dream-num/univer/commit/d6a9675d0450bcaf5c85340afea918cf1d49f3f9))
+
 # [0.20.0](https://github.com/dream-num/univer/compare/v0.19.0...v0.20.0) (2026-04-03)
 
 

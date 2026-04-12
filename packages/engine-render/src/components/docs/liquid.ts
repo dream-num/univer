@@ -22,6 +22,7 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
 } from '../../basics/i-document-skeleton-cached';
+import { VerticalAlign } from '@univerjs/core';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 
 export class Liquid {
@@ -171,11 +172,19 @@ export class Liquid {
         };
     }
 
-    translateDivide(divide: IDocumentSkeletonDivide, isVerticalAndWrap = false) {
-        const { left: divideLeft, paddingLeft: dividePaddingLeft } = divide;
+    translateDivide(divide: IDocumentSkeletonDivide, isVerticalAndWrap = false, verticalAlign = VerticalAlign.UNSPECIFIED, rotatedHeight = 0) {
+        const { left: divideLeft, paddingLeft: dividePaddingLeft, glyphGroupWidth = 0 } = divide;
         let left = divideLeft;
         if (!isVerticalAndWrap) {
             left += dividePaddingLeft;
+        } else {
+            if (verticalAlign === VerticalAlign.MIDDLE) {
+                left += (rotatedHeight - glyphGroupWidth) / 2;
+            } else if (verticalAlign === VerticalAlign.BOTTOM) {
+                left += rotatedHeight - glyphGroupWidth - 2;
+            } else {
+                left += 2;
+            }
         }
         this.translate(left, 0);
 

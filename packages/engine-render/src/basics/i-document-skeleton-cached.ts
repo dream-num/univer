@@ -195,16 +195,17 @@ export interface IDocumentSkeletonLine {
 }
 
 export interface IDocumentSkeletonDivide {
-    // divide 分割，为了适配插入对象、图片、表格等，图文混排
+    // divide: Used to adapt to inserted objects, images, tables, etc., for mixed text and graphics layout
     glyphGroup: IDocumentSkeletonGlyph[]; // glyphGroup
-    width: number; // width 被分割后的总宽度
-    left: number; // left 被对象分割后的偏移位置 | d1 | | d2 |
-    paddingLeft: number; // paddingLeft 根据horizonAlign和width计算对齐偏移
-    isFull: boolean; // isFull， // 内容是否装满
+    width: number; // width: Total width after division
+    left: number; // left: Offset position after division by objects | d1 | | d2 |
+    paddingLeft: number; // paddingLeft: Alignment offset calculated based on horizonAlign and width
+    isFull: boolean; // isFull: Whether content is full
     st: number; // startIndex
     ed: number; // endIndex
     breakType?: BreakPointType;
     parent?: IDocumentSkeletonLine;
+    glyphGroupWidth?: number; // glyphGroupWidth: Total width of glyphGroup, pre-calculated to avoid recalculation each time
 }
 
 export interface IAdjustability {

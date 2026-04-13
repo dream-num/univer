@@ -70,11 +70,7 @@ export class InvertedIndexCache {
             }
         }
 
-        // Because the inverted index cache is used for compare operation, it should be case-insensitive.
-        let _value = typeof value === 'string' ? value.toLowerCase() : value;
-        if (_value === '' || _value === null) {
-            _value = DEFAULT_EMPTY_CELL_KEY;
-        }
+        const _value = this.getValueKey(value);
 
         let cellList = columnMap.get(_value);
         if (cellList == null) {
@@ -85,16 +81,26 @@ export class InvertedIndexCache {
         cellList.add(row);
     }
 
-    getCellValuePositions(unitId: string, sheetId: string, column: number) {
-        return this._cache.get(unitId)?.get(sheetId)?.get(column);
-    }
-
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean | null | symbol, rowsInCache: NumericTuple[]) {
+    private getValueKey(value: string | number | boolean | null | symbol) {
         // Because the inverted index cache is used for compare operation, it should be case-insensitive.
         let _value = typeof value === 'string' ? value.toLowerCase() : value;
         if (_value === '' || _value === null) {
             _value = DEFAULT_EMPTY_CELL_KEY;
         }
+
+        // Ignore the NUMBER and STRING，such as 2025 and "2025"
+        if (typeof _value === 'number') {
+            _value = String(_value);
+        }
+        return _value;
+    }
+
+    getCellValuePositions(unitId: string, sheetId: string, column: number) {
+        return this._cache.get(unitId)?.get(sheetId)?.get(column);
+    }
+
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean | null | symbol, rowsInCache: NumericTuple[]) {
+        const _value = this.getValueKey(value);
         const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(_value);
         return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }

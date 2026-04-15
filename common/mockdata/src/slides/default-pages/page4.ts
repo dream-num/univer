@@ -15,7 +15,7 @@
  */
 
 import type { IWorksheetData } from '@univerjs/core';
-import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/slides';
 
 import { SLIDE_WORKBOOK_DATA } from '../../sheets/slide-workbook-data';
 

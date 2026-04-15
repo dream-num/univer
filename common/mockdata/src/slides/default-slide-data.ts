@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISlideData } from '@univerjs/core';
+import type { ISlideData } from '@univerjs/slides';
 
 import { DEFAULT_FIRST_PAGE } from './default-pages/page1';
 import { DEFAULT_SECOND_PAGE } from './default-pages/page2';

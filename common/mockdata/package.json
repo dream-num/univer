@@ -65,6 +65,7 @@
         "@univerjs/sheets-thread-comment-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/sheets-zen-editor": "workspace:*",
+        "@univerjs/slides": "workspace:*",
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",

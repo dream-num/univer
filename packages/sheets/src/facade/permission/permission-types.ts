@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUser } from '@univerjs/protocol';
-import type { Observable } from 'rxjs';
-
 /**
  * ========================
  * Basic Types / Enums
@@ -32,24 +29,15 @@ export enum UnitRole {
     Owner = 2,
 }
 
-/**
- * User reference information
- */
-export interface IUserRef {
-    /** User ID (defined by host system) */
-    id: string;
-    /** Display name */
-    displayName?: string;
-    /** Email address */
-    email?: string;
+export interface ICollaboratorUser {
+    userID: string;
+    name: string;
+    avatar: string;
 }
 
-/**
- * Collaborator information
- */
 export interface ICollaborator {
     /** User information */
-    user: IUserRef;
+    user: ICollaboratorUser;
     /** Role */
     role: UnitRole;
 }
@@ -191,11 +179,6 @@ export type WorksheetPermissionSnapshot = Record<WorksheetPermissionPoint, boole
 export type RangePermissionSnapshot = Record<RangePermissionPoint, boolean>;
 
 /**
- * Unsubscribe function type
- */
-export type UnsubscribeFn = () => void;
-
-/**
  * ========================
  * Worksheet Protection Configuration
  * ========================
@@ -205,8 +188,16 @@ export type UnsubscribeFn = () => void;
  * Worksheet protection options configuration
  */
 export interface IWorksheetProtectionOptions {
-    /** Whitelist of users allowed to edit; empty means only owner */
+    /**
+     * Specifies users allowed to edit this worksheet; if not specified, defaults to only the owner having edit permission.
+     */
     allowedUsers?: string[];
+
+    /**
+     * Whether to allow others to view this range.
+     * @default true
+     */
+    allowViewByOthers?: boolean;
 
     /** Protection name for UI display */
     name?: string;
@@ -225,12 +216,15 @@ export interface IWorksheetProtectionOptions {
  * Range protection options configuration
  */
 export interface IRangeProtectionOptions {
-    /** Whether to allow current user to edit (default false = protected, not editable) */
-    allowEdit?: boolean;
-
-    /** Whitelist of users allowed to edit; empty means determined by role or global policy */
+    /**
+     * Specifies users allowed to edit this range; if not specified, defaults to only the owner having edit permission.
+     */
     allowedUsers?: string[];
 
+    /**
+     * Whether to allow others to view this range.
+     * @default true
+     */
     allowViewByOthers?: boolean;
 
     /** Rule name for UI display and management */
@@ -239,117 +233,6 @@ export interface IRangeProtectionOptions {
     /** Custom metadata (logs, tags, etc.) */
     metadata?: Record<string, unknown>;
 }
-
-/**
- * Cell permission debug rule information
- */
-export interface ICellPermissionDebugRuleInfo {
-    ruleId: string;
-    /** Range reference string list, e.g., ['A1:B10', 'D1:D5'] */
-    rangeRefs: string[];
-    options: IRangeProtectionOptions;
-}
-
-/**
- * ========================
- * Facade: WorkbookPermission
- * ========================
- */
-
-/**
- * Workbook-level permission Facade interface
- */
-export interface IWorkbookPermission {
-    /**
-     * High-level mode setting: By Owner / Editor / Viewer / Commenter semantics
-     * Internally automatically combines multiple WorkbookPermissionPoints
-     */
-    setMode(mode: WorkbookMode): Promise<void>;
-
-    /** Shortcut: Set workbook to read-only (equivalent to setMode('viewer')) */
-    setReadOnly(): Promise<void>;
-
-    /** Shortcut: Set workbook to editable (equivalent to setMode('editor') or owner subset) */
-    setEditable(): Promise<void>;
-
-    /** Whether current user can edit this workbook (calculated from combined permissions) */
-    canEdit(): boolean;
-
-    /**
-     * Collaborator management (wraps IAuthzIoService)
-     */
-
-    /** Batch set collaborators (replace mode, overwrites existing collaborator list) */
-    setCollaborators(collaborators: Array<{ user: IUser; role: UnitRole }>): Promise<void>;
-
-    /** Add a single collaborator */
-    addCollaborator(user: IUser, role: UnitRole): Promise<void>;
-
-    /** Update collaborator role and information */
-    updateCollaborator(user: IUser, role: UnitRole): Promise<void>;
-
-    /** Remove collaborator */
-    removeCollaborator(userId: string): Promise<void>;
-
-    /** Batch remove collaborators */
-    removeCollaborators(userIds: string[]): Promise<void>;
-
-    /** List all collaborators */
-    listCollaborators(): Promise<ICollaborator[]>;
-
-    /**
-     * Low-level point operations: Directly set boolean value of a WorkbookPermissionPoint
-     */
-    setPoint(point: WorkbookPermissionPoint, value: boolean): Promise<void>;
-
-    /** Read current value of a point (synchronous, reads from local state) */
-    getPoint(point: WorkbookPermissionPoint): boolean;
-
-    /** Get snapshot of all current points */
-    getSnapshot(): WorkbookPermissionSnapshot;
-
-    /**
-     * ========================
-     * RxJS Observable Reactive Interface
-     * ========================
-     */
-
-    /**
-     * Permission snapshot change stream (BehaviorSubject, immediately provides current state on subscription)
-     * Triggers when any permission point changes
-     */
-    readonly permission$: Observable<WorkbookPermissionSnapshot>;
-
-    /**
-     * Single permission point change stream
-     * For scenarios that only care about specific permission point changes
-     */
-    readonly pointChange$: Observable<{
-        point: WorkbookPermissionPoint;
-        value: boolean;
-        oldValue: boolean;
-    }>;
-
-    /**
-     * Collaborator change stream
-     */
-    readonly collaboratorChange$: Observable<{
-        type: 'add' | 'update' | 'delete';
-        collaborator: ICollaborator;
-    }>;
-
-    /**
-     * Compatibility method: Simplified subscription (for users unfamiliar with RxJS)
-     * Internally implemented based on permission$ Observable
-     */
-    subscribe(listener: (snapshot: WorkbookPermissionSnapshot) => void): UnsubscribeFn;
-}
-
-/**
- * ========================
- * Facade: WorksheetPermission
- * ========================
- */
 
 /**
  * Worksheet permission configuration
@@ -366,15 +249,4 @@ export interface IWorksheetPermissionConfig {
         rangeRefs: string[]; // e.g., ['A1:B10', 'D1:D5']
         options?: IRangeProtectionOptions; // If not provided, defaults to "protected, not editable"
     }>;
-}
-
-/**
- * ========================
- * Facade: RangePermission
- * ========================
- */
-
-export interface ICellPermissionDebugInfo {
-    permissionId: string;
-    ruleId: string;
 }

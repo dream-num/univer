@@ -16,39 +16,43 @@
 
 import type { ICollaborator } from '@univerjs/protocol';
 import type {
+    IAddRangeProtectionMutationParams,
+    IAddWorksheetProtectionParams,
+    IDeleteWorksheetProtectionParams,
     IRangeProtectionRule,
 } from '@univerjs/sheets';
-import type { Observable, Subscription } from 'rxjs';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type {
     IRangeProtectionOptions,
     IWorksheetPermissionConfig,
     IWorksheetProtectionOptions,
-    UnsubscribeFn,
     WorksheetMode,
     WorksheetPermissionSnapshot,
 } from './permission-types';
-import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService } from '@univerjs/core';
-import { UnitRole } from '@univerjs/protocol';
+import { cellToRange, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
+import { UnitAction, UnitRole } from '@univerjs/protocol';
 import {
     AddRangeProtectionMutation,
+    AddWorksheetProtectionMutation,
+    DeleteRangeProtectionMutation,
+    DeleteWorksheetProtectionMutation,
     EditStateEnum,
+    getAllWorksheetPermissionPoint,
+    getAllWorksheetPermissionPointByPointPanel,
+    RangeProtectionPermissionEditPoint,
+    RangeProtectionPermissionViewPoint,
     RangeProtectionRuleModel,
     UnitObject,
     ViewStateEnum,
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
-import { FPermission } from '../f-permission';
 import { FRangeProtectionRule } from './f-range-protection-rule';
-import { RANGE_PERMISSION_POINT_MAP, WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
-import {
-    RangePermissionPoint,
-    WorksheetPermissionPoint,
-} from './permission-types';
+import { WORKSHEET_PERMISSION_POINT_MAP } from './permission-point-map';
+import { WorksheetPermissionPoint } from './permission-types';
+import { determineEditState, determineScope, determineViewState, getListRangeProtectionRules, handleWorksheetRangePermissionIsEmpty } from './util';
 
 /**
  * Implementation class for WorksheetPermission
@@ -56,45 +60,9 @@ import {
  *
  * @hideconstructor
  */
-export class FWorksheetPermission {
-    private readonly _permissionSubject: BehaviorSubject<WorksheetPermissionSnapshot>;
-    private readonly _rangeRulesSubject: BehaviorSubject<FRangeProtectionRule[]>;
-
-    /**
-     * Observable stream of permission snapshot changes (BehaviorSubject)
-     * Emits immediately on subscription with current state, then on any permission point change
-     */
-    readonly permission$: Observable<WorksheetPermissionSnapshot>;
-
-    /**
-     * Observable stream of individual permission point changes
-     * Emits when a specific permission point value changes
-     */
-    readonly pointChange$: Observable<{
-        point: WorksheetPermissionPoint;
-        value: boolean;
-        oldValue: boolean;
-    }>;
-
-    /**
-     * Observable stream of range protection rule changes
-     * Emits when protection rules are added, updated, or deleted
-     */
-    readonly rangeProtectionChange$: Observable<{
-        type: 'add' | 'update' | 'delete';
-        rules: FRangeProtectionRule[];
-    }>;
-
-    /**
-     * Observable stream of current range protection rules list (BehaviorSubject)
-     * Emits immediately on subscription with current rules, then auto-updates when rules change
-     */
-    readonly rangeProtectionRules$: Observable<FRangeProtectionRule[]>;
-
+export class FWorksheetPermission extends FBase {
     private readonly _unitId: string;
     private readonly _subUnitId: string;
-    private readonly _subscriptions: Subscription[] = [];
-    private readonly _fPermission: FPermission;
 
     constructor(
         private readonly _worksheet: FWorksheet,
@@ -106,238 +74,28 @@ export class FWorksheetPermission {
         @Inject(WorksheetProtectionPointModel) private readonly _worksheetProtectionPointModel: WorksheetProtectionPointModel,
         @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
     ) {
+        super();
+
         // Get unitId and subUnitId from worksheet
         this._unitId = this._worksheet.getWorkbook().getUnitId();
         this._subUnitId = this._worksheet.getSheetId();
-
-        // Initialize FPermission instance
-        this._fPermission = this._injector.createInstance(FPermission);
-
-        // Initialize BehaviorSubject
-        this._permissionSubject = new BehaviorSubject(this._buildSnapshot());
-        this._rangeRulesSubject = new BehaviorSubject<FRangeProtectionRule[]>(this._buildRangeProtectionRules());
-
-        // Setup observables from internal services
-        this.permission$ = this._createPermissionStream();
-        this.pointChange$ = this._createPointChangeStream();
-        this.rangeProtectionChange$ = this._createRangeProtectionChangeStream();
-        this.rangeProtectionRules$ = this._createRangeProtectionRulesStream();
     }
 
     /**
-     * Create permission snapshot stream from IPermissionService
-     * @private
-     */
-    private _createPermissionStream(): Observable<WorksheetPermissionSnapshot> {
-        // Listen to permission point changes from IPermissionService
-        const permissionSub = this._permissionService.permissionPointUpdate$.pipe(
-            filter((point) => point.id.includes(this._unitId) && point.id.includes(this._subUnitId))
-        ).subscribe(() => {
-            this._permissionSubject.next(this._buildSnapshot());
-        });
-        this._subscriptions.push(permissionSub);
-
-        return this._permissionSubject.asObservable().pipe(
-            distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
-    }
-
-    /**
-     * Create point change stream from IPermissionService
-     * @private
-     */
-    private _createPointChangeStream(): Observable<{ point: WorksheetPermissionPoint; value: boolean; oldValue: boolean }> {
-        return this._permissionService.permissionPointUpdate$.pipe(
-            filter((point) => point.id.includes(this._unitId) && point.id.includes(this._subUnitId)),
-            map((point) => {
-                const pointType = this._extractWorksheetPointType(point.id);
-                if (!pointType) return null;
-                return {
-                    point: pointType,
-                    value: point.value ?? false,
-                    oldValue: !(point.value ?? false),
-                };
-            }),
-            filter((change): change is { point: WorksheetPermissionPoint; value: boolean; oldValue: boolean } => change !== null),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
-    }
-
-    /**
-     * Create range protection change stream from RangeProtectionRuleModel
-     * @private
-     */
-    private _createRangeProtectionChangeStream(): Observable<{ type: 'add' | 'update' | 'delete'; rules: FRangeProtectionRule[] }> {
-        return this._rangeProtectionRuleModel.ruleChange$.pipe(
-            filter((change) => change.unitId === this._unitId && change.subUnitId === this._subUnitId),
-            map((change) => {
-                const rules = this._buildRangeProtectionRules();
-                const type: 'add' | 'update' | 'delete' = change.type === 'delete' ? 'delete' : (change.type === 'set' ? 'update' : 'add');
-                return { type, rules };
-            }),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
-    }
-
-    /**
-     * Create range protection rules list stream from RangeProtectionRuleModel
-     * @private
-     */
-    private _createRangeProtectionRulesStream(): Observable<FRangeProtectionRule[]> {
-        const ruleChangeSub = this._rangeProtectionRuleModel.ruleChange$.pipe(
-            filter((change) => change.unitId === this._unitId && change.subUnitId === this._subUnitId)
-        ).subscribe(() => {
-            this._rangeRulesSubject.next(this._buildRangeProtectionRules());
-        });
-        this._subscriptions.push(ruleChangeSub);
-
-        return this._rangeRulesSubject.asObservable().pipe(
-            distinctUntilChanged((prev, curr) => {
-                if (prev.length !== curr.length) return false;
-                return prev.every((p, i) => p.id === curr[i].id);
-            }),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
-    }
-
-    /**
-     * Extract WorksheetPermissionPoint type from permission point ID
-     * @private
-     */
-    private _extractWorksheetPointType(pointId: string): WorksheetPermissionPoint | null {
-        // Try to match against known worksheet permission points
-        for (const [pointName, PointClass] of Object.entries(WORKSHEET_PERMISSION_POINT_MAP)) {
-            const testPoint = new PointClass(this._unitId, this._subUnitId);
-            if (testPoint.id === pointId) {
-                return pointName as WorksheetPermissionPoint;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Read the actual edit permission from a rule's permissionId
-     */
-    private _getRuleEditPermission(rule: { permissionId: string }): boolean {
-        const PermissionPointClass = RANGE_PERMISSION_POINT_MAP[RangePermissionPoint.Edit];
-        if (!PermissionPointClass) {
-            return false;
-        }
-
-        const permissionPoint = new PermissionPointClass(
-            this._unitId,
-            this._subUnitId,
-            rule.permissionId
-        );
-
-        const permission = this._permissionService.getPermissionPoint(permissionPoint.id);
-        return permission?.value ?? false;
-    }
-
-    /**
-     * Build permission snapshot
-     */
-    private _buildSnapshot(): WorksheetPermissionSnapshot {
-        const snapshot = {} as WorksheetPermissionSnapshot;
-        for (const point in WorksheetPermissionPoint) {
-            const pointKey = WorksheetPermissionPoint[point as keyof typeof WorksheetPermissionPoint];
-            snapshot[pointKey] = this.getPoint(pointKey);
-        }
-        return snapshot;
-    }
-
-    /**
-     * Build range protection rules list
-     */
-    private _buildRangeProtectionRules(): FRangeProtectionRule[] {
-        const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
-        return rules.map((rule) => {
-            // Convert IRange to FRange using worksheet
-            const ranges = rule.ranges.map((range) =>
-                this._worksheet.getRange(
-                    range.startRow,
-                    range.startColumn,
-                    range.endRow - range.startRow + 1,
-                    range.endColumn - range.startColumn + 1
-                )
-            );
-
-            return this._injector.createInstance(
-                FRangeProtectionRule,
-                this._unitId,
-                this._subUnitId,
-                rule.id,
-                rule.permissionId,
-                ranges,
-                {
-                    name: rule.description || '',
-                    allowEdit: this._getRuleEditPermission(rule),
-                }
-            );
-        });
-    }
-
-    /**
-     * Build Facade objects for all protection rules
-     */
-    private _buildProtectionRule(rule: IRangeProtectionRule): FRangeProtectionRule {
-        const ranges = rule.ranges.map((range) =>
-            this._worksheet.getRange(range)
-        );
-
-            // Build options from rule state
-        const options: IRangeProtectionOptions = {
-            name: rule.description || '',
-            allowViewByOthers: rule.viewState !== ViewStateEnum.NoOneElseCanView,
-        };
-
-            // Handle allowEdit based on editState
-        if (rule.editState === EditStateEnum.DesignedUserCanEdit) {
-                // Get collaborators list synchronously for this rule
-                // Note: This is a synchronous context, but we need async data
-                // We'll use a placeholder here and expect the caller to handle async properly
-                // For now, we set it to an empty array as a fallback
-            options.allowEdit = true;
-        } else {
-            options.allowEdit = false;
-        }
-
-        return this._injector.createInstance(
-            FRangeProtectionRule,
-            this._unitId,
-            this._subUnitId,
-            rule.id,
-            rule.permissionId,
-            ranges,
-            options
-        );
-    }
-
-    /**
-     * Debug cell permission information.
-     * @param {number} row Row index.
-     * @param {number} col Column index.
-     * @returns {ICellPermissionDebugInfo | null} Debug information about which rules affect this cell, or null if no rules apply.
+     * Check if worksheet is currently protected.
+     * @returns {boolean} true if protected, false otherwise.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const debugInfo = permission?.debugCellPermission(0, 0);
-     * console.log(debugInfo);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * if (fWorksheet.getWorksheetPermission().isProtected()) {
+     *   console.log('Worksheet is protected');
+     * }
      * ```
      */
-    debugCellPermission(row: number, col: number): FRangeProtectionRule | undefined {
-        const info = this._fPermission.getPermissionInfoWithCell(this._unitId, this._subUnitId, row, col);
-        if (!info) {
-            return undefined;
-        }
-        const { ruleId } = info;
-        const rule = this._rangeProtectionRuleModel.getRule(this._unitId, this._subUnitId, ruleId);
-        if (!rule) {
-            return undefined;
-        }
-        return this._buildProtectionRule(rule);
+    isProtected(): boolean {
+        const rule = this._worksheetProtectionRuleModel.getRule(this._unitId, this._subUnitId);
+        return !!rule;
     }
 
     /**
@@ -347,11 +105,12 @@ export class FWorksheetPermission {
      * @returns {Promise<string>} The permissionId for the created protection.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const permission = fWorksheet.getWorksheetPermission();
      *
      * // Create worksheet protection with collaborators
-     * const permissionId = await permission?.protect({
+     * const permissionId = await permission.protect({
      *   allowedUsers: ['user1', 'user2'],
      *   name: 'My Worksheet Protection'
      * });
@@ -366,10 +125,62 @@ export class FWorksheetPermission {
             throw new Error('Worksheet is already protected. Call unprotect() first.');
         }
 
-        // Use FPermission's addWorksheetBasePermission method
-        const permissionId = await this._fPermission.addWorksheetBasePermission(this._unitId, this._subUnitId, options);
+        const editState = determineEditState(options?.allowedUsers);
+        const viewState = determineViewState(options?.allowViewByOthers);
+        const scope = determineScope(editState, viewState);
 
-        if (!permissionId) {
+        // Fetch existing collaborators if allowedUsers is provided
+        const collaborators: ICollaborator[] = [];
+        if (editState === EditStateEnum.DesignedUserCanEdit) {
+            const existingCollaborators = await this._authzIoService.listCollaborators({
+                objectID: this._unitId,
+                unitID: this._unitId,
+            });
+
+            options!.allowedUsers!.forEach((userId) => {
+                const existingCollaborator = existingCollaborators.find((c) => c.subject?.userID === userId || c.id === userId);
+                if (!existingCollaborator) {
+                    console.error(`User ${userId} not found in existing collaborators`);
+                    return;
+                }
+
+                collaborators.push({
+                    id: existingCollaborator.id,
+                    role: UnitRole.Editor,
+                    subject: existingCollaborator.subject,
+                });
+            });
+        }
+
+        const permissionId = await this._authzIoService.create({
+            objectType: UnitObject.Worksheet,
+            worksheetObject: {
+                collaborators,
+                unitID: this._unitId,
+                strategies: [
+                    { role: UnitRole.Editor, action: UnitAction.Edit },
+                    { role: UnitRole.Reader, action: UnitAction.View },
+                ],
+                name: options?.name || '',
+                scope,
+            },
+        });
+
+        const result = this._commandService.syncExecuteCommand<IAddWorksheetProtectionParams>(AddWorksheetProtectionMutation.id, {
+            unitId: this._unitId,
+            subUnitId: this._subUnitId,
+            rule: {
+                permissionId,
+                description: options?.name,
+                unitType: UnitObject.Worksheet,
+                unitId: this._unitId,
+                subUnitId: this._subUnitId,
+                viewState,
+                editState,
+            },
+        });
+
+        if (!result) {
             throw new Error('Failed to create worksheet protection');
         }
 
@@ -382,39 +193,28 @@ export class FWorksheetPermission {
      * @returns {Promise<void>} A promise that resolves when protection is removed.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.unprotect();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * await fWorksheet.getWorksheetPermission().unprotect();
      * ```
      */
-    async unprotect(): Promise<void> {
+    async unprotect(): Promise<boolean> {
         if (!this.isProtected()) {
-            return; // Already unprotected
+            return true; // Already unprotected
         }
 
-        // Use FPermission's removeWorksheetPermission method
-        this._fPermission.removeWorksheetPermission(this._unitId, this._subUnitId);
+        const result = this._commandService.syncExecuteCommand<IDeleteWorksheetProtectionParams>(DeleteWorksheetProtectionMutation.id, {
+            unitId: this._unitId,
+            subUnitId: this._subUnitId,
+        });
 
-        // Update snapshot
-        const newSnapshot = this._buildSnapshot();
-        this._permissionSubject.next(newSnapshot);
-    }
+        [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
+            const instance = new F(this._unitId, this._subUnitId);
+            this._permissionService.updatePermissionPoint(instance.id, true);
+        });
+        this._worksheetProtectionPointModel.deleteRule(this._unitId, this._subUnitId);
 
-    /**
-     * Check if worksheet is currently protected.
-     * @returns {boolean} true if protected, false otherwise.
-     * @example
-     * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * if (permission?.isProtected()) {
-     *   console.log('Worksheet is protected');
-     * }
-     * ```
-     */
-    isProtected(): boolean {
-        const rule = this._worksheetProtectionRuleModel.getRule(this._unitId, this._subUnitId);
-        return !!rule;
+        return result;
     }
 
     /**
@@ -424,16 +224,19 @@ export class FWorksheetPermission {
      * @returns {Promise<void>} A promise that resolves when the mode is set.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.setMode('readOnly');
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * await fWorksheet.getWorksheetPermission().setMode('readOnly');
      * ```
      */
     async setMode(mode: WorksheetMode): Promise<void> {
         // Ensure worksheet protection exists before setting permission points
 
         const pointsToSet = this._getModePermissions(mode);
-        await this._batchSetPermissionPoints(pointsToSet);
+
+        await Promise.all(
+            Object.entries(pointsToSet).map(([point, value]) => this.setPoint(point as WorksheetPermissionPoint, value))
+        );
     }
 
     /**
@@ -457,14 +260,12 @@ export class FWorksheetPermission {
             case 'readOnly':
                 // Fully read-only - only View is allowed
                 pointsToSet[WorksheetPermissionPoint.View] = true;
-                // All other permissions remain false
                 break;
             case 'filterOnly':
                 // Can only filter/sort
                 pointsToSet[WorksheetPermissionPoint.View] = true;
                 pointsToSet[WorksheetPermissionPoint.Sort] = true;
                 pointsToSet[WorksheetPermissionPoint.Filter] = true;
-                // All other permissions remain false
                 break;
         }
 
@@ -472,46 +273,13 @@ export class FWorksheetPermission {
     }
 
     /**
-     * Batch set multiple permission points efficiently
-     * @private
-     */
-    private async _batchSetPermissionPoints(pointsToSet: Record<WorksheetPermissionPoint, boolean>): Promise<void> {
-        // Note: IPermissionService doesn't have a batch update API, so we update individually
-        // but we optimize by only updating the snapshot once at the end
-        const pointsChanged: Array<{ point: WorksheetPermissionPoint; value: boolean; oldValue: boolean }> = [];
-
-        for (const [point, value] of Object.entries(pointsToSet)) {
-            const pointKey = point as WorksheetPermissionPoint;
-            const PointClass = WORKSHEET_PERMISSION_POINT_MAP[pointKey];
-            if (!PointClass) {
-                throw new Error(`Unknown worksheet permission point: ${pointKey}`);
-            }
-
-            const oldValue = this.getPoint(pointKey);
-            if (oldValue === value) {
-                continue; // Skip unchanged values
-            }
-
-            // Use FPermission's setWorksheetPermissionPoint method
-            await this._fPermission.setWorksheetPermissionPoint(this._unitId, this._subUnitId, PointClass, value);
-            pointsChanged.push({ point: pointKey, value, oldValue });
-        }
-
-        // Update snapshot once at the end (the Observable stream will pick up the changes automatically)
-        if (pointsChanged.length > 0) {
-            const newSnapshot = this._buildSnapshot();
-            this._permissionSubject.next(newSnapshot);
-        }
-    }
-
-    /**
      * Set the worksheet to read-only mode.
      * @returns {Promise<void>} A promise that resolves when the mode is set.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.setReadOnly();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * await fWorksheet.getWorksheetPermission().setReadOnly();
      * ```
      */
     async setReadOnly(): Promise<void> {
@@ -523,9 +291,9 @@ export class FWorksheetPermission {
      * @returns {Promise<void>} A promise that resolves when the mode is set.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.setEditable();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * await fWorksheet.getWorksheetPermission().setEditable();
      * ```
      */
     async setEditable(): Promise<void> {
@@ -533,13 +301,66 @@ export class FWorksheetPermission {
     }
 
     /**
+     * Set a specific permission point for the worksheet.
+     * Automatically creates worksheet protection if not already protected.
+     * @param {WorksheetPermissionPoint} point The permission point to set.
+     * @param {boolean} value The value to set (true = allowed, false = denied).
+     * @returns {Promise<void>} A promise that resolves when the point is set.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const permission = fWorksheet.getWorksheetPermission();
+     * await permission.setPoint(univerAPI.Enum.WorksheetPermissionPoint.InsertRow, false);
+     * ```
+     */
+    async setPoint(point: WorksheetPermissionPoint, value: boolean): Promise<void> {
+        const PermissionPointClass = WORKSHEET_PERMISSION_POINT_MAP[point];
+        if (!PermissionPointClass) {
+            throw new Error(`Unknown worksheet permission point: ${point}`);
+        }
+
+        // Set worksheet permission points require worksheet protection to exist first
+        const worksheetProtectionRule = this._worksheetProtectionRuleModel.getRule(this._unitId, this._subUnitId);
+        if (!worksheetProtectionRule) {
+            throw new Error(`Cannot set ${point} permission point because worksheet protection does not exist. Call protect() first.`);
+        }
+
+        const instance = new PermissionPointClass(this._unitId, this._subUnitId);
+        const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
+        if (permissionPoint && permissionPoint.value === value) {
+            return; // Value unchanged, no update needed
+        }
+
+        if (!permissionPoint) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+
+        await this._authzIoService.update({
+            objectType: UnitObject.Worksheet,
+            objectID: worksheetProtectionRule.permissionId,
+            unitID: this._unitId,
+            share: undefined,
+            name: worksheetProtectionRule.description || '',
+            strategies: [{
+                action: instance.subType,
+                role: value ? UnitRole.Editor : UnitRole.Owner,
+            }],
+            scope: undefined,
+            collaborators: undefined,
+        });
+
+        this._permissionService.updatePermissionPoint(instance.id, value);
+    }
+
+    /**
      * Check if the worksheet is editable.
      * @returns {boolean} true if the worksheet can be edited, false otherwise.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * if (permission?.canEdit()) {
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * if (fWorksheet.getWorksheetPermission().canEdit()) {
      *   console.log('Worksheet is editable');
      * }
      * ```
@@ -555,9 +376,11 @@ export class FWorksheetPermission {
      * @returns {boolean} true if the cell can be edited, false otherwise.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const canEdit = permission?.canEditCell(0, 0);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * // Check if cell C3 can be edited
+     * const fRange = fWorksheet.getRange('C3');
+     * const canEdit = fWorksheet.getWorksheetPermission().canEditCell(fRange.getRow(), fRange.getColumn());
      * console.log(canEdit);
      * ```
      */
@@ -578,7 +401,13 @@ export class FWorksheetPermission {
                     col <= range.endColumn
                 ) {
                     // Cell is within protected range, check the rule's edit permission
-                    return this._getRuleEditPermission(rule);
+                    const permissionPoint = new RangeProtectionPermissionEditPoint(
+                        this._unitId,
+                        this._subUnitId,
+                        rule.permissionId
+                    );
+                    const permission = this._permissionService.getPermissionPoint(permissionPoint.id);
+                    return permission?.value ?? false;
                 }
             }
         }
@@ -587,55 +416,64 @@ export class FWorksheetPermission {
     }
 
     /**
-     * Check if a specific cell can be viewed.
-     * @param {number} _row Row index (unused, for API consistency).
-     * @param {number} _col Column index (unused, for API consistency).
-     * @returns {boolean} true if the cell can be viewed, false otherwise.
+     * Check if the worksheet is viewable.
+     * @returns {boolean} true if the worksheet can be viewed, false otherwise.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const canView = permission?.canViewCell(0, 0);
-     * console.log(canView);
-     * ```
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * if (fWorksheet.getWorksheetPermission().canView()) {
+     *   console.log('Worksheet is viewable');
+     * }
      */
-    canViewCell(_row: number, _col: number): boolean {
-        // View permission is usually true by default
+    canView(): boolean {
         return this.getPoint(WorksheetPermissionPoint.View);
     }
 
     /**
-     * Set a specific permission point for the worksheet.
-     * Automatically creates worksheet protection if not already protected.
-     * @param {WorksheetPermissionPoint} point The permission point to set.
-     * @param {boolean} value The value to set (true = allowed, false = denied).
-     * @returns {Promise<void>} A promise that resolves when the point is set.
+     * Check if a specific cell can be viewed.
+     * @param {number} row Row index.
+     * @param {number} col Column index.
+     * @returns {boolean} true if the cell can be viewed, false otherwise.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.setPoint(univerAPI.Enum.WorksheetPermissionPoint.InsertRow, false);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * // Check if cell C3 can be viewed
+     * const fRange = fWorksheet.getRange('C3');
+     * const canView = fWorksheet.getWorksheetPermission().canViewCell(fRange.getRow(), fRange.getColumn());
+     * console.log(canView);
      * ```
      */
-    async setPoint(point: WorksheetPermissionPoint, value: boolean): Promise<void> {
-        // Ensure worksheet protection exists before setting permission points
-
-        const PointClass = WORKSHEET_PERMISSION_POINT_MAP[point];
-        if (!PointClass) {
-            throw new Error(`Unknown worksheet permission point: ${point}`);
+    canViewCell(row: number, col: number): boolean {
+        // First check worksheet-level view permission
+        if (!this.canView()) {
+            return false;
         }
 
-        const oldValue = this.getPoint(point);
-        if (oldValue === value) {
-            return; // Value unchanged, no update needed
+        // Check if there are range protection rules covering this cell that deny view permission
+        const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
+        for (const rule of rules) {
+            for (const range of rule.ranges) {
+                if (
+                    row >= range.startRow &&
+                    row <= range.endRow &&
+                    col >= range.startColumn &&
+                    col <= range.endColumn
+                ) {
+                    // Cell is within protected range, check the rule's view permission
+                    const permissionPoint = new RangeProtectionPermissionViewPoint(
+                        this._unitId,
+                        this._subUnitId,
+                        rule.permissionId
+                    );
+                    const permission = this._permissionService.getPermissionPoint(permissionPoint.id);
+                    return permission?.value ?? false;
+                }
+            }
         }
 
-        // Use FPermission's setWorksheetPermissionPoint method
-        await this._fPermission.setWorksheetPermissionPoint(this._unitId, this._subUnitId, PointClass, value);
-
-        // Update snapshot (the Observable stream will automatically emit the change)
-        const newSnapshot = this._buildSnapshot();
-        this._permissionSubject.next(newSnapshot);
+        return true;
     }
 
     /**
@@ -644,9 +482,10 @@ export class FWorksheetPermission {
      * @returns {boolean} true if allowed, false if denied.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const canInsertRow = permission?.getPoint(univerAPI.Enum.WorksheetPermissionPoint.InsertRow);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const permission = fWorksheet.getWorksheetPermission();
+     * const canInsertRow = permission.getPoint(univerAPI.Enum.WorksheetPermissionPoint.InsertRow);
      * console.log(canInsertRow);
      * ```
      */
@@ -667,14 +506,19 @@ export class FWorksheetPermission {
      * @returns {WorksheetPermissionSnapshot} An object containing all permission point values.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const snapshot = permission?.getSnapshot();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const snapshot = fWorksheet.getWorksheetPermission().getSnapshot();
      * console.log(snapshot);
      * ```
      */
     getSnapshot(): WorksheetPermissionSnapshot {
-        return this._buildSnapshot();
+        const snapshot = {} as WorksheetPermissionSnapshot;
+        for (const point in WorksheetPermissionPoint) {
+            const pointKey = WorksheetPermissionPoint[point as keyof typeof WorksheetPermissionPoint];
+            snapshot[pointKey] = this.getPoint(pointKey);
+        }
+        return snapshot;
     }
 
     /**
@@ -725,16 +569,16 @@ export class FWorksheetPermission {
      * @returns {Promise<FRangeProtectionRule[]>} Array of created protection rules.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.protectRanges([
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().protectRanges([
      *   {
-     *     ranges: [worksheet.getRange('A1:B2')],
-     *     options: { name: 'Protected Area 1', allowEdit: false, allowViewByOthers: true }
+     *     ranges: [fWorksheet.getRange('A1:B2')],
+     *     options: { name: 'Protected Area 1', allowedUsers: ['user1', 'user2'], allowViewByOthers: true }
      *   },
      *   {
-     *     ranges: [worksheet.getRange('C3:D4')],
-     *     options: { name: 'Protected Area 2', allowEdit: true, allowViewByOthers: false }
+     *     ranges: [fWorksheet.getRange('C3:D4')],
+     *     options: { name: 'Protected Area 2', allowViewByOthers: false }
      *   }
      * ]);
      * console.log(rules);
@@ -751,163 +595,110 @@ export class FWorksheetPermission {
             throw new Error('Configs cannot be empty');
         }
 
+        const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
+
         // Fetch existing collaborators once if any config has allowedUsers
         let existingCollaborators: ICollaborator[] = [];
-        const hasAllowedUsers = configs.some((c) => c.options?.allowedUsers?.length);
-        if (hasAllowedUsers) {
-            existingCollaborators = await this._authzIoService.listCollaborators({
-                objectID: this._unitId,
-                unitID: this._unitId,
-            });
-        }
+        let fetchCollaborators = false;
 
-        // 1. Create permissionId in parallel
-        const permissionIds = await Promise.all(
-            configs.map((c) => {
-                let collaborators: ICollaborator[] = [];
-                if (c.options?.allowedUsers) {
-                    // Create a map of allowed user IDs for easy lookup
-                    const allowedUserIds = new Set(c.options.allowedUsers);
+        const addRules: IRangeProtectionRule[] = [];
 
-                    // Filter and include only the allowed users with complete information
-                    collaborators = existingCollaborators
-                        .filter((collab) => allowedUserIds.has(collab.subject?.userID || collab.id))
-                        .map((collab) => ({
-                            id: collab.id,
-                            role: UnitRole.Editor,
-                            subject: collab.subject,
-                        }));
+        for (let i = 0; i < configs.length; i++) {
+            const { ranges, options } = configs[i];
 
-                    // Check for any user IDs that weren't found in existing collaborators
-                    const foundUserIds = new Set(collaborators.map((collab) => collab.subject?.userID || collab.id));
-                    c.options.allowedUsers.forEach((userId) => {
-                        if (!foundUserIds.has(userId)) {
-                            console.error(`User ${userId} not found in collaborators list`);
-                        }
+            if (
+                ranges.some((range) =>
+                    rules.some((rule) =>
+                        rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, range.getRange()))
+                    )
+                )
+            ) {
+                throw new Error(`The specified ranges overlap with existing protected ranges: ${ranges.map((r) => r.getA1Notation()).join(', ')}`);
+            }
+
+            const editState = determineEditState(options?.allowedUsers);
+            const viewState = determineViewState(options?.allowViewByOthers);
+            const scope = determineScope(editState, viewState);
+
+            const collaborators: ICollaborator[] = [];
+            if (editState === EditStateEnum.DesignedUserCanEdit) {
+                if (!fetchCollaborators) {
+                    existingCollaborators = await this._authzIoService.listCollaborators({
+                        objectID: this._unitId,
+                        unitID: this._unitId,
                     });
+                    fetchCollaborators = true;
                 }
 
-                return this._authzIoService.create({
-                    objectType: UnitObject.SelectRange,
-                    selectRangeObject: {
-                        collaborators,
-                        unitID: this._unitId,
-                        name: c.options?.name || '',
-                        scope: undefined,
-                    },
+                options!.allowedUsers!.forEach((userId) => {
+                    const existingCollaborator = existingCollaborators.find((c) => c.subject?.userID === userId || c.id === userId);
+                    if (!existingCollaborator) {
+                        console.error(`User ${userId} not found in existing collaborators`);
+                        return;
+                    }
+
+                    collaborators.push({
+                        id: existingCollaborator.id,
+                        role: UnitRole.Editor,
+                        subject: existingCollaborator.subject,
+                    });
                 });
-            })
-        );
+            }
 
-        // 2. Build rule parameters with proper viewState and editState
-        const ruleParams = configs.map((c, i) => {
-            const viewState = this._determineViewState(c.options);
-            const editState = this._determineEditState(c.options);
+            // Create permission ID with collaborators support
+            const permissionId = await this._authzIoService.create({
+                objectType: UnitObject.SelectRange,
+                selectRangeObject: {
+                    collaborators,
+                    unitID: this._unitId,
+                    name: options?.name || '',
+                    scope,
+                },
+            });
+            const ruleId = `ruleId_${generateRandomId(6)}`;
 
-            return {
-                permissionId: permissionIds[i],
+            addRules.push({
+                ranges: ranges.map((r) => r.getRange()),
+                permissionId,
+                id: ruleId,
+                description: options?.name,
                 unitType: UnitObject.SelectRange,
                 unitId: this._unitId,
                 subUnitId: this._subUnitId,
-                ranges: c.ranges.map((r) => r.getRange()),
-                id: this._rangeProtectionRuleModel.createRuleId(this._unitId, this._subUnitId),
-                description: c.options?.name || '',
                 viewState,
                 editState,
-            };
-        });
+            });
+        }
 
-        // 3. Execute command to add multiple rules at once
-        const result = await this._commandService.executeCommand(AddRangeProtectionMutation.id, {
+        const result = this._commandService.syncExecuteCommand<IAddRangeProtectionMutationParams>(AddRangeProtectionMutation.id, {
             unitId: this._unitId,
             subUnitId: this._subUnitId,
-            rules: ruleParams,
+            rules: addRules,
         });
 
         if (!result) {
             throw new Error('Failed to create range protection rules');
         }
 
-        // 4. Set permission points for each rule
-        await Promise.all(
-            configs.map((c, i) => this._setPermissionPoints(permissionIds[i], c.options))
-        );
-
-        // 5. Create RangeProtectionRule objects
-        const rules = ruleParams.map((param, i) =>
-            this._injector.createInstance(
+        const rangeProtectionRules = addRules.map((item, i) => {
+            const rule = this._injector.createInstance(
                 FRangeProtectionRule,
                 this._unitId,
                 this._subUnitId,
-                param.id,
-                param.permissionId,
+                item.id,
+                item.permissionId,
                 configs[i].ranges,
                 configs[i].options || {}
-            )
-        );
+            );
 
-        // The Observable stream will automatically emit the change event
-        return rules;
-    }
+            // Set permission points based on options (for local runtime control)
+            // rule.setPoint(RangePermissionPoint.Edit, configs[i].options?.allowEdit ?? false);
+            // rule.setPoint(RangePermissionPoint.View, configs[i].options?.allowViewByOthers ?? true);
 
-    /**
-     * Determine view state from options
-     * @private
-     */
-    private _determineViewState(options?: IRangeProtectionOptions): ViewStateEnum {
-        if (options?.allowViewByOthers === false) {
-            return ViewStateEnum.NoOneElseCanView; // Only owner can view
-        }
-        return ViewStateEnum.OthersCanView;
-    }
+            return rule;
+        });
 
-    /**
-     * Determine edit state from options
-     * @private
-     */
-    private _determineEditState(options?: IRangeProtectionOptions): EditStateEnum {
-        if (options?.allowEdit === true && options?.allowedUsers?.length) {
-            return EditStateEnum.DesignedUserCanEdit; // Designed users can edit
-        }
-        return EditStateEnum.OnlyMe;
-    }
-
-    /**
-     * Set permission points based on options (for local runtime control)
-     * @private
-     */
-    private async _setPermissionPoints(permissionId: string, options?: IRangeProtectionOptions): Promise<void> {
-        if (!options) {
-            return;
-        }
-
-        const getPermissionValue = (option: boolean | string[] | undefined, defaultValue: boolean): boolean => {
-            if (option === undefined) {
-                return defaultValue;
-            }
-            if (typeof option === 'boolean') {
-                return option;
-            }
-            return true; // For string[] whitelist
-        };
-
-        // Set permission points
-        await this._setPermissionPoint(permissionId, RangePermissionPoint.Edit, getPermissionValue(options.allowEdit, false));
-        await this._setPermissionPoint(permissionId, RangePermissionPoint.View, getPermissionValue(options.allowViewByOthers, true));
-    }
-
-    /**
-     * Set a single permission point
-     * @private
-     */
-    private async _setPermissionPoint(permissionId: string, point: RangePermissionPoint, value: boolean): Promise<void> {
-        const PermissionPointClass = RANGE_PERMISSION_POINT_MAP[point];
-        if (!PermissionPointClass) {
-            return;
-        }
-
-        // Use FPermission's setRangeProtectionPermissionPoint method
-        this._fPermission.setRangeProtectionPermissionPoint(this._unitId, this._subUnitId, permissionId, PermissionPointClass, value);
+        return rangeProtectionRules;
     }
 
     /**
@@ -916,20 +707,33 @@ export class FWorksheetPermission {
      * @returns {Promise<void>} A promise that resolves when the rules are removed.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * await permission?.unprotectRules(['rule1', 'rule2']);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const worksheetPermission = fWorksheet.getWorksheetPermission();
+     * const rules = await worksheetPermission.listRangeProtectionRules();
+     * // Unprotect the first rule as an example
+     * if (rules.length > 0) {
+     *   const result = await worksheetPermission.unprotectRules([rules[0].id]);
+     *   console.log(result);
+     * }
      * ```
      */
-    async unprotectRules(ruleIds: string[]): Promise<void> {
+    async unprotectRules(ruleIds: string[]): Promise<boolean> {
         if (!ruleIds || ruleIds.length === 0) {
-            return;
+            return true;
         }
 
-        // Use FPermission's removeRangeProtection method
-        this._fPermission.removeRangeProtection(this._unitId, this._subUnitId, ruleIds);
+        const result = await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {
+            unitId: this._unitId,
+            subUnitId: this._subUnitId,
+            ruleIds,
+        });
 
-        // The Observable stream will automatically emit the change event
+        if (result) {
+            handleWorksheetRangePermissionIsEmpty(this._injector, this._unitId, this._subUnitId);
+        }
+
+        return result;
     }
 
     /**
@@ -937,42 +741,83 @@ export class FWorksheetPermission {
      * @returns {Promise<FRangeProtectionRule[]>} Array of protection rules.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
      * console.log(rules);
      * ```
      */
-    async listRangeProtectionRules(): Promise<FRangeProtectionRule[]> {
-        return this._buildRangeProtectionRules();
+    async listRangeProtectionRules(
+        options?: {
+            ignoreCollaborators?: boolean; // Option to ignore fetching collaborators for performance
+        }
+    ): Promise<FRangeProtectionRule[]> {
+        return getListRangeProtectionRules(
+            this._injector,
+            this._unitId,
+            this._subUnitId,
+            {
+                worksheet: this._worksheet,
+                ignoreCollaborators: options?.ignoreCollaborators,
+            }
+        );
     }
 
     /**
-     * Subscribe to permission changes (simplified interface for users not familiar with RxJS).
-     * @param {Function} listener Callback function to be called when permissions change.
-     * @returns {UnsubscribeFn} Unsubscribe function.
+     * Debug cell permission information.
+     * @param {number} row Row index.
+     * @param {number} col Column index.
+     * @returns {FRangeProtectionRule | undefined} Debug information about which rules affect this cell, or null if no rules apply.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const unsubscribe = permission?.subscribe((snapshot) => {
-     *   console.log('Permission changed:', snapshot);
-     * });
-     * // Later, to stop listening:
-     * unsubscribe?.();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * // Get debug info for cell C3
+     * const fRange = fWorksheet.getRange('C3');
+     * const debugInfo = await fWorksheet.getWorksheetPermission().debugCellPermission(fRange.getRow(), fRange.getColumn());
+     * console.log(debugInfo);
      * ```
      */
-    subscribe(listener: (snapshot: WorksheetPermissionSnapshot) => void): UnsubscribeFn {
-        const subscription = this.permission$.subscribe(listener);
-        return () => subscription.unsubscribe();
-    }
+    async debugCellPermission(row: number, col: number): Promise<FRangeProtectionRule | undefined> {
+        const rules = this._rangeProtectionRuleModel.getSubunitRuleList(this._unitId, this._subUnitId);
+        const cellRange = cellToRange(row, col);
+        const rule = rules.find((rule) =>
+            rule.ranges.some((range) => Rectangle.intersects(cellRange, range))
+        );
 
-    /**
-     * Clean up resources
-     */
-    dispose(): void {
-        this._subscriptions.forEach((sub) => sub.unsubscribe());
-        this._permissionSubject.complete();
-        this._rangeRulesSubject.complete();
+        if (!rule) {
+            return;
+        }
+
+        const ranges = rule.ranges.map((range) => this._worksheet.getRange(range));
+        const options: IRangeProtectionOptions = {
+            name: rule.description || '',
+            allowViewByOthers: rule.viewState !== ViewStateEnum.NoOneElseCanView,
+        };
+
+        if (rule.editState === EditStateEnum.DesignedUserCanEdit) {
+            options.allowedUsers = [];
+
+            try {
+                // Fetch collaborators for this rule
+                const collaborators = await this._authzIoService.listCollaborators({
+                    objectID: rule.permissionId,
+                    unitID: this._unitId,
+                });
+                options.allowedUsers = collaborators.map((c) => c.subject?.userID || c.id);
+            } catch (error) {
+                console.error(`Failed to fetch collaborators for rule ${rule.id}:`, error);
+            }
+        }
+
+        return this._injector.createInstance(
+            FRangeProtectionRule,
+            this._unitId,
+            this._subUnitId,
+            rule.id,
+            rule.permissionId,
+            ranges,
+            options
+        );
     }
 }

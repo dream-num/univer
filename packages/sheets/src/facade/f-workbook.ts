@@ -23,7 +23,6 @@ import { FBaseInitialable } from '@univerjs/core/facade';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorkbookNameCommand, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
-import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 import { FWorkbookPermission } from './permission/f-workbook-permission';
@@ -798,21 +797,6 @@ export class FWorkbook extends FBaseInitialable {
     moveActiveSheet(index: number): FWorkbook {
         const sheet = this.getActiveSheet();
         return this.moveSheet(sheet, index);
-    }
-
-    /**
-     * Get the PermissionInstance.
-     * @returns {FPermission} - The PermissionInstance.
-     * @deprecated Use `getWorkbookPermission()` instead for the new permission API
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const permission = fWorkbook.getPermission();
-     * console.log(permission);
-     * ```
-     */
-    getPermission(): FPermission {
-        return this._injector.createInstance(FPermission);
     }
 
     /**

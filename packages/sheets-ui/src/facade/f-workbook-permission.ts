@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import { FPermission } from '@univerjs/sheets/facade';
+import { FWorkbookPermission } from '@univerjs/sheets/facade';
 
 /**
  * @ignore
  */
-export interface IFPermissionSheetsUIMixin {
+export interface IFWorkbookPermissionSheetsUIMixin {
     /**
      * Set visibility of unauthorized pop-up window
      * @param {boolean} visible - visibility of unauthorized pop-up window
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const permission = fWorkbook.getPermission();
+     * const permission = fWorkbook.getWorkbookPermission();
      * permission.setPermissionDialogVisible(false);
      * ```
      */
     setPermissionDialogVisible(visible: boolean): void;
 }
 
-export class FPermissionSheetsUIMixin extends FPermission implements IFPermissionSheetsUIMixin {
+export class FWorkbookPermissionSheetsUIMixin extends FWorkbookPermission implements IFWorkbookPermissionSheetsUIMixin {
     override setPermissionDialogVisible(visible: boolean): void {
         this._permissionService.setShowComponents(visible);
     }
 }
 
-FPermission.extend(FPermissionSheetsUIMixin);
+FWorkbookPermission.extend(FWorkbookPermissionSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FPermission extends IFPermissionSheetsUIMixin {}
+    interface FWorkbookPermission extends IFWorkbookPermissionSheetsUIMixin {}
 }

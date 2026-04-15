@@ -3,7 +3,7 @@
     "type": "module",
     "version": "0.20.1",
     "private": true,
-    "packageManager": "pnpm@10.32.1",
+    "packageManager": "pnpm@10.33.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -64,12 +64,12 @@
         "@release-it-plugins/workspaces": "^5.0.3",
         "@release-it/conventional-changelog": "^10.0.6",
         "@types/fs-extra": "^11.0.4",
-        "@types/node": "^25.5.0",
+        "@types/node": "^25.6.0",
         "@types/react": "19.2.14",
         "@types/react-dom": "19.2.3",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "eslint": "10.1.0",
+        "eslint": "10.2.0",
         "eslint-plugin-format": "^2.0.1",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "7.0.1",
@@ -77,14 +77,14 @@
         "fs-extra": "^11.3.4",
         "husky": "^9.1.7",
         "lint-staged": "^16.4.0",
-        "posthog-node": "^5.28.5",
-        "react": "19.2.4",
-        "react-dom": "19.2.4",
+        "posthog-node": "^5.29.2",
+        "react": "19.2.5",
+        "react-dom": "19.2.5",
         "release-it": "^19.2.4",
         "serve": "^14.2.6",
         "tailwindcss": "3.4.18",
         "tsx": "^4.21.0",
-        "turbo": "^2.8.20",
+        "turbo": "^2.9.6",
         "typescript": "^6.0.2",
         "vitest": "^4.1.1"
     },
@@ -93,8 +93,8 @@
             "@types/react": "19.2.14",
             "@types/react-dom": "19.2.3",
             "basic-ftp": "5.2.0",
-            "react": "19.2.4",
-            "react-dom": "19.2.4"
+            "react": "19.2.5",
+            "react-dom": "19.2.5"
         }
     },
     "lint-staged": {

@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-import type { ISize } from '../../shared/shape';
-import type { Nullable } from '../../shared/types';
-import type { IWorksheetData } from '../../sheets/typedef';
-import type { LocaleType, ThemeColorType } from '../enum';
+import type {
+    IColorStyle,
+    ICustomBlock,
+    IDocumentData,
+    IImageProperties,
+    ILists,
+    IPlaceholder,
+    IShapeProperties,
+    ISize,
+    IStyleBase,
+    IStyleData,
+    ITransformState,
+    IWorksheetData,
+    LocaleType,
+    Nullable,
+    ThemeColorType,
+} from '@univerjs/core';
 import type { ShapeType } from '../enum/prst-geom-type';
-import type { ICustomBlock, IDocumentData, ILists } from './i-document-data';
-import type { ITransformState } from './i-drawing';
-import type { IImageProperties } from './i-image-properties';
-import type { IPlaceholder } from './i-placeholder';
-import type { IShapeProperties } from './i-shape-properties';
-import type { IColorStyle, IStyleBase, IStyleData } from './i-style-data';
 
 export interface ISlideData extends IReferenceSource {
     id: string; // unit id

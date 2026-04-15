@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { ISlideData, ISlidePage } from '../../types/interfaces';
-import type { SlideDataModel } from '../slide-model';
+import type { Nullable } from '@univerjs/core';
+import type { ISlideData, ISlidePage } from '../../types/interfaces/i-slide-data';
 import { afterEach, describe, expect, it } from 'vitest';
-import { UniverInstanceType } from '../../common/unit';
-import { PageElementType, PageType } from '../../types/interfaces';
-import { Univer } from '../../univer';
+import { PageElementType, PageType } from '../../types/interfaces/i-slide-data';
+import { SlideDataModel } from '../slide-data-model';
 
 const slideSnapshotFactory = (): Partial<ISlideData> => ({
     id: 'slide-unit',
@@ -60,23 +59,22 @@ const slideSnapshotFactory = (): Partial<ISlideData> => ({
 });
 
 describe('SlideDataModel', () => {
-    let univer: Univer;
+    let slide: SlideDataModel;
 
     afterEach(() => {
-        univer?.dispose();
+        slide?.dispose();
     });
 
-    it('should manage pages and active-page state through the real unit creation flow', () => {
-        univer = new Univer();
-        const slide = univer.createUnit<Partial<ISlideData>, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, slideSnapshotFactory());
+    it('should manage pages and active-page state', () => {
+        slide = new SlideDataModel(slideSnapshotFactory());
         const activePages: string[] = [];
         const names: string[] = [];
-        const activePageSubscription = slide.activePage$.subscribe((page) => {
+        const activePageSubscription = slide.activePage$.subscribe((page: Nullable<ISlidePage>) => {
             if (page) {
                 activePages.push(page.id);
             }
         });
-        const nameSubscription = slide.name$.subscribe((name) => names.push(name));
+        const nameSubscription = slide.name$.subscribe((name: string) => names.push(name));
 
         expect(slide.getUnitId()).toBe('slide-unit');
         expect(slide.getSnapshot().title).toBe('Quarterly review');
@@ -129,8 +127,7 @@ describe('SlideDataModel', () => {
     });
 
     it('should keep empty slide snapshots stable when page collections are absent', () => {
-        univer = new Univer();
-        const slide = univer.createUnit<Partial<ISlideData>, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, {
+        slide = new SlideDataModel({
             id: 'empty-slide',
             title: 'Empty deck',
         });

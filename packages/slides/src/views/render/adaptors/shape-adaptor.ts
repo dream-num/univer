@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { Injector, IPageElement } from '@univerjs/core';
-import { BasicShapes, getColorStyle, PageElementType } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
+import type { IPageElement } from '../../../types/interfaces/i-slide-data';
+import { getColorStyle } from '@univerjs/core';
 import { Circle, Rect } from '@univerjs/engine-render';
-
+import { BasicShapes } from '../../../types/enum/prst-geom-type';
+import { PageElementType } from '../../../types/interfaces/i-slide-data';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 export class ShapeAdaptor extends ObjectAdaptor {

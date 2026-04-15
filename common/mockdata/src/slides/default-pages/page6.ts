@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/slides';
 
 import { DEFAULT_DOCUMENT_DATA_EN } from '../../docs/default-document-data-en';
 

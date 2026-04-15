@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, SlideDataModel } from '@univerjs/core';
-import { BasicShapes, CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, PageElementType } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
+import { CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
-
+import { BasicShapes, PageElementType } from '@univerjs/slides';
 import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
 import { CanvasView } from '../../controllers/canvas-view';

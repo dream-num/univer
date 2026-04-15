@@ -24,7 +24,6 @@ import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
-import { SlideDataModel } from '../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
@@ -153,6 +152,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         };
     }
 
+    __getCtorByType(type: UnitType): UnitCtor | undefined {
+        return this._ctorByType.get(type);
+    }
+
     private _currentUnits = new Map<UnitType, Nullable<UnitModel>>();
     private readonly _currentUnits$ = new BehaviorSubject<Map<UnitType, Nullable<UnitModel>>>(this._currentUnits);
     readonly currentUnits$ = this._currentUnits$.asObservable();
@@ -275,7 +278,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
             this.setCurrentUnitForType(id!);
-        } else if (this.focused instanceof SlideDataModel) {
+        } else if (this.focused?.type === UniverInstanceType.UNIVER_SLIDE) {
             this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, false);

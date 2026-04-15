@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISlideData } from '@univerjs/core';
-import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
+import type { ISlideData } from '@univerjs/slides';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/slides';
 
 import { DEFAULT_SECOND_PAGE } from './default-pages/page2';
 import { DEFAULT_THIRD_PAGE } from './default-pages/page3';

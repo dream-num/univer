@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { PageElementType, PresetListType } from '@univerjs/core';
+import { PresetListType } from '@univerjs/core';
+import { PageElementType } from '@univerjs/slides';
 
 export const PAGE3_RICHTEXT_3 = {
     id: 'detailContent3',

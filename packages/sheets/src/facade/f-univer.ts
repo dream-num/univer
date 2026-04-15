@@ -68,7 +68,6 @@ import {
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
-import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
 /**
@@ -132,12 +131,6 @@ export interface IFUniverSheetsMixin {
     getUniverSheet(id: string): FWorkbook | null;
 
     getWorkbook(id: string): FWorkbook | null;
-
-    /**
-     * Get the PermissionInstance.
-     * @deprecated This function is deprecated and will be removed in version 0.6.0. Please use the function with the same name on the `FWorkbook` instance instead.
-     */
-    getPermission(): FPermission;
 
     /**
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.UnitCreated, () => {})`
@@ -732,10 +725,6 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
 
     override getWorkbook(id: string): FWorkbook | null {
         return this.getUniverSheet(id);
-    }
-
-    override getPermission(): FPermission {
-        return this._injector.createInstance(FPermission);
     }
 
     override onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable {

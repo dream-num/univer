@@ -189,20 +189,24 @@ export class Univer implements IDisposable {
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor, options) => {
-                if (!this._startedTypes.has(type)) {
+                const isFirstTime = !this._startedTypes.has(type);
+                if (isFirstTime) {
                     this._pluginService.startPluginsForType(type);
                     this._startedTypes.add(type);
-
-                    const model = injector.createInstance(ctor, data);
-                    univerInstanceService.__addUnit(model, options);
-
-                    this._tryProgressToReady();
-
-                    return model;
                 }
 
-                const model = injector.createInstance(ctor, data);
+                const actualCtor = ctor ?? univerInstanceService.__getCtorByType(type);
+                if (!actualCtor) {
+                    throw new Error(`[Univer] no constructor registered for unit type ${type}`);
+                }
+
+                const model = injector.createInstance(actualCtor, data);
                 univerInstanceService.__addUnit(model, options);
+
+                if (isFirstTime) {
+                    this._tryProgressToReady();
+                }
+
                 return model;
             }
         );

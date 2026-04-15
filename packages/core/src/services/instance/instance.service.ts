@@ -136,6 +136,11 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._createHandler = handler;
     }
 
+    /** @ignore */
+    __getCtorByType(type: UnitType): UnitCtor | undefined {
+        return this._ctorByType.get(type);
+    }
+
     createUnit<T, U extends UnitModel>(type: UnitType, data: T, options?: ICreateUnitOptions): U {
         const model = this._createHandler(type, data, this._ctorByType.get(type)!, options);
         return model as U;

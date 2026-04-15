@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
-import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest } from '@univerjs/protocol';
+import type {
+    IAllowedRequest,
+    IAllowedResponse,
+    IBatchAllowedResponse,
+    ICreateCollaboratorRequest,
+    ICreateRequest,
+    ICreateResponse,
+    IDeleteCollaboratorRequest,
+    IListCollaboratorRequest,
+    IListCollaboratorResponse,
+    IListPermPointRequest,
+    IListPermPointResponse,
+    IListRolesRequest,
+    IListRolesResponse,
+    IPutCollaboratorsRequest,
+    IUpdateCollaboratorRequest,
+    IUpdatePermPointRequest,
+} from '@univerjs/protocol';
 import type { ILogContext } from '../log/context';
 import { createIdentifier } from '../../common/di';
 

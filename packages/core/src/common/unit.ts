@@ -15,8 +15,16 @@
  */
 
 import type { Observable } from 'rxjs';
-import { UniverType as UniverInstanceType } from '@univerjs/protocol';
 import { Disposable } from '../shared/lifecycle';
+
+export enum UniverInstanceType {
+    UNIVER_UNKNOWN = 0,
+    UNIVER_DOC = 1, // Univer Docs
+    UNIVER_SHEET = 2, // Univer Sheets
+    UNIVER_SLIDE = 3, // Univer Slides
+    UNIVER_PROJECT = 4,
+    UNRECOGNIZED = -1,
+}
 
 /**
  * The base class for all units.
@@ -38,5 +46,3 @@ export abstract class UnitModel<D = object, T extends UniverInstanceType = Unive
     /** Set revision of the current snapshot. */
     abstract setRev(rev: number): void;
 }
-
-export { UniverInstanceType };

@@ -16,7 +16,7 @@
 
 import type { Theme } from '@univerjs/themes';
 import type { Dependency, IDisposable } from './common/di';
-import type { UnitModel, UnitType } from './common/unit';
+import type { UnitModel } from './common/unit';
 import type { LogLevel } from './services/log/log.service';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
@@ -96,7 +96,7 @@ export interface IUniverConfig {
  * @hideconstructor
  */
 export class Univer implements IDisposable {
-    private _startedTypes = new Set<UnitType>();
+    private _startedTypes = new Set<UniverInstanceType>();
     private _injector: Injector;
 
     private get _univerInstanceService(): IUniverInstanceService {
@@ -159,7 +159,7 @@ export class Univer implements IDisposable {
         this._injector.get(LocaleService).setLocale(locale);
     }
 
-    createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>): U {
+    createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: Partial<T>): U {
         return this._univerInstanceService.createUnit(type, data);
     }
 
@@ -170,7 +170,7 @@ export class Univer implements IDisposable {
 
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
-            (type: UnitType, data, ctor, options) => {
+            (type: UniverInstanceType, data, ctor, options) => {
                 const isFirstTime = !this._startedTypes.has(type);
                 if (isFirstTime) {
                     this._pluginService.startPluginsForType(type);

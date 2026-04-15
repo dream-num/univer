@@ -21,9 +21,7 @@ import type { LogLevel } from './services/log/log.service';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { ILocales } from './shared';
-import type { IWorkbookData } from './sheets/typedef';
 import type { LocaleType } from './types/enum/locale-type';
-import type { IDocumentData } from './types/interfaces';
 import { Injector, touchDependencies } from './common/di';
 import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
@@ -53,6 +51,7 @@ import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undo
 import { UserManagerService } from './services/user-manager/user-manager.service';
 import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
+import { SlideDataModel } from './slides/slide-data-model';
 
 export interface IUniverConfig {
     /**
@@ -164,27 +163,10 @@ export class Univer implements IDisposable {
         return this._univerInstanceService.createUnit(type, data);
     }
 
-    /**
-     * Create a univer sheet instance with internal dependency injection.
-     *
-     * @deprecated use `createUnit` instead
-     */
-    createUniverSheet(data: Partial<IWorkbookData>): Workbook {
-        this._injector.get(ILogService).warn('[Univer]', 'Univer.createUniverSheet is deprecated, use createUnit instead');
-        return this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
-    }
-
-    /**
-     * @deprecated use `createUnit` instead
-     */
-    createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel {
-        this._injector.get(ILogService).warn('[Univer]', 'Univer.createUniverDoc is deprecated, use createUnit instead');
-        return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
-    }
-
     private _init(injector: Injector): void {
         this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SHEET, Workbook);
         this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel);
+        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel);
 
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
@@ -195,9 +177,9 @@ export class Univer implements IDisposable {
                     this._startedTypes.add(type);
                 }
 
-                const actualCtor = ctor ?? univerInstanceService.__getCtorByType(type);
+                const actualCtor = univerInstanceService.__getCtorByType(type) ?? ctor;
                 if (!actualCtor) {
-                    throw new Error(`[Univer] no constructor registered for unit type ${type}`);
+                    throw new Error(`[Univer]: No constructor registered for unit type ${type}.`);
                 }
 
                 const model = injector.createInstance(actualCtor, data);

@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IConfigService, Inject, Injector, IUniverInstanceService, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderingEngine } from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { defaultPluginConfig, SLIDES_PLUGIN_CONFIG_KEY } from './config/config';
 import { SlideDataModel } from './data-model/slide-data-model';
@@ -39,7 +39,6 @@ export class UniverSlidesPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSlidesConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -57,7 +56,8 @@ export class UniverSlidesPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel as never);
+        // Register the SlideDataModel constructor for the UNIVER_SLIDE type.
+        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel);
     }
 
     initialize(): void {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
@@ -68,7 +68,7 @@ export interface IRenderModule extends IDisposable { }
  */
 export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IRender, 'with'> {
     unit: T;
-    type: UnitType;
+    type: UniverInstanceType;
 }
 
 /**
@@ -82,7 +82,7 @@ export class RenderUnit extends Disposable implements IRender {
     readonly activated$ = this._activated$.pipe(distinctUntilChanged());
 
     get unitId(): string { return this._renderContext.unitId; }
-    get type(): UnitType { return this._renderContext.type; }
+    get type(): UniverInstanceType { return this._renderContext.type; }
 
     private readonly _injector: Injector;
 

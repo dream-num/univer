@@ -17,8 +17,8 @@
 import type { UnitAction } from '@univerjs/protocol';
 
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
-import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
-import { UnitObject, UniverType } from '@univerjs/protocol';
+import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { UnitObject } from '@univerjs/protocol';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 
 import { RangeProtectionCache } from '../../../model/range-protection.cache';
@@ -95,7 +95,7 @@ export class RangeProtectionService extends Disposable {
                 toJson,
                 parseJson,
                 pluginName: PLUGIN_NAME,
-                businesses: [UniverType.UNIVER_SHEET],
+                businesses: [UniverInstanceType.UNIVER_SHEET],
                 onLoad: (unitId, resources) => {
                     const result = this._selectionProtectionRuleModel.toObject();
                     result[unitId] = resources;

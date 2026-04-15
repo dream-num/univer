@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
@@ -73,7 +73,7 @@ export interface IRenderManagerService extends IDisposable {
      * @param type
      * @param dep
      */
-    registerRenderModule<T extends UnitModel>(type: UnitType, dep: Dependency<T>): IDisposable;
+    registerRenderModule<T extends UnitModel>(type: UniverInstanceType, dep: Dependency<T>): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -102,7 +102,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._defaultEngine;
     }
 
-    private readonly _renderDependencies = new Map<UnitType, Dependency[]>();
+    private readonly _renderDependencies = new Map<UniverInstanceType, Dependency[]>();
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -124,7 +124,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._renderDisposed$.complete();
     }
 
-    registerRenderModules(type: UnitType, deps: Dependency[]): IDisposable {
+    registerRenderModules(type: UniverInstanceType, deps: Dependency[]): IDisposable {
         if (!this._renderDependencies.has(type)) {
             this._renderDependencies.set(type, []);
         }
@@ -149,7 +149,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param type
      * @param depCtor
      */
-    registerRenderModule(type: UnitType, depCtor: Dependency): IDisposable {
+    registerRenderModule(type: UniverInstanceType, depCtor: Dependency): IDisposable {
         if (!this._renderDependencies.has(type)) {
             this._renderDependencies.set(type, []);
         }
@@ -172,7 +172,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param type
      * @returns Dependency[]
      */
-    private _getRenderDepsByType(type: UnitType): Array<Dependency> {
+    private _getRenderDepsByType(type: UniverInstanceType): Array<Dependency> {
         return Array.from(this._renderDependencies.get(type) ?? []);
     }
 

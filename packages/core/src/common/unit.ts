@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import type { UniverType } from '@univerjs/protocol';
 import type { Observable } from 'rxjs';
+import { UniverType as UniverInstanceType } from '@univerjs/protocol';
 import { Disposable } from '../shared/lifecycle';
-
-export { UniverType as UniverInstanceType } from '@univerjs/protocol';
-
-export type UnitType = UniverType | number;
 
 /**
  * The base class for all units.
  */
-export abstract class UnitModel<D = object, T extends UnitType = UnitType> extends Disposable {
+export abstract class UnitModel<D = object, T extends UniverInstanceType = UniverInstanceType> extends Disposable {
     abstract readonly type: T;
 
     abstract getUnitId(): string;
@@ -42,3 +38,5 @@ export abstract class UnitModel<D = object, T extends UnitType = UnitType> exten
     /** Set revision of the current snapshot. */
     abstract setRev(rev: number): void;
 }
+
+export { UniverInstanceType };

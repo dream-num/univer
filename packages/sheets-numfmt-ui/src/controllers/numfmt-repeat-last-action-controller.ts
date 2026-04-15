@@ -16,13 +16,13 @@
 
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import type { RepeatableCommandHandler } from '@univerjs/sheets-ui';
-import { Disposable, Inject } from '@univerjs/core';
+import { Disposable, Optional } from '@univerjs/core';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { IRepeatLastActionService, RepeatLastActionPermission } from '@univerjs/sheets-ui';
 
 export class NumfmtRepeatLastActionController extends Disposable {
     constructor(
-        @Inject(IRepeatLastActionService) private readonly _repeatLastActionService: IRepeatLastActionService
+        @Optional(IRepeatLastActionService) private readonly _repeatLastActionService?: IRepeatLastActionService
     ) {
         super();
 
@@ -30,6 +30,10 @@ export class NumfmtRepeatLastActionController extends Disposable {
     }
 
     private _initCommandRecording(): void {
+        if (!this._repeatLastActionService) {
+            return;
+        }
+
         const handler: RepeatableCommandHandler<ISetNumfmtCommandParams> = (selections, params) => {
             if (!params) return;
 

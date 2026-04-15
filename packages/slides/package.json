@@ -59,12 +59,16 @@
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
+    "peerDependencies": {
+        "rxjs": ">=7.0.0"
+    },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "rxjs": "^7.8.2",
         "typescript": "^6.0.2",
         "vitest": "^4.1.1"
     }

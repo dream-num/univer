@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { EventState, IColorStyle, Nullable, UnitModel } from '@univerjs/core';
 import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import type { IPageElement, ISlidePage, SlideDataModel } from '@univerjs/slides';
 import type { PageID } from '../type';
 import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {

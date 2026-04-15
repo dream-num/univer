@@ -17,13 +17,12 @@
 import type { IWorkbookData } from '../../../sheets/typedef';
 import type { Workbook } from '../../../sheets/workbook';
 import type { IDocumentData } from '../../../types/interfaces/i-document-data';
-import type { ISlideData } from '../../../types/interfaces/i-slide-data';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Injector } from '../../../common/di';
-import { UniverInstanceType } from '../../../common/unit';
+import { UnitModel, UniverInstanceType } from '../../../common/unit';
 import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
 import { Workbook as WorkbookModel } from '../../../sheets/workbook';
-import { SlideDataModel } from '../../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../../context/context';
 import { ContextService } from '../../context/context.service';
 import { DesktopLogService, LogLevel } from '../../log/log.service';
@@ -61,12 +60,15 @@ function createDocData(id = 'doc-unit'): Partial<IDocumentData> {
     };
 }
 
-function createSlideData(id = 'slide-unit'): Partial<ISlideData> {
-    return {
-        id,
-        title: 'Slide',
-        body: { pages: {}, pageOrder: [] },
-    };
+class MockSlideUnit extends UnitModel {
+    override type = UniverInstanceType.UNIVER_SLIDE;
+    override name$ = new BehaviorSubject('');
+    override setName() {}
+    override getSnapshot() { return {}; }
+    override getUnitId() { return 'slide-unit'; }
+    override getRev() { return 1; }
+    override incrementRev() {}
+    override setRev() {}
 }
 
 describe('UniverInstanceService', () => {
@@ -82,7 +84,7 @@ describe('UniverInstanceService', () => {
 
         service.registerCtorForType(UniverInstanceType.UNIVER_SHEET, WorkbookModel as never);
         service.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel as never);
-        service.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel as never);
+        service.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, MockSlideUnit as never);
         service.__setCreateHandler((type, data, _ctor, options) => {
             let unit;
             if (type === UniverInstanceType.UNIVER_SHEET) {
@@ -90,7 +92,7 @@ describe('UniverInstanceService', () => {
             } else if (type === UniverInstanceType.UNIVER_DOC) {
                 unit = new DocumentDataModel(data as Partial<IDocumentData>);
             } else {
-                unit = new SlideDataModel(data as Partial<ISlideData>);
+                unit = new MockSlideUnit();
             }
 
             service.__addUnit(unit, options);
@@ -127,7 +129,7 @@ describe('UniverInstanceService', () => {
     it('should focus sheet, doc, slide and reset contexts on null focus', () => {
         const workbook = service.createUnit<Partial<IWorkbookData>, WorkbookModel>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
         const doc = service.createUnit<Partial<IDocumentData>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
-        const slide = service.createUnit<Partial<ISlideData>, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, createSlideData());
+        const slide = service.createUnit<object, MockSlideUnit>(UniverInstanceType.UNIVER_SLIDE, {});
 
         service.focusUnit(workbook.getUnitId());
         expect(contextService.getContextValue(FOCUSING_UNIT)).toBe(true);

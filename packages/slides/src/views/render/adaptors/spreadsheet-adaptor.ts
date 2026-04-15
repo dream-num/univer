@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { EventState, IPageElement } from '@univerjs/core';
+import type { EventState } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import { IConfigService, IContextService, Inject, Injector, LocaleService, PageElementType, Styles, Worksheet } from '@univerjs/core';
+import type { IPageElement } from '@univerjs/slides';
+import { IConfigService, IContextService, Inject, Injector, LocaleService, Styles, Worksheet } from '@univerjs/core';
 import {
     getColor,
     Rect,
@@ -29,7 +30,7 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-
+import { PageElementType } from '@univerjs/slides';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 enum SHEET_VIEW_KEY {

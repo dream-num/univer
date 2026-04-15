@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { EventState, Injector, IPageElement } from '@univerjs/core';
+import type { EventState, Injector } from '@univerjs/core';
 import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
-import { DocumentDataModel, Inject, LocaleService, PageElementType } from '@univerjs/core';
+import type { IPageElement } from '@univerjs/slides';
+import { DocumentDataModel, Inject, LocaleService } from '@univerjs/core';
 import {
     Documents,
     DocumentSkeleton,
@@ -30,7 +31,7 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-
+import { PageElementType } from '@univerjs/slides';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 export enum DOCS_VIEW_KEY {

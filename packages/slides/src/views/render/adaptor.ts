@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Injector, IPageElement, Nullable, PageElementType } from '@univerjs/core';
+import type { Injector, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
+import type { IPageElement, PageElementType } from '@univerjs/slides';
 import { Registry } from '@univerjs/core';
 
 export abstract class ObjectAdaptor {

@@ -20,7 +20,6 @@ import type {
     IDocumentBody,
     IPosition,
     Nullable,
-    SlideDataModel,
     UnitModel,
 } from '@univerjs/core';
 import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
@@ -33,6 +32,7 @@ import type {
     IRenderModule,
     Scene,
 } from '@univerjs/engine-render';
+import type { SlideDataModel } from '@univerjs/slides';
 import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,

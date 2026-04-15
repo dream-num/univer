@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IPageElement } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
+import type { IPageElement } from '@univerjs/slides';
 import type { ObjectAdaptor } from './adaptor';
 import { Inject, Injector, sortRules } from '@univerjs/core';
 import { CanvasObjectProviderRegistry } from './adaptor';

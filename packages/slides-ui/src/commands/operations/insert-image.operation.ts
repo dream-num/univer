@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, getImageSize, IImageIoService } from '@univerjs/drawing';
+import { PageElementType } from '@univerjs/slides';
 import { ILocalFileService } from '@univerjs/ui';
 import { CanvasView } from '../../controllers/canvas-view';
 

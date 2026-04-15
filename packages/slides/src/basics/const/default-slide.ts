@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-export { DEFAULT_SLIDE } from './basics/const/default-slide';
-export type { IUniverSlidesConfig } from './config/config';
-export { SlideDataModel } from './data-model/slide-data-model';
-export { UniverSlidesPlugin } from './plugin';
-export * from './types/enum/prst-geom-type';
-export * from './types/interfaces/i-slide-data';
-export * from './views/render';
+export const DEFAULT_SLIDE = {
+    id: 'default_slide',
+    title: 'defaultSlide',
+    pageSize: {
+        width: 300,
+        height: 300,
+    },
+};

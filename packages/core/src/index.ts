@@ -183,7 +183,6 @@ export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { extractPureTextFromCell, getOriginCellValue, Worksheet } from './sheets/worksheet';
 export { Skeleton } from './skeleton';
-export { SlideDataModel } from './slides/slide-model';
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';
 export * from './types/enum';

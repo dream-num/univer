@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
 import { CommandType, IUniverInstanceService, merge } from '@univerjs/core';
 
 export interface IUpdateElementOperationParams {

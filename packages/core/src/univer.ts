@@ -23,7 +23,7 @@ import type { Plugin, PluginCtor } from './services/plugin/plugin.service';
 import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
 import type { LocaleType } from './types/enum/locale-type';
-import type { IDocumentData, ISlideData } from './types/interfaces';
+import type { IDocumentData } from './types/interfaces';
 import { Injector, touchDependencies } from './common/di';
 import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
@@ -53,7 +53,6 @@ import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undo
 import { UserManagerService } from './services/user-manager/user-manager.service';
 import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
-import { SlideDataModel } from './slides/slide-model';
 
 export interface IUniverConfig {
     /**
@@ -183,18 +182,9 @@ export class Univer implements IDisposable {
         return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
     }
 
-    /**
-     * @deprecated use `createUnit` instead
-     */
-    createUniverSlide(data: Partial<ISlideData>): SlideDataModel {
-        this._injector.get(ILogService).warn('[Univer]', 'Univer.createUniverSlide is deprecated, use createUnit instead');
-        return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, data);
-    }
-
     private _init(injector: Injector): void {
         this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SHEET, Workbook);
         this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel);
-        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel);
 
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(

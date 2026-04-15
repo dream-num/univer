@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, IPageElement, ISlidePage } from '@univerjs/core';
+import type { IColorStyle } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
-import { getColorStyle, Inject, Injector, PageElementType, SlideDataModel } from '@univerjs/core';
+import type { IPageElement, ISlidePage } from '@univerjs/slides';
+import { getColorStyle, Inject, Injector } from '@univerjs/core';
 import { Rect, Scene, Slide, Viewport } from '@univerjs/engine-render';
+import { PageElementType, SlideDataModel } from '@univerjs/slides';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 import { ObjectProvider } from '../object-provider';
 

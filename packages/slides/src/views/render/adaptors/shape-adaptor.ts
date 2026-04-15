@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { Injector, IPageElement } from '@univerjs/core';
-import { BasicShapes, getColorStyle, PageElementType } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
+import type { IPageElement } from '@univerjs/slides';
+import { getColorStyle } from '@univerjs/core';
 import { Circle, Rect } from '@univerjs/engine-render';
+import { BasicShapes, PageElementType } from '@univerjs/slides';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

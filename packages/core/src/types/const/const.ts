@@ -168,15 +168,6 @@ export const DEFAULT_STYLES = {
     },
 };
 
-export const DEFAULT_SLIDE = {
-    id: 'default_slide',
-    title: 'defaultSlide',
-    pageSize: {
-        width: 300,
-        height: 300,
-    },
-};
-
 export const SHEET_EDITOR_UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
 export const NAMED_STYLE_MAP: Record<NamedStyleType, Nullable<ITextStyle>> = {

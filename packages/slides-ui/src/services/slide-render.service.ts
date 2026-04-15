@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { SlideDataModel, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
 import {
     IContextService,
     IUniverInstanceService,

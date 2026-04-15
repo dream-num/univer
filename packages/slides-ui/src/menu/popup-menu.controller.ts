@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, SlideDataModel } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import type { BaseObject, ObjectType, Scene } from '@univerjs/engine-render';
+import type { SlideDataModel } from '@univerjs/slides';
 import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';

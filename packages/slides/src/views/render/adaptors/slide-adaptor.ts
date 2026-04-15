@@ -16,10 +16,11 @@
 
 import type { IColorStyle } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
-import type { IPageElement, ISlidePage } from '@univerjs/slides';
+import type { IPageElement, ISlidePage } from '../../../types/interfaces/i-slide-data';
 import { getColorStyle, Inject, Injector } from '@univerjs/core';
 import { Rect, Scene, Slide, Viewport } from '@univerjs/engine-render';
-import { PageElementType, SlideDataModel } from '@univerjs/slides';
+import { SlideDataModel } from '../../../data-model/slide-data-model';
+import { PageElementType } from '../../../types/interfaces/i-slide-data';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 import { ObjectProvider } from '../object-provider';
 

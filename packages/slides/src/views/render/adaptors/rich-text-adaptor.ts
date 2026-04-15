@@ -16,10 +16,10 @@
 
 import type { Injector } from '@univerjs/core';
 import type { IRichTextProps, Scene } from '@univerjs/engine-render';
-import type { IPageElement } from '@univerjs/slides';
+import type { IPageElement } from '../../../types/interfaces/i-slide-data';
 import { Inject, LocaleService } from '@univerjs/core';
 import { RichText } from '@univerjs/engine-render';
-import { PageElementType } from '@univerjs/slides';
+import { PageElementType } from '../../../types/interfaces/i-slide-data';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 export class RichTextAdaptor extends ObjectAdaptor {

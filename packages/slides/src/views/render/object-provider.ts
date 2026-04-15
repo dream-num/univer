@@ -15,7 +15,7 @@
  */
 
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import type { IPageElement } from '@univerjs/slides';
+import type { IPageElement } from '../../types/interfaces/i-slide-data';
 import type { ObjectAdaptor } from './adaptor';
 import { Inject, Injector, sortRules } from '@univerjs/core';
 import { CanvasObjectProviderRegistry } from './adaptor';

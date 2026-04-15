@@ -16,7 +16,7 @@
 
 import type { EventState, Injector } from '@univerjs/core';
 import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
-import type { IPageElement } from '@univerjs/slides';
+import type { IPageElement } from '../../../types/interfaces/i-slide-data';
 import { DocumentDataModel, Inject, LocaleService } from '@univerjs/core';
 import {
     Documents,
@@ -31,7 +31,7 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import { PageElementType } from '@univerjs/slides';
+import { PageElementType } from '../../../types/interfaces/i-slide-data';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 export enum DOCS_VIEW_KEY {

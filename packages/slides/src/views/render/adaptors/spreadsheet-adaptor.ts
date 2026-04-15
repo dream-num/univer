@@ -16,7 +16,7 @@
 
 import type { EventState } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import type { IPageElement } from '@univerjs/slides';
+import type { IPageElement } from '../../../types/interfaces/i-slide-data';
 import { IConfigService, IContextService, Inject, Injector, LocaleService, Styles, Worksheet } from '@univerjs/core';
 import {
     getColor,
@@ -30,7 +30,7 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-import { PageElementType } from '@univerjs/slides';
+import { PageElementType } from '../../../types/interfaces/i-slide-data';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 enum SHEET_VIEW_KEY {

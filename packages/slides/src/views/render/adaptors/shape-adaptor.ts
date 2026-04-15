@@ -15,11 +15,11 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { IPageElement } from '@univerjs/slides';
+import type { IPageElement } from '../../../types/interfaces/i-slide-data';
 import { getColorStyle } from '@univerjs/core';
 import { Circle, Rect } from '@univerjs/engine-render';
-import { BasicShapes, PageElementType } from '@univerjs/slides';
-
+import { BasicShapes } from '../../../types/enum/prst-geom-type';
+import { PageElementType } from '../../../types/interfaces/i-slide-data';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 export class ShapeAdaptor extends ObjectAdaptor {

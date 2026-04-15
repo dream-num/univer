@@ -16,7 +16,7 @@
 
 import type { Injector, Nullable } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import type { IPageElement, PageElementType } from '@univerjs/slides';
+import type { IPageElement, PageElementType } from '../../types/interfaces/i-slide-data';
 import { Registry } from '@univerjs/core';
 
 export abstract class ObjectAdaptor {

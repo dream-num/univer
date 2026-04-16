@@ -58,12 +58,8 @@
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
-    "peerDependencies": {
-        "rxjs": ">=7.0.0"
-    },
     "dependencies": {
-        "@grpc/grpc-js": "^1.14.3",
-        "@univerjs/core": "workspace:*"
+        "@grpc/grpc-js": "^1.14.3"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

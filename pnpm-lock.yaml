@@ -1491,9 +1491,6 @@ importers:
       '@grpc/grpc-js':
         specifier: ^1.14.3
         version: 1.14.3
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

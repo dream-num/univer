@@ -88,7 +88,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^1.1.1",
-        "@univerjs/protocol": "0.1.48",
+        "@univerjs/protocol": "0.1.49",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
         "@univerjs/ui": "workspace:*"
@@ -96,11 +96,11 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/themes": "workspace:*",
-        "postcss": "^8.5.8",
+        "postcss": "^8.5.10",
         "react": "18.3.1",
         "rxjs": "^7.8.2",
         "tailwindcss": "3.4.18",
         "typescript": "^6.0.2",
-        "vitest": "^4.1.1"
+        "vitest": "^4.1.4"
     }
 }

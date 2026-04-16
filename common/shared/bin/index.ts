@@ -46,6 +46,11 @@ if (command === 'build') {
         options.ignorePackages = ignorePackages;
     }
 
+    const configIdx = args.indexOf('--config');
+    if (configIdx !== -1 && args[configIdx + 1]) {
+        options.tsdownConfigPath = args[configIdx + 1];
+    }
+
     // eslint-disable-next-line antfu/no-top-level-await
     await build(options);
 }

@@ -53,7 +53,7 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         format,
         outputOptions: {
             codeSplitting: true,
-            minify: true,
+            minify: false,
         },
         outDir,
         plugins: [

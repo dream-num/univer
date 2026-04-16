@@ -16,11 +16,9 @@
 
 import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '../utils/interface';
-
 import {
     CommandType,
     ICommandService,
-    IPermissionService,
     isICellData,
     IUndoRedoService,
     IUniverInstanceService,
@@ -29,10 +27,10 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import { WorksheetEditPermission } from '../../services/permission/permission-point';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../operations/selection.operation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -55,40 +53,40 @@ export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandShare
 export const SetRangeValuesCommand: ICommand = {
     id: 'sheet.command.set-range-values',
     type: CommandType.COMMAND,
-
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const permissionService = accessor.get(IPermissionService);
-        const target = getSheetCommandTarget(univerInstanceService, params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
-        const { subUnitId, unitId, workbook, worksheet } = target;
-        const { value, range, redoUndoId } = params;
-        const currentSelections = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const currentSelections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
-        if (!currentSelections || !currentSelections.length) return false;
-        if (!permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)) return false;
+        const { value, range, redoUndoId } = params;
+        let ranges = range ? [range] : currentSelections;
+        if (!ranges || !ranges.length) return false;
+
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const { subUnitId, unitId, workbook, worksheet } = target;
 
         const cellValue = new ObjectMatrix<ICellData>();
         let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
 
         if (Tools.isArray(value)) {
-            for (let i = 0; i < currentSelections.length; i++) {
-                const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
+            for (let i = 0; i < ranges.length; i++) {
+                const { startRow, startColumn, endRow, endColumn } = ranges[i];
 
-                for (let r = 0; r <= endRow - startRow; r++) {
-                    for (let c = 0; c <= endColumn - startColumn; c++) {
-                        cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        cellValue.setValue(r, c, value[r - startRow][c - startColumn]);
                     }
                 }
             }
         } else if (isICellData(value)) {
-            for (let i = 0; i < currentSelections.length; i++) {
-                const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
+            for (let i = 0; i < ranges.length; i++) {
+                const { startRow, startColumn, endRow, endColumn } = ranges[i];
 
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
@@ -98,44 +96,58 @@ export const SetRangeValuesCommand: ICommand = {
             }
         } else {
             realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;
+            ranges = realCellValue ? [new ObjectMatrix(realCellValue).getStartEndScope()] : [];
         }
 
-        const setRangeValuesMutationParams = { subUnitId, unitId, cellValue: realCellValue ?? cellValue.getMatrix() };
-        const redoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
-        const cellHeights = mapObjectMatrix(setRangeValuesMutationParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
+        const setRangeValuesMutationRedoParams = { unitId, subUnitId, cellValue: realCellValue ?? cellValue.getMatrix() };
+        const setRangeValuesMutationUndoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationRedoParams);
+        const cellHeights = mapObjectMatrix(setRangeValuesMutationRedoParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
 
-        const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+        const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationRedoParams);
         if (!setValueMutationResult) return false;
 
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
-            params: setRangeValuesMutationParams,
+            params: setRangeValuesMutationRedoParams,
         });
 
         const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,
-            ranges: currentSelections,
+            ranges,
             cellHeights: new ObjectMatrix<number>(cellHeights as IObjectMatrixPrimitiveType<number>),
         });
 
         const result = sequenceExecute([...redos, ...autoHeightRedos], commandService);
         if (result.result) {
-            const selectionOperation = followSelectionOperation(range ?? cellValue.getRange(), workbook, worksheet);
+            const redoMutations = [
+                { id: SetRangeValuesMutation.id, params: setRangeValuesMutationRedoParams },
+                ...redos,
+                ...autoHeightRedos,
+                followSelectionOperation(ranges[ranges.length - 1], workbook, worksheet),
+            ];
+            const undoMutations = [
+                { id: SetRangeValuesMutation.id, params: setRangeValuesMutationUndoParams },
+                ...undos,
+                ...autoHeightUndos,
+            ];
+
+            if (currentSelections && currentSelections.length) {
+                undoMutations.push({
+                    id: SetSelectionsOperation.id,
+                    params: {
+                        unitId,
+                        subUnitId,
+                        selections: currentSelections,
+                        reveal: true,
+                    },
+                });
+            }
+
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [
-                    { id: SetRangeValuesMutation.id, params: redoParams },
-                    ...undos,
-                    ...autoHeightUndos,
-                    selectionOperation,
-                ],
-                redoMutations: [
-                    { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
-                    ...redos,
-                    ...autoHeightRedos,
-                    Tools.deepClone(selectionOperation),
-                ],
+                undoMutations,
+                redoMutations,
                 id: redoUndoId,
             });
 

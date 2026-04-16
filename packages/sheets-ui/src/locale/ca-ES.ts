@@ -474,6 +474,8 @@ const locale: typeof enUS = {
             setRowColStyleErr: 'L\'interval està protegit i no teniu permís per establir estils de fila i columna. Per establir estils de fila i columna, contacteu amb el creador.',
             moveRowColErr: 'L\'interval està protegit i no teniu permís per moure files i columnes. Per moure files i columnes, contacteu amb el creador.',
             moveRangeErr: 'L\'interval està protegit i no teniu permís per moure la selecció. Per moure la selecció, contacteu amb el creador.',
+            insertRowColErr: 'L\'interval está protegido y no tienes permiso para insertar filas y columnas. Para insertar filas y columnas, contacta con el creador.',
+            removeRowColErr: 'L\'interval está protegido y no tienes permiso para eliminar filas y columnas. Para eliminar filas y columnas, contacta con el creador.',
             autoFillErr: 'L\'interval està protegit i no teniu permís per a l\'emplenament automàtic. Per utilitzar l\'emplenament automàtic, contacteu amb el creador.',
             filterErr: 'L\'interval està protegit i no teniu permís per filtrar. Per filtrar, contacteu amb el creador.',
             operatorSheetErr: 'El full de càlcul està protegit i no teniu permís per operar-hi. Per operar al full de càlcul, contacteu amb el creador.',

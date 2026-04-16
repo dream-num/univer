@@ -472,6 +472,8 @@ const locale = {
             setRowColStyleErr: 'The range is protected, and you do not have permission to set row and column styles. To set row and column styles, please contact the creator.',
             moveRowColErr: 'The range is protected, and you do not have permission to move rows and columns. To move rows and columns, please contact the creator.',
             moveRangeErr: 'The range is protected, and you do not have permission to move the selection. To move the selection, please contact the creator.',
+            insertRowColErr: 'The range is protected, and you do not have permission to insert rows and columns. To insert rows and columns, please contact the creator.',
+            removeRowColErr: 'The range is protected, and you do not have permission to delete rows and columns. To delete rows and columns, please contact the creator.',
             autoFillErr: 'The range is protected, and you do not have permission for auto-fill. To use auto-fill, please contact the creator.',
             filterErr: 'The range is protected, and you do not have filtering permission. To filter, please contact the creator.',
             operatorSheetErr: 'The worksheet is protected, and you do not have permission to operate the worksheet. To operate the worksheet, please contact the creator.',

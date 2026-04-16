@@ -474,6 +474,8 @@ const locale: typeof enUS = {
             setRowColStyleErr: 'El rango está protegido y no tienes permiso para establecer estilos de fila y columna. Para establecer estilos de fila y columna, contacta al creador.',
             moveRowColErr: 'El rango está protegido y no tienes permiso para mover filas y columnas. Para mover filas y columnas, contacta al creador.',
             moveRangeErr: 'El rango está protegido y no tienes permiso para mover la selección. Para mover la selección, contacta al creador.',
+            insertRowColErr: 'El rango está protegido y no tienes permiso para insertar filas y columnas. Para insertar filas y columnas, contacta al creador.',
+            removeRowColErr: 'El rango está protegido y no tienes permiso para eliminar filas y columnas. Para eliminar filas y columnas, contacta al creador.',
             autoFillErr: 'El rango está protegido y no tienes permiso para autorrellenar. Para usar el autorrellenado, contacta al creador.',
             filterErr: 'El rango está protegido y no tienes permiso para filtrar. Para filtrar, contacta al creador.',
             operatorSheetErr: 'La hoja de cálculo está protegida y no tienes permiso para operar en ella. Para operar en la hoja de cálculo, contacta al creador.',

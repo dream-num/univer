@@ -474,6 +474,8 @@ const locale: typeof enUS = {
             setRowColStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly riadkov a stĺpcov. Ak chcete nastavovať štýly riadkov a stĺpcov, kontaktujte autora.',
             moveRowColErr: 'Rozsah je chránený a nemáte oprávnenie presúvať riadky a stĺpce. Ak chcete presúvať riadky a stĺpce, kontaktujte autora.',
             moveRangeErr: 'Rozsah je chránený a nemáte oprávnenie presúvať výber. Ak chcete presúvať výber, kontaktujte autora.',
+            insertRowColErr: 'Rozsah je chránený a nemáte oprávnění pro vkládání řádků a sloupců. Pokud chcete vkládat řádky a sloupce, kontaktujte autora.',
+            removeRowColErr: 'Rozsah je chránený a nemáte oprávnění pro odstraňování řádků a sloupců. Pokud chcete odstraňovat řádky a sloupce, kontaktujte autora.',
             autoFillErr: 'Rozsah je chránený a nemáte oprávnenie na automatické dopĺňanie. Ak chcete použiť automatické dopĺňanie, kontaktujte autora.',
             filterErr: 'Rozsah je chránený a nemáte oprávnenie na filtrovanie. Ak chcete filtrovať, kontaktujte autora.',
             operatorSheetErr: 'Hárok je chránený a nemáte oprávnenie pracovať s hárkom. Ak chcete pracovať s hárkom, kontaktujte autora.',

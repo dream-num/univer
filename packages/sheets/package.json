@@ -83,7 +83,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/protocol": "0.1.49",
+        "@univerjs/protocol": "workspace:*",
         "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {

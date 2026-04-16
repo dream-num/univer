@@ -796,8 +796,8 @@ importers:
         specifier: 5.1.9
         version: 5.1.9
       numfmt:
-        specifier: ^3.2.3
-        version: 3.2.3
+        specifier: 3.2.6
+        version: 3.2.6
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -9230,8 +9230,8 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  numfmt@3.2.3:
-    resolution: {integrity: sha512-q5vjJSiuomxYNNVhB/TWqjtctZz+fnscUchvwonutXZ/neY2XLw6z4q3DS4ijLDrP5Y/tgrVeP1/7PjgHRoZuw==}
+  numfmt@3.2.6:
+    resolution: {integrity: sha512-MXc2KP3j+2usdHTY5/ENUc2S+3BRF/cJqnR6RHeq6LBqKoIZOAQ62DQw974nnaZOencbfkmkTPyTmMnlkCpjzg==}
 
   nypm@0.6.2:
     resolution: {integrity: sha512-7eM+hpOtrKrBDCh7Ypu2lJ9Z7PNZBdi/8AT3AX8xoCj43BBVHD0hPSTEvMtkMpfs8FCqBGhxB+uToIQimA111g==}
@@ -17811,7 +17811,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  numfmt@3.2.3: {}
+  numfmt@3.2.6: {}
 
   nypm@0.6.2:
     dependencies:

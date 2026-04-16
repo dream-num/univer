@@ -19,7 +19,7 @@ import type { IBuildContext, IBuildOptions } from './types';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { build as tsdownBuild } from 'tsdown';
+import { mergeConfig, build as tsdownBuild } from 'tsdown';
 import { createModuleConfig } from './configs/module';
 import { createUmdConfig } from './configs/umd';
 import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants';
@@ -109,7 +109,17 @@ export async function build(options: IBuildOptions = {}) {
     removeCssArtifacts(path.join(packageDir, BUILD_OUTPUT_ROOT));
 
     const context = createBuildContext(packageDir, options);
-    const configs = createConfigs(context, options);
+    let configs = createConfigs(context, options);
+
+    if (options.tsdownConfigPath) {
+        const configPath = path.resolve(packageDir, options.tsdownConfigPath);
+        let userConfig = (await import(configPath)).default;
+        if (typeof userConfig === 'function') {
+            userConfig = await userConfig();
+        }
+        configs = configs.map((config) => mergeConfig(config, userConfig));
+    }
+
     await Promise.all(configs.map((config) => tsdownBuild(config)));
     cleanupPackageJson(packageDir, context.packageJson);
     emitPublishPackageJson(packageDir);

@@ -56,7 +56,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
-        "build:bundle": "univer-cli build",
+        "build:bundle": "univer-cli build --config tsdown.override.mts",
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
@@ -72,14 +72,13 @@
         "opentype.js": "^1.3.4"
     },
     "devDependencies": {
-        "@types/opentype.js": "^1.3.8",
+        "@types/opentype.js": "^1.3.9",
         "@univerjs-infra/shared": "workspace:*",
         "jest-canvas-mock": "^2.5.2",
+        "rollup-plugin-polyfill-node": "^0.13.0",
         "rxjs": "^7.8.2",
+        "tsdown": "^0.21.8",
         "typescript": "^6.0.2",
-        "vitest": "^4.1.1"
-    },
-    "browser": {
-        "fs": false
+        "vitest": "^4.1.4"
     }
 }

@@ -471,6 +471,8 @@ const locale: typeof enUS = {
             setRowColStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu hàng cột. Nếu cần thiết lập kiểu hàng cột, vui lòng liên hệ với người tạo.',
             moveRowColErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền di chuyển hàng cột. Nếu cần di chuyển hàng cột, vui lòng liên hệ với người tạo.',
             moveRangeErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền di chuyển vùng chọn. Nếu cần di chuyển vùng chọn, vui lòng liên hệ với người tạo.',
+            insertRowColErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền chèn hàng cột. Nếu cần chèn hàng cột, vui lòng liên hệ với người tạo.',
+            removeRowColErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền xóa hàng cột. Nếu cần xóa hàng cột, vui lòng liên hệ với người tạo.',
             autoFillErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền tự động điền. Nếu cần tự động điền, vui lòng liên hệ với người tạo.',
             filterErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền lọc. Nếu cần lọc, vui lòng liên hệ với người tạo.',
             operatorSheetErr: 'Trang bảng này đã được bảo vệ, hiện không có quyền thao tác trên trang bảng. Nếu cần thao tác trên trang bảng, vui lòng liên hệ với người tạo.',

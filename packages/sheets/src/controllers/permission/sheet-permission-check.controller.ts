@@ -649,8 +649,8 @@ export class SheetPermissionCheckController extends Disposable {
                     if (!sequenceGridWorksheet) return true;
 
                     if (sheetName) {
-                        const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(sequenceGridUnitId, sequenceGridWorksheet.getSheetId()).id);
-                        if (!viewPermission) return false;
+                        const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(sequenceGridWorkbook.getUnitId(), sequenceGridWorksheet.getSheetId()).id);
+                        if (!viewPermission || viewPermission.value === false) return false;
                     }
 
                     const { startRow, endRow, startColumn, endColumn } = range;

@@ -46,7 +46,7 @@ interface IDerivedDependencyGroups {
 
 const SOURCE_EXTS = new Set(['.ts', '.tsx']);
 const TEST_FILE_RE = /\.(spec|test)\.[cm]?tsx?$/;
-const IMMUTABLE_MANAGED_DEPENDENCIES = new Set(['@univerjs/icons', '@univerjs/icons-svg', '@univerjs/protocol']);
+const IMMUTABLE_MANAGED_DEPENDENCIES = new Set(['@univerjs/icons', '@univerjs/icons-svg']);
 
 function filterPackageName(packageName: string): string {
     if (packageName.startsWith('@univerjs/')) {

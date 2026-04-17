@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction, UnitObject } from '@univerjs/protocol';
+import type {
+    IActionInfo,
+    IAllowedRequest,
+    IBatchAllowedResponse,
+    ICollaborator,
+    ICreateRequest,
+    ICreateRequestSelectRangeObject,
+    IListPermPointRequest,
+    IPermissionPoint,
+    IPutCollaboratorsRequest,
+    IUnitRoleKV,
+    IUpdatePermPointRequest,
+    UnitAction,
+    UnitObject,
+} from '@univerjs/protocol';
 import type { IAuthzIoService } from './type';
 import { ObjectScope, UnitRole } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
@@ -33,7 +47,7 @@ interface IPermissionData {
     name: string;
     unitID: string;
     strategies: Array<{ action: UnitAction; role: UnitRole }>;
-    selectRangeObject?: ICreateRequest_SelectRangeObject;
+    selectRangeObject?: ICreateRequestSelectRangeObject;
 }
 
 /**

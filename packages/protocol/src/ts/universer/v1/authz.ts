@@ -236,7 +236,7 @@ export interface IAuthzService {
     /** list all collaborators for specified object */
     ListCollaborators(request: IListCollaboratorRequest, metadata?: Metadata): Observable<IListCollaboratorResponse>;
     /** update collaborator for specified object */
-    IUpdateCollaborator(request: IUpdateCollaboratorRequest, metadata?: Metadata): Observable<IUpdateCollaboratorResponse>;
+    UpdateCollaborator(request: IUpdateCollaboratorRequest, metadata?: Metadata): Observable<IUpdateCollaboratorResponse>;
     /** delete collaborator for specified object */
     DeleteCollaborator(request: IDeleteCollaboratorRequest, metadata?: Metadata): Observable<IDeleteCollaboratorResponse>;
     /** put collaborators for specified object */

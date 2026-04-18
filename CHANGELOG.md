@@ -1,5 +1,21 @@
 # Changelog
 
+# [0.21.0](https://github.com/dream-num/univer/compare/v0.20.1...v0.21.0) (2026-04-18)
+
+
+### Bug Fixes
+
+* **aligan:** update ([#6798](https://github.com/dream-num/univer/issues/6798)) ([f5db141](https://github.com/dream-num/univer/commit/f5db141bbe2dafe7e146a1d3bf64100ea072c3b0))
+* **formula:** optimize the logic of inverted index ([#6818](https://github.com/dream-num/univer/issues/6818)) ([79d2c30](https://github.com/dream-num/univer/commit/79d2c30d68a4345bfd88a45e19c74a80018e1e27))
+* **mobile:** fix dependency not registered ([#6806](https://github.com/dream-num/univer/issues/6806)) ([2a010b6](https://github.com/dream-num/univer/commit/2a010b657262298c63ca96aed400458e6080387a))
+* **permission:** fix some API operations that were not blocked by permission control ([#6815](https://github.com/dream-num/univer/issues/6815)) ([3d6f418](https://github.com/dream-num/univer/commit/3d6f4182f2d2f0f9be155592d336b39eff06fdd7))
+* **protocol:** correct method name from IUpdateCollaborator to UpdateCollaborator ([#6817](https://github.com/dream-num/univer/issues/6817)) ([3479e20](https://github.com/dream-num/univer/commit/3479e201dd311e865016e644b45681b87cac5e8a))
+
+
+### Features
+
+* **protocol:** add protocol package ([#6816](https://github.com/dream-num/univer/issues/6816)) ([0da09ac](https://github.com/dream-num/univer/commit/0da09ac9ca433de23d0d194fb8d30eb201456aee))
+
 ## [0.20.1](https://github.com/dream-num/univer/compare/v0.20.0...v0.20.1) (2026-04-11)
 
 

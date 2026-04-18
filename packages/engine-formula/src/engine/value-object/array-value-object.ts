@@ -16,17 +16,24 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
-
 import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE, DEFAULT_EMPTY_CELL_KEY } from '../../basics/inverted-index-cache';
+import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isWildcard } from '../utils/compare';
 import { stringIsNumberPattern } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
-import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
+import {
+    BooleanValueObject,
+    createBooleanValueObjectByRawValue,
+    createNumberValueObjectByRawValue,
+    createStringValueObjectByRawValue,
+    NullValueObject,
+    NumberValueObject,
+    StringValueObject,
+} from './primitive-object';
 
 enum BatchOperatorType {
     MINUS,
@@ -1530,7 +1537,6 @@ export class ArrayValueObject extends BaseValueObject {
 
             if (rowsInCache.length > 0) {
                 if (operator === compareToken.EQUALS && !(valueObject.isString() && isWildcard(valueObject.getValue() as string))) {
-                    // TODO@DR-Univer: When comparing equal with two parameters, one of them is error, and the logic here is wrong
                     const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
                         unitId,
                         sheetId,
@@ -1539,8 +1545,8 @@ export class ArrayValueObject extends BaseValueObject {
                         rowsInCache
                     );
 
-                    if (rowPositions != null) {
-                        rowPositions.forEach((row) => {
+                    if (rowPositions !== undefined && rowPositions.errorType === null) {
+                        rowPositions.matchingRows.forEach((row) => {
                             if (row < startRow || row > startRow + rowCount - 1) {
                                 return;
                             }
@@ -1730,23 +1736,13 @@ export class ArrayValueObject extends BaseValueObject {
             result[r][column] = ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (!currentValue || currentValue?.isNull()) {
-            CELL_INVERTED_INDEX_CACHE.set(
-                unitId,
-                sheetId,
-                column + startColumn,
-                DEFAULT_EMPTY_CELL_KEY,
-                r + startRow
-            );
-        } else {
-            CELL_INVERTED_INDEX_CACHE.set(
-                unitId,
-                sheetId,
-                column + startColumn,
-                currentValue.getValue(),
-                r + startRow
-            );
-        }
+        CELL_INVERTED_INDEX_CACHE.set(
+            unitId,
+            sheetId,
+            column + startColumn,
+            currentValue?.isNull() ? null : currentValue?.getValue(),
+            r + startRow
+        );
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

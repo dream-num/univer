@@ -39,9 +39,9 @@ export class FRangeProtectionRule {
         private readonly _ranges: FRange[],
         private readonly _options: IRangeProtectionOptions,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
-        @Inject(IAuthzIoService) private readonly _authzIoService: IAuthzIoService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @IAuthzIoService private readonly _authzIoService: IAuthzIoService,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {}
 

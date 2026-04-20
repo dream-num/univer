@@ -359,7 +359,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType, data } = floatDomParam;
+                    const { transform, drawingType, data, hidden } = floatDomParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_DOM && drawingType !== DrawingTypeEnum.DRAWING_CHART) {
                         return;
@@ -368,6 +368,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
                     if (renderObject == null) {
+                        return;
+                    }
+
+                    if (hidden) {
                         return;
                     }
                     const { scene, canvas } = renderObject;

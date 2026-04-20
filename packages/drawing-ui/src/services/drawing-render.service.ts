@@ -52,6 +52,7 @@ export class DrawingRenderService {
             isMultiTransform,
             transforms: multiTransforms,
             adjustValues,
+            hidden,
         } = imageParam;
 
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
@@ -112,6 +113,10 @@ export class DrawingRenderService {
                     imageConfig.url = source;
                     shouldBeCache = true;
                 }
+            }
+
+            if (hidden) {
+                imageConfig.visible = false;
             }
 
             if (scene.getObject(imageShapeKey)) {

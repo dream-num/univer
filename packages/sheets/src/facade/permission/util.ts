@@ -18,7 +18,7 @@ import type { Injector } from '@univerjs/core';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import type { IRangeProtectionOptions } from './permission-types';
-import { IAuthzIoService, PermissionService, Rectangle } from '@univerjs/core';
+import { IAuthzIoService, IPermissionService, Rectangle } from '@univerjs/core';
 import { ObjectScope } from '@univerjs/protocol';
 import { EditStateEnum, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, ViewStateEnum, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { FRangeProtectionRule } from './f-range-protection-rule';
@@ -54,7 +54,7 @@ export function determineScope(editState: EditStateEnum, viewState: ViewStateEnu
 export function handleWorksheetRangePermissionIsEmpty(injector: Injector, unitId: string, subUnitId: string): void {
     const rangeProtectionRuleModel = injector.get(RangeProtectionRuleModel);
     const worksheetProtectionPointModel = injector.get(WorksheetProtectionPointModel);
-    const permissionService = injector.get(PermissionService);
+    const permissionService = injector.get(IPermissionService);
 
     const rules = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
     if (rules.length > 0) {

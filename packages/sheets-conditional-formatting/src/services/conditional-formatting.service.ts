@@ -59,6 +59,44 @@ export class ConditionalFormattingService extends Disposable {
         return this._injector.get(ConditionalFormattingViewModel);
     }
 
+    private _mergeComposeResult(
+        result: { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean },
+        rule: IConditionFormattingRule,
+        ruleResult: unknown
+    ) {
+        const type = rule.rule.type;
+
+        if (type === CFRuleType.highlightCell) {
+            ruleResult && merge(result, { style: ruleResult });
+            return;
+        }
+
+        if (type === CFRuleType.colorScale) {
+            if (ruleResult && typeof ruleResult === 'string') {
+                const preStyle = result.style || {};
+                result.style = { ...preStyle, bg: { rgb: ruleResult } };
+            }
+            return;
+        }
+
+        if (type === CFRuleType.dataBar) {
+            const ruleCache = ruleResult as IDataBarRenderParams;
+            if (ruleCache) {
+                result.dataBar = ruleCache;
+                result.isShowValue = ruleCache.isShowValue;
+            }
+            return;
+        }
+
+        if (type === CFRuleType.iconSet) {
+            const ruleCache = ruleResult as IIconSetRenderParams;
+            if (ruleCache) {
+                result.iconSet = ruleCache;
+                result.isShowValue = ruleCache.isShowValue;
+            }
+        }
+    }
+
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(Injector) private _injector: Injector,
@@ -73,6 +111,11 @@ export class ConditionalFormattingService extends Disposable {
         this._initSheetChange();
     }
 
+    //Conditional formats need to be evaluated in priority order
+    //  (in this implementation, this is equivalent to evaluating higher-priority rules first,
+    //  which generally corresponds to a smaller order value coming first).
+    // Evaluation of subsequent rules shall stop only if the current rule is matched and stopIfTrue=true.
+    // A stopIfTrue rule that is not matched must not terminate the evaluation of subsequent rules.
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
         const cellCfs = this._conditionalFormattingViewModelV2.getCellCfs(unitId, subUnitId, row, col);
 
@@ -94,7 +137,7 @@ export class ConditionalFormattingService extends Disposable {
 
             matchedRules.push({ rule, cacheItem });
 
-            if (stopIfTrueIndex === -1 && rule.stopIfTrue) {
+            if (stopIfTrueIndex === -1 && rule.stopIfTrue && this._isRuleMatched(rule, cacheItem.result)) {
                 stopIfTrueIndex = matchedRules.length - 1;
             }
         }
@@ -111,32 +154,18 @@ export class ConditionalFormattingService extends Disposable {
 
         for (let i = effectiveRules.length - 1; i >= 0; i--) {
             const { rule, cacheItem } = effectiveRules[i];
-            const type = rule.rule.type;
-
-            if (type === CFRuleType.highlightCell) {
-                cacheItem.result && merge(result, { style: cacheItem.result });
-            } else if (type === CFRuleType.colorScale) {
-                const ruleCache = cacheItem.result;
-                if (ruleCache && typeof ruleCache === 'string') {
-                    const preStyle = result.style || {};
-                    result.style = { ...preStyle, bg: { rgb: ruleCache } };
-                }
-            } else if (type === CFRuleType.dataBar) {
-                const ruleCache = cacheItem.result as IDataBarRenderParams;
-                if (ruleCache) {
-                    result.dataBar = ruleCache;
-                    result.isShowValue = ruleCache.isShowValue;
-                }
-            } else if (type === CFRuleType.iconSet) {
-                const ruleCache = cacheItem.result as IIconSetRenderParams;
-                if (ruleCache) {
-                    result.iconSet = ruleCache;
-                    result.isShowValue = ruleCache.isShowValue;
-                }
-            }
+            this._mergeComposeResult(result, rule, cacheItem.result);
         }
 
         return result;
+    }
+
+    private _isRuleMatched(rule: IConditionFormattingRule, ruleResult: unknown) {
+        if (rule.rule.type === CFRuleType.highlightCell) {
+            return !!ruleResult && typeof ruleResult === 'object' && Object.keys(ruleResult as object).length > 0;
+        }
+
+        return !!ruleResult;
     }
 
     private _initSnapshot() {
@@ -157,7 +186,7 @@ export class ConditionalFormattingService extends Disposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return {};
             }
         };

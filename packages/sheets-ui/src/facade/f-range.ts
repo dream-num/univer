@@ -306,16 +306,19 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     }
 
     /**
-     * attachDOMPopup
+     * attachRangePopup
      * @param popup
      * @returns {IDisposable} disposable
-        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-        let range = sheet.getRange(2, 2, 3, 3);
-        univerAPI.getActiveWorkbook().setActiveRange(range);
-        let disposable = range.attachDOMPopup({
-        componentKey: 'univer.sheet.single-dom-popup',
-        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
-        });
+     * @example
+     * ```typescript
+     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * let range = sheet.getRange(2, 2, 3, 3);
+     * univerAPI.getActiveWorkbook().setActiveRange(range);
+     * let disposable = range.attachRangePopup({
+     *   componentKey: 'univer.sheet.single-dom-popup',
+     *   extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+     * });
+     * ```
      */
     override attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable> {
         popup.direction = popup.direction ?? 'top-center';

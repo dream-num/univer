@@ -129,6 +129,10 @@ export interface IDrawingParam extends IDrawingSearch {
      * It is only used when drawingType is DRAWING_GROUP.
      */
     groupBaseBound?: Nullable<IGroupBaseBound>;
+    /**
+     * The drawing element is hidden when render
+     */
+    hidden?: boolean;
 }
 
 /**

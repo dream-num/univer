@@ -18,18 +18,16 @@ import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { IScrollToCellCommandParams } from '../../commands/commands/set-scroll.command';
-import { debounce, generateRandomId, ICommandService, IContextService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { debounce, generateRandomId, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { borderRightClassName, clsx, Dropdown } from '@univerjs/design';
-import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { MoreDownIcon } from '@univerjs/icons';
 import { getPrimaryForRange, InsertDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetSelectionsOperation, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
+import { ILayoutService, useDependency } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollToCellCommand } from '../../commands/commands/set-scroll.command';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { genNormalSelectionStyle } from '../../services/selection/const';
-import { getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction, restoreSheetNavigationAfterDefinedNameConfirm } from './defined-name.utils';
+import { DefinedNameBoxActionType, getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction } from '../../services/utils/defined-name-utils';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 
 export function DefinedName({ disable }: { disable: boolean }) {
@@ -42,9 +40,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const superTableService = useDependency(ISuperTableService);
     const functionService = useDependency(IFunctionService);
-    const editorService = useDependency(IEditorService);
-    const editorBridgeService = useDependency(IEditorBridgeService);
-    const contextService = useDependency(IContextService);
+    const layoutService = useDependency(ILayoutService);
 
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook?.getUnitId();
@@ -155,45 +151,34 @@ export function DefinedName({ disable }: { disable: boolean }) {
         handleDefinedNamesList(value);
     }
 
-    function returnFocusToSheet() {
-        restoreSheetNavigationAfterDefinedNameConfirm({
-            unitId,
-            input: inputRef.current,
-            commandService,
-            univerInstanceService,
-            editorService,
-            editorBridgeService,
-            contextService,
-        });
-    }
-
     function confirm() {
+        const formulaOrRefString = getAbsoluteRefStringFromSelection(workbook, selectionManagerService.getCurrentSelections(), lexerTreeBuilder);
         const action = resolveDefinedNameBoxAction({
             inputValue,
             rangeString,
             unitId,
-            workbook,
+            formulaOrRefString,
+            univerInstanceService,
             definedNamesService,
             superTableService,
             functionService,
         });
 
         switch (action.type) {
-            case 'noop':
+            case DefinedNameBoxActionType.Noop:
                 return true;
-            case 'focusDefinedName':
+            case DefinedNameBoxActionType.FocusDefinedName:
                 setRangeString(action.definedName.name);
                 setInputValue(action.definedName.name);
                 focusDefinedName(action.definedName);
                 return true;
-            case 'focusSelection':
+            case DefinedNameBoxActionType.FocusSelection:
                 setRangeString(action.refString);
                 setInputValue(action.refString);
                 focusSelection(action.refString);
                 return true;
-            case 'createDefinedName': {
-                const absoluteRef = getAbsoluteRefStringFromSelection(workbook, selectionManagerService.getCurrentSelections(), lexerTreeBuilder);
-                if (!absoluteRef) {
+            case DefinedNameBoxActionType.CreateDefinedName: {
+                if (!formulaOrRefString) {
                     resetValue();
                     return false;
                 }
@@ -202,7 +187,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                     id: generateRandomId(10),
                     unitId,
                     name: action.name,
-                    formulaOrRefString: absoluteRef,
+                    formulaOrRefString,
                     localSheetId: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
                 });
 
@@ -214,7 +199,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                 }
                 return !!result;
             }
-            case 'reset':
+            case DefinedNameBoxActionType.Reset:
                 resetValue();
                 return false;
         }
@@ -228,7 +213,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
             setIsInputEvent(false);
             setOpen(false);
             if (handled) {
-                returnFocusToSheet();
+                layoutService.focus();
             }
         } else if (e.key === 'Escape') {
             e.preventDefault();

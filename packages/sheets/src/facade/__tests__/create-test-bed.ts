@@ -31,7 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { DefinedNamesService, FormulaDataModel, FunctionService, IDefinedNamesService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { DefinedNamesService, FormulaDataModel, FunctionService, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder, SuperTableService } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
@@ -150,6 +150,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([SheetPermissionInitController]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([ISuperTableService, { useClass: SuperTableService }]);
             injector.add([SheetLazyExecuteScheduleService]);
 
             dependencies?.forEach((d) => injector.add(d));

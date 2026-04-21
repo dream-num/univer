@@ -26,6 +26,7 @@ export {
     SheetSkeletonChangeType,
     SheetValueChangeType,
 } from './basics/const/command-listener-const';
+export { validateDefinedName } from './basics/defined-name-utils';
 export { expandToContinuousRange } from './basics/expand-range';
 export {
     type IAddWorksheetMergeMutationParams,

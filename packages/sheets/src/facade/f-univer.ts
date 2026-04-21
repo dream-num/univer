@@ -67,7 +67,6 @@ import {
     SheetsFreezeSyncController,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
-import { FDefinedNameBuilder } from './f-defined-name';
 import { FWorkbook } from './f-workbook';
 
 /**
@@ -136,22 +135,6 @@ export interface IFUniverSheetsMixin {
      * @deprecated Use `univerAPI.addEvent(univerAPI.Event.UnitCreated, () => {})`
      */
     onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable;
-
-    /**
-     * Create a new defined name builder.
-     * @returns {FDefinedNameBuilder} - The defined name builder.
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const definedNameBuilder = univerAPI.newDefinedName()
-     *   .setRef('Sheet1!$A$1')
-     *   .setName('MyDefinedName')
-     *   .setComment('This is a comment');
-     * console.log(definedNameBuilder);
-     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder.build());
-     * ```
-     */
-    newDefinedName(): FDefinedNameBuilder;
 
     /**
      * Get the target of the sheet.
@@ -734,10 +717,6 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         });
 
         return toDisposable(subscription);
-    }
-
-    override newDefinedName(): FDefinedNameBuilder {
-        return this._injector.createInstance(FDefinedNameBuilder);
     }
 
     override getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {

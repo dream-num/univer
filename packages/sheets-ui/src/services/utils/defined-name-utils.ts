@@ -38,7 +38,6 @@ interface IResolveDefinedNameBoxActionParams {
     definedNamesService: IDefinedNamesService;
     superTableService: ISuperTableService;
     functionService: IFunctionService;
-    id?: string;
 }
 
 type DefinedNameBoxAction =
@@ -49,7 +48,7 @@ type DefinedNameBoxAction =
     | { type: DefinedNameBoxActionType.Reset };
 
 export function resolveDefinedNameBoxAction(params: IResolveDefinedNameBoxActionParams): DefinedNameBoxAction {
-    const { inputValue, rangeString, unitId, formulaOrRefString, univerInstanceService, definedNamesService, superTableService, functionService, id } = params;
+    const { inputValue, rangeString, unitId, formulaOrRefString, univerInstanceService, definedNamesService, superTableService, functionService } = params;
 
     if (inputValue === rangeString) {
         return { type: DefinedNameBoxActionType.Noop };
@@ -77,7 +76,6 @@ export function resolveDefinedNameBoxAction(params: IResolveDefinedNameBoxAction
         definedNamesService,
         superTableService,
         functionService,
-        id,
     });
 
     if (validateResult === true) {

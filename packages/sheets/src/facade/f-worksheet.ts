@@ -2399,10 +2399,13 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     insertDefinedName(name: string, formulaOrRefString: string): void {
-        const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
-        const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
-        param.localSheetId = this.getSheetId();
-        this._fWorkbook.insertDefinedNameBuilder(param);
+        const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder, this._fWorkbook.getId());
+        const definedNameParam = definedNameBuilder
+            .setName(name)
+            .setRef(formulaOrRefString)
+            .setScopeToWorksheet(this)
+            .build();
+        this._fWorkbook.insertDefinedNameBuilder(definedNameParam);
     }
 
     /**

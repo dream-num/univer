@@ -87,9 +87,9 @@ describe('Test FDefinedName', () => {
     });
 
     it('defined name insertDefinedNameBuilder', () => {
-        const builder = univerAPI.newDefinedName();
-        const param = builder.setName('test').setFormula('A1').setComment('test comment').setHidden(true).build();
         const activeSpreadsheet = univerAPI.getActiveWorkbook()!;
+        const builder = activeSpreadsheet.newDefinedNameBuilder();
+        const param = builder.setName('test').setFormula('A1').setComment('test comment').setHidden(true).build();
         activeSpreadsheet.insertDefinedNameBuilder(param);
         const definedName = activeSpreadsheet.getDefinedName('test');
         expect(definedName?.getComment()).eq('test comment');

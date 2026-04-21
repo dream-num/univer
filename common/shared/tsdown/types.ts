@@ -19,7 +19,9 @@ import type { UserConfig } from 'tsdown';
 export interface IBuildOptions {
     skipUMD?: boolean;
     cleanup?: boolean;
+    ignorePackages?: string[];
     nodeFirst?: boolean;
+    tsdownConfigPath?: string;
 }
 
 export type TEntryType = 'facade' | 'index' | 'locale';
@@ -38,7 +40,6 @@ export interface IPackageJson {
 }
 
 export interface IBuildContext {
-    bundledPackages: string[];
     entries: IEntryConfig[];
     externalPackages: string[];
     facadeExternalPackages: string[];

@@ -23,6 +23,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import pkg from '../package.json';
 import { defaultPluginConfig } from './config/config';
 import { NumfmtAlertRenderController } from './controllers/numfmt-alert-render.controller';
+import { NumfmtRepeatLastActionController } from './controllers/numfmt-repeat-last-action-controller';
 import { SheetNumfmtUIController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { UserHabitController } from './controllers/user-habit.controller';
@@ -62,6 +63,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
             [NumfmtEditorController],
             [UserHabitController],
             [NumfmtMenuController],
+            [NumfmtRepeatLastActionController],
         ]);
     }
 
@@ -71,6 +73,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
             [SheetNumfmtUIController],
             [NumfmtEditorController],
             [NumfmtMenuController],
+            [NumfmtRepeatLastActionController],
         ]);
     }
 

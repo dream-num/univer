@@ -12,7 +12,7 @@ jobs:
 
         steps:
             - name: Dispatch sync event to univer-pro
-              uses: peter-evans/repository-dispatch@v2
+              uses: peter-evans/repository-dispatch@v4
               with:
                   repository: dream-num/univer-pro
                   token: ${{ secrets.GH_TOKEN }}

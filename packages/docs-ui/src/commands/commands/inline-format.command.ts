@@ -359,7 +359,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
                 docMenuStyleService.setStyleCache(
                     {
-                        [key]: cacheStyle?.[key] !== undefined
+                        [key]: cacheStyle?.[key] !== undefined && isNeedReverseValue(key)
                             ? getReverseFormatValue(
                                 cacheStyle,
                                 key,
@@ -417,6 +417,10 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
 function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecoration {
     return value !== null && typeof value === 'object';
+}
+
+function isNeedReverseValue(key: keyof IStyleBase): boolean {
+    return !(/fs|ff|cl|bg/.test(key));
 }
 
 function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, preCommandId: string) {

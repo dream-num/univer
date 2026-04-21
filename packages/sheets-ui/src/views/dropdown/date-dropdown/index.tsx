@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import type { DateKit } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
 import type { IBaseDropdownProps } from '../type';
-import { dayjs, LocaleService } from '@univerjs/core';
+import { dateKit, LocaleService } from '@univerjs/core';
 import { borderTopClassName, Button, Calendar, clsx, TimeInput } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 
 export interface IDateDropdownProps {
-    defaultValue?: dayjs.Dayjs;
-    onChange?: (value: dayjs.Dayjs | undefined) => boolean | Promise<boolean>;
+    defaultValue?: DateKit;
+    onChange?: (value: DateKit | undefined) => boolean | Promise<boolean>;
     patternType?: 'datetime' | 'date' | 'time';
     showTime?: boolean;
 }
@@ -32,8 +33,8 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
     const { popup } = props;
     const { extraProps } = popup;
     const { hideFn, patternType, defaultValue, onChange, showTime } = extraProps!;
-    const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(defaultValue);
-    const defaultDate = useMemo(() => patternType !== 'time' ? dayjs() : dayjs('1900-01-01 00:00:00'), []);
+    const [localDate, setLocalDate] = useState<DateKit | undefined>(defaultValue);
+    const defaultDate = useMemo(() => patternType !== 'time' ? dateKit() : dateKit('1900-01-01 00:00:00'), []);
     const date = localDate && localDate.isValid() ? localDate : defaultDate;
     const localeService = useDependency(LocaleService);
 
@@ -57,7 +58,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                     <TimeInput
                         value={date.toDate()}
                         onValueChange={(newValue) => {
-                            setLocalDate(dayjs(newValue));
+                            setLocalDate(dateKit(newValue));
                         }}
                     />
                 )
@@ -66,7 +67,7 @@ export function DateDropdown(props: { popup: IPopup<IDateDropdownProps & IBaseDr
                         value={date.toDate()}
                         showTime={showTime ?? patternType === 'datetime'}
                         onValueChange={(newValue) => {
-                            setLocalDate(dayjs(newValue));
+                            setLocalDate(dateKit(newValue));
                         }}
                     />
                 )}

@@ -9,8 +9,6 @@ We provide security updates for the following versions of Univer.
 | Version | Supported          |
 | ------- | ------------------ |
 | latest  | :white_check_mark: |
-| 0.6.0   | :white_check_mark: |
-| < 0.6.0 | :x:                |
 
 As Univer is still not reaching version 1.0 and we are moving fast with latest feature updates, unsupported versions may contain unpatched vulnerabilities. We recommend upgrading to the latest supported version.
 

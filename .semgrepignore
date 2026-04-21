@@ -1,0 +1,12 @@
+submodules/
+node_modules/
+coverage/
+dist/
+lib/
+.next/
+.turbo/
+.vercel/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

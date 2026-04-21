@@ -34,7 +34,7 @@ export interface ISidebarMethodOptions {
 
     width?: number | string;
 
-    onClose?: () => void;
+    onClose?: (id?: string) => void;
     onOpen?: () => void;
 }
 
@@ -103,15 +103,9 @@ export function Sidebar() {
     }, [options]);
 
     function handleClose() {
-        const options = {
-            ...sidebarOptions,
-            visible: false,
-        };
-
-        sidebarService.options.visible = false;
-        sidebarService.sidebarOptions$.next(options);
-        options?.onClose?.();
+        sidebarService.close(sidebarOptions?.id);
     }
+
     return (
         <section
             data-u-comp="sidebar"

@@ -27,7 +27,7 @@ import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mu
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-interface IRemoveWorksheetMergeCommandParams extends ISheetCommandSharedParams {
+export interface IRemoveWorksheetMergeCommandParams extends ISheetCommandSharedParams {
     ranges?: IRange[];
 }
 

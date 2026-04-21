@@ -20,7 +20,7 @@ import { Disposable, Inject } from '@univerjs/core';
 import { DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { QuickInsertButtonComponentKey } from './const';
+import { QuickInsertButtonComponentKey } from '../views/QuickInsertButton';
 
 export class DocQuickInsertMenuController extends Disposable implements IRenderModule {
     private _popup$ = new BehaviorSubject<Nullable<{ startIndex: number; disposable: INeedCheckDisposable }>>(null);

@@ -17,7 +17,7 @@
 import type { IStyleData, Nullable } from '@univerjs/core';
 import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../type';
 import type { IContext } from './base-calculate-unit';
-import { CellValueType, dayjs, Range, Tools } from '@univerjs/core';
+import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
 import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
@@ -125,8 +125,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.last7Days: {
                             return {
                                 value: {
-                                    start: dayjs().subtract(7, 'day').valueOf(),
-                                    end: dayjs().valueOf(),
+                                    start: dateKit().subtract(7, 'day').valueOf(),
+                                    end: dateKit().valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -134,8 +134,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.lastMonth: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('month').subtract(1, 'month').valueOf(),
-                                    end: dayjs().endOf('month').subtract(1, 'month').valueOf(),
+                                    start: dateKit().startOf('month').subtract(1, 'month').valueOf(),
+                                    end: dateKit().endOf('month').subtract(1, 'month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -143,8 +143,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.lastWeek: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('week').subtract(1, 'week').valueOf(),
-                                    end: dayjs().endOf('week').subtract(1, 'week').valueOf(),
+                                    start: dateKit().startOf('week').subtract(1, 'week').valueOf(),
+                                    end: dateKit().endOf('week').subtract(1, 'week').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -152,8 +152,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.nextMonth: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('month').add(1, 'month').valueOf(),
-                                    end: dayjs().endOf('month').add(1, 'month').valueOf(),
+                                    start: dateKit().startOf('month').add(1, 'month').valueOf(),
+                                    end: dateKit().endOf('month').add(1, 'month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -161,8 +161,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.nextWeek: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('week').add(1, 'week').valueOf(),
-                                    end: dayjs().endOf('week').add(1, 'week').valueOf(),
+                                    start: dateKit().startOf('week').add(1, 'week').valueOf(),
+                                    end: dateKit().endOf('week').add(1, 'week').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -170,8 +170,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.thisMonth: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('month').valueOf(),
-                                    end: dayjs().endOf('month').valueOf(),
+                                    start: dateKit().startOf('month').valueOf(),
+                                    end: dateKit().endOf('month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -179,8 +179,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.thisWeek: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('week').valueOf(),
-                                    end: dayjs().endOf('week').valueOf(),
+                                    start: dateKit().startOf('week').valueOf(),
+                                    end: dateKit().endOf('week').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -188,8 +188,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.today: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('day').valueOf(),
-                                    end: dayjs().endOf('day').valueOf(),
+                                    start: dateKit().startOf('day').valueOf(),
+                                    end: dateKit().endOf('day').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -197,8 +197,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.tomorrow: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('day').add(1, 'day').valueOf(),
-                                    end: dayjs().endOf('day').add(1, 'day').valueOf(),
+                                    start: dateKit().startOf('day').add(1, 'day').valueOf(),
+                                    end: dateKit().endOf('day').add(1, 'day').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -206,8 +206,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         case CFTimePeriodOperator.yesterday: {
                             return {
                                 value: {
-                                    start: dayjs().startOf('day').subtract(1, 'day').valueOf(),
-                                    end: dayjs().endOf('day').subtract(1, 'day').valueOf(),
+                                    start: dateKit().startOf('day').subtract(1, 'day').valueOf(),
+                                    end: dateKit().endOf('day').subtract(1, 'day').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides",
-    "version": "0.18.0",
+    "version": "0.21.0",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -59,13 +59,17 @@
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
+    "peerDependencies": {
+        "rxjs": ">=7.0.0"
+    },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.9.3",
-        "vitest": "^4.1.0"
+        "rxjs": "^7.8.2",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     }
 }

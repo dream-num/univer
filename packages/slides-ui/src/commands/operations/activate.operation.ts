@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation, SlideDataModel } from '@univerjs/core';
+import type { IAccessor, IOperation } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { CanvasView } from '../../controllers/canvas-view';
 

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/storybook",
-    "version": "0.18.0",
+    "version": "0.21.0",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -16,31 +16,31 @@
         "build:storybook": "storybook build"
     },
     "dependencies": {
-        "@chromatic-com/storybook": "^5.0.1",
-        "@storybook/addon-docs": "^10.2.12",
-        "@storybook/addon-links": "^10.2.12",
-        "@storybook/addon-styling-webpack": "^3.0.0",
-        "@storybook/addon-webpack5-compiler-swc": "^4.0.2",
+        "@chromatic-com/storybook": "^5.1.2",
+        "@storybook/addon-docs": "^10.3.5",
+        "@storybook/addon-links": "^10.3.5",
+        "@storybook/addon-styling-webpack": "^3.0.2",
+        "@storybook/addon-webpack5-compiler-swc": "^4.0.3",
         "@storybook/icons": "^2.0.1",
-        "@storybook/react": "^10.2.12",
-        "@storybook/react-webpack5": "^10.2.12",
+        "@storybook/react": "^10.3.5",
+        "@storybook/react-webpack5": "^10.3.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/themes": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "css-loader": "^7.1.4",
         "postcss-loader": "^8.2.1",
-        "storybook": "^10.2.12",
+        "storybook": "^10.3.5",
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^4.0.0",
         "tsconfig-paths-webpack-plugin": "^4.2.0",
-        "typescript": "^5.9.3"
+        "typescript": "^6.0.2"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
         "fs-extra": "^11.3.4",
-        "postcss": "^8.5.8",
+        "postcss": "^8.5.10",
         "tailwindcss": "3.4.18",
         "tailwindcss-animate": "^1.0.7"
     }

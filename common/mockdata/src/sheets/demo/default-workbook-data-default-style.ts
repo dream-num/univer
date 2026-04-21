@@ -36226,10 +36226,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE = {
             data: '',
         },
         {
-            name: 'SHEET_HYPER_LINK_PLUGIN',
-            data: '{"sheet-0011":[]}',
-        },
-        {
             name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
             data: '',
         },

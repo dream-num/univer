@@ -55,7 +55,7 @@ function resolveUmdGlobal(source: string) {
     }
 
     if (source.startsWith('@univerjs')) {
-        if (source === '@univerjs/protocol' || source === '@univerjs/icons') {
+        if (source === '@univerjs/icons') {
             return null;
         }
 

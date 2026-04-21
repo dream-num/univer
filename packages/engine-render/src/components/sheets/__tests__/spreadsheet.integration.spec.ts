@@ -422,4 +422,71 @@ describe('spreadsheet integration', () => {
         });
         noSkeletonSpreadsheet.dispose();
     });
+
+    it('draws row and column gap areas using defaults from gapConfig', () => {
+        const { spreadsheet, skeleton, mainCanvas } = fixture;
+        const context = mainCanvas.getContext() as any;
+
+        skeleton.setGapConfig({
+            defaultBackgroundColor: 'rgba(11, 22, 33, 0.08)',
+            defaultStripeColor: 'rgba(11, 22, 33, 0.25)',
+            rowGaps: {
+                1: { size: 6 },
+            },
+            colGaps: {
+                1: { size: 5 },
+            },
+        });
+
+        const drawSingleGapRectSpy = vi.spyOn(spreadsheet as any, '_drawSingleGapRect');
+
+        (spreadsheet as any)._drawGapAreas(
+            context,
+            skeleton,
+            0,
+            3,
+            0,
+            3,
+            0,
+            400,
+            0,
+            240
+        );
+
+        expect(drawSingleGapRectSpy).toHaveBeenCalled();
+        expect(drawSingleGapRectSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ size: 6 }),
+            expect.any(Number),
+            expect.any(Number),
+            expect.any(Number),
+            6,
+            'rgba(11, 22, 33, 0.08)',
+            'rgba(11, 22, 33, 0.25)'
+        );
+        expect(drawSingleGapRectSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ size: 5 }),
+            expect.any(Number),
+            expect.any(Number),
+            5,
+            expect.any(Number),
+            'rgba(11, 22, 33, 0.08)',
+            'rgba(11, 22, 33, 0.25)'
+        );
+
+        // Cover fallback branch in _drawSingleGapRect: use default colors when item colors are absent.
+        expect(() => {
+            (spreadsheet as any)._drawSingleGapRect(
+                context,
+                { size: 3 },
+                1,
+                2,
+                30,
+                12,
+                'rgba(11, 22, 33, 0.08)',
+                'rgba(11, 22, 33, 0.25)'
+            );
+        }).not.toThrow();
+    });
 });

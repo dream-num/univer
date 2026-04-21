@@ -15,7 +15,7 @@
  */
 
 import type { ICollaborator } from '@univerjs/protocol';
-import { LocaleService } from '@univerjs/core';
+import { IAuthzIoService, LocaleService } from '@univerjs/core';
 import { Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
@@ -30,11 +30,15 @@ export const SheetPermissionUserDialog = () => {
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
+    const authzIoService = useDependency(IAuthzIoService);
+
     const userList = useObservable(sheetPermissionUserManagerService.userList$, sheetPermissionUserManagerService.userList);
     const searchUserList = userList?.filter((item) => {
-        return item.subject?.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase()) && item.role === UnitRole.Editor;
+        return item.subject?.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase()) && (item.role === UnitRole.Owner || item.role === UnitRole.Editor);
     }) ?? [];
     const [selectUserInfo, setSelectUserInfo] = useState<ICollaborator[]>(sheetPermissionUserManagerService.selectUserList);
+
+    const cfgEnableObjInherit = authzIoService.getCfgEnableObjInherit?.() ?? false;
 
     const handleChangeUser = (item: ICollaborator) => {
         const index = selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID);
@@ -57,9 +61,25 @@ export const SheetPermissionUserDialog = () => {
                     onChange={(v) => setInputValue(v)}
                 />
             </div>
-            <div className={clsx('univer-h-60 univer-overflow-y-auto', scrollbarClassName)}>
+            <div className={clsx('univer-h-60 univer-min-w-72 univer-overflow-y-auto', scrollbarClassName)}>
                 {searchUserList?.length > 0
                     ? searchUserList?.map((item) => {
+                        if (cfgEnableObjInherit && item.role === UnitRole.Owner) {
+                            return (
+                                <div
+                                    key={item.subject?.userID}
+                                    className={`
+                                      univer-my-2 univer-flex univer-cursor-not-allowed univer-items-center
+                                      univer-rounded-md
+                                    `}
+                                >
+                                    <Avatar src={item.subject?.avatar} size={24} />
+                                    <div className="univer-mx-1.5 univer-flex-1">{item.subject?.name}</div>
+                                    <div className="univer-text-xs univer-text-rose-600">{localeService.t('permission.dialog.ownerInherit')}</div>
+                                </div>
+                            );
+                        }
+
                         return (
                             <div
                                 key={item.subject?.userID}
@@ -70,8 +90,17 @@ export const SheetPermissionUserDialog = () => {
                                 onClick={() => handleChangeUser(item)}
                             >
                                 <Avatar src={item.subject?.avatar} size={24} />
-                                <div className="univer-ml-1.5 univer-flex-1">{item.subject?.name}</div>
-                                {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (<div><CheckMarkIcon /></div>)}
+                                <div className="univer-mx-1.5 univer-flex-1">{item.subject?.name}</div>
+                                {item.role === UnitRole.Owner && (
+                                    <div className="univer-text-xs univer-text-rose-600">{localeService.t('permission.dialog.ownerWithoutInherit')}</div>
+                                )}
+                                {selectUserInfo?.findIndex((v) => v.subject?.userID === item.subject?.userID) !== -1 && (
+                                    <div>
+                                        <CheckMarkIcon
+                                            className="univer-ml-1.5"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         );
                     })

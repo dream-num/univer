@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import type { IObjectFullState } from './basics/interfaces';
 import type { IViewportInfo, Vector2 } from './basics/vector2';
@@ -160,7 +160,7 @@ export class SceneViewer extends BaseObject {
                 return true;
             }
 
-            (transformState as IKeyValue)[key] = props[key as keyof IObjectFullState];
+            (transformState as Record<string, any>)[key] = props[key as keyof IObjectFullState];
             hasTransformState = true;
         });
 

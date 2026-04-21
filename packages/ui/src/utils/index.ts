@@ -16,4 +16,5 @@
 
 export * from './cell';
 export * from './di';
+export * from './html';
 export * from './util';

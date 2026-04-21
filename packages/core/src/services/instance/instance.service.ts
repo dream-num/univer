@@ -16,7 +16,7 @@
 
 import type { Observable } from 'rxjs';
 import type { IDisposable } from '../../common/di';
-import type { UnitModel, UnitType } from '../../common/unit';
+import type { UnitModel } from '../../common/unit';
 import type { Nullable } from '../../shared';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
 import { createIdentifier, Inject, Injector } from '../../common/di';
@@ -24,7 +24,6 @@ import { UniverInstanceType } from '../../common/unit';
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
-import { SlideDataModel } from '../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
@@ -51,7 +50,7 @@ export interface IUniverInstanceService {
     /** Omits value when a new UnitModel is created. */
     unitAdded$: Observable<UnitModel>;
     /** Subscribe to curtain type of units' creation. */
-    getTypeOfUnitAdded$<T extends UnitModel>(type: UnitType): Observable<T>;
+    getTypeOfUnitAdded$<T extends UnitModel>(type: UniverInstanceType): Observable<T>;
 
     /** @ignore */
     __addUnit(unit: UnitModel): void;
@@ -59,7 +58,7 @@ export interface IUniverInstanceService {
     /** Omits value when a UnitModel is disposed. */
     unitDisposed$: Observable<UnitModel>;
     /** Subscribe to curtain type of units' disposing. */
-    getTypeOfUnitDisposed$<T extends UnitModel>(type: UnitType): Observable<T>;
+    getTypeOfUnitDisposed$<T extends UnitModel>(type: UniverInstanceType): Observable<T>;
 
     /**
      * An observable value that emits the id of the focused unit. A Univer app instance
@@ -75,24 +74,24 @@ export interface IUniverInstanceService {
     getFocusedUnit(): Nullable<UnitModel>;
 
     /** @deprecated Use `getCurrentUnitOfType` instead. */
-    getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T>;
-    getCurrentUnitOfType<T extends UnitModel>(type: UnitType): Nullable<T>;
+    getCurrentUnitForType<T extends UnitModel>(type: UniverInstanceType): Nullable<T>;
+    getCurrentUnitOfType<T extends UnitModel>(type: UniverInstanceType): Nullable<T>;
     setCurrentUnitForType(unitId: string): void;
-    getCurrentTypeOfUnit$<T extends UnitModel>(type: UnitType): Observable<Nullable<T>>;
+    getCurrentTypeOfUnit$<T extends UnitModel>(type: UniverInstanceType): Observable<Nullable<T>>;
 
     /** Create a unit with snapshot info. */
-    createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>, options?: ICreateUnitOptions): U;
+    createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: Partial<T>, options?: ICreateUnitOptions): U;
     /** Dispose a unit  */
     disposeUnit(unitId: string): boolean;
 
-    registerCtorForType<T extends UnitModel>(type: UnitType, ctor: new (...args: any[]) => T): IDisposable;
+    registerCtorForType<T extends UnitModel>(type: UniverInstanceType, ctor: new (...args: any[]) => T): IDisposable;
 
     /** @deprecated */
     changeDoc(unitId: string, doc: DocumentDataModel): void;
 
-    getUnit<T extends UnitModel>(id: string, type?: UnitType): Nullable<T>;
-    getAllUnitsForType<T>(type: UnitType): T[];
-    getUnitType(unitId: string): UnitType;
+    getUnit<T extends UnitModel>(id: string, type?: UniverInstanceType): Nullable<T>;
+    getAllUnitsForType<T>(type: UniverInstanceType): T[];
+    getUnitType(unitId: string): UniverInstanceType;
 
     /** @deprecated */
     getUniverSheetInstance(unitId: string): Nullable<Workbook>;
@@ -104,7 +103,7 @@ export interface IUniverInstanceService {
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
-    private readonly _unitsByType = new Map<UnitType, UnitModel[]>();
+    private readonly _unitsByType = new Map<UniverInstanceType, UnitModel[]>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -127,23 +126,23 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     private _createHandler!: (
-        type: UnitType,
+        type: UniverInstanceType,
         data: unknown,
         ctor: UnitCtor,
         options?: ICreateUnitOptions
     ) => UnitModel;
 
-    __setCreateHandler(handler: (type: UnitType, data: unknown, ctor: UnitCtor, options?: ICreateUnitOptions) => UnitModel): void {
+    __setCreateHandler(handler: (type: UniverInstanceType, data: unknown, ctor: UnitCtor, options?: ICreateUnitOptions) => UnitModel): void {
         this._createHandler = handler;
     }
 
-    createUnit<T, U extends UnitModel>(type: UnitType, data: T, options?: ICreateUnitOptions): U {
+    createUnit<T, U extends UnitModel>(type: UniverInstanceType, data: T, options?: ICreateUnitOptions): U {
         const model = this._createHandler(type, data, this._ctorByType.get(type)!, options);
         return model as U;
     }
 
-    private readonly _ctorByType = new Map<UnitType, new () => UnitModel>();
-    registerCtorForType<T extends UnitModel>(type: UnitType, ctor: new () => T): IDisposable {
+    private readonly _ctorByType = new Map<UniverInstanceType, new () => UnitModel>();
+    registerCtorForType<T extends UnitModel>(type: UniverInstanceType, ctor: new () => T): IDisposable {
         this._ctorByType.set(type, ctor);
 
         return {
@@ -153,18 +152,22 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         };
     }
 
-    private _currentUnits = new Map<UnitType, Nullable<UnitModel>>();
-    private readonly _currentUnits$ = new BehaviorSubject<Map<UnitType, Nullable<UnitModel>>>(this._currentUnits);
+    __getCtorByType(type: UniverInstanceType): UnitCtor | undefined {
+        return this._ctorByType.get(type);
+    }
+
+    private _currentUnits = new Map<UniverInstanceType, Nullable<UnitModel>>();
+    private readonly _currentUnits$ = new BehaviorSubject<Map<UniverInstanceType, Nullable<UnitModel>>>(this._currentUnits);
     readonly currentUnits$ = this._currentUnits$.asObservable();
     getCurrentTypeOfUnit$<T>(type: number): Observable<Nullable<T>> {
         return this.currentUnits$.pipe(map((units) => units.get(type) ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
     }
 
-    getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T> {
+    getCurrentUnitForType<T extends UnitModel>(type: UniverInstanceType): Nullable<T> {
         return this._currentUnits.get(type) as Nullable<T>;
     }
 
-    getCurrentUnitOfType<T extends UnitModel>(type: UnitType): Nullable<T> {
+    getCurrentUnitOfType<T extends UnitModel>(type: UniverInstanceType): Nullable<T> {
         return this.getCurrentUnitForType(type);
     }
 
@@ -178,7 +181,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     private readonly _unitAdded$ = new Subject<UnitModel>();
     readonly unitAdded$ = this._unitAdded$.asObservable();
-    getTypeOfUnitAdded$<T extends UnitModel<object, number>>(type: UnitType): Observable<T> {
+    getTypeOfUnitAdded$<T extends UnitModel<object, number>>(type: UniverInstanceType): Observable<T> {
         return this._unitAdded$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
 
@@ -217,7 +220,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this.unitDisposed$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
 
-    getUnit<T extends UnitModel = UnitModel>(id: string, type?: UnitType): Nullable<T> {
+    getUnit<T extends UnitModel = UnitModel>(id: string, type?: UniverInstanceType): Nullable<T> {
         const unit = this._getUnitById(id)?.[0] as Nullable<T>;
         if (type && unit?.type !== type) return null;
         return unit;
@@ -235,7 +238,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     }
 
-    getAllUnitsForType<T>(type: UnitType): T[] {
+    getAllUnitsForType<T>(type: UniverInstanceType): T[] {
         return (this._unitsByType.get(type) ?? []) as T[];
     }
 
@@ -275,7 +278,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
             this.setCurrentUnitForType(id!);
-        } else if (this.focused instanceof SlideDataModel) {
+        } else if (this.focused?.type === UniverInstanceType.UNIVER_SLIDE) {
             this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
@@ -324,7 +327,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return true;
     }
 
-    private _tryResetCurrentOnRemoval(unitId: string, type: UnitType): void {
+    private _tryResetCurrentOnRemoval(unitId: string, type: UniverInstanceType): void {
         const current = this.getCurrentUnitForType(type);
         if (current?.getUnitId() === unitId) {
             this._currentUnits.set(type, null);
@@ -338,7 +341,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
     };
 
-    private _getUnitById(unitId: string): Nullable<[UnitModel, UnitType]> {
+    private _getUnitById(unitId: string): Nullable<[UnitModel, UniverInstanceType]> {
         for (const [type, units] of this._unitsByType) {
             const unit = units.find((unit) => unit.getUnitId() === unitId);
             if (unit) {

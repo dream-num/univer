@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
-import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest } from '@univerjs/protocol';
+import type {
+    IAllowedRequest,
+    IAllowedResponse,
+    IBatchAllowedResponse,
+    ICreateCollaboratorRequest,
+    ICreateRequest,
+    ICreateResponse,
+    IDeleteCollaboratorRequest,
+    IListCollaboratorRequest,
+    IListCollaboratorResponse,
+    IListPermPointRequest,
+    IListPermPointResponse,
+    IListRolesRequest,
+    IListRolesResponse,
+    IPutCollaboratorsRequest,
+    IUpdateCollaboratorRequest,
+    IUpdatePermPointRequest,
+} from '@univerjs/protocol';
 import type { ILogContext } from '../log/context';
 import { createIdentifier } from '../../common/di';
 
@@ -32,6 +49,8 @@ export interface IAuthzIoService {
     deleteCollaborator(config: IDeleteCollaboratorRequest, context?: ILogContext): Promise<void>;
     createCollaborator(config: ICreateCollaboratorRequest, context?: ILogContext): Promise<void>;
     putCollaborators(config: IPutCollaboratorsRequest, context?: ILogContext): Promise<void>;
+    setCfgEnableObjInherit?(enabled: boolean): void;
+    getCfgEnableObjInherit?(): boolean;
 }
 
 export const IAuthzIoService = createIdentifier<IAuthzIoService>('IAuthzIoIoService');

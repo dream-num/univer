@@ -39,6 +39,7 @@ import {
     Vector2,
 } from '@univerjs/engine-render';
 import {
+    attachRangeWithCoord,
     MoveColsCommand,
     MoveRowsCommand,
     SheetsSelectionsService,
@@ -384,7 +385,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
-        const selectionWithCoord = this._sheetSkeletonManagerService.attachRangeWithCoord(matchSelectionData.range);
+        const selectionWithCoord = attachRangeWithCoord(skeleton, matchSelectionData.range);
 
         if (selectionWithCoord == null) {
             return;

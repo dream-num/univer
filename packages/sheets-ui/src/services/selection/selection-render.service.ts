@@ -21,7 +21,7 @@ import type { ISheetObjectParam } from '../../controllers/utils/component-tools'
 import type { SelectionControl } from './selection-control';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, Rectangle, set, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
@@ -30,7 +30,6 @@ import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/se
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
 import { genNormalSelectionStyle } from './const';
-import { attachSelectionWithCoord } from './util';
 
 /**
  * This services controls rendering of normal selections in a render unit.

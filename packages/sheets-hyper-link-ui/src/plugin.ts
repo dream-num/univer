@@ -26,7 +26,7 @@ import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.contr
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
-import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
+import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
@@ -66,8 +66,6 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetsHyperLinkPopupService],
             [SheetsHyperLinkSidePanelService],
 
-            [SheetsHyperLinkRenderManagerController],
-
             [SheetsHyperLinkPopupController],
             [SheetsHyperLinkUIController],
             [SheetsHyperLinkAutoFillController],
@@ -77,8 +75,6 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
         ];
         dependencies.forEach((dep) => this._injector.add(dep));
-
-        this._injector.get(SheetsHyperLinkRenderManagerController);
     }
 
     override onReady(): void {

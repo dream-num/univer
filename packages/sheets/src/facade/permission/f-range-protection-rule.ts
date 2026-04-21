@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import type { IDeleteRangeProtectionMutationParams, ISetRangeProtectionMutationParams } from '@univerjs/sheets';
 import type { FRange } from '../f-range';
-import type { IRangeProtectionOptions } from './permission-types';
-import { ICommandService, Inject, Injector } from '@univerjs/core';
-import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation } from '@univerjs/sheets';
+import type { IRangeProtectionOptions, RangePermissionSnapshot } from './permission-types';
+import { IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
+import { UnitRole } from '@univerjs/protocol';
+import { DeleteRangeProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, UnitObject } from '@univerjs/sheets';
+import { RANGE_PERMISSION_POINT_MAP } from './permission-point-map';
+import { RangePermissionPoint } from './permission-types';
+import { handleWorksheetRangePermissionIsEmpty } from './util';
 
 /**
  * Implementation class for range protection rules
@@ -34,37 +39,28 @@ export class FRangeProtectionRule {
         private readonly _ranges: FRange[],
         private readonly _options: IRangeProtectionOptions,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @IAuthzIoService private readonly _authzIoService: IAuthzIoService,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {}
 
     /**
      * Get the rule ID.
-     * @returns {string} The unique identifier of this protection rule.
-     * @example
-     * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
-     * const ruleId = rules?.[0]?.id;
-     * console.log(ruleId);
-     * ```
      */
     get id(): string {
         return this._ruleId;
     }
 
     /**
+     * Get the permission ID associated with this rule.
+     */
+    get permissionId(): string {
+        return this._permissionId;
+    }
+
+    /**
      * Get the protected ranges.
-     * @returns {FRange[]} Array of protected ranges.
-     * @example
-     * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
-     * const ranges = rules?.[0]?.ranges;
-     * console.log(ranges);
-     * ```
      */
     get ranges(): FRange[] {
         return this._ranges;
@@ -72,15 +68,6 @@ export class FRangeProtectionRule {
 
     /**
      * Get the protection options.
-     * @returns {IRangeProtectionOptions} Copy of the protection options.
-     * @example
-     * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
-     * const options = rules?.[0]?.options;
-     * console.log(options);
-     * ```
      */
     get options(): IRangeProtectionOptions {
         return { ...this._options };
@@ -92,14 +79,18 @@ export class FRangeProtectionRule {
      * @returns {Promise<void>} A promise that resolves when the ranges are updated.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
-     * const rule = rules?.[0];
-     * await rule?.updateRanges([worksheet.getRange('A1:C3')]);
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Update the ranges to A1:C3 for the first rule
+     * if (rules.length > 0) {
+     *   const rule = rules[0];
+     *   const result = await rule.updateRanges([fWorksheet.getRange('A1:C3')]);
+     *   console.log(result);
+     * }
      * ```
      */
-    async updateRanges(ranges: FRange[]): Promise<void> {
+    async updateRanges(ranges: FRange[]): Promise<boolean> {
         if (!ranges || ranges.length === 0) {
             throw new Error('Ranges cannot be empty');
         }
@@ -110,16 +101,13 @@ export class FRangeProtectionRule {
         }
 
         // Check for overlap with other rules
-        const subunitRuleList = this._rangeProtectionRuleModel
+        const subUnitRuleList = this._rangeProtectionRuleModel
             .getSubunitRuleList(this._unitId, this._subUnitId)
             .filter((r) => r.id !== this._ruleId);
 
-        const hasOverlap = subunitRuleList.some((otherRule) =>
+        const hasOverlap = subUnitRuleList.some((otherRule) =>
             otherRule.ranges.some((otherRange) =>
-                ranges.some((newRange) => {
-                    const newRangeData = newRange.getRange();
-                    return this._rangesIntersect(newRangeData, otherRange);
-                })
+                ranges.some((newRange) => Rectangle.intersects(otherRange, newRange.getRange()))
             )
         );
 
@@ -128,7 +116,7 @@ export class FRangeProtectionRule {
         }
 
         // Execute update
-        await this._commandService.executeCommand(SetRangeProtectionMutation.id, {
+        const result = await this._commandService.executeCommand<ISetRangeProtectionMutationParams>(SetRangeProtectionMutation.id, {
             unitId: this._unitId,
             subUnitId: this._subUnitId,
             ruleId: this._ruleId,
@@ -138,9 +126,13 @@ export class FRangeProtectionRule {
             },
         });
 
-        // Update local reference
-        (this._ranges as FRange[]).length = 0;
-        this._ranges.push(...ranges);
+        if (result) {
+            // Update local reference
+            this._ranges.length = 0;
+            this._ranges.push(...ranges);
+        }
+
+        return result;
     }
 
     /**
@@ -148,35 +140,234 @@ export class FRangeProtectionRule {
      * @returns {Promise<void>} A promise that resolves when the rule is removed.
      * @example
      * ```ts
-     * const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
-     * const permission = worksheet?.getWorksheetPermission();
-     * const rules = await permission?.listRangeProtectionRules();
-     * const rule = rules?.[0];
-     * await rule?.remove();
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Remove the first protection rule
+     * if (rules.length > 0) {
+     *   const rule = rules[0];
+     *   const result = await rule.remove();
+     *   console.log(result);
+     * }
      * ```
      */
-    async remove(): Promise<void> {
-        await this._commandService.executeCommand(DeleteRangeProtectionMutation.id, {
+    async remove(): Promise<boolean> {
+        const result = await this._commandService.executeCommand<IDeleteRangeProtectionMutationParams>(DeleteRangeProtectionMutation.id, {
             unitId: this._unitId,
             subUnitId: this._subUnitId,
             ruleIds: [this._ruleId],
         });
+
+        if (result) {
+            handleWorksheetRangePermissionIsEmpty(this._injector, this._unitId, this._subUnitId);
+        }
+
+        return result;
     }
 
     /**
-     * Check if two ranges intersect
-     * @returns true if ranges intersect, false otherwise
-     * @private
+     * Set a specific permission point for the range rule (low-level API).
+     *
+     * **Important:** This method only updates the permission point value for an existing protection rule.
+     * It does NOT create permission checks that will block actual editing operations.
+     * You must call `protect()` first to create a protection rule before using this method.
+     *
+     * This method is useful for:
+     * - Fine-tuning permissions after creating a protection rule with `protect()`
+     * - Dynamically adjusting permissions based on runtime conditions
+     * - Advanced permission management scenarios
+     *
+     * @param {RangePermissionPoint} point The permission point to set.
+     * @param {boolean} value The value to set (true = allowed, false = denied).
+     * @returns {Promise<void>} A promise that resolves when the point is set.
+     * @throws {Error} If no protection rule exists for this range.
+     *
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * // First, create a protection rule
+     * const rule = await fRange.getRangePermission().protect({ name: 'My Range', allowEdit: true });
+     * // Then you can dynamically update permission points
+     * await rule.setPoint(univerAPI.Enum.RangePermissionPoint.Edit, false); // Now disable edit
+     * await rule.setPoint(univerAPI.Enum.RangePermissionPoint.View, true);  // Ensure view is enabled
+     * ```
      */
-    private _rangesIntersect(
-        range1: { startRow: number; startColumn: number; endRow: number; endColumn: number },
-        range2: { startRow: number; startColumn: number; endRow: number; endColumn: number }
-    ): boolean {
-        return !(
-            range1.endRow < range2.startRow ||
-            range1.startRow > range2.endRow ||
-            range1.endColumn < range2.startColumn ||
-            range1.startColumn > range2.endColumn
-        );
+    async setPoint(point: RangePermissionPoint, value: boolean): Promise<void> {
+        const PermissionPointClass = RANGE_PERMISSION_POINT_MAP[point];
+        if (!PermissionPointClass) {
+            throw new Error(`Unknown range permission point: ${point}`);
+        }
+
+        const instance = new PermissionPointClass(this._unitId, this._subUnitId, this._permissionId);
+        const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
+
+        if (permissionPoint && permissionPoint.value === value) {
+            return; // Value unchanged, no update needed
+        }
+
+        if (!permissionPoint) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+
+        await this._authzIoService.update({
+            objectType: UnitObject.SelectRange,
+            objectID: this._permissionId,
+            unitID: this._unitId,
+            share: undefined,
+            name: this._options.name || '',
+            strategies: [{
+                action: instance.subType,
+                role: value ? UnitRole.Editor : UnitRole.Owner,
+            }],
+            scope: undefined,
+            collaborators: undefined,
+        });
+
+        this._permissionService.updatePermissionPoint(instance.id, value);
+    }
+
+    /**
+     * Get the value of a specific permission point.
+     * @param {RangePermissionPoint} point The range permission point to query.
+     * @returns {boolean} true if allowed, false if denied.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Check if the first rule allows editing
+     * if (rules.length > 0) {
+     *   const rule = rules[0];
+     *   const canEdit = rule.getPoint(univerAPI.Enum.RangePermissionPoint.Edit);
+     *   console.log(canEdit);
+     * }
+     * ```
+     */
+    getPoint(point: RangePermissionPoint): boolean {
+        const PermissionPointClass = RANGE_PERMISSION_POINT_MAP[point];
+        if (!PermissionPointClass) {
+            console.warn(`Unknown permission point: ${point}`);
+            return false;
+        }
+
+        const permissionPoint = new PermissionPointClass(this._unitId, this._subUnitId, this._permissionId);
+        const permission = this._permissionService.getPermissionPoint(permissionPoint.id);
+        if (permission) {
+            return permission.value;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if the current user can edit this range.
+     * @returns {boolean} true if editable, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Check if the first rule allows editing
+     * const rule = rules[0];
+     * if (rule?.canEdit()) {
+     *   console.log(`You can edit this range ${rule.ranges.map(r => r.getA1Notation()).join(', ')}`);
+     * }
+     * ```
+     */
+    canEdit(): boolean {
+        // Always check the permission point value first
+        // This handles cases where setPoint() was called without protect()
+        return this.getPoint(RangePermissionPoint.Edit);
+    }
+
+    /**
+     * Check if the current user can view this range.
+     * @returns {boolean} true if viewable, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Check if the first rule allows viewing
+     * const rule = rules[0];
+     * if (rule?.canView()) {
+     *   console.log(`You can view this range ${rule.ranges.map(r => r.getA1Notation()).join(', ')}`);
+     * }
+     * ```
+     */
+    canView(): boolean {
+        // Always check the permission point value first
+        // This handles cases where setPoint() was called without protect()
+        return this.getPoint(RangePermissionPoint.View);
+    }
+
+    /**
+     * Check if the current user can manage collaborators for this range.
+     * @returns {boolean} true if can manage collaborators, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Check if the first rule allows managing collaborators
+     * const rule = rules[0];
+     * if (rule?.canManageCollaborator()) {
+     *   console.log(`You can manage collaborators for this range ${rule.ranges.map(r => r.getA1Notation()).join(', ')}`);
+     * }
+     * ```
+     */
+    canManageCollaborator(): boolean {
+        // Always check the permission point value first
+        // This handles cases where setPoint() was called without protect()
+        return this.getPoint(RangePermissionPoint.ManageCollaborator);
+    }
+
+    /**
+     * Check if the current user can delete this protection rule.
+     * @returns {boolean} true if can delete rule, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Check if the first rule allows deleting the rule
+     * const rule = rules[0];
+     * if (rule?.canDelete()) {
+     *   console.log(`You can delete this protection rule for this range ${rule.ranges.map(r => r.getA1Notation()).join(', ')}`);
+     * }
+     * ```
+     */
+    canDelete(): boolean {
+        // Always check the permission point value first
+        // This handles cases where setPoint() was called without protect()
+        return this.getPoint(RangePermissionPoint.Delete);
+    }
+
+    /**
+     * Get the current permission snapshot.
+     * @returns {RangePermissionSnapshot} Snapshot of all permission points.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const rules = await fWorksheet.getWorksheetPermission().listRangeProtectionRules();
+     * // Get the permission snapshot of the first rule
+     * if (rules.length > 0) {
+     *   const rule = rules[0];
+     *   const snapshot = rule.getSnapshot();
+     *   console.log(snapshot);
+     * }
+     * ```
+     */
+    getSnapshot(): RangePermissionSnapshot {
+        const snapshot: RangePermissionSnapshot = {} as RangePermissionSnapshot;
+
+        Object.values(RangePermissionPoint).forEach((point) => {
+            snapshot[point] = this.getPoint(point);
+        });
+
+        return snapshot;
     }
 }

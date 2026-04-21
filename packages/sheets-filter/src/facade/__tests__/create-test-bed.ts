@@ -16,6 +16,7 @@
 
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
+    ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -33,6 +34,7 @@ import { FUniver } from '@univerjs/core/facade';
 import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IFunctionService, ISheetRowFilteredService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetRowFilteredService } from '@univerjs/engine-formula/services/sheet-row-filtered.service.js';
 import {
+    MarkDirtyFilterChangeMutation,
     RefRangeService,
     SheetInterceptorService,
     SheetRangeThemeModel,
@@ -161,6 +163,9 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     // note that UI plugins are not registered here, because the unit test environment does not have a UI
     univer.registerPlugin(TestPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);
+
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(MarkDirtyFilterChangeMutation);
 
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
     const univerInstanceService = injector.get(IUniverInstanceService);

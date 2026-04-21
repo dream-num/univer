@@ -20,7 +20,7 @@ import { DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, MoveC
 import { KeyCode } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { CloseQuickInsertPopupOperation, ShowQuickInsertPopupOperation } from '../../commands/operations/quick-insert-popup.operation';
-import { numberedListMenu, textMenu } from '../../menu/built-in-menus';
+import { numberedListMenu, textMenu } from '../../menu/menu';
 import { DocQuickInsertTriggerController } from '../doc-quick-insert-trigger.controller';
 
 function createCommandService() {

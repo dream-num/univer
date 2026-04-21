@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BuildOptions, Plugin, SameShape } from 'esbuild';
+import type { BuildOptions, Plugin, PluginBuild, SameShape } from 'esbuild';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
@@ -48,6 +48,138 @@ const monacoEditorEntryPoints = [
     'vs/language/typescript/ts.worker.js',
     'vs/editor/editor.worker.js',
 ];
+
+const supportsColor = !!process.stdout.isTTY && process.env.NO_COLOR == null;
+const ansi = {
+    reset: '\x1B[0m',
+    bold: '\x1B[1m',
+    dim: '\x1B[2m',
+    red: '\x1B[31m',
+    green: '\x1B[32m',
+    yellow: '\x1B[33m',
+    blue: '\x1B[34m',
+    cyan: '\x1B[36m',
+    gray: '\x1B[90m',
+    underline: '\x1B[4m',
+} as const;
+
+type TLogLevel = 'error' | 'info' | 'ready' | 'recover' | 'watch';
+
+const levelStyleMap: Record<TLogLevel, string[]> = {
+    error: [ansi.bold, ansi.red],
+    info: [ansi.bold, ansi.blue],
+    ready: [ansi.bold, ansi.green],
+    recover: [ansi.bold, ansi.cyan],
+    watch: [ansi.bold, ansi.yellow],
+};
+
+function colorize(text: string, styles: string[]) {
+    if (!supportsColor || styles.length === 0) {
+        return text;
+    }
+
+    return `${styles.join('')}${text}${ansi.reset}`;
+}
+
+function formatLabel(level: TLogLevel) {
+    return colorize(`[${level}]`, levelStyleMap[level]);
+}
+
+function formatMuted(text: string) {
+    return colorize(text, [ansi.dim, ansi.gray]);
+}
+
+function formatUrl(url: string) {
+    return colorize(url, [ansi.bold, ansi.underline, ansi.cyan]);
+}
+
+function formatDuration(durationMs: number) {
+    if (durationMs < 1000) {
+        return `${durationMs}ms`;
+    }
+
+    return `${(durationMs / 1000).toFixed(durationMs < 10_000 ? 1 : 0)}s`;
+}
+
+function createLogger() {
+    function write(level: TLogLevel, message: string, method: 'error' | 'log' = 'log') {
+        console[method](`${formatLabel(level)} ${message}`);
+    }
+
+    return {
+        error(message: string) {
+            write('error', message, 'error');
+        },
+        info(message: string) {
+            write('info', message);
+        },
+        ready(message: string) {
+            write('ready', message);
+        },
+        recover(message: string) {
+            write('recover', message);
+        },
+        watch(message: string) {
+            write('watch', message);
+        },
+        muted(message: string) {
+            console.log(formatMuted(message));
+        },
+        url: formatUrl,
+    };
+}
+
+const logger = createLogger();
+
+function createWatchStatusPlugin() {
+    let serverUrl: string | null = null;
+    let hasSuccessfulBuild = false;
+    let lastBuildFailed = false;
+    let buildStartedAt = 0;
+
+    return {
+        plugin: {
+            name: 'watch-status',
+            setup(build: PluginBuild) {
+                build.onStart(() => {
+                    buildStartedAt = Date.now();
+                });
+
+                build.onEnd((result) => {
+                    const duration = formatDuration(Math.max(Date.now() - buildStartedAt, 0));
+
+                    if (result.errors.length > 0) {
+                        lastBuildFailed = true;
+                        logger.error(`Build failed in ${duration} with ${result.errors.length} error(s). Waiting for changes...`);
+                        return;
+                    }
+
+                    if (lastBuildFailed) {
+                        lastBuildFailed = false;
+                        hasSuccessfulBuild = true;
+                        logger.recover(
+                            serverUrl
+                                ? `Build recovered in ${duration}. Local server: ${logger.url(serverUrl)}`
+                                : `Build recovered in ${duration}.`
+                        );
+                        return;
+                    }
+
+                    if (!hasSuccessfulBuild) {
+                        hasSuccessfulBuild = true;
+                        logger.watch(`Initial build completed in ${duration}. Watching for changes...`);
+                        return;
+                    }
+
+                    logger.watch(`Rebuilt in ${duration}.`);
+                });
+            },
+        } satisfies Plugin,
+        setServerUrl(url: string) {
+            serverUrl = url;
+        },
+    };
+}
 
 function nodeBuildTask() {
     return esbuild.build({
@@ -150,9 +282,16 @@ if (isReact16) {
  * Build the project
  */
 async function main() {
+    if (args.watch) {
+        logger.info('Starting examples dev server...');
+    }
+
     await monacoBuildTask();
 
     if (args.watch) {
+        const watchStatus = createWatchStatusPlugin();
+        config.plugins?.push(watchStatus.plugin);
+
         const ctx = await esbuild.context(config);
         await nodeBuildTask();
         await ctx.watch();
@@ -164,10 +303,16 @@ async function main() {
         });
 
         const url = `http://localhost:${port}`;
-        console.log(`Local server: ${url}`);
+        watchStatus.setServerUrl(url);
+        logger.ready(`Local server: ${logger.url(url)}`);
+        logger.muted('Watching for file changes. Press Ctrl+C to stop.');
     } else {
         await esbuild.build(config);
     }
 }
 
-main();
+main().catch((error: unknown) => {
+    logger.error('Examples build exited unexpectedly.');
+    console.error(error);
+    process.exitCode = 1;
+});

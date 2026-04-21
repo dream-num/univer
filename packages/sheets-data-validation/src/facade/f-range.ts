@@ -25,7 +25,7 @@ import { FDataValidation } from './f-data-validation';
 /**
  * @ignore
  */
-export interface IFRangeDataValidationMixin {
+export interface IFRangeSheetsDataValidationMixin {
     /**
      * Set a data validation rule to current range. if rule is null, clear data validation rule.
      * @param {Nullable<FDataValidation>} rule data validation rule, build by `FUniver.newDataValidation`
@@ -166,7 +166,7 @@ export interface IFRangeDataValidationMixin {
 /**
  * @ignore
  */
-export class FRangeDataValidationMixin extends FRange implements IFRangeDataValidationMixin {
+export class FRangeSheetsDataValidationMixin extends FRange implements IFRangeSheetsDataValidationMixin {
     override setDataValidation(rule: Nullable<FDataValidation>): FRange {
         if (!rule) {
             this._commandService.syncExecuteCommand(ClearRangeDataValidationCommand.id, {
@@ -298,8 +298,8 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
     }
 }
 
-FRange.extend(FRangeDataValidationMixin);
+FRange.extend(FRangeSheetsDataValidationMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeDataValidationMixin { }
+    interface FRange extends IFRangeSheetsDataValidationMixin { }
 }

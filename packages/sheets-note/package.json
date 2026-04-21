@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-note",
-    "version": "0.18.0",
+    "version": "0.21.0",
     "private": false,
     "description": "Univer sheets note base plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -81,7 +81,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "rxjs": "^7.8.2",
-        "typescript": "^5.9.3",
-        "vitest": "^4.1.0"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     }
 }

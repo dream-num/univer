@@ -23,6 +23,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -41,6 +43,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -54,6 +58,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node

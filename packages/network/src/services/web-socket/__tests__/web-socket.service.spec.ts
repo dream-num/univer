@@ -70,10 +70,10 @@ describe('WebSocketService', () => {
 
     it('creates sockets, forwards events, and removes listeners on close', () => {
         const service = new WebSocketService();
-        const socket = service.createSocket('ws://example.com/socket');
+        const socket = service.createSocket('wss://example.com/socket');
 
         expect(socket).not.toBeNull();
-        expect(socket?.URL).toBe('ws://example.com/socket');
+        expect(socket?.URL).toBe('wss://example.com/socket');
 
         const createdSocket = FakeWebSocket.instances[0];
         const openEvents: Event[] = [];
@@ -130,7 +130,7 @@ describe('WebSocketService', () => {
 
         const service = new WebSocketService();
 
-        expect(service.createSocket('ws://example.com/fail')).toBeNull();
+        expect(service.createSocket('wss://example.com/fail')).toBeNull();
         expect(errorSpy).toHaveBeenCalled();
 
         errorSpy.mockRestore();

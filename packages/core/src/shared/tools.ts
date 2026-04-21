@@ -15,7 +15,7 @@
  */
 
 import type { IStyleData } from '../types/interfaces';
-import type { IKeyValue, Nullable } from './types';
+import type { Nullable } from './types';
 import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl, topLevelDomainSet } from '../common/url';
 
@@ -89,7 +89,7 @@ function diffArrays(oneArray: any[], twoArray: any[]) {
     return true;
 }
 
-function diffObject(oneObject: IKeyValue, twoObject: IKeyValue) {
+function diffObject(oneObject: Record<string, any>, twoObject: Record<string, any>) {
     const oneKeys = Object.keys(oneObject);
     const twoKeys = Object.keys(twoObject);
     if (oneKeys.length !== twoKeys.length) {
@@ -288,9 +288,9 @@ export class Tools {
             return clone as T;
         }
         if (this.isObject(value)) {
-            const clone: IKeyValue = {};
-            Object.keys(value as IKeyValue).forEach((key) => {
-                const item = (value as IKeyValue)[key];
+            const clone: Record<string, any> = {};
+            Object.keys(value as Record<string, any>).forEach((key) => {
+                const item = (value as Record<string, any>)[key];
                 clone[key] = Tools.deepClone(item);
             });
             Object.setPrototypeOf(clone, Object.getPrototypeOf(value));
@@ -385,7 +385,7 @@ export class Tools {
      * @param obj
      * @returns
      */
-    static removeNull(value: IKeyValue): object {
+    static removeNull(value: Record<string, any>): object {
         if (this.isObject(value)) {
             Object.keys(value).forEach((key) => {
                 const item = value[key];
@@ -466,8 +466,8 @@ export class Tools {
      * @param extendJson
      * @returns
      */
-    static commonExtend<T>(originJson: IKeyValue, extendJson: IKeyValue): T {
-        const resultJsonObject: IKeyValue = {};
+    static commonExtend<T>(originJson: Record<string, any>, extendJson: Record<string, any>): T {
+        const resultJsonObject: Record<string, any> = {};
 
         for (const attr in originJson) {
             resultJsonObject[attr] = originJson[attr];

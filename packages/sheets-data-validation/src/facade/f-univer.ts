@@ -23,7 +23,16 @@ import type {
     IUpdateSheetDataValidationRangeCommandParams,
     IUpdateSheetDataValidationSettingCommandParams,
 } from '@univerjs/sheets-data-validation';
-import type { IBeforeSheetDataValidationAddEvent, IBeforeSheetDataValidationCriteriaUpdateEvent, IBeforeSheetDataValidationDeleteAllEvent, IBeforeSheetDataValidationDeleteEvent, IBeforeSheetDataValidationOptionsUpdateEvent, IBeforeSheetDataValidationRangeUpdateEvent } from './f-event';
+import type {
+    IBeforeSheetDataValidationAddEventParams,
+    IBeforeSheetDataValidationCriteriaUpdateEventParams,
+    IBeforeSheetDataValidationDeleteAllEventParams,
+    IBeforeSheetDataValidationDeleteEventParams,
+    IBeforeSheetDataValidationOptionsUpdateEventParams,
+    IBeforeSheetDataValidationRangeUpdateEventParams,
+    ISheetDataValidationChangedEventParams,
+    ISheetDataValidatorStatusChangedEventParams,
+} from './f-event';
 import { CanceledError, ICommandService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import {
@@ -41,7 +50,7 @@ import { FDataValidationBuilder } from './f-data-validation-builder';
 /**
  * @ignore
  */
-export interface IFUnvierDataValidationMixin {
+export interface IFUniverSheetsDataValidationMixin {
     /**
      * Creates a new instance of FDataValidationBuilder
      * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
@@ -66,7 +75,7 @@ export interface IFUnvierDataValidationMixin {
     newDataValidation(): FDataValidationBuilder;
 }
 
-export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataValidationMixin {
+export class FUniverSheetsDataValidationMixin extends FUniver implements IFUniverSheetsDataValidationMixin {
     /**
      * @deprecated use `univerAPI.newDataValidation()` as instead.
      * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
@@ -100,16 +109,16 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                             return;
                         }
                         const { workbook, worksheet } = target;
-
                         const fRule = new FDataValidation(rule, worksheet.getSheet(), this._injector);
-                        this.fireEvent(this.Event.SheetDataValidationChanged, {
+                        const eventParams: ISheetDataValidationChangedEventParams = {
                             origin: ruleChange,
                             worksheet,
                             workbook,
                             changeType: type,
                             oldRule,
                             rule: fRule,
-                        });
+                        };
+                        this.fireEvent(this.Event.SheetDataValidationChanged, eventParams);
                     });
                 }
             )
@@ -133,14 +142,15 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                         if (!rule) {
                             return;
                         }
-                        this.fireEvent(this.Event.SheetDataValidatorStatusChanged, {
+                        const eventParams: ISheetDataValidatorStatusChangedEventParams = {
                             workbook,
                             worksheet,
                             row,
                             column: col,
                             rule,
                             status,
-                        });
+                        };
+                        this.fireEvent(this.Event.SheetDataValidatorStatusChanged, eventParams);
                     });
                 }
             )
@@ -158,7 +168,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                             return;
                         }
                         const { workbook, worksheet } = target;
-                        const eventParams: IBeforeSheetDataValidationAddEvent = {
+                        const eventParams: IBeforeSheetDataValidationAddEventParams = {
                             worksheet,
                             workbook,
                             rule: params.rule,
@@ -187,7 +197,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                         if (!rule) {
                             return;
                         }
-                        const eventParams: IBeforeSheetDataValidationCriteriaUpdateEvent = {
+                        const eventParams: IBeforeSheetDataValidationCriteriaUpdateEventParams = {
                             worksheet,
                             workbook,
                             rule,
@@ -219,7 +229,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                         if (!rule) {
                             return;
                         }
-                        const eventParams: IBeforeSheetDataValidationRangeUpdateEvent = {
+                        const eventParams: IBeforeSheetDataValidationRangeUpdateEventParams = {
                             worksheet,
                             workbook,
                             rule,
@@ -250,7 +260,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                         if (!rule) {
                             return;
                         }
-                        const eventParams: IBeforeSheetDataValidationOptionsUpdateEvent = {
+                        const eventParams: IBeforeSheetDataValidationOptionsUpdateEventParams = {
                             worksheet,
                             workbook,
                             rule,
@@ -281,7 +291,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                         if (!rule) {
                             return;
                         }
-                        const eventParams: IBeforeSheetDataValidationDeleteEvent = {
+                        const eventParams: IBeforeSheetDataValidationDeleteEventParams = {
                             worksheet,
                             workbook,
                             rule,
@@ -307,7 +317,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
                             return;
                         }
                         const { workbook, worksheet } = target;
-                        const eventParams: IBeforeSheetDataValidationDeleteAllEvent = {
+                        const eventParams: IBeforeSheetDataValidationDeleteAllEventParams = {
                             worksheet,
                             workbook,
                             rules: worksheet.getDataValidations(),
@@ -323,7 +333,7 @@ export class FUnvierDataValidationMixin extends FUniver implements IFUnvierDataV
     }
 }
 
-FUniver.extend(FUnvierDataValidationMixin);
+FUniver.extend(FUniverSheetsDataValidationMixin);
 declare module '@univerjs/core/facade' {
     /**
      * @ignore
@@ -338,5 +348,5 @@ declare module '@univerjs/core/facade' {
     }
 
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUnvierDataValidationMixin {}
+    interface FUniver extends IFUniverSheetsDataValidationMixin {}
 }

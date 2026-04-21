@@ -15,7 +15,6 @@
  */
 
 import type { IAccessor, IDisposable } from '../../common/di';
-import type { IKeyValue } from '../../shared/types';
 
 import { findLast, remove } from '../../common/array';
 import { createIdentifier, Inject, Injector } from '../../common/di';
@@ -542,7 +541,7 @@ export class CommandService extends Disposable implements ICommandService {
 
             this._multiCommandDisposables.set(command.id, disposableCollection);
         } else {
-            if ((registry[0] as IKeyValue).multi !== true) {
+            if ((registry[0] as Record<string, any>).multi !== true) {
                 throw new Error('Command has registered as a single command.');
             } else {
                 multiCommand = registry[0] as MultiCommand;

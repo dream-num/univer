@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IConfigService, IUniverInstanceService, Workbook } from '@univerjs/core';
+import type { IUniverInstanceService, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
-import type { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import type { SheetInterceptorService } from '@univerjs/sheets';
 import {
-    CancelMarkDirtyRowAutoHeightMutation,
-    MarkDirtyRowAutoHeightMutation,
+    CancelMarkDirtyRowAutoHeightOperation,
+    MarkDirtyRowAutoHeightOperation,
 } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import { AutoHeightController } from '../auto-height.controller';
@@ -62,9 +62,7 @@ describe('AutoHeightController', () => {
         const controller = new AutoHeightController(
             renderManagerService,
             sheetInterceptorService,
-            { } as unknown as SheetsSelectionsService,
-            univerInstanceService,
-            {} as IConfigService
+            univerInstanceService
         );
 
         expect(controller).toBeTruthy();
@@ -85,7 +83,7 @@ describe('AutoHeightController', () => {
         // If our inline execution happened, we should have redo/undo mutations appended.
         expect(result.redos).toEqual([
             {
-                id: MarkDirtyRowAutoHeightMutation.id,
+                id: MarkDirtyRowAutoHeightOperation.id,
                 params: {
                     unitId: 'u-1',
                     subUnitId: 's-1',
@@ -100,7 +98,7 @@ describe('AutoHeightController', () => {
 
         expect(result.undos).toEqual([
             {
-                id: CancelMarkDirtyRowAutoHeightMutation.id,
+                id: CancelMarkDirtyRowAutoHeightOperation.id,
                 params: {
                     unitId: 'u-1',
                     subUnitId: 's-1',

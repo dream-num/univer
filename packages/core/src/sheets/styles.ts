@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyType, Nullable } from '../shared';
+import type { Nullable } from '../shared';
 import type { IStyleData } from '../types/interfaces';
 import type { ICellDataForSheetInterceptor } from './typedef';
 import { generateRandomId, LRUMap, Tools } from '../shared';
@@ -24,11 +24,11 @@ import { generateRandomId, LRUMap, Tools } from '../shared';
  *
  */
 export class Styles {
-    private _styles: IKeyType<Nullable<IStyleData>>;
+    private _styles: Record<string, Nullable<IStyleData>>;
 
     private _cacheMap = new LRUMap<string, string>(100000);
 
-    constructor(styles: IKeyType<Nullable<IStyleData>> = {}) {
+    constructor(styles: Record<string, Nullable<IStyleData>> = {}) {
         this._styles = styles;
 
         this._generateCacheMap();
@@ -100,7 +100,7 @@ export class Styles {
         }
     }
 
-    toJSON(): IKeyType<Nullable<IStyleData>> {
+    toJSON(): Record<string, Nullable<IStyleData>> {
         return this._styles;
     }
 

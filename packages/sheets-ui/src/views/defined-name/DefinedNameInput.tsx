@@ -22,7 +22,7 @@ import { AbsoluteRefType, IUniverInstanceService, LocaleService, UniverInstanceT
 import { borderBottomClassName, borderClassName, Button, clsx, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, IFunctionService, isReferenceStrings, ISuperTableService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { ErrorIcon } from '@univerjs/icons';
-import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, validateDefinedName } from '@univerjs/sheets';
 import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
@@ -130,23 +130,18 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     };
 
     const confirmChange = () => {
-        const validationError = validateDefinedName({
+        const validationResult = validateDefinedName(nameValue, {
             unitId,
-            name: nameValue,
-            workbook,
+            formulaOrRefString: formulaOrRefStringValue,
+            univerInstanceService,
             definedNamesService,
             superTableService,
             functionService,
-            checkDuplicate: id == null || id.length === 0,
+            id,
         });
 
-        if (validationError) {
-            setValidString(localeService.t(validationError));
-            return;
-        }
-
-        if (formulaOrRefStringValue.length === 0) {
-            setValidString(localeService.t('definedName.formulaOrRefStringEmpty'));
+        if (typeof validationResult === 'string') {
+            setValidString(localeService.t(validationResult));
             return;
         }
 

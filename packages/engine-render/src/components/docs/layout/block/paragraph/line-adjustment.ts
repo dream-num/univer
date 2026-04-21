@@ -132,6 +132,8 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
         const { width } = divide;
         let glyphGroupWidth = getGlyphGroupWidth(divide);
 
+        divide.glyphGroupWidth = glyphGroupWidth;
+
         if (width === Number.POSITIVE_INFINITY) {
             continue;
         }
@@ -178,6 +180,7 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
                 adjustGlyphsInDivide(divide, justificationRatio, extraJustification);
                 // Recalculate the glyph group width, because we adjust the width and xOffset of glyphs.
                 glyphGroupWidth = getGlyphGroupWidth(divide);
+                divide.glyphGroupWidth = glyphGroupWidth;
             }
         }
 

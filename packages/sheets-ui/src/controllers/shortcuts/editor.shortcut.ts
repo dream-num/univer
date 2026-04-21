@@ -16,9 +16,9 @@
 
 import type { IShortcutItem } from '@univerjs/ui';
 import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand } from '@univerjs/docs-ui';
-
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+import { RepeatLastActionCommand } from '../../commands/commands/repeat-last-action.command';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
@@ -84,6 +84,14 @@ export const StartEditWithF2Shortcut: IShortcutItem = {
         eventType: DeviceInputEventType.Keyboard,
         keycode: KeyCode.F2,
     },
+};
+
+export const RepeatLastActionShortcut: IShortcutItem = {
+    id: RepeatLastActionCommand.id,
+    binding: KeyCode.F4,
+    description: 'shortcut.sheet.repeat-last-action',
+    group: '4_sheet-edit',
+    preconditions: whenSheetEditorFocused,
 };
 
 export const EditorCursorEnterShortcut: IShortcutItem = {

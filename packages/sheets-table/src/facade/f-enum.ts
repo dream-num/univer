@@ -20,7 +20,7 @@ import { TableColumnFilterTypeEnum, TableConditionTypeEnum, TableDateCompareType
 /**
  * @ignore
  */
-export interface ITableEnumMixin {
+export interface IFSheetsTableEnumMixin {
     TableColumnFilterTypeEnum: typeof TableColumnFilterTypeEnum;
     TableConditionTypeEnum: typeof TableConditionTypeEnum;
     TableNumberCompareTypeEnum: typeof TableNumberCompareTypeEnum;
@@ -28,7 +28,7 @@ export interface ITableEnumMixin {
     TableDateCompareTypeEnum: typeof TableDateCompareTypeEnum;
 }
 
-export class TableEnum extends FEnum implements ITableEnumMixin {
+export class FSheetsTableEnumMixin extends FEnum implements IFSheetsTableEnumMixin {
     override get TableColumnFilterTypeEnum(): typeof TableColumnFilterTypeEnum {
         return TableColumnFilterTypeEnum;
     };
@@ -50,8 +50,8 @@ export class TableEnum extends FEnum implements ITableEnumMixin {
     }
 }
 
-FEnum.extend(TableEnum);
+FEnum.extend(FSheetsTableEnumMixin);
 declare module '@univerjs/core/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEnum extends ITableEnumMixin { }
+    interface FEnum extends IFSheetsTableEnumMixin { }
 }

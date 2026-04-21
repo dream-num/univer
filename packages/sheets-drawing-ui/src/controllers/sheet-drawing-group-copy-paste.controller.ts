@@ -18,18 +18,12 @@ import type { IDrawingGroupNestedParam, IMutationInfo, Nullable } from '@univerj
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { Disposable, DrawingTypeEnum } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { discreteRangeToRange } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import {
-    ISheetClipboardService,
-    ISheetSelectionRenderService,
-    PREDEFINED_HOOK_NAME_PASTE,
-    SheetSkeletonManagerService,
-} from '@univerjs/sheets-ui';
-import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
+import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from '@univerjs/sheets';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 import { cloneGroupParams } from '../commands/commands/utils';
 
 export interface IGroupFeaturePasteHookParams {
@@ -68,6 +62,7 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
     constructor(
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
@@ -139,12 +134,13 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
     }
 
     private _generateGroupPasteMutations(pasteTo: ISheetDiscreteRangeLocation): { redos: IMutationInfo[]; undos: IMutationInfo[] } {
-        const { unitId, subUnitId, range } = pasteTo;
-        const render = this._renderManagerService.getRenderById(unitId);
-        const skeletonManagerService = render?.with(SheetSkeletonManagerService);
-        const selectionRenderService = render?.with(ISheetSelectionRenderService);
+        if (!this._copyInfo) {
+            return { redos: [], undos: [] };
+        }
 
-        if (!skeletonManagerService || !selectionRenderService || !this._copyInfo) {
+        const { unitId, subUnitId, range } = pasteTo;
+        const pasteToSkeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        if (!pasteToSkeleton) {
             return { redos: [], undos: [] };
         }
 
@@ -158,7 +154,7 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
 
         // Resolve the paste destination rectangle.
         const pasteRange = discreteRangeToRange(range);
-        const pasteRect = skeletonManagerService.attachRangeWithCoord({
+        const pasteRect = attachRangeWithCoord(pasteToSkeleton, {
             startRow: pasteRange.startRow,
             endRow: pasteRange.endRow,
             startColumn: pasteRange.startColumn,
@@ -181,8 +177,8 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
                     unitId,
                     subUnitId,
                     transform: newTransform,
-                    sheetTransform: transformToDrawingPosition(newTransform, selectionRenderService) ?? origRootGroup.sheetTransform,
-                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, selectionRenderService) ?? origRootGroup.sheetTransform,
+                    sheetTransform: transformToDrawingPosition(newTransform, pasteToSkeleton) ?? origRootGroup.sheetTransform,
+                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, pasteToSkeleton) ?? origRootGroup.sheetTransform,
                 } as ISheetDrawing;
             }),
         ];

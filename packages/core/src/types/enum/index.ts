@@ -27,7 +27,6 @@ export * from './interpolation-point-type';
 export * from './locale-type';
 export * from './mention-type';
 export * from './protection-type';
-export * from './prst-geom-type';
 export * from './relative-date';
 export * from './sheet-types';
 export * from './text-style';

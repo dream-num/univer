@@ -56,7 +56,7 @@ describe('watermark facade', () => {
         const module = await import('./f-univer');
 
         expect(mocked.extendUniver).toHaveBeenCalledWith(module.FUniverWatermarkMixin);
-        expect(mocked.extendEnum).toHaveBeenCalledWith(module.FWatermarkEnum);
+        expect(mocked.extendEnum).toHaveBeenCalledWith(module.FWatermarkEnumMixin);
 
         const updateWatermarkConfig = vi.fn();
         const deleteWatermarkConfig = vi.fn();
@@ -95,7 +95,7 @@ describe('watermark facade', () => {
         expect(deleteResult).toBe(thisArg);
         expect(deleteWatermarkConfig).toHaveBeenCalledTimes(1);
 
-        const enumObj = new module.FWatermarkEnum();
+        const enumObj = new module.FWatermarkEnumMixin();
         expect(enumObj.IWatermarkTypeEnum).toBe(mocked.IWatermarkTypeEnum);
     });
 

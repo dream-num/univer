@@ -19,7 +19,7 @@ import type { IBuildContext, IBuildOptions } from './types';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { build as tsdownBuild } from 'tsdown';
+import { mergeConfig, build as tsdownBuild } from 'tsdown';
 import { createModuleConfig } from './configs/module';
 import { createUmdConfig } from './configs/umd';
 import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants';
@@ -27,7 +27,7 @@ import { createBaseConfig, createInputOptions, createInputPlugins } from './util
 import { cleanupPackageJson } from './utils/cleanup-pkg';
 import { getEntries } from './utils/entries';
 import { removeCssArtifacts } from './utils/files';
-import { createBundledPackages, createExternalPackages, readPackageJson } from './utils/package';
+import { createExternalPackages, readPackageJson } from './utils/package';
 import { emitPublishPackageJson } from './utils/publish-manifest';
 
 /**
@@ -35,14 +35,12 @@ import { emitPublishPackageJson } from './utils/publish-manifest';
  */
 function createBuildContext(packageDir: string, options: IBuildOptions): IBuildContext {
     const packageJson = readPackageJson(packageDir);
-    const bundledPackages = createBundledPackages(packageJson);
-    const externalPackages = createExternalPackages(packageJson);
+    const externalPackages = createExternalPackages(packageJson, options.ignorePackages);
 
     return {
-        bundledPackages,
         entries: getEntries(packageDir),
         externalPackages,
-        facadeExternalPackages: [...externalPackages, packageJson.name],
+        facadeExternalPackages: [...externalPackages, packageJson.name, `${packageJson.name}/*`],
         inputOptions: createInputOptions(options),
         packageDir,
         packageJson,
@@ -61,7 +59,6 @@ function createConfigs(context: IBuildContext, options: IBuildOptions) {
     const moduleConfigs = context.entries.flatMap((entry) => {
         return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
-            bundledPackages: context.bundledPackages,
             enableObfuscation,
             entry,
             externalPackages: context.externalPackages,
@@ -112,7 +109,17 @@ export async function build(options: IBuildOptions = {}) {
     removeCssArtifacts(path.join(packageDir, BUILD_OUTPUT_ROOT));
 
     const context = createBuildContext(packageDir, options);
-    const configs = createConfigs(context, options);
+    let configs = createConfigs(context, options);
+
+    if (options.tsdownConfigPath) {
+        const configPath = path.resolve(packageDir, options.tsdownConfigPath);
+        let userConfig = (await import(configPath)).default;
+        if (typeof userConfig === 'function') {
+            userConfig = await userConfig();
+        }
+        configs = configs.map((config) => mergeConfig(config, userConfig));
+    }
+
     await Promise.all(configs.map((config) => tsdownBuild(config)));
     cleanupPackageJson(packageDir, context.packageJson);
     emitPublishPackageJson(packageDir);

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { IDisposable, Nullable, UnitModel } from '@univerjs/core';
 import type { BaseObject, IRenderContext, IRenderModule, RichText, Scene, Slide } from '@univerjs/engine-render';
-
+import type { SlideDataModel } from '@univerjs/slides';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
 import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';

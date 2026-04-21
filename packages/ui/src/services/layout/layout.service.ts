@@ -15,7 +15,18 @@
  */
 
 import type { ContextService, IDisposable, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    DocumentDataModel,
+    FOCUSING_UNIVER_EDITOR,
+    IContextService,
+    IUniverInstanceService,
+    remove,
+    toDisposable,
+    UniverInstanceType,
+    Workbook,
+} from '@univerjs/core';
 import { fromEvent } from 'rxjs';
 
 type FocusHandlerFn = (unitId: string) => void;
@@ -97,7 +108,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             handler = this._focusHandlers.get(UniverInstanceType.UNIVER_SHEET);
         } else if (currentFocused instanceof DocumentDataModel) {
             handler = this._focusHandlers.get(UniverInstanceType.UNIVER_DOC);
-        } else if (currentFocused instanceof SlideDataModel) {
+        } else if (currentFocused?.type === UniverInstanceType.UNIVER_SLIDE) {
             handler = this._focusHandlers.get(UniverInstanceType.UNIVER_SLIDE);
         }
 

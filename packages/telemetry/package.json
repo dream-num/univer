@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/telemetry",
-    "version": "0.18.0",
+    "version": "0.21.0",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -61,7 +61,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^5.9.3",
-        "vitest": "^4.1.0"
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.4"
     }
 }

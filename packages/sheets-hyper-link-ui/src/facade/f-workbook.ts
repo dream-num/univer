@@ -16,7 +16,6 @@
 
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
-import { FWorkbookHyperLinkMixin } from '@univerjs/sheets-hyper-link/facade';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 interface IFWorkbookHyperlinkUIMixin {
@@ -47,7 +46,7 @@ interface IFWorkbookHyperlinkUIMixin {
     navigateToSheetHyperlink(this: FWorkbook, hyperlink: string): void;
 }
 
-class FWorkbookHyperLinkUIMixin extends FWorkbookHyperLinkMixin implements IFWorkbookHyperlinkUIMixin {
+class FWorkbookHyperlinkUIMixin extends FWorkbook implements IFWorkbookHyperlinkUIMixin {
     // TODO: this should be migrated back to hyperlink ui plugin
     override navigateToSheetHyperlink(hyperlink: string): void {
         const parserService = this._injector.get(SheetsHyperLinkParserService);
@@ -57,7 +56,7 @@ class FWorkbookHyperLinkUIMixin extends FWorkbookHyperLinkMixin implements IFWor
     }
 }
 
-FWorkbook.extend(FWorkbookHyperLinkUIMixin);
+FWorkbook.extend(FWorkbookHyperlinkUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookHyperlinkUIMixin {}

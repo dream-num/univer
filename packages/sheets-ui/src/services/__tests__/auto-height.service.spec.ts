@@ -17,7 +17,7 @@
 import type { ICommandInfo, ICommandService as ICommandServiceType, Workbook } from '@univerjs/core';
 import type { Engine, IRenderContext, Scene } from '@univerjs/engine-render';
 import { ICommandService, Injector, UniverInstanceType } from '@univerjs/core';
-import { MarkDirtyRowAutoHeightMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { MarkDirtyRowAutoHeightOperation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AutoHeightService, taskRowsFromRanges } from '../auto-height.service';
@@ -178,7 +178,7 @@ describe('AutoHeightService', () => {
 
         expect(commandHandlers).toHaveLength(1);
         commandHandlers[0]({
-            id: MarkDirtyRowAutoHeightMutation.id,
+            id: MarkDirtyRowAutoHeightOperation.id,
             params: {
                 unitId: 'u-1',
                 subUnitId: 's-1',

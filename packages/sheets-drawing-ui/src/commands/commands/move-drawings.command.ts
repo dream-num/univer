@@ -15,15 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import type { ISetDrawingCommandParams } from './interfaces';
+import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-
-import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
-import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -35,7 +30,7 @@ export const MoveDrawingsCommand: ICommand = {
     handler: (accessor: IAccessor, params: IMoveDrawingsCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const drawingManagerService = accessor.get(ISheetDrawingService);
-        const selectionRenderService = accessor.get(ISheetSelectionRenderService);
+        const sheetSkeletonService = accessor.get(SheetSkeletonService);
 
         const { direction } = params;
 
@@ -48,12 +43,13 @@ export const MoveDrawingsCommand: ICommand = {
         const unitId = drawings[0].unitId;
 
         const newDrawings = drawings.map((drawing) => {
-            const { transform } = drawing as ISheetDrawing;
-            if (transform == null) {
+            const { transform, unitId, subUnitId } = drawing as ISheetDrawing;
+            const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+            if (!transform || !skeleton) {
                 return null;
             }
-            const newTransform = { ...transform };
 
+            const newTransform = { ...transform };
             const { left = 0, top = 0 } = transform;
 
             if (direction === Direction.UP) {
@@ -69,8 +65,8 @@ export const MoveDrawingsCommand: ICommand = {
             return {
                 ...drawing,
                 transform: newTransform,
-                sheetTransform: transformToDrawingPosition(newTransform, selectionRenderService),
-                axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, selectionRenderService),
+                sheetTransform: transformToDrawingPosition(newTransform, skeleton),
+                axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton),
             } as ISheetDrawing;
         }).filter((drawing) => drawing != null) as ISheetDrawing[];
 

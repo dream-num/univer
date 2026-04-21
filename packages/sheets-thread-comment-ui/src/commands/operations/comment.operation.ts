@@ -26,7 +26,7 @@ import { SHEETS_THREAD_COMMENT_PANEL } from '../../types/const';
 
 export const ShowAddSheetCommentModalOperation: IOperation = {
     type: CommandType.OPERATION,
-    id: 'sheets.operation.show-comment-modal',
+    id: 'sheet.operation.show-comment-modal',
     handler(accessor) {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -70,7 +70,7 @@ export const ShowAddSheetCommentModalOperation: IOperation = {
 };
 
 export const ToggleSheetCommentPanelOperation: IOperation = {
-    id: 'sheets.operation.toggle-comment-panel',
+    id: 'sheet.operation.toggle-comment-panel',
     type: CommandType.OPERATION,
     handler(accessor) {
         const sidebarService = accessor.get(ISidebarService);

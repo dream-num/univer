@@ -63,6 +63,7 @@ import { SheetsScrollRenderController } from './controllers/render-controllers/s
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { RepeatLastActionController } from './controllers/repeat-last-action.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoHeightService } from './services/auto-height.service';
@@ -86,6 +87,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionRenderManagerService } from './services/permission/sheet-permission-render-manager.service';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
+import { IRepeatLastActionService, RepeatLastActionService } from './services/repeat-last-action.service';
 import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { SelectAllService } from './services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
@@ -153,6 +155,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
             [IRefSelectionsService, { useClass: RefSelectionsService }],
             [SheetPrintInterceptorService],
+            [IRepeatLastActionService, { useClass: RepeatLastActionService }],
             [IStatusBarService, { useClass: StatusBarService }],
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [HoverManagerService],
@@ -177,6 +180,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [EditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
+            [RepeatLastActionController],
 
             // permission
             [SheetPermissionPanelModel],
@@ -223,6 +227,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [EditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
+            [RepeatLastActionController],
         ]);
     }
 

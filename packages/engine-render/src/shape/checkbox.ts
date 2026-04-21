@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Tools } from '@univerjs/core';
@@ -67,7 +66,7 @@ export class CheckboxShape extends Shape<ICheckboxShapeProps> {
     }
 
     override toJson() {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         CHECK_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof CheckboxShape]) {
                 props[key] = this[key as keyof CheckboxShape];

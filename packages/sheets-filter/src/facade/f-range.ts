@@ -25,7 +25,7 @@ import { FFilter } from './f-filter';
 /**
  * @ignore
  */
-export interface IFRangeFilter {
+export interface IFRangeSheetsFilterMixin {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
      * @returns {FFilter | null} The FFilter instance to handle the filter.
@@ -67,7 +67,7 @@ export interface IFRangeFilter {
     getFilter(): FFilter | null;
 }
 
-export class FRangeFilter extends FRange implements IFRangeFilter {
+export class FRangeSheetsFilterMixin extends FRange implements IFRangeSheetsFilterMixin {
     override createFilter(): FFilter | null {
         if (this._getFilterModel()) return null;
 
@@ -102,8 +102,8 @@ export class FRangeFilter extends FRange implements IFRangeFilter {
     }
 }
 
-FRange.extend(FRangeFilter);
+FRange.extend(FRangeSheetsFilterMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeFilter { }
+    interface FRange extends IFRangeSheetsFilterMixin { }
 }

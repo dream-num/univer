@@ -168,6 +168,7 @@ export class Documents extends DocComponent {
                 cellValueType,
                 // isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
+            const isVertical = vertexAngleDeg === VERTICAL_ROTATE_ANGLE && centerAngleDeg === VERTICAL_ROTATE_ANGLE;
             const horizontalOffsetNoAngle = this._horizontalHandler(
                 actualWidth,
                 pagePaddingLeft,
@@ -260,6 +261,8 @@ export class Documents extends DocComponent {
                     let alignOffset = alignOffsetNoAngle;
                     let rotateTranslateXListApply = null;
 
+                    let rotatedHeightStore = 0;
+
                     if (vertexAngle !== 0) {
                         const {
                             rotateTranslateXList,
@@ -269,6 +272,8 @@ export class Documents extends DocComponent {
                             fixOffsetY,
                             rotateTranslateY,
                         } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, vertexAngle);
+
+                        rotatedHeightStore = rotatedHeight;
 
                         let exceedWidthFix = rotatedWidth;
                         if (rotatedHeight > this.height && wrapStrategy !== WrapStrategy.WRAP) {
@@ -294,7 +299,7 @@ export class Documents extends DocComponent {
                         );
 
                         let exceedHeightFix = verticalOffset - fixOffsetY;
-                        if (rotatedHeight > this.height) {
+                        if (rotatedHeight > this.height && !isVertical) {
                             if (vertexAngle < 0) {
                                 exceedHeightFix = this.height - (rotatedHeight + fixOffsetY);
                             } else {
@@ -360,7 +365,7 @@ export class Documents extends DocComponent {
                                 const { glyphGroup } = divide;
 
                                 this._drawLiquid.translateSave();
-                                this._drawLiquid.translateDivide(divide);
+                                this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
 
                                 // Draw text background.
                                 for (const glyph of glyphGroup) {

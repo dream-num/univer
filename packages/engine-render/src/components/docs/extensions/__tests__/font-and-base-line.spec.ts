@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import type { IScale } from '@univerjs/core';
+import type { IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
+import type { UniverRenderingContext } from '../../../../context';
+import type { IExtensionConfig } from '../../../extension';
 import { BaselineOffset } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
@@ -21,7 +25,22 @@ import { Vector2 } from '../../../../basics/vector2';
 import { CheckboxShape } from '../../../../shape';
 import { FontAndBaseLine } from '../font-and-base-line';
 
-function createContext() {
+type MockRenderContext = UniverRenderingContext & {
+    save: ReturnType<typeof vi.fn>;
+    restore: ReturnType<typeof vi.fn>;
+    fillText: ReturnType<typeof vi.fn>;
+    translate: ReturnType<typeof vi.fn>;
+    rotate: ReturnType<typeof vi.fn>;
+};
+
+type GlyphOverrides = Omit<Partial<IDocumentSkeletonGlyph>, 'bBox' | 'parent'> & {
+    bBox?: Partial<IDocumentSkeletonGlyph['bBox']>;
+    parent?: IDocumentSkeletonGlyph['parent'] | null;
+};
+
+const DEFAULT_SCALE: IScale = { scaleX: 1, scaleY: 1 };
+
+function createContext(): MockRenderContext {
     return {
         fillStyle: '',
         font: '10px Arial',
@@ -30,20 +49,29 @@ function createContext() {
         fillText: vi.fn(),
         translate: vi.fn(),
         rotate: vi.fn(),
-    } as any;
+    } as unknown as MockRenderContext;
 }
 
-function createGlyph(content: string, overrides?: Partial<any>) {
-    return {
+function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkeletonGlyph {
+    const baseGlyph = {
         content,
+        raw: content,
         width: 16,
         left: 0,
         xOffset: 0,
         glyphType: GlyphType.WORD,
+        streamType: 'LETTER',
+        count: 1,
+        adjustability: {
+            stretchability: [0, 0],
+            shrinkability: [0, 0],
+        },
+        isJustifiable: false,
         parent: {
             parent: {},
         },
         bBox: {
+            width: 10,
             aba: 10,
             abd: 2,
             sbo: 2,
@@ -56,14 +84,23 @@ function createGlyph(content: string, overrides?: Partial<any>) {
             fs: 12,
             cl: { rgb: '#223344' },
         },
+    };
+
+    return {
+        ...baseGlyph,
         ...overrides,
-    } as any;
+        parent: overrides?.parent === null ? undefined : overrides?.parent ?? baseGlyph.parent,
+        bBox: {
+            ...baseGlyph.bBox,
+            ...overrides?.bBox,
+        },
+    } as unknown as IDocumentSkeletonGlyph;
 }
 
 describe('docs font and baseline extension', () => {
     it('handles text drawing with baseline offsets and vertical text branch', () => {
         const extension = new FontAndBaseLine();
-        const context = createContext();
+        const TestContext = createContext();
         extension.extensionOffset = {
             spanPointWithFont: Vector2.create(12, 20),
             spanStartPoint: Vector2.create(10, 10),
@@ -72,10 +109,10 @@ describe('docs font and baseline extension', () => {
                 vertexAngle: 0,
                 centerAngle: 0,
             },
-        } as any;
+        } as IExtensionConfig;
 
-        extension.draw(context, { scaleX: 1, scaleY: 1 } as any, createGlyph('A'));
-        expect(context.fillText).toHaveBeenCalledWith('A', 12, 20);
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A'));
+        expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
 
         const superscript = createGlyph('S', {
             ts: {
@@ -84,8 +121,8 @@ describe('docs font and baseline extension', () => {
                 va: BaselineOffset.SUPERSCRIPT,
             },
         });
-        extension.draw(context, { scaleX: 1, scaleY: 1 } as any, superscript);
-        expect(context.fillText).toHaveBeenCalledWith('S', 12, 17);
+        extension.draw(TestContext, DEFAULT_SCALE, superscript);
+        expect(TestContext.fillText).toHaveBeenCalledWith('S', 12, 17);
 
         extension.extensionOffset = {
             spanPointWithFont: Vector2.create(12, 20),
@@ -95,7 +132,7 @@ describe('docs font and baseline extension', () => {
                 vertexAngle: 0,
                 centerAngle: 0,
             },
-        } as any;
+        } as IExtensionConfig;
         const subscript = createGlyph('s', {
             ts: {
                 fs: 12,
@@ -103,8 +140,8 @@ describe('docs font and baseline extension', () => {
                 va: BaselineOffset.SUBSCRIPT,
             },
         });
-        extension.draw(context, { scaleX: 1, scaleY: 1 } as any, subscript);
-        expect(context.fillText).toHaveBeenCalledWith('s', 12, 22);
+        extension.draw(TestContext, DEFAULT_SCALE, subscript);
+        expect(TestContext.fillText).toHaveBeenCalledWith('s', 12, 22);
 
         extension.extensionOffset = {
             spanPointWithFont: Vector2.create(16, 26),
@@ -114,14 +151,31 @@ describe('docs font and baseline extension', () => {
                 vertexAngle: 90,
                 centerAngle: 90,
             },
-        } as any;
-        extension.draw(context, { scaleX: 1, scaleY: 1 } as any, createGlyph('X'));
-        expect(context.rotate).toHaveBeenCalled();
+        } as IExtensionConfig;
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('X'));
+        expect(TestContext.rotate).toHaveBeenCalled();
+
+        TestContext.fillText.mockClear();
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('阿', {
+            bBox: {
+                width: 12,
+                aba: 10,
+                abd: 2,
+                ba: 10,
+                bd: 2,
+                sp: 0,
+                sbr: 0,
+                sbo: 2,
+                spr: 0,
+                spo: 3,
+            },
+        }));
+        expect(TestContext.fillText).toHaveBeenCalledWith('阿', 18, 22);
     });
 
     it('renders checkbox list glyphs and clears cache', () => {
         const extension = new FontAndBaseLine();
-        const context = createContext();
+        const TestContext = createContext();
         const checkSpy = vi.spyOn(CheckboxShape, 'drawWith').mockImplementation(() => undefined);
 
         extension.extensionOffset = {
@@ -132,7 +186,7 @@ describe('docs font and baseline extension', () => {
                 vertexAngle: 0,
                 centerAngle: 0,
             },
-        } as any;
+        } as IExtensionConfig;
 
         const checkedGlyph = createGlyph('\u2611', {
             glyphType: GlyphType.LIST,
@@ -141,15 +195,15 @@ describe('docs font and baseline extension', () => {
                 cl: { rgb: '#111111' },
             },
         });
-        extension.draw(context, { scaleX: 1, scaleY: 1 } as any, checkedGlyph);
+        extension.draw(TestContext, DEFAULT_SCALE, checkedGlyph);
         expect(checkSpy).toHaveBeenCalled();
 
         extension.clearCache();
         extension.extensionOffset = {
             renderConfig: {},
-        } as any;
-        context.fillText.mockClear();
-        extension.draw(context, { scaleX: 1, scaleY: 1 } as any, createGlyph('A', { parent: null }));
-        expect(context.fillText).not.toHaveBeenCalled();
+        } as IExtensionConfig;
+        TestContext.fillText.mockClear();
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', { parent: null }));
+        expect(TestContext.fillText).not.toHaveBeenCalled();
     });
 });

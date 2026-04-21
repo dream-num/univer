@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable, SlideDataModel } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { BaseObject } from '@univerjs/engine-render';
+import type { SlideDataModel } from '@univerjs/slides';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';

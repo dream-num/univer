@@ -61,7 +61,7 @@ export interface IDataValidationError {
 /**
  * @ignore
  */
-export interface IFWorkbookDataValidationMixin {
+export interface IFWorkbookSheetsDataValidationMixin {
     /**
      * Get data validation validator status for current workbook.
      * @returns A promise that resolves to a matrix of validator status.
@@ -152,7 +152,7 @@ export interface IFWorkbookDataValidationMixin {
 /**
  * @ignore
  */
-export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
+export class FWorkbookSheetsDataValidationMixin extends FWorkbook implements IFWorkbookSheetsDataValidationMixin {
     declare _dataValidationModel: SheetDataValidationModel;
 
     override _initialize(): void {
@@ -373,8 +373,8 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
     }
 }
 
-FWorkbook.extend(FWorkbookDataValidationMixin);
+FWorkbook.extend(FWorkbookSheetsDataValidationMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookDataValidationMixin { }
+    interface FWorkbook extends IFWorkbookSheetsDataValidationMixin { }
 }

@@ -14,89 +14,104 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
-import { CFRuleType, CFSubRuleType, ClearRangeCfCommand, ClearWorksheetCfCommand } from '@univerjs/sheets-conditional-formatting';
-import { describe, expect, it, vi } from 'vitest';
+import type { IRange } from '@univerjs/core';
+import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, CFTextOperator } from '@univerjs/sheets-conditional-formatting';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createCfUiTestBed } from '../../../__tests__/create-cf-ui-test-bed';
 import { ConditionalFormattingPanelController } from '../../../controllers/cf.panel.controller';
 import { CF_MENU_OPERATION, OpenConditionalFormattingOperator } from '../open-conditional-formatting-panel';
 
+const range: IRange = {
+    startRow: 1,
+    endRow: 2,
+    startColumn: 3,
+    endColumn: 4,
+};
+
 describe('OpenConditionalFormattingOperator', () => {
-    const range = {
-        startRow: 1,
-        endRow: 2,
-        startColumn: 3,
-        endColumn: 4,
-    };
-
-    function createAccessor() {
-        const controller = {
-            openPanel: vi.fn(),
-        };
-        const selectionManagerService = {
-            getCurrentSelections: vi.fn(() => [{ range }]),
-        };
-        const commandService = {
-            executeCommand: vi.fn(),
-        };
-
-        const get: IAccessor['get'] = ((token: unknown) => {
-            if (token === ConditionalFormattingPanelController) {
-                return controller;
-            }
-
-            if (token === SheetsSelectionsService) {
-                return selectionManagerService;
-            }
-
-            if (token === ICommandService) {
-                return commandService;
-            }
-
-            throw new Error('Unknown dependency');
-        }) as IAccessor['get'];
-        const has: IAccessor['has'] = (() => false) as IAccessor['has'];
-
-        const accessor: IAccessor = {
-            get,
-            has,
-        };
-
-        return { accessor, controller, commandService };
-    }
-
-    it('opens the panel with a formula rule seeded from the current selection', () => {
-        const { accessor, controller } = createAccessor();
-
-        expect(OpenConditionalFormattingOperator.handler(accessor, { value: CF_MENU_OPERATION.formula })).toBe(true);
-        expect(controller.openPanel).toHaveBeenCalledWith({
-            ranges: [range],
-            rule: {
-                type: CFRuleType.highlightCell,
-                subType: CFSubRuleType.formula,
-                value: '=',
-            },
-        });
+    afterEach(() => {
+        // each test disposes its own univer instance
     });
 
-    it('opens the panel without payload for the manage-rules action', () => {
-        const { accessor, controller } = createAccessor();
+    it('opens the real sidebar panel with a rule seeded from the current selection', async () => {
+        const testBed = createCfUiTestBed();
+        testBed.injector.add([ConditionalFormattingPanelController]);
+        testBed.injector.get(ConditionalFormattingPanelController);
+        testBed.commandService.registerCommand(OpenConditionalFormattingOperator);
+        testBed.setSelection(range);
 
-        OpenConditionalFormattingOperator.handler(accessor, { value: CF_MENU_OPERATION.viewRule });
+        expect(await testBed.commandService.executeCommand(OpenConditionalFormattingOperator.id, {
+            value: CF_MENU_OPERATION.formula,
+        })).toBe(true);
 
-        expect(controller.openPanel).toHaveBeenCalledWith();
+        expect(testBed.sidebarService.open).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'sheet.conditional.formatting.panel',
+            children: expect.objectContaining({
+                rule: {
+                    ranges: [expect.objectContaining(range)],
+                    rule: {
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.formula,
+                        value: '=',
+                    },
+                },
+            }),
+        }));
+
+        testBed.univer.dispose();
     });
 
-    it('dispatches clear commands for range and worksheet actions', () => {
-        const { accessor, commandService } = createAccessor();
+    it('clears range rules and worksheet rules through the real operator flow', async () => {
+        const testBed = createCfUiTestBed();
+        testBed.injector.add([ConditionalFormattingPanelController]);
+        testBed.injector.get(ConditionalFormattingPanelController);
+        testBed.commandService.registerCommand(OpenConditionalFormattingOperator);
+        testBed.setSelection(range);
 
-        OpenConditionalFormattingOperator.handler(accessor, { value: CF_MENU_OPERATION.clearRangeRules });
-        OpenConditionalFormattingOperator.handler(accessor, { value: CF_MENU_OPERATION.clearWorkSheetRules });
+        const addRule = async (cfId: string, ranges = [range]) => {
+            const rule: IConditionFormattingRule = {
+                cfId,
+                ranges,
+                stopIfTrue: false,
+                rule: {
+                    type: CFRuleType.highlightCell,
+                    subType: CFSubRuleType.text,
+                    operator: CFTextOperator.notContainsText,
+                    value: 'A1',
+                    style: { bg: { rgb: '#ff0' } },
+                },
+            };
 
-        expect(commandService.executeCommand).toHaveBeenNthCalledWith(1, ClearRangeCfCommand.id, {
-            ranges: [range],
-        });
-        expect(commandService.executeCommand).toHaveBeenNthCalledWith(2, ClearWorksheetCfCommand.id);
+            await testBed.commandService.executeCommand(AddConditionalRuleMutation.id, {
+                unitId: testBed.unitId,
+                subUnitId: testBed.subUnitId,
+                rule,
+            });
+        };
+
+        await addRule('cf-range');
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)).toHaveLength(1);
+
+        expect(await testBed.commandService.executeCommand(OpenConditionalFormattingOperator.id, {
+            value: CF_MENU_OPERATION.clearRangeRules,
+        })).toBe(true);
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)).toEqual([]);
+
+        await addRule('cf-sheet-1');
+        await addRule('cf-sheet-2', [{
+            startRow: 5,
+            endRow: 5,
+            startColumn: 5,
+            endColumn: 5,
+        }]);
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)).toHaveLength(2);
+
+        expect(await testBed.commandService.executeCommand(OpenConditionalFormattingOperator.id, {
+            value: CF_MENU_OPERATION.clearWorkSheetRules,
+        })).toBe(true);
+        expect(testBed.ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)).toEqual([]);
+
+        testBed.univer.dispose();
     });
 });

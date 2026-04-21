@@ -83,8 +83,8 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
 
     it('workbook and worksheet render facade methods should use render services and command ids consistently', async () => {
         const sheetSize = 100;
-        const rowHeader = { setCustomHeader: vi.fn() };
-        const columnHeader = { setCustomHeader: vi.fn() };
+        const rowHeader = { setCustomHeader: vi.fn(), makeDirty: vi.fn() };
+        const columnHeader = { setCustomHeader: vi.fn(), makeDirty: vi.fn() };
         const mainComponent = { makeDirty: vi.fn() };
         const visibleRange = { startRow: 1, endRow: 4, startColumn: 2, endColumn: 6 };
         const visibleRanges = new Map([[SHEET_VIEWPORT_KEY.VIEW_MAIN, visibleRange]]);
@@ -94,9 +94,9 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
         };
         const worksheetSkeleton = { skeleton: { id: 'sheet-skeleton' } };
         const skeletonManager = {
+            getSkeleton: vi.fn(() => worksheetSkeleton.skeleton),
             reCalculate: vi.fn(),
             getCurrentSkeleton: vi.fn(() => skeleton),
-            getWorksheetSkeleton: vi.fn(() => worksheetSkeleton),
             setColumnHeaderSize: vi.fn(),
             setRowHeaderSize: vi.fn(),
         };
@@ -124,9 +124,10 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
             showSelection: vi.fn(),
         };
         const render = {
-            components: new Map([
+            components: new Map<SHEET_VIEW_KEY, unknown>([
                 [SHEET_VIEW_KEY.ROW, rowHeader],
                 [SHEET_VIEW_KEY.COLUMN, columnHeader],
+                [SHEET_VIEW_KEY.MAIN, mainComponent],
             ]),
             mainComponent,
             with: vi.fn((service: unknown) => {

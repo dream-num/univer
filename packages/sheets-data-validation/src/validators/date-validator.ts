@@ -17,7 +17,7 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { DataValidationOperator, DataValidationType, dayjs, isFormulaString, numfmt, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, dateKit, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
@@ -43,7 +43,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     }
 
     // support like 2020年11月11日 locale date
-    return numfmt.parseDate(dayjs(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
+    return numfmt.parseDate(dateKit(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
 };
 
 export class DateValidator extends BaseDataValidator {
@@ -140,7 +140,7 @@ export class DateValidator extends BaseDataValidator {
                 date = numfmt.dateFromSerial(res);
             }
 
-            return dayjs(`${date[0]}/${date[1]}/${date[2]} ${date[3]}:${date[4]}:${date[5]}`).format(bizInfo?.showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
+            return dateKit(`${date[0]}/${date[1]}/${date[2]} ${date[3]}:${date[4]}:${date[5]}`).format(bizInfo?.showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
         };
 
         return {

@@ -117,10 +117,6 @@
         {
             "name": "SHEET_FILTER_PLUGIN",
             "data": "{}"
-        },
-        {
-            "name": "SHEET_HYPER_LINK_PLUGIN",
-            "data": "{\"4FDtSTxrsa_03719b8_jm\":[]}"
         }
     ],
     "rev": 4

@@ -16,9 +16,8 @@
 
 import type { ICommand, Workbook } from '@univerjs/core';
 
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
-import { UniverType } from '@univerjs/protocol';
 import { AddWorksheetProtectionCommand, DeleteWorksheetProtectionCommand, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 
 export const DeleteWorksheetProtectionFormSheetBarCommand: ICommand = {
@@ -34,7 +33,7 @@ export const DeleteWorksheetProtectionFormSheetBarCommand: ICommand = {
         const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverType.UNIVER_SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         const unitId = workbook.getUnitId();
 

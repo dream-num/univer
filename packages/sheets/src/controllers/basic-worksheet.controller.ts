@@ -130,7 +130,7 @@ import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/de
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
-import { CancelMarkDirtyRowAutoHeightMutation, MarkDirtyRowAutoHeightMutation } from '../commands/mutations/mark-dirty-auto-height.mutation';
+import { MarkDirtyFilterChangeMutation } from '../commands/mutations/mark-dirty-filter-change.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
@@ -167,6 +167,7 @@ import {
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
+import { CancelMarkDirtyRowAutoHeightOperation, MarkDirtyRowAutoHeightOperation } from '../commands/operations/mark-dirty-auto-height.operation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SelectRangeCommand, SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
@@ -217,12 +218,14 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetRowHiddenMutation, // formula SUBTOTAL
             SetRowVisibleMutation,
 
-            MarkDirtyRowAutoHeightMutation,
-            CancelMarkDirtyRowAutoHeightMutation,
+            MarkDirtyRowAutoHeightOperation,
+            CancelMarkDirtyRowAutoHeightOperation,
             CopyWorksheetEndMutation,
 
             SetWorksheetRowCountMutation,
             SetWorksheetColumnCountMutation,
+
+            MarkDirtyFilterChangeMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);

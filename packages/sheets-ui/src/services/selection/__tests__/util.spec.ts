@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
-import { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from '../util';
 
 describe('selection util', () => {
     it('should attach coordinates and normalize reversed ranges', () => {

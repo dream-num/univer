@@ -15,10 +15,42 @@
  */
 
 import type { NumericTuple } from '@flatten-js/interval-tree';
+import type { ErrorType } from './error-type';
 import IntervalTree from '@flatten-js/interval-tree';
+import { isRealNum } from '@univerjs/core';
+import { ERROR_TYPE_SET } from './error-type';
+
+type ValueType = string | number | boolean;
+type ValueTypeWithNullUndefined = ValueType | null | undefined;
+type ValueTypeWithSymbol = ValueType | symbol;
 
 // empty cell, empty string and null value share the same inverted index cache key
 export const DEFAULT_EMPTY_CELL_KEY = Symbol('EMPTY_CELL');
+
+const normalizedValueMap: Map<ValueTypeWithNullUndefined, ValueTypeWithSymbol> = new Map();
+
+function normalizeValue(value: ValueTypeWithNullUndefined): ValueTypeWithSymbol {
+    if (normalizedValueMap.has(value)) {
+        return normalizedValueMap.get(value) as ValueTypeWithSymbol;
+    }
+
+    let _value: ValueTypeWithSymbol;
+
+    if (value === null || value === undefined || value === '') {
+        _value = DEFAULT_EMPTY_CELL_KEY;
+    } else if (isRealNum(value) && Number(value).toString() === value.toString()) {
+        // Number string that can be converted to number will be converted to number and stored in the inverted index cache, but '12a' or '012' will not be converted to number, because they are not pure number string.
+        _value = Number(value) === 0 ? 0 : Number(value);
+    } else if (typeof value === 'string') {
+        // For string value, we will convert it to lower case to make the compare operation case-insensitive.
+        _value = value.toLowerCase();
+    } else {
+        _value = value;
+    }
+
+    normalizedValueMap.set(value, _value);
+    return _value;
+}
 
 export class InvertedIndexCache {
     /**
@@ -33,11 +65,11 @@ export class InvertedIndexCache {
      *    }
      * }
      */
-    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null | symbol, Set<number>>>>> = new Map();
+    private _cache: Map<string, Map<string, Map<number, Map<ValueTypeWithSymbol, Set<number>>>>> = new Map();
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
-    set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null | symbol, row: number, isForceUpdate: boolean = false) {
+    set(unitId: string, sheetId: string, column: number, value: ValueTypeWithNullUndefined, row: number, isForceUpdate: boolean = false) {
         if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row) && !isForceUpdate) {
             return;
         }
@@ -70,11 +102,7 @@ export class InvertedIndexCache {
             }
         }
 
-        // Because the inverted index cache is used for compare operation, it should be case-insensitive.
-        let _value = typeof value === 'string' ? value.toLowerCase() : value;
-        if (_value === '' || _value === null) {
-            _value = DEFAULT_EMPTY_CELL_KEY;
-        }
+        const _value = normalizeValue(value);
 
         let cellList = columnMap.get(_value);
         if (cellList == null) {
@@ -89,14 +117,44 @@ export class InvertedIndexCache {
         return this._cache.get(unitId)?.get(sheetId)?.get(column);
     }
 
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean | null | symbol, rowsInCache: NumericTuple[]) {
-        // Because the inverted index cache is used for compare operation, it should be case-insensitive.
-        let _value = typeof value === 'string' ? value.toLowerCase() : value;
-        if (_value === '' || _value === null) {
-            _value = DEFAULT_EMPTY_CELL_KEY;
+    getCellPositions(unitId: string, sheetId: string, column: number, value: ValueTypeWithNullUndefined, rowsInCache: NumericTuple[]): {
+        errorType: ErrorType | null;
+        matchingRows: number[];
+    } | undefined {
+        const columnMap = this._cache.get(unitId)?.get(sheetId)?.get(column);
+        if (!columnMap) return;
+
+        const result: {
+            errorType: ErrorType | null;
+            matchingRows: number[];
+        } = {
+            errorType: null,
+            matchingRows: [],
+        };
+
+        const _value = normalizeValue(value);
+
+        if (ERROR_TYPE_SET.has(_value as ErrorType)) {
+            result.errorType = _value as ErrorType;
+        } else if (_value === 0 || _value === DEFAULT_EMPTY_CELL_KEY) {
+            const rows = [];
+
+            const rowsForZero = columnMap.get(0);
+            if (rowsForZero) {
+                rows.push(...rowsForZero);
+            }
+
+            const rowsForEmpty = columnMap.get(DEFAULT_EMPTY_CELL_KEY);
+            if (rowsForEmpty) {
+                rows.push(...rowsForEmpty);
+            }
+
+            result.matchingRows = rows.filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+        } else {
+            result.matchingRows = Array.from(columnMap.get(_value) ?? []).filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
         }
-        const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(_value);
-        return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+
+        return result;
     }
 
     setContinueBuildingCache(unitId: string, sheetId: string, column: number, startRow: number, endRow: number) {
@@ -210,6 +268,7 @@ export class InvertedIndexCache {
     clear() {
         this._cache.clear();
         this._continueBuildingCache.clear();
+        normalizedValueMap.clear();
     }
 
     private _handleNewInterval(columnMap: IntervalTree<NumericTuple>, startRow: number, endRow: number) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/slides';
 
 export const DEFAULT_FIRST_PAGE = {
     id: 'cover_1',

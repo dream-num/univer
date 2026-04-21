@@ -40,7 +40,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
@@ -50,7 +50,6 @@ import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
-import { attachSelectionWithCoord } from './util';
 
 enum ExpandingControl {
     BOTTOM_RIGHT = 'bottom-right',
@@ -719,22 +718,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
         const newSelection: ISelectionWithStyle = { range: newSelectionRange, style: null, primary: null };
         const newSelectionRangeWithCoord = attachSelectionWithCoord(newSelection, skeleton);
-        // newSelectionRangeWithCoord.rangeWithCoord.unitId = unitId;
-        // newSelectionRangeWithCoord.rangeWithCoord.sheetId = sheetId;
-
-        // const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
-        // const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
-
-        // const newSelectionRangeWithCoord: IRangeWithCoord = {
-        //     startColumn: newSelectionRange.startColumn,
-        //     startRow: newSelectionRange.startRow,
-        //     endColumn: newSelectionRange.endColumn,
-        //     endRow: newSelectionRange.endRow,
-        //     startY: startCellXY?.startY || 0,
-        //     endY: endCellXY?.endY || 0,
-        //     startX: startCellXY?.startX || 0,
-        //     endX: endCellXY?.endX || 0,
-        // };
 
         const rangeChanged =
             currSelectionRange.startRow !== newSelectionRange.startRow ||

@@ -50,7 +50,7 @@ export class ThemeSwitcherService extends Disposable {
 
         const styleElement = document.createElement('style');
         styleElement.setAttribute('id', this._styleSheetId);
-        styleElement.innerHTML = `:root {\n${cssVariables}\n}`;
+        styleElement.textContent = `:root {\n${cssVariables}\n}`;
         document.head.appendChild(styleElement);
     }
 

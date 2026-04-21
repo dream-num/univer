@@ -19,5 +19,5 @@ import './f-worksheet';
 import './f-enum';
 
 export { FConditionalFormattingBuilder } from './f-conditional-formatting-builder';
-export type { IFRangeConditionalFormattingMixin } from './f-range';
+export type { IFRangeSheetsConditionalFormattingMixin } from './f-range';
 export type { IFWorksheetConditionalFormattingMixin } from './f-worksheet';

@@ -478,7 +478,12 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         id: SetInlineFormatFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
-        label: FONT_FAMILY_COMPONENT,
+        label: {
+            name: FONT_FAMILY_COMPONENT,
+            props: {
+                id: SetInlineFormatFontFamilyCommand.id,
+            },
+        },
         selections: [{
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,

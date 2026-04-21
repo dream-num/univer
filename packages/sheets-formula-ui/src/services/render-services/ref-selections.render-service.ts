@@ -19,8 +19,8 @@ import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, 
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionModel } from '@univerjs/sheets';
 import { DisposableCollection, IContextService, Inject, Injector, RANGE_TYPE, Rectangle, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
-import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachSelectionWithCoord, convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
+import { BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 
 /**
@@ -127,7 +127,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         listenerDisposables.add(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 if (!this.inRefSelectionMode()) return;
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+                if (!skeleton) return;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), row, RANGE_TYPE.ROW);
                 if (matchSelectionData) return;
@@ -141,7 +142,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         listenerDisposables.add(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (!this.inRefSelectionMode()) return;
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+            if (!skeleton) return;
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
             const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), column, RANGE_TYPE.COLUMN);
             if (matchSelectionData) return;
@@ -157,7 +159,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // remove all other selections
             this._reset();
             if (!this.inRefSelectionMode()) return;
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+            if (!skeleton) return;
             const selectionWithStyle = getAllSelection(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());

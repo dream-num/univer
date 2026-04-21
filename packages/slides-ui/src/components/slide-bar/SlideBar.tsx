@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { SlideDataModel } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';

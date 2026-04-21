@@ -18,12 +18,43 @@ import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IS
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRangeThemeStyleJSON, ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
-import { ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RANGE_TYPE, RedoCommand, toDisposable, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    ILogService,
+    Inject,
+    Injector,
+    IPermissionService,
+    IResourceLoaderService,
+    IUniverInstanceService,
+    LocaleService,
+    mergeWorksheetSnapshotWithDefault,
+    RANGE_TYPE,
+    RedoCommand,
+    toDisposable,
+    Tools,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RangeThemeStyle, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorkbookNameCommand, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
+import {
+    CopySheetCommand,
+    getPrimaryForRange,
+    InsertSheetCommand,
+    RangeThemeStyle,
+    RegisterWorksheetRangeThemeStyleCommand,
+    RemoveSheetCommand,
+    SetDefinedNameCommand,
+    SetSelectionsOperation,
+    SetWorkbookNameCommand,
+    SetWorksheetActiveOperation,
+    SetWorksheetOrderCommand,
+    SheetRangeThemeService,
+    SheetsSelectionsService,
+    UnregisterWorksheetRangeThemeStyleCommand,
+    WorkbookEditablePermission,
+} from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
-import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 import { FWorkbookPermission } from './permission/f-workbook-permission';
@@ -801,21 +832,6 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * Get the PermissionInstance.
-     * @returns {FPermission} - The PermissionInstance.
-     * @deprecated Use `getWorkbookPermission()` instead for the new permission API
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const permission = fWorkbook.getPermission();
-     * console.log(permission);
-     * ```
-     */
-    getPermission(): FPermission {
-        return this._injector.createInstance(FPermission);
-    }
-
-    /**
      * Get the WorkbookPermission instance for managing workbook-level permissions.
      * This is the new permission API that provides a more intuitive and type-safe interface.
      * @returns {FWorkbookPermission} - The WorkbookPermission instance.
@@ -854,10 +870,6 @@ export class FWorkbook extends FBaseInitialable {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const definedName = fWorkbook.getDefinedName('MyDefinedName');
      * console.log(definedName?.getFormulaOrRefString());
-     *
-     * if (definedName) {
-     *   definedName.setName('NewDefinedName');
-     * }
      * ```
      */
     getDefinedName(name: string): FDefinedName | null {
@@ -891,44 +903,22 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * Insert a defined name.
-     * @param {string} name The name of the defined name to insert
-     * @param {string} formulaOrRefString The formula(=sum(A2:b10)) or reference(A1) string of the defined name to insert
-     * @returns {FWorkbook} The current FWorkbook instance
+     * Create a new defined name builder.
+     * @returns {FDefinedNameBuilder} - The defined name builder.
      * @example
      * ```ts
-     * // The code below inserts a defined name
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.insertDefinedName('MyDefinedName', 'Sheet1!$A$1');
+     * const definedNameParam = fWorkbook.newDefinedNameBuilder()
+     *   .setRef('Sheet1!$A$1')
+     *   .setName('MyDefinedName')
+     *   .setComment('This is a comment');
+     *   .build();
+     * console.log(definedNameParam);
+     * fWorkbook.insertDefinedNameBuilder(definedNameParam);
      * ```
      */
-    insertDefinedName(name: string, formulaOrRefString: string): FWorkbook {
-        const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
-        const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
-        param.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
-        this.insertDefinedNameBuilder(param);
-        return this;
-    }
-
-    /**
-     * Delete the defined name with the given name.
-     * @param {string} name The name of the defined name to delete
-     * @returns {boolean} true if the defined name was deleted, false otherwise
-     * @example
-     * ```ts
-     * // The code below deletes the defined name with the given name
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.deleteDefinedName('MyDefinedName');
-     * ```
-     */
-    deleteDefinedName(name: string): boolean {
-        const definedName = this.getDefinedName(name);
-        if (definedName) {
-            definedName.delete();
-            return true;
-        }
-
-        return false;
+    newDefinedNameBuilder(): FDefinedNameBuilder {
+        return this._injector.createInstance(FDefinedNameBuilder, this.id);
     }
 
     /**
@@ -939,17 +929,16 @@ export class FWorkbook extends FBaseInitialable {
      * ```ts
      * // The code below inserts a defined name by builder param
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const definedNameBuilder = univerAPI.newDefinedName()
+     * const definedNameParam = fWorkbook.newDefinedNameBuilder()
      *   .setRef('Sheet1!$A$1')
      *   .setName('MyDefinedName')
      *   .setComment('This is a comment')
      *   .build();
-     * fWorkbook.insertDefinedNameBuilder(definedNameBuilder);
+     * fWorkbook.insertDefinedNameBuilder(definedNameParam);
      * ```
      */
     insertDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
-        param.unitId = this.getId();
-        this._commandService.syncExecuteCommand(SetDefinedNameCommand.id, param);
+        this._commandService.syncExecuteCommand<ISetDefinedNameMutationParam>(SetDefinedNameCommand.id, param);
     }
 
     /**
@@ -974,7 +963,50 @@ export class FWorkbook extends FBaseInitialable {
      * ```
      */
     updateDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
-        this._commandService.syncExecuteCommand(SetDefinedNameCommand.id, param);
+        this._commandService.syncExecuteCommand<ISetDefinedNameMutationParam>(SetDefinedNameCommand.id, param);
+    }
+
+    /**
+     * Insert a defined name.
+     * @param {string} name The name of the defined name to insert
+     * @param {string} formulaOrRefString The formula(=sum(A2:b10)) or reference(A1) string of the defined name to insert
+     * @returns {FWorkbook} The current FWorkbook instance
+     * @example
+     * ```ts
+     * // The code below inserts a defined name
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.insertDefinedName('MyDefinedName', 'Sheet1!$A$1');
+     * ```
+     */
+    insertDefinedName(name: string, formulaOrRefString: string): FWorkbook {
+        const definedNameParam = this.newDefinedNameBuilder()
+            .setName(name)
+            .setRef(formulaOrRefString)
+            .setScopeToWorkbook()
+            .build();
+        this.insertDefinedNameBuilder(definedNameParam);
+        return this;
+    }
+
+    /**
+     * Delete the defined name with the given name.
+     * @param {string} name The name of the defined name to delete
+     * @returns {boolean} true if the defined name was deleted, false otherwise
+     * @example
+     * ```ts
+     * // The code below deletes the defined name with the given name
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.deleteDefinedName('MyDefinedName');
+     * ```
+     */
+    deleteDefinedName(name: string): boolean {
+        const definedName = this.getDefinedName(name);
+        if (definedName) {
+            definedName.delete();
+            return true;
+        }
+
+        return false;
     }
 
     /**

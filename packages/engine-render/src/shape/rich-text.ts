@@ -18,7 +18,7 @@ import type {
     IBorderData,
     IColorStyle,
     IDocumentData,
-    IKeyValue,
+
     IStyleBase,
     ITextDecoration,
     ITransformState,
@@ -271,7 +271,7 @@ export class RichText extends BaseObject {
     }
 
     override toJson(): RichtextObjectJSONType {
-        const props: IKeyValue = {};
+        const props: Record<string, any> = {};
         RICHTEXT_OBJECT_ARRAY.forEach((key) => {
             // @ts-ignore
             if (this[key]) {

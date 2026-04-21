@@ -20,7 +20,7 @@ import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
-import { RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
+import { MarkDirtyFilterChangeMutation, RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { IMessageService } from '@univerjs/ui';
@@ -127,6 +127,7 @@ function createFilterCommandTestBed() {
         SetSheetsFilterCriteriaCommand,
         ClearSheetsFilterCriteriaCommand,
         ReCalcSheetsFilterCommand,
+        MarkDirtyFilterChangeMutation,
     ].forEach((command) => commandService.registerCommand(command));
 
     const univerInstanceService = get(IUniverInstanceService);

@@ -165,6 +165,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
         univer,
         get,
         doc,
+        injector,
     };
 }
 

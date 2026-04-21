@@ -152,7 +152,7 @@ export class ConditionalFormattingService extends Disposable {
 
         const result = {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean };
 
-        for (let i = 0; i < effectiveRules.length; i++) {
+        for (let i = effectiveRules.length - 1; i >= 0; i--) {
             const { rule, cacheItem } = effectiveRules[i];
             this._mergeComposeResult(result, rule, cacheItem.result);
         }

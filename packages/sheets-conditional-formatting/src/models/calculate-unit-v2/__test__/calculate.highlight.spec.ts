@@ -29,7 +29,7 @@ describe('Test conditional formatting highlight', () => {
     });
 
     describe('Test Number', async () => {
-        it('Should apply later matched rule style when multiple rules are matched', () => {
+        it('Should apply higher-priority rule style when multiple rules are matched', () => {
             const lowerPriorityRule: IConditionFormattingRule<INumberHighlightCell> = {
                 ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                 cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
@@ -60,7 +60,7 @@ describe('Test conditional formatting highlight', () => {
             testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, higherPriorityRule);
 
             const result = testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
-            expect(result).toEqual({ style: { bg: { rgb: '#FFC000' } } });
+            expect(result).toEqual({ style: { bg: { rgb: '#FFFF00' } } });
         });
 
         it('Should not stop at stopIfTrue rule when the rule is not matched', () => {

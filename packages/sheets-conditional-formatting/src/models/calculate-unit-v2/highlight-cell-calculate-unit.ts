@@ -28,6 +28,17 @@ interface IConfig {
     value: any;
     type: CFSubRuleType;
 }
+
+const isFormulaResultMatched = (value: unknown) => value === true || value === 1 || value === 'TRUE';
+
+const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }>(ranges: T[]) => [...ranges].sort((a, b) => {
+    if (a.startRow !== b.startRow) {
+        return a.startRow - b.startRow;
+    }
+
+    return a.startColumn - b.startColumn;
+});
+
 export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, Nullable<IStyleData>> {
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
@@ -106,7 +117,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                 case CFSubRuleType.formula: {
                     const _ruleConfig = ruleConfig as IFormulaHighlightCell;
                     const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
-                    conditionalFormattingFormulaService.registerFormulaWithRange(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value, context.rule.ranges);
+                    const normalizedRanges = sortRangesByTopLeft(context.rule.ranges);
+                    conditionalFormattingFormulaService.registerFormulaWithRange(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value, normalizedRanges);
                     const result = conditionalFormattingFormulaService.getFormulaMatrix(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value);
                     if (result && result.status === FormulaResultStatus.SUCCESS) {
                         this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
@@ -374,16 +386,31 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     return uniqueCacheValue && uniqueCacheValue !== 1;
                 }
                 case CFSubRuleType.formula: {
-                    // const _ruleConfig = ruleConfig as IFormulaHighlightCell;
+                    const _ruleConfig = ruleConfig as IFormulaHighlightCell;
+                    const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
+
+                    // The formula engine stores results at relative offsets from the first range's top-left.
+                    const firstRange = sortRangesByTopLeft(context.rule.ranges)[0];
+                    const relativeRow = row - firstRange.startRow;
+                    const relativeCol = col - firstRange.startColumn;
+
+                    const formulaResult = conditionalFormattingFormulaService.getFormulaResultWithCoords(
+                        context.unitId,
+                        context.subUnitId,
+                        context.rule.cfId,
+                        _ruleConfig.value,
+                        relativeRow,
+                        relativeCol
+                    );
+
+                    if (formulaResult.status === FormulaResultStatus.SUCCESS && formulaResult.result !== undefined) {
+                        return isFormulaResultMatched(formulaResult.result);
+                    }
+
                     const cache = preComputingResult?.value;
                     if (cache) {
-                        // The formula result matrix starts from (0,0), but we need to use relative coordinates
-                        // based on the first range's start position
-                        const firstRange = context.rule.ranges[0];
-                        const relativeRow = row - firstRange.startRow;
-                        const relativeCol = col - firstRange.startColumn;
                         const value = cache.getValue(relativeRow, relativeCol);
-                        return value === true;
+                        return isFormulaResultMatched(value);
                     }
                     return false;
                 }

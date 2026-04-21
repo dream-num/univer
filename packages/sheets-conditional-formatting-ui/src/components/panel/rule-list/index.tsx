@@ -370,7 +370,12 @@ export const RuleList = (props: IRuleListProps) => {
                                 >
                                     {getRuleDescribe(rule, localeService)}
                                 </div>
-                                <div className="univer-text-xs univer-text-gray-400">
+                                <div
+                                    className="
+                                      univer-max-w-[250px] univer-overflow-hidden univer-text-ellipsis univer-text-xs
+                                      univer-text-gray-400
+                                    "
+                                >
                                     {rule.ranges.map((range) => serializeRange(range)).join(',')}
                                 </div>
                             </div>

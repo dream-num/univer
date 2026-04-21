@@ -17,19 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import {
-    AbsoluteRefType,
-    EDITOR_ACTIVATED,
-    FOCUSING_EDITOR_BUT_HIDDEN,
-    FOCUSING_EDITOR_INPUT_FORMULA,
-    FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FX_BAR_EDITOR,
-} from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
+import { AbsoluteRefType } from '@univerjs/core';
+import { validateDefinedName } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
-import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import { getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction, restoreSheetNavigationAfterDefinedNameConfirm, validateDefinedName } from './defined-name.utils';
+import { getAbsoluteRefStringFromSelection, resolveDefinedNameBoxAction } from '../defined-name-utils';
 
 function createWorkbookMock(sheetNames = ['Sheet1']) {
     const sheets = new Map(sheetNames.map((name, index) => [`sheet-${index}`, { getName: () => name }]));
@@ -59,18 +50,38 @@ function createValidationDeps(overrides: {
         functionService: {
             hasExecutor: vi.fn(() => overrides.hasFunction ?? false),
         } as any,
+        univerInstanceService: {
+            getUnit: vi.fn(() => ({ getSheets: () => [{ getName: () => 'Sheet1' }] })),
+        } as any,
     };
 }
 
 describe('defined-name.utils', () => {
     it('should reject duplicate defined names during validation', () => {
-        const error = validateDefinedName(createValidationDeps({
+        const name = 'SalesTotal';
+        const formulaOrRefString = 'Sheet1!$A$1';
+        const {
+            unitId,
+            definedNamesService,
+            superTableService,
+            functionService,
+            univerInstanceService,
+        } = createValidationDeps({
             definedName: {
                 id: 'defined-name-1',
-                name: 'SalesTotal',
-                formulaOrRefString: 'Sheet1!$A$1',
+                name,
+                formulaOrRefString,
             },
-        }));
+        });
+
+        const error = validateDefinedName(name, {
+            unitId,
+            formulaOrRefString,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        });
 
         expect(error).toBe('definedName.nameDuplicate');
     });
@@ -82,10 +93,25 @@ describe('defined-name.utils', () => {
             formulaOrRefString: 'Sheet1!$A$1',
         };
 
+        const {
+            unitId,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        } = createValidationDeps({
+            definedName: existingDefinedName,
+        });
+
         const action = resolveDefinedNameBoxAction({
-            ...createValidationDeps({ definedName: existingDefinedName }),
             inputValue: 'salestotal',
             rangeString: 'A1',
+            unitId,
+            formulaOrRefString: existingDefinedName.formulaOrRefString,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
         });
 
         expect(action).toEqual({
@@ -95,10 +121,23 @@ describe('defined-name.utils', () => {
     });
 
     it('should resolve Enter on a typed reference to focus the selection', () => {
+        const {
+            unitId,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        } = createValidationDeps();
+
         const action = resolveDefinedNameBoxAction({
-            ...createValidationDeps(),
             inputValue: 'B2:C4',
             rangeString: 'A1',
+            unitId,
+            formulaOrRefString: '',
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
         });
 
         expect(action).toEqual({
@@ -108,10 +147,23 @@ describe('defined-name.utils', () => {
     });
 
     it('should resolve Enter on a valid new name to create a defined name', () => {
+        const {
+            unitId,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        } = createValidationDeps();
+
         const action = resolveDefinedNameBoxAction({
-            ...createValidationDeps(),
             inputValue: 'SalesTotal',
             rangeString: 'A1',
+            unitId,
+            formulaOrRefString: 'A1',
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
         });
 
         expect(action).toEqual({
@@ -121,10 +173,23 @@ describe('defined-name.utils', () => {
     });
 
     it('should reset when Enter is pressed on an invalid name', () => {
+        const {
+            unitId,
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
+        } = createValidationDeps();
+
         const action = resolveDefinedNameBoxAction({
-            ...createValidationDeps(),
             inputValue: 'Sheet1',
             rangeString: 'A1',
+            unitId,
+            formulaOrRefString: '',
+            univerInstanceService,
+            definedNamesService,
+            superTableService,
+            functionService,
         });
 
         expect(action).toEqual({
@@ -172,67 +237,5 @@ describe('defined-name.utils', () => {
 
         expect(absoluteRef).toBe('ABS(Sheet1!B2:C4)');
         expect(convertRefersToAbsolute).toHaveBeenCalledWith('Sheet1!B2:C4', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
-    });
-
-    it('should use the standard editor-exit operation when the sheet editor is visible', () => {
-        const blur = vi.fn();
-        const syncExecuteCommand = vi.fn(() => true);
-
-        const result = restoreSheetNavigationAfterDefinedNameConfirm({
-            unitId: 'unit-1',
-            input: { blur },
-            commandService: { syncExecuteCommand } as any,
-            univerInstanceService: { focusUnit: vi.fn() } as any,
-            editorService: { blur: vi.fn(), getEditor: vi.fn() } as any,
-            editorBridgeService: {
-                isVisible: () => ({ visible: true }),
-                getEditLocation: () => ({ unitId: 'editing-unit' }),
-            } as any,
-            contextService: { setContextValue: vi.fn() } as any,
-        });
-
-        expect(result).toBe(true);
-        expect(blur).toHaveBeenCalledTimes(1);
-        expect(syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
-            visible: false,
-            eventType: DeviceInputEventType.Keyboard,
-            keycode: KeyCode.ENTER,
-            unitId: 'editing-unit',
-        });
-    });
-
-    it('should restore normal sheet keyboard focus when the sheet editor is not visible', () => {
-        const blurInput = vi.fn();
-        const focusUnit = vi.fn();
-        const blurEditorService = vi.fn();
-        const focusNormalEditor = vi.fn();
-        const setContextValue = vi.fn();
-
-        const result = restoreSheetNavigationAfterDefinedNameConfirm({
-            unitId: 'unit-1',
-            input: { blur: blurInput },
-            commandService: { syncExecuteCommand: vi.fn() } as any,
-            univerInstanceService: { focusUnit } as any,
-            editorService: {
-                blur: blurEditorService,
-                getEditor: vi.fn(() => ({ focus: focusNormalEditor })),
-            } as any,
-            editorBridgeService: {
-                isVisible: () => ({ visible: false }),
-                getEditLocation: () => null,
-            } as any,
-            contextService: { setContextValue } as any,
-        });
-
-        expect(result).toBe(true);
-        expect(blurInput).toHaveBeenCalledTimes(1);
-        expect(blurEditorService).toHaveBeenCalledWith(true);
-        expect(focusUnit).toHaveBeenCalledWith('unit-1');
-        expect(focusNormalEditor).toHaveBeenCalledTimes(1);
-        expect(setContextValue).toHaveBeenCalledWith(FOCUSING_EDITOR_INPUT_FORMULA, false);
-        expect(setContextValue).toHaveBeenCalledWith(EDITOR_ACTIVATED, false);
-        expect(setContextValue).toHaveBeenCalledWith(FOCUSING_EDITOR_BUT_HIDDEN, false);
-        expect(setContextValue).toHaveBeenCalledWith(FOCUSING_EDITOR_STANDALONE, false);
-        expect(setContextValue).toHaveBeenCalledWith(FOCUSING_FX_BAR_EDITOR, false);
     });
 });

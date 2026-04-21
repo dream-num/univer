@@ -26,7 +26,6 @@ import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, validateDefinedName } from '@univerj
 import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
-import { validateDefinedName } from './defined-name.utils';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
     inputId: string;

@@ -169,10 +169,10 @@ export class SheetScrollManagerService implements IRenderModule {
         offsetY = offsetY || 0;
 
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
-        const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
-        const viewportScrollX = colAcc + offsetX;
-        const viewportScrollY = rowAcc + offsetY;
+        const { startX: colStart = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0, startY: rowStart = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0 } =
+            skeleton?.getCellWithCoordByIndex?.(sheetViewStartRow, sheetViewStartColumn, false) ?? {};
+        const viewportScrollX = colStart + offsetX;
+        const viewportScrollY = rowStart + offsetY;
 
         return {
             viewportScrollX,
